@@ -72,25 +72,173 @@ float cpu = provider->getCpuUsage();
 - **Component**：データだけを持つ
 - **System**：処理だけを行う
 
-### 各要素の役割
+PlayerやEnemyという独立したクラスは存在しない。
+EntityにComponentを組み合わせることで実体を表現する。
 ```cpp
-// Entity: ただのID
-using EntityId = uint32_t;
+// Playerの生成
+EntityId player = entityManager.create();
+componentManager.add<TransformComponent>(player, 0.0f, 0.0f, 0.0f);
+componentManager.add<HealthComponent>(player, 100, 100);
+componentManager.add<WeaponComponent>(player, weaponData);
 
-// Component: データだけ
-struct HealthComponent
-{
-    int m_hp;
-    int m_maxHp;
-};
-
-// System: 処理だけ
-class MoveSystem
-{
-public:
-    void update(TransformComponent& transform, float dx, float dy);
-};
+// Enemyの生成（Componentの組み合わせが違うだけ）
+EntityId enemy = entityManager.create();
+componentManager.add<TransformComponent>(enemy, 5.0f, 3.0f, 0.0f);
+componentManager.add<HealthComponent>(enemy, 120, 120);
+componentManager.add<AIComponent>(enemy, AIType::Heavy, 0.5f);
 ```
+
+---
+
+## イベント駆動：EventBus
+
+SystemがSystemを直接呼ばないようにEventBusを使う。
+```cpp
+// BattleSystemがイベントを発行する
+eventBus.emit<EnemyDefeatedEvent>({ enemyId, "chrome.exe" });
+
+// ScoreManagerがイベントを受信する
+eventBus.subscribe<EnemyDefeatedEvent>([](const EnemyDefeatedEvent& e) {
+    // スコアを加算する
+});
+```
+
+### イベントの定義
+`IGameEvent`をマーカーとして継承し1ファイルにまとめて定義する。
+```cpp
+// game/events/InGameEvent.h
+struct IGameEvent {};
+
+struct EnemyDefeatedEvent : public IGameEvent
+{
+    EntityId m_enemyId;
+    std::string m_processName;
+};
+
+struct PlayerDamagedEvent : public IGameEvent
+{
+    int m_damage;
+};
+
+struct RoomClearedEvent : public IGameEvent
+{
+    int m_roomId;
+};
+
+struct DungeonClearedEvent : public IGameEvent {};
+```
+
+---
+
+## グローバルアクセス：ServiceLocator
+
+ServiceLocatorはシングルトンの倉庫。
+ゲーム全体で1つだけ存在するManagerクラスを預けて
+どこからでも取り出せる仕組み。
+```cpp
+// Main.cppで全部預ける
+ServiceLocator::provide(new InputManager());
+ServiceLocator::provide(new SoundManager());
+ServiceLocator::provide(new Renderer());
+
+// どこからでも取り出せる
+ServiceLocator::getSoundManager()->play("attack");
+ServiceLocator::getInputManager()->getKey();
+```
+
+---
+
+## クラス一覧
+
+### Game層
+
+#### ECS基盤
+| クラス名 | .cpp | 概要 |
+|---|---|---|
+| `Entity` | なし | ただのID番号 |
+| `ComponentManager` | あり | Componentの管理 |
+| `SystemManager` | あり | Systemの管理・更新順序 |
+| `EventBus` | あり | イベントの発行・購読管理 |
+
+#### Components
+| クラス名 | .cpp | 概要 |
+|---|---|---|
+| `TransformComponent` | なし | 座標・回転 |
+| `HealthComponent` | なし | HP |
+| `WeaponComponent` | あり | 武器情報・攻撃力計算 |
+| `AIComponent` | なし | 敵AI情報・AIType |
+| `BossComponent` | なし | ボスのフェーズ管理 |
+| `ProcessComponent` | なし | プロセス名・種類 |
+| `RenderComponent` | なし | 描画情報 |
+
+#### Systems
+| クラス名 | 概要 |
+|---|---|
+| `MoveSystem` | 移動処理 |
+| `AISystem` | 敵AI処理・AITypeで分岐 |
+| `BattleSystem` | 戦闘計算 |
+| `RenderSystem` | 描画処理 |
+| `ProcessSystem` | プロセス連携処理 |
+
+#### イベント
+| ファイル名 | 概要 |
+|---|---|
+| `InGameEvent.h` | 全イベント定義（IGameEventを継承） |
+
+定義されるイベント：
+- `EnemyDefeatedEvent` 敵撃破時
+- `PlayerDamagedEvent` プレイヤーダメージ時
+- `RoomClearedEvent` 部屋クリア時
+- `DungeonClearedEvent` ダンジョンクリア時
+
+#### その他Game層
+| クラス名 | 概要 |
+|---|---|
+| `GameManager` | ゲーム全体の進行管理 |
+| `DungeonManager` | ダンジョン構造管理 |
+| `Room` | 部屋の情報 |
+| `WeaponFactory` | ファイル情報から武器を生成 |
+
+#### Interfaces
+| クラス名 | 概要 |
+|---|---|
+| `ISystemDataProvider` | CPU・メモリ取得 |
+| `IFileSystemProvider` | ファイルシステム操作 |
+| `IProcessProvider` | プロセス情報取得 |
+
+---
+
+### Engine層
+
+#### シーン
+| クラス名 | 概要 |
+|---|---|
+| `IScene` | シーンのインターフェース |
+| `SceneManager` | シーン遷移管理 |
+| `TitleScene` | タイトル画面 |
+| `FileSelectScene` | ファイル選択画面 |
+| `LoadingScene` | ロード画面 |
+| `GameScene` | ゲーム画面 |
+| `ResultScene` | リザルト画面 |
+| `ClearScene` | クリア画面 |
+
+#### その他Engine層
+| クラス名 | 概要 |
+|---|---|
+| `ServiceLocator` | グローバルなサービスへのアクセス管理 |
+| `Renderer` | 3D描画管理 |
+| `InputManager` | キー入力管理 |
+| `SoundManager` | サウンド管理 |
+| `Camera` | アイソメトリックカメラ制御 |
+
+---
+
+### Platform層
+| クラス名 | 概要 |
+|---|---|
+| `WindowsSystemProvider` | CPU・メモリ使用率取得 |
+| `WindowsFileSystemProvider` | ファイル・フォルダ走査 |
+| `WindowsProcessProvider` | プロセス列挙・レジストリ参照 |
 
 ---
 
@@ -106,12 +254,14 @@ src/
 │   ├── ecs/
 │   │   ├── Entity.h
 │   │   ├── ComponentManager.h / .cpp
-│   │   └── SystemManager.h / .cpp
+│   │   ├── SystemManager.h / .cpp
+│   │   └── EventBus.h / .cpp
 │   ├── components/
 │   │   ├── TransformComponent.h
 │   │   ├── HealthComponent.h
 │   │   ├── WeaponComponent.h / .cpp
 │   │   ├── AIComponent.h
+│   │   ├── BossComponent.h
 │   │   ├── ProcessComponent.h
 │   │   └── RenderComponent.h
 │   ├── systems/
@@ -120,10 +270,13 @@ src/
 │   │   ├── BattleSystem.h / .cpp
 │   │   ├── RenderSystem.h / .cpp
 │   │   └── ProcessSystem.h / .cpp
+│   ├── events/
+│   │   └── InGameEvent.h
 │   └── dungeon/
 │       ├── DungeonManager.h / .cpp
 │       └── Room.h / .cpp
 ├── engine/
+│   ├── ServiceLocator.h / .cpp
 │   ├── scene/
 │   │   ├── IScene.h
 │   │   ├── SceneManager.h / .cpp
@@ -131,7 +284,8 @@ src/
 │   │   ├── FileSelectScene.h / .cpp
 │   │   ├── LoadingScene.h / .cpp
 │   │   ├── GameScene.h / .cpp
-│   │   └── ResultScene.h / .cpp
+│   │   ├── ResultScene.h / .cpp
+│   │   └── ClearScene.h / .cpp
 │   ├── Renderer.h / .cpp
 │   ├── InputManager.h / .cpp
 │   ├── SoundManager.h / .cpp
@@ -146,7 +300,6 @@ src/
 ---
 
 ## 開発方針
-
 最初からECSで作る。移行作業によるリスクを避けるため
 オブジェクト指向からECSへの移行は行わない。
 
@@ -156,6 +309,8 @@ src/
 - Entity
 - ComponentManager
 - SystemManager
+- EventBus
+- ServiceLocator
 
 **Step2: 最小限のゲームを動かす**
 - TransformComponent + MoveSystem でPlayerが動く
