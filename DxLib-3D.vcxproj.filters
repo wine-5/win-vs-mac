@@ -21,5 +21,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="docs\naming_convention.md" />
+    <None Include="README.md" />
+    <None Include="docs\game_design.md" />
   </ItemGroup>
 </Project>
