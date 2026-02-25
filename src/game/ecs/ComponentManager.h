@@ -8,7 +8,9 @@
 
 namespace game::ecs
 {
-    // 全ComponentArrayを型ごとに管理するECSマネージャ
+    /**
+     * @brief 全ComponentArrayを型ごとに管理するECSマネージャ
+     */
     class ComponentManager
     {
     public:

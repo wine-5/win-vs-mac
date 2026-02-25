@@ -2,7 +2,9 @@
 
 namespace game::ecs
 {
-	// 全てのSystemの純粋仮想クラス
+	/**
+	 * @brief 全てのSystemの基底インターフェース
+	 */
 	class ISystem
 	{
 	public:

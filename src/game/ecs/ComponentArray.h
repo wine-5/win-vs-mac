@@ -5,7 +5,9 @@
 
 namespace game::ecs
 {
-    // EntityIdとComponentを紐付けて管理する
+    /**
+     * @brief EntityIdとComponentを紐付けて管理するコンテナクラス
+     */
     template <typename T>
     class ComponentArray : public IComponent
     {

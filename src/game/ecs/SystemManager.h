@@ -5,7 +5,9 @@
 
 namespace game::ecs
 {
-	// 全てのシステムを登録、更新を行うクラス
+	/**
+	 * @brief 全てのSystemを登録・更新するマネージャクラス
+	 */
 	class SystemManager
 	{
 	public:
