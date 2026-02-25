@@ -9,5 +9,6 @@ namespace game::ecs
     {
     public:
         virtual ~IComponent() = default;
+        virtual void remove(EntityId id) = 0;
     };
 }

@@ -131,7 +131,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\EventBus.cpp" />
     <ClCompile Include="src\core\ServiceLocator.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
@@ -163,6 +162,7 @@
     <ClInclude Include="src\game\ecs\IComponent.h" />
     <ClInclude Include="src\game\ecs\ISystem.h" />
     <ClInclude Include="src\game\ecs\SystemManager.h" />
+    <ClInclude Include="src\game\event\InGameEvents.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

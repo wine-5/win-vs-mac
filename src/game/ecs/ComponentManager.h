@@ -42,7 +42,7 @@ namespace game::ecs
         {
             for (auto& [type, array] : m_componentArrays)
             {
-                // 各コンポーネントのremoveを呼ぶ
+                array->remove(id);
             }
         }
 

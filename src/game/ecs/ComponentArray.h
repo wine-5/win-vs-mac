@@ -22,7 +22,7 @@ namespace game::ecs
             return m_component[id];
         }
 
-        void remove(EntityId id)
+        void remove(EntityId id) override
         {
             m_component.erase(id);
         }
