@@ -47,5 +47,8 @@
     <ClInclude Include="src\game\ecs\SystemManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\ecs\EntityManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

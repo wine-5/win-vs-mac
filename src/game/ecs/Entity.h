@@ -8,14 +8,7 @@ namespace game::ecs
 	// 0 は無効IDとして扱う
 	constexpr EntityId INVALID_ENTITY_ID = 0;
 
-	/**
-	 * @brief ECSにおけるエンティティを表すIDラッパークラス
-	 *
-	 * Entityは実体データを持たず、単なる識別子である。
-	 * 実際のデータは各Componentが保持する。
-	 *
-	 * 0は無効なエンティティIDとして扱う。
-	 */
+	/** @brief エンティティIDのラッパークラス */
 	class Entity
 	{
 	public:
