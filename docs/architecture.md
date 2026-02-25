@@ -107,7 +107,7 @@ eventBus.subscribe<EnemyDefeatedEvent>([](const EnemyDefeatedEvent& e) {
 `IGameEvent`をマーカーとして継承し1ファイルにまとめて定義する。
 ```cpp
 // game/events/InGameEvent.h
-struct IGameEvent {};
+class IGameEvent {};
 
 struct EnemyDefeatedEvent : public IGameEvent
 {
@@ -156,8 +156,12 @@ ServiceLocator::getInputManager()->getKey();
 | クラス名 | .cpp | 概要 |
 |---|---|---|
 | `Entity` | なし | ただのID番号 |
-| `ComponentManager` | あり | Componentの管理 |
-| `SystemManager` | あり | Systemの管理・更新順序 |
+| `EntityManager` | なし | EntityIdの発行・回収 |
+| `IComponent` | なし | 全Componentの基底クラス |
+| `ComponentArray` | なし | 1種類のComponentをEntityIdで管理 |
+| `ComponentManager` | なし | 全ComponentArrayを型ごとに管理 |
+| `ISystem` | なし | 全Systemの純粋仮想クラス |
+| `SystemManager` | なし | Systemの管理・更新順序 |
 | `EventBus` | あり | イベントの発行・購読管理 |
 
 #### Components
@@ -198,6 +202,7 @@ ServiceLocator::getInputManager()->getKey();
 | `DungeonManager` | ダンジョン構造管理 |
 | `Room` | 部屋の情報 |
 | `WeaponFactory` | ファイル情報から武器を生成 |
+| `EntityFactory` | EntityにComponentを組み合わせて生成する |
 | `SystemInitializer` | Systemの登録・初期化順序を管理 |
 
 #### Interfaces
@@ -244,6 +249,7 @@ ServiceLocator::getInputManager()->getKey();
 ---
 
 ## フォルダ構成
+
 ```
 src/
 ├── game/
@@ -254,8 +260,12 @@ src/
 │   │   └── IProcessProvider.h
 │   ├── ecs/
 │   │   ├── Entity.h
-│   │   ├── ComponentManager.h / .cpp
-│   │   ├── SystemManager.h / .cpp
+│   │   ├── EntityManager.h
+│   │   ├── IComponent.h
+│   │   ├── ComponentArray.h
+│   │   ├── ComponentManager.h
+│   │   ├── ISystem.h
+│   │   ├── SystemManager.h
 │   │   └── EventBus.h / .cpp
 │   ├── components/
 │   │   ├── TransformComponent.h
@@ -271,6 +281,8 @@ src/
 │   │   ├── BattleSystem.h / .cpp
 │   │   ├── RenderSystem.h / .cpp
 │   │   └── ProcessSystem.h / .cpp
+│   ├── factory/
+│   │   └── EntityFactory.h / .cpp
 │   ├── events/
 │   │   └── InGameEvent.h
 │   └── dungeon/
@@ -308,8 +320,9 @@ src/
 
 **Step1: ECS基盤を作る**
 - Entity
-- ComponentManager
-- SystemManager
+- EntityManager
+- IComponent / ComponentArray / ComponentManager
+- ISystem / SystemManager
 - EventBus
 - ServiceLocator
 
@@ -327,8 +340,8 @@ src/
 ---
 
 ## 未決定事項
-- ComponentManagerの具体的な実装方法
 - SystemManagerの更新順序
 - DungeonManagerの自動生成アルゴリズム
 - Cameraのアイソメトリック実装方法
-- SystemInitializer：Systemの登録順序を管理するクラスの設計
+- SystemInitializerの具体的な設計
+- 全ファイルのコメントをDoxygenコメントに統一する
