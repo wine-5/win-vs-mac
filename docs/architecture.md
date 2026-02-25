@@ -3,10 +3,12 @@
 ## 基本方針
 全体構造にクリーンアーキテクチャを採用し、
 Game層の内部にECSを採用する。
+また全レイヤーから使われる共通基盤としてCore層を設ける。
 
 ---
 
 ## 全体構造：クリーンアーキテクチャ
+
 ```
 ┌─────────────────────────────────────┐
 │  Platform層                          │
@@ -24,11 +26,16 @@ Game層の内部にECSを採用する。
 │  │  │  └──────────────────┘   │  │  │
 │  │  └─────────────────────────┘  │  │
 │  └───────────────────────────────┘  │
+│  ┌───────────────────────────────┐  │
+│  │  Core層                       │  │
+│  │  どのレイヤーからも使える      │  │
+│  └───────────────────────────────┘  │
 └─────────────────────────────────────┘
 ```
 
 依存方向：外側が内側に依存する。内側は外側を知らない。
 Game層 ← Engine層 ← Platform層
+Core層はどのレイヤーからも依存される。
 
 ---
 
@@ -47,12 +54,17 @@ DxLibを用いた描画・入力・シーン管理を担当。
 Windows APIの処理をすべてここに閉じ込める。
 インターフェースの実装クラスを置く。
 
+### Core層
+どのレイヤーにも依存しない共通基盤。
+EventBusやServiceLocatorなど全レイヤーから使われるものを置く。
+
 ---
 
 ## 依存関係の原則
 
 OS依存コードは直接Game層に書かない。
 必ずインターフェース経由で利用する。
+
 ```cpp
 // NG: Game層でWindows APIを直接呼ぶ
 #include <windows.h>
@@ -74,6 +86,7 @@ float cpu = provider->getCpuUsage();
 
 PlayerやEnemyという独立したクラスは存在しない。
 EntityにComponentを組み合わせることで実体を表現する。
+
 ```cpp
 // Playerの生成
 EntityId player = entityManager.create();
@@ -93,18 +106,21 @@ componentManager.add<AIComponent>(enemy, AIType::Heavy, 0.5f);
 ## イベント駆動：EventBus
 
 SystemがSystemを直接呼ばないようにEventBusを使う。
+EventBusはCore層に置くことでGame層・Engine層の両方から使える。
+
 ```cpp
-// BattleSystemがイベントを発行する
+// BattleSystemがイベントを発行する（Game層）
 eventBus.emit<EnemyDefeatedEvent>({ enemyId, "chrome.exe" });
 
-// ScoreManagerがイベントを受信する
+// SoundManagerがイベントを受信する（Engine層）
 eventBus.subscribe<EnemyDefeatedEvent>([](const EnemyDefeatedEvent& e) {
-    // スコアを加算する
+    // 効果音を鳴らす
 });
 ```
 
 ### イベントの定義
 `IGameEvent`をマーカーとして継承し1ファイルにまとめて定義する。
+
 ```cpp
 // game/events/InGameEvent.h
 class IGameEvent {};
@@ -135,6 +151,8 @@ struct DungeonClearedEvent : public IGameEvent {};
 ServiceLocatorはシングルトンの倉庫。
 ゲーム全体で1つだけ存在するManagerクラスを預けて
 どこからでも取り出せる仕組み。
+Core層に置くことでGame層・Engine層の両方から使える。
+
 ```cpp
 // Main.cppで全部預ける
 ServiceLocator::provide(new InputManager());
@@ -150,6 +168,14 @@ ServiceLocator::getInputManager()->getKey();
 
 ## クラス一覧
 
+### Core層
+| クラス名 | .cpp | 概要 |
+|---|---|---|
+| `EventBus` | あり | イベントの発行・購読管理 |
+| `ServiceLocator` | あり | グローバルなサービスへのアクセス管理 |
+
+---
+
 ### Game層
 
 #### ECS基盤
@@ -162,7 +188,6 @@ ServiceLocator::getInputManager()->getKey();
 | `ComponentManager` | なし | 全ComponentArrayを型ごとに管理 |
 | `ISystem` | なし | 全Systemの純粋仮想クラス |
 | `SystemManager` | なし | Systemの管理・更新順序 |
-| `EventBus` | あり | イベントの発行・購読管理 |
 
 #### Components
 | クラス名 | .cpp | 概要 |
@@ -231,7 +256,6 @@ ServiceLocator::getInputManager()->getKey();
 #### その他Engine層
 | クラス名 | 概要 |
 |---|---|
-| `ServiceLocator` | グローバルなサービスへのアクセス管理 |
 | `Renderer` | 3D描画管理 |
 | `InputManager` | キー入力管理 |
 | `SoundManager` | サウンド管理 |
@@ -252,6 +276,9 @@ ServiceLocator::getInputManager()->getKey();
 
 ```
 src/
+├── core/
+│   ├── EventBus.h / .cpp
+│   └── ServiceLocator.h / .cpp
 ├── game/
 │   ├── GameManager.h / .cpp
 │   ├── interfaces/
@@ -265,8 +292,7 @@ src/
 │   │   ├── ComponentArray.h
 │   │   ├── ComponentManager.h
 │   │   ├── ISystem.h
-│   │   ├── SystemManager.h
-│   │   └── EventBus.h / .cpp
+│   │   └── SystemManager.h
 │   ├── components/
 │   │   ├── TransformComponent.h
 │   │   ├── HealthComponent.h
@@ -289,7 +315,6 @@ src/
 │       ├── DungeonManager.h / .cpp
 │       └── Room.h / .cpp
 ├── engine/
-│   ├── ServiceLocator.h / .cpp
 │   ├── scene/
 │   │   ├── IScene.h
 │   │   ├── SceneManager.h / .cpp
@@ -318,7 +343,7 @@ src/
 
 ### 開発順序
 
-**Step1: ECS基盤を作る**
+**Step1: ECS基盤・Core層を作る**
 - Entity
 - EntityManager
 - IComponent / ComponentArray / ComponentManager
