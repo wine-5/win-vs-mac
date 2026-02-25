@@ -152,8 +152,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\game\ecs\ComponentArray.h" />
     <ClInclude Include="src\game\ecs\ComponentManager.h" />
     <ClInclude Include="src\game\ecs\Entity.h" />
+    <ClInclude Include="src\game\ecs\IComponent.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
