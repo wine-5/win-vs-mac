@@ -131,6 +131,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\EventBus.cpp" />
+    <ClCompile Include="src\core\ServiceLocator.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -152,6 +154,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\EventBus.h" />
+    <ClInclude Include="src\core\ServiceLocator.h" />
     <ClInclude Include="src\game\ecs\ComponentArray.h" />
     <ClInclude Include="src\game\ecs\ComponentManager.h" />
     <ClInclude Include="src\game\ecs\Entity.h" />
