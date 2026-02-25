@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -103,6 +103,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -120,6 +121,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -129,14 +131,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\ServiceLocator.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="docs\architecture.md" />
+    <None Include="docs\game_concept.md" />
     <None Include="docs\game_design.md">
       <SubType>
       </SubType>
     </None>
+    <None Include="docs\schedule.md" />
     <None Include="README.md">
       <SubType>
       </SubType>
@@ -145,6 +151,18 @@
       <SubType>
       </SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\core\EventBus.h" />
+    <ClInclude Include="src\core\ServiceLocator.h" />
+    <ClInclude Include="src\game\ecs\ComponentArray.h" />
+    <ClInclude Include="src\game\ecs\ComponentManager.h" />
+    <ClInclude Include="src\game\ecs\Entity.h" />
+    <ClInclude Include="src\game\ecs\EntityManager.h" />
+    <ClInclude Include="src\game\ecs\IComponent.h" />
+    <ClInclude Include="src\game\ecs\ISystem.h" />
+    <ClInclude Include="src\game\ecs\SystemManager.h" />
+    <ClInclude Include="src\game\event\InGameEvents.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

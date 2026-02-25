@@ -1,0 +1,38 @@
+﻿#pragma once
+#include <queue>
+#include "Entity.h"
+
+namespace game::ecs
+{
+	/**
+	 * @brief EntityのIdの発行、回収を担当
+	 */
+	class EntityManager
+	{
+	public:
+		EntityManager() : m_nextId(1){}
+		
+		/** @brief Entityを生成 */
+		Entity create()
+		{
+			if (!m_recycledIds.empty())
+			{
+				EntityId id = m_recycledIds.front();
+				m_recycledIds.pop();
+				return Entity(id);
+			}
+			return Entity(m_nextId++);
+		}
+
+		/** @brief Entityを破棄 */
+		void destroy(Entity entity)
+		{
+			m_recycledIds.push(entity.getId());
+		}
+
+	private:
+		EntityId m_nextId;
+		// 再利用可能なEntityIdのキュー
+		std::queue<EntityId> m_recycledIds;
+	};
+}
