@@ -157,6 +157,7 @@
     <ClInclude Include="src\core\ServiceLocator.h" />
     <ClInclude Include="src\game\ecs\ComponentArray.h" />
     <ClInclude Include="src\game\ecs\ComponentManager.h" />
+    <ClInclude Include="src\game\ecs\component\TransformComponent.h" />
     <ClInclude Include="src\game\ecs\Entity.h" />
     <ClInclude Include="src\game\ecs\EntityManager.h" />
     <ClInclude Include="src\game\ecs\IComponent.h" />
