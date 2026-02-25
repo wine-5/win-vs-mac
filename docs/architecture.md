@@ -198,6 +198,7 @@ ServiceLocator::getInputManager()->getKey();
 | `DungeonManager` | ダンジョン構造管理 |
 | `Room` | 部屋の情報 |
 | `WeaponFactory` | ファイル情報から武器を生成 |
+| `SystemInitializer` | Systemの登録・初期化順序を管理 |
 
 #### Interfaces
 | クラス名 | 概要 |
@@ -330,3 +331,4 @@ src/
 - SystemManagerの更新順序
 - DungeonManagerの自動生成アルゴリズム
 - Cameraのアイソメトリック実装方法
+- SystemInitializer：Systemの登録順序を管理するクラスの設計
