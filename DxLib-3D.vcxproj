@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\core\ServiceLocator.cpp" />
+    <ClCompile Include="src\game\ecs\system\InputSystem.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +166,7 @@
     <ClInclude Include="src\game\ecs\IComponent.h" />
     <ClInclude Include="src\game\ecs\ISystem.h" />
     <ClInclude Include="src\game\ecs\SystemManager.h" />
+    <ClInclude Include="src\game\ecs\system\InputSystem.h" />
     <ClInclude Include="src\game\event\InGameEvents.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
