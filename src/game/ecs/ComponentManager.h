@@ -6,11 +6,13 @@
 
 namespace game::ecs
 {
+	// 型消去用の基底インターフェース
 	struct IComponent
 	{
 		virtual ~IComponent() = default;
 	};
 
+	// EntityIdとComponentを紐付けて管理する
 	template <typename T>
 	class ComponentArray : public IComponent
 	{
@@ -39,6 +41,7 @@ namespace game::ecs
 		std::unordered_map<EntityId, T> m_component;
 	};
 
+	// 全ComponentArrayを型ごとに管理するECSマネージャ
 	class ComponentManager
 	{
 	public:
@@ -47,11 +50,13 @@ namespace game::ecs
 		{
 			getComponentArray<T>()->add(id, component);
 		}
+
 		template<typename T>
 		T& get(EntityId id)
 		{
 			return getComponentArray<T>()->get(id);
 		}
+
 		template<typename T>
 		void remove(EntityId id)
 		{

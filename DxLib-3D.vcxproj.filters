@@ -24,5 +24,16 @@
     <None Include="docs\naming_convention.md" />
     <None Include="README.md" />
     <None Include="docs\game_design.md" />
+    <None Include="docs\architecture.md" />
+    <None Include="docs\game_concept.md" />
+    <None Include="docs\schedule.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\game\ecs\Entity.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\ecs\ComponentManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
