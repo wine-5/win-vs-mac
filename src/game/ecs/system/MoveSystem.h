@@ -10,6 +10,7 @@ namespace game::ecs::system
      */
     class MoveSystem : public ISystem
     {
+    public:
         MoveSystem(ComponentManager& componentManager, EntityId playerId, float moveSpeed);
         void update(float deltaTime) override;
 
