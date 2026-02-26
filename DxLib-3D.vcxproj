@@ -136,6 +136,7 @@
     <ClCompile Include="src\game\ecs\system\InputSystem.cpp" />
     <ClCompile Include="src\game\ecs\system\MoveSystem.cpp" />
     <ClCompile Include="src\game\ecs\system\PhysicsSystem.cpp" />
+    <ClCompile Include="src\game\ObjectFactory.cpp" />
     <ClCompile Include="src\game\scene\InGameScnce.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\utility\LogUtil.cpp" />
@@ -176,6 +177,7 @@
     <ClInclude Include="src\game\ecs\system\MoveSystem.h" />
     <ClInclude Include="src\game\ecs\system\PhysicsSystem.h" />
     <ClInclude Include="src\game\event\InGameEvents.h" />
+    <ClInclude Include="src\game\ObjectFactory.h" />
     <ClInclude Include="src\game\scene\InGameScene.h" />
     <ClInclude Include="src\game\scene\IScene.h" />
     <ClInclude Include="src\utility\LogUtil.h" />

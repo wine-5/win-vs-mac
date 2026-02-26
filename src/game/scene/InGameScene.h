@@ -4,6 +4,7 @@
 #include "game/ecs/ComponentManager.h"
 #include "game/ecs/SystemManager.h"
 #include "game/actor/Player.h"
+#include "game/ObjectFactory.h"
 
 namespace game::scene
 {
@@ -21,6 +22,6 @@ namespace game::scene
 		ecs::ComponentManager m_componentManager;
 		ecs::SystemManager m_systemManager;
 
-		actor::Player m_player;
+		game::ObjectFactory m_objectFactory;
 	};
 }
