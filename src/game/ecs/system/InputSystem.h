@@ -11,6 +11,10 @@ namespace game::ecs::system
 	class InputSystem : public ISystem
 	{
 	public:
+		static constexpr float INPUT_NEUTRAL = 0.0f;
+		static constexpr float INPUT_POSITIVE = 1.0f;
+		static constexpr float INPUT_NEGATIVE = -1.0f;
+
 		InputSystem(ComponentManager& componentManager, EntityId playerId);
 		void update(float deltaTime) override;
 
