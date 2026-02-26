@@ -14,6 +14,8 @@ namespace game::scene
 	class InGameScene : public IScene
 	{
 	public:
+		static constexpr float PLAYER_MOVE_SPEED = 5.0f;
+
 		InGameScene();
 		void update(float deltaTime) override;
 

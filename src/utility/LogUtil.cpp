@@ -4,14 +4,14 @@
 
 namespace utility
 {
-    int LogUtil::m_line = 0;
+    int LogUtil::s_line = 0;
 
     void LogUtil::print(int r, int g, int b, const char* format, va_list args)
     {
-        char buffer[1024];
+        char buffer[BUFFER_SIZE];
         vsnprintf(buffer, sizeof(buffer), format, args);
-        DrawFormatString(0, m_line * m_lineHeight, GetColor(r, g, b), "%s", buffer);
-        m_line++;
+        DrawFormatString(0, s_line * LINE_HEIGHT, GetColor(r, g, b), "%s", buffer);
+        s_line++;
     }
 
     void LogUtil::log(const char* format, ...)
@@ -19,7 +19,7 @@ namespace utility
 #ifdef _DEBUG
         va_list args;
         va_start(args, format);
-        print(255, 255, 255, format, args);
+        print(LOG_COLOR_R, LOG_COLOR_G, LOG_COLOR_B, format, args);
         va_end(args);
 #endif
     }
@@ -29,7 +29,7 @@ namespace utility
 #ifdef _DEBUG
         va_list args;
         va_start(args, format);
-        print(255, 255, 0, format, args);
+        print(WARNING_COLOR_R, WARNING_COLOR_G, WARNING_COLOR_B, format, args);
         va_end(args);
 #endif
     }
@@ -39,7 +39,7 @@ namespace utility
 #ifdef _DEBUG
         va_list args;
         va_start(args, format);
-        print(255, 0, 0, format, args);
+        print(ERROR_COLOR_R, ERROR_COLOR_G, ERROR_COLOR_B, format, args);
         va_end(args);
 #endif
     }
@@ -47,7 +47,7 @@ namespace utility
     void LogUtil::clear()
     {
 #ifdef _DEBUG
-        m_line = 0; // 行番号をリセット
+        s_line = 0; // 行番号をリセット
 #endif
     }
 }

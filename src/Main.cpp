@@ -2,6 +2,12 @@
 #include "game/scene/InGameScene.h"
 #include "utility/LogUtil.h"
 
+namespace
+{
+	constexpr float TARGET_FPS = 60.0f;
+	constexpr float DELTA_TIME = 1.0f / TARGET_FPS;
+}
+
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	if (DxLib_Init() == -1) return -1;
@@ -12,8 +18,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	{
 		ClearDrawScreen();// 画面クリア
 		utility::LogUtil::clear();
-		float deltaTime = 1.0f / 60.0f;
-		inGameScene.update(deltaTime);
+		inGameScene.update(DELTA_TIME);
 
 		ScreenFlip();       // 画面を反映
 	}

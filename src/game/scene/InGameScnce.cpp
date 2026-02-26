@@ -14,7 +14,7 @@ namespace game::scene
 		m_objectFactory.init();
 
 		m_systemManager.registerSystem<ecs::system::InputSystem>(m_componentManager,m_objectFactory.getPlayer().getId());
-		m_systemManager.registerSystem<ecs::system::MoveSystem>(m_componentManager, m_objectFactory.getPlayer().getId(), 5.0f);
+		m_systemManager.registerSystem<ecs::system::MoveSystem>(m_componentManager, m_objectFactory.getPlayer().getId(), PLAYER_MOVE_SPEED);
 		m_systemManager.registerSystem<ecs::system::PhysicsSystem>(m_componentManager, m_objectFactory.getPlayer().getId());
 	}
 
