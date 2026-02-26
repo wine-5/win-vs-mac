@@ -6,6 +6,7 @@
 #include "game/ObjectFactory.h"
 #include "utility/LogUtil.h"
 #include "game/ecs/system/CameraSystem.h"
+#include "game/ecs/system/RenderSystem.h"
 
 namespace game::scene
 {
@@ -18,6 +19,7 @@ namespace game::scene
 		m_systemManager.registerSystem<ecs::system::MoveSystem>(m_componentManager, m_objectFactory.getPlayer().getId(), PLAYER_MOVE_SPEED);
 		m_systemManager.registerSystem<ecs::system::PhysicsSystem>(m_componentManager, m_objectFactory.getPlayer().getId());
 		m_systemManager.registerSystem<ecs::system::CameraSystem>(m_componentManager, m_objectFactory.getPlayer().getId());
+		m_systemManager.registerSystem<ecs::system::RenderSystem>(m_componentManager, m_objectFactory.getPlayer().getId());
 	}
 
 	void InGameScene::update(float deltaTime)
