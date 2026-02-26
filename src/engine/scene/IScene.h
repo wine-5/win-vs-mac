@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace game::scene
+namespace engine::scene
 {
     /**
      * @brief Sceneの基底純粋仮想クラス
