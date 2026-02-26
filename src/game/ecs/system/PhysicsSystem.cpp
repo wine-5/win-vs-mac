@@ -22,7 +22,7 @@ namespace game::ecs::system
 			velocity.m_velocity.y = m_jumpForce;
 
 		// 重力
-		if (!isGrounded(transform.m_position.y))
+		if (!isGrounded(transform.m_position.y) || velocity.m_velocity.y > 0.0f)
 			velocity.m_velocity.y += m_gravity * deltaTime;
 		else
 		{
