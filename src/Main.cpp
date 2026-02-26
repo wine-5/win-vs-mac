@@ -1,5 +1,6 @@
 ﻿#include "DxLib.h"
 #include "game/scene/InGameScene.h"
+#include "utility/LogUtil.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -10,7 +11,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	while (ProcessMessage() == 0)
 	{
 		ClearDrawScreen();// 画面クリア
-
+		utility::LogUtil::clear();
 		float deltaTime = 1.0f / 60.0f;
 		inGameScene.update(deltaTime);
 

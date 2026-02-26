@@ -21,12 +21,10 @@ namespace game::scene
 
 		// 現在位置を出力する（デバック）
 		auto& transform = m_componentManager.get<ecs::component::TransformComponent>(m_player.getId());
-		utility::LogUtil::clear();
 
-		utility::LogUtil::debug("x: %8.2f  y: %8.2f  z: %8.2f\n",
+		utility::LogUtil::log("x: %8.2f  y: %8.2f  z: %8.2f\n",
 			transform.m_position.x,
 			transform.m_position.y,
 			transform.m_position.z);
-
 	}
 }
