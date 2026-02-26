@@ -4,6 +4,7 @@
 #include "game/ecs/ComponentManager.h"
 #include "game/ecs/SystemManager.h"
 #include "game/ObjectFactory.h"
+#include "game/ecs/component/RenderComponent.h"
 
 namespace engine::scene
 {

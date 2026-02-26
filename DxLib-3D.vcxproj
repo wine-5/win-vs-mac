@@ -175,6 +175,7 @@
     <ClInclude Include="src\game\ecs\ComponentArray.h" />
     <ClInclude Include="src\game\ecs\ComponentManager.h" />
     <ClInclude Include="src\game\ecs\component\InputComponent.h" />
+    <ClInclude Include="src\game\ecs\component\RenderComponent.h" />
     <ClInclude Include="src\game\ecs\component\TransformComponent.h" />
     <ClInclude Include="src\game\ecs\component\VelocityComponent.h" />
     <ClInclude Include="src\game\ecs\Entity.h" />
