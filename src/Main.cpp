@@ -1,6 +1,9 @@
 ﻿#include "DxLib.h"
-#include "game/scene/InGameScene.h"
+#include "engine/scene/InGameScene.h"
 #include "utility/LogUtil.h"
+#include "core/ServiceLocator.h"
+#include "engine/Camera.h"  
+#include "engine/Renderer.h"
 
 namespace
 {
@@ -12,7 +15,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	if (DxLib_Init() == -1) return -1;
 
-	game::scene::InGameScene inGameScene;
+	// ServiceLocatorにサービスを登録
+	core::ServiceLocator::provide(std::make_unique<engine::Camera>());
+	core::ServiceLocator::provide(std::make_unique<engine::Renderer>());
+
+	engine::scene::InGameScene inGameScene;
 
 	while (ProcessMessage() == 0)
 	{

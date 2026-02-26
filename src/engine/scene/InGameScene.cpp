@@ -5,8 +5,8 @@
 #include "game/ecs/component/TransformComponent.h"
 #include "game/ObjectFactory.h"
 #include "utility/LogUtil.h"
-#include "game/ecs/system/CameraSystem.h"
-#include "game/ecs/system/RenderSystem.h"
+#include "core/ServiceLocator.h"
+#include "engine/Camera.h"
 
 namespace engine::scene
 {
@@ -17,8 +17,6 @@ namespace engine::scene
 
 		m_systemManager.registerSystem<game::ecs::system::InputSystem>(m_componentManager, m_objectFactory.getPlayer().getId());
 		m_systemManager.registerSystem<game::ecs::system::MoveSystem>(m_componentManager, m_objectFactory.getPlayer().getId(), PLAYER_MOVE_SPEED);
-		m_systemManager.registerSystem<game::ecs::system::CameraSystem>(m_componentManager, m_objectFactory.getPlayer().getId());
-		m_systemManager.registerSystem<game::ecs::system::RenderSystem>(m_componentManager, m_objectFactory.getPlayer().getId());
 		m_systemManager.registerSystem<game::ecs::system::PhysicsSystem>(m_componentManager, m_objectFactory.getPlayer().getId());
 	}
 
@@ -26,8 +24,11 @@ namespace engine::scene
 	{
 		m_systemManager.update(deltaTime);
 
-		// 現在位置を出力する（デバック）
 		auto& transform = m_componentManager.get<game::ecs::component::TransformComponent>(m_objectFactory.getPlayer().getId());
+		// カメラ更新
+		core::ServiceLocator::get<engine::Camera>()->update(transform.m_position, core::Vector3(0.0f, 800.0f, -600.0f));
+
+		// 現在位置を出力する（デバック）
 
 		utility::LogUtil::log("x: %8.2f  y: %8.2f  z: %8.2f\n",
 			transform.m_position.x,

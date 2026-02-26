@@ -1,13 +1,13 @@
 ﻿#pragma once
-#include <DxLib.h>
+#include "core/Vector3.h"
 
 namespace game::ecs::component
 {
-	/**
-	 * @brief 速度を持つコンポーネント
-	 */
-	struct VelocityComponent
-	{
-		VECTOR m_velocity = { 0.0f, 0.0f, 0.0f };
-	};
+    /**
+     * @brief 速度を持つコンポーネント
+     */
+    struct VelocityComponent
+    {
+        core::Vector3 m_velocity;
+    };
 }

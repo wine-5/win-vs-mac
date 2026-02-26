@@ -132,15 +132,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\core\ServiceLocator.cpp" />
+    <ClCompile Include="src\engine\Camera.cpp" />
+    <ClCompile Include="src\engine\Renderer.cpp" />
     <ClCompile Include="src\engine\ResourceManager.cpp" />
+    <ClCompile Include="src\engine\scene\InGameScene.cpp" />
     <ClCompile Include="src\game\actor\Player.cpp" />
-    <ClCompile Include="src\game\ecs\system\CameraSystem.cpp" />
     <ClCompile Include="src\game\ecs\system\InputSystem.cpp" />
     <ClCompile Include="src\game\ecs\system\MoveSystem.cpp" />
     <ClCompile Include="src\game\ecs\system\PhysicsSystem.cpp" />
-    <ClCompile Include="src\game\ecs\system\RenderSystem.cpp" />
     <ClCompile Include="src\game\ObjectFactory.cpp" />
-    <ClCompile Include="src\game\scene\InGameScnce.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\utility\LogUtil.cpp" />
   </ItemGroup>
@@ -165,13 +165,16 @@
   <ItemGroup>
     <ClInclude Include="src\core\EventBus.h" />
     <ClInclude Include="src\core\ServiceLocator.h" />
+    <ClInclude Include="src\core\Vector3.h" />
+    <ClInclude Include="src\engine\Camera.h" />
+    <ClInclude Include="src\engine\Renderer.h" />
     <ClInclude Include="src\engine\ResourceManager.h" />
+    <ClInclude Include="src\engine\scene\InGameScene.h" />
+    <ClInclude Include="src\engine\scene\IScene.h" />
     <ClInclude Include="src\game\actor\Player.h" />
     <ClInclude Include="src\game\ecs\ComponentArray.h" />
     <ClInclude Include="src\game\ecs\ComponentManager.h" />
-    <ClInclude Include="src\game\ecs\component\CameraComponent.h" />
     <ClInclude Include="src\game\ecs\component\InputComponent.h" />
-    <ClInclude Include="src\game\ecs\component\RenderComponent.h" />
     <ClInclude Include="src\game\ecs\component\TransformComponent.h" />
     <ClInclude Include="src\game\ecs\component\VelocityComponent.h" />
     <ClInclude Include="src\game\ecs\Entity.h" />
@@ -179,15 +182,11 @@
     <ClInclude Include="src\game\ecs\IComponent.h" />
     <ClInclude Include="src\game\ecs\ISystem.h" />
     <ClInclude Include="src\game\ecs\SystemManager.h" />
-    <ClInclude Include="src\game\ecs\system\CameraSystem.h" />
     <ClInclude Include="src\game\ecs\system\InputSystem.h" />
     <ClInclude Include="src\game\ecs\system\MoveSystem.h" />
     <ClInclude Include="src\game\ecs\system\PhysicsSystem.h" />
-    <ClInclude Include="src\game\ecs\system\RenderSystem.h" />
     <ClInclude Include="src\game\event\InGameEvents.h" />
     <ClInclude Include="src\game\ObjectFactory.h" />
-    <ClInclude Include="src\game\scene\InGameScene.h" />
-    <ClInclude Include="src\game\scene\IScene.h" />
     <ClInclude Include="src\utility\LogUtil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
