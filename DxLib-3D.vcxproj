@@ -142,7 +142,7 @@
     <ClCompile Include="src\game\ecs\system\PhysicsSystem.cpp" />
     <ClCompile Include="src\game\ObjectFactory.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\utility\LogUtil.cpp" />
+    <ClCompile Include="src\core\utility\LogUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -187,7 +187,7 @@
     <ClInclude Include="src\game\ecs\system\PhysicsSystem.h" />
     <ClInclude Include="src\game\event\InGameEvents.h" />
     <ClInclude Include="src\game\ObjectFactory.h" />
-    <ClInclude Include="src\utility\LogUtil.h" />
+    <ClInclude Include="src\core\utility\LogUtil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

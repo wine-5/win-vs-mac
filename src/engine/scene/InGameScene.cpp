@@ -4,7 +4,7 @@
 #include "game/ecs/system/PhysicsSystem.h"
 #include "game/ecs/component/TransformComponent.h"
 #include "game/ObjectFactory.h"
-#include "utility/LogUtil.h"
+#include "core/utility/LogUtil.h"
 #include "core/ServiceLocator.h"
 #include "engine/Camera.h"
 
