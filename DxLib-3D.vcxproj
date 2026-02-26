@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\core\ServiceLocator.cpp" />
+    <ClCompile Include="src\engine\ResourceManager.cpp" />
     <ClCompile Include="src\game\actor\Player.cpp" />
     <ClCompile Include="src\game\ecs\system\CameraSystem.cpp" />
     <ClCompile Include="src\game\ecs\system\InputSystem.cpp" />
@@ -164,6 +165,7 @@
   <ItemGroup>
     <ClInclude Include="src\core\EventBus.h" />
     <ClInclude Include="src\core\ServiceLocator.h" />
+    <ClInclude Include="src\engine\ResourceManager.h" />
     <ClInclude Include="src\game\actor\Player.h" />
     <ClInclude Include="src\game\ecs\ComponentArray.h" />
     <ClInclude Include="src\game\ecs\ComponentManager.h" />
