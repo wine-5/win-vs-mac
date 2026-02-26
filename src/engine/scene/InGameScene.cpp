@@ -28,9 +28,9 @@ namespace engine::scene
 		// カメラ更新
 		core::ServiceLocator::get<engine::Camera>()->update(transform.m_position, core::Vector3(0.0f, 800.0f, -600.0f));
 
-		// 現在位置を出力する（デバック）
+		// 現在位置を出力する(デバック)
 
-		utility::LogUtil::log("x: %8.2f  y: %8.2f  z: %8.2f\n",
+		core::utility::LogUtil::log("x: %8.2f  y: %8.2f  z: %8.2f\n",
 			transform.m_position.x,
 			transform.m_position.y,
 			transform.m_position.z);

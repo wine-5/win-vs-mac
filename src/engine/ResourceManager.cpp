@@ -13,7 +13,7 @@ namespace engine
 		int handle = MV1LoadModel(filePath.c_str());
 		if (handle == -1)
 		{
-			utility::LogUtil::error("モデルの読み込みに失敗しました: %s", filePath.c_str());
+			core::utility::LogUtil::error("モデルの読み込みに失敗しました: %s", filePath.c_str());
 			return -1;
 		}
 

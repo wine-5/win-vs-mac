@@ -2,7 +2,7 @@
 #include <DxLib.h>
 #include <cstdio>
 
-namespace utility
+namespace core::utility
 {
     int LogUtil::s_line = 0;
 

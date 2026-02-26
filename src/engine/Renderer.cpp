@@ -8,7 +8,7 @@ namespace engine
     {
         if (modelHandle == -1)
         {
-            utility::LogUtil::error("モデルが読み込まれていません");
+            core::utility::LogUtil::error("モデルが読み込まれていません");
             return;
         }
 

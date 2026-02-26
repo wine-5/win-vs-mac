@@ -24,7 +24,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	while (ProcessMessage() == 0)
 	{
 		ClearDrawScreen();// 画面クリア
-		utility::LogUtil::clear();
+		core::utility::LogUtil::clear();
 		inGameScene.update(DELTA_TIME);
 
 		ScreenFlip();       // 画面を反映

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <cstdarg>
 
-namespace utility
+namespace core::utility
 {
     class LogUtil
     {
