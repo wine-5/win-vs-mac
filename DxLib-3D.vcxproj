@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="src\core\ServiceLocator.cpp" />
     <ClCompile Include="src\game\actor\Player.cpp" />
+    <ClCompile Include="src\game\ecs\system\CameraSystem.cpp" />
     <ClCompile Include="src\game\ecs\system\InputSystem.cpp" />
     <ClCompile Include="src\game\ecs\system\MoveSystem.cpp" />
     <ClCompile Include="src\game\ecs\system\PhysicsSystem.cpp" />
@@ -174,6 +175,7 @@
     <ClInclude Include="src\game\ecs\IComponent.h" />
     <ClInclude Include="src\game\ecs\ISystem.h" />
     <ClInclude Include="src\game\ecs\SystemManager.h" />
+    <ClInclude Include="src\game\ecs\system\CameraSystem.h" />
     <ClInclude Include="src\game\ecs\system\InputSystem.h" />
     <ClInclude Include="src\game\ecs\system\MoveSystem.h" />
     <ClInclude Include="src\game\ecs\system\PhysicsSystem.h" />
