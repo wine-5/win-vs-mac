@@ -19,6 +19,13 @@ namespace core
 			m_services[key] = std::shared_ptr<void>(std::move(service));
 		}
 
+		template<typename TInterface, typename TImpl>
+		static void provide(std::unique_ptr<TImpl> service)
+		{
+			auto key = std::type_index(typeid(TInterface));
+			m_services[key] = std::shared_ptr<void>(std::move(service));
+		}
+
 		template<typename T>
 		static T* get()
 		{

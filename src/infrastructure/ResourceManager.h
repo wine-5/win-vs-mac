@@ -1,18 +1,19 @@
 ﻿#pragma once
 #include <unordered_map>
 #include <string>
+#include "core/IResourceManager.h"
 
 namespace infrastructure
 {
 	/**
 	 * @brief リソースの読み込み・管理を担当するクラス
 	 */
-	class ResourceManager
+	class ResourceManager : public core::IResourceManager
 	{
 	public:
-		int loadModel(const std::string& filePath);
-		void unloadModel(const std::string& filePath);
-		void unloadAll();
+		int loadModel(const std::string& filePath) override;
+		void unloadModel(const std::string& filePath) override;
+		void unloadAll() override;
 
 	private:
 		// ファイルパスをキーにしてモデルを管理

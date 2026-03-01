@@ -23,8 +23,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// ServiceLocatorにサービスを登録
 	core::ServiceLocator::provide(std::make_unique<infrastructure::Camera>());
 	core::ServiceLocator::provide(std::make_unique<infrastructure::Renderer>());
-	core::ServiceLocator::provide(std::make_unique<infrastructure::ResourceManager>());
-
+	core::ServiceLocator::provide<core::IResourceManager>(
+		std::make_unique<infrastructure::ResourceManager>()
+	);
+	
 	game::scene::InGameScene inGameScene;
 
 	while (ProcessMessage() == 0)

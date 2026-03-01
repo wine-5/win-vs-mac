@@ -164,6 +164,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\EventBus.h" />
+    <ClInclude Include="src\core\IResourceManager.h" />
     <ClInclude Include="src\core\ServiceLocator.h" />
     <ClInclude Include="src\core\Vector3.h" />
     <ClInclude Include="src\infrastructure\Camera.h" />
