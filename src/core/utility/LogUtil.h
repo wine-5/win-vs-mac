@@ -32,3 +32,8 @@ namespace core::utility
         static constexpr int LINE_HEIGHT = 20; // 1行の高さ
     };
 }
+
+// ログ出力用マクロ（使用を簡潔にする）
+#define LOG(...)   core::utility::LogUtil::log(__VA_ARGS__)
+#define LOG_W(...) core::utility::LogUtil::warning(__VA_ARGS__)
+#define LOG_E(...) core::utility::LogUtil::error(__VA_ARGS__)
