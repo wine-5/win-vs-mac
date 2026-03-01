@@ -4,6 +4,7 @@
 #include "core/ServiceLocator.h"
 #include "infrastructure/Camera.h"  
 #include "infrastructure/Renderer.h"
+#include "infrastructure/ResourceManager.h"
 
 namespace
 {
@@ -13,11 +14,16 @@ namespace
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
+	SetGraphMode(1280, 720, 32);
+	ChangeWindowMode(TRUE);
+
 	if (DxLib_Init() == -1) return -1;
+	SetUseLighting(FALSE);
 
 	// ServiceLocatorにサービスを登録
 	core::ServiceLocator::provide(std::make_unique<infrastructure::Camera>());
 	core::ServiceLocator::provide(std::make_unique<infrastructure::Renderer>());
+	core::ServiceLocator::provide(std::make_unique<infrastructure::ResourceManager>());
 
 	game::scene::InGameScene inGameScene;
 

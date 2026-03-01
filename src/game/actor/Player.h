@@ -5,6 +5,8 @@
 
 namespace game::actor
 {
+	constexpr const char* PLAYER_MODEL_PATH = "assets/Model/Player.mv1";
+
 	/**
 	 * @brief Playerのセットアップを担当するクラス
 	 */
@@ -15,6 +17,7 @@ namespace game::actor
 		core::ecs::EntityId getId() const;
 
 	private:
+
 		core::ecs::Entity m_entity;
 	};
 }

@@ -3,6 +3,8 @@
 #include "game/component/VelocityComponent.h"
 #include "game/component/InputComponent.h"
 #include "game/component/RenderComponent.h"
+#include "core/ServiceLocator.h"
+#include "infrastructure/ResourceManager.h"
 
 namespace game::actor
 {
@@ -12,7 +14,10 @@ namespace game::actor
 		componentManager.add<component::TransformComponent>(m_entity.getId(), {});
 		componentManager.add<component::VelocityComponent>(m_entity.getId(), {});
 		componentManager.add<component::InputComponent>(m_entity.getId(), {});
-		componentManager.add<component::RenderComponent>(m_entity.getId(), {});
+
+		// モデルを読み込んでRenderComponentに設定する
+		int handle = core::ServiceLocator::get<infrastructure::ResourceManager>()->loadModel(PLAYER_MODEL_PATH);
+		componentManager.add<component::RenderComponent>(m_entity.getId(), { handle });
 	}
 
 	core::ecs::EntityId Player::getId() const

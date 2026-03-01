@@ -27,7 +27,7 @@ namespace game::scene
 
 	auto& transform = m_componentManager.get<game::component::TransformComponent>(m_objectFactory.getPlayer().getId());
 	auto& render = m_componentManager.get<game::component::RenderComponent>(m_objectFactory.getPlayer().getId());
-		core::ServiceLocator::get<infrastructure::Camera>()->update(transform.m_position, core::Vector3(0.0f, 800.0f, -600.0f));
+		core::ServiceLocator::get<infrastructure::Camera>()->update(transform.m_position, core::Vector3(0.0f, 200.0f, -300.0f));
 
 		// 描画
 		core::ServiceLocator::get<infrastructure::Renderer>()->drawModel(render.m_modelHandle, transform.m_position);
