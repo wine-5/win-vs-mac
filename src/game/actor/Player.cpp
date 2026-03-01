@@ -1,8 +1,8 @@
 ﻿#include "Player.h"
-#include "game/ecs/component/TransformComponent.h"
-#include "game/ecs/component/VelocityComponent.h"
-#include "game/ecs/component/InputComponent.h"
-#include "game/ecs/component/RenderComponent.h"
+#include "game/component/TransformComponent.h"
+#include "game/component/VelocityComponent.h"
+#include "game/component/InputComponent.h"
+#include "game/component/RenderComponent.h"
 
 namespace game::actor
 {

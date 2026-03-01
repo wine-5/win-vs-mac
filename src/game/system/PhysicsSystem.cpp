@@ -1,7 +1,7 @@
 ﻿#include "PhysicsSystem.h"
-#include "game/ecs/component/TransformComponent.h"
-#include "game/ecs/component/VelocityComponent.h"
-#include "game/ecs/component/InputComponent.h"
+#include "game/component/TransformComponent.h"
+#include "game/component/VelocityComponent.h"
+#include "game/component/InputComponent.h"
 
 namespace game::ecs::system
 {

@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "game/ecs/ISystem.h"
-#include "game/ecs/ComponentManager.h"
-#include "game/ecs/Entity.h"
+#include "core/ecs/ISystem.h"
+#include "core/ecs/ComponentManager.h"
+#include "core/ecs/Entity.h"
 
 namespace game::ecs::system
 {

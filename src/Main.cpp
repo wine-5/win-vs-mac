@@ -1,9 +1,9 @@
 ﻿#include "DxLib.h"
-#include "engine/scene/InGameScene.h"
+#include "game/scene/InGameScene.h"
 #include "core/utility/LogUtil.h"
 #include "core/ServiceLocator.h"
-#include "engine/Camera.h"  
-#include "engine/Renderer.h"
+#include "infrastructure/Camera.h"  
+#include "infrastructure/Renderer.h"
 
 namespace
 {

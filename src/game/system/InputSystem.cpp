@@ -1,6 +1,6 @@
 ﻿#include "InputSystem.h"
 #include <DxLib.h>
-#include "game/ecs/component/InputComponent.h"
+#include "game/component/InputComponent.h"
 
 namespace game::ecs::system
 {

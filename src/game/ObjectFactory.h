@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "game/ecs/EntityManager.h"
-#include "game/ecs/ComponentManager.h"
+#include "core/ecs/EntityManager.h"
+#include "core/ecs/ComponentManager.h"
 #include "game/actor/Player.h"
 #include <memory>
 

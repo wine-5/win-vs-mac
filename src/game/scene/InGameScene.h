@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include "IScene.h"
-#include "game/ecs/EntityManager.h"
-#include "game/ecs/ComponentManager.h"
-#include "game/ecs/SystemManager.h"
+#include "core/ecs/EntityManager.h"
+#include "core/ecs/ComponentManager.h"
+#include "core/ecs/SystemManager.h"
 #include "game/ObjectFactory.h"
-#include "game/ecs/component/RenderComponent.h"
+#include "game/component/RenderComponent.h"
 
 namespace engine::scene
 {

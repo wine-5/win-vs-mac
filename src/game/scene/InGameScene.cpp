@@ -1,13 +1,13 @@
 ﻿#include "InGameScene.h"
-#include "game/ecs/system/InputSystem.h"
-#include "game/ecs/system/MoveSystem.h"
-#include "game/ecs/system/PhysicsSystem.h"
-#include "game/ecs/component/TransformComponent.h"
+#include "game/system/InputSystem.h"
+#include "game/system/MoveSystem.h"
+#include "game/system/PhysicsSystem.h"
+#include "game/component/TransformComponent.h"
 #include "game/ObjectFactory.h"
 #include "core/utility/LogUtil.h"
 #include "core/ServiceLocator.h"
-#include "engine/Camera.h"
-#include "engine/Renderer.h"
+#include "infrastructure/Camera.h"
+#include "infrastructure/Renderer.h"
 
 namespace engine::scene
 {

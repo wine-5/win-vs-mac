@@ -1,6 +1,6 @@
 ﻿#include "MoveSystem.h"
-#include "game/ecs/component/InputComponent.h"
-#include "game/ecs/component/VelocityComponent.h"
+#include "game/component/InputComponent.h"
+#include "game/component/VelocityComponent.h"
 
 namespace game::ecs::system
 {
