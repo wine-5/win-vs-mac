@@ -8,20 +8,20 @@
 
 namespace game::scene
 {
-    /**
-     * @brief インゲームのシーンクラス
-     */
-    class InGameScene : public IScene
-    {
-    public:
-        static constexpr float PLAYER_MOVE_SPEED = 5.0f;
-        InGameScene();
-        void update(float deltaTime) override;
+	/**
+	 * @brief インゲームのシーンクラス
+	 */
+	class InGameScene : public IScene
+	{
+	public:
+		static constexpr float PLAYER_MOVE_SPEED = 5.0f;
+		InGameScene();
+		void update(float deltaTime) override;
 
-    private:
-        core::ecs::EntityManager    m_entityManager;
-        core::ecs::ComponentManager m_componentManager;
-        core::ecs::SystemManager    m_systemManager;
-        game::ObjectFactory         m_objectFactory;
-    };
+	private:
+		core::ecs::EntityManager    m_entityManager;
+		core::ecs::ComponentManager m_componentManager;
+		core::ecs::SystemManager    m_systemManager;
+		game::ObjectFactory         m_objectFactory;
+	};
 }

@@ -5,16 +5,16 @@
 
 namespace game::actor
 {
-    /**
-     * @brief Playerのセットアップを担当するクラス
-     */
-    class Player
-    {
-    public:
-        Player(core::ecs::EntityManager& entityManager, core::ecs::ComponentManager& componentManager);
-        core::ecs::EntityId getId() const;
+	/**
+	 * @brief Playerのセットアップを担当するクラス
+	 */
+	class Player
+	{
+	public:
+		Player(core::ecs::EntityManager& entityManager, core::ecs::ComponentManager& componentManager);
+		core::ecs::EntityId getId() const;
 
-    private:
-        core::ecs::Entity m_entity;
-    };
+	private:
+		core::ecs::Entity m_entity;
+	};
 }

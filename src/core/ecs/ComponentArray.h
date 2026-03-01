@@ -5,34 +5,34 @@
 
 namespace core::ecs
 {
-    /**
-     * @brief EntityIdとComponentを紐付けて管理するコンテナクラス
-     */
-    template <typename T>
-    class ComponentArray : public IComponent
-    {
-    public:
-        void add(EntityId id, T component)
-        {
-            m_component[id] = component;
-        }
+	/**
+	 * @brief EntityIdとComponentを紐付けて管理するコンテナクラス
+	 */
+	template <typename T>
+	class ComponentArray : public IComponent
+	{
+	public:
+		void add(EntityId id, T component)
+		{
+			m_component[id] = component;
+		}
 
-        T& get(EntityId id)
-        {
-            return m_component[id];
-        }
+		T& get(EntityId id)
+		{
+			return m_component[id];
+		}
 
-        void remove(EntityId id) override
-        {
-            m_component.erase(id);
-        }
+		void remove(EntityId id) override
+		{
+			m_component.erase(id);
+		}
 
-        bool has(EntityId id) const
-        {
-            return m_component.find(id) != m_component.end();
-        }
+		bool has(EntityId id) const
+		{
+			return m_component.find(id) != m_component.end();
+		}
 
-    private:
-        std::unordered_map<EntityId, T> m_component;
-    };
+	private:
+		std::unordered_map<EntityId, T> m_component;
+	};
 }

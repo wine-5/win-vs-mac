@@ -6,20 +6,20 @@
 
 namespace game
 {
-    /**
-     * @brief ゲームオブジェクトの生成・破棄を担当するクラス
-     */
-    class ObjectFactory
-    {
-    public:
-        ObjectFactory(core::ecs::EntityManager& entityManager, core::ecs::ComponentManager& componentManager);
-        void init();
+	/**
+	 * @brief ゲームオブジェクトの生成・破棄を担当するクラス
+	 */
+	class ObjectFactory
+	{
+	public:
+		ObjectFactory(core::ecs::EntityManager& entityManager, core::ecs::ComponentManager& componentManager);
+		void init();
 
-        actor::Player& getPlayer() const;
+		actor::Player& getPlayer() const;
 
-    private:
-        core::ecs::EntityManager& m_entityManager;
-        core::ecs::ComponentManager& m_componentManager;
-        std::unique_ptr<actor::Player> m_player; // init()で生成タイミングを遅らせるためunique_ptrで保持
-    };
+	private:
+		core::ecs::EntityManager& m_entityManager;
+		core::ecs::ComponentManager& m_componentManager;
+		std::unique_ptr<actor::Player> m_player; // init()で生成タイミングを遅らせるためunique_ptrで保持
+	};
 }

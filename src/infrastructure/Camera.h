@@ -3,12 +3,12 @@
 
 namespace infrastructure
 {
-    /**
-     * @brief アイソメトリックカメラの制御クラス
-     */
-    class Camera
-    {
-    public:
-        void update(const core::Vector3& targetPosition, const core::Vector3& offset);
-    };
+	/**
+	 * @brief アイソメトリックカメラの制御クラス
+	 */
+	class Camera
+	{
+	public:
+		void update(const core::Vector3& targetPosition, const core::Vector3& offset);
+	};
 }
