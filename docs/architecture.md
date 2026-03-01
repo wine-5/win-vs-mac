@@ -1,69 +1,101 @@
 ﻿# アーキテクチャ設計
 
 ## 基本方針
-全体構造にクリーンアーキテクチャを採用し、
+依存方向を一方向に制御するレイヤードアーキテクチャをベースに、
 Game層の内部にECSを採用する。
 また全レイヤーから使われる共通基盤としてCore層を設ける。
 
 ---
 
-## 全体構造：クリーンアーキテクチャ
+## 全体構造
 
 ```
-┌─────────────────────────────────────┐
-│  Platform層                          │
-│  Windows API実装                     │
-│  ┌───────────────────────────────┐  │
-│  │  Engine層                      │  │
-│  │  DxLib・シーン管理             │  │
-│  │  ┌─────────────────────────┐  │  │
-│  │  │  Game層                  │  │  │
-│  │  │  ┌──────────────────┐   │  │  │
-│  │  │  │  ECS             │   │  │  │
-│  │  │  │  Entity          │   │  │  │
-│  │  │  │  Component       │   │  │  │
-│  │  │  │  System          │   │  │  │
-│  │  │  └──────────────────┘   │  │  │
-│  │  └─────────────────────────┘  │  │
-│  └───────────────────────────────┘  │
-│  ┌───────────────────────────────┐  │
-│  │  Core層                       │  │
-│  │  どのレイヤーからも使える      │  │
-│  └───────────────────────────────┘  │
-└─────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│  Platform層                               │
+│  Windows API実装                          │
+│  ┌────────────────────────────────────┐  │
+│  │  Infrastructure層                   │  │
+│  │  DxLib・外部ライブラリへの依存を閉じ込める │  │
+│  │  ┌──────────────────────────────┐  │  │
+│  │  │  Game層                       │  │  │
+│  │  │  ゲーム固有のロジック・ECS     │  │  │
+│  │  └──────────────────────────────┘  │  │
+│  └────────────────────────────────────┘  │
+│  ┌────────────────────────────────────┐  │
+│  │  Core層                             │  │
+│  │  どのレイヤーからも使える共通基盤    │  │
+│  └────────────────────────────────────┘  │
+└──────────────────────────────────────────┘
 ```
 
-依存方向：外側が内側に依存する。内側は外側を知らない。
-Game層 ← Engine層 ← Platform層
-Core層はどのレイヤーからも依存される。
+依存方向（矢印の逆方向のインクルードは禁止）：
+```
+platform → infrastructure → game → core
+```
+
+- 外側の層は内側の層をインクルードしてよい
+- 内側の層は外側の層をインクルードしてはいけない
+- Core層はすべての層からインクルードされるが、自身はどの層もインクルードしない
 
 ---
 
 ## 各レイヤーの責務
 
+### Core層
+どの層にも依存しない共通基盤。
+「誰からでも参照されるが、自分は誰も参照しない層」。
+EventBus・ServiceLocator・数学ユーティリティなど全レイヤーから使われるものを置く。
+
 ### Game層
 ゲームのルールとロジックのみを担当。
 DxLibやWindows APIには直接触れない。
 内部はECSで設計する。
+Platformのデータはインターフェース経由で取得する。
 
-### Engine層
-DxLibを用いた描画・入力・シーン管理を担当。
+### Infrastructure層
+DxLibを用いた描画・入力・音声・シーン管理を担当。
+「DxLibが変わったら影響を受けるもの」をすべてここに閉じ込める。
 ゲームロジックは持たない。
 
 ### Platform層
 Windows APIの処理をすべてここに閉じ込める。
 インターフェースの実装クラスを置く。
+「WindowsAPIが変わったら影響を受けるもの」がここに入る。
 
-### Core層
-どのレイヤーにも依存しない共通基盤。
-EventBusやServiceLocatorなど全レイヤーから使われるものを置く。
+---
+
+## 層の判断基準
+
+迷ったときは「何が変わったら影響を受けるか」で判断する。
+
+```
+Core層           → どれが変わっても影響を受けない
+Game層           → ゲームのルールが変わったら影響を受ける
+Infrastructure層 → DxLib（外部ライブラリ）が変わったら影響を受ける
+Platform層       → WindowsAPIが変わったら影響を受ける
+```
 
 ---
 
 ## 依存関係の原則
 
-OS依存コードは直接Game層に書かない。
-必ずインターフェース経由で利用する。
+### インクルードの禁止方向
+
+```cpp
+// ❌ coreがgameをインクルード
+// ❌ gameがinfrastructureをインクルード
+// ❌ infrastructureがplatformをインクルード
+```
+
+同じ層内での参照はOK：
+
+```cpp
+// ✅ game層内でgame層をインクルード
+// game/scene/GameScene.cpp
+#include "game/ecs/system/MoveSystem.h"
+```
+
+### OS依存コードはインターフェース経由で利用する
 
 ```cpp
 // NG: Game層でWindows APIを直接呼ぶ
@@ -71,8 +103,15 @@ OS依存コードは直接Game層に書かない。
 DWORD cpu = GetSystemTimes(...);
 
 // OK: インターフェース経由で取得
-ISystemDataProvider* provider = ...;
+ISystemDataProvider* provider = ServiceLocator::get<ISystemDataProvider>();
 float cpu = provider->getCpuUsage();
+```
+
+インターフェースはCore層に置くことで、Game層もPlatform層も両方から参照できる：
+
+```
+platform/WindowsSystemProvider  → implements → core/ISystemDataProvider
+game/GameScene                  → uses       → core/ISystemDataProvider
 ```
 
 ---
@@ -106,13 +145,13 @@ componentManager.add<AIComponent>(enemy, AIType::Heavy, 0.5f);
 ## イベント駆動：EventBus
 
 SystemがSystemを直接呼ばないようにEventBusを使う。
-EventBusはCore層に置くことでGame層・Engine層の両方から使える。
+EventBusはCore層に置くことでGame層・Infrastructure層の両方から使える。
 
 ```cpp
 // BattleSystemがイベントを発行する（Game層）
 eventBus.emit<EnemyDefeatedEvent>({ enemyId, "chrome.exe" });
 
-// SoundManagerがイベントを受信する（Engine層）
+// SoundManagerがイベントを受信する（Infrastructure層）
 eventBus.subscribe<EnemyDefeatedEvent>([](const EnemyDefeatedEvent& e) {
     // 効果音を鳴らす
 });
@@ -151,7 +190,7 @@ struct DungeonClearedEvent : public IGameEvent {};
 ServiceLocatorはシングルトンの倉庫。
 ゲーム全体で1つだけ存在するManagerクラスを預けて
 どこからでも取り出せる仕組み。
-Core層に置くことでGame層・Engine層の両方から使える。
+Core層に置くことでGame層・Infrastructure層の両方から使える。
 
 ```cpp
 // Main.cppで全部預ける
@@ -160,8 +199,8 @@ ServiceLocator::provide(new SoundManager());
 ServiceLocator::provide(new Renderer());
 
 // どこからでも取り出せる
-ServiceLocator::getSoundManager()->play("attack");
-ServiceLocator::getInputManager()->getKey();
+ServiceLocator::get<SoundManager>()->play("attack");
+ServiceLocator::get<InputManager>()->getKey();
 ```
 
 ---
@@ -173,6 +212,9 @@ ServiceLocator::getInputManager()->getKey();
 |---|---|---|
 | `EventBus` | あり | イベントの発行・購読管理 |
 | `ServiceLocator` | あり | グローバルなサービスへのアクセス管理 |
+| `ISystemDataProvider` | なし | CPU・メモリ取得インターフェース |
+| `IFileSystemProvider` | なし | ファイルシステム操作インターフェース |
+| `IProcessProvider` | なし | プロセス情報取得インターフェース |
 
 ---
 
@@ -230,16 +272,9 @@ ServiceLocator::getInputManager()->getKey();
 | `EntityFactory` | EntityにComponentを組み合わせて生成する |
 | `SystemInitializer` | Systemの登録・初期化順序を管理 |
 
-#### Interfaces
-| クラス名 | 概要 |
-|---|---|
-| `ISystemDataProvider` | CPU・メモリ取得 |
-| `IFileSystemProvider` | ファイルシステム操作 |
-| `IProcessProvider` | プロセス情報取得 |
-
 ---
 
-### Engine層
+### Infrastructure層
 
 #### シーン
 | クラス名 | 概要 |
@@ -253,13 +288,14 @@ ServiceLocator::getInputManager()->getKey();
 | `ResultScene` | リザルト画面 |
 | `ClearScene` | クリア画面 |
 
-#### その他Engine層
+#### その他Infrastructure層
 | クラス名 | 概要 |
 |---|---|
 | `Renderer` | 3D描画管理 |
 | `InputManager` | キー入力管理 |
 | `SoundManager` | サウンド管理 |
 | `Camera` | アイソメトリックカメラ制御 |
+| `ResourceManager` | モデル・画像リソース管理 |
 
 ---
 
@@ -277,57 +313,68 @@ ServiceLocator::getInputManager()->getKey();
 ```
 src/
 ├── core/
-│   ├── EventBus.h / .cpp
-│   └── ServiceLocator.h / .cpp
-├── game/
-│   ├── GameManager.h / .cpp
-│   ├── interfaces/
-│   │   ├── ISystemDataProvider.h
-│   │   ├── IFileSystemProvider.h
-│   │   └── IProcessProvider.h
 │   ├── ecs/
+│   │   ├── ComponentArray.h
+│   │   ├── ComponentManager.h
 │   │   ├── Entity.h
 │   │   ├── EntityManager.h
 │   │   ├── IComponent.h
-│   │   ├── ComponentArray.h
-│   │   ├── ComponentManager.h
 │   │   ├── ISystem.h
 │   │   └── SystemManager.h
-│   ├── components/
+│   ├── provider/
+│   │   ├── ISystemDataProvider.h
+│   │   ├── IFileSystemProvider.h
+│   │   └── IProcessProvider.h
+│   ├── utility/
+│   │   ├── LogUtil.h
+│   │   └── LogUtil.cpp
+│   ├── EventBus.h
+│   ├── ServiceLocator.h / .cpp
+│   └── Vector3.h
+├── game/
+│   ├── actor/
+│   │   └── Player.h / .cpp
+│   ├── component/
 │   │   ├── TransformComponent.h
+│   │   ├── RenderComponent.h
+│   │   ├── VelocityComponent.h
+│   │   ├── InputComponent.h
 │   │   ├── HealthComponent.h
 │   │   ├── WeaponComponent.h / .cpp
 │   │   ├── AIComponent.h
 │   │   ├── BossComponent.h
-│   │   ├── ProcessComponent.h
-│   │   └── RenderComponent.h
-│   ├── systems/
+│   │   └── ProcessComponent.h
+│   ├── system/
 │   │   ├── MoveSystem.h / .cpp
+│   │   ├── InputSystem.h / .cpp
+│   │   ├── PhysicsSystem.h / .cpp
 │   │   ├── AISystem.h / .cpp
 │   │   ├── BattleSystem.h / .cpp
 │   │   ├── RenderSystem.h / .cpp
 │   │   └── ProcessSystem.h / .cpp
-│   ├── factory/
-│   │   └── EntityFactory.h / .cpp
-│   ├── events/
-│   │   └── InGameEvent.h
-│   └── dungeon/
-│       ├── DungeonManager.h / .cpp
-│       └── Room.h / .cpp
-├── engine/
 │   ├── scene/
 │   │   ├── IScene.h
-│   │   ├── SceneManager.h / .cpp
+│   │   ├── InGameScene.h / .cpp
 │   │   ├── TitleScene.h / .cpp
 │   │   ├── FileSelectScene.h / .cpp
 │   │   ├── LoadingScene.h / .cpp
-│   │   ├── GameScene.h / .cpp
 │   │   ├── ResultScene.h / .cpp
 │   │   └── ClearScene.h / .cpp
+│   ├── event/
+│   │   └── InGameEvents.h
+│   ├── factory/
+│   │   └── EntityFactory.h / .cpp
+│   ├── dungeon/
+│   │   ├── DungeonManager.h / .cpp
+│   │   └── Room.h / .cpp
+│   ├── ObjectFactory.h / .cpp
+│   └── GameManager.h / .cpp
+├── infrastructure/
 │   ├── Renderer.h / .cpp
+│   ├── Camera.h / .cpp
+│   ├── ResourceManager.h / .cpp
 │   ├── InputManager.h / .cpp
-│   ├── SoundManager.h / .cpp
-│   └── Camera.h / .cpp
+│   └── SoundManager.h / .cpp
 ├── platform/
 │   ├── WindowsSystemProvider.h / .cpp
 │   ├── WindowsFileSystemProvider.h / .cpp
