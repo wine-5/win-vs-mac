@@ -2,7 +2,7 @@
 #include <DxLib.h>
 #include "core/utility/LogUtil.h"
 
-namespace engine
+namespace infrastructure
 {
 	int ResourceManager::loadModel(const std::string& filePath)
 	{
@@ -13,7 +13,7 @@ namespace engine
 		int handle = MV1LoadModel(filePath.c_str());
 		if (handle == -1)
 		{
-			core::utility::LogUtil::error("モデルの読み込みに失敗しました: %s", filePath.c_str());
+			LOG_E("モデルの読み込みに失敗しました: %s", filePath.c_str());
 			return -1;
 		}
 

@@ -6,7 +6,7 @@
 #include "game/ObjectFactory.h"
 #include "game/component/RenderComponent.h"
 
-namespace engine::scene
+namespace game::scene
 {
     /**
      * @brief インゲームのシーンクラス
@@ -19,9 +19,9 @@ namespace engine::scene
         void update(float deltaTime) override;
 
     private:
-        game::ecs::EntityManager    m_entityManager;
-        game::ecs::ComponentManager m_componentManager;
-        game::ecs::SystemManager    m_systemManager;
+        core::ecs::EntityManager    m_entityManager;
+        core::ecs::ComponentManager m_componentManager;
+        core::ecs::SystemManager    m_systemManager;
         game::ObjectFactory         m_objectFactory;
     };
 }

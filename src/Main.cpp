@@ -16,10 +16,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	if (DxLib_Init() == -1) return -1;
 
 	// ServiceLocatorにサービスを登録
-	core::ServiceLocator::provide(std::make_unique<engine::Camera>());
-	core::ServiceLocator::provide(std::make_unique<engine::Renderer>());
+	core::ServiceLocator::provide(std::make_unique<infrastructure::Camera>());
+	core::ServiceLocator::provide(std::make_unique<infrastructure::Renderer>());
 
-	engine::scene::InGameScene inGameScene;
+	game::scene::InGameScene inGameScene;
 
 	while (ProcessMessage() == 0)
 	{

@@ -11,10 +11,10 @@ namespace game::actor
     class Player
     {
     public:
-        Player(ecs::EntityManager& entityManager, ecs::ComponentManager& componentManager);
-        ecs::EntityId getId() const;
+        Player(core::ecs::EntityManager& entityManager, core::ecs::ComponentManager& componentManager);
+        core::ecs::EntityId getId() const;
 
     private:
-        ecs::Entity m_entity;
+        core::ecs::Entity m_entity;
     };
 }

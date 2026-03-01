@@ -2,9 +2,9 @@
 #include "game/component/InputComponent.h"
 #include "game/component/VelocityComponent.h"
 
-namespace game::ecs::system
+namespace game::system
 {
-    MoveSystem::MoveSystem(ComponentManager& componentManager, EntityId playerId, float moveSpeed)
+    MoveSystem::MoveSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId playerId, float moveSpeed)
         : m_componentManager(componentManager)
         , m_playerId(playerId)
         , m_moveSpeed(moveSpeed)

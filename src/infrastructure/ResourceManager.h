@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <string>
 
-namespace engine
+namespace infrastructure
 {
 	/**
 	 * @brief リソースの読み込み・管理を担当するクラス

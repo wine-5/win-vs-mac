@@ -12,14 +12,14 @@ namespace game
     class ObjectFactory
     {
     public:
-        ObjectFactory(ecs::EntityManager& entityManager, ecs::ComponentManager& componentManager);
+        ObjectFactory(core::ecs::EntityManager& entityManager, core::ecs::ComponentManager& componentManager);
         void init();
 
         actor::Player& getPlayer() const;
 
     private:
-        ecs::EntityManager& m_entityManager;
-        ecs::ComponentManager& m_componentManager;
+        core::ecs::EntityManager& m_entityManager;
+        core::ecs::ComponentManager& m_componentManager;
         std::unique_ptr<actor::Player> m_player; // init()で生成タイミングを遅らせるためunique_ptrで保持
     };
 }

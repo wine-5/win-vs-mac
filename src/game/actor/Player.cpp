@@ -6,16 +6,16 @@
 
 namespace game::actor
 {
-	Player::Player(ecs::EntityManager& entityManager, ecs::ComponentManager& componentManager)
+	Player::Player(core::ecs::EntityManager& entityManager, core::ecs::ComponentManager& componentManager)
 		: m_entity(entityManager.create())
 	{
-		componentManager.add<ecs::component::TransformComponent>(m_entity.getId(), {});
-		componentManager.add<ecs::component::VelocityComponent>(m_entity.getId(), {});
-		componentManager.add<ecs::component::InputComponent>(m_entity.getId(), {});
-		componentManager.add<ecs::component::RenderComponent>(m_entity.getId(), {});
+		componentManager.add<component::TransformComponent>(m_entity.getId(), {});
+		componentManager.add<component::VelocityComponent>(m_entity.getId(), {});
+		componentManager.add<component::InputComponent>(m_entity.getId(), {});
+		componentManager.add<component::RenderComponent>(m_entity.getId(), {});
 	}
 
-	ecs::EntityId Player::getId() const
+	core::ecs::EntityId Player::getId() const
 	{
 		return m_entity.getId();
 	}

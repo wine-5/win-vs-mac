@@ -6,7 +6,7 @@
 #include "IComponent.h"
 #include "ComponentArray.h"
 
-namespace game::ecs
+namespace core::ecs
 {
     /**
      * @brief 全ComponentArrayを型ごとに管理するECSマネージャ

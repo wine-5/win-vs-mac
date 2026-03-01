@@ -3,7 +3,7 @@
 #include "Entity.h"
 #include "IComponent.h"
 
-namespace game::ecs
+namespace core::ecs
 {
     /**
      * @brief EntityIdとComponentを紐付けて管理するコンテナクラス

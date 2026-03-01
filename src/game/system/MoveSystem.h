@@ -3,20 +3,20 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 
-namespace game::ecs::system
+namespace game::system
 {
     /**
      * @brief 入力を元に速度を計算するSystem
      */
-    class MoveSystem : public ISystem
+    class MoveSystem : public core::ecs::ISystem
     {
     public:
-        MoveSystem(ComponentManager& componentManager, EntityId playerId, float moveSpeed);
+        MoveSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId playerId, float moveSpeed);
         void update(float deltaTime) override;
 
     private:
-        ComponentManager& m_componentManager;
-        EntityId m_playerId;
+        core::ecs::ComponentManager& m_componentManager;
+        core::ecs::EntityId m_playerId;
         float m_moveSpeed;
     };
 }

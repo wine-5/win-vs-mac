@@ -3,7 +3,7 @@
 #include <memory>
 #include "ISystem.h"
 
-namespace game::ecs
+namespace core::ecs
 {
 	/**
 	 * @brief 全てのSystemを登録・更新するマネージャクラス

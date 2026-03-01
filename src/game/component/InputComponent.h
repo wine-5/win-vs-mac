@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace game::ecs::component
+namespace game::component
 {
 	/**
 	 * @brief プレイヤーの入力状態を持つコンポーネント

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <cstdint>
 
-namespace game::ecs
+namespace core::ecs
 {
 	using EntityId = uint32_t;
 

@@ -2,7 +2,7 @@
 #include <queue>
 #include "Entity.h"
 
-namespace game::ecs
+namespace core::ecs
 {
 	/**
 	 * @brief EntityのIdの発行、回収を担当

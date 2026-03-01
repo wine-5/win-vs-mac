@@ -1,7 +1,7 @@
 ﻿#include "Camera.h"
 #include <DxLib.h>
 
-namespace engine
+namespace infrastructure
 {
     void Camera::update(const core::Vector3& targetPosition, const core::Vector3& offset)
     {

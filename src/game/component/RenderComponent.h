@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace game::ecs::component
+namespace game::component
 {
     /**
      * @brief 描画情報を持つコンポーネント

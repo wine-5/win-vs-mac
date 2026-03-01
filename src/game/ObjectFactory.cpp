@@ -2,7 +2,7 @@
 
 namespace game
 {
-	ObjectFactory::ObjectFactory(ecs::EntityManager& entityManager, ecs::ComponentManager& componentManager)
+	ObjectFactory::ObjectFactory(core::ecs::EntityManager& entityManager, core::ecs::ComponentManager& componentManager)
 		: m_entityManager(entityManager)
 		, m_componentManager(componentManager)
 	{

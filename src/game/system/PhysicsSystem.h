@@ -3,15 +3,15 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 
-namespace game::ecs::system
+namespace game::system
 {
 	/**
 	 * @brief 速度を元に位置を更新・重力・ジャンプを処理するSystem
 	 */
-	class PhysicsSystem : public ISystem
+	class PhysicsSystem : public core::ecs::ISystem
 	{
 	public:
-		PhysicsSystem(ComponentManager& componentManager, EntityId playerId);
+		PhysicsSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId playerId);
 		void update(float deltaTime) override;
 
 	private:
@@ -21,8 +21,8 @@ namespace game::ecs::system
 
 		bool isGrounded(float positionY) const;
 
-		ComponentManager& m_componentManager;
-		EntityId m_playerId;
+		core::ecs::ComponentManager& m_componentManager;
+		core::ecs::EntityId m_playerId;
 
 		float m_gravity = DEFAULT_GRAVITY;
 		float m_jumpForce = DEFAULT_JUMP_FORCE;

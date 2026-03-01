@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "core/Vector3.h"
 
-namespace game::ecs::component
+namespace game::component
 {
     /**
      * @brief 位置・回転・大きさを持つコンポーネント

@@ -3,9 +3,9 @@
 #include "game/component/VelocityComponent.h"
 #include "game/component/InputComponent.h"
 
-namespace game::ecs::system
+namespace game::system
 {
-    PhysicsSystem::PhysicsSystem(ComponentManager& componentManager, EntityId playerId)
+    PhysicsSystem::PhysicsSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId playerId)
         : m_componentManager(componentManager)
         , m_playerId(playerId)
     {

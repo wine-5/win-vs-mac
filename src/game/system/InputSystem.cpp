@@ -2,9 +2,9 @@
 #include <DxLib.h>
 #include "game/component/InputComponent.h"
 
-namespace game::ecs::system
+namespace game::system
 {
-	InputSystem::InputSystem(ComponentManager& componentManager, EntityId playerId)
+	InputSystem::InputSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId playerId)
 		: m_componentManager(componentManager)
 		, m_playerId(playerId)
 	{

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace game::ecs
+namespace core::ecs
 {
 	/**
 	 * @brief 全てのSystemの基底インターフェース

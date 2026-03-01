@@ -26,7 +26,7 @@ namespace core
             auto it = m_services.find(key);
             if (it == m_services.end())
             {
-                core::utility::LogUtil::error("ServiceLocator: サービスが登録されていません");
+                LOG_E("ServiceLocator: サービスが登録されていません");
                 return nullptr;
             }
             return static_cast<T*>(it->second.get());

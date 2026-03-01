@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "core/Vector3.h"
 
-namespace engine
+namespace infrastructure
 {
     /**
      * @brief 3D描画を担当するクラス

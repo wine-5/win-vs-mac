@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace game::ecs
+namespace core::ecs
 {
     /**
      * @brief 型消去用の基底インターフェース
