@@ -5,6 +5,9 @@
 #include <typeindex>
 #include <any>
 
+/**
+ * @brief イベントの発行と購読を管理するクラス
+ */
 class EventBus
 {
 public:

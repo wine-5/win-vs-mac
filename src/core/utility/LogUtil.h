@@ -3,6 +3,9 @@
 
 namespace core::utility
 {
+    /**
+     * @brief 画面へのログ出力を担当するユーティリティクラス
+     */
     class LogUtil
     {
     public:
