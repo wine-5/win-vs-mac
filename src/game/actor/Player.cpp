@@ -3,12 +3,13 @@
 #include "game/component/VelocityComponent.h"
 #include "game/component/InputComponent.h"
 #include "game/component/RenderComponent.h"
-#include "core/ServiceLocator.h"
 #include "core/IResourceManager.h"
 
 namespace game::actor
 {
-	Player::Player(core::ecs::EntityManager& entityManager, core::ecs::ComponentManager& componentManager)
+	Player::Player(core::ecs::EntityManager& entityManager,
+		core::ecs::ComponentManager& componentManager,
+		core::IResourceManager& resourceManager)
 		: m_entity(entityManager.create())
 	{
 		componentManager.add<component::TransformComponent>(m_entity.getId(), {});
@@ -16,7 +17,7 @@ namespace game::actor
 		componentManager.add<component::InputComponent>(m_entity.getId(), {});
 
 		// モデルを読み込んでRenderComponentに設定する
-		int handle = core::ServiceLocator::get<core::IResourceManager>()->loadModel(PLAYER_MODEL_PATH);
+		int handle = resourceManager.loadModel(PLAYER_MODEL_PATH);
 		componentManager.add<component::RenderComponent>(m_entity.getId(), { handle });
 	}
 

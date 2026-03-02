@@ -1,7 +1,6 @@
 ﻿#include "DxLib.h"
 #include "game/scene/InGameScene.h"
 #include "core/utility/LogUtil.h"
-#include "ServiceLocatorInitializer.h"
 
 namespace
 {
@@ -20,7 +19,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	if (DxLib_Init() == -1) return -1;
 	SetUseLighting(FALSE);
 
-	ServiceLocatorInitializer::init();
+	// 現在は空実装のためコメントアウト
+	//ServiceLocatorInitializer::init();
 	game::scene::InGameScene inGameScene;
 
 	while (ProcessMessage() == 0)
