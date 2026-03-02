@@ -17,7 +17,6 @@ namespace game::scene
 	class InGameScene : public IScene
 	{
 	public:
-		static constexpr float PLAYER_MOVE_SPEED = 5.0f;
 		InGameScene();
 		void update(float deltaTime) override;
 
@@ -31,5 +30,10 @@ namespace game::scene
 		infrastructure::ResourceManager m_resourceManager;
 
 		game::ObjectFactory         m_objectFactory;
+
+		// カメラ設定
+		static constexpr float CAMERA_OFFSET_X = 0.0f;
+		static constexpr float CAMERA_OFFSET_Y = 200.0f;
+		static constexpr float CAMERA_OFFSET_Z = -300.0f;
 	};
 }

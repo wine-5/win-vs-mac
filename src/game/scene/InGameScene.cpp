@@ -8,6 +8,7 @@
 #include "infrastructure/Camera.h"
 #include "infrastructure/Renderer.h"
 #include "infrastructure/ResourceManager.h"
+#include "game/actor/Player.h"
 
 namespace game::scene
 {
@@ -17,7 +18,7 @@ namespace game::scene
 		m_objectFactory.init();
 
 		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_objectFactory.getPlayer().getId());
-		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_objectFactory.getPlayer().getId(), PLAYER_MOVE_SPEED);
+		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_objectFactory.getPlayer().getId(), game::actor::PLAYER_MOVE_SPEED);
 		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager, m_objectFactory.getPlayer().getId());
 	}
 
@@ -28,7 +29,7 @@ namespace game::scene
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_objectFactory.getPlayer().getId());
 		auto& render = m_componentManager.get<game::component::RenderComponent>(m_objectFactory.getPlayer().getId());
 
-		m_camera.update(transform.m_position, core::Vector3(0.0f, 200.0f, -300.0f));
+		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
 		m_renderer.drawModel(render.m_modelHandle, transform.m_position);
 
 		LOG("x: %8.2f  y: %8.2f  z: %8.2f\n",

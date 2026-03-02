@@ -6,6 +6,7 @@
 namespace game::actor
 {
 	constexpr const char* PLAYER_MODEL_PATH = "assets/Model/Player.mv1";
+	constexpr float PLAYER_MOVE_SPEED = 5.0f;
 
 	/**
 	 * @brief Playerのセットアップを担当するクラス
