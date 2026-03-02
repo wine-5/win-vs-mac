@@ -142,7 +142,7 @@
     <ClCompile Include="src\game\system\PhysicsSystem.cpp" />
     <ClCompile Include="src\game\ObjectFactory.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\core\utility\LogUtil.cpp" />
+    <ClCompile Include="src\infrastructure\utility\LogUtil.cpp" />
     <ClCompile Include="src\ServiceLocatorInitializer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -190,7 +190,7 @@
     <ClInclude Include="src\game\system\PhysicsSystem.h" />
     <ClInclude Include="src\game\event\InGameEvents.h" />
     <ClInclude Include="src\game\ObjectFactory.h" />
-    <ClInclude Include="src\core\utility\LogUtil.h" />
+    <ClInclude Include="src\infrastructure\utility\LogUtil.h" />
     <ClInclude Include="src\ServiceLocatorInitializer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

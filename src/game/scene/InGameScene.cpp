@@ -4,7 +4,7 @@
 #include "game/system/PhysicsSystem.h"
 #include "game/component/TransformComponent.h"
 #include "game/ObjectFactory.h"
-#include "core/utility/LogUtil.h"
+#include "infrastructure/utility/LogUtil.h"
 #include "infrastructure/Camera.h"
 #include "infrastructure/Renderer.h"
 #include "infrastructure/ResourceManager.h"

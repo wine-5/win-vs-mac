@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <cstdarg>
 
-namespace core::utility
+namespace infrastructure::utility
 {
     /**
      * @brief 画面へのログ出力を担当するユーティリティクラス
@@ -37,6 +37,6 @@ namespace core::utility
 }
 
 // ログ出力用マクロ（使用を簡潔にする）
-#define LOG(...)   core::utility::LogUtil::log(__VA_ARGS__)
-#define LOG_W(...) core::utility::LogUtil::warning(__VA_ARGS__)
-#define LOG_E(...) core::utility::LogUtil::error(__VA_ARGS__)
+#define LOG(...)   infrastructure::utility::LogUtil::log(__VA_ARGS__)
+#define LOG_W(...) infrastructure::utility::LogUtil::warning(__VA_ARGS__)
+#define LOG_E(...) infrastructure::utility::LogUtil::error(__VA_ARGS__)

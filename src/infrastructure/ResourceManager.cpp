@@ -1,6 +1,6 @@
 ﻿#include "ResourceManager.h"
 #include <DxLib.h>
-#include "core/utility/LogUtil.h"
+#include "infrastructure/utility/LogUtil.h"
 
 namespace infrastructure
 {

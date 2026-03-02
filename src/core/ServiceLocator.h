@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <memory>
-#include "utility/LogUtil.h"
+#include "infrastructure/utility/LogUtil.h"
 
 namespace core
 {

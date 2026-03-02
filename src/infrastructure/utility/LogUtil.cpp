@@ -2,7 +2,7 @@
 #include <DxLib.h>
 #include <cstdio>
 
-namespace core::utility
+namespace infrastructure::utility
 {
     int LogUtil::s_line = 0;
 
@@ -10,7 +10,9 @@ namespace core::utility
     {
         char buffer[BUFFER_SIZE];
         vsnprintf(buffer, sizeof(buffer), format, args);
-        DrawFormatString(0, s_line * LINE_HEIGHT, GetColor(r, g, b), "%s", buffer);
+        SetDrawBright(r, g, b);
+        printfDx("%s\n", buffer);
+        SetDrawBright(255, 255, 255);
         s_line++;
     }
 
@@ -47,6 +49,7 @@ namespace core::utility
     void LogUtil::clear()
     {
 #ifdef _DEBUG
+        clsDx(); // printfDxの出力をクリア
         s_line = 0; // 行番号をリセット
 #endif
     }
