@@ -5,7 +5,7 @@
 #include "core/interface/IResourceManager.h"
 namespace game::actor
 {
-	constexpr const char* PLAYER_MODEL_PATH = "assets/Model/Player.mv1";
+	constexpr const char* PLAYER_MODEL_PATH = "assets/model/Player.mv1";
 	constexpr float PLAYER_MOVE_SPEED = 5.0f;
 
 	/**
