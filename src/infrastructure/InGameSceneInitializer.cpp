@@ -7,6 +7,7 @@ namespace infrastructure
 		m_scene = std::make_unique<game::scene::InGameScene>(
 			m_camera,
 			m_renderer,
+			m_animator,
 			m_resourceManager,
 			m_inputManager
 		);

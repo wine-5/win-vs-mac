@@ -10,7 +10,7 @@ namespace game::actor
 {
 	Player::Player(core::ecs::EntityManager& entityManager,
 		core::ecs::ComponentManager& componentManager,
-		core::iface::IResourceManager& resourceManager)
+		int modelHandle)
 		: m_entity(entityManager.create())
 	{
 		componentManager.add<component::TransformComponent>(m_entity.getId(), {});
@@ -18,9 +18,7 @@ namespace game::actor
 		componentManager.add<component::InputComponent>(m_entity.getId(), {});
 		componentManager.add<component::AnimationComponent<constant::PlayerAnimationState>>(m_entity.getId(), {});
 
-		// モデルを読み込んでRenderComponentに設定する
-		int handle = resourceManager.loadModel(PLAYER_MODEL_PATH);
-		componentManager.add<component::RenderComponent>(m_entity.getId(), { handle });
+		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
 	}
 
 	core::ecs::EntityId Player::getId() const
