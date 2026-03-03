@@ -4,7 +4,7 @@
 
 namespace game::system
 {
-	InputSystem::InputSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId playerId ,core::IInputProvider& inputProvider)
+	InputSystem::InputSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId playerId ,core::iface::IInputProvider& inputProvider)
 		: m_componentManager(componentManager)
 		, m_playerId(playerId)
 		, m_inputProvider(inputProvider)

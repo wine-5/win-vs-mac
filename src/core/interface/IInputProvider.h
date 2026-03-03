@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include "KeyCode.h"
+#include "core/KeyCode.h"
 
-namespace core
+namespace core::iface
 {
 	/**
 	 * @brief キー入力取得の純粋仮想クラス
@@ -11,6 +11,6 @@ namespace core
 	{
 	public:
 		virtual ~IInputProvider() = default;
-		virtual bool isKeyDown(KeyCode keycode) const = 0;
+		virtual bool isKeyDown(core::KeyCode keycode) const = 0;
 	};
 }

@@ -2,7 +2,7 @@
 #include "core/ecs/EntityManager.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
-#include "core/IResourceManager.h"
+#include "core/interface/IResourceManager.h"
 namespace game::actor
 {
 	constexpr const char* PLAYER_MODEL_PATH = "assets/Model/Player.mv1";
@@ -16,7 +16,7 @@ namespace game::actor
 	public:
 		Player(core::ecs::EntityManager& entityManager,
 			core::ecs::ComponentManager& componentManager,
-			core::IResourceManager& resourceManager);
+			core::iface::IResourceManager& resourceManager);
 		core::ecs::EntityId getId() const;
 
 	private:

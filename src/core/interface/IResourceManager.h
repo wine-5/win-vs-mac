@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <string>
 
-namespace core
+namespace core::iface
 {
 	/**
 	 * @brief リソースの読み込み・管理を行う純粋仮想クラス

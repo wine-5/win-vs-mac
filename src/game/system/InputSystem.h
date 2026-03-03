@@ -2,7 +2,7 @@
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
-#include "core/IInputProvider.h"
+#include "core/interface/IInputProvider.h"
 
 namespace game::system
 {
@@ -18,13 +18,13 @@ namespace game::system
 
 		InputSystem(core::ecs::ComponentManager& componentManager,
 			core::ecs::EntityId playerId,
-			core::IInputProvider& inputProvider);
+			core::iface::IInputProvider& inputProvider);
 
 		void update(float deltaTime) override;
 
 	private:
 		core::ecs::ComponentManager& m_componentManager;
 		core::ecs::EntityId m_playerId;
-		core::IInputProvider& m_inputProvider;
+		core::iface::IInputProvider& m_inputProvider;
 	};
 }

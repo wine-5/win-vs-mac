@@ -57,6 +57,9 @@
     <ClCompile Include="src\infrastructure\InputManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\interface\ICamera.h">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -146,7 +149,7 @@
     <ClInclude Include="src\infrastructure\utility\LogUtil.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\IResourceManager.h">
+    <ClInclude Include="src\core\interface\IResourceManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\ServiceLocatorInitializer.h">
@@ -155,7 +158,7 @@
     <ClInclude Include="src\core\KeyCode.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\IInputProvider.h">
+    <ClInclude Include="src\core\interface\IInputProvider.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\infrastructure\InputManager.h">

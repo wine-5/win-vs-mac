@@ -1,14 +1,14 @@
 ﻿#pragma once
 #include <unordered_map>
 #include <string>
-#include "core/IResourceManager.h"
+#include "core/interface/IResourceManager.h"
 
 namespace infrastructure
 {
 	/**
 	 * @brief リソースの読み込み・管理を担当するクラス
 	 */
-	class ResourceManager : public core::IResourceManager
+	class ResourceManager : public core::iface::IResourceManager
 	{
 	public:
 		int loadModel(const std::string& filePath) override;

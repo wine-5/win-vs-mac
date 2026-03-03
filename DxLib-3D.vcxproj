@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\interface\ICamera.h" />
     <ClCompile Include="src\core\ServiceLocator.cpp" />
     <ClCompile Include="src\infrastructure\Camera.cpp" />
     <ClCompile Include="src\infrastructure\InputManager.cpp" />
@@ -166,8 +167,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\EventBus.h" />
-    <ClInclude Include="src\core\IInputProvider.h" />
-    <ClInclude Include="src\core\IResourceManager.h" />
+    <ClInclude Include="src\core\interface\IInputProvider.h" />
+    <ClInclude Include="src\core\interface\IResourceManager.h" />
     <ClInclude Include="src\core\KeyCode.h" />
     <ClInclude Include="src\core\ServiceLocator.h" />
     <ClInclude Include="src\core\Vector3.h" />

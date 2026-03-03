@@ -2,8 +2,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <memory>
-#include "infrastructure/utility/LogUtil.h"
-
+#include <cassert>
 namespace core
 {
 	/**
@@ -31,11 +30,8 @@ namespace core
 		{
 			auto key = std::type_index(typeid(T));
 			auto it = m_services.find(key);
-			if (it == m_services.end())
-			{
-				LOG_E("ServiceLocator: サービスが登録されていません");
-				return nullptr;
-			}
+			assert(it != m_services.end() && "ServiceLocator: サービスが登録されていません");
+
 			return static_cast<T*>(it->second.get());
 		}
 

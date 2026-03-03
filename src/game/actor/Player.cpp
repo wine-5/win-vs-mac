@@ -3,13 +3,12 @@
 #include "game/component/VelocityComponent.h"
 #include "game/component/InputComponent.h"
 #include "game/component/RenderComponent.h"
-#include "core/IResourceManager.h"
 
 namespace game::actor
 {
 	Player::Player(core::ecs::EntityManager& entityManager,
 		core::ecs::ComponentManager& componentManager,
-		core::IResourceManager& resourceManager)
+		core::iface::IResourceManager& resourceManager)
 		: m_entity(entityManager.create())
 	{
 		componentManager.add<component::TransformComponent>(m_entity.getId(), {});
