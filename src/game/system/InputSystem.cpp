@@ -1,12 +1,13 @@
 ﻿#include "InputSystem.h"
-#include <DxLib.h>
+#include "core/KeyCode.h"
 #include "game/component/InputComponent.h"
 
 namespace game::system
 {
-	InputSystem::InputSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId playerId)
+	InputSystem::InputSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId playerId ,core::IInputProvider& inputProvider)
 		: m_componentManager(componentManager)
 		, m_playerId(playerId)
+		, m_inputProvider(inputProvider)
 	{
 	}
 
@@ -19,10 +20,10 @@ namespace game::system
 		input.m_moveZ = INPUT_NEUTRAL;
 		input.m_jumpPressed = false;
 
-		if (CheckHitKey(KEY_INPUT_D)) input.m_moveX = INPUT_POSITIVE;
-		if (CheckHitKey(KEY_INPUT_A)) input.m_moveX = INPUT_NEGATIVE;
-		if (CheckHitKey(KEY_INPUT_W)) input.m_moveZ = INPUT_POSITIVE;
-		if (CheckHitKey(KEY_INPUT_S)) input.m_moveZ = INPUT_NEGATIVE;
-		if (CheckHitKey(KEY_INPUT_SPACE)) input.m_jumpPressed = true;
+		if (m_inputProvider.isKeyDown(core::KeyCode::D)) input.m_moveX = INPUT_POSITIVE;
+		if (m_inputProvider.isKeyDown(core::KeyCode::A)) input.m_moveX = INPUT_NEGATIVE;
+		if (m_inputProvider.isKeyDown(core::KeyCode::W)) input.m_moveZ = INPUT_POSITIVE;
+		if (m_inputProvider.isKeyDown(core::KeyCode::S)) input.m_moveZ = INPUT_NEGATIVE;
+		if (m_inputProvider.isKeyDown(core::KeyCode::Space)) input.m_jumpPressed = true;
 	}
 }

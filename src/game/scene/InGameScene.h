@@ -8,6 +8,8 @@
 #include "infrastructure/Camera.h"
 #include "infrastructure/Renderer.h"
 #include "infrastructure/ResourceManager.h"
+#include "infrastructure/InputManager.h"
+
 
 namespace game::scene
 {
@@ -28,6 +30,7 @@ namespace game::scene
 		infrastructure::Camera m_camera;
 		infrastructure::Renderer m_renderer;
 		infrastructure::ResourceManager m_resourceManager;
+		infrastructure::InputManager m_inputManager;
 
 		game::ObjectFactory         m_objectFactory;
 
