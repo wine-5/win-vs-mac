@@ -35,7 +35,7 @@ namespace game::scene
 		auto& render = m_componentManager.get<game::component::RenderComponent>(m_objectFactory.getPlayer().getId());
 
 		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
-		m_renderer.drawModel(render.m_modelHandle, transform.m_position);
+		m_renderer.drawModel(render.m_modelHandle, transform.m_position,transform.m_rotation);
 
 		LOG("x: %8.2f  y: %8.2f  z: %8.2f\n",
 			transform.m_position.x,

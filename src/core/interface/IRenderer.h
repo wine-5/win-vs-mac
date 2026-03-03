@@ -11,6 +11,6 @@ namespace core::iface
 	{
 	public:
 		virtual ~IRenderer() = default;
-		virtual void drawModel(int modelHandle, const core::Vector3& position) = 0;
+		virtual void drawModel(int modelHandle, const core::Vector3& position, const::core::Vector3& rotation) = 0;
 	};
 }
