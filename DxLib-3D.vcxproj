@@ -180,6 +180,7 @@
     <ClInclude Include="src\core\Vector3.h" />
     <ClInclude Include="src\game\component\AnimationComponent.h" />
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
+    <ClInclude Include="src\game\data\PlayerData.h" />
     <ClInclude Include="src\game\system\AnimationSystem.h" />
     <ClInclude Include="src\infrastructure\Animator.h" />
     <ClInclude Include="src\infrastructure\Camera.h" />
