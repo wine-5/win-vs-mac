@@ -2,8 +2,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <memory>
-#include "utility/LogUtil.h"
-
+#include <cassert>
 namespace core
 {
 	/**
@@ -19,16 +18,20 @@ namespace core
 			m_services[key] = std::shared_ptr<void>(std::move(service));
 		}
 
+		template<typename TInterface, typename TImpl>
+		static void provide(std::unique_ptr<TImpl> service)
+		{
+			auto key = std::type_index(typeid(TInterface));
+			m_services[key] = std::shared_ptr<void>(std::move(service));
+		}
+
 		template<typename T>
 		static T* get()
 		{
 			auto key = std::type_index(typeid(T));
 			auto it = m_services.find(key);
-			if (it == m_services.end())
-			{
-				LOG_E("ServiceLocator: サービスが登録されていません");
-				return nullptr;
-			}
+			assert(it != m_services.end() && "ServiceLocator: サービスが登録されていません");
+
 			return static_cast<T*>(it->second.get());
 		}
 

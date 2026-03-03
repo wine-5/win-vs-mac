@@ -131,8 +131,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\core\interface\ICamera.h" />
+    <ClCompile Include="src\core\interface\ILogger.h" />
     <ClCompile Include="src\core\ServiceLocator.cpp" />
     <ClCompile Include="src\infrastructure\Camera.cpp" />
+    <ClCompile Include="src\infrastructure\InGameSceneInitializer.cpp" />
+    <ClCompile Include="src\infrastructure\InputManager.cpp" />
     <ClCompile Include="src\infrastructure\Renderer.cpp" />
     <ClCompile Include="src\infrastructure\ResourceManager.cpp" />
     <ClCompile Include="src\game\scene\InGameScene.cpp" />
@@ -142,7 +146,8 @@
     <ClCompile Include="src\game\system\PhysicsSystem.cpp" />
     <ClCompile Include="src\game\ObjectFactory.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\core\utility\LogUtil.cpp" />
+    <ClCompile Include="src\infrastructure\utility\LogUtil.cpp" />
+    <ClCompile Include="src\ServiceLocatorInitializer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -164,9 +169,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\EventBus.h" />
+    <ClInclude Include="src\core\interface\IInputProvider.h" />
+    <ClInclude Include="src\core\interface\IRenderer.h" />
+    <ClInclude Include="src\core\interface\IResourceManager.h" />
+    <ClInclude Include="src\core\KeyCode.h" />
     <ClInclude Include="src\core\ServiceLocator.h" />
     <ClInclude Include="src\core\Vector3.h" />
     <ClInclude Include="src\infrastructure\Camera.h" />
+    <ClInclude Include="src\infrastructure\InGameSceneInitializer.h" />
+    <ClInclude Include="src\infrastructure\InputManager.h" />
     <ClInclude Include="src\infrastructure\Renderer.h" />
     <ClInclude Include="src\infrastructure\ResourceManager.h" />
     <ClInclude Include="src\game\scene\InGameScene.h" />
@@ -188,7 +199,8 @@
     <ClInclude Include="src\game\system\PhysicsSystem.h" />
     <ClInclude Include="src\game\event\InGameEvents.h" />
     <ClInclude Include="src\game\ObjectFactory.h" />
-    <ClInclude Include="src\core\utility\LogUtil.h" />
+    <ClInclude Include="src\infrastructure\utility\LogUtil.h" />
+    <ClInclude Include="src\ServiceLocatorInitializer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

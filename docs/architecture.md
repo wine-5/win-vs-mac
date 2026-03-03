@@ -45,6 +45,7 @@ platform → infrastructure → game → core
 どの層にも依存しない共通基盤。
 「誰からでも参照されるが、自分は誰も参照しない層」。
 EventBus・ServiceLocator・数学ユーティリティなど全レイヤーから使われるものを置く。
+またgame層がinfrastructure層に直接依存しないためのインターフェースもここに置く。
 
 ### Game層
 ゲームのルールとロジックのみを担当。
@@ -53,7 +54,7 @@ DxLibやWindows APIには直接触れない。
 Platformのデータはインターフェース経由で取得する。
 
 ### Infrastructure層
-DxLibを用いた描画・入力・音声・シーン管理を担当。
+DxLibを用いた描画・入力・音声を担当。
 「DxLibが変わったら影響を受けるもの」をすべてここに閉じ込める。
 ゲームロジックは持たない。
 
@@ -91,8 +92,8 @@ Platform層       → WindowsAPIが変わったら影響を受ける
 
 ```cpp
 // ✅ game層内でgame層をインクルード
-// game/scene/GameScene.cpp
-#include "game/ecs/system/MoveSystem.h"
+// game/scene/InGameScene.cpp
+#include "game/system/MoveSystem.h"
 ```
 
 ### OS依存コードはインターフェース経由で利用する
@@ -114,6 +115,15 @@ platform/WindowsSystemProvider  → implements → core/ISystemDataProvider
 game/GameScene                  → uses       → core/ISystemDataProvider
 ```
 
+### infrastructure層への依存をインターフェースで切る
+
+game層がinfrastructure層に直接依存しないようにインターフェースをcore層に置く。
+
+```
+infrastructure/ResourceManager  → implements → core/IResourceManager
+game/Player                     → uses       → core/IResourceManager
+```
+
 ---
 
 ## Game層内部：ECS設計
@@ -129,15 +139,15 @@ EntityにComponentを組み合わせることで実体を表現する。
 ```cpp
 // Playerの生成
 EntityId player = entityManager.create();
-componentManager.add<TransformComponent>(player, 0.0f, 0.0f, 0.0f);
-componentManager.add<HealthComponent>(player, 100, 100);
-componentManager.add<WeaponComponent>(player, weaponData);
+componentManager.add<TransformComponent>(player, {});
+componentManager.add<HealthComponent>(player, {});
+componentManager.add<RenderComponent>(player, { handle });
 
 // Enemyの生成（Componentの組み合わせが違うだけ）
 EntityId enemy = entityManager.create();
-componentManager.add<TransformComponent>(enemy, 5.0f, 3.0f, 0.0f);
-componentManager.add<HealthComponent>(enemy, 120, 120);
-componentManager.add<AIComponent>(enemy, AIType::Heavy, 0.5f);
+componentManager.add<TransformComponent>(enemy, {});
+componentManager.add<HealthComponent>(enemy, {});
+componentManager.add<AIComponent>(enemy, {});
 ```
 
 ---
@@ -161,7 +171,7 @@ eventBus.subscribe<EnemyDefeatedEvent>([](const EnemyDefeatedEvent& e) {
 `IGameEvent`をマーカーとして継承し1ファイルにまとめて定義する。
 
 ```cpp
-// game/events/InGameEvent.h
+// game/event/InGameEvents.h
 class IGameEvent {};
 
 struct EnemyDefeatedEvent : public IGameEvent
@@ -188,19 +198,21 @@ struct DungeonClearedEvent : public IGameEvent {};
 ## グローバルアクセス：ServiceLocator
 
 ServiceLocatorはシングルトンの倉庫。
-ゲーム全体で1つだけ存在するManagerクラスを預けて
-どこからでも取り出せる仕組み。
+ゲーム全体で1つだけ存在するManagerクラスを預けてどこからでも取り出せる仕組み。
 Core層に置くことでGame層・Infrastructure層の両方から使える。
 
+複数の場所から使われるサービス（AudioManagerなど）のみを登録する。
+特定の1箇所からしか使われないクラスはコンストラクタインジェクションで渡す。
+
 ```cpp
-// Main.cppで全部預ける
-ServiceLocator::provide(new InputManager());
-ServiceLocator::provide(new SoundManager());
-ServiceLocator::provide(new Renderer());
+// ServiceLocatorInitializerで登録する
+ServiceLocator::provide(std::make_unique<AudioManager>());
+
+// インターフェースを指定して登録する場合
+ServiceLocator::provide<IResourceManager>(std::make_unique<ResourceManager>());
 
 // どこからでも取り出せる
-ServiceLocator::get<SoundManager>()->play("attack");
-ServiceLocator::get<InputManager>()->getKey();
+ServiceLocator::get<AudioManager>()->play("attack");
 ```
 
 ---
@@ -212,6 +224,7 @@ ServiceLocator::get<InputManager>()->getKey();
 |---|---|---|
 | `EventBus` | あり | イベントの発行・購読管理 |
 | `ServiceLocator` | あり | グローバルなサービスへのアクセス管理 |
+| `IResourceManager` | なし | リソース管理インターフェース |
 | `ISystemDataProvider` | なし | CPU・メモリ取得インターフェース |
 | `IFileSystemProvider` | なし | ファイルシステム操作インターフェース |
 | `IProcessProvider` | なし | プロセス情報取得インターフェース |
@@ -235,26 +248,41 @@ ServiceLocator::get<InputManager>()->getKey();
 | クラス名 | .cpp | 概要 |
 |---|---|---|
 | `TransformComponent` | なし | 座標・回転 |
+| `VelocityComponent` | なし | 速度 |
+| `InputComponent` | なし | 入力状態 |
+| `RenderComponent` | なし | 描画情報（モデルハンドル） |
 | `HealthComponent` | なし | HP |
 | `WeaponComponent` | あり | 武器情報・攻撃力計算 |
 | `AIComponent` | なし | 敵AI情報・AIType |
 | `BossComponent` | なし | ボスのフェーズ管理 |
 | `ProcessComponent` | なし | プロセス名・種類 |
-| `RenderComponent` | なし | 描画情報 |
 
 #### Systems
 | クラス名 | 概要 |
 |---|---|
+| `InputSystem` | 入力処理 |
 | `MoveSystem` | 移動処理 |
+| `PhysicsSystem` | 物理処理 |
 | `AISystem` | 敵AI処理・AITypeで分岐 |
 | `BattleSystem` | 戦闘計算 |
 | `RenderSystem` | 描画処理 |
 | `ProcessSystem` | プロセス連携処理 |
 
+#### シーン
+| クラス名 | 概要 |
+|---|---|
+| `IScene` | シーンのインターフェース |
+| `InGameScene` | インゲーム画面 |
+| `TitleScene` | タイトル画面 |
+| `FileSelectScene` | ファイル選択画面 |
+| `LoadingScene` | ロード画面 |
+| `ResultScene` | リザルト画面 |
+| `ClearScene` | クリア画面 |
+
 #### イベント
 | ファイル名 | 概要 |
 |---|---|
-| `InGameEvent.h` | 全イベント定義（IGameEventを継承） |
+| `InGameEvents.h` | 全イベント定義（IGameEventを継承） |
 
 定義されるイベント：
 - `EnemyDefeatedEvent` 敵撃破時
@@ -265,6 +293,8 @@ ServiceLocator::get<InputManager>()->getKey();
 #### その他Game層
 | クラス名 | 概要 |
 |---|---|
+| `Player` | PlayerのEntityセットアップ |
+| `ObjectFactory` | ゲームオブジェクトの生成管理 |
 | `GameManager` | ゲーム全体の進行管理 |
 | `DungeonManager` | ダンジョン構造管理 |
 | `Room` | 部屋の情報 |
@@ -275,27 +305,13 @@ ServiceLocator::get<InputManager>()->getKey();
 ---
 
 ### Infrastructure層
-
-#### シーン
-| クラス名 | 概要 |
-|---|---|
-| `IScene` | シーンのインターフェース |
-| `SceneManager` | シーン遷移管理 |
-| `TitleScene` | タイトル画面 |
-| `FileSelectScene` | ファイル選択画面 |
-| `LoadingScene` | ロード画面 |
-| `GameScene` | ゲーム画面 |
-| `ResultScene` | リザルト画面 |
-| `ClearScene` | クリア画面 |
-
-#### その他Infrastructure層
 | クラス名 | 概要 |
 |---|---|
 | `Renderer` | 3D描画管理 |
-| `InputManager` | キー入力管理 |
-| `SoundManager` | サウンド管理 |
 | `Camera` | アイソメトリックカメラ制御 |
 | `ResourceManager` | モデル・画像リソース管理 |
+| `InputManager` | キー入力管理 |
+| `SoundManager` | サウンド管理 |
 
 ---
 
@@ -315,70 +331,101 @@ src/
 ├── core/
 │   ├── ecs/
 │   │   ├── ComponentArray.h
-│   │   ├── ComponentManager.h
+│   │   ├── ComponentManager.h  
 │   │   ├── Entity.h
 │   │   ├── EntityManager.h
 │   │   ├── IComponent.h
 │   │   ├── ISystem.h
 │   │   └── SystemManager.h
-│   ├── provider/
-│   │   ├── ISystemDataProvider.h
-│   │   ├── IFileSystemProvider.h
-│   │   └── IProcessProvider.h
 │   ├── utility/
 │   │   ├── LogUtil.h
 │   │   └── LogUtil.cpp
 │   ├── EventBus.h
-│   ├── ServiceLocator.h / .cpp
+│   ├── IResourceManager.h
+│   ├── ISystemDataProvider.h
+│   ├── IFileSystemProvider.h
+│   ├── IProcessProvider.h
+│   ├── ServiceLocator.h
+│   ├── ServiceLocator.cpp
 │   └── Vector3.h
 ├── game/
 │   ├── actor/
-│   │   └── Player.h / .cpp
+│   │   ├── Player.h
+│   │   └── Player.cpp
 │   ├── component/
 │   │   ├── TransformComponent.h
 │   │   ├── RenderComponent.h
 │   │   ├── VelocityComponent.h
 │   │   ├── InputComponent.h
 │   │   ├── HealthComponent.h
-│   │   ├── WeaponComponent.h / .cpp
+│   │   ├── WeaponComponent.h
+│   │   ├── WeaponComponent.cpp
 │   │   ├── AIComponent.h
 │   │   ├── BossComponent.h
 │   │   └── ProcessComponent.h
 │   ├── system/
-│   │   ├── MoveSystem.h / .cpp
-│   │   ├── InputSystem.h / .cpp
-│   │   ├── PhysicsSystem.h / .cpp
-│   │   ├── AISystem.h / .cpp
-│   │   ├── BattleSystem.h / .cpp
-│   │   ├── RenderSystem.h / .cpp
-│   │   └── ProcessSystem.h / .cpp
+│   │   ├── InputSystem.h
+│   │   ├── InputSystem.cpp
+│   │   ├── MoveSystem.h
+│   │   ├── MoveSystem.cpp
+│   │   ├── PhysicsSystem.h
+│   │   ├── PhysicsSystem.cpp
+│   │   ├── AISystem.h
+│   │   ├── AISystem.cpp
+│   │   ├── BattleSystem.h
+│   │   ├── BattleSystem.cpp
+│   │   ├── RenderSystem.h
+│   │   ├── RenderSystem.cpp
+│   │   ├── ProcessSystem.h
+│   │   └── ProcessSystem.cpp
 │   ├── scene/
 │   │   ├── IScene.h
-│   │   ├── InGameScene.h / .cpp
-│   │   ├── TitleScene.h / .cpp
-│   │   ├── FileSelectScene.h / .cpp
-│   │   ├── LoadingScene.h / .cpp
-│   │   ├── ResultScene.h / .cpp
-│   │   └── ClearScene.h / .cpp
+│   │   ├── InGameScene.h
+│   │   ├── InGameScene.cpp
+│   │   ├── TitleScene.h
+│   │   ├── TitleScene.cpp
+│   │   ├── FileSelectScene.h
+│   │   ├── FileSelectScene.cpp
+│   │   ├── LoadingScene.h
+│   │   ├── LoadingScene.cpp
+│   │   ├── ResultScene.h
+│   │   ├── ResultScene.cpp
+│   │   ├── ClearScene.h
+│   │   └── ClearScene.cpp
 │   ├── event/
 │   │   └── InGameEvents.h
 │   ├── factory/
-│   │   └── EntityFactory.h / .cpp
+│   │   ├── EntityFactory.h
+│   │   └── EntityFactory.cpp
 │   ├── dungeon/
-│   │   ├── DungeonManager.h / .cpp
-│   │   └── Room.h / .cpp
-│   ├── ObjectFactory.h / .cpp
-│   └── GameManager.h / .cpp
+│   │   ├── DungeonManager.h
+│   │   ├── DungeonManager.cpp
+│   │   ├── Room.h
+│   │   └── Room.cpp
+│   ├── ObjectFactory.h
+│   ├── ObjectFactory.cpp
+│   ├── GameManager.h
+│   └── GameManager.cpp
 ├── infrastructure/
-│   ├── Renderer.h / .cpp
-│   ├── Camera.h / .cpp
-│   ├── ResourceManager.h / .cpp
-│   ├── InputManager.h / .cpp
-│   └── SoundManager.h / .cpp
+│   ├── Renderer.h
+│   ├── Renderer.cpp
+│   ├── Camera.h
+│   ├── Camera.cpp
+│   ├── ResourceManager.h
+│   ├── ResourceManager.cpp
+│   ├── InputManager.h
+│   ├── InputManager.cpp
+│   ├── SoundManager.h
+│   └── SoundManager.cpp
 ├── platform/
-│   ├── WindowsSystemProvider.h / .cpp
-│   ├── WindowsFileSystemProvider.h / .cpp
-│   └── WindowsProcessProvider.h / .cpp
+│   ├── WindowsSystemProvider.h
+│   ├── WindowsSystemProvider.cpp
+│   ├── WindowsFileSystemProvider.h
+│   ├── WindowsFileSystemProvider.cpp
+│   ├── WindowsProcessProvider.h
+│   └── WindowsProcessProvider.cpp
+├── ServiceLocatorInitializer.h
+├── ServiceLocatorInitializer.cpp
 └── Main.cpp
 ```
 
