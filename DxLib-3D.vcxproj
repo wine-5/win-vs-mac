@@ -175,6 +175,8 @@
     <ClInclude Include="src\core\KeyCode.h" />
     <ClInclude Include="src\core\ServiceLocator.h" />
     <ClInclude Include="src\core\Vector3.h" />
+    <ClInclude Include="src\game\component\AnimationComponent.h" />
+    <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
     <ClInclude Include="src\infrastructure\Camera.h" />
     <ClInclude Include="src\infrastructure\InGameSceneInitializer.h" />
     <ClInclude Include="src\infrastructure\InputManager.h" />

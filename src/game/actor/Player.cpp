@@ -3,6 +3,8 @@
 #include "game/component/VelocityComponent.h"
 #include "game/component/InputComponent.h"
 #include "game/component/RenderComponent.h"
+#include "game/component/AnimationComponent.h"
+#include "game/constant/PlayerAnimationState.h"
 
 namespace game::actor
 {
@@ -14,6 +16,7 @@ namespace game::actor
 		componentManager.add<component::TransformComponent>(m_entity.getId(), {});
 		componentManager.add<component::VelocityComponent>(m_entity.getId(), {});
 		componentManager.add<component::InputComponent>(m_entity.getId(), {});
+		componentManager.add<component::AnimationComponent<constant::PlayerAnimationState>>(m_entity.getId(), {});
 
 		// モデルを読み込んでRenderComponentに設定する
 		int handle = resourceManager.loadModel(PLAYER_MODEL_PATH);
