@@ -134,6 +134,7 @@
     <ClCompile Include="src\core\interface\ICamera.h" />
     <ClCompile Include="src\core\interface\ILogger.h" />
     <ClCompile Include="src\core\ServiceLocator.cpp" />
+    <ClCompile Include="src\game\system\AnimationSystem.cpp" />
     <ClCompile Include="src\infrastructure\Camera.cpp" />
     <ClCompile Include="src\infrastructure\InGameSceneInitializer.cpp" />
     <ClCompile Include="src\infrastructure\InputManager.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="src\core\Vector3.h" />
     <ClInclude Include="src\game\component\AnimationComponent.h" />
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
+    <ClInclude Include="src\game\system\AnimationSystem.h" />
     <ClInclude Include="src\infrastructure\Camera.h" />
     <ClInclude Include="src\infrastructure\InGameSceneInitializer.h" />
     <ClInclude Include="src\infrastructure\InputManager.h" />
