@@ -1,6 +1,6 @@
 ﻿#include "DxLib.h"
-#include "game/scene/InGameScene.h"
 #include "infrastructure/utility/LogUtil.h"
+#include "infrastructure/InGameSceneInitializer.h"
 
 namespace
 {
@@ -21,7 +21,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// 現在は空実装のためコメントアウト
 	//ServiceLocatorInitializer::init();
-	game::scene::InGameScene inGameScene;
+	infrastructure::InGameSceneInitializer sceneInitializer;
+	game::scene::InGameScene& inGameScene = sceneInitializer.getScene();
 
 	while (ProcessMessage() == 0)
 	{
