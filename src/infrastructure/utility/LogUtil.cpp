@@ -4,53 +4,42 @@
 
 namespace infrastructure::utility
 {
-    int LogUtil::s_line = 0;
+	int LogUtil::s_line = 0;
 
-    void LogUtil::print(int r, int g, int b, const char* format, va_list args)
-    {
-        char buffer[BUFFER_SIZE];
-        vsnprintf(buffer, sizeof(buffer), format, args);
-        SetDrawBright(r, g, b);
-        printfDx("%s\n", buffer);
-        SetDrawBright(255, 255, 255);
-        s_line++;
-    }
+	void LogUtil::print(int r, int g, int b, const char* message)
+	{
+		SetDrawBright(r, g, b);
+		printfDx("%s\n", message);
+		SetDrawBright(255, 255, 255);
+		s_line++;
+	}
 
-    void LogUtil::log(const char* format, ...)
-    {
+	void LogUtil::log(const char* message)
+	{
 #ifdef _DEBUG
-        va_list args;
-        va_start(args, format);
-        print(LOG_COLOR_R, LOG_COLOR_G, LOG_COLOR_B, format, args);
-        va_end(args);
+		print(LOG_COLOR_R, LOG_COLOR_G, LOG_COLOR_B, message);
 #endif
-    }
+	}
 
-    void LogUtil::warning(const char* format, ...)
-    {
+	void LogUtil::warning(const char* message)
+	{
 #ifdef _DEBUG
-        va_list args;
-        va_start(args, format);
-        print(WARNING_COLOR_R, WARNING_COLOR_G, WARNING_COLOR_B, format, args);
-        va_end(args);
+		print(WARNING_COLOR_R, WARNING_COLOR_G, WARNING_COLOR_B, message);
 #endif
-    }
+	}
 
-    void LogUtil::error(const char* format, ...)
-    {
+	void LogUtil::error(const char* message)
+	{
 #ifdef _DEBUG
-        va_list args;
-        va_start(args, format);
-        print(ERROR_COLOR_R, ERROR_COLOR_G, ERROR_COLOR_B, format, args);
-        va_end(args);
+		print(ERROR_COLOR_R, ERROR_COLOR_G, ERROR_COLOR_B, message);
 #endif
-    }
+	}
 
-    void LogUtil::clear()
-    {
+	void LogUtil::clear()
+	{
 #ifdef _DEBUG
-        clsDx(); // printfDxの出力をクリア
-        s_line = 0; // 行番号をリセット
+		clsDx();
+		s_line = 0;
 #endif
-    }
+	}
 }

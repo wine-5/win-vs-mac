@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "core/interface/ILogger.h"
 #include <cstdarg>
 
 namespace infrastructure::utility
@@ -6,7 +7,7 @@ namespace infrastructure::utility
     /**
      * @brief 画面へのログ出力を担当するユーティリティクラス
      */
-    class LogUtil
+    class LogUtil : public core::iface::ILogger
     {
     public:
         static constexpr int BUFFER_SIZE = 1024;
@@ -24,19 +25,14 @@ namespace infrastructure::utility
         static constexpr int ERROR_COLOR_G = 0;
         static constexpr int ERROR_COLOR_B = 0;
 
-        static void log(const char* format, ...);
-        static void warning(const char* format, ...);
-        static void error(const char* format, ...);
-        static void clear();
+        void log(const char* message) override;
+        void warning(const char* message) override;
+        void error(const char* message) override;
+        void clear() override;
 
     private:
-        static void print(int r, int g, int b, const char* format, va_list args);
+        static void print(int r, int g, int b, const char* message);
         static int s_line; // 現在の行番号
         static constexpr int LINE_HEIGHT = 20; // 1行の高さ
     };
 }
-
-// ログ出力用マクロ（使用を簡潔にする）
-#define LOG(...)   infrastructure::utility::LogUtil::log(__VA_ARGS__)
-#define LOG_W(...) infrastructure::utility::LogUtil::warning(__VA_ARGS__)
-#define LOG_E(...) infrastructure::utility::LogUtil::error(__VA_ARGS__)

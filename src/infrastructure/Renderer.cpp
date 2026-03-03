@@ -1,6 +1,6 @@
 ﻿#include "Renderer.h"
 #include "DxLib.h"
-#include "infrastructure/utility/LogUtil.h"
+#include "core/interface/ILogger.h"
 
 namespace infrastructure
 {

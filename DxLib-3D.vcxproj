@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\core\interface\ICamera.h" />
+    <ClCompile Include="src\core\interface\ILogger.h" />
     <ClCompile Include="src\core\ServiceLocator.cpp" />
     <ClCompile Include="src\infrastructure\Camera.cpp" />
     <ClCompile Include="src\infrastructure\InGameSceneInitializer.cpp" />

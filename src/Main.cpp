@@ -1,6 +1,8 @@
 ﻿#include "DxLib.h"
-#include "infrastructure/utility/LogUtil.h"
 #include "infrastructure/InGameSceneInitializer.h"
+#include "ServiceLocatorInitializer.h"
+#include "core/ServiceLocator.h"
+#include "core/interface/ILogger.h"
 
 namespace
 {
@@ -19,15 +21,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	if (DxLib_Init() == -1) return -1;
 	SetUseLighting(FALSE);
 
-	// 現在は空実装のためコメントアウト
-	//ServiceLocatorInitializer::init();
+	ServiceLocatorInitializer::init();
+
 	infrastructure::InGameSceneInitializer sceneInitializer;
 	game::scene::InGameScene& inGameScene = sceneInitializer.getScene();
 
 	while (ProcessMessage() == 0)
 	{
 		ClearDrawScreen();// 画面クリア
-		infrastructure::utility::LogUtil::clear();
+		core::ServiceLocator::get<core::iface::ILogger>()->clear();
 		inGameScene.update(DELTA_TIME);
 
 		ScreenFlip();       // 画面を反映

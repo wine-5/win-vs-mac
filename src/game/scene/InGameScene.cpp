@@ -6,6 +6,7 @@
 #include "game/ObjectFactory.h"
 #include "game/actor/Player.h"
 #include "game/component/RenderComponent.h"
+#include "core/interface/ILogger.h"
 
 namespace game::scene
 {
@@ -36,9 +37,9 @@ namespace game::scene
 		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
 		m_renderer.drawModel(render.m_modelHandle, transform.m_position);
 
-		/*LOG("x: %8.2f  y: %8.2f  z: %8.2f\n",
+		LOG("x: %8.2f  y: %8.2f  z: %8.2f\n",
 			transform.m_position.x,
 			transform.m_position.y,
-			transform.m_position.z);*/
+			transform.m_position.z);
 	}
 }

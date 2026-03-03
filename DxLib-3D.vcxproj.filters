@@ -63,6 +63,9 @@
     <ClCompile Include="src\infrastructure\InGameSceneInitializer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\core\interface\ILogger.h">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
