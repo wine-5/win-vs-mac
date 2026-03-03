@@ -16,8 +16,8 @@ namespace game::data
 
 	private:
 		std::string m_modelPath = "assets/model/Player.mv1";
-		std::string m_idleAnimPath = "assets/animation/Player_Idle.mv1";
-		std::string m_walkAnimPath = "assets/animation/Player_Walking.mv1";
+		std::string m_idleAnimPath = "assets/animations/Player_Idle.mv1";
+		std::string m_walkAnimPath = "assets/animations/Player_Walking.mv1";
 		float       m_moveSpeed = 5.0f;
 	};
 }
