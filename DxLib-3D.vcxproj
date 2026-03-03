@@ -168,6 +168,7 @@
   <ItemGroup>
     <ClInclude Include="src\core\EventBus.h" />
     <ClInclude Include="src\core\interface\IInputProvider.h" />
+    <ClInclude Include="src\core\interface\IRenderer.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
     <ClInclude Include="src\core\KeyCode.h" />
     <ClInclude Include="src\core\ServiceLocator.h" />

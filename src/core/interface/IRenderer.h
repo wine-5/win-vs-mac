@@ -1,0 +1,16 @@
+﻿#pragma once
+#include "core/Vector3.h"
+
+namespace core::iface
+{
+	/**
+	 * @brief 描画の純粋仮想クラス
+	 * Game層がInfrastructre層に直接依存しないための抽象化
+	 */
+	class IRenderer
+	{
+	public:
+		virtual ~IRenderer() = default;
+		virtual void drawModel(int modelHandle, const core::Vector3& position) = 0;
+	};
+}

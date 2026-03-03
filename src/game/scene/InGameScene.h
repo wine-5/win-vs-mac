@@ -5,10 +5,10 @@
 #include "core/ecs/SystemManager.h"
 #include "game/ObjectFactory.h"
 #include "game/component/RenderComponent.h"
-#include "infrastructure/Camera.h"
-#include "infrastructure/Renderer.h"
-#include "infrastructure/ResourceManager.h"
-#include "infrastructure/InputManager.h"
+#include "core/interface/ICamera.h"
+#include "core/interface/IRenderer.h"
+#include "core/interface/IResourceManager.h"
+#include "core/interface/IInputProvider.h"
 
 
 namespace game::scene
@@ -19,7 +19,11 @@ namespace game::scene
 	class InGameScene : public IScene
 	{
 	public:
-		InGameScene();
+		InGameScene(core::iface::ICamera& camera,
+			core::iface::IRenderer& renderer,
+			core::iface::IResourceManager& resourceManager,
+			core::iface::IInputProvider& inputProvider);
+
 		void update(float deltaTime) override;
 
 	private:
@@ -27,10 +31,10 @@ namespace game::scene
 		core::ecs::ComponentManager m_componentManager;
 		core::ecs::SystemManager    m_systemManager;
 
-		infrastructure::Camera m_camera;
-		infrastructure::Renderer m_renderer;
-		infrastructure::ResourceManager m_resourceManager;
-		infrastructure::InputManager m_inputManager;
+		core::iface::ICamera& m_camera;
+		core::iface::IRenderer& m_renderer;
+		core::iface::IResourceManager& m_resourceManager;
+		core::iface::IInputProvider& m_inputProvider;
 
 		game::ObjectFactory         m_objectFactory;
 
