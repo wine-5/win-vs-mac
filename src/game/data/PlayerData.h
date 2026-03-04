@@ -16,8 +16,11 @@ namespace game::data
 
 	private:
 		std::string m_modelPath = "assets/model/Player.mv1";
-		std::string m_idleAnimPath = "assets/animations/Player_Idle.mv1";
-		std::string m_walkAnimPath = "assets/animations/Player_Walking.mv1";
+		// アニメーションのファイルを直したらパスを適用する
+		// std::string m_idleAnimPath = "assets/animations/Player_Idle.mv1";
+		// std::string m_walkAnimPath = "assets/animations/Player_Walking.mv1";
+		std::string m_idleAnimPath = "None";
+		std::string m_walkAnimPath = "None";
 		float       m_moveSpeed = 5.0f;
 	};
 }
