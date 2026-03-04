@@ -1,19 +1,19 @@
 ﻿#include "InputManager.h"
-#include "core/KeyCode.h"
+#include "core/input/KeyCode.h"
 #include <DxLib.h>
 #include <unordered_map>
 
 namespace infrastructure
 {
-	bool InputManager::isKeyDown(core::KeyCode keyCode) const
+	bool InputManager::isKeyDown(core::input::KeyCode keyCode) const
 	{
-		static const std::unordered_map<core::KeyCode, int> keyMap =
+		static const std::unordered_map<core::input::KeyCode, int> keyMap =
 		{
-			{core::KeyCode::W, KEY_INPUT_W},
-			{core::KeyCode::A, KEY_INPUT_A},
-			{core::KeyCode::S, KEY_INPUT_S},
-			{core::KeyCode::D, KEY_INPUT_D},
-			{core::KeyCode::Space, KEY_INPUT_SPACE},
+			{core::input::KeyCode::W, KEY_INPUT_W},
+			{core::input::KeyCode::A, KEY_INPUT_A},
+			{core::input::KeyCode::S, KEY_INPUT_S},
+			{core::input::KeyCode::D, KEY_INPUT_D},
+			{core::input::KeyCode::Space, KEY_INPUT_SPACE},
 		};
 
 		auto it = keyMap.find(keyCode);

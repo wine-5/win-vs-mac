@@ -1,5 +1,5 @@
 ﻿#include "InputSystem.h"
-#include "core/KeyCode.h"
+#include "core/input/KeyCode.h"
 #include "game/component/InputComponent.h"
 
 namespace game::system
@@ -20,10 +20,10 @@ namespace game::system
 		input.m_moveZ = INPUT_NEUTRAL;
 		input.m_jumpPressed = false;
 
-		if (m_inputProvider.isKeyDown(core::KeyCode::D)) input.m_moveX = INPUT_POSITIVE;
-		if (m_inputProvider.isKeyDown(core::KeyCode::A)) input.m_moveX = INPUT_NEGATIVE;
-		if (m_inputProvider.isKeyDown(core::KeyCode::W)) input.m_moveZ = INPUT_POSITIVE;
-		if (m_inputProvider.isKeyDown(core::KeyCode::S)) input.m_moveZ = INPUT_NEGATIVE;
-		if (m_inputProvider.isKeyDown(core::KeyCode::Space)) input.m_jumpPressed = true;
+		if (m_inputProvider.isKeyDown(core::input::KeyCode::D)) input.m_moveX = INPUT_POSITIVE;
+		if (m_inputProvider.isKeyDown(core::input::KeyCode::A)) input.m_moveX = INPUT_NEGATIVE;
+		if (m_inputProvider.isKeyDown(core::input::KeyCode::W)) input.m_moveZ = INPUT_POSITIVE;
+		if (m_inputProvider.isKeyDown(core::input::KeyCode::S)) input.m_moveZ = INPUT_NEGATIVE;
+		if (m_inputProvider.isKeyDown(core::input::KeyCode::Space)) input.m_jumpPressed = true;
 	}
 }

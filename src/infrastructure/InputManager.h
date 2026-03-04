@@ -9,6 +9,6 @@ namespace infrastructure
 	class InputManager : public core::iface::IInputProvider
 	{
 	public:
-		bool isKeyDown(core::KeyCode keyCode) const override;
+		bool isKeyDown(core::input::KeyCode keyCode) const override;
 	};
 }

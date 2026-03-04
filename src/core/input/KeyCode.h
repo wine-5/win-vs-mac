@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace core
+namespace core::input
 {
     /**
      * @brief DxLibに依存しない独自のキーコードを定義

@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "core/KeyCode.h"
+#include "core/input/KeyCode.h"
 
 namespace core::iface
 {
@@ -11,6 +11,6 @@ namespace core::iface
 	{
 	public:
 		virtual ~IInputProvider() = default;
-		virtual bool isKeyDown(core::KeyCode keycode) const = 0;
+		virtual bool isKeyDown(core::input::KeyCode keycode) const = 0;
 	};
 }
