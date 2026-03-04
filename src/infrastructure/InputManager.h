@@ -9,6 +9,9 @@ namespace infrastructure
 	class InputManager : public core::iface::IInputProvider
 	{
 	public:
-		bool isKeyDown(core::KeyCode keyCode) const override;
+		bool isKeyDown(core::input::KeyCode keyCode) const override;
+		bool isPadButtonDown(core::input::GamePadCode code) const override;
+		float getPadAxis(core::input::GamePadCode code) const override;
+		bool isPadConnected() const override;
 	};
 }

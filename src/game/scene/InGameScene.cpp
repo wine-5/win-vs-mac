@@ -45,10 +45,10 @@ namespace game::scene
 		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
 		m_renderer.drawModel(render.m_modelHandle, transform.m_position,transform.m_rotation);
 
-		LOG("animIndex: %d  animTime: %8.2f  animTotalTime: %8.2f\n",
+		/*LOG("animIndex: %d  animTime: %8.2f  animTotalTime: %8.2f\n",
 			anim.m_animIndex,
 			anim.m_animTime,
-			anim.m_animTotalTime);
+			anim.m_animTotalTime);*/
 
 		LOG("x: %8.2f  y: %8.2f  z: %8.2f\n",
 			transform.m_position.x,
