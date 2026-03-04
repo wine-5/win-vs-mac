@@ -136,6 +136,7 @@
     <ClCompile Include="src\core\ServiceLocator.cpp" />
     <ClCompile Include="src\game\stage\Ground.cpp" />
     <ClCompile Include="src\game\system\AnimationSystem.cpp" />
+    <ClCompile Include="src\game\system\CollisionSystem.cpp" />
     <ClCompile Include="src\infrastructure\Animator.cpp" />
     <ClCompile Include="src\infrastructure\Camera.cpp" />
     <ClCompile Include="src\infrastructure\InGameSceneInitializer.cpp" />
@@ -182,10 +183,12 @@
     <ClInclude Include="src\core\Vector3.h" />
     <ClInclude Include="src\game\component\AnimationComponent.h" />
     <ClInclude Include="src\game\component\ColliderComponent.h" />
+    <ClInclude Include="src\game\constant\CollisionTag.h" />
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
     <ClInclude Include="src\game\data\PlayerData.h" />
     <ClInclude Include="src\game\stage\Ground.h" />
     <ClInclude Include="src\game\system\AnimationSystem.h" />
+    <ClInclude Include="src\game\system\CollisionSystem.h" />
     <ClInclude Include="src\infrastructure\Animator.h" />
     <ClInclude Include="src\infrastructure\Camera.h" />
     <ClInclude Include="src\infrastructure\InGameSceneInitializer.h" />
