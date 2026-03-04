@@ -10,5 +10,8 @@ namespace infrastructure
 	{
 	public:
 		bool isKeyDown(core::input::KeyCode keyCode) const override;
+		bool isPadButtonDown(core::input::GamePadCode code) const override;
+		float getPadAxis(core::input::GamePadCode code) const override;
+		bool isPadConnected() const override;
 	};
 }

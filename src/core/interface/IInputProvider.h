@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "core/input/KeyCode.h"
+#include "core/input/GamePadCode.h"
 
 namespace core::iface
 {
@@ -11,6 +12,17 @@ namespace core::iface
 	{
 	public:
 		virtual ~IInputProvider() = default;
+
+		// キーボード
 		virtual bool isKeyDown(core::input::KeyCode keycode) const = 0;
+
+		// コントローラーボタン
+		virtual bool isPadButtonDown(core::input::GamePadCode code) const = 0;
+
+		// コントローラースティック
+		virtual float getPadAxis(core::input::GamePadCode code) const = 0;
+
+		// コントローラーが接続されているか
+		virtual bool isPadConnected() const = 0;
 	};
 }
