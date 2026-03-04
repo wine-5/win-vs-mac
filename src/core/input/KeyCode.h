@@ -13,5 +13,10 @@ namespace core::input
         S,
         D,
         Space,
+
+        Up,
+        Down,
+        Left,
+        Right,
     };
 }
