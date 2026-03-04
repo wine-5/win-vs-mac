@@ -9,9 +9,9 @@ namespace game
 	{
 	}
 
-	void ObjectFactory::init()
+	void ObjectFactory::init(int playerModelHandle)
 	{
-		m_player = std::make_unique<actor::Player>(m_entityManager, m_componentManager, m_resourceManager);
+		m_player = std::make_unique<actor::Player>(m_entityManager, m_componentManager, playerModelHandle);
 	}
 
 	actor::Player& ObjectFactory::getPlayer() const

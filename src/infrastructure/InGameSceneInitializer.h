@@ -2,6 +2,7 @@
 #include "game/scene/InGameScene.h"
 #include "infrastructure/Camera.h"
 #include "infrastructure/Renderer.h"
+#include "infrastructure/Animator.h"
 #include "infrastructure/ResourceManager.h"
 #include "infrastructure/InputManager.h"
 #include <memory>
@@ -21,6 +22,7 @@ namespace infrastructure
 	private:
 		Camera                         m_camera;
 		Renderer                       m_renderer;
+		Animator                       m_animator;
 		ResourceManager                m_resourceManager;
 		InputManager                   m_inputManager;
 		std::unique_ptr<game::scene::InGameScene> m_scene;
