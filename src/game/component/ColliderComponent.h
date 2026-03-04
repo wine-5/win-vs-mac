@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "core/Vector3.h"
+#include "game/constant/CollisionTag.h"
 
 namespace game::component
 {
@@ -10,5 +11,6 @@ namespace game::component
 	{
 		core::Vector3 m_size; // 当たり判定のサイズ（幅、高さ、奥行き)
 		core::Vector3 m_offset; // 中心からのオフセット
+		constant::CollisionTag m_tag = constant::CollisionTag::None; // オブジェクト識別用のタグ
 	};
 }
