@@ -21,6 +21,6 @@ namespace game::data
 		// std::string m_walkAnimPath = "assets/animations/Player_Walking.mv1";
 		std::string m_idleAnimPath = "None";
 		std::string m_walkAnimPath = "None";
-		float       m_moveSpeed = 5.0f;
+		float       m_moveSpeed = 20.0f;
 	};
 }
