@@ -1,6 +1,11 @@
 ﻿#include "AnimationSystem.h"
 #include "game/component/RenderComponent.h"
 
+namespace
+{
+	constexpr float ANIMATION_FPS = 30.0f;
+}
+
 namespace game::system
 {
 	AnimationSystem::AnimationSystem(core::ecs::ComponentManager& componentManager,
@@ -38,7 +43,7 @@ namespace game::system
 			changeAnimation(anim, render.m_modelHandle, nextState, nextHandle);
 		}
 
-		anim.m_animTime += deltaTime * 30.0f;
+		anim.m_animTime += deltaTime * ANIMATION_FPS;
 		if (anim.m_animTime >= anim.m_animTotalTime)
 			anim.m_animTime = 0.0f;
 

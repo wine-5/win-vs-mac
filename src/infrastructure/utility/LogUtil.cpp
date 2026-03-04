@@ -10,7 +10,7 @@ namespace infrastructure::utility
 	{
 		SetDrawBright(r, g, b);
 		printfDx("%s\n", message);
-		SetDrawBright(255, 255, 255);
+		SetDrawBright(LOG_COLOR_R, LOG_COLOR_G, LOG_COLOR_B);
 		s_line++;
 	}
 
