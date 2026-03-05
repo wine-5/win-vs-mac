@@ -18,25 +18,14 @@ namespace game::system
 		auto& input = m_componentManager.get<component::InputComponent>(m_playerId);
 
 		// ジャンプ処理
-		if (input.m_jumpPressed && isGrounded(transform.m_position.y))
+		if (input.m_jumpPressed)
 			velocity.m_velocity.y = m_jumpForce;
 
 		// 重力
-		if (!isGrounded(transform.m_position.y) || velocity.m_velocity.y > 0.0f)
-			velocity.m_velocity.y += m_gravity * deltaTime;
-		else
-		{
-			velocity.m_velocity.y = 0.0f;
-			transform.m_position.y = m_groundY;
-		}
+		velocity.m_velocity.y += m_gravity * deltaTime;
 
 		transform.m_position.x += velocity.m_velocity.x * deltaTime;
 		transform.m_position.y += velocity.m_velocity.y * deltaTime;
 		transform.m_position.z += velocity.m_velocity.z * deltaTime;
-	}
-
-	bool PhysicsSystem::isGrounded(float positionY) const
-	{
-		return positionY <= m_groundY;
 	}
 }

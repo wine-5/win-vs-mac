@@ -2,6 +2,7 @@
 #include "game/component/TransformComponent.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/ColliderComponent.h"
+#include "game/constant/CollisionTag.h"
 
 namespace game::stage
 {
@@ -20,6 +21,7 @@ namespace game::stage
 
 		component::ColliderComponent collider;
 		collider.m_size = size;
+		collider.m_tag = constant::CollisionTag::Ground;
 
 		componentManager.add<component::ColliderComponent>(m_entity.getId(), collider);
 	}

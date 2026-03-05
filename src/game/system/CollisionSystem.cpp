@@ -75,12 +75,17 @@ namespace game::system
 			auto& groundTransform = m_componentManager.get<component::TransformComponent>(groundId);
 			auto& playerCollider = m_componentManager.get<component::ColliderComponent>(playerId);
 			auto& groundCollider = m_componentManager.get<component::ColliderComponent>(groundId);
+			auto& playerVelocity = m_componentManager.get<component::VelocityComponent>(playerId);
 
 			// Groundの上面のY座標
-			float groundTopY = groundTransform.m_position.y + groundCollider.m_size.y / 2.0f;
+			float groundTopY = groundTransform.m_position.y + groundCollider.m_offset.y + groundCollider.m_size.y / 2.0f;
 
 			// PlayerをGroundの上に乗せる
-			playerTransform.m_position.y = groundTopY + playerCollider.m_size.y / 2.0f;
+			playerTransform.m_position.y = groundTopY - playerCollider.m_offset.y + playerCollider.m_size.y / 2.0f;
+
+			// 下方向の速度をリセット（地面に着地）
+			if (playerVelocity.m_velocity.y < 0.0f)
+				playerVelocity.m_velocity.y = 0.0f;
 		}	
 	}
 }
