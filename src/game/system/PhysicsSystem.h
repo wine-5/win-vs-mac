@@ -17,10 +17,12 @@ namespace game::system
 	private:
 		static constexpr float DEFAULT_GRAVITY = -98.0f;
 		static constexpr float DEFAULT_JUMP_FORCE = 50.0f;
+		static constexpr float DEFAULT_MAX_FALL_SPEED = -200.0f;
 
 		core::ecs::ComponentManager& m_componentManager;
 		core::ecs::EntityId m_playerId;
 		float m_gravity = DEFAULT_GRAVITY;
 		float m_jumpForce = DEFAULT_JUMP_FORCE;
+		float m_maxFallSpeed = DEFAULT_MAX_FALL_SPEED;
 	};
 }

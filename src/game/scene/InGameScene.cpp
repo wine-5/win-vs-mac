@@ -9,6 +9,7 @@
 #include "core/interface/ILogger.h"
 #include "game/system/AnimationSystem.h"
 #include "game/system/CollisionSystem.h"
+#include "game/component/ColliderComponent.h"
 
 namespace game::scene
 {
@@ -63,6 +64,16 @@ namespace game::scene
 		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
 		m_renderer.drawModel(render.m_modelHandle, transform.m_position,transform.m_rotation);
 		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation);
+
+		// デバッグ: コライダーを可視化
+		auto& playerCollider = m_componentManager.get<game::component::ColliderComponent>(m_objectFactory.getPlayer().getId());
+		auto& groundCollider = m_componentManager.get<game::component::ColliderComponent>(m_ground->getId());
+		
+		core::Vector3 playerColliderCenter = transform.m_position + playerCollider.m_offset;
+		core::Vector3 groundColliderCenter = groundTransform.m_position + groundCollider.m_offset;
+		
+		m_renderer.drawCollider(playerColliderCenter, playerCollider.m_size, 0x00FF00); // 緑: Player
+		m_renderer.drawCollider(groundColliderCenter, groundCollider.m_size, 0x0000FF); // 青: Ground
 
 		/*LOG("animIndex: %d  animTime: %8.2f  animTotalTime: %8.2f\n",
 			anim.m_animIndex,

@@ -19,4 +19,25 @@ namespace infrastructure
 		MV1SetRotationXYZ(modelHandle, rot);
 		MV1DrawModel(modelHandle);
 	}
+
+	void Renderer::drawCollider(const core::Vector3& center, const core::Vector3& size, unsigned int color)
+	{
+		// コライダーの最小・最大座標を計算
+		core::Vector3 min = {
+			center.x - size.x / 2.0f,
+			center.y - size.y / 2.0f,
+			center.z - size.z / 2.0f
+		};
+		core::Vector3 max = {
+			center.x + size.x / 2.0f,
+			center.y + size.y / 2.0f,
+			center.z + size.z / 2.0f
+		};
+
+		VECTOR v1 = VGet(min.x, min.y, min.z);
+		VECTOR v2 = VGet(max.x, max.y, max.z);
+
+		// ワイヤーフレームで描画（塗りつぶしなし）
+		DrawCube3D(v1, v2, color, color, FALSE);
+	}
 }

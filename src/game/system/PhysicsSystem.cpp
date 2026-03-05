@@ -25,9 +25,8 @@ namespace game::system
 		velocity.m_velocity.y += m_gravity * deltaTime;
 
 		// 速度を制限（トンネリング防止）
-		const float MAX_FALL_SPEED = -200.0f; // 最大落下速度
-		if (velocity.m_velocity.y < MAX_FALL_SPEED)
-			velocity.m_velocity.y = MAX_FALL_SPEED;
+		if (velocity.m_velocity.y < m_maxFallSpeed)
+			velocity.m_velocity.y = m_maxFallSpeed;
 
 		transform.m_position.x += velocity.m_velocity.x * deltaTime;
 		transform.m_position.y += velocity.m_velocity.y * deltaTime;

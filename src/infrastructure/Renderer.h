@@ -11,5 +11,6 @@ namespace infrastructure
 	{
 	public:
 		void drawModel(int modelHandle, const core::Vector3& position, const core::Vector3& rotation) override;
+		void drawCollider(const core::Vector3& center, const core::Vector3& size, unsigned int color) override;
 	};
 }
