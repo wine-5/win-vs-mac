@@ -4,7 +4,7 @@
 
 namespace infrastructure
 {
-	void Renderer::drawModel(int modelHandle, const core::Vector3& position, const core::Vector3& rotation)
+	void Renderer::drawModel(int modelHandle, const core::Vector3& position, const core::Vector3& rotation, const core::Vector3& scale)
 	{
 		if (modelHandle == -1)
 		{
@@ -14,7 +14,9 @@ namespace infrastructure
 
 		VECTOR pos = { position.x, position.y, position.z };
 		VECTOR rot = { rotation.x, rotation.y, rotation.z };
+		VECTOR scl = { scale.x, scale.y, scale.z };
 
+		MV1SetScale(modelHandle, scl);
 		MV1SetPosition(modelHandle, pos);
 		MV1SetRotationXYZ(modelHandle, rot);
 		MV1DrawModel(modelHandle);

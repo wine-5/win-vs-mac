@@ -34,7 +34,7 @@ namespace game::scene
 			m_componentManager,
 			groundModelHandle,
 			core::Vector3(0.0f, -200.0f, 0.0f),
-			core::Vector3(100.0f, 10.0f, 100.0f)
+			core::Vector3(10.0f, 10.0f, 100.0f)
 		);
 
 		int idleAnimHandle = m_resourceManager.loadModel(m_playerData.getIdleAnimPath());
@@ -62,8 +62,8 @@ namespace game::scene
 		auto& groundTransform = m_componentManager.get<game::component::TransformComponent>(m_ground->getId());
 
 		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
-		m_renderer.drawModel(render.m_modelHandle, transform.m_position,transform.m_rotation);
-		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation);
+		m_renderer.drawModel(render.m_modelHandle, transform.m_position,transform.m_rotation,transform.m_scale);
+		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
 
 		// デバッグ: コライダーを可視化
 		auto& playerCollider = m_componentManager.get<game::component::ColliderComponent>(m_objectFactory.getPlayer().getId());
