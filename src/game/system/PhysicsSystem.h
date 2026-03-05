@@ -15,7 +15,7 @@ namespace game::system
 		void update(float deltaTime) override;
 
 	private:
-		static constexpr float DEFAULT_GRAVITY = -9.8f;
+		static constexpr float DEFAULT_GRAVITY = -98.0f;
 		static constexpr float DEFAULT_JUMP_FORCE = 50.0f;
 
 		core::ecs::ComponentManager& m_componentManager;

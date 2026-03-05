@@ -38,10 +38,19 @@ namespace game::system
 		core::Vector3 centerA = transformA.m_position + colliderA.m_offset;
 		core::Vector3 centerB = transformB.m_position + colliderB.m_offset;
 
+		// 各軸の距離と必要な距離
+		float distX = abs(centerA.x - centerB.x);
+		float distY = abs(centerA.y - centerB.y);
+		float distZ = abs(centerA.z - centerB.z);
+
+		float requiredX = (colliderA.m_size.x + colliderB.m_size.x) / 2.0f;
+		float requiredY = (colliderA.m_size.y + colliderB.m_size.y) / 2.0f;
+		float requiredZ = (colliderA.m_size.z + colliderB.m_size.z) / 2.0f;
+
 		// 各軸の重なりをチェック
-		bool overlapX = abs(centerA.x - centerB.x) < (colliderA.m_size.x + colliderB.m_size.x) / 2.0f;
-		bool overlapY = abs(centerA.y - centerB.y) < (colliderA.m_size.y + colliderB.m_size.y) / 2.0f;
-		bool overlapZ = abs(centerA.z - centerB.z) < (colliderA.m_size.z + colliderB.m_size.z) / 2.0f;
+		bool overlapX = distX <= requiredX;
+		bool overlapY = distY <= requiredY;
+		bool overlapZ = distZ <= requiredZ;
 
 		return overlapX && overlapY && overlapZ;
 	}
@@ -77,15 +86,24 @@ namespace game::system
 			auto& groundCollider = m_componentManager.get<component::ColliderComponent>(groundId);
 			auto& playerVelocity = m_componentManager.get<component::VelocityComponent>(playerId);
 
-			// Groundの上面のY座標
-			float groundTopY = groundTransform.m_position.y + groundCollider.m_offset.y + groundCollider.m_size.y / 2.0f;
+			// 各コライダーの中心とAABBの境界を計算
+			core::Vector3 playerCenter = playerTransform.m_position + playerCollider.m_offset;
+			core::Vector3 groundCenter = groundTransform.m_position + groundCollider.m_offset;
 
-			// PlayerをGroundの上に乗せる
-			playerTransform.m_position.y = groundTopY - playerCollider.m_offset.y + playerCollider.m_size.y / 2.0f;
+			float playerBottom = playerCenter.y - playerCollider.m_size.y / 2.0f;
+			float groundTop = groundCenter.y + groundCollider.m_size.y / 2.0f;
 
-			// 下方向の速度をリセット（地面に着地）
-			if (playerVelocity.m_velocity.y < 0.0f)
-				playerVelocity.m_velocity.y = 0.0f;
+			// Playerが地面より下、または地面に近い場合に補正
+			if (playerBottom <= groundTop)
+			{
+				// Playerの下端を地面の上端に合わせる
+				float correction = groundTop - playerBottom;
+				playerTransform.m_position.y += correction;
+
+				// 下方向の速度をリセット（地面に着地）
+				if (playerVelocity.m_velocity.y < 0.0f)
+					playerVelocity.m_velocity.y = 0.0f;
+			}
 		}	
 	}
 }
