@@ -2,6 +2,7 @@
 #include "core/ecs/EntityManager.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
+#include "core/Vector3.h"
 
 namespace game::actor
 {
@@ -13,7 +14,8 @@ namespace game::actor
 	public:
 		Player(core::ecs::EntityManager& entityManager,
 			core::ecs::ComponentManager& componentManager,
-			int modelHandle);
+			int modelHandle,
+			core::Vector3 colliderSize);
 
 		core::ecs::EntityId getId() const;
 

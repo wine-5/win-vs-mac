@@ -4,21 +4,27 @@
 #include "game/component/InputComponent.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/AnimationComponent.h"
+#include "game/component/ColliderComponent.h"
 #include "game/constant/PlayerAnimationState.h"
 
 namespace game::actor
 {
 	Player::Player(core::ecs::EntityManager& entityManager,
 		core::ecs::ComponentManager& componentManager,
-		int modelHandle)
+		int modelHandle,
+		core::Vector3 colliderSize)
 		: m_entity(entityManager.create())
 	{
 		componentManager.add<component::TransformComponent>(m_entity.getId(), {});
 		componentManager.add<component::VelocityComponent>(m_entity.getId(), {});
 		componentManager.add<component::InputComponent>(m_entity.getId(), {});
 		componentManager.add<component::AnimationComponent<constant::PlayerAnimationState>>(m_entity.getId(), {});
-
 		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
+
+		component::ColliderComponent collider;
+		collider.m_size = colliderSize;
+		collider.m_tag = constant::CollisionTag::Player;
+		componentManager.add<component::ColliderComponent>(m_entity.getId(), collider);
 	}
 
 	core::ecs::EntityId Player::getId() const

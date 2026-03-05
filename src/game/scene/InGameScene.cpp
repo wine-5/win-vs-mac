@@ -23,7 +23,7 @@ namespace game::scene
 		, m_inputProvider(inputProvider)
 		, m_objectFactory(m_entityManager, m_componentManager, m_resourceManager)
 	{
-		m_objectFactory.init(m_resourceManager.loadModel(m_playerData.getModelPath()));
+		m_objectFactory.init(m_resourceManager.loadModel(m_playerData.getModelPath()), m_playerData);
 
 		int idleAnimHandle = m_resourceManager.loadModel(m_playerData.getIdleAnimPath());
 		int walkAnimHandle = m_resourceManager.loadModel(m_playerData.getWalkAnimPath());

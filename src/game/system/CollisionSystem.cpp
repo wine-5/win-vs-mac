@@ -81,6 +81,6 @@ namespace game::system
 
 			// PlayerをGroundの上に乗せる
 			playerTransform.m_position.y = groundTopY + playerCollider.m_size.y / 2.0f;
-		}
+		}	
 	}
 }

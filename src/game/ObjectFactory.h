@@ -2,8 +2,9 @@
 #include "core/ecs/EntityManager.h"
 #include "core/ecs/ComponentManager.h"
 #include "game/actor/Player.h"
-#include <memory>
 #include "core/interface/IResourceManager.h"
+#include "game/data/PlayerData.h"
+#include <memory>
 
 namespace game
 {
@@ -14,7 +15,7 @@ namespace game
 	{
 	public:
 		ObjectFactory(core::ecs::EntityManager& entityManager, core::ecs::ComponentManager& componentManager,core::iface::IResourceManager& resourceManager);
-		void init(int playerModelhandle);
+		void init(int playerModelhandle, const data::PlayerData& playerData);
 
 		actor::Player& getPlayer() const;
 
