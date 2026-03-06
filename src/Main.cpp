@@ -3,6 +3,7 @@
 #include "ServiceLocatorInitializer.h"
 #include "core/ServiceLocator.h"
 #include "core/interface/ILogger.h"
+#include "thirdparty/nlohmann/json.hpp"
 
 namespace
 {
