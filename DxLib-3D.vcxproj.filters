@@ -221,5 +221,8 @@
     <ClInclude Include="src\infrastructure\Animator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\data\ModelMetadata.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
