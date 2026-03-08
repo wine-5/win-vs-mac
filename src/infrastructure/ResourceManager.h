@@ -26,5 +26,7 @@ namespace infrastructure
 		std::unordered_map<std::string, int> m_modelHandles;
 		std::unordered_map<std::string, core::data::ModelMetadata> m_metadata;
 
+	public:
+		virtual ~ResourceManager() = default;
 	};
 }
