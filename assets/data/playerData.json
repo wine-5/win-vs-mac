@@ -1,0 +1,19 @@
+﻿{
+  "id": "player",
+  "category": "player",
+  "model": {
+    "path": "assets/model/Player.mv1",
+    "scale": [ 0.02, 0.02, 0.02 ]
+  },
+  "collider": {
+    "size": [ 0, 0, 0 ],
+    "offset": [ 0, 0, 0 ]
+  },
+  "animations": {
+    "idle": "assets/animations/Player_Idle.mv1",
+    "walk": "assets/animations/Player_Walking.mv1"
+  },
+  "gameplay": {
+    "moveSpeed": 20.0
+  }
+}

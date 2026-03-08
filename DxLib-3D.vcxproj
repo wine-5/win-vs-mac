@@ -185,6 +185,8 @@
     <ClInclude Include="src\game\component\AnimationComponent.h" />
     <ClInclude Include="src\game\component\ColliderComponent.h" />
     <ClInclude Include="src\game\constant\CollisionTag.h" />
+    <ClInclude Include="src\game\constant\ModelId.h" />
+    <ClInclude Include="src\infrastructure\constant\JsonKeys.h" />
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
     <ClInclude Include="src\game\data\PlayerData.h" />
     <ClInclude Include="src\game\stage\Ground.h" />

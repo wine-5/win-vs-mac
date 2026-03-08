@@ -10,6 +10,7 @@
 #include "game/system/AnimationSystem.h"
 #include "game/system/CollisionSystem.h"
 #include "game/component/ColliderComponent.h"
+#include "game/constant/ModelId.h"
 
 namespace game::scene
 {
@@ -24,8 +25,10 @@ namespace game::scene
 		, m_resourceManager(resourceManager)
 		, m_inputProvider(inputProvider)
 		, m_objectFactory(m_entityManager, m_componentManager, m_resourceManager)
+		, m_playerData(game::data::PlayerData::fromMetadata(
+			m_resourceManager.getMetadata(constant::ModelId::PLAYER).value()))
 	{
-		m_objectFactory.init(m_resourceManager.loadModel(m_playerData.getModelPath()), m_playerData);
+		m_objectFactory.init(m_resourceManager.loadModelById(constant::ModelId::PLAYER), m_playerData);
 
 		// Ground生成
 		int groundModelHandle = m_resourceManager.loadModel("assets/model/Ground.mv1");
@@ -37,13 +40,13 @@ namespace game::scene
 			core::Vector3(10.0f, 10.0f, 100.0f)
 		);
 
-		int idleAnimHandle = m_resourceManager.loadModel(m_playerData.getIdleAnimPath());
-		int walkAnimHandle = m_resourceManager.loadModel(m_playerData.getWalkAnimPath());
+		/*int idleAnimHandle = m_resourceManager.loadModel(m_playerData.getIdleAnimPath());
+		int walkAnimHandle = m_resourceManager.loadModel(m_playerData.getWalkAnimPath());*/
 
 		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_objectFactory.getPlayer().getId(), m_inputProvider);
 		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_objectFactory.getPlayer().getId(), m_playerData.getMoveSpeed());
 		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager, m_objectFactory.getPlayer().getId());
-		m_systemManager.registerSystem<game::system::AnimationSystem>(m_componentManager, m_objectFactory.getPlayer().getId(), m_animator,idleAnimHandle, walkAnimHandle);
+		//m_systemManager.registerSystem<game::system::AnimationSystem>(m_componentManager, m_objectFactory.getPlayer().getId(), m_animator,idleAnimHandle, walkAnimHandle);
 
 		// System登録の後に追加
 		auto* collisionSystem = m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
