@@ -15,7 +15,8 @@ namespace game::actor
 		Player(core::ecs::EntityManager& entityManager,
 			core::ecs::ComponentManager& componentManager,
 			int modelHandle,
-			core::Vector3 colliderSize);
+			core::Vector3 colliderSize,
+			core::Vector3 colliderOffset);
 
 		core::ecs::EntityId getId() const;
 

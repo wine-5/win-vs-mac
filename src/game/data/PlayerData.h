@@ -24,6 +24,7 @@ namespace game::data
             PlayerData data;
             data.m_modelPath = metadata.modelPath;
             data.m_colliderSize = metadata.colliderSize;
+            data.m_colliderOffset = metadata.colliderOffset;
 
             // アニメーションパス（stringProperties から取得）
             auto idleIt = metadata.stringProperties.find("idleAnim");
@@ -47,6 +48,7 @@ namespace game::data
         const std::string& getWalkAnimPath() const { return m_walkAnimPath; }
         float              getMoveSpeed()    const { return m_moveSpeed; }
         core::Vector3      getColliderSize() const { return m_colliderSize; }
+        core::Vector3      getColliderOffset() const { return m_colliderOffset; }
 
     private:
         // デフォルト値（JSONから読み取れない場合のフォールバック）
@@ -55,5 +57,6 @@ namespace game::data
         std::string   m_walkAnimPath = "None";
         float         m_moveSpeed = 20.0f;
         core::Vector3 m_colliderSize = { 50.0f, 100.0f, 50.0f };
+        core::Vector3 m_colliderOffset = { 0.0f, 50.0f, 0.0f };
     };
 }

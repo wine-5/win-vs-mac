@@ -36,8 +36,8 @@ namespace game::scene
 			m_entityManager,
 			m_componentManager,
 			groundModelHandle,
-			core::Vector3(0.0f, -200.0f, 0.0f),
-			core::Vector3(10.0f, 10.0f, 100.0f)
+			core::Vector3(0.0f, -50.0f, 0.0f),
+			core::Vector3(100.0f, 1.0f, 100.0f)
 		);
 
 		/*int idleAnimHandle = m_resourceManager.loadModel(m_playerData.getIdleAnimPath());

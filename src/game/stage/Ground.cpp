@@ -15,7 +15,7 @@ namespace game::stage
 	{
 		component::TransformComponent transform;
 		transform.m_position = position;
-		transform.m_scale = core::Vector3(0.01f, 0.01f, 0.01f);
+		transform.m_scale = core::Vector3(1.0f, 1.0f, 1.0f);
 
 		componentManager.add<component::TransformComponent>(m_entity.getId(), transform);
 		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
