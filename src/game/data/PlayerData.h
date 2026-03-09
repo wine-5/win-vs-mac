@@ -51,12 +51,12 @@ namespace game::data
         core::Vector3      getColliderOffset() const { return m_colliderOffset; }
 
     private:
-        // デフォルト値（JSONから読み取れない場合のフォールバック）
-        std::string   m_modelPath = "assets/model/Player.mv1";
-        std::string   m_idleAnimPath = "None";
-        std::string   m_walkAnimPath = "None";
-        float         m_moveSpeed = 20.0f;
-        core::Vector3 m_colliderSize = { 50.0f, 100.0f, 50.0f };
-        core::Vector3 m_colliderOffset = { 0.0f, 50.0f, 0.0f };
+        // JSON読み込み失敗時はFail Fast
+        std::string   m_modelPath;
+        std::string   m_idleAnimPath;
+        std::string   m_walkAnimPath;
+        float         m_moveSpeed;
+        core::Vector3 m_colliderSize;
+        core::Vector3 m_colliderOffset;
     };
 }
