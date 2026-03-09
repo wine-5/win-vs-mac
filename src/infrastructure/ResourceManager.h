@@ -13,12 +13,14 @@ namespace infrastructure
 	public:
 		ResourceManager();
 
-		int loadModel(const std::string& filePath) override;
 		int loadModelById(const std::string& modelId) override;
 		std::optional<core::data::ModelMetadata> getMetadata(const std::string& modelId) const override;
 
 	private:
+		// TODO: オブジェクトの種類が増えるごとにloadXxxData()関数が肥大化するため、
+		//       将来的にJsonLoaderクラスを作成し、汎用的なJSON読み込みシステムに移行する予定
 		void loadPlayerData();
+		void loadGroundData();
 		core::data::ModelMetadata parseJsonFile(const std::string& filePath);
 
 		// ファイルパスをキーにしてモデルを管理

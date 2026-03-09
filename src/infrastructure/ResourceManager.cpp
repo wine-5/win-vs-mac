@@ -3,31 +3,19 @@
 #include "core/interface/ILogger.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include <fstream>
+#include <cassert>
 #include "constant/JsonKeys.h"
 
 namespace infrastructure
 {
     ResourceManager::ResourceManager()
     {
-        // 起動時にplayer.jsonを読み込む
+        // TODO: オブジェクトの種類が増えるごとにloadXxxData()関数が肥大化するため、
+        //       将来的にJsonLoaderクラスを作成し、汎用的なJSON読み込みシステムに移行する予定
+        
+        // 起動時にplayer.jsonとground.jsonを読み込む
         loadPlayerData();
-    }
-
-    int ResourceManager::loadModel(const std::string& filePath)
-    {
-        // キャッシュにある場合は重複しないように
-        auto it = m_modelCache.find(filePath);
-        if (it != m_modelCache.end()) return it->second;
-
-        int handle = MV1LoadModel(filePath.c_str());
-        if (handle == -1)
-        {
-            LOG_E("モデルの読み込みに失敗しました: %s", filePath.c_str());
-            return -1;
-        }
-
-        m_modelCache[filePath] = handle;
-        return handle;
+        loadGroundData();
     }
 
     int ResourceManager::loadModelById(const std::string& modelId)
@@ -76,7 +64,7 @@ namespace infrastructure
             mutableMetadata.colliderSize.y = vMax.y - vMin.y;
             mutableMetadata.colliderSize.z = vMax.z - vMin.z;
 
-            LOG("Auto-calculated collider size for '%s': (%.2f, %.2f, %.2f)",
+            LOG("'%s' のコライダーサイズを自動計算: (%.2f, %.2f, %.2f)",
                 modelId.c_str(),
                 mutableMetadata.colliderSize.x,
                 mutableMetadata.colliderSize.y,
@@ -104,6 +92,13 @@ namespace infrastructure
         printfDx("Loaded player metadata: %s\n", metadata.id.c_str());
     }
 
+    void ResourceManager::loadGroundData()
+    {
+        auto metadata = parseJsonFile("assets/data/groundData.json");
+        m_metadata[metadata.id] = metadata;
+        printfDx("Loaded ground metadata: %s\n", metadata.id.c_str());
+    }
+
     core::data::ModelMetadata ResourceManager::parseJsonFile(const std::string& filePath)
     {
         using namespace infrastructure::constant;  // JsonKeysを使いやすく
@@ -111,8 +106,9 @@ namespace infrastructure
         std::ifstream file(filePath);
         if (!file.is_open())
         {
-            LOG_E("JSONファイルを開けませんでした: %s", filePath.c_str());
-            return {};
+            LOG_E("FATAL: JSONファイルを開けませんでした: %s", filePath.c_str());
+            assert(false && "致命的エラー: JSONファイルが見つかりません。ファイルパスを確認してください。");
+            return {};  // Assert後は到達しないが、コンパイラ警告回避
         }
 
         nlohmann::json j = nlohmann::json::parse(file);
@@ -137,6 +133,23 @@ namespace infrastructure
         metadata.colliderOffset.y = j[JsonKeys::COLLIDER][JsonKeys::OFFSET][1];
         metadata.colliderOffset.z = j[JsonKeys::COLLIDER][JsonKeys::OFFSET][2];
 
+        // Transform情報（直接メンバに代入、findコスト削減）
+        if (j.contains(JsonKeys::TRANSFORM))
+        {
+            if (j[JsonKeys::TRANSFORM].contains("posX"))
+                metadata.position.x = j[JsonKeys::TRANSFORM]["posX"];
+            if (j[JsonKeys::TRANSFORM].contains("posY"))
+                metadata.position.y = j[JsonKeys::TRANSFORM]["posY"];
+            if (j[JsonKeys::TRANSFORM].contains("posZ"))
+                metadata.position.z = j[JsonKeys::TRANSFORM]["posZ"];
+            if (j[JsonKeys::TRANSFORM].contains("rotX"))
+                metadata.rotation.x = j[JsonKeys::TRANSFORM]["rotX"];
+            if (j[JsonKeys::TRANSFORM].contains("rotY"))
+                metadata.rotation.y = j[JsonKeys::TRANSFORM]["rotY"];
+            if (j[JsonKeys::TRANSFORM].contains("rotZ"))
+                metadata.rotation.z = j[JsonKeys::TRANSFORM]["rotZ"];
+        }
+
         // アニメーション（stringProperties）
         if (j.contains(JsonKeys::ANIMATIONS))
         {
@@ -146,7 +159,7 @@ namespace infrastructure
                 metadata.stringProperties["walkAnim"] = j[JsonKeys::ANIMATIONS][JsonKeys::WALK];
         }
 
-        // ゲームプレイパラメータ（floatProperties）
+        // ゲームプレイパラメータ（floatProperties - Entity固有のレアなパラメータのみ）
         if (j.contains(JsonKeys::GAMEPLAY))
         {
             if (j[JsonKeys::GAMEPLAY].contains(JsonKeys::MOVE_SPEED))
