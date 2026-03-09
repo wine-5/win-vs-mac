@@ -15,6 +15,9 @@
 #include "game/ObjectFactory.h"
 #include "game/component/RenderComponent.h"
 #include "game/data/PlayerData.h"
+#include "game/stage/Ground.h"
+
+#include <memory>
 
 
 namespace game::scene
@@ -46,6 +49,8 @@ namespace game::scene
 
 		game::ObjectFactory         m_objectFactory;
 		game::data::PlayerData m_playerData;
+
+		std::unique_ptr <stage::Ground> m_ground;
 
 		// カメラ設定
 		static constexpr float CAMERA_OFFSET_X = 0.0f;

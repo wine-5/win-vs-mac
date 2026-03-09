@@ -10,6 +10,7 @@ namespace infrastructure
 	class Renderer : public core::iface::IRenderer
 	{
 	public:
-		void drawModel(int modelHandle, const core::Vector3& position, const core::Vector3& rotation) override;
+		void drawModel(int modelHandle, const core::Vector3& position, const core::Vector3& rotation, const core::Vector3& scale) override;
+		void drawCollider(const core::Vector3& center, const core::Vector3& size, unsigned int color) override;
 	};
 }

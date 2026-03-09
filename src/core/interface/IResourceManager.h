@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include <string>
+#include <optional>
+#include "core/data/ModelMetadata.h"
 
 namespace core::iface
 {
@@ -11,8 +13,7 @@ namespace core::iface
 	{
 	public:
 		virtual ~IResourceManager() = default;
-		virtual int loadModel(const std::string& filePath) = 0;
-		virtual void unloadModel(const std::string& filePath) = 0;
-		virtual void unloadAll() = 0;
+		virtual int loadModelById(const std::string& modelId) = 0;
+		virtual std::optional<core::data::ModelMetadata> getMetadata(const std::string& modelId) const = 0;
 	};
 }

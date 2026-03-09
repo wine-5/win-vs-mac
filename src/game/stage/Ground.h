@@ -4,19 +4,21 @@
 #include "core/ecs/Entity.h"
 #include "core/Vector3.h"
 
-namespace game::actor
+// 前方宣言
+namespace game::data { class GroundData; }
+
+namespace game::stage
 {
 	/**
-	 * @brief Playerのセットアップを担当するクラス
+	 * @brief 地面のオブジェクト
 	 */
-	class Player
+	class Ground
 	{
 	public:
-		Player(core::ecs::EntityManager& entityManager,
+		Ground(core::ecs::EntityManager& entityManager,
 			core::ecs::ComponentManager& componentManager,
 			int modelHandle,
-			core::Vector3 colliderSize,
-			core::Vector3 colliderOffset);
+			const game::data::GroundData& groundData);
 
 		core::ecs::EntityId getId() const;
 

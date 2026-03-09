@@ -102,7 +102,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -120,7 +120,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -134,7 +134,9 @@
     <ClCompile Include="src\core\interface\ICamera.h" />
     <ClCompile Include="src\core\interface\ILogger.h" />
     <ClCompile Include="src\core\ServiceLocator.cpp" />
+    <ClCompile Include="src\game\stage\Ground.cpp" />
     <ClCompile Include="src\game\system\AnimationSystem.cpp" />
+    <ClCompile Include="src\game\system\CollisionSystem.cpp" />
     <ClCompile Include="src\infrastructure\Animator.cpp" />
     <ClCompile Include="src\infrastructure\Camera.cpp" />
     <ClCompile Include="src\infrastructure\InGameSceneInitializer.cpp" />
@@ -153,6 +155,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="assets\data\groundData.json" />
+    <None Include="assets\data\playerData.json" />
+    <None Include="assets\config\resources.json" />
     <None Include="docs\architecture.md" />
     <None Include="docs\game_concept.md" />
     <None Include="docs\game_design.md">
@@ -170,6 +175,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\core\data\ModelMetadata.h" />
     <ClInclude Include="src\core\EventBus.h" />
     <ClInclude Include="src\core\input\GamePadCode.h" />
     <ClInclude Include="src\core\interface\IAnimator.h" />
@@ -180,9 +186,16 @@
     <ClInclude Include="src\core\ServiceLocator.h" />
     <ClInclude Include="src\core\Vector3.h" />
     <ClInclude Include="src\game\component\AnimationComponent.h" />
+    <ClInclude Include="src\game\component\ColliderComponent.h" />
+    <ClInclude Include="src\game\constant\CollisionTag.h" />
+    <ClInclude Include="src\game\constant\ModelId.h" />
+    <ClInclude Include="src\game\data\GroundData.h" />
+    <ClInclude Include="src\infrastructure\constant\JsonKeys.h" />
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
     <ClInclude Include="src\game\data\PlayerData.h" />
+    <ClInclude Include="src\game\stage\Ground.h" />
     <ClInclude Include="src\game\system\AnimationSystem.h" />
+    <ClInclude Include="src\game\system\CollisionSystem.h" />
     <ClInclude Include="src\infrastructure\Animator.h" />
     <ClInclude Include="src\infrastructure\Camera.h" />
     <ClInclude Include="src\infrastructure\InGameSceneInitializer.h" />

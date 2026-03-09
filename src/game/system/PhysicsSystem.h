@@ -15,17 +15,14 @@ namespace game::system
 		void update(float deltaTime) override;
 
 	private:
-		static constexpr float DEFAULT_GRAVITY = -9.8f;
-		static constexpr float DEFAULT_JUMP_FORCE = 5.0f;
-		static constexpr float DEFAULT_GROUND_Y = 0.0f;
-
-		bool isGrounded(float positionY) const;
+		static constexpr float DEFAULT_GRAVITY = -98.0f;
+		static constexpr float DEFAULT_JUMP_FORCE = 50.0f;
+		static constexpr float DEFAULT_MAX_FALL_SPEED = -200.0f;
 
 		core::ecs::ComponentManager& m_componentManager;
 		core::ecs::EntityId m_playerId;
-
 		float m_gravity = DEFAULT_GRAVITY;
 		float m_jumpForce = DEFAULT_JUMP_FORCE;
-		float m_groundY = DEFAULT_GROUND_Y; // 地面の座標（今後は床の大きさに動的に設定できるようにするが一時的にテストするために)
+		float m_maxFallSpeed = DEFAULT_MAX_FALL_SPEED;
 	};
 }
