@@ -3,11 +3,11 @@
   "category": "player",
   "model": {
     "path": "assets/model/Player.mv1",
-    "scale": [ 0.02, 0.02, 0.02 ]
+    "scale": [ 1, 1, 1 ]
   },
   "collider": {
-    "size": [ 0, 0, 0 ],
-    "offset": [ 0, 0, 0 ]
+    "size": [ 50.5, 150.7, 50.5 ],
+    "offset": [ 0, 75, 0 ]
   },
   "animations": {
     "idle": "assets/animations/Player_Idle.mv1",
