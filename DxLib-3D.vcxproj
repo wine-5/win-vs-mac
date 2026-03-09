@@ -155,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="assets\data\playerData.json" />
     <None Include="docs\architecture.md" />
     <None Include="docs\game_concept.md" />
     <None Include="docs\game_design.md">
@@ -186,6 +187,7 @@
     <ClInclude Include="src\game\component\ColliderComponent.h" />
     <ClInclude Include="src\game\constant\CollisionTag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
+    <ClInclude Include="src\game\data\GroundData.h" />
     <ClInclude Include="src\infrastructure\constant\JsonKeys.h" />
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
     <ClInclude Include="src\game\data\PlayerData.h" />

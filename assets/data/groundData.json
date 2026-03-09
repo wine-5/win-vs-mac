@@ -1,0 +1,20 @@
+﻿{
+  "id": "ground",
+  "category": "stage",
+  "model": {
+    "path": "assets/model/Ground.mv1",
+    "scale": [ 1.0, 1.0, 1.0 ]
+  },
+  "transform": {
+    "posX": 0.0,
+    "posY": -50.0,
+    "posZ": 0.0,
+    "rotX": 0.0,
+    "rotY": 0.0,
+    "rotZ": 0.0
+  },
+  "collider": {
+    "size": [ 100.0, 1.0, 100.0 ],
+    "offset": [ 0.0, 0.0, 0.0 ]
+  }
+}

@@ -10,6 +10,7 @@ namespace infrastructure::constant
         constexpr const char* CATEGORY = "category";
         constexpr const char* MODEL = "model";
         constexpr const char* COLLIDER = "collider";
+        constexpr const char* TRANSFORM = "transform";
         constexpr const char* ANIMATIONS = "animations";
         constexpr const char* GAMEPLAY = "gameplay";
 

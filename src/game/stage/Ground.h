@@ -4,6 +4,9 @@
 #include "core/ecs/Entity.h"
 #include "core/Vector3.h"
 
+// 前方宣言
+namespace game::data { class GroundData; }
+
 namespace game::stage
 {
 	/**
@@ -13,10 +16,9 @@ namespace game::stage
 	{
 	public:
 		Ground(core::ecs::EntityManager& entityManager,
-			core::ecs::ComponentManager& compnentManager,
+			core::ecs::ComponentManager& componentManager,
 			int modelHandle,
-			core::Vector3 position,
-			core::Vector3 size);
+			const game::data::GroundData& groundData);
 
 		core::ecs::EntityId getId() const;
 
