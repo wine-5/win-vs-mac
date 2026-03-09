@@ -155,7 +155,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="assets\data\groundData.json" />
     <None Include="assets\data\playerData.json" />
+    <None Include="assets\config\resources.json" />
     <None Include="docs\architecture.md" />
     <None Include="docs\game_concept.md" />
     <None Include="docs\game_design.md">

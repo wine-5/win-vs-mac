@@ -11,9 +11,6 @@ namespace game::data
     class GroundData
     {
     public:
-        /// @brief このデータのJSONファイルパス
-        static constexpr const char* JSON_PATH = "assets/data/groundData.json";
-
         /**
          * @brief ModelMetadataからGroundDataを生成
          * @param metadata ResourceManagerから取得したメタデータ

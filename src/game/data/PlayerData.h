@@ -11,9 +11,6 @@ namespace game::data
     class PlayerData
     {
     public:
-        /// @brief このデータのJSONファイルパス
-        static constexpr const char* JSON_PATH = "assets/data/playerData.json";
-
         /**
          * @brief ModelMetadataからPlayerDataを生成
          * @param metadata ResourceManagerから取得したメタデータ

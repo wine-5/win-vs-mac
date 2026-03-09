@@ -10,12 +10,13 @@ namespace infrastructure
 {
     ResourceManager::ResourceManager()
     {
-        // TODO: オブジェクトの種類が増えるごとにloadXxxData()関数が肥大化するため、
-        //       将来的にJsonLoaderクラスを作成し、汎用的なJSON読み込みシステムに移行する予定
-        
-        // 起動時にplayer.jsonとground.jsonを読み込む
-        loadPlayerData();
-        loadGroundData();
+        // resources.jsonから全リソースを読み込む
+        auto resourceList = loadResourceList("assets/config/resources.json");
+        for (const auto& res : resourceList)
+        {
+            auto metadata = parseJsonFile(res.path);
+            m_metadata[res.id] = metadata;
+        }
     }
 
     int ResourceManager::loadModelById(const std::string& modelId)
@@ -85,18 +86,28 @@ namespace infrastructure
         return it->second;
     }
 
-    void ResourceManager::loadPlayerData()
+    std::vector<ResourceManager::ResourceDefinition> ResourceManager::loadResourceList(const std::string& filePath)
     {
-        auto metadata = parseJsonFile("assets/data/playerData.json");
-        m_metadata[metadata.id] = metadata;
-        printfDx("Loaded player metadata: %s\n", metadata.id.c_str());
-    }
+        std::ifstream file(filePath);
+        if (!file.is_open())
+        {
+            LOG_E("FATAL: resources.jsonを開けませんでした: %s", filePath.c_str());
+            assert(false && "致命的エラー: resources.jsonが見つかりません。ファイルパスを確認してください。");
+            return {};
+        }
 
-    void ResourceManager::loadGroundData()
-    {
-        auto metadata = parseJsonFile("assets/data/groundData.json");
-        m_metadata[metadata.id] = metadata;
-        printfDx("Loaded ground metadata: %s\n", metadata.id.c_str());
+        nlohmann::json j = nlohmann::json::parse(file);
+        std::vector<ResourceDefinition> resources;
+
+        for (const auto& item : j["resources"])
+        {
+            ResourceDefinition def;
+            def.id = item["id"];
+            def.path = item["path"];
+            resources.push_back(def);
+        }
+
+        return resources;
     }
 
     core::data::ModelMetadata ResourceManager::parseJsonFile(const std::string& filePath)

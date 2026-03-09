@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <unordered_map>
+#include <vector>
 #include <string>
 #include "core/interface/IResourceManager.h"
 
@@ -17,10 +18,14 @@ namespace infrastructure
 		std::optional<core::data::ModelMetadata> getMetadata(const std::string& modelId) const override;
 
 	private:
-		// TODO: オブジェクトの種類が増えるごとにloadXxxData()関数が肥大化するため、
-		//       将来的にJsonLoaderクラスを作成し、汎用的なJSON読み込みシステムに移行する予定
-		void loadPlayerData();
-		void loadGroundData();
+		/// @brief リソース定義（resources.jsonの1エントリ）
+		struct ResourceDefinition {
+			std::string id;
+			std::string path;
+		};
+
+		/// @brief resources.jsonからリソースリストを読み込む
+		std::vector<ResourceDefinition> loadResourceList(const std::string& filePath);
 		core::data::ModelMetadata parseJsonFile(const std::string& filePath);
 
 		// ファイルパスをキーにしてモデルを管理

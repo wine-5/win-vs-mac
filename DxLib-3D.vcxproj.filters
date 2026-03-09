@@ -87,6 +87,9 @@
     <None Include="docs\architecture.md" />
     <None Include="docs\game_concept.md" />
     <None Include="docs\schedule.md" />
+    <None Include="assets\data\groundData.json" />
+    <None Include="assets\data\playerData.json" />
+    <None Include="assets\config\resources.json" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\ecs\Entity.h">
@@ -228,6 +231,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\constant\ModelId.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\data\GroundData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
