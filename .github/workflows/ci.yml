@@ -40,6 +40,7 @@ jobs:
         run: |
           set +e
           FILES=$(find src -name "*.cpp")
+          INCLUDES=$(find src -type d | sed 's/^/-I/')
           LINT_OUTPUT=""
           FAILED=0
           for f in $FILES; do
@@ -48,8 +49,7 @@ jobs:
               --header-filter="^$PWD/src/.*" \
               -- \
               -std=c++17 \
-              -I$PWD/src \
-              -I$PWD/src/infrastructure \
+              $INCLUDES \
               -DDXLIB_DISABLE 2>&1)
             if echo "$OUTPUT" | grep -q "warning:\|error:"; then
               LINT_OUTPUT="$LINT_OUTPUT$OUTPUT"
@@ -104,7 +104,6 @@ jobs:
                   -e 's/invalid case style for variable.*/ローカル変数はcamelCaseにしてください/g' \
                   -e 's/invalid case style for constant.*/定数はUPPER_SNAKE_CASEにしてください/g' \
                   -e 's/invalid case style for enum.*/列挙型はPascalCaseにしてください/g' \
-                  -e 's/use a trailing return type.*/trailing return typeを使うことを推奨します/g' \
                   -e 's/variable .* is not initialized.*/変数が初期化されていません/g')
             fi
             MESSAGE="❌ 失敗 ビルド: ${BUILD_STATUS} 命名規則: ${LINT_STATUS} ${LINT_DETAILS}"
