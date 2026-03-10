@@ -95,7 +95,16 @@ jobs:
                 | grep -v "thirdparty" \
                 | sed 's|/home/runner/work/DxLib-3D-Game/DxLib-3D-Game/||' \
                 | head -10 \
-                | awk -F: '{print $1 ":" $2 " → " $NF}')
+                | awk -F: '{print $1 ":" $2 " → " $NF}' \
+                | sed \
+                  -e 's/invalid case style for member.*/メンバ変数にm_プレフィックスをつけてください/g' \
+                  -e 's/invalid case style for namespace.*/名前空間は小文字にしてください/g' \
+                  -e 's/invalid case style for function.*/関数名はcamelCaseにしてください/g' \
+                  -e 's/invalid case style for variable.*/ローカル変数はcamelCaseにしてください/g' \
+                  -e 's/invalid case style for constant.*/定数はUPPER_SNAKE_CASEにしてください/g' \
+                  -e 's/invalid case style for enum.*/列挙型はPascalCaseにしてください/g' \
+                  -e 's/use a trailing return type.*/trailing return typeを使うことを推奨します/g' \
+                  -e 's/variable .* is not initialized.*/変数が初期化されていません/g')
             fi
             MESSAGE="❌ 失敗 ビルド: ${BUILD_STATUS} 命名規則: ${LINT_STATUS} ${LINT_DETAILS}"
             COLOR=15158332
