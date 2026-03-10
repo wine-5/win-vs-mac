@@ -6,7 +6,7 @@ namespace infrastructure
 {
 	bool InputManager::isKeyDown(core::input::KeyCode keyCode) const
 	{
-		static const std::unordered_map<core::input::KeyCode, int> keyMap =
+		static const std::unordered_map<core::input::KeyCode, int> KEY_MAP =
 		{
 			{core::input::KeyCode::W, KEY_INPUT_W},
 			{core::input::KeyCode::A, KEY_INPUT_A},
@@ -20,14 +20,14 @@ namespace infrastructure
 			{ core::input::KeyCode::Right, KEY_INPUT_RIGHT },
 		};
 
-		auto it = keyMap.find(keyCode);
-		if (it == keyMap.end()) return false;
+		auto it = KEY_MAP.find(keyCode);
+		if (it == KEY_MAP.end()) return false;
 		return CheckHitKey(it->second) != 0;
 	}
 
 	bool InputManager::isPadButtonDown(core::input::GamePadCode code) const
 	{
-		int input = GetJoypadInputState(DX_INPUT_PAD1);
+		int input{GetJoypadInputState(DX_INPUT_PAD1)};
 		switch (code)
 		{
 		case core::input::GamePadCode::ButtonB:  return (input & PAD_INPUT_B) != 0;

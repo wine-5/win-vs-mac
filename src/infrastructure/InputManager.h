@@ -14,26 +14,26 @@ namespace infrastructure
 		 * @param keyCode キーコード
 		 * @return 押されている場合true
 		 */
-		bool isKeyDown(core::input::KeyCode keyCode) const override;
+		[[nodiscard]] bool isKeyDown(core::input::KeyCode keyCode) const override;
 		
 		/**
 		 * @brief 指定したゲームパッドボタンが押されているか判定する
 		 * @param code ゲームパッドコード
 		 * @return 押されている場合true
 		 */
-		bool isPadButtonDown(core::input::GamePadCode code) const override;
+		[[nodiscard]] bool isPadButtonDown(core::input::GamePadCode code) const override;
 		
 		/**
 		 * @brief ゲームパッドのアナログ値を取得する
 		 * @param code ゲームパッドコード
 		 * @return アナログ値（-1.0f〜1.0f）
 		 */
-		float getPadAxis(core::input::GamePadCode code) const override;
+		[[nodiscard]] float getPadAxis(core::input::GamePadCode code) const override;
 		
 		/**
 		 * @brief ゲームパッドが接続されているか判定する
 		 * @return 接続されている場合true
 		 */
-		bool isPadConnected() const override;
+		[[nodiscard]] bool isPadConnected() const override;
 	};
 }

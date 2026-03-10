@@ -34,8 +34,8 @@ namespace infrastructure
 	private:
 		/// @brief リソース定義（resources.jsonの1エントリ）
 		struct ResourceDefinition {
-			std::string id;
-			std::string path;
+			std::string m_id;
+			std::string m_path;
 		};
 
 		/// @brief resources.jsonからリソースリストを読み込む

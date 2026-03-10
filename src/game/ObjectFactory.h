@@ -35,7 +35,7 @@ namespace game
 		 * @brief 生成したPlayerオブジェクトを取得する
 		 * @return Playerオブジェクトの参照
 		 */
-		actor::Player& getPlayer() const;
+		[[nodiscard]] actor::Player& getPlayer() const;
 
 	private:
 		core::ecs::EntityManager& m_entityManager;

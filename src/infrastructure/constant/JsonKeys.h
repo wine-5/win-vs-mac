@@ -3,7 +3,7 @@
 namespace infrastructure::constant
 {
     /// @brief JSONのキー名定数（タイポ防止）
-    namespace JsonKeys
+    namespace json_keys
     {
         // トップレベル
         constexpr const char* ID = "id";
