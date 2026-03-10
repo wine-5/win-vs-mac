@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          FILES=$(find src -name "*.cpp")
+          FILES=$(find src -name "*.cpp" -o -name "*.h")
           LINT_OUTPUT=""
           FAILED=0
           for f in $FILES; do
