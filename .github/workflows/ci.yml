@@ -26,8 +26,6 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    outputs:
-      lint_result: ${{ steps.lint.outcome }}
 
     steps:
       - name: Checkout
@@ -37,20 +35,25 @@ jobs:
         run: sudo apt-get install -y clang-tidy
 
       - name: Run clang-tidy
-        id: lint
-        continue-on-error: true
         run: |
           FILES=$(find src -name "*.cpp")
+          LINT_OUTPUT=""
+          FAILED=0
           for f in $FILES; do
-            clang-tidy "$f" \
+            OUTPUT=$(clang-tidy "$f" \
               --config-file=.clang-tidy \
               --header-filter="^$PWD/src/.*" \
               -- \
               -std=c++17 \
               -I$PWD/src \
-              -DDXLIB_DISABLE
-          done 2>&1 | tee /tmp/lint_output.txt
-          exit ${PIPESTATUS[0]}
+              -DDXLIB_DISABLE 2>&1)
+            if echo "$OUTPUT" | grep -q "warning:\|error:"; then
+              LINT_OUTPUT="$LINT_OUTPUT$OUTPUT"
+              FAILED=1
+            fi
+          done
+          echo "$LINT_OUTPUT" > /tmp/lint_output.txt
+          exit $FAILED
 
       - name: Upload lint result
         if: always()
@@ -58,7 +61,6 @@ jobs:
         with:
           name: lint-output
           path: /tmp/lint_output.txt
-
   notify:
     runs-on: ubuntu-latest
     needs: [build, lint]
