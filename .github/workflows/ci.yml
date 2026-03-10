@@ -54,8 +54,6 @@ jobs:
 
     steps:
       - name: Notify Discord
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           BUILD_STATUS="${{ needs.build.result }}"
           LINT_STATUS="${{ needs.lint.result }}"
@@ -68,6 +66,8 @@ jobs:
             MESSAGE="❌ 失敗 ビルド: $BUILD_STATUS 命名規則: $LINT_STATUS"
           fi
 
+          WEBHOOK="${{ secrets.DISCORD_WEBHOOK_URL }}"
+
           curl -H "Content-Type: application/json" \
             -d "{\"embeds\": [{\"title\": \"CI結果\", \"description\": \"$MESSAGE\", \"color\": $COLOR}]}" \
-            "$DISCORD_WEBHOOK_URL"
+            "$WEBHOOK"
