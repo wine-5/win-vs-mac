@@ -46,3 +46,26 @@ jobs:
               -I$PWD/src \
               -DDXLIB_DISABLE
           done
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build, lint]
+    if: always()
+
+    steps:
+      - name: Notify Discord
+        run: |
+          BUILD_STATUS="${{ needs.build.result }}"
+          LINT_STATUS="${{ needs.lint.result }}"
+
+          if [ "$BUILD_STATUS" = "success" ] && [ "$LINT_STATUS" = "success" ]; then
+            COLOR=3066993
+            MESSAGE="✅ ビルド・命名規則チェック成功"
+          else
+            COLOR=15158332
+            MESSAGE="❌ 失敗\nビルド: $BUILD_STATUS\n命名規則: $LINT_STATUS"
+          fi
+
+          curl -H "Content-Type: application/json" \
+            -d "{\"embeds\": [{\"title\": \"CI結果\", \"description\": \"$MESSAGE\", \"color\": $COLOR}]}" \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
