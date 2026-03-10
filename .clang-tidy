@@ -2,6 +2,9 @@ Checks: >
   readability-identifier-naming,
   modernize-*,
   -modernize-use-trailing-return-type,
+  -modernize-avoid-c-arrays,
+  -modernize-use-override,
+  -modernize-concat-nested-namespaces,
   cppcoreguidelines-init-variables
 
 CheckOptions:
