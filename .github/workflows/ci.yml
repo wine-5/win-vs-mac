@@ -95,10 +95,9 @@ jobs:
                 | grep -v "thirdparty" \
                 | sed 's|/home/runner/work/DxLib-3D-Game/DxLib-3D-Game/||' \
                 | head -10 \
-                | awk -F: '{print $1 " 行" $2 ": " $4}' \
-                | tr '\n' '\n')
+                | awk -F: '{print $1 ":" $2 " → " $NF}')
             fi
-            MESSAGE="❌ 失敗\nビルド: $BUILD_STATUS\n命名規則: $LINT_STATUS\n\n$LINT_DETAILS"
+            MESSAGE="❌ 失敗 ビルド: ${BUILD_STATUS} 命名規則: ${LINT_STATUS} ${LINT_DETAILS}"
             COLOR=15158332
           fi
 
