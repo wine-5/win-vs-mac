@@ -11,6 +11,11 @@ namespace core
 	class ServiceLocator
 	{
 	public:
+		/**
+		 * @brief サービスを登録する（型と同じキーで登録）
+		 * @tparam T サービスの型
+		 * @param service 登録するサービス
+		 */
 		template<typename T>
 		static void provide(std::unique_ptr<T> service)
 		{
@@ -18,6 +23,12 @@ namespace core
 			m_services[key] = std::shared_ptr<void>(std::move(service));
 		}
 
+		/**
+		 * @brief サービスを登録する（インターフェース型をキーとして登録）
+		 * @tparam TInterface インターフェース型
+		 * @tparam TImpl 実装型
+		 * @param service 登録するサービス
+		 */
 		template<typename TInterface, typename TImpl>
 		static void provide(std::unique_ptr<TImpl> service)
 		{
@@ -25,6 +36,11 @@ namespace core
 			m_services[key] = std::shared_ptr<void>(std::move(service));
 		}
 
+		/**
+		 * @brief サービスを取得する
+		 * @tparam T サービスの型
+		 * @return サービスのポインタ
+		 */
 		template<typename T>
 		static T* get()
 		{
@@ -35,6 +51,9 @@ namespace core
 			return static_cast<T*>(it->second.get());
 		}
 
+		/**
+		 * @brief 全てのサービスをクリアする
+		 */
 		static void clear()
 		{
 			m_services.clear();

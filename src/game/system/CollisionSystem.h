@@ -12,19 +12,41 @@ namespace game::system
     class CollisionSystem : public core::ecs::ISystem
     {
     public:
-        CollisionSystem(core::ecs::ComponentManager& componentManager);
+		/**
+		 * @brief CollisionSystemのコンストラクタ
+		 * @param componentManager ComponentManagerの参照
+		 */
+		CollisionSystem(core::ecs::ComponentManager& componentManager);
 
-        void addEntity(core::ecs::EntityId id);
-        void update(float deltaTime) override;
+		/**
+		 * @brief 衝突判定を行うEntityを登録する
+		 * @param id 登録するEntityID
+		 */
+		void addEntity(core::ecs::EntityId id);
+		
+		/**
+		 * @brief 全Entity間の衝突検出と押し返しを行う
+		 * @param deltaTime フレーム間の時間差
+		 */
+		void update(float deltaTime) override;
 
-    private:
-        // AABBの衝突判定
-        bool isColliding(core::ecs::EntityId a, core::ecs::EntityId b)const;
+	private:
+		/**
+		 * @brief 2つのEntity間でAABB衝突判定を行う
+		 * @param a EntityID A
+		 * @param b EntityID B
+		 * @return 衝突している場合true
+		 */
+		bool isColliding(core::ecs::EntityId a, core::ecs::EntityId b) const;
 
-        // 押し返し処理
-        void resolveCollision(core::ecs::EntityId player, core::ecs::EntityId ground);
+		/**
+		 * @brief 衝突を解決し、押し返し処理を行う
+		 * @param a EntityID A
+		 * @param b EntityID B
+		 */
+		void resolveCollision(core::ecs::EntityId a, core::ecs::EntityId b);
 
-        core::ecs::ComponentManager& m_componentManager;
-        std::vector<core::ecs::EntityId> m_entities;
+		core::ecs::ComponentManager& m_componentManager;
+		std::vector<core::ecs::EntityId> m_entities;
     };
 }

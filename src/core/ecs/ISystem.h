@@ -10,6 +10,10 @@ namespace core::ecs
 	public:
 		virtual ~ISystem() = default;
 
+		/**
+		 * @brief Systemの更新処理
+		 * @param deltaTime フレーム間の時間差
+		 */
 		virtual void update(float deltaTime) = 0;
 	};
 }

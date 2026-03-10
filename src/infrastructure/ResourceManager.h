@@ -12,9 +12,23 @@ namespace infrastructure
 	class ResourceManager : public core::iface::IResourceManager
 	{
 	public:
+		/**
+		 * @brief ResourceManagerのコンストラクタ
+		 */
 		ResourceManager();
 
+		/**
+		 * @brief modelIDからモデルを読み込み、ハンドルを返す
+		 * @param modelId モデルID
+		 * @return モデルハンドル
+		 */
 		int loadModelById(const std::string& modelId) override;
+		
+		/**
+		 * @brief modelIDからメタデータを取得する
+		 * @param modelId モデルID
+		 * @return メタデータ（存在しない場合nullopt）
+		 */
 		std::optional<core::data::ModelMetadata> getMetadata(const std::string& modelId) const override;
 
 	private:

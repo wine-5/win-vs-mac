@@ -25,9 +25,27 @@ namespace infrastructure::utility
         static constexpr int ERROR_COLOR_G = 0;
         static constexpr int ERROR_COLOR_B = 0;
 
+        /**
+         * @brief 通常ログを出力する
+         * @param message ログメッセージ
+         */
         void log(const char* message) override;
+        
+        /**
+         * @brief 警告ログを出力する
+         * @param message 警告メッセージ
+         */
         void warning(const char* message) override;
+        
+        /**
+         * @brief エラーログを出力する
+         * @param message エラーメッセージ
+         */
         void error(const char* message) override;
+        
+        /**
+         * @brief ログをクリアする
+         */
         void clear() override;
 
     private:

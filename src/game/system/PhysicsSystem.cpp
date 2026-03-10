@@ -5,17 +5,17 @@
 
 namespace game::system
 {
-	PhysicsSystem::PhysicsSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId playerId)
+	PhysicsSystem::PhysicsSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId)
 		: m_componentManager(componentManager)
-		, m_playerId(playerId)
+		, m_entityId(entityId)
 	{
 	}
 
 	void PhysicsSystem::update(float deltaTime)
 	{
-		auto& transform = m_componentManager.get<component::TransformComponent>(m_playerId);
-		auto& velocity = m_componentManager.get<component::VelocityComponent>(m_playerId);
-		auto& input = m_componentManager.get<component::InputComponent>(m_playerId);
+		auto& transform = m_componentManager.get<component::TransformComponent>(m_entityId);
+		auto& velocity = m_componentManager.get<component::VelocityComponent>(m_entityId);
+		auto& input = m_componentManager.get<component::InputComponent>(m_entityId);
 
 		// ジャンプ処理
 		if (input.m_jumpPressed)

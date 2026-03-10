@@ -14,30 +14,57 @@ namespace core::ecs
 	class ComponentManager
 	{
 	public:
+		/**
+		 * @brief EntityにComponentを追加する
+		 * @tparam T Componentの型
+		 * @param id EntityID
+		 * @param component 追加するComponent
+		 */
 		template<typename T>
 		void add(EntityId id, T component)
 		{
 			getComponentArray<T>()->add(id, component);
 		}
 
+		/**
+		 * @brief EntityのComponentを取得する
+		 * @tparam T Componentの型
+		 * @param id EntityID
+		 * @return Componentの参照
+		 */
 		template<typename T>
 		T& get(EntityId id)
 		{
 			return getComponentArray<T>()->get(id);
 		}
 
+		/**
+		 * @brief EntityのComponentを削除する
+		 * @tparam T Componentの型
+		 * @param id EntityID
+		 */
 		template<typename T>
 		void remove(EntityId id)
 		{
 			getComponentArray<T>()->remove(id);
 		}
 
+		/**
+		 * @brief Entityが指定Componentを持っているか判定する
+		 * @tparam T Componentの型
+		 * @param id EntityID
+		 * @return Componentを持っている場合true
+		 */
 		template<typename T>
 		bool has(EntityId id)
 		{
 			return getComponentArray<T>()->has(id);
 		}
 
+		/**
+		 * @brief Entityの全Componentを削除する
+		 * @param id EntityID
+		 */
 		void removeAll(EntityId id)
 		{
 			for (auto& [type, array] : m_componentArrays)

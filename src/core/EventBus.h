@@ -13,6 +13,8 @@ class EventBus
 public:
 	/**
 	 * @brief イベントを購読する
+	 * @tparam TEvent イベントの型
+	 * @param callback イベント発行時に呼ばれるコールバック関数
 	 */
 	template<typename TEvent>
 	void subscribe(std::function<void(const TEvent&)> callback)
@@ -28,6 +30,8 @@ public:
 
 	/**
 	 * @brief イベントを発行する
+	 * @tparam TEvent イベントの型
+	 * @param event 発行するイベント
 	 */
 	template<typename TEvent>
 	void publish(const TEvent& event)

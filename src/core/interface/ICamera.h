@@ -11,6 +11,12 @@ namespace core::iface
 	{
 	public:
 		virtual ~ICamera() = default;
+		
+		/**
+		 * @brief カメラの位置をターゲットに追従させる
+		 * @param targetPosition 追従対象の座標
+		 * @param offset ターゲットからのオフセット
+		 */
 		virtual void update(const core::Vector3& targetPosition, const core::Vector3& offset) = 0;
 	};
 }

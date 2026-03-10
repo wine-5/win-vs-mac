@@ -11,6 +11,13 @@ namespace core::ecs
 	class SystemManager
 	{
 	public:
+		/**
+		 * @brief Systemを登録する
+		 * @tparam T 登録するSystemの型
+		 * @tparam Args コンストラクタ引数の型
+		 * @param args コンストラクタに渡す引数
+		 * @return 登録されたSystemのポインタ
+		 */
 		template<typename T, typename... Args>
 		T* registerSystem(Args&&... args)
 		{
@@ -20,6 +27,10 @@ namespace core::ecs
 			return ptr;
 		}
 
+		/**
+		 * @brief 全てのSystemを更新する
+		 * @param deltaTime フレーム間の時間差
+		 */
 		void update(float deltaTime)
 		{
 			for (auto& system : m_system)

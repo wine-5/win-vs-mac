@@ -5,16 +5,16 @@
 
 namespace game::system
 {
-	InputSystem::InputSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId playerId ,core::iface::IInputProvider& inputProvider)
+	InputSystem::InputSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId ,core::iface::IInputProvider& inputProvider)
 		: m_componentManager(componentManager)
-		, m_playerId(playerId)
+		, m_entityId(entityId)
 		, m_inputProvider(inputProvider)
 	{
 	}
 
 	void InputSystem::update(float deltaTime)
 	{
-		auto& input = m_componentManager.get<component::InputComponent>(m_playerId);
+		auto& input = m_componentManager.get<component::InputComponent>(m_entityId);
 
 		// キーを離したときに前フレームの値が残らないように初期化
 		input.m_moveX = INPUT_NEUTRAL;

@@ -13,16 +13,31 @@ namespace core::iface
 	public:
 		virtual ~IInputProvider() = default;
 
-		// キーボード
+		/**
+		 * @brief 指定したキーが押されているか判定する
+		 * @param keycode キーコード
+		 * @return 押されている場合true
+		 */
 		virtual bool isKeyDown(core::input::KeyCode keycode) const = 0;
 
-		// コントローラーボタン
+		/**
+		 * @brief 指定したゲームパッドボタンが押されているか判定する
+		 * @param code ゲームパッドコード
+		 * @return 押されている場合true
+		 */
 		virtual bool isPadButtonDown(core::input::GamePadCode code) const = 0;
 
-		// コントローラースティック
+		/**
+		 * @brief ゲームパッドのアナログ値を取得する
+		 * @param code ゲームパッドコード
+		 * @return アナログ値（-1.0f〜1.0f）
+		 */
 		virtual float getPadAxis(core::input::GamePadCode code) const = 0;
 
-		// コントローラーが接続されているか
+		/**
+		 * @brief ゲームパッドが接続されているか判定する
+		 * @return 接続されている場合true
+		 */
 		virtual bool isPadConnected() const = 0;
 	};
 }

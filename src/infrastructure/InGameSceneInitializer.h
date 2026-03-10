@@ -16,7 +16,15 @@ namespace infrastructure
 	class InGameSceneInitializer
 	{
 	public:
+		/**
+		 * @brief InGameSceneInitializerのコンストラクタ
+		 */
 		InGameSceneInitializer();
+		
+		/**
+		 * @brief 初期化されたInGameSceneを取得する
+		 * @return InGameSceneの参照
+		 */
 		game::scene::InGameScene& getScene();
 
 	private:
