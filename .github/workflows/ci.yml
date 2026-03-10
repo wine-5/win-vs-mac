@@ -53,6 +53,13 @@ jobs:
     if: always()
 
     steps:
+      - name: Debug Webhook URL
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          echo "URL length: ${#WEBHOOK}"
+          echo "URL start: ${WEBHOOK:0:30}"
+
       - name: Notify Discord
         run: |
           BUILD_STATUS="${{ needs.build.result }}"
