@@ -40,8 +40,11 @@ jobs:
           for f in $FILES; do
             clang-tidy "$f" \
               --config-file=.clang-tidy \
+              --header-filter="^$PWD/src/.*" \
               -- \
               -std=c++17 \
               -I$PWD/thirdparty/dxlib \
-              -I$PWD/src
+              -I$PWD/src \
+              -D_WIN32 \
+              --include-directory=/usr/include
           done
