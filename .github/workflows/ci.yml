@@ -36,7 +36,9 @@ jobs:
 
       - name: Run clang-tidy
         id: run_lint
+        shell: bash
         run: |
+          set +e
           FILES=$(find src -name "*.cpp")
           LINT_OUTPUT=""
           FAILED=0
@@ -54,7 +56,6 @@ jobs:
             fi
           done
           echo "$LINT_OUTPUT" > lint_output.txt
-          cat lint_output.txt
           exit $FAILED
 
       - name: Upload lint result
