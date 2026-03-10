@@ -26,6 +26,8 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    outputs:
+      lint_result: ${{ steps.lint.outcome }}
 
     steps:
       - name: Checkout
@@ -35,6 +37,8 @@ jobs:
         run: sudo apt-get install -y clang-tidy
 
       - name: Run clang-tidy
+        id: lint
+        continue-on-error: true
         run: |
           FILES=$(find src -name "*.cpp")
           for f in $FILES; do
@@ -45,7 +49,15 @@ jobs:
               -std=c++17 \
               -I$PWD/src \
               -DDXLIB_DISABLE
-          done
+          done 2>&1 | tee /tmp/lint_output.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Upload lint result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-output
+          path: /tmp/lint_output.txt
 
   notify:
     runs-on: ubuntu-latest
@@ -53,28 +65,40 @@ jobs:
     if: always()
 
     steps:
-      - name: Debug Webhook URL
-        env:
-          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        run: |
-          echo "URL length: ${#WEBHOOK}"
-          echo "URL start: ${WEBHOOK:0:30}"
+      - name: Download lint result
+        uses: actions/download-artifact@v4
+        with:
+          name: lint-output
+        continue-on-error: true
 
       - name: Notify Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           BUILD_STATUS="${{ needs.build.result }}"
           LINT_STATUS="${{ needs.lint.result }}"
 
           if [ "$BUILD_STATUS" = "success" ] && [ "$LINT_STATUS" = "success" ]; then
-            COLOR=3066993
             MESSAGE="✅ ビルド・命名規則チェック成功"
+            COLOR=3066993
           else
+            # lint結果を整形
+            LINT_DETAILS=""
+            if [ -f "lint_output.txt" ]; then
+              LINT_DETAILS=$(grep "warning:\|error:" lint_output.txt \
+                | grep -v "thirdparty" \
+                | sed 's|/home/runner/work/DxLib-3D-Game/DxLib-3D-Game/||' \
+                | head -20 \
+                | awk -F: '{printf "📁 %s 行%s: %s\n", $1, $2, $4}')
+            fi
+
+            MESSAGE="❌ 失敗 ビルド: $BUILD_STATUS 命名規則: $LINT_STATUS\n\n$LINT_DETAILS"
             COLOR=15158332
-            MESSAGE="❌ 失敗 ビルド: $BUILD_STATUS 命名規則: $LINT_STATUS"
           fi
 
-          WEBHOOK="${{ secrets.DISCORD_WEBHOOK_URL }}"
+          # 2000文字制限対応
+          MESSAGE="${MESSAGE:0:1900}"
 
           curl -H "Content-Type: application/json" \
             -d "{\"embeds\": [{\"title\": \"CI結果\", \"description\": \"$MESSAGE\", \"color\": $COLOR}]}" \
-            "$WEBHOOK"
+            "$DISCORD_WEBHOOK_URL"
