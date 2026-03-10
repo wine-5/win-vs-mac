@@ -1,6 +1,7 @@
 Checks: >
   readability-identifier-naming,
   modernize-*,
+  -modernize-use-trailing-return-type,
   cppcoreguidelines-init-variables
 
 CheckOptions:
