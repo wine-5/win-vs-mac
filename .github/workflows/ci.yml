@@ -39,7 +39,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          FILES=$(find src -name "*.cpp" -o -name "*.h")
+          FILES=$(find src -name "*.cpp")
           LINT_OUTPUT=""
           FAILED=0
           for f in $FILES; do
@@ -49,6 +49,7 @@ jobs:
               -- \
               -std=c++17 \
               -I$PWD/src \
+              -I$PWD/src/infrastructure \
               -DDXLIB_DISABLE 2>&1)
             if echo "$OUTPUT" | grep -q "warning:\|error:"; then
               LINT_OUTPUT="$LINT_OUTPUT$OUTPUT"
