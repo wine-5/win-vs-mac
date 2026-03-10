@@ -54,7 +54,7 @@ jobs:
             fi
           done
           echo "$LINT_OUTPUT" > lint_output.txt
-          echo "failed=$FAILED" >> $GITHUB_OUTPUT
+          cat lint_output.txt
           exit $FAILED
 
       - name: Upload lint result
