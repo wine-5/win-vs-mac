@@ -1,0 +1,49 @@
+Checks: >
+  readability-identifier-naming,
+  modernize-*,
+  cppcoreguidelines-init-variables
+
+CheckOptions:
+  # クラス名 PascalCase
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+
+  # インターフェース名 I + PascalCase
+  - key: readability-identifier-naming.AbstractClassPrefix
+    value: I
+
+  # 関数名 camelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: camelCase
+
+  # ローカル変数 camelCase
+  - key: readability-identifier-naming.LocalVariableCase
+    value: camelCase
+
+  # メンバ変数 m_ + camelCase
+  - key: readability-identifier-naming.MemberPrefix
+    value: m_
+  - key: readability-identifier-naming.MemberCase
+    value: camelCase
+
+  # 静的メンバ変数 s_ + camelCase
+  - key: readability-identifier-naming.StaticMemberPrefix
+    value: s_
+  - key: readability-identifier-naming.StaticMemberCase
+    value: camelCase
+
+  # 定数 UPPER_SNAKE_CASE
+  - key: readability-identifier-naming.ConstantCase
+    value: UPPER_CASE
+
+  # 列挙型名 PascalCase
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+
+  # 列挙値 PascalCase
+  - key: readability-identifier-naming.EnumConstantCase
+    value: CamelCase
+
+  # 名前空間 小文字
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case

@@ -23,3 +23,22 @@ jobs:
             /p:Configuration=Debug `
             /p:Platform=x64 `
             /m
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install clang-tidy
+        run: sudo apt-get install -y clang-tidy
+
+      - name: Run clang-tidy
+        run: |
+          find src -name "*.cpp" | xargs clang-tidy \
+            --config-file=.clang-tidy \
+            -- \
+            -std=c++17 \
+            -Ithirdparty/dxlib \
+            -Isrc
