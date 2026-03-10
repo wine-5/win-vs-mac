@@ -36,9 +36,12 @@ jobs:
 
       - name: Run clang-tidy
         run: |
-          find src -name "*.cpp" -print0 | xargs -0 clang-tidy \
-            --config-file=.clang-tidy \
-            -- \
-            -std=c++17 \
-            -I$PWD/thirdparty/dxlib \
-            -I$PWD/src
+          FILES=$(find src -name "*.cpp")
+          for f in $FILES; do
+            clang-tidy "$f" \
+              --config-file=.clang-tidy \
+              -- \
+              -std=c++17 \
+              -I$PWD/thirdparty/dxlib \
+              -I$PWD/src
+          done
