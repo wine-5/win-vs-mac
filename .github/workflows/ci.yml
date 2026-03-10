@@ -94,16 +94,19 @@ jobs:
               LINT_DETAILS=$(grep "warning:\|error:" lint_output.txt \
                 | grep -v "thirdparty" \
                 | sed 's|/home/runner/work/DxLib-3D-Game/DxLib-3D-Game/||' \
-                | head -20 \
-                | awk -F: '{printf "📁 %s 行%s: %s\n", $1, $2, $4}')
+                | head -10 \
+                | awk -F: '{print $1 " 行" $2 ": " $4}' \
+                | tr '\n' '\n')
             fi
-
-            MESSAGE="❌ 失敗 ビルド: $BUILD_STATUS 命名規則: $LINT_STATUS\n\n$LINT_DETAILS"
+            MESSAGE="❌ 失敗\nビルド: $BUILD_STATUS\n命名規則: $LINT_STATUS\n\n$LINT_DETAILS"
             COLOR=15158332
           fi
 
-          MESSAGE="${MESSAGE:0:1900}"
+          PAYLOAD=$(jq -n \
+            --arg msg "$MESSAGE" \
+            --argjson color "$COLOR" \
+            '{embeds: [{title: "CI結果", description: $msg, color: $color}]}')
 
           curl -H "Content-Type: application/json" \
-            -d "{\"embeds\": [{\"title\": \"CI結果\", \"description\": \"$MESSAGE\", \"color\": $COLOR}]}" \
+            -d "$PAYLOAD" \
             "$DISCORD_WEBHOOK_URL"
