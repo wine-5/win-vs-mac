@@ -14,23 +14,23 @@ CheckOptions:
 
   # 関数名 camelCase
   - key: readability-identifier-naming.FunctionCase
-    value: camelCase
+    value: camelBack
 
   # ローカル変数 camelCase
   - key: readability-identifier-naming.LocalVariableCase
-    value: camelCase
+    value: camelBack
 
   # メンバ変数 m_ + camelCase
   - key: readability-identifier-naming.MemberPrefix
     value: m_
   - key: readability-identifier-naming.MemberCase
-    value: camelCase
+    value: camelBack
 
   # 静的メンバ変数 s_ + camelCase
   - key: readability-identifier-naming.StaticMemberPrefix
     value: s_
   - key: readability-identifier-naming.StaticMemberCase
-    value: camelCase
+    value: camelBack
 
   # 定数 UPPER_SNAKE_CASE
   - key: readability-identifier-naming.ConstantCase
