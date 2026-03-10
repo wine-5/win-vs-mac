@@ -55,25 +55,100 @@
 ## コメント規則
 
 ### Doxygenコメント
-クラスの説明、publicなメソッド・関数には簡潔なDoxygenコメントを書く。
+**すべてのpublic関数・メソッドには必ずDoxygenコメントを記載する。**
+Visual Studioでホバー時にガイドが表示されるようにし、他者が見ても理解しやすくするため。
+
+#### 記載必須項目
+- `@brief` : 関数の簡潔な1行説明（必須）
+- `@param` : パラメータの説明（引数がある場合）
+- `@return` : 戻り値の説明（void以外の場合）
+
+#### フォーマット例
 ```cpp
 /**
  * @brief Entityの生成・破棄を管理するクラス
  */
 class EntityManager
+{
+public:
+    /**
+     * @brief Entityを生成する
+     * @return 生成したEntity
+     */
+    Entity create();
 
-/// @brief Entityを生成する
-/// @return 生成したEntity
-Entity create();
+    /**
+     * @brief Entityを破棄する
+     * @param entity 破棄するEntity
+     */
+    void destroy(Entity entity);
 
-/// @brief Entityを破棄する
-/// @param entity 破棄するEntity
-void destroy(Entity entity);
+    /**
+     * @brief 指定したIDのEntityを取得する
+     * @param id 取得したいEntityのID
+     * @return Entityのインスタンス
+     * @throws std::out_of_range IDが存在しない場合
+     */
+    Entity getEntity(EntityId id) const;
+};
+```
+
+#### 1行コメント形式（簡易版）
+シンプルなgetter/setterの場合は `///` を使った簡易形式も可：
+```cpp
+/// Entityの総数を取得
+size_t getEntityCount() const noexcept;
+
+/// Entityが有効かどうかを判定
+bool isValid(EntityId id) const noexcept;
 ```
 
 ### 通常コメント
-処理の説明など内部のコメントは通常コメントを使う。
+処理の説明や内部のコメントは通常コメントを使う。
 ```cpp
 // 再利用可能なEntityIdのキュー
 std::queue<EntityId> m_recycledIds;
+
+// 初期化処理
+void initialize()
+{
+    // リソースを読み込む
+    loadResources();
+    
+    // システムをセットアップ
+    setupSystems();
+}
 ```
+
+### privateメソッドのコメント
+privateメソッドについては、複雑な処理の場合のみコメントを記載（任意）。
+```cpp
+private:
+    /**
+     * @brief リソースファイルを読み込む
+     * @details JSONファイルをパースしてメタデータを生成する
+     */
+    void loadResources();
+```
+
+---
+
+## メンバ変数の初期化規則
+
+メンバ変数は**クラス定義時に初期化する**ことを推奨。
+
+| 型 | 初期化方法 | 例 |
+|---|---|---|
+| **プリミティブ型** | `{}` | `int m_health{};` `float m_speed{};` `bool m_flag{};` |
+| **クラス型** | 初期化なし | `Vector3 m_pos;` `std::string m_name;` |
+| **enum型** | `= 値` | `CollisionTag m_tag = CollisionTag::None;` |
+| **スマートポインタ** | `{}` | `std::unique_ptr<Player> m_player{};` |
+| **参照型** | 初期化リスト | `RenderSystem(IRenderer& r) : m_renderer(r) {}` |
+| **constexpr定数** | `= 値` | `static constexpr float MAX_SPEED = 10.0f;` |
+
+### 注意点
+- 参照型とconst型は**必ずコンストラクタ初期化リストで初期化**（定義時初期化は不可）
+- `{}`は値を0に初期化する（`int x{};` → 0、`bool flag{};` → false、`ptr{};` → nullptr）
+- 初期化の順序は**宣言順**であり、初期化リストの記述順ではない
+
+---

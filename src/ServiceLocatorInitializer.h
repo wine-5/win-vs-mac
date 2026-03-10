@@ -6,5 +6,8 @@
 class ServiceLocatorInitializer
 {
 public:
+    /**
+     * @brief ServiceLocatorに全サービスを登録する
+     */
     static void init();
 };

@@ -15,12 +15,24 @@ namespace game::system
 	class AnimationSystem : public core::ecs::ISystem
 	{
 	public:
+		/**
+		 * @brief AnimationSystemのコンストラクタ
+		 * @param componentManager ComponentManagerの参照
+		 * @param entityId 対象EntityのID
+		 * @param animator IAnimatorの参照
+		 * @param idleAnimHandle Idleアニメーションハンドル
+		 * @param walkAnimHandle Walkアニメーションハンドル
+		 */
 		AnimationSystem(core::ecs::ComponentManager& componentManager,
-			core::ecs::EntityId playerId,
+			core::ecs::EntityId entityId,
 			core::iface::IAnimator& animator,
 			int idleAnimHandle,
 			int walkAnimHandle);
 
+		/**
+		 * @brief アニメーション状態を管理・更新する
+		 * @param deltaTime フレーム間の時間差
+		 */
 		void update(float deltaTime) override;
 
 	private:
@@ -31,7 +43,7 @@ namespace game::system
 			int newAnimHandle);
 		
 		core::ecs::ComponentManager& m_componentManager;
-		core::ecs::EntityId m_playerId;
+		core::ecs::EntityId m_entityId;
 		core::iface::IAnimator& m_animator;
 		int m_idleAnimHandle;
 		int m_walkAnimHandle;

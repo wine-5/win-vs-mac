@@ -12,6 +12,7 @@ namespace core::ecs
 	public:
 		static constexpr EntityId INITIAL_ENTITY_ID = 1;
 
+		/** @brief EntityManagerのコンストラクタ */
 		EntityManager() : m_nextId(INITIAL_ENTITY_ID){}
 		
 		/** @brief Entityを生成 */

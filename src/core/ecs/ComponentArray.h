@@ -12,21 +12,40 @@ namespace core::ecs
 	class ComponentArray : public IComponent
 	{
 	public:
+		/**
+		 * @brief EntityにComponentを追加する
+		 * @param id EntityID
+		 * @param component 追加するComponent
+		 */
 		void add(EntityId id, T component)
 		{
 			m_component[id] = component;
 		}
 
+		/**
+		 * @brief EntityのComponentを取得する
+		 * @param id EntityID
+		 * @return Componentの参照
+		 */
 		T& get(EntityId id)
 		{
 			return m_component[id];
 		}
 
+		/**
+		 * @brief EntityのComponentを削除する
+		 * @param id EntityID
+		 */
 		void remove(EntityId id) override
 		{
 			m_component.erase(id);
 		}
 
+		/**
+		 * @brief Entityが指定Componentを持っているか判定する
+		 * @param id EntityID
+		 * @return Componentを持っている場合true
+		 */
 		bool has(EntityId id) const
 		{
 			return m_component.find(id) != m_component.end();

@@ -8,24 +8,24 @@
 ## フェーズ1：ECS基盤・最小構成（3月〜4月）
 
 ### 3月
-- [ ] フォルダ構成の作成
-- [ ] DxLibのセットアップ完了
-- [ ] `Entity`の実装
-- [ ] `ComponentManager`の実装
-- [ ] `SystemManager`の実装
-- [ ] `TransformComponent`の実装
+- [x] フォルダ構成の作成
+- [x] DxLibのセットアップ完了
+- [x] `Entity`の実装
+- [x] `ComponentManager`の実装
+- [x] `SystemManager`の実装
+- [x] `TransformComponent`の実装
 - [ ] `HealthComponent`の実装
-- [ ] `MoveSystem`の実装
-- [ ] `InputManager`の実装
-- [ ] プレイヤーがWASDで動く状態
+- [x] `MoveSystem`の実装
+- [x] `InputManager`の実装
+- [x] プレイヤーがWASDで動く状態
 
 ### 4月
 - [ ] `SceneManager`の実装
-- [ ] `IScene`インターフェースの実装
+- [x] `IScene`インターフェースの実装
 - [ ] `TitleScene`の実装
-- [ ] `GameScene`の仮実装
-- [ ] `Renderer`の実装（3D描画の基礎）
-- [ ] `Camera`のアイソメトリック実装
+- [x] `GameScene`の仮実装（InGameSceneとして実装）
+- [x] `Renderer`の実装（3D描画の基礎）
+- [x] `Camera`のアイソメトリック実装
 - [ ] `AIComponent`の実装
 - [ ] `AISystem`の実装
 - [ ] 敵が動く状態

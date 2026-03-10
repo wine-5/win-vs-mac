@@ -9,12 +9,12 @@ namespace
 namespace game::system
 {
 	AnimationSystem::AnimationSystem(core::ecs::ComponentManager& componentManager,
-		core::ecs::EntityId playerId,
+		core::ecs::EntityId entityId,
 		core::iface::IAnimator& animator,
 		int idleAnimHandle,
 		int walkAnimHandle)
 		: m_componentManager(componentManager)
-		, m_playerId(playerId)
+		, m_entityId(entityId)
 		, m_animator(animator)
 		, m_idleAnimHandle(idleAnimHandle)
 		, m_walkAnimHandle(walkAnimHandle)
@@ -23,9 +23,9 @@ namespace game::system
 
 	void AnimationSystem::update(float deltaTime)
 	{
-		auto& anim = m_componentManager.get<component::AnimationComponent<constant::PlayerAnimationState>>(m_playerId);
-		auto& velocity = m_componentManager.get<component::VelocityComponent>(m_playerId);
-		auto& render = m_componentManager.get<component::RenderComponent>(m_playerId);
+		auto& anim = m_componentManager.get<component::AnimationComponent<constant::PlayerAnimationState>>(m_entityId);
+		auto& velocity = m_componentManager.get<component::VelocityComponent>(m_entityId);
+		auto& render = m_componentManager.get<component::RenderComponent>(m_entityId);
 
 		// 速度から次の状態を決める
 		bool isMoving = (velocity.m_velocity.x != 0.0f || velocity.m_velocity.z != 0.0f);

@@ -12,12 +12,24 @@ namespace game::actor
 	class Player
 	{
 	public:
+		/**
+		 * @brief Playerのコンストラクタ
+		 * @param entityManager EntityManagerの参照
+		 * @param componentManager ComponentManagerの参照
+		 * @param modelHandle モデルハンドル
+		 * @param colliderSize コライダーのサイズ
+		 * @param colliderOffset コライダーのオフセット
+		 */
 		Player(core::ecs::EntityManager& entityManager,
 			core::ecs::ComponentManager& componentManager,
 			int modelHandle,
 			core::Vector3 colliderSize,
 			core::Vector3 colliderOffset);
 
+		/**
+		 * @brief PlayerのEntityIDを取得する
+		 * @return EntityID
+		 */
 		core::ecs::EntityId getId() const;
 
 	private:

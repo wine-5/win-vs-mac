@@ -40,11 +40,17 @@ namespace game::data
             return data;
         }
 
+        /** @brief モデルパスを取得 */
         const std::string& getModelPath()    const { return m_modelPath; }
+        /** @brief Idleアニメーションパスを取得 */
         const std::string& getIdleAnimPath() const { return m_idleAnimPath; }
+        /** @brief Walkアニメーションパスを取得 */
         const std::string& getWalkAnimPath() const { return m_walkAnimPath; }
+        /** @brief 移動速度を取得 */
         float              getMoveSpeed()    const { return m_moveSpeed; }
+        /** @brief コライダーサイズを取得 */
         core::Vector3      getColliderSize() const { return m_colliderSize; }
+        /** @brief コライダーオフセットを取得 */
         core::Vector3      getColliderOffset() const { return m_colliderOffset; }
 
     private:

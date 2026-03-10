@@ -29,11 +29,17 @@ namespace game::data
             return data;
         }
 
+        /** @brief モデルパスを取得 */
         const std::string& getModelPath()      const { return m_modelPath; }
+        /** @brief 位置を取得 */
         core::Vector3      getPosition()       const { return m_position; }
+        /** @brief 回転を取得 */
         core::Vector3      getRotation()       const { return m_rotation; }
+        /** @brief スケールを取得 */
         core::Vector3      getScale()          const { return m_scale; }
+        /** @brief コライダーサイズを取得 */
         core::Vector3      getColliderSize()   const { return m_colliderSize; }
+        /** @brief コライダーオフセットを取得 */
         core::Vector3      getColliderOffset() const { return m_colliderOffset; }
 
     private:

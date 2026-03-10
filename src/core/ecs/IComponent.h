@@ -9,6 +9,11 @@ namespace core::ecs
     {
     public:
         virtual ~IComponent() = default;
+        
+        /**
+         * @brief EntityのComponentを削除する
+         * @param id EntityID
+         */
         virtual void remove(EntityId id) = 0;
     };
 }
