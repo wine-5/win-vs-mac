@@ -94,7 +94,7 @@ jobs:
             if [ -f "lint_output.txt" ]; then
               LINT_DETAILS=$(grep "warning:\|error:" lint_output.txt \
                 | grep -v "thirdparty" \
-                | grep -v "DxLib.h\|dxlib\|DxLib" \
+                | grep -v "file not found" \
                 | sed 's|/home/runner/work/DxLib-3D-Game/DxLib-3D-Game/||' \
                 | head -10 \
                 | awk -F: '{print $1 ":" $2 " → " $NF}' \
