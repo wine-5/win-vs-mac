@@ -43,8 +43,6 @@ jobs:
               --header-filter="^$PWD/src/.*" \
               -- \
               -std=c++17 \
-              -I$PWD/thirdparty/dxlib \
               -I$PWD/src \
-              -D_WIN32 \
-              --include-directory=/usr/include
+              -DDXLIB_DISABLE
           done
