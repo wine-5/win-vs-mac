@@ -2,6 +2,7 @@
 #include "game/component/TransformComponent.h"
 #include "game/component/ColliderComponent.h"
 #include "game/component/VelocityComponent.h"
+#include <cmath>
 
 namespace game::system
 {

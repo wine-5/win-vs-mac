@@ -27,7 +27,7 @@ namespace infrastructure
 
 	bool InputManager::isPadButtonDown(core::input::GamePadCode code) const
 	{
-		int input{GetJoypadInputState(DX_INPUT_PAD1)};
+		int input = GetJoypadInputState(DX_INPUT_PAD1);
 		switch (code)
 		{
 		case core::input::GamePadCode::ButtonB:  return (input & PAD_INPUT_B) != 0;
