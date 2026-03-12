@@ -4,51 +4,23 @@
 
 ### 3. メンバ変数の初期化統一 🟢 **推奨**
 
-#### 現状の問題
-- 初期化方法が統一されていない
-- 未初期化によるバグのリスク
+#### 方針
+**Uniform Initialization（統一初期化）** で未初期化バグを防ぐ。
 
-#### 統一ルール
+詳細は [`docs/naming_convention.md`](naming_convention.md#メンバ変数の初期化規則) を参照。
 
-##### ① プリミティブ型 → `{}`で初期化（ゼロクリア）
-```cpp
-int m_count{};           // 0で初期化
-float m_speed{};         // 0.0fで初期化
-bool m_isActive{};       // falseで初期化
-```
+#### 簡易ルール
+| 型 | 初期化 | 例 |
+|---|---|---|
+| プリミティブ型 | `{}` | `int m_count{};` |
+| ポインタ | `{}` | `Player* m_ptr{};` |
+| enum | `= 値` | `Tag m_tag = Tag::None;` |
+| STL/クラス | なし | `std::vector<int> m_data;` |
 
-##### ② クラス型 → デフォルトコンストラクタに任せる
-```cpp
-core::Vector3 m_position;      // Vector3のデフォルトコンストラクタ
-std::string m_name;            // 空文字列で初期化される
-std::vector<int> m_data;       // 空配列
-```
-
-##### ③ enum型 → 明示的にデフォルト値を指定
-```cpp
-constant::CollisionTag m_tag = constant::CollisionTag::None;  // ✓ 既に実装済み
-```
-
-##### ④ スマートポインタ → `{}`で初期化（nullptr）
-```cpp
-std::unique_ptr<Player> m_player{};
-std::shared_ptr<Data> m_data{};
-```
-
-##### ⑤ 参照型 → コンストラクタ初期化リストで初期化（`{}`不可）
-```cpp
-ICamera& m_camera;  // 初期化リストで初期化必須
-```
-
-#### 対象ファイル
-- `src/core/ecs/EntityManager.h` - `m_nextId`
-- `src/core/ecs/ComponentManager.h` - すべてのメンバ変数
-- `src/game/system/*.h` - すべてのSystem クラスのメンバ変数
-- `src/infrastructure/*.h` - すべてのメンバ変数
-
-#### 既に正しく実装されている例
-- `src/game/component/TransformComponent.h` - `m_scale = {1.0f, 1.0f, 1.0f}` ✓
-- `src/game/component/ColliderComponent.h` - `m_tag = constant::CollisionTag::None` ✓
+#### メリット
+- ゴミ値によるバグを防ぐ
+- 縮小変換を禁止（型安全）
+- コードの意図が明確
 
 ---
 
