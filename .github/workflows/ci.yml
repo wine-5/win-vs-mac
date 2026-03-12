@@ -49,14 +49,19 @@ jobs:
             echo "Checking: $f" >&2
             OUTPUT=$(clang-tidy "$f" \
               --config-file=.clang-tidy \
-              --header-filter="^$PWD/src/.*" \
+              --header-filter="^$PWD/src/(?!.*thirdparty).*" \
               -- \
               -std=c++17 \
               $INCLUDES \
+              -isystem thirdparty \
               -DDXLIB_DISABLE 2>&1)
-            if echo "$OUTPUT" | grep -q "warning:\|error:"; then
+            
+            # thirdpartyとDxLibのエラーを除外
+            FILTERED=$(echo "$OUTPUT" | grep -v "thirdparty" | grep -v "DxLib.h" | grep -v "file not found")
+            
+            if echo "$FILTERED" | grep -q "warning:\|error:"; then
               echo "❌ Found issues in $f" >&2
-              LINT_OUTPUT="$LINT_OUTPUT\n=== $f ===\n$OUTPUT\n"
+              LINT_OUTPUT="$LINT_OUTPUT\n=== $f ===\n$FILTERED\n"
               FAILED=1
             else
               echo "✅ $f passed" >&2
@@ -108,26 +113,32 @@ jobs:
               echo "=== Lint Output File Contents ===" >&2
               cat lint_output.txt >&2
               
-              # エラーを抽出して整形（最大15件）
-              LINT_DETAILS=$(grep -A 2 "warning:\|error:" lint_output.txt \
+              # エラーを抽出して整形
+              LINT_DETAILS=$(cat lint_output.txt \
                 | grep -v "thirdparty" \
+                | grep -v "DxLib.h" \
                 | grep -v "file not found" \
-                | head -20 \
-                | sed 's|/home/runner/work/[^/]*/[^/]*/||' \
-                | sed \
-                  -e 's/invalid case style for member.*/❌ メンバ変数にm_プレフィックスが必要/g' \
-                  -e 's/invalid case style for namespace.*/❌ 名前空間は小文字にしてください/g' \
-                  -e 's/invalid case style for function.*/❌ 関数名はcamelCaseにしてください/g' \
-                  -e 's/invalid case style for variable.*/❌ ローカル変数はcamelCaseにしてください/g' \
-                  -e 's/invalid case style for constant.*/❌ 定数はUPPER_SNAKE_CASEにしてください/g' \
-                  -e 's/invalid case style for enum.*/❌ 列挙型はPascalCaseにしてください/g' \
-                  -e 's/variable .* is not initialized.*/❌ 変数が初期化されていません/g' \
-                | grep -v "^--$")
+                | grep -v "^$" \
+                | grep -E "warning:|error:|src/" \
+                | head -25 \
+                | sed 's|/home/runner/work/[^/]*/[^/]*/||g' \
+                | awk '
+                  /invalid case style for member/ {print "❌ メンバ変数にm_プレフィックスが必要"; next}
+                  /invalid case style for namespace/ {print "❌ 名前空間は小文字にしてください"; next}
+                  /invalid case style for function/ {print "❌ 関数名はcamelCaseにしてください"; next}
+                  /invalid case style for variable/ {print "❌ ローカル変数はcamelCaseにしてください"; next}
+                  /invalid case style for constant/ {print "❌ 定数はUPPER_SNAKE_CASEにしてください"; next}
+                  /invalid case style for enum/ {print "❌ 列挙型はPascalCaseにしてください"; next}
+                  /variable .* is not initialized/ {print "❌ 変数が初期化されていません"; next}
+                  {print}
+                ')
               
               if [ -n "$LINT_DETAILS" ]; then
+                # Discordの文字数制限を考慮
+                LINT_DETAILS=$(echo "$LINT_DETAILS" | head -c 1500)
                 LINT_DETAILS="\n\n**エラー詳細:**\n\`\`\`\n${LINT_DETAILS}\n\`\`\`"
               else
-                LINT_DETAILS="\n\n⚠️ lint_output.txtにエラーが記録されていますが、抽出に失敗しました"
+                LINT_DETAILS="\n\n⚠️ エラー詳細の抽出に失敗しました。GitHub Actionsのログを確認してください。"
               fi
             else
               echo "⚠️ lint_output.txt not found or empty" >&2
