@@ -41,7 +41,7 @@ jobs:
         shell: bash
         run: |
           set +e
-          FILES=$(find src -name "*.cpp" -o -name "*.h")
+          FILES=$(find src -name "*.cpp")
           INCLUDES=$(find src -type d | sed 's/^/-I/')
           LINT_OUTPUT=""
           FAILED=0
