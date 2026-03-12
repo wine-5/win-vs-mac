@@ -26,21 +26,21 @@ namespace game::scene
 		, m_inputProvider(inputProvider)
 		, m_factoryManager(m_entityManager, m_componentManager, m_resourceManager)
 		, m_playerData(game::data::PlayerData::fromMetadata(
-			m_resourceManager.getMetadata(constant::ModelId::PLAYER).value()))
+			m_resourceManager.getMetadata(constant::model_id::PLAYER).value()))
 	{
 		// 先にモデルをロードして自動計算を実行
-		int playerModelHandle = m_resourceManager.loadModelById(constant::ModelId::PLAYER);
+		int playerModelHandle = m_resourceManager.loadModelById(constant::model_id::PLAYER);
 		
 		// モデルロード後に再度メタデータを取得してPlayerDataを更新
-        auto playerMeta = m_resourceManager.getMetadata(constant::ModelId::PLAYER);
+        auto playerMeta = m_resourceManager.getMetadata(constant::model_id::PLAYER);
         assert(playerMeta.has_value() && "Playerのメタデータが見つかりません");
         m_playerData = game::data::PlayerData::fromMetadata(playerMeta.value());
 		
 		m_factoryManager.getPlayerFactory().create(playerModelHandle, m_playerData);
 
 		// Ground生成（JSON駆動）
-		int groundModelHandle = m_resourceManager.loadModelById(constant::ModelId::GROUND);
-        auto groundMeta = m_resourceManager.getMetadata(constant::ModelId::GROUND);
+		int groundModelHandle = m_resourceManager.loadModelById(constant::model_id::GROUND);
+        auto groundMeta = m_resourceManager.getMetadata(constant::model_id::GROUND);
         assert(groundMeta.has_value() && "Groundのメタデータが見つかりません");
 
 		game::data::GroundData groundData = game::data::GroundData::fromMetadata(groundMeta.value());
@@ -56,12 +56,6 @@ namespace game::scene
 	auto* collisionSystem = m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
 	collisionSystem->addEntity(m_factoryManager.getPlayerFactory().getPlayer().getId());
 	collisionSystem->addEntity(m_groundId);
-	}
-
-	void InGameScene::update(float deltaTime)
-	{
-		m_systemManager.update(deltaTime);
-
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_factoryManager.getPlayerFactory().getPlayer().getId());
 		auto& render = m_componentManager.get<game::component::RenderComponent>(m_factoryManager.getPlayerFactory().getPlayer().getId());
 		auto& anim = m_componentManager.get<game::component::AnimationComponent<game::constant::PlayerAnimationState>>(m_factoryManager.getPlayerFactory().getPlayer().getId());
