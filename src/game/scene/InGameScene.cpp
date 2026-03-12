@@ -32,16 +32,16 @@ namespace game::scene
 		int playerModelHandle = m_resourceManager.loadModelById(constant::model_id::PLAYER);
 		
 		// モデルロード後に再度メタデータを取得してPlayerDataを更新
-        auto playerMeta = m_resourceManager.getMetadata(constant::model_id::PLAYER);
-        assert(playerMeta.has_value() && "Playerのメタデータが見つかりません");
-        m_playerData = game::data::PlayerData::fromMetadata(playerMeta.value());
+		auto playerMeta = m_resourceManager.getMetadata(constant::model_id::PLAYER);
+		assert(playerMeta.has_value() && "Playerのメタデータが見つかりません");
+		m_playerData = game::data::PlayerData::fromMetadata(playerMeta.value());
 		
 		m_factoryManager.getPlayerFactory().create(playerModelHandle, m_playerData);
 
 		// Ground生成（JSON駆動）
 		int groundModelHandle = m_resourceManager.loadModelById(constant::model_id::GROUND);
-        auto groundMeta = m_resourceManager.getMetadata(constant::model_id::GROUND);
-        assert(groundMeta.has_value() && "Groundのメタデータが見つかりません");
+		auto groundMeta = m_resourceManager.getMetadata(constant::model_id::GROUND);
+		assert(groundMeta.has_value() && "Groundのメタデータが見つかりません");
 
 		game::data::GroundData groundData = game::data::GroundData::fromMetadata(groundMeta.value());
 		m_groundId = m_factoryManager.getGroundFactory().create(
@@ -49,13 +49,30 @@ namespace game::scene
 			groundData
 		);
 
-	m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_factoryManager.getPlayerFactory().getPlayer().getId(), m_inputProvider);
-	m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_factoryManager.getPlayerFactory().getPlayer().getId(), m_playerData.getMoveSpeed());
-	m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager, m_factoryManager.getPlayerFactory().getPlayer().getId());
-	
-	auto* collisionSystem = m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
-	collisionSystem->addEntity(m_factoryManager.getPlayerFactory().getPlayer().getId());
-	collisionSystem->addEntity(m_groundId);
+		// アニメーションハンドルをロード
+		//int idleAnimHandle = m_resourceManager.loadModelById(m_playerData.getIdleAnimPath());
+		//int walkAnimHandle = m_resourceManager.loadModelById(m_playerData.getWalkAnimPath());
+
+		// システム登録
+		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_factoryManager.getPlayerFactory().getPlayer().getId(), m_inputProvider);
+		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_factoryManager.getPlayerFactory().getPlayer().getId(), m_playerData.getMoveSpeed());
+		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager, m_factoryManager.getPlayerFactory().getPlayer().getId());
+		//m_systemManager.registerSystem<game::system::AnimationSystem>(
+		//	m_componentManager,
+		//	m_factoryManager.getPlayerFactory().getPlayer().getId(),
+		//	m_animator,
+		//	idleAnimHandle,
+		//	walkAnimHandle);
+		
+		auto* collisionSystem = m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
+		collisionSystem->addEntity(m_factoryManager.getPlayerFactory().getPlayer().getId());
+		collisionSystem->addEntity(m_groundId);
+	}
+
+	void InGameScene::update(float deltaTime)
+	{
+		m_systemManager.update(deltaTime);
+
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_factoryManager.getPlayerFactory().getPlayer().getId());
 		auto& render = m_componentManager.get<game::component::RenderComponent>(m_factoryManager.getPlayerFactory().getPlayer().getId());
 		auto& anim = m_componentManager.get<game::component::AnimationComponent<game::constant::PlayerAnimationState>>(m_factoryManager.getPlayerFactory().getPlayer().getId());

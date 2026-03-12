@@ -41,11 +41,12 @@ jobs:
         shell: bash
         run: |
           set +e
-          FILES=$(find src -name "*.cpp")
+          FILES=$(find src -name "*.cpp" -o -name "*.h")
           INCLUDES=$(find src -type d | sed 's/^/-I/')
           LINT_OUTPUT=""
           FAILED=0
           for f in $FILES; do
+            echo "Checking: $f" >&2
             OUTPUT=$(clang-tidy "$f" \
               --config-file=.clang-tidy \
               --header-filter="^$PWD/src/.*" \
@@ -54,11 +55,21 @@ jobs:
               $INCLUDES \
               -DDXLIB_DISABLE 2>&1)
             if echo "$OUTPUT" | grep -q "warning:\|error:"; then
-              LINT_OUTPUT="$LINT_OUTPUT$OUTPUT"
+              echo "❌ Found issues in $f" >&2
+              LINT_OUTPUT="$LINT_OUTPUT\n=== $f ===\n$OUTPUT\n"
               FAILED=1
+            else
+              echo "✅ $f passed" >&2
             fi
           done
-          echo "$LINT_OUTPUT" > lint_output.txt
+          echo -e "$LINT_OUTPUT" > lint_output.txt
+          
+          # 結果をログに出力
+          if [ "$FAILED" -eq 1 ]; then
+            echo "=== Lint Errors Found ===" >&2
+            cat lint_output.txt >&2
+          fi
+          
           exit $FAILED
 
       - name: Upload lint result
@@ -93,23 +104,36 @@ jobs:
             COLOR=3066993
           else
             LINT_DETAILS=""
-            if [ -f "lint_output.txt" ]; then
-              LINT_DETAILS=$(grep "warning:\|error:" lint_output.txt \
+            if [ -f "lint_output.txt" ] && [ -s "lint_output.txt" ]; then
+              echo "=== Lint Output File Contents ===" >&2
+              cat lint_output.txt >&2
+              
+              # エラーを抽出して整形（最大15件）
+              LINT_DETAILS=$(grep -A 2 "warning:\|error:" lint_output.txt \
                 | grep -v "thirdparty" \
                 | grep -v "file not found" \
-                | sed 's|/home/runner/work/DxLib-3D-Game/DxLib-3D-Game/||' \
-                | head -10 \
-                | awk -F: '{print $1 ":" $2 " → " $NF}' \
+                | head -20 \
+                | sed 's|/home/runner/work/[^/]*/[^/]*/||' \
                 | sed \
-                  -e 's/invalid case style for member.*/メンバ変数にm_プレフィックスをつけてください/g' \
-                  -e 's/invalid case style for namespace.*/名前空間は小文字にしてください/g' \
-                  -e 's/invalid case style for function.*/関数名はcamelCaseにしてください/g' \
-                  -e 's/invalid case style for variable.*/ローカル変数はcamelCaseにしてください/g' \
-                  -e 's/invalid case style for constant.*/定数はUPPER_SNAKE_CASEにしてください/g' \
-                  -e 's/invalid case style for enum.*/列挙型はPascalCaseにしてください/g' \
-                  -e 's/variable .* is not initialized.*/変数が初期化されていません/g')
+                  -e 's/invalid case style for member.*/❌ メンバ変数にm_プレフィックスが必要/g' \
+                  -e 's/invalid case style for namespace.*/❌ 名前空間は小文字にしてください/g' \
+                  -e 's/invalid case style for function.*/❌ 関数名はcamelCaseにしてください/g' \
+                  -e 's/invalid case style for variable.*/❌ ローカル変数はcamelCaseにしてください/g' \
+                  -e 's/invalid case style for constant.*/❌ 定数はUPPER_SNAKE_CASEにしてください/g' \
+                  -e 's/invalid case style for enum.*/❌ 列挙型はPascalCaseにしてください/g' \
+                  -e 's/variable .* is not initialized.*/❌ 変数が初期化されていません/g' \
+                | grep -v "^--$")
+              
+              if [ -n "$LINT_DETAILS" ]; then
+                LINT_DETAILS="\n\n**エラー詳細:**\n\`\`\`\n${LINT_DETAILS}\n\`\`\`"
+              else
+                LINT_DETAILS="\n\n⚠️ lint_output.txtにエラーが記録されていますが、抽出に失敗しました"
+              fi
+            else
+              echo "⚠️ lint_output.txt not found or empty" >&2
             fi
-            MESSAGE="❌ 失敗 ビルド: ${BUILD_STATUS} 命名規則: ${LINT_STATUS} ${LINT_DETAILS}"
+            
+            MESSAGE="❌ **失敗**\nビルド: \`${BUILD_STATUS}\`\n命名規則: \`${LINT_STATUS}\`${LINT_DETAILS}"
             COLOR=15158332
           fi
 
