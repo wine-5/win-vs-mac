@@ -4,6 +4,8 @@
 
 namespace infrastructure
 {
+	// ========== キーボード入力 ==========
+
 	bool InputManager::isKeyDown(core::input::KeyCode keyCode) const
 	{
 		static const std::unordered_map<core::input::KeyCode, int> KEY_MAP =
@@ -24,6 +26,8 @@ namespace infrastructure
 		if (it == KEY_MAP.end()) return false;
 		return CheckHitKey(it->second) != 0;
 	}
+
+	// ========== ゲームパッド入力 ==========
 
 	bool InputManager::isPadButtonDown(core::input::GamePadCode code) const
 	{
@@ -56,5 +60,22 @@ namespace infrastructure
 	bool InputManager::isPadConnected() const
 	{
 		return GetJoypadInputState(DX_INPUT_PAD1) != -1;
+	}
+
+	// ========== マウス入力 ==========
+
+	void InputManager::getMousePosition(int& outX, int& outY) const
+	{
+		GetMousePoint(&outX, &outY);
+	}
+
+	bool InputManager::isMouseLeftPressed() const
+	{
+		return (GetMouseInput() & MOUSE_INPUT_LEFT) != 0;
+	}
+
+	bool InputManager::isMouseRightPressed() const
+	{
+		return (GetMouseInput() & MOUSE_INPUT_RIGHT) != 0;
 	}
 }
