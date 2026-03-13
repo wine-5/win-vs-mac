@@ -24,7 +24,7 @@ namespace infrastructure
                 m_titleScene = std::make_unique<game::scene::TitleScene>(
                     m_titleInputManager,
                     m_titleUIRenderer,
-                    screen);
+                    *screen);
             }
             return m_titleScene.get();
 

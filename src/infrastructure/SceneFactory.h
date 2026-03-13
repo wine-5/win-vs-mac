@@ -7,13 +7,9 @@
 #include "ResourceManager.h"
 #include "InputManager.h"
 #include "UIRenderer.h"
+#include "game/scene/InGameScene.h"
+#include "game/scene/TitleScene.h"
 #include <memory>
-
-namespace game::scene
-{
-    class InGameScene;
-    class TitleScene;
-}
 
 namespace infrastructure
 {

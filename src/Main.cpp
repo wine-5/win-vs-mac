@@ -1,9 +1,9 @@
 ﻿#include "DxLib.h"
-#include "infrastructure/InGameSceneInitializer.h"
 #include "ServiceLocatorInitializer.h"
 #include "core/ServiceLocator.h"
 #include "core/interface/ILogger.h"
-#include "thirdparty/nlohmann/json.hpp"
+#include "game/scene/SceneManager.h"
+#include "game/scene/SceneType.h"
 
 namespace
 {
@@ -24,15 +24,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	ServiceLocatorInitializer::init();
 
-	infrastructure::InGameSceneInitializer sceneInitializer;
-	game::scene::InGameScene& inGameScene = sceneInitializer.getScene();
+	// ServiceLocatorからSceneManagerを取得
+	auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
+	
+	// 初期シーンをTitleに設定
+	sceneManager->changeScene(game::scene::SceneType::Title);
 
 	while (ProcessMessage() == 0)
 	{
 		ClearDrawScreen();// 画面クリア
 		core::ServiceLocator::get<core::iface::ILogger>()->clear();
-		inGameScene.update(DELTA_TIME);
-		inGameScene.draw();
+		
+		sceneManager->update(DELTA_TIME);
+		sceneManager->draw();
 
 		ScreenFlip();       // 画面を反映
 	}

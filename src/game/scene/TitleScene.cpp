@@ -1,32 +1,30 @@
 ﻿#include "TitleScene.h"
-#include "InGameScene.h"
+#include "SceneManager.h"
+#include "SceneType.h"
 #include "game/ui/Button.h"
 #include "game/constant/UI.h"
 #include "core/utility/Color.h"
 #include "core/ServiceLocator.h"
 #include <cstdlib>
-#include "game/scene/SceneManager.h"
 
 namespace game::scene
 {
-	namespace
-	{
+    namespace
+    {
         // タイトルのUIの定数
         constexpr int TITLE_Y = 150;
         constexpr int START_BUTTON_Y = 300;
         constexpr int EXIT_BUTTON_Y = 400;
         constexpr int BUTTON_WIDTH = 200;
         constexpr int BUTTON_HEIGHT = 50;
-	}
+    }
 
     TitleScene::TitleScene(core::iface::IInputProvider& inputProvider,
         core::iface::IUIRenderer& uiRenderer,
-        core::iface::IScreen& screen,
-        SceneManager& sceneManager)
+        core::iface::IScreen& screen)
         : m_inputProvider(inputProvider)
         , m_uiRenderer(uiRenderer)
         , m_screen(screen)
-        , m_sceneManager(sceneManager)
     {
         setupUI();
     }
@@ -43,7 +41,7 @@ namespace game::scene
         int titleX = (m_screen.getWidth() - titleWidth) / 2;
         m_uiRenderer.drawText(titleX, TITLE_Y, title, core::utility::Color::WHITE);
 
-        //  UI要素を描画
+        // UI要素を描画
         m_uiManager.draw(m_uiRenderer);
     }
 
@@ -54,11 +52,12 @@ namespace game::scene
         // スタートボタンの作成
         auto startButton = std::make_unique<ui::Button>(
             "開始", buttonX, START_BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, m_inputProvider);
-        
-        // ボタンが押されたときに参照する関数を登録
-        startButton->setOnClick([this]() {
-            // InGameSceneに遷移
-            // ここは後で書く
+
+        // ボタンが押されたときの処理
+        startButton->setOnClick([]() {
+            // ServiceLocatorからSceneManagerを取得してシーン遷移
+            auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
+            sceneManager->changeScene(SceneType::InGame);
             });
 
         m_uiManager.addElement(std::move(startButton));

@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "IScene.h"
-#include "SceneManager.h"
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
@@ -19,12 +18,10 @@ namespace game::scene
          * @param inputProvider 入力インターフェース
          * @param uiRenderer UI描画インターフェース
          * @param screen 画面情報インターフェース
-         * @param sceneManager シーンマネージャー
          */
         TitleScene(core::iface::IInputProvider& inputProvider,
             core::iface::IUIRenderer& uiRenderer,
-            core::iface::IScreen& screen,
-            SceneManager& sceneManager);
+            core::iface::IScreen& screen);
 
         /**
          * @brief シーンの更新処理
@@ -46,7 +43,6 @@ namespace game::scene
         core::iface::IInputProvider& m_inputProvider;
         core::iface::IUIRenderer& m_uiRenderer;
         core::iface::IScreen& m_screen;
-        SceneManager& m_sceneManager;
         ui::UIManager m_uiManager;
     };
 }
