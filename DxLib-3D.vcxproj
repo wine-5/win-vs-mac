@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="src\core\interface\ICamera.h" />
     <ClCompile Include="src\core\interface\ILogger.h" />
+    <ClCompile Include="src\infrastructure\Screen.cpp" />
     <ClCompile Include="src\core\ServiceLocator.cpp" />
     <ClCompile Include="src\game\factory\FactoryInitializer.cpp" />
     <ClCompile Include="src\game\factory\FactoryManager.cpp" />
@@ -190,7 +191,9 @@
     <ClInclude Include="src\core\interface\IRenderer.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
     <ClInclude Include="src\core\input\KeyCode.h" />
+    <ClInclude Include="src\core\interface\IScreen.h" />
     <ClInclude Include="src\core\interface\IUIRenderer.h" />
+    <ClInclude Include="src\infrastructure\Screen.h" />
     <ClInclude Include="src\core\ServiceLocator.h" />
     <ClInclude Include="src\core\utility\Color.h" />
     <ClInclude Include="src\core\Vector3.h" />
