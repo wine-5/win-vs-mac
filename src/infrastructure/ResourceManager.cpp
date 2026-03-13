@@ -4,6 +4,7 @@
 #include "thirdparty/nlohmann/json.hpp"
 #include <fstream>
 #include <cassert>
+#include <stdexcept>
 #include "constant/JsonKeys.h"
 
 namespace infrastructure
@@ -93,7 +94,7 @@ namespace infrastructure
         {
             LOG_E("FATAL: resources.jsonを開けませんでした: %s", filePath.c_str());
             assert(false && "致命的エラー: resources.jsonが見つかりません。ファイルパスを確認してください。");
-            return {};
+            throw std::runtime_error("resources.jsonを開けませんでした: " + filePath);
         }
 
         nlohmann::json j = nlohmann::json::parse(file);
@@ -119,7 +120,7 @@ namespace infrastructure
         {
             LOG_E("FATAL: JSONファイルを開けませんでした: %s", filePath.c_str());
             assert(false && "致命的エラー: JSONファイルが見つかりません。ファイルパスを確認してください。");
-            return {};  // Assert後は到達しないが、コンパイラ警告回避
+            throw std::runtime_error("JSONファイルを開けませんでした: " + filePath);
         }
 
         nlohmann::json j = nlohmann::json::parse(file);

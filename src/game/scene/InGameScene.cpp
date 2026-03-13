@@ -12,6 +12,7 @@
 #include "game/component/ColliderComponent.h"
 #include "game/constant/ModelId.h"
 #include <cassert>
+#include <stdexcept>
 
 namespace game::scene
 {
@@ -41,6 +42,10 @@ namespace game::scene
 
 		// モデルロード後に再度メタデータを取得してPlayerDataを更新
 		auto playerMeta = m_resourceManager.getMetadata(constant::model_id::PLAYER);
+		if (!playerMeta.has_value()) {
+			LOG("ERROR", "Playerのメタデータが見つかりません");
+			throw std::runtime_error("Playerのメタデータの読み込みに失敗しました");
+		}
 		assert(playerMeta.has_value() && "Playerのメタデータが見つかりません");
 		m_playerData = game::data::PlayerData::fromMetadata(playerMeta.value());
 

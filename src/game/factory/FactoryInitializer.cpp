@@ -1,4 +1,7 @@
 ﻿#include "FactoryInitializer.h"
+#include "core/interface/ILogger.h"
+#include <cassert>
+#include <stdexcept>
 
 namespace game::factory
 {
@@ -21,6 +24,10 @@ namespace game::factory
 	{
 		int groundHandle = m_resourceManager.loadModelById(constant::model_id::GROUND);
 		auto groundMeta = m_resourceManager.getMetadata(constant::model_id::GROUND);
+		if (!groundMeta.has_value()) {
+			LOG("ERROR", "Groundのメタデータが見つかりません");
+			throw std::runtime_error("Groundのメタデータの読み込みに失敗しました");
+		}
 		assert(groundMeta.has_value() && "Groundのメタデータが見つかりません");
 
 		data::GroundData groundData = data::GroundData::fromMetadata(groundMeta.value());
