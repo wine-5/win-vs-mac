@@ -33,7 +33,7 @@ namespace core::utility
             return (a << 24) | (r << 16) | (g << 8) | b;
         }
 
-        // ========== よく使う色を定義 ==========
+        // ========== 基本色 ==========
 
         static constexpr unsigned int WHITE = 0xFFFFFFFF;
         static constexpr unsigned int BLACK = 0xFF000000;
@@ -46,5 +46,13 @@ namespace core::utility
         static constexpr unsigned int GRAY = 0xFF808080;
         static constexpr unsigned int DARK_GRAY = 0xFF404040;
         static constexpr unsigned int LIGHT_GRAY = 0xFFC0C0C0;
+
+        // ========== UI用の色 ==========
+
+        // ボタンの色
+        static constexpr unsigned int BUTTON_NORMAL = 0xFF6464C8;
+        static constexpr unsigned int BUTTON_FOCUSED = 0xFF9696FF;
+        static constexpr unsigned int BUTTON_PRESSED = 0xFF5050B4;
+        static constexpr unsigned int BUTTON_DISABLED = GRAY;
     };
 }

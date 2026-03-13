@@ -142,6 +142,7 @@
     <ClCompile Include="src\game\stage\Ground.cpp" />
     <ClCompile Include="src\game\system\AnimationSystem.cpp" />
     <ClCompile Include="src\game\system\CollisionSystem.cpp" />
+    <ClCompile Include="src\game\ui\Button.cpp" />
     <ClCompile Include="src\infrastructure\Animator.cpp" />
     <ClCompile Include="src\infrastructure\Camera.cpp" />
     <ClCompile Include="src\infrastructure\InGameSceneInitializer.cpp" />
@@ -153,6 +154,7 @@
     <ClCompile Include="src\game\system\InputSystem.cpp" />
     <ClCompile Include="src\game\system\MoveSystem.cpp" />
     <ClCompile Include="src\game\system\PhysicsSystem.cpp" />
+    <ClCompile Include="src\infrastructure\UIRenderer.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\infrastructure\utility\LogUtil.cpp" />
     <ClCompile Include="src\ServiceLocatorInitializer.cpp" />
@@ -195,6 +197,7 @@
     <ClInclude Include="src\game\component\ColliderComponent.h" />
     <ClInclude Include="src\game\constant\CollisionTag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
+    <ClInclude Include="src\game\constant\UI.h" />
     <ClInclude Include="src\game\data\GroundData.h" />
     <ClInclude Include="src\game\factory\FactoryInitializer.h" />
     <ClInclude Include="src\game\factory\FactoryManager.h" />
@@ -203,6 +206,8 @@
     <ClInclude Include="src\game\factory\PlayerFactory.h" />
     <ClInclude Include="src\game\scene\SceneManager.h" />
     <ClInclude Include="src\game\scene\SceneType.h" />
+    <ClInclude Include="src\game\ui\Button.h" />
+    <ClInclude Include="src\game\ui\IUIElement.h" />
     <ClInclude Include="src\infrastructure\constant\JsonKeys.h" />
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
     <ClInclude Include="src\game\data\PlayerData.h" />
@@ -233,6 +238,7 @@
     <ClInclude Include="src\game\system\MoveSystem.h" />
     <ClInclude Include="src\game\system\PhysicsSystem.h" />
     <ClInclude Include="src\game\event\InGameEvents.h" />
+    <ClInclude Include="src\infrastructure\UIRenderer.h" />
     <ClInclude Include="src\infrastructure\utility\LogUtil.h" />
     <ClInclude Include="src\ServiceLocatorInitializer.h" />
   </ItemGroup>

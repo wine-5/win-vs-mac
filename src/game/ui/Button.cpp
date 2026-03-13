@@ -1,5 +1,6 @@
 ﻿#include "Button.h"
 #include "core/utility/Color.h"
+#include "game/constant/UI.h"
 
 namespace game::ui
 {
@@ -44,7 +45,7 @@ namespace game::ui
         }
         else
         {
-            m_state == UIState::Normal;
+            m_state = UIState::Normal;
             m_wasPressed = false;
         }
     }
@@ -57,6 +58,41 @@ namespace game::ui
         uiRenderer.drawBox(m_x, m_y, m_width, m_height, getColor(), true);
 
         // ボタンの枠線
-        uiRenderer.drawBox(m_x, m_y, m_width, m_height, core::utility::Color::White, false);
+        uiRenderer.drawBox(m_x, m_y, m_width, m_height, core::utility::Color::WHITE, false);
+
+        int textWidth = uiRenderer.getTextWidth(m_text.c_str());
+        int textX = m_x + (m_width - textWidth) / 2;
+        int textY = m_y + (m_height - game::constant::ui::FONT_SIZE_NORMAL) / 2;
+        uiRenderer.drawText(textX, textY, m_text.c_str(), core::utility::Color::BLUE);
+    }
+
+    void Button::setVisible(bool visible)
+    {
+        m_visible = visible;
+    }
+
+    void Button::setOnClick(std::function<void()> callback)
+    {
+        m_onClick = callback;
+    }
+
+    bool Button::isMouseOver() const
+    {
+        int mouseX{}, mouseY{};
+        m_inputProvider.getMousePosition(mouseX, mouseY);
+        return mouseX >= m_x && mouseX <= m_x + m_width &&
+            mouseY >= m_y && mouseY <= m_y + m_height;
+    }
+
+    unsigned int Button::getColor() const
+    {
+        switch (m_state)
+        {
+        case UIState::Normal:   return core::utility::Color::BUTTON_NORMAL;
+        case UIState::Focused:  return core::utility::Color::BUTTON_FOCUSED;
+        case UIState::Pressed:  return core::utility::Color::BUTTON_PRESSED;
+        case UIState::Disabled: return core::utility::Color::BUTTON_DISABLED;
+        default:                return core::utility::Color::BUTTON_NORMAL;
+        }
     }
 }
