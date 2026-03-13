@@ -35,16 +35,16 @@ namespace core::utility
 
         // ========== よく使う色を定義 ==========
 
-        static constexpr unsigned int White = 0xFFFFFFFF;
-        static constexpr unsigned int Black = 0xFF000000;
-        static constexpr unsigned int Red = 0xFFFF0000;
-        static constexpr unsigned int Green = 0xFF00FF00;
-        static constexpr unsigned int Blue = 0xFF0000FF;
-        static constexpr unsigned int Yellow = 0xFFFFFF00;
-        static constexpr unsigned int Cyan = 0xFF00FFFF;
-        static constexpr unsigned int Magenta = 0xFFFF00FF;
-        static constexpr unsigned int Gray = 0xFF808080;
-        static constexpr unsigned int DarkGray = 0xFF404040;
-        static constexpr unsigned int LightGray = 0xFFC0C0C0;
+        static constexpr unsigned int WHITE = 0xFFFFFFFF;
+        static constexpr unsigned int BLACK = 0xFF000000;
+        static constexpr unsigned int RED = 0xFFFF0000;
+        static constexpr unsigned int GREEN = 0xFF00FF00;
+        static constexpr unsigned int BLUE = 0xFF0000FF;
+        static constexpr unsigned int YELLOW = 0xFFFFFF00;
+        static constexpr unsigned int CYAN = 0xFF00FFFF;
+        static constexpr unsigned int MAGENTA = 0xFFFF00FF;
+        static constexpr unsigned int GRAY = 0xFF808080;
+        static constexpr unsigned int DARK_GRAY = 0xFF404040;
+        static constexpr unsigned int LIGHT_GRAY = 0xFFC0C0C0;
     };
 }
