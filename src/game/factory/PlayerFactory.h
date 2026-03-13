@@ -44,6 +44,6 @@ namespace game::factory
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IResourceManager& m_resourceManager;
 
-		std::unique_ptr<actor::Player> m_player;
+		std::unique_ptr<actor::Player> m_player{};
 	};
 }

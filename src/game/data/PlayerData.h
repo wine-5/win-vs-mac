@@ -58,7 +58,7 @@ namespace game::data
         std::string   m_modelPath;
         std::string   m_idleAnimPath;
         std::string   m_walkAnimPath;
-        float         m_moveSpeed;
+        float         m_moveSpeed{0.0f};
         core::Vector3 m_colliderSize;
         core::Vector3 m_colliderOffset;
     };

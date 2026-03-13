@@ -6,7 +6,7 @@ namespace core::ecs
 	using EntityId = uint32_t;
 
 	// 0 は無効IDとして扱う
-	constexpr EntityId INVALID_ENTITY_ID = 0;
+	constexpr EntityId INVALID_ENTITY_ID{};
 
 	/** @brief エンティティIDのラッパークラス */
 	class Entity
@@ -31,6 +31,6 @@ namespace core::ecs
 		bool operator!=(const Entity& other) const { return m_id != other.m_id; }
 
 	private:
-		EntityId m_id;
+		EntityId m_id{INVALID_ENTITY_ID};
 	};
 }

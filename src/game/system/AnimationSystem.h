@@ -43,9 +43,9 @@ namespace game::system
 			int newAnimHandle);
 		
 		core::ecs::ComponentManager& m_componentManager;
-		core::ecs::EntityId m_entityId;
+		core::ecs::EntityId m_entityId{};
 		core::iface::IAnimator& m_animator;
-		int m_idleAnimHandle;
-		int m_walkAnimHandle;
+		int m_idleAnimHandle{-1};
+		int m_walkAnimHandle{-1};
 	};
 }
