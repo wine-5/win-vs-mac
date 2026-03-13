@@ -30,17 +30,17 @@ namespace game::data
         }
 
         /** @brief モデルパスを取得 */
-        const std::string& getModelPath()      const { return m_modelPath; }
+        const std::string& getModelPath()      const noexcept { return m_modelPath; }
         /** @brief 位置を取得 */
-        core::Vector3      getPosition()       const { return m_position; }
+        core::Vector3      getPosition()       const noexcept { return m_position; }
         /** @brief 回転を取得 */
-        core::Vector3      getRotation()       const { return m_rotation; }
+        core::Vector3      getRotation()       const noexcept { return m_rotation; }
         /** @brief スケールを取得 */
-        core::Vector3      getScale()          const { return m_scale; }
+        core::Vector3      getScale()          const noexcept { return m_scale; }
         /** @brief コライダーサイズを取得 */
-        core::Vector3      getColliderSize()   const { return m_colliderSize; }
+        core::Vector3      getColliderSize()   const noexcept { return m_colliderSize; }
         /** @brief コライダーオフセットを取得 */
-        core::Vector3      getColliderOffset() const { return m_colliderOffset; }
+        core::Vector3      getColliderOffset() const noexcept { return m_colliderOffset; }
 
     private:
         // デフォルト値なし - JSON読み込み失敗時はFail Fast

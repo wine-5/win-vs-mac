@@ -2,6 +2,7 @@
 #include "game/component/TransformComponent.h"
 #include "game/component/ColliderComponent.h"
 #include "game/component/VelocityComponent.h"
+#include <cmath>
 
 namespace game::system
 {
@@ -39,9 +40,9 @@ namespace game::system
 		core::Vector3 centerB = transformB.m_position + colliderB.m_offset;
 
 		// 各軸の距離と必要な距離
-		float distX = abs(centerA.x - centerB.x);
-		float distY = abs(centerA.y - centerB.y);
-		float distZ = abs(centerA.z - centerB.z);
+		float distX = std::abs(centerA.x - centerB.x);
+		float distY = std::abs(centerA.y - centerB.y);
+		float distZ = std::abs(centerA.z - centerB.z);
 
 		float requiredX = (colliderA.m_size.x + colliderB.m_size.x) / 2.0f;
 		float requiredY = (colliderA.m_size.y + colliderB.m_size.y) / 2.0f;

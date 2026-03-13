@@ -7,9 +7,9 @@ namespace core
 	 */
 	struct Vector3
 	{
-		float x = 0.0f;
-		float y = 0.0f;
-		float z = 0.0f;
+		float x{0.0f};
+		float y{0.0f};
+		float z{0.0f};
 
 		/** @brief デフォルトコンストラクタ */
 		Vector3() = default;
@@ -23,12 +23,12 @@ namespace core
 		Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
 
 		/** @brief ベクトル加算 */
-		Vector3 operator+(const Vector3& other) const { return { x + other.x, y + other.y, z + other.z }; }
+		Vector3 operator+(const Vector3& other) const noexcept { return { x + other.x, y + other.y, z + other.z }; }
 		
 		/** @brief ベクトル減算 */
-		Vector3 operator-(const Vector3& other) const { return { x - other.x, y - other.y, z - other.z }; }
+		Vector3 operator-(const Vector3& other) const noexcept { return { x - other.x, y - other.y, z - other.z }; }
 		
 		/** @brief ベクトル加算代入 */
-		Vector3& operator+=(const Vector3& other) { x += other.x; y += other.y; z += other.z; return *this; }
+		Vector3& operator+=(const Vector3& other) noexcept { x += other.x; y += other.y; z += other.z; return *this; }
 	};
 }

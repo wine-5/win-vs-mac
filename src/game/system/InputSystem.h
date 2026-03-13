@@ -34,7 +34,7 @@ namespace game::system
 
 	private:
 		core::ecs::ComponentManager& m_componentManager;
-		core::ecs::EntityId m_entityId;
+		core::ecs::EntityId m_entityId{};
 		core::iface::IInputProvider& m_inputProvider;
 	};
 }

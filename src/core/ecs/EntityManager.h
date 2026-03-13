@@ -34,7 +34,7 @@ namespace core::ecs
 		}
 
 	private:
-		EntityId m_nextId;
+		EntityId m_nextId{INITIAL_ENTITY_ID};
 		// 再利用可能なEntityIdのキュー
 		std::queue<EntityId> m_recycledIds;
 	};

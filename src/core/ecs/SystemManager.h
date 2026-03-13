@@ -23,7 +23,7 @@ namespace core::ecs
 		{
 			auto system = std::make_unique<T>(std::forward<Args>(args)...);
 			T* ptr = system.get();
-			m_system.push_back(std::move(system));
+			m_systems.push_back(std::move(system));
 			return ptr;
 		}
 
@@ -33,7 +33,7 @@ namespace core::ecs
 		 */
 		void update(float deltaTime)
 		{
-			for (auto& system : m_system)
+			for (auto& system : m_systems)
 			{
 				system->update(deltaTime);
 			}
@@ -41,6 +41,6 @@ namespace core::ecs
 
 	private:
 		// 登録順に更新されるSystemのリスト
-		std::vector<std::unique_ptr<ISystem>> m_system;
+		std::vector<std::unique_ptr<ISystem>> m_systems;
 	};
 }

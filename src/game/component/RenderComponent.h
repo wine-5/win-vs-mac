@@ -7,7 +7,7 @@ namespace game::component
 	 */
 	struct RenderComponent
 	{
-		int  m_modelHandle = -1; // -1は未ロード
-		bool m_isVisible = true;
+		int  m_modelHandle{-1}; // -1は未ロード
+		bool m_isVisible{true};
 	};
 }

@@ -29,7 +29,7 @@ namespace game::actor
 		componentManager.add<component::ColliderComponent>(m_entity.getId(), collider);
 	}
 
-	core::ecs::EntityId Player::getId() const
+	core::ecs::EntityId Player::getId() const noexcept
 	{
 		return m_entity.getId();
 	}

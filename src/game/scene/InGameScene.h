@@ -12,10 +12,9 @@
 #include "core/interface/IAnimator.h"
 
 /* game層のインクルード */
-#include "game/ObjectFactory.h"
+#include "game/factory/FactoryManager.h"
 #include "game/component/RenderComponent.h"
 #include "game/data/PlayerData.h"
-#include "game/stage/Ground.h"
 
 #include <memory>
 
@@ -49,6 +48,11 @@ namespace game::scene
 		void update(float deltaTime) override;
 
 	private:
+		/* コンストラクタで参照する関数 */
+		void loadResources();
+		void spawnEntities();
+		void setupSystems();
+
 		core::ecs::EntityManager    m_entityManager;
 		core::ecs::ComponentManager m_componentManager;
 		core::ecs::SystemManager    m_systemManager;
@@ -59,10 +63,11 @@ namespace game::scene
 		core::iface::IResourceManager& m_resourceManager;
 		core::iface::IInputProvider& m_inputProvider;
 
-		game::ObjectFactory         m_objectFactory;
+		game::factory::FactoryManager m_factoryManager;
 		game::data::PlayerData m_playerData;
 
-		std::unique_ptr <stage::Ground> m_ground;
+		core::ecs::EntityId m_groundId{core::ecs::INVALID_ENTITY_ID};
+		core::ecs::EntityId m_playerId{ core::ecs::INVALID_ENTITY_ID };
 
 		// カメラ設定
 		static constexpr float CAMERA_OFFSET_X = 0.0f;

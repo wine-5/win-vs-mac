@@ -27,7 +27,7 @@ namespace game::system
 
 	private:
 		core::ecs::ComponentManager& m_componentManager;
-		core::ecs::EntityId m_entityId;
-		float m_moveSpeed;
+		core::ecs::EntityId m_entityId{};
+		float m_moveSpeed{0.0f};
 	};
 }

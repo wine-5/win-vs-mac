@@ -4,6 +4,7 @@
 #include "thirdparty/nlohmann/json.hpp"
 #include <fstream>
 #include <cassert>
+#include <stdexcept>
 #include "constant/JsonKeys.h"
 
 namespace infrastructure
@@ -14,8 +15,8 @@ namespace infrastructure
         auto resourceList = loadResourceList("assets/config/resources.json");
         for (const auto& res : resourceList)
         {
-            auto metadata = parseJsonFile(res.path);
-            m_metadata[res.id] = metadata;
+            auto metadata = parseJsonFile(res.m_path);
+            m_metadata[res.m_id] = metadata;
         }
     }
 
@@ -93,7 +94,7 @@ namespace infrastructure
         {
             LOG_E("FATAL: resources.jsonを開けませんでした: %s", filePath.c_str());
             assert(false && "致命的エラー: resources.jsonが見つかりません。ファイルパスを確認してください。");
-            return {};
+            throw std::runtime_error("resources.jsonを開けませんでした: " + filePath);
         }
 
         nlohmann::json j = nlohmann::json::parse(file);
@@ -102,8 +103,8 @@ namespace infrastructure
         for (const auto& item : j["resources"])
         {
             ResourceDefinition def;
-            def.id = item["id"];
-            def.path = item["path"];
+            def.m_id = item["id"];
+            def.m_path = item["path"];
             resources.push_back(def);
         }
 
@@ -112,69 +113,69 @@ namespace infrastructure
 
     core::data::ModelMetadata ResourceManager::parseJsonFile(const std::string& filePath)
     {
-        using namespace infrastructure::constant;  // JsonKeysを使いやすく
+        using namespace infrastructure::constant;  // json_keysを使いやすく
 
         std::ifstream file(filePath);
         if (!file.is_open())
         {
             LOG_E("FATAL: JSONファイルを開けませんでした: %s", filePath.c_str());
             assert(false && "致命的エラー: JSONファイルが見つかりません。ファイルパスを確認してください。");
-            return {};  // Assert後は到達しないが、コンパイラ警告回避
+            throw std::runtime_error("JSONファイルを開けませんでした: " + filePath);
         }
 
         nlohmann::json j = nlohmann::json::parse(file);
 
         core::data::ModelMetadata metadata;
-        metadata.id = j[JsonKeys::ID];
-        metadata.category = j[JsonKeys::CATEGORY];
-        metadata.modelPath = j[JsonKeys::MODEL][JsonKeys::PATH];
+        metadata.id = j[json_keys::ID];
+        metadata.category = j[json_keys::CATEGORY];
+        metadata.modelPath = j[json_keys::MODEL][json_keys::PATH];
 
         // スケール
-        metadata.scale.x = j[JsonKeys::MODEL][JsonKeys::SCALE][0];
-        metadata.scale.y = j[JsonKeys::MODEL][JsonKeys::SCALE][1];
-        metadata.scale.z = j[JsonKeys::MODEL][JsonKeys::SCALE][2];
+        metadata.scale.x = j[json_keys::MODEL][json_keys::SCALE][0];
+        metadata.scale.y = j[json_keys::MODEL][json_keys::SCALE][1];
+        metadata.scale.z = j[json_keys::MODEL][json_keys::SCALE][2];
 
         // コライダーサイズ
-        metadata.colliderSize.x = j[JsonKeys::COLLIDER][JsonKeys::SIZE][0];
-        metadata.colliderSize.y = j[JsonKeys::COLLIDER][JsonKeys::SIZE][1];
-        metadata.colliderSize.z = j[JsonKeys::COLLIDER][JsonKeys::SIZE][2];
+        metadata.colliderSize.x = j[json_keys::COLLIDER][json_keys::SIZE][0];
+        metadata.colliderSize.y = j[json_keys::COLLIDER][json_keys::SIZE][1];
+        metadata.colliderSize.z = j[json_keys::COLLIDER][json_keys::SIZE][2];
 
         // コライダーオフセット
-        metadata.colliderOffset.x = j[JsonKeys::COLLIDER][JsonKeys::OFFSET][0];
-        metadata.colliderOffset.y = j[JsonKeys::COLLIDER][JsonKeys::OFFSET][1];
-        metadata.colliderOffset.z = j[JsonKeys::COLLIDER][JsonKeys::OFFSET][2];
+        metadata.colliderOffset.x = j[json_keys::COLLIDER][json_keys::OFFSET][0];
+        metadata.colliderOffset.y = j[json_keys::COLLIDER][json_keys::OFFSET][1];
+        metadata.colliderOffset.z = j[json_keys::COLLIDER][json_keys::OFFSET][2];
 
         // Transform情報（直接メンバに代入、findコスト削減）
-        if (j.contains(JsonKeys::TRANSFORM))
+        if (j.contains(json_keys::TRANSFORM))
         {
-            if (j[JsonKeys::TRANSFORM].contains("posX"))
-                metadata.position.x = j[JsonKeys::TRANSFORM]["posX"];
-            if (j[JsonKeys::TRANSFORM].contains("posY"))
-                metadata.position.y = j[JsonKeys::TRANSFORM]["posY"];
-            if (j[JsonKeys::TRANSFORM].contains("posZ"))
-                metadata.position.z = j[JsonKeys::TRANSFORM]["posZ"];
-            if (j[JsonKeys::TRANSFORM].contains("rotX"))
-                metadata.rotation.x = j[JsonKeys::TRANSFORM]["rotX"];
-            if (j[JsonKeys::TRANSFORM].contains("rotY"))
-                metadata.rotation.y = j[JsonKeys::TRANSFORM]["rotY"];
-            if (j[JsonKeys::TRANSFORM].contains("rotZ"))
-                metadata.rotation.z = j[JsonKeys::TRANSFORM]["rotZ"];
+            if (j[json_keys::TRANSFORM].contains("posX"))
+                metadata.position.x = j[json_keys::TRANSFORM]["posX"];
+            if (j[json_keys::TRANSFORM].contains("posY"))
+                metadata.position.y = j[json_keys::TRANSFORM]["posY"];
+            if (j[json_keys::TRANSFORM].contains("posZ"))
+                metadata.position.z = j[json_keys::TRANSFORM]["posZ"];
+            if (j[json_keys::TRANSFORM].contains("rotX"))
+                metadata.rotation.x = j[json_keys::TRANSFORM]["rotX"];
+            if (j[json_keys::TRANSFORM].contains("rotY"))
+                metadata.rotation.y = j[json_keys::TRANSFORM]["rotY"];
+            if (j[json_keys::TRANSFORM].contains("rotZ"))
+                metadata.rotation.z = j[json_keys::TRANSFORM]["rotZ"];
         }
 
         // アニメーション（stringProperties）
-        if (j.contains(JsonKeys::ANIMATIONS))
+        if (j.contains(json_keys::ANIMATIONS))
         {
-            if (j[JsonKeys::ANIMATIONS].contains(JsonKeys::IDLE))
-                metadata.stringProperties["idleAnim"] = j[JsonKeys::ANIMATIONS][JsonKeys::IDLE];
-            if (j[JsonKeys::ANIMATIONS].contains(JsonKeys::WALK))
-                metadata.stringProperties["walkAnim"] = j[JsonKeys::ANIMATIONS][JsonKeys::WALK];
+            if (j[json_keys::ANIMATIONS].contains(json_keys::IDLE))
+                metadata.stringProperties["idleAnim"] = j[json_keys::ANIMATIONS][json_keys::IDLE];
+            if (j[json_keys::ANIMATIONS].contains(json_keys::WALK))
+                metadata.stringProperties["walkAnim"] = j[json_keys::ANIMATIONS][json_keys::WALK];
         }
 
         // ゲームプレイパラメータ（floatProperties - Entity固有のレアなパラメータのみ）
-        if (j.contains(JsonKeys::GAMEPLAY))
+        if (j.contains(json_keys::GAMEPLAY))
         {
-            if (j[JsonKeys::GAMEPLAY].contains(JsonKeys::MOVE_SPEED))
-                metadata.floatProperties["moveSpeed"] = j[JsonKeys::GAMEPLAY][JsonKeys::MOVE_SPEED];
+            if (j[json_keys::GAMEPLAY].contains(json_keys::MOVE_SPEED))
+                metadata.floatProperties["moveSpeed"] = j[json_keys::GAMEPLAY][json_keys::MOVE_SPEED];
         }
 
         return metadata;

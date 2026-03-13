@@ -7,8 +7,8 @@ namespace game::component
 	 */
 	struct InputComponent
 	{
-		float m_moveX = 0.0f;
-		float m_moveZ = 0.0f;
-		bool  m_jumpPressed = false;
+		float m_moveX{0.0f};
+		float m_moveZ{0.0f};
+		bool  m_jumpPressed{false};
 	};
 }

@@ -134,6 +134,10 @@
     <ClCompile Include="src\core\interface\ICamera.h" />
     <ClCompile Include="src\core\interface\ILogger.h" />
     <ClCompile Include="src\core\ServiceLocator.cpp" />
+    <ClCompile Include="src\game\factory\FactoryInitializer.cpp" />
+    <ClCompile Include="src\game\factory\FactoryManager.cpp" />
+    <ClCompile Include="src\game\factory\GroundFactory.cpp" />
+    <ClCompile Include="src\game\factory\PlayerFactory.cpp" />
     <ClCompile Include="src\game\stage\Ground.cpp" />
     <ClCompile Include="src\game\system\AnimationSystem.cpp" />
     <ClCompile Include="src\game\system\CollisionSystem.cpp" />
@@ -148,7 +152,6 @@
     <ClCompile Include="src\game\system\InputSystem.cpp" />
     <ClCompile Include="src\game\system\MoveSystem.cpp" />
     <ClCompile Include="src\game\system\PhysicsSystem.cpp" />
-    <ClCompile Include="src\game\ObjectFactory.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\infrastructure\utility\LogUtil.cpp" />
     <ClCompile Include="src\ServiceLocatorInitializer.cpp" />
@@ -190,6 +193,11 @@
     <ClInclude Include="src\game\constant\CollisionTag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
     <ClInclude Include="src\game\data\GroundData.h" />
+    <ClInclude Include="src\game\factory\FactoryInitializer.h" />
+    <ClInclude Include="src\game\factory\FactoryManager.h" />
+    <ClInclude Include="src\game\factory\GroundFactory.h" />
+    <ClInclude Include="src\game\factory\IFactory.h" />
+    <ClInclude Include="src\game\factory\PlayerFactory.h" />
     <ClInclude Include="src\infrastructure\constant\JsonKeys.h" />
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
     <ClInclude Include="src\game\data\PlayerData.h" />
@@ -220,7 +228,6 @@
     <ClInclude Include="src\game\system\MoveSystem.h" />
     <ClInclude Include="src\game\system\PhysicsSystem.h" />
     <ClInclude Include="src\game\event\InGameEvents.h" />
-    <ClInclude Include="src\game\ObjectFactory.h" />
     <ClInclude Include="src\infrastructure\utility\LogUtil.h" />
     <ClInclude Include="src\ServiceLocatorInitializer.h" />
   </ItemGroup>
