@@ -187,7 +187,9 @@
     <ClInclude Include="src\core\interface\IRenderer.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
     <ClInclude Include="src\core\input\KeyCode.h" />
+    <ClInclude Include="src\core\interface\IUIRenderer.h" />
     <ClInclude Include="src\core\ServiceLocator.h" />
+    <ClInclude Include="src\core\utility\Color.h" />
     <ClInclude Include="src\core\Vector3.h" />
     <ClInclude Include="src\game\component\AnimationComponent.h" />
     <ClInclude Include="src\game\component\ColliderComponent.h" />

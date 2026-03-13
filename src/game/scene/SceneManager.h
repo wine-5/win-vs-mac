@@ -26,6 +26,6 @@ namespace game::scene
 
 	private:
 		std::unique_ptr<IScene> m_currentScene{};
-		SceneType m_currentSceneType;
+		SceneType m_currentSceneType{};
 	};
 }
