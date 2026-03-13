@@ -34,12 +34,6 @@ namespace game::ui
         virtual void draw(core::iface::IUIRenderer& uiRenderer) const = 0;
 
         /**
-         * @brief 表示状態を取得する
-         * @return 表示されている場合true
-         */
-        virtual bool isVisible() const = 0;
-
-        /**
          * @brief 表示状態を設定する
          * @param visible 表示するかどうか
          */
