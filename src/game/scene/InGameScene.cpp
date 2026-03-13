@@ -1,4 +1,5 @@
 ﻿#include "InGameScene.h"
+#include "game/factory/FactoryInitializer.h"
 #include "game/system/InputSystem.h"
 #include "game/system/MoveSystem.h"
 #include "game/system/PhysicsSystem.h"
@@ -36,7 +37,7 @@ namespace game::scene
 	void InGameScene::loadResources()
 	{
 		// 先にモデルをロードして自動計算を実行
-		int playerModelHandle = m_resourceManager.loadModelById(constant::model_id::PLAYER);
+		m_resourceManager.loadModelById(constant::model_id::PLAYER);
 
 		// モデルロード後に再度メタデータを取得してPlayerDataを更新
 		auto playerMeta = m_resourceManager.getMetadata(constant::model_id::PLAYER);
@@ -47,18 +48,9 @@ namespace game::scene
 	void InGameScene::spawnEntities()
 	{
 		
-		m_factoryManager.getPlayerFactory().create(playerModelHandle, m_playerData);
-
-		// Ground生成（JSON駆動）
-		int groundModelHandle = m_resourceManager.loadModelById(constant::model_id::GROUND);
-		auto groundMeta = m_resourceManager.getMetadata(constant::model_id::GROUND);
-		assert(groundMeta.has_value() && "Groundのメタデータが見つかりません");
-
-		game::data::GroundData groundData = game::data::GroundData::fromMetadata(groundMeta.value());
-		m_groundId = m_factoryManager.getGroundFactory().create(
-			groundModelHandle,
-			groundData
-		);
+		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
+		initializer.initializePlayer(m_playerData);
+		m_groundId = initializer.initializeGround();
 
 	}
 	void InGameScene::setupSystems()
