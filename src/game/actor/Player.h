@@ -30,7 +30,7 @@ namespace game::actor
 		 * @brief PlayerのEntityIDを取得する
 		 * @return EntityID
 		 */
-		core::ecs::EntityId getId() const;
+		core::ecs::EntityId getId() const noexcept;
 
 	private:
 		core::ecs::Entity m_entity;

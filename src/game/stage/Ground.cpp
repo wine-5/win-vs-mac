@@ -29,7 +29,7 @@ namespace game::stage
 		componentManager.add<component::ColliderComponent>(m_entity.getId(), collider);
 	}
 
-	core::ecs::EntityId Ground::getId() const
+	core::ecs::EntityId Ground::getId() const noexcept
 	{
 		return m_entity.getId();
 	}
