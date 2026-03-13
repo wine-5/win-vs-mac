@@ -8,6 +8,12 @@ namespace game::scene
 			m_currentScene->update(deltaTime);
 	}
 
+	void SceneManager::draw()
+	{
+		if (m_currentScene)
+			m_currentScene->draw();
+	}
+
 	void SceneManager::changeScene(SceneType sceneType, std::unique_ptr<IScene> scene)
 	{
 		m_currentSceneType = sceneType;

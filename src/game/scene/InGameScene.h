@@ -47,6 +47,11 @@ namespace game::scene
 		 */
 		void update(float deltaTime) override;
 
+		/**
+		 * @brief シーンの描画処理
+		 */
+		void draw() override;
+
 	private:
 		/* コンストラクタで参照する関数 */
 		void loadResources();

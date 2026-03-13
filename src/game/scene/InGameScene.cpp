@@ -1,4 +1,10 @@
 ﻿#include "InGameScene.h"
+
+/* core層 */
+#include "core/interface/ILogger.h"
+#include "core/utility/Color.h"
+
+/* game層 */
 #include "game/factory/FactoryInitializer.h"
 #include "game/system/InputSystem.h"
 #include "game/system/MoveSystem.h"
@@ -6,11 +12,12 @@
 #include "game/component/TransformComponent.h"
 #include "game/actor/Player.h"
 #include "game/component/RenderComponent.h"
-#include "core/interface/ILogger.h"
 #include "game/system/AnimationSystem.h"
 #include "game/system/CollisionSystem.h"
 #include "game/component/ColliderComponent.h"
 #include "game/constant/ModelId.h"
+
+/* 標準のインクルード */
 #include <cassert>
 #include <stdexcept>
 
@@ -86,14 +93,19 @@ namespace game::scene
 	void InGameScene::update(float deltaTime)
 	{
 		m_systemManager.update(deltaTime);
-
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
-		auto& render = m_componentManager.get<game::component::RenderComponent>(m_playerId);
+		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
+	}
+
+	void InGameScene::draw()
+	{
+		// コンポーネントの取得
+		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
 		auto& anim = m_componentManager.get<game::component::AnimationComponent<game::constant::PlayerAnimationState>>(m_playerId);
 		auto& groundRender = m_componentManager.get<game::component::RenderComponent>(m_groundId);
+		auto& render = m_componentManager.get<game::component::RenderComponent>(m_playerId);
 		auto& groundTransform = m_componentManager.get<game::component::TransformComponent>(m_groundId);
 
-		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
 		m_renderer.drawModel(render.m_modelHandle, transform.m_position,transform.m_rotation,transform.m_scale);
 		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
 
@@ -104,7 +116,8 @@ namespace game::scene
 		core::Vector3 playerColliderCenter = transform.m_position + playerCollider.m_offset;
 		core::Vector3 groundColliderCenter = groundTransform.m_position + groundCollider.m_offset;
 		
-		m_renderer.drawCollider(playerColliderCenter, playerCollider.m_size, 0x00FF00); // 緑: Player
-		m_renderer.drawCollider(groundColliderCenter, groundCollider.m_size, 0x0000FF); // 青: Ground
+		m_renderer.drawCollider(playerColliderCenter, playerCollider.m_size, core::utility::Color::GREEN);
+		m_renderer.drawCollider(groundColliderCenter, groundCollider.m_size, core::utility::Color::BLUE);
+
 	}
 }

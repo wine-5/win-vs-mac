@@ -22,6 +22,11 @@ namespace game::scene
 		 * @param sceneType 変更先のシーンの種類
 		 */
 
+		/**
+		* @brief 現在のシーンを描画する
+		*/
+		void draw();
+
 		void changeScene(SceneType sceneType, std::unique_ptr<IScene> scene);
 
 	private:

@@ -32,6 +32,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ClearDrawScreen();// 画面クリア
 		core::ServiceLocator::get<core::iface::ILogger>()->clear();
 		inGameScene.update(DELTA_TIME);
+		inGameScene.draw();
 
 		ScreenFlip();       // 画面を反映
 	}

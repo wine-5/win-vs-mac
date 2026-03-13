@@ -143,6 +143,7 @@
     <ClCompile Include="src\game\system\AnimationSystem.cpp" />
     <ClCompile Include="src\game\system\CollisionSystem.cpp" />
     <ClCompile Include="src\game\ui\Button.cpp" />
+    <ClCompile Include="src\game\ui\UIManager.cpp" />
     <ClCompile Include="src\infrastructure\Animator.cpp" />
     <ClCompile Include="src\infrastructure\Camera.cpp" />
     <ClCompile Include="src\infrastructure\InGameSceneInitializer.cpp" />
@@ -208,6 +209,7 @@
     <ClInclude Include="src\game\scene\SceneType.h" />
     <ClInclude Include="src\game\ui\Button.h" />
     <ClInclude Include="src\game\ui\IUIElement.h" />
+    <ClInclude Include="src\game\ui\UIManager.h" />
     <ClInclude Include="src\infrastructure\constant\JsonKeys.h" />
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
     <ClInclude Include="src\game\data\PlayerData.h" />
