@@ -198,6 +198,7 @@
     <ClInclude Include="src\game\factory\GroundFactory.h" />
     <ClInclude Include="src\game\factory\IFactory.h" />
     <ClInclude Include="src\game\factory\PlayerFactory.h" />
+    <ClInclude Include="src\game\scene\SceneType.h" />
     <ClInclude Include="src\infrastructure\constant\JsonKeys.h" />
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
     <ClInclude Include="src\game\data\PlayerData.h" />
