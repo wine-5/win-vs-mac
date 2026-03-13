@@ -28,13 +28,24 @@ namespace game::scene
 		, m_playerData(game::data::PlayerData::fromMetadata(
 			m_resourceManager.getMetadata(constant::model_id::PLAYER).value()))
 	{
+		loadResources();
+		spawnEntities();
+		setupSystems();
+	}
+
+	void InGameScene::loadResources()
+	{
 		// 先にモデルをロードして自動計算を実行
 		int playerModelHandle = m_resourceManager.loadModelById(constant::model_id::PLAYER);
-		
+
 		// モデルロード後に再度メタデータを取得してPlayerDataを更新
 		auto playerMeta = m_resourceManager.getMetadata(constant::model_id::PLAYER);
 		assert(playerMeta.has_value() && "Playerのメタデータが見つかりません");
 		m_playerData = game::data::PlayerData::fromMetadata(playerMeta.value());
+
+	}
+	void InGameScene::spawnEntities()
+	{
 		
 		m_factoryManager.getPlayerFactory().create(playerModelHandle, m_playerData);
 
@@ -49,6 +60,9 @@ namespace game::scene
 			groundData
 		);
 
+	}
+	void InGameScene::setupSystems()
+	{
 		// アニメーションハンドルをロード
 		//int idleAnimHandle = m_resourceManager.loadModelById(m_playerData.getIdleAnimPath());
 		//int walkAnimHandle = m_resourceManager.loadModelById(m_playerData.getWalkAnimPath());
@@ -63,7 +77,7 @@ namespace game::scene
 		//	m_animator,
 		//	idleAnimHandle,
 		//	walkAnimHandle);
-		
+
 		auto* collisionSystem = m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
 		collisionSystem->addEntity(m_factoryManager.getPlayerFactory().getPlayer().getId());
 		collisionSystem->addEntity(m_groundId);

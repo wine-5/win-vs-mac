@@ -48,6 +48,11 @@ namespace game::scene
 		void update(float deltaTime) override;
 
 	private:
+		/* コンストラクタで参照する関数 */
+		void loadResources();
+		void spawnEntities();
+		void setupSystems();
+
 		core::ecs::EntityManager    m_entityManager;
 		core::ecs::ComponentManager m_componentManager;
 		core::ecs::SystemManager    m_systemManager;
