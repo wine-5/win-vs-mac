@@ -67,6 +67,7 @@ namespace game::scene
 		game::data::PlayerData m_playerData;
 
 		core::ecs::EntityId m_groundId{core::ecs::INVALID_ENTITY_ID};
+		core::ecs::EntityId m_playerId{ core::ecs::INVALID_ENTITY_ID };
 
 		// カメラ設定
 		static constexpr float CAMERA_OFFSET_X = 0.0f;

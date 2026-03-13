@@ -51,6 +51,7 @@ namespace game::scene
 		
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
 		initializer.initializePlayer(m_playerData);
+		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
 		m_groundId = initializer.initializeGround();
 
 	}
@@ -62,9 +63,9 @@ namespace game::scene
 		//int walkAnimHandle = m_resourceManager.loadModelById(m_playerData.getWalkAnimPath());
 
 		// システム登録
-		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_factoryManager.getPlayerFactory().getPlayer().getId(), m_inputProvider);
-		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_factoryManager.getPlayerFactory().getPlayer().getId(), m_playerData.getMoveSpeed());
-		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager, m_factoryManager.getPlayerFactory().getPlayer().getId());
+		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_playerId, m_inputProvider);
+		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed());
+		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager, m_playerId);
 		//m_systemManager.registerSystem<game::system::AnimationSystem>(
 		//	m_componentManager,
 		//	m_factoryManager.getPlayerFactory().getPlayer().getId(),
@@ -73,7 +74,7 @@ namespace game::scene
 		//	walkAnimHandle);
 
 		auto* collisionSystem = m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
-		collisionSystem->addEntity(m_factoryManager.getPlayerFactory().getPlayer().getId());
+		collisionSystem->addEntity(m_playerId);
 		collisionSystem->addEntity(m_groundId);
 	}
 
@@ -81,9 +82,9 @@ namespace game::scene
 	{
 		m_systemManager.update(deltaTime);
 
-		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_factoryManager.getPlayerFactory().getPlayer().getId());
-		auto& render = m_componentManager.get<game::component::RenderComponent>(m_factoryManager.getPlayerFactory().getPlayer().getId());
-		auto& anim = m_componentManager.get<game::component::AnimationComponent<game::constant::PlayerAnimationState>>(m_factoryManager.getPlayerFactory().getPlayer().getId());
+		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
+		auto& render = m_componentManager.get<game::component::RenderComponent>(m_playerId);
+		auto& anim = m_componentManager.get<game::component::AnimationComponent<game::constant::PlayerAnimationState>>(m_playerId);
 		auto& groundRender = m_componentManager.get<game::component::RenderComponent>(m_groundId);
 		auto& groundTransform = m_componentManager.get<game::component::TransformComponent>(m_groundId);
 
@@ -92,7 +93,7 @@ namespace game::scene
 		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
 
 		// デバッグ: コライダーを可視化
-		auto& playerCollider = m_componentManager.get<game::component::ColliderComponent>(m_factoryManager.getPlayerFactory().getPlayer().getId());
+		auto& playerCollider = m_componentManager.get<game::component::ColliderComponent>(m_playerId);
 		auto& groundCollider = m_componentManager.get<game::component::ColliderComponent>(m_groundId);
 		
 		core::Vector3 playerColliderCenter = transform.m_position + playerCollider.m_offset;
