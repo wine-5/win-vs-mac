@@ -45,6 +45,7 @@ namespace game::scene
 		m_playerData = game::data::PlayerData::fromMetadata(playerMeta.value());
 
 	}
+
 	void InGameScene::spawnEntities()
 	{
 		
@@ -53,6 +54,7 @@ namespace game::scene
 		m_groundId = initializer.initializeGround();
 
 	}
+
 	void InGameScene::setupSystems()
 	{
 		// アニメーションハンドルをロード
