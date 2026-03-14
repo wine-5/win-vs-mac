@@ -7,7 +7,7 @@
 namespace game::system
 {
 	CollisionSystem::CollisionSystem(core::ecs::ComponentManager& componentManager)
-		: m_componentManager(componentManager)
+		: m_componentManager{componentManager}
 	{
 	}
 
