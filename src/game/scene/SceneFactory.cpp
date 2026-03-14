@@ -1,9 +1,9 @@
 ﻿#include "SceneFactory.h"
-#include "game/scene/TitleScene.h"
-#include "game/scene/InGameScene.h"
+#include "TitleScene.h"
+#include "InGameScene.h"
 #include "core/ServiceLocator.h"
 
-namespace infrastructure
+namespace game::scene
 {
     SceneFactory::SceneFactory()
         : m_inGameScene{}
@@ -11,28 +11,28 @@ namespace infrastructure
     {
     }
 
-    game::scene::IScene* SceneFactory::createScene(game::scene::SceneType sceneType)
+    IScene* SceneFactory::createScene(SceneType sceneType)
     {
         auto* screen = core::ServiceLocator::get<core::iface::IScreen>();
 
         switch (sceneType)
         {
-        case game::scene::SceneType::Title:
+        case SceneType::Title:
             // 初回のみ生成
             if (!m_titleScene)
             {
-                m_titleScene = std::make_unique<game::scene::TitleScene>(
+                m_titleScene = std::make_unique<TitleScene>(
                     m_titleInputManager,
                     m_titleUIRenderer,
                     *screen);
             }
             return m_titleScene.get();
 
-        case game::scene::SceneType::InGame:
+        case SceneType::InGame:
             // 初回のみ生成
             if (!m_inGameScene)
             {
-                m_inGameScene = std::make_unique<game::scene::InGameScene>(
+                m_inGameScene = std::make_unique<InGameScene>(
                     m_inGameCamera,
                     m_inGameRenderer,
                     m_inGameAnimator,

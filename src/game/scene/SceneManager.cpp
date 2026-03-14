@@ -1,11 +1,11 @@
 ﻿#include "SceneManager.h"
-#include "infrastructure/SceneFactory.h"
+#include "SceneFactory.h"
 
 namespace game::scene
 {
 	SceneManager::SceneManager()
-		: m_sceneFactory(std::make_unique<infrastructure::SceneFactory>())
-		, m_currentScene(nullptr)
+		: m_sceneFactory(std::make_unique<SceneFactory>())
+		, m_currentScene{}
 	{
 	}
 

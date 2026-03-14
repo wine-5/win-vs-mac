@@ -3,7 +3,7 @@
 #include "SceneType.h"
 #include <memory>
 
-namespace infrastructure { class SceneFactory; }  // 前方宣言
+namespace game::scene { class SceneFactory; }  // 前方宣言
 
 namespace game::scene
 {
@@ -42,7 +42,7 @@ namespace game::scene
 		void changeScene(SceneType sceneType);
 
 	private:
-		std::unique_ptr<infrastructure::SceneFactory> m_sceneFactory;
+		std::unique_ptr<SceneFactory> m_sceneFactory;
 		IScene* m_currentScene;
 		SceneType m_currentSceneType{};
 	};
