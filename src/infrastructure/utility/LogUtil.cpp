@@ -1,45 +1,82 @@
 ﻿#include "LogUtil.h"
-#include <DxLib.h>
 #include <cstdio>
+#include <ctime>
+#include <Windows.h>
 
 namespace infrastructure::utility
 {
-	int LogUtil::s_line = 0;
-
-	void LogUtil::print(int r, int g, int b, const char* message)
-	{
-		SetDrawBright(r, g, b);
-		printfDx("%s\n", message);
-		SetDrawBright(LOG_COLOR_R, LOG_COLOR_G, LOG_COLOR_B);
-		s_line++;
-	}
-
-	void LogUtil::log(const char* message)
-	{
+    LogUtil::LogUtil()
+        : m_consoleHandle(nullptr)
+    {
 #ifdef _DEBUG
-		print(LOG_COLOR_R, LOG_COLOR_G, LOG_COLOR_B, message);
+        // Windowsコンソールウィンドウを作成
+        AllocConsole();
+        
+        // 標準出力をコンソールにリダイレクト
+        FILE* fp;
+        freopen_s(&fp, "CONOUT$", "w", stdout);
+        freopen_s(&fp, "CONOUT$", "w", stderr);
+        
+        // コンソールハンドルを取得
+        m_consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+        
+        // コンソールウィンドウのタイトルを設定
+        SetConsoleTitleA("DxLib-3D Debug Console");
+        
+        printf("===========================================\n");
+        printf("  DxLib-3D Debug Console\n");
+        printf("===========================================\n\n");
 #endif
-	}
-
-	void LogUtil::warning(const char* message)
-	{
+    }
+    
+    LogUtil::~LogUtil()
+    {
 #ifdef _DEBUG
-		print(WARNING_COLOR_R, WARNING_COLOR_G, WARNING_COLOR_B, message);
+        // コンソールを解放
+        FreeConsole();
 #endif
-	}
+    }
 
-	void LogUtil::error(const char* message)
-	{
+    void LogUtil::log(const char* message)
+    {
 #ifdef _DEBUG
-		print(ERROR_COLOR_R, ERROR_COLOR_G, ERROR_COLOR_B, message);
+        if (m_consoleHandle)
+        {
+            SetConsoleTextAttribute(m_consoleHandle, COLOR_WHITE);
+            printf("[INFO] %s\n", message);
+        }
 #endif
-	}
+    }
 
-	void LogUtil::clear()
-	{
+    void LogUtil::warning(const char* message)
+    {
 #ifdef _DEBUG
-		clsDx();
-		s_line = 0;
+        if (m_consoleHandle)
+        {
+            SetConsoleTextAttribute(m_consoleHandle, COLOR_YELLOW);
+            printf("[WARN] %s\n", message);
+            SetConsoleTextAttribute(m_consoleHandle, COLOR_WHITE);
+        }
 #endif
-	}
+    }
+
+    void LogUtil::error(const char* message)
+    {
+#ifdef _DEBUG
+        if (m_consoleHandle)
+        {
+            SetConsoleTextAttribute(m_consoleHandle, COLOR_RED);
+            printf("[ERROR] %s\n", message);
+            SetConsoleTextAttribute(m_consoleHandle, COLOR_WHITE);
+        }
+#endif
+    }
+
+    void LogUtil::clear()
+    {
+#ifdef _DEBUG
+        // コンソールは自動クリアしない（履歴を残す）
+        // 必要ならsystem("cls")を使用
+#endif
+    }
 }

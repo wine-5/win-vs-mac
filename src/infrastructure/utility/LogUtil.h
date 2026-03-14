@@ -1,29 +1,25 @@
 ﻿#pragma once
 #include "core/interface/ILogger.h"
 #include <cstdarg>
+#include <Windows.h>
 
 namespace infrastructure::utility
 {
     /**
-     * @brief 画面へのログ出力を担当するユーティリティクラス
+     * @brief 別ウィンドウでログ出力を担当するユーティリティクラス
      */
     class LogUtil : public core::iface::ILogger
     {
     public:
-        static constexpr int BUFFER_SIZE = 1024;
+        /**
+         * @brief コンストラクタ - Windowsコンソールを作成
+         */
+        LogUtil();
         
-        // ログの色定数
-        static constexpr int LOG_COLOR_R = 255;
-        static constexpr int LOG_COLOR_G = 255;
-        static constexpr int LOG_COLOR_B = 255;
-        
-        static constexpr int WARNING_COLOR_R = 255;
-        static constexpr int WARNING_COLOR_G = 255;
-        static constexpr int WARNING_COLOR_B = 0;
-        
-        static constexpr int ERROR_COLOR_R = 255;
-        static constexpr int ERROR_COLOR_G = 0;
-        static constexpr int ERROR_COLOR_B = 0;
+        /**
+         * @brief デストラクタ - コンソールを解放
+         */
+        ~LogUtil() override;
 
         /**
          * @brief 通常ログを出力する
@@ -49,8 +45,11 @@ namespace infrastructure::utility
         void clear() override;
 
     private:
-        static void print(int r, int g, int b, const char* message);
-        static int s_line; // 現在の行番号
-        static constexpr int LINE_HEIGHT = 20; // 1行の高さ
+        HANDLE m_consoleHandle;  // コンソールのハンドル
+        
+        // コンソールの色定数
+        static constexpr WORD COLOR_WHITE = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+        static constexpr WORD COLOR_YELLOW = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+        static constexpr WORD COLOR_RED = FOREGROUND_RED | FOREGROUND_INTENSITY;
     };
 }
