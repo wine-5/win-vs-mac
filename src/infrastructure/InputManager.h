@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "core/interface/IInputProvider.h"
+#include <unordered_map>
 
 namespace infrastructure
 {
@@ -9,6 +10,7 @@ namespace infrastructure
 	class InputManager : public core::iface::IInputProvider
 	{
 	public:
+		InputManager();
 		// ========== キーボード入力 ==========
 
 		/**
@@ -18,6 +20,18 @@ namespace infrastructure
 		 */
 		[[nodiscard]] bool isKeyDown(core::input::KeyCode keyCode) const override;
 		
+		/**
+		 * @brief 指定したキーが押された瞬間か判定する（押しっぱなしは無視）
+		 * @param keycode キーコード
+		 * @return 押された瞬間の場合true
+		 */
+		[[nodiscard]] bool isKeyPressed(core::input::KeyCode keycode) const override;
+
+		/**
+		 * @brief フレームの最後に呼び出して前フレームの状態を更新する
+		 */
+		void updatePreviousState() override;
+
 		// ========== ゲームパッド入力 ==========
 
 		/**
@@ -60,5 +74,8 @@ namespace infrastructure
 		 * @return 押されている場合true
 		 */
 		[[nodiscard]] bool isMouseRightPressed() const override;
+
+	private:
+		mutable std::unordered_map<core::input::KeyCode, bool> m_previousKeyState;
 	};
 }

@@ -22,6 +22,18 @@ namespace core::iface
 		 */
 		virtual bool isKeyDown(core::input::KeyCode keycode) const = 0;
 
+		/**
+		 * @brief 指定したキーが押された瞬間か判定する（押しっぱなしは無視）
+		 * @param keycode キーコード
+		 * @return 押された瞬間の場合true
+		 */
+		virtual bool isKeyPressed(core::input::KeyCode keycode) const = 0;
+
+		/**
+		 * @brief フレーム最後に呼び出して前フレームの入力状態を更新する
+		 */
+		virtual void updatePreviousState() = 0;
+
 		// ========== ゲームパッド入力 ==========
 
 		/**

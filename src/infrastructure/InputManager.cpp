@@ -5,26 +5,47 @@
 namespace infrastructure
 {
 	// ========== キーボード入力 ==========
+	static const std::unordered_map<core::input::KeyCode, int> KEY_MAP =
+	{
+		{core::input::KeyCode::W, KEY_INPUT_W},
+		{core::input::KeyCode::A, KEY_INPUT_A},
+		{core::input::KeyCode::S, KEY_INPUT_S},
+		{core::input::KeyCode::D, KEY_INPUT_D},
+		{core::input::KeyCode::R, KEY_INPUT_R},
+		{core::input::KeyCode::Space, KEY_INPUT_SPACE},
+		{core::input::KeyCode::Escape, KEY_INPUT_ESCAPE},
+
+		{ core::input::KeyCode::Up,    KEY_INPUT_UP    },
+		{ core::input::KeyCode::Down,  KEY_INPUT_DOWN  },
+		{ core::input::KeyCode::Left,  KEY_INPUT_LEFT  },
+		{ core::input::KeyCode::Right, KEY_INPUT_RIGHT },
+	};
+
+	InputManager::InputManager()
+		: m_previousKeyState{}
+	{
+	}
 
 	bool InputManager::isKeyDown(core::input::KeyCode keyCode) const
 	{
-		static const std::unordered_map<core::input::KeyCode, int> KEY_MAP =
-		{
-			{core::input::KeyCode::W, KEY_INPUT_W},
-			{core::input::KeyCode::A, KEY_INPUT_A},
-			{core::input::KeyCode::S, KEY_INPUT_S},
-			{core::input::KeyCode::D, KEY_INPUT_D},
-			{core::input::KeyCode::Space, KEY_INPUT_SPACE},
-
-			{ core::input::KeyCode::Up,    KEY_INPUT_UP    },
-			{ core::input::KeyCode::Down,  KEY_INPUT_DOWN  },
-			{ core::input::KeyCode::Left,  KEY_INPUT_LEFT  },
-			{ core::input::KeyCode::Right, KEY_INPUT_RIGHT },
-		};
-
 		auto it = KEY_MAP.find(keyCode);
 		if (it == KEY_MAP.end()) return false;
 		return CheckHitKey(it->second) != 0;
+	}
+
+	bool InputManager::isKeyPressed(core::input::KeyCode keyCode) const
+	{
+		bool currentState = isKeyDown(keyCode);
+		bool previousState = m_previousKeyState[keyCode];  // デフォルトはfalse
+		return currentState && !previousState;
+	}
+
+	void InputManager::updatePreviousState()
+	{
+		for (const auto& [keyCode, dxKey] : KEY_MAP)
+		{
+			m_previousKeyState[keyCode] = isKeyDown(keyCode);
+		}
 	}
 
 	// ========== ゲームパッド入力 ==========
