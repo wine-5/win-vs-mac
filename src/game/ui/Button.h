@@ -21,7 +21,7 @@ namespace game::ui
          * @param height 高さ
          * @param inputProvider 入力インターフェース
          */
-        Button(const std::string& text, int x, int y, int width, int height,
+        Button(std::string text, int x, int y, int width, int height,
             core::iface::IInputProvider& inputProvider);
 
         void update() override;

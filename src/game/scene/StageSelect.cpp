@@ -34,11 +34,11 @@ namespace game::scene
 
     void StageSelect::draw()
     {
-        const char* title = "セレクト画面（仮）";
-        int titleWidth = m_uiRenderer.getTextWidth(title);
+        const char* TITLE = "セレクト画面（仮）";
+        int titleWidth = m_uiRenderer.getTextWidth(TITLE);
         int titleX = (m_screen.getWidth() - titleWidth) / 2;
         int titleY = static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO);
-        m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE);
+        m_uiRenderer.drawText(titleX, titleY, TITLE, core::utility::Color::WHITE);
 
         // UI要素を描画
         m_uiManager.draw(m_uiRenderer);
@@ -47,17 +47,17 @@ namespace game::scene
     void StageSelect::setupUI()
     {
         // 画面サイズを取得
-        const int screenWidth = m_screen.getWidth();
-        const int screenHeight = m_screen.getHeight();
+        const int SCREEN_WIDTH = m_screen.getWidth();
+        const int SCREEN_HEIGHT = m_screen.getHeight();
 
         // 比率に基づいて実際のピクセル値を計算
-        const int buttonWidth = static_cast<int>(screenWidth * BUTTON_WIDTH_RATIO);
-        const int buttonHeight = static_cast<int>(screenHeight * BUTTON_HEIGHT_RATIO);
-        const int buttonX = (screenWidth - buttonWidth) / 2;
-        const int startButtonY = static_cast<int>(screenHeight * START_BUTTON_Y_RATIO);
+        const int BUTTON_WIDTH = static_cast<int>(SCREEN_WIDTH * BUTTON_WIDTH_RATIO);
+        const int BUTTON_HEIGHT = static_cast<int>(SCREEN_HEIGHT * BUTTON_HEIGHT_RATIO);
+        const int BUTTON_X = (SCREEN_WIDTH - BUTTON_WIDTH) / 2;
+        const int START_BUTTON_Y = static_cast<int>(SCREEN_HEIGHT * START_BUTTON_Y_RATIO);
 
         auto startButton = std::make_unique<ui::Button>(
-            "ゲームスタート", buttonX, startButtonY, buttonWidth, buttonHeight, m_inputProvider);
+            "ゲームスタート", BUTTON_X, START_BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, m_inputProvider);
 
         // ボタンが押されたときの処理（Loading画面へ遷移）
         startButton->setOnClick([]() {

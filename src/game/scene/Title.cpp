@@ -36,11 +36,11 @@ namespace game::scene
 
     void Title::draw()
     {
-        const char* title = "タイトルシーン（ここにタイトルを書く予定)";
-        int titleWidth = m_uiRenderer.getTextWidth(title);
+        const char* TITLE = "タイトルシーン（ここにタイトルを書く予定)";
+        int titleWidth = m_uiRenderer.getTextWidth(TITLE);
         int titleX = (m_screen.getWidth() - titleWidth) / 2;
         int titleY = static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO);
-        m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE);
+        m_uiRenderer.drawText(titleX, titleY, TITLE, core::utility::Color::WHITE);
 
         // UI要素を描画
         m_uiManager.draw(m_uiRenderer);
@@ -49,18 +49,18 @@ namespace game::scene
     void Title::setupUI()
     {
         // 画面サイズを取得
-        const int screenWidth = m_screen.getWidth();
-        const int screenHeight = m_screen.getHeight();
+        const int SCREEN_WIDTH = m_screen.getWidth();
+        const int SCREEN_HEIGHT = m_screen.getHeight();
         
         // 比率に基づいて実際のピクセル値を計算
-        const int buttonWidth = static_cast<int>(screenWidth * BUTTON_WIDTH_RATIO);
-        const int buttonHeight = static_cast<int>(screenHeight * BUTTON_HEIGHT_RATIO);
-        const int buttonX = (screenWidth - buttonWidth) / 2;
-        const int startButtonY = static_cast<int>(screenHeight * START_BUTTON_Y_RATIO);
-        const int exitButtonY = static_cast<int>(screenHeight * EXIT_BUTTON_Y_RATIO);
+        const int BUTTON_WIDTH = static_cast<int>(SCREEN_WIDTH * BUTTON_WIDTH_RATIO);
+        const int BUTTON_HEIGHT = static_cast<int>(SCREEN_HEIGHT * BUTTON_HEIGHT_RATIO);
+        const int BUTTON_X = (SCREEN_WIDTH - BUTTON_WIDTH) / 2;
+        const int START_BUTTON_Y = static_cast<int>(SCREEN_HEIGHT * START_BUTTON_Y_RATIO);
+        const int EXIT_BUTTON_Y = static_cast<int>(SCREEN_HEIGHT * EXIT_BUTTON_Y_RATIO);
 
         auto startButton = std::make_unique<ui::Button>(
-            "ステージ選択へ", buttonX, startButtonY, buttonWidth, buttonHeight, m_inputProvider);
+            "ステージ選択へ", BUTTON_X, START_BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, m_inputProvider);
 
         // ボタンが押されたときの処理
         startButton->setOnClick([]() {
@@ -73,7 +73,7 @@ namespace game::scene
 
         // 終了ボタンの作成
         auto exitButton = std::make_unique<ui::Button>(
-            "ゲームをやめる", buttonX, exitButtonY, buttonWidth, buttonHeight, m_inputProvider);
+            "ゲームをやめる", BUTTON_X, EXIT_BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT, m_inputProvider);
 
         exitButton->setOnClick([]() {
             std::exit(0);  // ゲーム終了
