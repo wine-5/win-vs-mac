@@ -60,13 +60,13 @@ namespace game::scene
         const int exitButtonY = static_cast<int>(screenHeight * EXIT_BUTTON_Y_RATIO);
 
         auto startButton = std::make_unique<ui::Button>(
-            "開始", buttonX, startButtonY, buttonWidth, buttonHeight, m_inputProvider);
+            "ステージ選択へ", buttonX, startButtonY, buttonWidth, buttonHeight, m_inputProvider);
 
         // ボタンが押されたときの処理
         startButton->setOnClick([]() {
             // ServiceLocatorからSceneManagerを取得してシーン遷移
             auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
-            sceneManager->changeScene(SceneType::InGame);
+            sceneManager->changeScene(SceneType::StageSelect);
             });
 
         m_uiManager.addElement(std::move(startButton));

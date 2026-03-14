@@ -35,8 +35,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
 	
 	// 初期シーンをTitleに設定
-	sceneManager->changeScene(game::scene::SceneType::Title);
+	//sceneManager->changeScene(game::scene::SceneType::Title);
 
+	// デバック用：初期シーンをgameに設定
+	sceneManager->changeScene(game::scene::SceneType::InGame);
 	while (ProcessMessage() == 0)
 	{
 		ClearDrawScreen();// 画面クリア

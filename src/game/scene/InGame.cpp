@@ -3,6 +3,7 @@
 /* core層 */
 #include "core/interface/ILogger.h"
 #include "core/utility/Color.h"
+#include "core/ServiceLocator.h"
 
 /* game層 */
 #include "game/factory/FactoryInitializer.h"
@@ -16,6 +17,8 @@
 #include "game/system/CollisionSystem.h"
 #include "game/component/ColliderComponent.h"
 #include "game/constant/ModelId.h"
+#include "game/scene/SceneManager.h"
+#include "game/scene/SceneType.h"
 
 /* 標準のインクルード */
 #include <cassert>
@@ -92,9 +95,20 @@ namespace game::scene
 
 	void InGame::update(float deltaTime)
 	{
+		// デバッグ用：Rキーでリザルト画面へ
+		if (m_inputProvider.isKeyPressed(core::input::KeyCode::R))
+		{
+			LOG("INFO: Rキーでリザルト画面へ遷移");
+			auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
+			sceneManager->changeScene(game::scene::SceneType::Result);
+			return;
+		}
 		m_systemManager.update(deltaTime);
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
 		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
+		
+		// フレーム最後に入力状態を更新
+		m_inputProvider.updatePreviousState();
 	}
 
 	void InGame::draw()
