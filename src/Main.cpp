@@ -22,7 +22,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	if (DxLib_Init() == -1) return -1;
 	SetUseLighting(FALSE);
 
-	ServiceLocatorInitializer::init();
+	ServiceLocatorInitializer::init(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	// ServiceLocatorからSceneManagerを取得
 	auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
@@ -33,7 +33,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	while (ProcessMessage() == 0)
 	{
 		ClearDrawScreen();// 画面クリア
-		core::ServiceLocator::get<core::iface::ILogger>()->clear();
 		
 		sceneManager->update(DELTA_TIME);
 		sceneManager->draw();

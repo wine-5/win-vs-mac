@@ -6,15 +6,17 @@ namespace infrastructure
 {
     /**
      * @brief 画面情報を提供するクラス
-     * DxLibから画面サイズを取得する
+     * SetGraphMode()で設定した画面サイズを保持する
      */
     class Screen : public core::iface::IScreen
     {
     public:
         /**
-         * @brief DxLibから画面サイズを取得して初期化
+         * @brief 画面サイズを指定して初期化
+         * @param width 画面幅
+         * @param height 画面高さ
          */
-        Screen();
+        Screen(int width, int height);
 
         /**
          * @brief 画面幅を取得

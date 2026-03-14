@@ -1,14 +1,11 @@
 ﻿#include "Screen.h"
-#include <DxLib.h>
 
 namespace infrastructure
 {
-	Screen::Screen()
-		: m_width{}
-		, m_height{}
+	Screen::Screen(int width, int height)
+		: m_width(width)
+		, m_height(height)
 	{
-		// DxLibから現在の画面サイズを取得する
-		GetWindowSize(&m_width, &m_height);
 	}
 
 	int Screen::getWidth() const noexcept

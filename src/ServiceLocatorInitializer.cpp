@@ -6,11 +6,15 @@
 #include "infrastructure/utility/LogUtil.h"
 #include "game/scene/SceneManager.h"
 
-void ServiceLocatorInitializer::init()
+void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 {
-	// Screen登録（コンストラクタで画面サイズを取得する）
+	// DEBUG:デバック用のためリリース時は消すこと
+	core::ServiceLocator::provide<core::iface::ILogger>(
+		std::make_unique<infrastructure::utility::LogUtil>()
+	);
+	// Screen登録（SetGraphMode()で設定した画面サイズを渡す）
 	core::ServiceLocator::provide<core::iface::IScreen>(
-		std::make_unique<infrastructure::Screen>()
+		std::make_unique<infrastructure::Screen>(screenWidth, screenHeight)
 	);
 	
 	// SceneManager登録（内部でSceneFactoryを所有）
@@ -18,8 +22,4 @@ void ServiceLocatorInitializer::init()
 		std::make_unique<game::scene::SceneManager>()
 	);
 	
-	// DEBUG:デバック用のためリリース時は消すこと
-	core::ServiceLocator::provide<core::iface::ILogger>(
-		std::make_unique<infrastructure::utility::LogUtil>()
-	);
 }
