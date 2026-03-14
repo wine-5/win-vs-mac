@@ -134,6 +134,7 @@
     <ClCompile Include="src\core\interface\ICamera.h" />
     <ClCompile Include="src\core\interface\ILogger.h" />
     <ClCompile Include="src\game\scene\Loading.cpp" />
+    <ClCompile Include="src\game\scene\Result.cpp" />
     <ClCompile Include="src\game\scene\SceneFactory.cpp" />
     <ClCompile Include="src\game\scene\StageSelect.cpp" />
     <ClCompile Include="src\game\scene\Title.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="src\core\interface\IScreen.h" />
     <ClInclude Include="src\core\interface\IUIRenderer.h" />
     <ClInclude Include="src\game\scene\Loading.h" />
+    <ClInclude Include="src\game\scene\Result.h" />
     <ClInclude Include="src\game\scene\SceneFactory.h" />
     <ClInclude Include="src\game\scene\StageSelect.h" />
     <ClInclude Include="src\game\scene\Title.h" />
