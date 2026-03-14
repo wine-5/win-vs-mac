@@ -9,20 +9,27 @@ namespace
 {
 	constexpr float TARGET_FPS = 60.0f;
 	constexpr float DELTA_TIME = 1.0f / TARGET_FPS;
-	constexpr int   SCREEN_WIDTH = 1280;
-	constexpr int   SCREEN_HEIGHT = 720;
 	constexpr int   COLOR_BIT = 32;
 }
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
-	SetGraphMode(SCREEN_WIDTH, SCREEN_HEIGHT,COLOR_BIT);
+	int screenWidth{}, screenHeight{};
+#ifdef _DEBUG // デバック用
+	screenWidth = 1280;
+	screenHeight = 720;
+	SetGraphMode(screenWidth, screenHeight, COLOR_BIT);
 	ChangeWindowMode(TRUE);
+#else // リリース用（フルサイズ）
+	GetDefaultState(&screenWidth, &screenHeight, nullptr);
+	SetGraphMode(screenWidth, screenHeight, COLOR_BIT);
+	ChangeWindowMode(FALSE);
+#endif
 
 	if (DxLib_Init() == -1) return -1;
 	SetUseLighting(FALSE);
 
-	ServiceLocatorInitializer::init(SCREEN_WIDTH, SCREEN_HEIGHT);
+	ServiceLocatorInitializer::init(screenWidth, screenHeight);
 
 	// ServiceLocatorからSceneManagerを取得
 	auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
