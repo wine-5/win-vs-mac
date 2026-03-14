@@ -6,7 +6,7 @@ namespace game::ui
 {
     Button::Button(const std::string& text, int x, int y, int width, int height,
         core::iface::IInputProvider& inputProvider)
-        : m_text(text)
+        : m_text{text}
         , m_x{x}
         , m_y{y}
         , m_width{width}
@@ -15,7 +15,7 @@ namespace game::ui
         , m_visible{true}
         , m_wasPressed{false}
         , m_onClick{}
-        , m_inputProvider(inputProvider)
+        , m_inputProvider{inputProvider}
     {
     }
 

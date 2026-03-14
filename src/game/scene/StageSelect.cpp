@@ -20,9 +20,9 @@ namespace game::scene
     StageSelect::StageSelect(core::iface::IInputProvider& inputProvider,
         core::iface::IUIRenderer& uiRenderer,
         core::iface::IScreen& screen)
-        : m_inputProvider(inputProvider)
-        , m_uiRenderer(uiRenderer)
-        , m_screen(screen)
+        : m_inputProvider{inputProvider}
+        , m_uiRenderer{uiRenderer}
+        , m_screen{screen}
     {
         setupUI();
     }

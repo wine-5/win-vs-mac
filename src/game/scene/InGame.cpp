@@ -31,14 +31,14 @@ namespace game::scene
 		core::iface::IAnimator& animator,
 		core::iface::IResourceManager& resourceManager,
 		core::iface::IInputProvider& inputProvider)
-		: m_camera(camera)
-		, m_renderer(renderer)
-		, m_animator(animator)
-		, m_resourceManager(resourceManager)
-		, m_inputProvider(inputProvider)
-		, m_factoryManager(m_entityManager, m_componentManager, m_resourceManager)
-		, m_playerData(game::data::PlayerData::fromMetadata(
-			m_resourceManager.getMetadata(constant::model_id::PLAYER).value()))
+		: m_camera{camera}
+		, m_renderer{renderer}
+		, m_animator{animator}
+		, m_resourceManager{resourceManager}
+		, m_inputProvider{inputProvider}
+		, m_factoryManager{m_entityManager, m_componentManager, m_resourceManager}
+		, m_playerData{game::data::PlayerData::fromMetadata(
+			m_resourceManager.getMetadata(constant::model_id::PLAYER).value())}
 	{
 		loadResources();
 		spawnEntities();
