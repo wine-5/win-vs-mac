@@ -9,6 +9,9 @@
 #include "infrastructure/UIRenderer.h"
 #include "InGame.h"
 #include "Title.h"
+#include "StageSelect.h"
+#include "Loading.h"
+#include "Result.h"
 #include <memory>
 
 namespace game::scene
@@ -42,5 +45,19 @@ namespace game::scene
         infrastructure::InputManager m_titleInputManager;
         infrastructure::UIRenderer m_titleUIRenderer;
         std::unique_ptr<Title> m_titleScene;
+
+        // StageSelect用の依存関係と実体
+        infrastructure::InputManager m_stageSelectInputManager;
+        infrastructure::UIRenderer m_stageSelectUIRenderer;
+        std::unique_ptr<StageSelect> m_stageSelectScene;
+
+        // Loading用の依存関係と実体
+        infrastructure::UIRenderer m_loadingUIRenderer;
+        std::unique_ptr<Loading> m_loadingScene;
+
+        // Result用の依存関係と実体
+        infrastructure::InputManager m_resultInputManager;
+        infrastructure::UIRenderer m_resultUIRenderer;
+        std::unique_ptr<Result> m_resultScene;
     };
 }
