@@ -8,6 +8,8 @@ class ServiceLocatorInitializer
 public:
     /**
      * @brief ServiceLocatorに全サービスを登録する
+     * @param screenWidth 画面幅
+     * @param screenHeight 画面高さ
      */
-    static void init();
+    static void init(int screenWidth, int screenHeight);
 };

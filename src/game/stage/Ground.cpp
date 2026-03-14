@@ -11,7 +11,7 @@ namespace game::stage
 		core::ecs::ComponentManager& componentManager,
 		int modelHandle,
 		const game::data::GroundData& groundData)
-		: m_entity(entityManager.create())
+		: m_entity{entityManager.create()}
 	{
 		component::TransformComponent transform;
 		transform.m_position = groundData.getPosition();

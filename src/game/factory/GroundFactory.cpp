@@ -6,9 +6,9 @@ namespace game::factory
 		core::ecs::EntityManager& entityManager,
 		core::ecs::ComponentManager& componentManager,
 		core::iface::IResourceManager& resourceManager)
-		: m_entityManager(entityManager)
-		, m_componentManager(componentManager)
-		, m_resourceManager(resourceManager)
+		: m_entityManager{entityManager}
+		, m_componentManager{componentManager}
+		, m_resourceManager{resourceManager}
 	{
 	}
 

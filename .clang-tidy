@@ -6,7 +6,8 @@ Checks: >
   -modernize-use-override,
   -modernize-concat-nested-namespaces,
   -modernize-use-nodiscard,
-  cppcoreguidelines-init-variables
+  cppcoreguidelines-init-variables,
+  modernize-use-default-member-init
 
 CheckOptions:
   # クラス名 PascalCase
@@ -23,6 +24,10 @@ CheckOptions:
 
   # ローカル変数 camelCase
   - key: readability-identifier-naming.LocalVariableCase
+    value: camelBack
+
+  # ローカルconst変数 camelCase（関数内のconst変数）
+  - key: readability-identifier-naming.LocalConstantCase
     value: camelBack
 
   # メンバ変数 m_ + camelCase

@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "core/interface/IInputProvider.h"
+#include <unordered_map>
 
 namespace infrastructure
 {
@@ -9,6 +10,9 @@ namespace infrastructure
 	class InputManager : public core::iface::IInputProvider
 	{
 	public:
+		InputManager();
+		// ========== キーボード入力 ==========
+
 		/**
 		 * @brief 指定したキーが押されているか判定する
 		 * @param keyCode キーコード
@@ -16,6 +20,20 @@ namespace infrastructure
 		 */
 		[[nodiscard]] bool isKeyDown(core::input::KeyCode keyCode) const override;
 		
+		/**
+		 * @brief 指定したキーが押された瞬間か判定する（押しっぱなしは無視）
+		 * @param keycode キーコード
+		 * @return 押された瞬間の場合true
+		 */
+		[[nodiscard]] bool isKeyPressed(core::input::KeyCode keycode) const override;
+
+		/**
+		 * @brief フレームの最後に呼び出して前フレームの状態を更新する
+		 */
+		void updatePreviousState() override;
+
+		// ========== ゲームパッド入力 ==========
+
 		/**
 		 * @brief 指定したゲームパッドボタンが押されているか判定する
 		 * @param code ゲームパッドコード
@@ -35,5 +53,29 @@ namespace infrastructure
 		 * @return 接続されている場合true
 		 */
 		[[nodiscard]] bool isPadConnected() const override;
+
+		// ========== マウス入力 ==========
+
+		/**
+		 * @brief マウスの座標を取得する
+		 * @param outX X座標の出力先
+		 * @param outY Y座標の出力先
+		 */
+		void getMousePosition(int& outX, int& outY) const override;
+
+		/**
+		 * @brief マウスの左ボタンが押されているか判定する
+		 * @return 押されている場合true
+		 */
+		[[nodiscard]] bool isMouseLeftPressed() const override;
+
+		/**
+		 * @brief マウスの右ボタンが押されているか判定する
+		 * @return 押されている場合true
+		 */
+		[[nodiscard]] bool isMouseRightPressed() const override;
+
+	private:
+		mutable std::unordered_map<core::input::KeyCode, bool> m_previousKeyState;
 	};
 }

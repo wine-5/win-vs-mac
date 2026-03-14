@@ -24,18 +24,18 @@ namespace game::scene
 	/**
 	 * @brief インゲームのシーンクラス
 	 */
-	class InGameScene : public IScene
+	class InGame : public IScene
 	{
 	public:
 		/**
-		 * @brief InGameSceneのコンストラクタ
+		 * @brief InGameのコンストラクタ
 		 * @param camera カメラのインターフェース
 		 * @param renderer 描画のインターフェース
 		 * @param animator アニメーションのインターフェース
 		 * @param resourceManager リソース管理のインターフェース
 		 * @param inputProvider 入力のインターフェース
 		 */
-		InGameScene(core::iface::ICamera& camera,
+		InGame(core::iface::ICamera& camera,
 			core::iface::IRenderer& renderer,
 			core::iface::IAnimator& animator,
 			core::iface::IResourceManager& resourceManager,
@@ -46,6 +46,11 @@ namespace game::scene
 		 * @param deltaTime フレーム間の時間差
 		 */
 		void update(float deltaTime) override;
+
+		/**
+		 * @brief シーンの描画処理
+		 */
+		void draw() override;
 
 	private:
 		/* コンストラクタで参照する関数 */

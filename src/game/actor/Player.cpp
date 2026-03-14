@@ -14,7 +14,7 @@ namespace game::actor
 		int modelHandle,
 		core::Vector3 colliderSize,
 		core::Vector3 colliderOffset)
-		: m_entity(entityManager.create())
+		: m_entity{entityManager.create()}
 	{
 		componentManager.add<component::TransformComponent>(m_entity.getId(), {});
 		componentManager.add<component::VelocityComponent>(m_entity.getId(), {});

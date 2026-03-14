@@ -8,8 +8,8 @@ namespace game::factory
 	FactoryInitializer::FactoryInitializer(
 		FactoryManager& factoryManager,
 		core::iface::IResourceManager& resourceManager)
-		: m_factoryManager(factoryManager)
-		, m_resourceManager(resourceManager)
+		: m_factoryManager{factoryManager}
+		, m_resourceManager{resourceManager}
 	{
 	}
 

@@ -6,8 +6,8 @@
 namespace game::system
 {
 	PhysicsSystem::PhysicsSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId)
-		: m_componentManager(componentManager)
-		, m_entityId(entityId)
+		: m_componentManager{componentManager}
+		, m_entityId{entityId}
 	{
 	}
 
