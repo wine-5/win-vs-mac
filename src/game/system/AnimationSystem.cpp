@@ -13,11 +13,11 @@ namespace game::system
 		core::iface::IAnimator& animator,
 		int idleAnimHandle,
 		int walkAnimHandle)
-		: m_componentManager(componentManager)
-		, m_entityId(entityId)
-		, m_animator(animator)
-		, m_idleAnimHandle(idleAnimHandle)
-		, m_walkAnimHandle(walkAnimHandle)
+		: m_componentManager{componentManager}
+		, m_entityId{entityId}
+		, m_animator{animator}
+		, m_idleAnimHandle{idleAnimHandle}
+		, m_walkAnimHandle{walkAnimHandle}
 	{
 	}
 

@@ -6,9 +6,9 @@
 namespace game::system
 {
 	InputSystem::InputSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId ,core::iface::IInputProvider& inputProvider)
-		: m_componentManager(componentManager)
-		, m_entityId(entityId)
-		, m_inputProvider(inputProvider)
+		: m_componentManager{componentManager}
+		, m_entityId{entityId}
+		, m_inputProvider{inputProvider}
 	{
 	}
 

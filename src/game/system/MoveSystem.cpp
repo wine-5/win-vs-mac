@@ -7,9 +7,9 @@
 namespace game::system
 {
 	MoveSystem::MoveSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId, float moveSpeed)
-		: m_componentManager(componentManager)
-		, m_entityId(entityId)
-		, m_moveSpeed(moveSpeed)
+		: m_componentManager{componentManager}
+		, m_entityId{entityId}
+		, m_moveSpeed{moveSpeed}
 	{
 	}
 
