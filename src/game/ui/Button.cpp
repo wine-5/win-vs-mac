@@ -7,14 +7,14 @@ namespace game::ui
     Button::Button(const std::string& text, int x, int y, int width, int height,
         core::iface::IInputProvider& inputProvider)
         : m_text(text)
-        , m_x(x)
-        , m_y(y)
-        , m_width(width)
-        , m_height(height)
-        , m_state(UIState::Normal)
-        , m_visible(true)
-        , m_wasPressed(false)
-        , m_onClick(nullptr)
+        , m_x{x}
+        , m_y{y}
+        , m_width{width}
+        , m_height{height}
+        , m_state{UIState::Normal}
+        , m_visible{true}
+        , m_wasPressed{false}
+        , m_onClick{}
         , m_inputProvider(inputProvider)
     {
     }

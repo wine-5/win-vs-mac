@@ -6,7 +6,7 @@
 namespace infrastructure::utility
 {
     LogUtil::LogUtil()
-        : m_consoleHandle(nullptr)
+        : m_consoleHandle{}
     {
 #ifdef _DEBUG
         // Windowsコンソールウィンドウを作成

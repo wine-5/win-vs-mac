@@ -6,8 +6,8 @@
 namespace infrastructure
 {
     SceneFactory::SceneFactory()
-        : m_inGameScene(nullptr)
-        , m_titleScene(nullptr)
+        : m_inGameScene{}
+        , m_titleScene{}
     {
     }
 
