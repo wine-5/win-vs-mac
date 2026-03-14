@@ -3,10 +3,10 @@
 #include "SceneType.h"
 #include <memory>
 
-namespace game::scene { class SceneFactory; }  // 前方宣言
-
 namespace game::scene
 {
+	class SceneFactory;  // 前方宣言
+
 	/**
 	 * @brief シーン全体を管理するクラス
 	 */

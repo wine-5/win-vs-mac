@@ -1,6 +1,6 @@
 ﻿#include "SceneFactory.h"
-#include "TitleScene.h"
-#include "InGameScene.h"
+#include "Title.h"
+#include "InGame.h"
 #include "core/ServiceLocator.h"
 
 namespace game::scene
@@ -21,7 +21,7 @@ namespace game::scene
             // 初回のみ生成
             if (!m_titleScene)
             {
-                m_titleScene = std::make_unique<TitleScene>(
+                m_titleScene = std::make_unique<Title>(
                     m_titleInputManager,
                     m_titleUIRenderer,
                     *screen);
@@ -32,7 +32,7 @@ namespace game::scene
             // 初回のみ生成
             if (!m_inGameScene)
             {
-                m_inGameScene = std::make_unique<InGameScene>(
+                m_inGameScene = std::make_unique<InGame>(
                     m_inGameCamera,
                     m_inGameRenderer,
                     m_inGameAnimator,

@@ -1,4 +1,4 @@
-﻿#include "TitleScene.h"
+﻿#include "Title.h"
 #include "SceneManager.h"
 #include "SceneType.h"
 #include "game/ui/Button.h"
@@ -19,7 +19,7 @@ namespace game::scene
         constexpr float BUTTON_HEIGHT_RATIO = 0.06f;   // 画面高さの6%
     }
 
-    TitleScene::TitleScene(core::iface::IInputProvider& inputProvider,
+    Title::Title(core::iface::IInputProvider& inputProvider,
         core::iface::IUIRenderer& uiRenderer,
         core::iface::IScreen& screen)
         : m_inputProvider(inputProvider)
@@ -29,12 +29,12 @@ namespace game::scene
         setupUI();
     }
 
-    void TitleScene::update(float deltaTime)
+    void Title::update(float deltaTime)
     {
         m_uiManager.update();
     }
 
-    void TitleScene::draw()
+    void Title::draw()
     {
         const char* title = "タイトルシーン（ここにタイトルを書く予定)";
         int titleWidth = m_uiRenderer.getTextWidth(title);
@@ -46,7 +46,7 @@ namespace game::scene
         m_uiManager.draw(m_uiRenderer);
     }
 
-    void TitleScene::setupUI()
+    void Title::setupUI()
     {
         // 画面サイズを取得
         const int screenWidth = m_screen.getWidth();

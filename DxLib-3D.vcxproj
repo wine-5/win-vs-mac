@@ -134,7 +134,7 @@
     <ClCompile Include="src\core\interface\ICamera.h" />
     <ClCompile Include="src\core\interface\ILogger.h" />
     <ClCompile Include="src\game\scene\SceneFactory.cpp" />
-    <ClCompile Include="src\game\scene\TitleScene.cpp" />
+    <ClCompile Include="src\game\scene\Title.cpp" />
     <ClCompile Include="src\infrastructure\Screen.cpp" />
     <ClCompile Include="src\core\ServiceLocator.cpp" />
     <ClCompile Include="src\game\factory\FactoryInitializer.cpp" />
@@ -152,7 +152,7 @@
     <ClCompile Include="src\infrastructure\InputManager.cpp" />
     <ClCompile Include="src\infrastructure\Renderer.cpp" />
     <ClCompile Include="src\infrastructure\ResourceManager.cpp" />
-    <ClCompile Include="src\game\scene\InGameScene.cpp" />
+    <ClCompile Include="src\game\scene\InGame.cpp" />
     <ClCompile Include="src\game\actor\Player.cpp" />
     <ClCompile Include="src\game\system\InputSystem.cpp" />
     <ClCompile Include="src\game\system\MoveSystem.cpp" />
@@ -195,7 +195,7 @@
     <ClInclude Include="src\core\interface\IScreen.h" />
     <ClInclude Include="src\core\interface\IUIRenderer.h" />
     <ClInclude Include="src\game\scene\SceneFactory.h" />
-    <ClInclude Include="src\game\scene\TitleScene.h" />
+    <ClInclude Include="src\game\scene\Title.h" />
     <ClInclude Include="src\infrastructure\Screen.h" />
     <ClInclude Include="src\core\ServiceLocator.h" />
     <ClInclude Include="src\core\utility\Color.h" />
@@ -227,7 +227,7 @@
     <ClInclude Include="src\infrastructure\InputManager.h" />
     <ClInclude Include="src\infrastructure\Renderer.h" />
     <ClInclude Include="src\infrastructure\ResourceManager.h" />
-    <ClInclude Include="src\game\scene\InGameScene.h" />
+    <ClInclude Include="src\game\scene\InGame.h" />
     <ClInclude Include="src\game\scene\IScene.h" />
     <ClInclude Include="src\game\actor\Player.h" />
     <ClInclude Include="src\core\ecs\ComponentArray.h" />

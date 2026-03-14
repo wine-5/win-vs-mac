@@ -7,8 +7,8 @@
 #include "infrastructure/ResourceManager.h"
 #include "infrastructure/InputManager.h"
 #include "infrastructure/UIRenderer.h"
-#include "InGameScene.h"
-#include "TitleScene.h"
+#include "InGame.h"
+#include "Title.h"
 #include <memory>
 
 namespace game::scene
@@ -30,17 +30,17 @@ namespace game::scene
         IScene* createScene(SceneType sceneType);
 
     private:
-        // InGameScene用の依存関係と実体
+        // InGame用の依存関係と実体
         infrastructure::Camera m_inGameCamera;
         infrastructure::Renderer m_inGameRenderer;
         infrastructure::Animator m_inGameAnimator;
         infrastructure::ResourceManager m_inGameResourceManager;
         infrastructure::InputManager m_inGameInputManager;
-        std::unique_ptr<InGameScene> m_inGameScene;
+        std::unique_ptr<InGame> m_inGameScene;
 
-        // TitleScene用の依存関係と実体
+        // Title用の依存関係と実体
         infrastructure::InputManager m_titleInputManager;
         infrastructure::UIRenderer m_titleUIRenderer;
-        std::unique_ptr<TitleScene> m_titleScene;
+        std::unique_ptr<Title> m_titleScene;
     };
 }

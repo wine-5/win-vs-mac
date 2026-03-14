@@ -42,7 +42,7 @@
     <ClCompile Include="src\infrastructure\ResourceManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\scene\InGameScene.cpp">
+    <ClCompile Include="src\game\scene\InGame.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\infrastructure\utility\LogUtil.cpp">
@@ -87,7 +87,7 @@
     <ClCompile Include="src\game\scene\SceneFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\scene\TitleScene.cpp">
+    <ClCompile Include="src\game\scene\Title.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\infrastructure\Screen.cpp">
@@ -182,7 +182,7 @@
     <ClInclude Include="src\infrastructure\ResourceManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\scene\InGameScene.h">
+    <ClInclude Include="src\game\scene\InGame.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\scene\IScene.h">
@@ -281,7 +281,7 @@
     <ClInclude Include="src\game\scene\SceneFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\scene\TitleScene.h">
+    <ClInclude Include="src\game\scene\Title.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\infrastructure\Screen.h">

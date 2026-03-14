@@ -10,16 +10,16 @@ namespace game::scene
     /**
      * @brief タイトルシーンのクラス
      */
-    class TitleScene : public IScene
+    class Title : public IScene
     {
     public:
         /**
-         * @brief TitleSceneのコンストラクタ
+         * @brief Titleのコンストラクタ
          * @param inputProvider 入力インターフェース
          * @param uiRenderer UI描画インターフェース
          * @param screen 画面情報インターフェース
          */
-        TitleScene(core::iface::IInputProvider& inputProvider,
+        Title(core::iface::IInputProvider& inputProvider,
             core::iface::IUIRenderer& uiRenderer,
             core::iface::IScreen& screen);
 

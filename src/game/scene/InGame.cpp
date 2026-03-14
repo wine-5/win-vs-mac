@@ -1,4 +1,4 @@
-﻿#include "InGameScene.h"
+﻿#include "InGame.h"
 
 /* core層 */
 #include "core/interface/ILogger.h"
@@ -23,7 +23,7 @@
 
 namespace game::scene
 {
-	InGameScene::InGameScene(core::iface::ICamera& camera,
+	InGame::InGame(core::iface::ICamera& camera,
 		core::iface::IRenderer& renderer,
 		core::iface::IAnimator& animator,
 		core::iface::IResourceManager& resourceManager,
@@ -42,7 +42,7 @@ namespace game::scene
 		setupSystems();
 	}
 
-	void InGameScene::loadResources()
+	void InGame::loadResources()
 	{
 		// 先にモデルをロードして自動計算を実行
 		m_resourceManager.loadModelById(constant::model_id::PLAYER);
@@ -58,7 +58,7 @@ namespace game::scene
 
 	}
 
-	void InGameScene::spawnEntities()
+	void InGame::spawnEntities()
 	{
 		
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
@@ -68,7 +68,7 @@ namespace game::scene
 
 	}
 
-	void InGameScene::setupSystems()
+	void InGame::setupSystems()
 	{
 		// アニメーションハンドルをロード
 		//int idleAnimHandle = m_resourceManager.loadModelById(m_playerData.getIdleAnimPath());
@@ -90,14 +90,14 @@ namespace game::scene
 		collisionSystem->addEntity(m_groundId);
 	}
 
-	void InGameScene::update(float deltaTime)
+	void InGame::update(float deltaTime)
 	{
 		m_systemManager.update(deltaTime);
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
 		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
 	}
 
-	void InGameScene::draw()
+	void InGame::draw()
 	{
 		// コンポーネントの取得
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
