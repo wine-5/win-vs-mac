@@ -26,6 +26,10 @@ CheckOptions:
   - key: readability-identifier-naming.LocalVariableCase
     value: camelBack
 
+  # ローカルconst変数 camelCase（関数内のconst変数）
+  - key: readability-identifier-naming.LocalConstantCase
+    value: camelBack
+
   # メンバ変数 m_ + camelCase
   - key: readability-identifier-naming.MemberPrefix
     value: m_
