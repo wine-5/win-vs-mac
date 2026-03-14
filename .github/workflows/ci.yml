@@ -36,8 +36,17 @@ jobs:
       - name: Install clang-tidy
         run: sudo apt-get install -y clang-tidy
 
+      - name: Check initialization style
+        id: check_init
+        continue-on-error: true
+        run: |
+          chmod +x .github/scripts/check-initialization.sh
+          .github/scripts/check-initialization.sh 2>&1 | tee init_check_output.txt
+          exit ${PIPESTATUS[0]}
+
       - name: Run clang-tidy
         id: run_lint
+        continue-on-error: true
         shell: bash
         run: |
           set +e
@@ -77,12 +86,33 @@ jobs:
           
           exit $FAILED
 
+      - name: Combine lint results
+        if: always()
+        run: |
+          echo "=== Initialization Check ===" > combined_lint.txt
+          if [ -f "init_check_output.txt" ]; then
+            cat init_check_output.txt >> combined_lint.txt
+          else
+            echo "No initialization check output" >> combined_lint.txt
+          fi
+          echo "" >> combined_lint.txt
+          echo "=== clang-tidy Check ===" >> combined_lint.txt
+          if [ -f "lint_output.txt" ]; then
+            cat lint_output.txt >> combined_lint.txt
+          else
+            echo "No clang-tidy output" >> combined_lint.txt
+          fi
+
+      - name: Fail if any check failed
+        if: steps.check_init.outcome == 'failure' || steps.run_lint.outcome == 'failure'
+        run: exit 1
+
       - name: Upload lint result
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: lint-output
-          path: lint_output.txt
+          path: combined_lint.txt
           if-no-files-found: warn
 
   notify:
@@ -105,16 +135,16 @@ jobs:
           LINT_STATUS="${{ needs.lint.result }}"
 
           if [ "$BUILD_STATUS" = "success" ] && [ "$LINT_STATUS" = "success" ]; then
-            MESSAGE="✅ ビルド・命名規則チェック成功"
+            MESSAGE="✅ ビルド・コードチェック成功 (命名規則・初期化スタイル)"
             COLOR=3066993
           else
             LINT_DETAILS=""
-            if [ -f "lint_output.txt" ] && [ -s "lint_output.txt" ]; then
+            if [ -f "combined_lint.txt" ] && [ -s "combined_lint.txt" ]; then
               echo "=== Lint Output File Contents ===" >&2
-              cat lint_output.txt >&2
+              cat combined_lint.txt >&2
               
               # エラーを抽出して整形
-              LINT_DETAILS=$(cat lint_output.txt \
+              LINT_DETAILS=$(cat combined_lint.txt \
                 | grep -v "thirdparty" \
                 | grep -v "DxLib.h" \
                 | grep -v "file not found" \
@@ -130,6 +160,7 @@ jobs:
                   /invalid case style for constant/ {print "❌ 定数はUPPER_SNAKE_CASEにしてください"; next}
                   /invalid case style for enum/ {print "❌ 列挙型はPascalCaseにしてください"; next}
                   /variable .* is not initialized/ {print "❌ 変数が初期化されていません"; next}
+                  /Found \(\) initialization/ {print "❌ 初期化は {} を使ってください（() は非推奨）"; next}
                   {print}
                 ')
               
@@ -141,10 +172,10 @@ jobs:
                 LINT_DETAILS="\n\n⚠️ エラー詳細の抽出に失敗しました。GitHub Actionsのログを確認してください。"
               fi
             else
-              echo "⚠️ lint_output.txt not found or empty" >&2
+              echo "⚠️ combined_lint.txt not found or empty" >&2
             fi
             
-            MESSAGE="❌ **失敗**\nビルド: \`${BUILD_STATUS}\`\n命名規則: \`${LINT_STATUS}\`${LINT_DETAILS}"
+            MESSAGE="❌ **失敗**\nビルド: \`${BUILD_STATUS}\`\nコードチェック: \`${LINT_STATUS}\`${LINT_DETAILS}"
             COLOR=15158332
           fi
 

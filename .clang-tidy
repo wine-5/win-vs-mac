@@ -6,7 +6,8 @@ Checks: >
   -modernize-use-override,
   -modernize-concat-nested-namespaces,
   -modernize-use-nodiscard,
-  cppcoreguidelines-init-variables
+  cppcoreguidelines-init-variables,
+  modernize-use-default-member-init
 
 CheckOptions:
   # クラス名 PascalCase
