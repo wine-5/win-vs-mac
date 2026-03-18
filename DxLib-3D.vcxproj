@@ -197,6 +197,7 @@
     <ClInclude Include="src\core\input\KeyCode.h" />
     <ClInclude Include="src\core\interface\IScreen.h" />
     <ClInclude Include="src\core\interface\IUIRenderer.h" />
+    <ClInclude Include="src\game\component\AIComponent.h" />
     <ClInclude Include="src\game\component\HealthComponent.h" />
     <ClInclude Include="src\game\scene\Loading.h" />
     <ClInclude Include="src\game\scene\Result.h" />
