@@ -80,7 +80,7 @@ namespace game::scene
 		// システム登録
 		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_playerId, m_inputProvider);
 		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed());
-		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager, m_playerId);
+		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager);
 		//m_systemManager.registerSystem<game::system::AnimationSystem>(
 		//	m_componentManager,
 		//	m_factoryManager.getPlayerFactory().getPlayer().getId(),
@@ -88,9 +88,7 @@ namespace game::scene
 		//	idleAnimHandle,
 		//	walkAnimHandle);
 
-		auto* collisionSystem = m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
-		collisionSystem->addEntity(m_playerId);
-		collisionSystem->addEntity(m_groundId);
+		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
 	}
 
 	void InGame::update(float deltaTime)

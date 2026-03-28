@@ -11,19 +11,16 @@ namespace game::system
 	{
 	}
 
-	void CollisionSystem::addEntity(core::ecs::EntityId id)
-	{
-		m_entities.push_back(id);
-	}
-
 	void CollisionSystem::update(float deltaTime)
 	{
-		for (int i = 0; i < m_entities.size(); i++)
+		auto entities = m_componentManager.getAllEntities<component::ColliderComponent>();
+
+		for (size_t i = 0; i < entities.size(); i++)
 		{
-			for (int j = i + 1; j < m_entities.size(); j++)
+			for (size_t j = i + 1; j < entities.size(); j++)
 			{
-				if (isColliding(m_entities[i], m_entities[j]))
-					resolveCollision(m_entities[i], m_entities[j]);
+				if (isColliding(entities[i], entities[j]))
+					resolveCollision(entities[i], entities[j]);
 			}
 		}
 	}

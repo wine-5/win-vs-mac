@@ -14,10 +14,9 @@ namespace game::system
 		/**
 		 * @brief PhysicsSystemのコンストラクタ
 		 * @param componentManager ComponentManagerの参照
-		 * @param entityId 対象EntityのID
 		 */
-		PhysicsSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId);
-		
+		PhysicsSystem(core::ecs::ComponentManager& componentManager);
+
 		/**
 		 * @brief 速度を元に位置を更新、重力やジャンプを処理する
 		 * @param deltaTime フレーム間の時間差
@@ -30,7 +29,6 @@ namespace game::system
 		static constexpr float DEFAULT_MAX_FALL_SPEED = -200.0f;
 
 		core::ecs::ComponentManager& m_componentManager;
-		core::ecs::EntityId m_entityId{};
 		float m_gravity{DEFAULT_GRAVITY};
 		float m_jumpForce{DEFAULT_JUMP_FORCE};
 		float m_maxFallSpeed{DEFAULT_MAX_FALL_SPEED};

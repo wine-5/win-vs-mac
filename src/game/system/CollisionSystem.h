@@ -2,7 +2,6 @@
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
-#include <vector>
 
 namespace game::system
 {
@@ -18,12 +17,6 @@ namespace game::system
 		 */
 		CollisionSystem(core::ecs::ComponentManager& componentManager);
 
-		/**
-		 * @brief 衝突判定を行うEntityを登録する
-		 * @param id 登録するEntityID
-		 */
-		void addEntity(core::ecs::EntityId id);
-		
 		/**
 		 * @brief 全Entity間の衝突検出と押し返しを行う
 		 * @param deltaTime フレーム間の時間差
@@ -47,6 +40,5 @@ namespace game::system
 		void resolveCollision(core::ecs::EntityId a, core::ecs::EntityId b);
 
 		core::ecs::ComponentManager& m_componentManager;
-		std::vector<core::ecs::EntityId> m_entities;
     };
 }
