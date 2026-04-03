@@ -201,6 +201,7 @@
     <ClInclude Include="src\game\component\AIComponent.h" />
     <ClInclude Include="src\game\component\AttackComponent.h" />
     <ClInclude Include="src\game\component\HealthComponent.h" />
+    <ClInclude Include="src\game\constant\EnemyAnimationState.h" />
     <ClInclude Include="src\game\scene\Loading.h" />
     <ClInclude Include="src\game\scene\Result.h" />
     <ClInclude Include="src\game\scene\SceneFactory.h" />
