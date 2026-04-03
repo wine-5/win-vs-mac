@@ -20,20 +20,21 @@ namespace infrastructure
         }
     }
 
-    int ResourceManager::loadModelById(const std::string& modelId)
+    int ResourceManager::loadModelById(const std::string_view modelId)
     {
+        std::string modelIdStr(modelId);
         // メタデータを取得
-        auto it = m_metadata.find(modelId);
+        auto it = m_metadata.find(modelIdStr);
         if (it == m_metadata.end())
         {
-            LOG_E("モデルID '%s' が見つかりません", modelId.c_str());
+            LOG_E("モデルID '%s' が見つかりません", modelIdStr.c_str());
             return -1;
         }
 
         const auto& metadata = it->second;
 
         // 既にロード済みか確認
-        auto handleIt = m_modelHandles.find(modelId);
+        auto handleIt = m_modelHandles.find(modelIdStr);
         if (handleIt != m_modelHandles.end())
         {
             return handleIt->second;
@@ -57,7 +58,7 @@ namespace infrastructure
             metadata.colliderSize.z == 0.0f)
         {
             // 非constなメタデータを取得して更新
-            auto& mutableMetadata = m_metadata[modelId];
+            auto& mutableMetadata = m_metadata[modelIdStr];
 
             VECTOR vMin = MV1GetFrameMinVertexLocalPosition(handle, -1);
             VECTOR vMax = MV1GetFrameMaxVertexLocalPosition(handle, -1);
@@ -67,23 +68,23 @@ namespace infrastructure
             mutableMetadata.colliderSize.z = vMax.z - vMin.z;
 
             LOG("'%s' のコライダーサイズを自動計算: (%.2f, %.2f, %.2f)",
-                modelId.c_str(),
+                modelIdStr.c_str(),
                 mutableMetadata.colliderSize.x,
                 mutableMetadata.colliderSize.y,
                 mutableMetadata.colliderSize.z);
         }
 
-        m_modelHandles[modelId] = handle;
+        m_modelHandles[modelIdStr] = handle;
         return handle;
     }
 
-    std::optional<core::data::ModelMetadata> ResourceManager::getMetadata(const std::string& modelId) const
+    std::optional<core::data::ModelMetadata> ResourceManager::getMetadata(const std::string_view modelId) const
     {
-        auto it = m_metadata.find(modelId);
+        std::string modelIdStr(modelId);
+        auto it = m_metadata.find(modelIdStr);
         if (it == m_metadata.end())
-        {
             return std::nullopt;
-        }
+
         return it->second;
     }
 

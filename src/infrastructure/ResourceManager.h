@@ -22,14 +22,14 @@ namespace infrastructure
 		 * @param modelId モデルID
 		 * @return モデルハンドル
 		 */
-		int loadModelById(const std::string& modelId) override;
+		int loadModelById(const std::string_view modelId) override;
 		
 		/**
 		 * @brief modelIDからメタデータを取得する
 		 * @param modelId モデルID
 		 * @return メタデータ（存在しない場合nullopt）
 		 */
-		std::optional<core::data::ModelMetadata> getMetadata(const std::string& modelId) const override;
+		std::optional<core::data::ModelMetadata> getMetadata(const std::string_view modelId) const override;
 
 	private:
 		/// @brief リソース定義（resources.jsonの1エントリ）
