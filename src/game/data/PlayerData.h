@@ -2,6 +2,7 @@
 #include <string>
 #include "core/Vector3.h"
 #include "core/data/ModelMetadata.h"
+#include "game/constant//MetadataKeys.h"
 
 namespace game::data
 {
@@ -24,16 +25,19 @@ namespace game::data
             data.m_colliderOffset = metadata.colliderOffset;
 
             // アニメーションパス（stringProperties から取得）
-            auto idleIt = metadata.stringProperties.find("idleAnim");
+            auto idleIt = metadata.stringProperties.find(
+                std::string(constant::metadata_keys::IDLE_ANIM));
             if (idleIt != metadata.stringProperties.end())
                 data.m_idleAnimPath = idleIt->second;
 
-            auto walkIt = metadata.stringProperties.find("walkAnim");
+            auto walkIt = metadata.stringProperties.find(
+                std::string(constant::metadata_keys::WALK_ANIM));
             if (walkIt != metadata.stringProperties.end())
                 data.m_walkAnimPath = walkIt->second;
 
             // moveSpeed（floatProperties から取得）
-            auto moveSpeedIt = metadata.floatProperties.find("moveSpeed");
+            auto moveSpeedIt = metadata.floatProperties.find(
+                std::string(constant::metadata_keys::MOVE_SPEED));
             if (moveSpeedIt != metadata.floatProperties.end())
                 data.m_moveSpeed = moveSpeedIt->second;
 
