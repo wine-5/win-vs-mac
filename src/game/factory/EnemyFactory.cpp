@@ -1,0 +1,30 @@
+﻿#include "EnemyFactory.h"
+
+namespace game::factory
+{
+	EnemyFactory::EnemyFactory(
+		core::ecs::EntityManager& entityManager,
+		core::ecs::ComponentManager& componentManager,
+		core::iface::IResourceManager& resourceManager)
+		: m_entityManager{ entityManager }
+		, m_componentManager{ componentManager }
+		, m_resourceManager{ resourceManager }
+	{
+	}
+
+	core::ecs::EntityId EnemyFactory::create(int modelHandle, const data::EnemyData& enemyData)
+	{
+		auto enemy = std::make_unique<actor::Enemy>(
+			m_entityManager,
+			m_componentManager,
+			modelHandle,
+			enemyData);
+
+		// ここにm_enemiesにpush_backする処理を書く
+	}
+
+	const std::vector<core::ecs::EntityId>& EnemyFactory::getEnemyIds() const noexcept
+	{
+
+	}
+}

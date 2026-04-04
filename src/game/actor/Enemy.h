@@ -18,10 +18,7 @@ namespace game::actor
          * @param entityManager EntityManagerの参照
          * @param componentManager ComponentManagerの参照
          * @param modelHandle モデルハンドル
-         * @param moveSpeed 移動速度
-         * @param detectionRange 索敵範囲
-         * @param colliderSize コライダーのサイズ
-         * @param colliderOffset コライダーのオフセット
+         * @param Enemyのデータ
          */
         Enemy(core::ecs::EntityManager& entityManager,
             core::ecs::ComponentManager& componentManager,

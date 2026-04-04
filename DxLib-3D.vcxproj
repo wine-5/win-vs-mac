@@ -134,6 +134,7 @@
     <ClCompile Include="src\core\interface\ICamera.h" />
     <ClCompile Include="src\core\interface\ILogger.h" />
     <ClCompile Include="src\game\actor\Enemy.cpp" />
+    <ClCompile Include="src\game\factory\EnemyFactory.cpp" />
     <ClCompile Include="src\game\scene\Loading.cpp" />
     <ClCompile Include="src\game\scene\Result.cpp" />
     <ClCompile Include="src\game\scene\SceneFactory.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="src\game\constant\EnemyAnimationState.h" />
     <ClInclude Include="src\game\constant\MetadataKeys.h" />
     <ClInclude Include="src\game\data\EnemyData.h" />
+    <ClInclude Include="src\game\factory\EnemyFactory.h" />
     <ClInclude Include="src\game\scene\Loading.h" />
     <ClInclude Include="src\game\scene\Result.h" />
     <ClInclude Include="src\game\scene\SceneFactory.h" />
