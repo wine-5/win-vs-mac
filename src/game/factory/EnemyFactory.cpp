@@ -20,11 +20,14 @@ namespace game::factory
 			modelHandle,
 			enemyData);
 
-		// ここにm_enemiesにpush_backする処理を書く
+		core::ecs::EntityId id = enemy->getId();
+		m_enemies.push_back(std::move(enemy));
+		m_enemyIds.push_back(id);
+		return id;
 	}
 
 	const std::vector<core::ecs::EntityId>& EnemyFactory::getEnemyIds() const noexcept
 	{
-
+		return m_enemyIds;
 	}
 }
