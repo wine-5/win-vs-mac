@@ -177,6 +177,9 @@ namespace infrastructure
         {
             if (j[json_keys::GAMEPLAY].contains(json_keys::MOVE_SPEED))
                 metadata.floatProperties["moveSpeed"] = j[json_keys::GAMEPLAY][json_keys::MOVE_SPEED];
+
+            if (j[json_keys::GAMEPLAY].contains(json_keys::DETECTION_RANGE))
+                metadata.floatProperties["detectionRange"] = j[json_keys::GAMEPLAY][json_keys::DETECTION_RANGE];
         }
 
         return metadata;

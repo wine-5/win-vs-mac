@@ -170,6 +170,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="assets\data\enemyData.json" />
     <None Include="assets\data\groundData.json" />
     <None Include="assets\data\playerData.json" />
     <None Include="assets\config\resources.json" />

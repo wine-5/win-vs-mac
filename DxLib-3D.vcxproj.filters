@@ -135,6 +135,7 @@
     <None Include="assets\data\groundData.json" />
     <None Include="assets\data\playerData.json" />
     <None Include="assets\config\resources.json" />
+    <None Include="assets\data\enemyData.json" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\ecs\Entity.h">

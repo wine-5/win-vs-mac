@@ -126,8 +126,14 @@ namespace game::scene
 		auto& render = m_componentManager.get<game::component::RenderComponent>(m_playerId);
 		auto& groundTransform = m_componentManager.get<game::component::TransformComponent>(m_groundId);
 
+		// モデルの描画
 		m_renderer.drawModel(render.m_modelHandle, transform.m_position,transform.m_rotation,transform.m_scale);
 		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
+
+		// 敵の描画
+		auto& enemyRenderer = m_componentManager.get<component::RenderComponent>(m_enemyId);
+		auto& enemyTransform = m_componentManager.get<component::TransformComponent>(m_enemyId);
+		m_renderer.drawModel(enemyRenderer.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
 
 		// デバッグ: コライダーを可視化
 		auto& playerCollider = m_componentManager.get<game::component::ColliderComponent>(m_playerId);
