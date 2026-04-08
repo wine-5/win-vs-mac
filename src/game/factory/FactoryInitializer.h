@@ -3,6 +3,7 @@
 #include "core/interface/IResourceManager.h"
 #include "game/data/PlayerData.h"
 #include "game/data/GroundData.h"
+#include "game/data/EnemyData.h"
 #include "game/constant/ModelId.h"
 #include <cassert>
 
@@ -36,6 +37,12 @@ namespace game::factory
 		 * @return 生成したGroundのEntityId
 		 */
 		core::ecs::EntityId initializeGround();
+
+		/**
+		 * @brief Enemyを初期化
+		 * @return 生成したEnemyのEntityId
+		 */
+		core::ecs::EntityId initializeEnemy();
 
 	private:
 		FactoryManager& m_factoryManager;

@@ -73,7 +73,8 @@ namespace game::scene
 
 		core::ecs::EntityId m_groundId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_playerId{ core::ecs::INVALID_ENTITY_ID };
-
+		core::ecs::EntityId m_enemyId{ core::ecs::INVALID_ENTITY_ID };
+		
 		// カメラ設定
 		static constexpr float CAMERA_OFFSET_X = 0.0f;
 		static constexpr float CAMERA_OFFSET_Y = 200.0f;

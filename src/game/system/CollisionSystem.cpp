@@ -59,8 +59,8 @@ namespace game::system
 		auto& colliderB = m_componentManager.get<component::ColliderComponent>(b);
 
 		// TagがPlayerとGroundの組み合わせを特定する
-		core::ecs::EntityId playerId = -1;
-		core::ecs::EntityId groundId = -1;
+		core::ecs::EntityId playerId = core::ecs::INVALID_ENTITY_ID;
+		core::ecs::EntityId groundId = core::ecs::INVALID_ENTITY_ID;
 
 		if (colliderA.m_tag == constant::CollisionTag::Player &&
 			colliderB.m_tag == constant::CollisionTag::Ground)
@@ -76,7 +76,7 @@ namespace game::system
 		}
 
 		// Player vs Ground の押し返し処理
-		if (playerId != -1 && groundId != -1)
+		if (playerId != core::ecs::INVALID_ENTITY_ID && groundId != core::ecs::INVALID_ENTITY_ID)
 		{
 			auto& playerTransform = m_componentManager.get<component::TransformComponent>(playerId);
 			auto& groundTransform = m_componentManager.get<component::TransformComponent>(groundId);

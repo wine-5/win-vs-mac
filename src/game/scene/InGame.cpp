@@ -19,6 +19,8 @@
 #include "game/constant/ModelId.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
+#include "game/system/AISystem.h"
+#include "game/component/AIComponent.h"
 
 /* 標準のインクルード */
 #include <cassert>
@@ -67,7 +69,12 @@ namespace game::scene
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
 		initializer.initializePlayer(m_playerData);
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
+
 		m_groundId = initializer.initializeGround();
+
+		m_enemyId = initializer.initializeEnemy();
+		auto& ai = m_componentManager.get<component::AIComponent>(m_enemyId);
+		ai.m_targetEntity = core::ecs::Entity(m_playerId);
 
 	}
 
@@ -89,6 +96,7 @@ namespace game::scene
 		//	walkAnimHandle);
 
 		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
+		m_systemManager.registerSystem<game::system::AISystem>(m_componentManager);
 	}
 
 	void InGame::update(float deltaTime)
@@ -113,7 +121,7 @@ namespace game::scene
 	{
 		// コンポーネントの取得
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
-		auto& anim = m_componentManager.get<game::component::AnimationComponent<game::constant::PlayerAnimationState>>(m_playerId);
+		//auto& anim = m_componentManager.get<game::component::AnimationComponent<game::constant::PlayerAnimationState>>(m_playerId);
 		auto& groundRender = m_componentManager.get<game::component::RenderComponent>(m_groundId);
 		auto& render = m_componentManager.get<game::component::RenderComponent>(m_playerId);
 		auto& groundTransform = m_componentManager.get<game::component::TransformComponent>(m_groundId);
@@ -130,6 +138,5 @@ namespace game::scene
 		
 		m_renderer.drawCollider(playerColliderCenter, playerCollider.m_size, core::utility::Color::GREEN);
 		m_renderer.drawCollider(groundColliderCenter, groundCollider.m_size, core::utility::Color::BLUE);
-
 	}
 }
