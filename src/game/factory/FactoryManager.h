@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "PlayerFactory.h"
 #include "GroundFactory.h"
+#include "EnemyFactory.h"
 
 namespace game::factory
 {
@@ -25,16 +26,23 @@ namespace game::factory
          * @brief PlayerFactoryを取得する
          * @return PlayerFactoryの参照
          */
-        PlayerFactory& getPlayerFactory();
+        [[nodiscard]] PlayerFactory& getPlayerFactory() const noexcept;
 
         /**
          * @brief GroundFactoryを取得する
          * @return GroundFactoryの参照
          */
-        GroundFactory& getGroundFactory();
+        [[nodiscard]] GroundFactory& getGroundFactory() const noexcept;
+
+        /**
+         * @brief EnemyFactoryを取得する
+         * @return EnemyFactoryの参照
+         */
+        [[nodiscard]] EnemyFactory& getEnemyFactory() const noexcept;
 
     private:
         std::unique_ptr<PlayerFactory> m_playerFactory;
         std::unique_ptr<GroundFactory> m_groundFactory;
+        std::unique_ptr<EnemyFactory> m_enemyFactory;
     };
 }
