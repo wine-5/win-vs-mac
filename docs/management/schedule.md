@@ -14,21 +14,21 @@
 - [x] `ComponentManager`の実装
 - [x] `SystemManager`の実装
 - [x] `TransformComponent`の実装
-- [ ] `HealthComponent`の実装
+- [x] `HealthComponent`の実装
 - [x] `MoveSystem`の実装
 - [x] `InputManager`の実装
 - [x] プレイヤーがWASDで動く状態
 
 ### 4月
-- [ ] `SceneManager`の実装
+- [x] `SceneManager`の実装
 - [x] `IScene`インターフェースの実装
-- [ ] `TitleScene`の実装
+- [x] `TitleScene`の実装
 - [x] `GameScene`の仮実装（InGameSceneとして実装）
 - [x] `Renderer`の実装（3D描画の基礎）
 - [x] `Camera`のアイソメトリック実装
-- [ ] `AIComponent`の実装
-- [ ] `AISystem`の実装
-- [ ] 敵が動く状態
+- [x] `AIComponent`の実装
+- [x] `AISystem`の実装
+- [x] 敵が動く状態
 
 ---
 
