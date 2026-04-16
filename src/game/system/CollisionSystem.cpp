@@ -7,23 +7,20 @@
 namespace game::system
 {
 	CollisionSystem::CollisionSystem(core::ecs::ComponentManager& componentManager)
-		: m_componentManager{componentManager}
+		: m_componentManager{ componentManager }
 	{
-	}
-
-	void CollisionSystem::addEntity(core::ecs::EntityId id)
-	{
-		m_entities.push_back(id);
 	}
 
 	void CollisionSystem::update(float deltaTime)
 	{
-		for (int i = 0; i < m_entities.size(); i++)
+		auto entities = m_componentManager.getAllEntities<component::ColliderComponent>();
+
+		for (size_t i = 0; i < entities.size(); i++)
 		{
-			for (int j = i + 1; j < m_entities.size(); j++)
+			for (size_t j = i + 1; j < entities.size(); j++)
 			{
-				if (isColliding(m_entities[i], m_entities[j]))
-					resolveCollision(m_entities[i], m_entities[j]);
+				if (isColliding(entities[i], entities[j]))
+					resolveCollision(entities[i], entities[j]);
 			}
 		}
 	}
@@ -62,8 +59,8 @@ namespace game::system
 		auto& colliderB = m_componentManager.get<component::ColliderComponent>(b);
 
 		// TagがPlayerとGroundの組み合わせを特定する
-		core::ecs::EntityId playerId = -1;
-		core::ecs::EntityId groundId = -1;
+		core::ecs::EntityId playerId = core::ecs::INVALID_ENTITY_ID;
+		core::ecs::EntityId groundId = core::ecs::INVALID_ENTITY_ID;
 
 		if (colliderA.m_tag == constant::CollisionTag::Player &&
 			colliderB.m_tag == constant::CollisionTag::Ground)
@@ -79,7 +76,7 @@ namespace game::system
 		}
 
 		// Player vs Ground の押し返し処理
-		if (playerId != -1 && groundId != -1)
+		if (playerId != core::ecs::INVALID_ENTITY_ID && groundId != core::ecs::INVALID_ENTITY_ID)
 		{
 			auto& playerTransform = m_componentManager.get<component::TransformComponent>(playerId);
 			auto& groundTransform = m_componentManager.get<component::TransformComponent>(groundId);
@@ -105,6 +102,50 @@ namespace game::system
 				if (playerVelocity.m_velocity.y < 0.0f)
 					playerVelocity.m_velocity.y = 0.0f;
 			}
-		}	
+
+
+		}
+
+		// Enemy vs Ground の組み合わせを特定する
+		core::ecs::EntityId enemyId = core::ecs::INVALID_ENTITY_ID;
+		groundId = core::ecs::INVALID_ENTITY_ID;
+
+		if (colliderA.m_tag == constant::CollisionTag::Enemy &&
+			colliderB.m_tag == constant::CollisionTag::Ground)
+		{
+			enemyId = a;
+			groundId = b;
+		}
+		else if (colliderA.m_tag == constant::CollisionTag::Ground &&
+			colliderB.m_tag == constant::CollisionTag::Enemy)
+		{
+			enemyId = b;
+			groundId = a;
+		}
+
+		// Enemy vs Ground の押し返し処理
+		if (enemyId != core::ecs::INVALID_ENTITY_ID && groundId != core::ecs::INVALID_ENTITY_ID)
+		{
+			auto& enemyTransform = m_componentManager.get<component::TransformComponent>(enemyId);
+			auto& groundTransform = m_componentManager.get<component::TransformComponent>(groundId);
+			auto& enemyCollider = m_componentManager.get<component::ColliderComponent>(enemyId);
+			auto& groundCollider = m_componentManager.get<component::ColliderComponent>(groundId);
+			auto& enemyVelocity = m_componentManager.get<component::VelocityComponent>(enemyId);
+
+			core::Vector3 enemyCenter = enemyTransform.m_position + enemyCollider.m_offset;
+			core::Vector3 groundCenter = groundTransform.m_position + groundCollider.m_offset;
+
+			float enemyBottom = enemyCenter.y - enemyCollider.m_size.y / 2.0f;
+			float groundTop = groundCenter.y + groundCollider.m_size.y / 2.0f;
+
+			if (enemyBottom <= groundTop)
+			{
+				float correction = groundTop - enemyBottom;
+				enemyTransform.m_position.y += correction;
+
+				if (enemyVelocity.m_velocity.y < 0.0f)
+					enemyVelocity.m_velocity.y = 0.0f;
+			}
+		}
 	}
 }

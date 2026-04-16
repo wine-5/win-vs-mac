@@ -1,0 +1,25 @@
+﻿{
+  "id": "enemy",
+  "category": "enemy",
+  "model": {
+    "path": "assets/model/Player.mv1",
+    "scale": [ 1, 1, 1 ]
+  },
+  "collider": {
+    "size": [ 50.5, 150.7, 50.5 ],
+    "offset": [ 0, 75, 0 ]
+  },
+  "transform": {
+    "posX": 300.0,
+    "posY": 0.0,
+    "posZ": 300.0
+  },
+  "animations": {
+    "idle": "assets/animations/Player_Idle.mv1",
+    "walk": "assets/animations/Player_Walking.mv1"
+  },
+  "gameplay": {
+    "moveSpeed": 5.0,
+    "detectionRange": 300.0
+  }
+}

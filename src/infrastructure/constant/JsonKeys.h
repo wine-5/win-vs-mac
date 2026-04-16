@@ -28,5 +28,6 @@ namespace infrastructure::constant
 
         // gameplay配下
         constexpr const char* MOVE_SPEED = "moveSpeed";
+        constexpr const char* DETECTION_RANGE = "detectionRange";
     }
 }

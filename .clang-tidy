@@ -46,6 +46,10 @@ CheckOptions:
   - key: readability-identifier-naming.ConstantCase
     value: UPPER_CASE
 
+  # const修飾関数パラメータ camelCase（const parameterは定数ではなくパラメータ）
+  - key: readability-identifier-naming.ConstantParameterCase
+    value: camelBack
+
   # 列挙型名 PascalCase
   - key: readability-identifier-naming.EnumCase
     value: CamelCase

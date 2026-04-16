@@ -12,8 +12,7 @@ namespace game::actor
 	Player::Player(core::ecs::EntityManager& entityManager,
 		core::ecs::ComponentManager& componentManager,
 		int modelHandle,
-		core::Vector3 colliderSize,
-		core::Vector3 colliderOffset)
+		const data::PlayerData& playerData)
 		: m_entity{entityManager.create()}
 	{
 		componentManager.add<component::TransformComponent>(m_entity.getId(), {});
@@ -23,8 +22,8 @@ namespace game::actor
 		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
 
 		component::ColliderComponent collider;
-		collider.m_size = colliderSize;
-		collider.m_offset = colliderOffset;
+		collider.m_size = playerData.getColliderSize();
+		collider.m_offset = playerData.getColliderOffset();
 		collider.m_tag = constant::CollisionTag::Player;
 		componentManager.add<component::ColliderComponent>(m_entity.getId(), collider);
 	}

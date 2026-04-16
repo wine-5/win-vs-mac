@@ -33,4 +33,19 @@ namespace game::factory
 		data::GroundData groundData = data::GroundData::fromMetadata(groundMeta.value());
 		return m_factoryManager.getGroundFactory().create(groundHandle, groundData);
 	}
+
+	core::ecs::EntityId FactoryInitializer::initializeEnemy()
+	{
+		int enemyHandle = m_resourceManager.loadModelById(constant::model_id::ENEMY);
+		auto enemyMeta = m_resourceManager.getMetadata(constant::model_id::ENEMY);
+
+		if (!enemyMeta.has_value())
+		{
+			LOG("ERROR: Enemyのメタデータが見つかりません");
+			throw std::runtime_error("Enemyのメタデータの読み込みに失敗しました");
+		}
+
+		data::EnemyData enemyData = data::EnemyData::fromMetadata(enemyMeta.value());
+		return m_factoryManager.getEnemyFactory().create(enemyHandle, enemyData);
+	}
 }

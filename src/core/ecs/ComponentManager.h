@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <memory>
+#include <vector>
 #include "Entity.h"
 #include "IComponent.h"
 #include "ComponentArray.h"
@@ -59,6 +60,17 @@ namespace core::ecs
 		bool has(EntityId id)
 		{
 			return getComponentArray<T>()->has(id);
+		}
+
+		/**
+		 * @brief 指定したComponentを持つ全EntityのIDを取得する
+		 * @tparam T Componentの型
+		 * @return EntityIDのベクター
+		 */
+		template<typename T>
+		std::vector<EntityId> getAllEntities()
+		{
+			return getComponentArray<T>()->getAllEntities();
 		}
 
 		/**

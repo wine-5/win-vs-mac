@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <unordered_map>
+#include <vector>
 #include "Entity.h"
 #include "IComponent.h"
 
@@ -49,6 +50,21 @@ namespace core::ecs
 		bool has(EntityId id) const
 		{
 			return m_component.find(id) != m_component.end();
+		}
+
+		/**
+		 * @brief このComponentを持つ全EntityのIDを取得する
+		 * @return EntityIDのベクター
+		 */
+		std::vector<EntityId> getAllEntities() const
+		{
+			std::vector<EntityId> entities;
+			entities.reserve(m_component.size());
+			for (const auto& [id, _] : m_component)
+			{
+				entities.push_back(id);
+			}
+			return entities;
 		}
 
 	private:

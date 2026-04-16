@@ -3,6 +3,7 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 #include "core/Vector3.h"
+#include "game/data/PlayerData.h"
 
 namespace game::actor
 {
@@ -17,14 +18,12 @@ namespace game::actor
 		 * @param entityManager EntityManagerの参照
 		 * @param componentManager ComponentManagerの参照
 		 * @param modelHandle モデルハンドル
-		 * @param colliderSize コライダーのサイズ
-		 * @param colliderOffset コライダーのオフセット
+		 * @param playerData プレイヤーのデータ
 		 */
 		Player(core::ecs::EntityManager& entityManager,
 			core::ecs::ComponentManager& componentManager,
 			int modelHandle,
-			core::Vector3 colliderSize,
-			core::Vector3 colliderOffset);
+			const data::PlayerData& playerData);
 
 		/**
 		 * @brief PlayerのEntityIDを取得する

@@ -18,8 +18,7 @@ namespace game::factory
 			m_entityManager,
 			m_componentManager,
 			modelHandle,
-			playerData.getColliderSize(),
-			playerData.getColliderOffset());
+			playerData);
 	}
 
 	actor::Player& PlayerFactory::getPlayer() const

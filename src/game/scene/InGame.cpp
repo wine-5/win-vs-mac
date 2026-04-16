@@ -19,6 +19,8 @@
 #include "game/constant/ModelId.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
+#include "game/system/AISystem.h"
+#include "game/component/AIComponent.h"
 
 /* 標準のインクルード */
 #include <cassert>
@@ -67,7 +69,12 @@ namespace game::scene
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
 		initializer.initializePlayer(m_playerData);
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
+
 		m_groundId = initializer.initializeGround();
+
+		m_enemyId = initializer.initializeEnemy();
+		auto& ai = m_componentManager.get<component::AIComponent>(m_enemyId);
+		ai.m_targetEntity = core::ecs::Entity(m_playerId);
 
 	}
 
@@ -80,7 +87,7 @@ namespace game::scene
 		// システム登録
 		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_playerId, m_inputProvider);
 		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed());
-		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager, m_playerId);
+		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager);
 		//m_systemManager.registerSystem<game::system::AnimationSystem>(
 		//	m_componentManager,
 		//	m_factoryManager.getPlayerFactory().getPlayer().getId(),
@@ -88,9 +95,8 @@ namespace game::scene
 		//	idleAnimHandle,
 		//	walkAnimHandle);
 
-		auto* collisionSystem = m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
-		collisionSystem->addEntity(m_playerId);
-		collisionSystem->addEntity(m_groundId);
+		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
+		m_systemManager.registerSystem<game::system::AISystem>(m_componentManager);
 	}
 
 	void InGame::update(float deltaTime)
@@ -115,13 +121,19 @@ namespace game::scene
 	{
 		// コンポーネントの取得
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
-		auto& anim = m_componentManager.get<game::component::AnimationComponent<game::constant::PlayerAnimationState>>(m_playerId);
+		//auto& anim = m_componentManager.get<game::component::AnimationComponent<game::constant::PlayerAnimationState>>(m_playerId);
 		auto& groundRender = m_componentManager.get<game::component::RenderComponent>(m_groundId);
 		auto& render = m_componentManager.get<game::component::RenderComponent>(m_playerId);
 		auto& groundTransform = m_componentManager.get<game::component::TransformComponent>(m_groundId);
 
+		// モデルの描画
 		m_renderer.drawModel(render.m_modelHandle, transform.m_position,transform.m_rotation,transform.m_scale);
 		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
+
+		// 敵の描画
+		auto& enemyRenderer = m_componentManager.get<component::RenderComponent>(m_enemyId);
+		auto& enemyTransform = m_componentManager.get<component::TransformComponent>(m_enemyId);
+		m_renderer.drawModel(enemyRenderer.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
 
 		// デバッグ: コライダーを可視化
 		auto& playerCollider = m_componentManager.get<game::component::ColliderComponent>(m_playerId);
@@ -132,6 +144,5 @@ namespace game::scene
 		
 		m_renderer.drawCollider(playerColliderCenter, playerCollider.m_size, core::utility::Color::GREEN);
 		m_renderer.drawCollider(groundColliderCenter, groundCollider.m_size, core::utility::Color::BLUE);
-
 	}
 }

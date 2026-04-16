@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <string>
+#include <string_view>
 #include <optional>
 #include "core/data/ModelMetadata.h"
 
@@ -19,13 +20,13 @@ namespace core::iface
 		 * @param modelId モデルID
 		 * @return モデルハンドル
 		 */
-		virtual int loadModelById(const std::string& modelId) = 0;
+		virtual int loadModelById(const std::string_view modelId) = 0;
 		
 		/**
 		 * @brief modelIDからメタデータを取得する
 		 * @param modelId モデルID
 		 * @return メタデータ（存在しない場合nullopt）
 		 */
-		virtual std::optional<core::data::ModelMetadata> getMetadata(const std::string& modelId) const = 0;
+		virtual std::optional<core::data::ModelMetadata> getMetadata(const std::string_view modelId) const = 0;
 	};
 }
