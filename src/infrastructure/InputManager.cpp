@@ -28,15 +28,15 @@ namespace infrastructure
 
 	bool InputManager::isKeyDown(core::input::KeyCode keyCode) const
 	{
-		auto it = KEY_MAP.find(keyCode);
+		auto it{KEY_MAP.find(keyCode)};
 		if (it == KEY_MAP.end()) return false;
 		return CheckHitKey(it->second) != 0;
 	}
 
 	bool InputManager::isKeyPressed(core::input::KeyCode keyCode) const
 	{
-		bool currentState = isKeyDown(keyCode);
-		bool previousState = m_previousKeyState[keyCode];  // デフォルトはfalse
+		bool currentState{isKeyDown(keyCode)};
+		bool previousState{m_previousKeyState[keyCode]};  // デフォルトはfalse
 		return currentState && !previousState;
 	}
 
@@ -67,7 +67,7 @@ namespace infrastructure
 
 	float InputManager::getPadAxis(core::input::GamePadCode code) const
 	{
-		int x = 0, y = 0;
+		int x{}, y{};
 		GetJoypadAnalogInput(&x, &y, DX_INPUT_PAD1);
 
 		switch (code)
