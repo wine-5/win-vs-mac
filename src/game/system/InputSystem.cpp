@@ -36,8 +36,8 @@ namespace game::system
 		if (!m_inputProvider.isPadConnected()) return;
 
 		// コントローラースティック入力
-		float axisX = m_inputProvider.getPadAxis(core::input::GamePadCode::LeftStickX);
-		float axisY = m_inputProvider.getPadAxis(core::input::GamePadCode::LeftStickY);
+		float axisX{m_inputProvider.getPadAxis(core::input::GamePadCode::LeftStickX)};
+		float axisY{m_inputProvider.getPadAxis(core::input::GamePadCode::LeftStickY)};
 		if (axisX != 0.0f)
 			input.m_moveX = axisX;
 		if (axisY != 0.0f)

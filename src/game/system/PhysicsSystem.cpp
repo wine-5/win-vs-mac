@@ -12,7 +12,7 @@ namespace game::system
 
 	void PhysicsSystem::update(float deltaTime)
 	{
-		auto entities = m_componentManager.getAllEntities<component::VelocityComponent>();
+		auto entities{m_componentManager.getAllEntities<component::VelocityComponent>()};
 
 		for (auto& entityId : entities)
 		{

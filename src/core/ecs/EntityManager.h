@@ -20,7 +20,7 @@ namespace core::ecs
 		{
 			if (!m_recycledIds.empty())
 			{
-				EntityId id = m_recycledIds.front();
+				EntityId id{m_recycledIds.front()};
 				m_recycledIds.pop();
 				return Entity(id);
 			}

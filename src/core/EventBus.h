@@ -19,7 +19,7 @@ public:
 	template<typename TEvent>
 	void subscribe(std::function<void(const TEvent&)> callback)
 	{
-		auto key = std::type_index(typeid(TEvent));
+		auto key{std::type_index(typeid(TEvent))};
 		m_listeners[key].push_back(
 			[callback](const std::any& e)
 			{
@@ -36,8 +36,8 @@ public:
 	template<typename TEvent>
 	void publish(const TEvent& event)
 	{
-		auto key = std::type_index(typeid(TEvent));
-		auto it = m_listeners.find(key);
+		auto key{std::type_index(typeid(TEvent))};
+		auto it{m_listeners.find(key)};
 		if (it == m_listeners.end()) return;
 
 		for (auto& listener : it->second)

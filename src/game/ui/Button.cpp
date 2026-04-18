@@ -22,8 +22,8 @@ namespace game::ui
     {
         if(!m_visible || m_state == UIState::Disabled) return;
 
-        bool isOver = isMouseOver();
-        bool isMousePressed = m_inputProvider.isMouseLeftPressed();
+        bool isOver{isMouseOver()};
+        bool isMousePressed{m_inputProvider.isMouseLeftPressed()};
 
         if (isOver)
         {
@@ -59,9 +59,9 @@ namespace game::ui
         // ボタンの枠線
         uiRenderer.drawBox(m_x, m_y, m_width, m_height, core::utility::Color::WHITE, false);
 
-        int textWidth = uiRenderer.getTextWidth(m_text.c_str());
-        int textX = m_x + (m_width - textWidth) / 2;
-        int textY = m_y + (m_height - game::constant::ui::FONT_SIZE_NORMAL) / 2;
+        int textWidth{uiRenderer.getTextWidth(m_text.c_str())};
+        int textX{m_x + (m_width - textWidth) / 2};
+        int textY{m_y + (m_height - game::constant::ui::FONT_SIZE_NORMAL) / 2};
         uiRenderer.drawText(textX, textY, m_text.c_str(), core::utility::Color::BLUE);
     }
 

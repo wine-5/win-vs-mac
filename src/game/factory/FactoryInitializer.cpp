@@ -16,14 +16,14 @@ namespace game::factory
 
 	void FactoryInitializer::initializePlayer(const data::PlayerData& playerData)
 	{
-		int playerHandle = m_resourceManager.loadModelById(constant::model_id::PLAYER);
+		int playerHandle{m_resourceManager.loadModelById(constant::model_id::PLAYER)};
 		m_factoryManager.getPlayerFactory().create(playerHandle, playerData);
 	}
 
 	core::ecs::EntityId FactoryInitializer::initializeGround()
 	{
-		int groundHandle = m_resourceManager.loadModelById(constant::model_id::GROUND);
-		auto groundMeta = m_resourceManager.getMetadata(constant::model_id::GROUND);
+		int groundHandle{m_resourceManager.loadModelById(constant::model_id::GROUND)};
+		auto groundMeta{m_resourceManager.getMetadata(constant::model_id::GROUND)};
 		if (!groundMeta.has_value()) {
 			LOG("ERROR: Groundのメタデータが見つかりません");
 			throw std::runtime_error("Groundのメタデータの読み込みに失敗しました");
@@ -36,8 +36,8 @@ namespace game::factory
 
 	core::ecs::EntityId FactoryInitializer::initializeEnemy()
 	{
-		int enemyHandle = m_resourceManager.loadModelById(constant::model_id::ENEMY);
-		auto enemyMeta = m_resourceManager.getMetadata(constant::model_id::ENEMY);
+		int enemyHandle{m_resourceManager.loadModelById(constant::model_id::ENEMY)};
+		auto enemyMeta{m_resourceManager.getMetadata(constant::model_id::ENEMY)};
 
 		if (!enemyMeta.has_value())
 		{

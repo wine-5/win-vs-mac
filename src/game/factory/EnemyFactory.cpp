@@ -14,13 +14,13 @@ namespace game::factory
 
 	core::ecs::EntityId EnemyFactory::create(int modelHandle, const data::EnemyData& enemyData)
 	{
-		auto enemy = std::make_unique<actor::Enemy>(
+		auto enemy{std::make_unique<actor::Enemy>(
 			m_entityManager,
 			m_componentManager,
 			modelHandle,
-			enemyData);
+			enemyData)};
 
-		core::ecs::EntityId id = enemy->getId();
+		core::ecs::EntityId id{enemy->getId()};
 		m_enemies.push_back(std::move(enemy));
 		m_enemyIds.push_back(id);
 		return id;
