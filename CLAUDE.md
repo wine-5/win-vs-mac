@@ -59,6 +59,7 @@ platform → infrastructure → game → core
 ## コーディング規則
 
 - メンバ変数はクラス定義時に **Uniform Initialization（`{}`）** で初期化する
+- **ローカル変数も Uniform Initialization（`{}`）** で初期化する
 - public 関数には必ず **Doxygen コメント**（`@brief`, `@param`, `@return`）を記載する
 - スマートポインタは `make_unique` / `make_shared` を使用する
 
