@@ -34,10 +34,10 @@ namespace game::scene
 
     void StageSelect::draw()
     {
-        const char* title = "セレクト画面（仮）";
-        int titleWidth = m_uiRenderer.getTextWidth(title);
-        int titleX = (m_screen.getWidth() - titleWidth) / 2;
-        int titleY = static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO);
+        const char* title{"セレクト画面（仮）"};
+        int titleWidth{m_uiRenderer.getTextWidth(title)};
+        int titleX{(m_screen.getWidth() - titleWidth) / 2};
+        int titleY{static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO)};
         m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE);
 
         // UI要素を描画
@@ -56,8 +56,8 @@ namespace game::scene
         const int buttonX = (screenWidth - buttonWidth) / 2;
         const int startButtonY = static_cast<int>(screenHeight * START_BUTTON_Y_RATIO);
 
-        auto startButton = std::make_unique<ui::Button>(
-            "ゲームスタート", buttonX, startButtonY, buttonWidth, buttonHeight, m_inputProvider);
+        auto startButton{std::make_unique<ui::Button>(
+            "ゲームスタート", buttonX, startButtonY, buttonWidth, buttonHeight, m_inputProvider)};
 
         // ボタンが押されたときの処理（Loading画面へ遷移）
         startButton->setOnClick([]() {

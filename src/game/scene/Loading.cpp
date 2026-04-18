@@ -37,20 +37,20 @@ namespace game::scene
     void Loading::draw()
     {
         // ローディングタイトル表示
-        const char* title = "Loading...";
-        int titleWidth = m_uiRenderer.getTextWidth(title);
-        int titleX = (m_screen.getWidth() - titleWidth) / 2;
-        int titleY = static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO);
+        const char* title{"Loading..."};
+        int titleWidth{m_uiRenderer.getTextWidth(title)};
+        int titleX{(m_screen.getWidth() - titleWidth) / 2};
+        int titleY{static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO)};
         m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE);
 
         // 経過時間表示（切り上げ）
-        float remainingTime = TEST_LOADING_DURATION - m_elapsedTime;
+        float remainingTime{TEST_LOADING_DURATION - m_elapsedTime};
         if (remainingTime < 0.0f) remainingTime = 0.0f;
 
         std::string timerText = std::to_string(static_cast<int>(std::ceil(remainingTime))) + "秒";
-        int timerWidth = m_uiRenderer.getTextWidth(timerText.c_str());
-        int timerX = (m_screen.getWidth() - timerWidth) / 2;
-        int timerY = static_cast<int>(m_screen.getHeight() * TIMER_Y_RATIO);
+        int timerWidth{m_uiRenderer.getTextWidth(timerText.c_str())};
+        int timerX{(m_screen.getWidth() - timerWidth) / 2};
+        int timerY{static_cast<int>(m_screen.getHeight() * TIMER_Y_RATIO)};
         m_uiRenderer.drawText(timerX, timerY, timerText.c_str(), core::utility::Color::YELLOW);
     }
 }
