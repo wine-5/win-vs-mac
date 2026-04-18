@@ -21,8 +21,8 @@ namespace core::ecs
 		template<typename T, typename... Args>
 		T* registerSystem(Args&&... args)
 		{
-			auto system = std::make_unique<T>(std::forward<Args>(args)...);
-			T* ptr = system.get();
+			auto system{std::make_unique<T>(std::forward<Args>(args)...)};
+			T* ptr{system.get()};
 			m_systems.push_back(std::move(system));
 			return ptr;
 		}
