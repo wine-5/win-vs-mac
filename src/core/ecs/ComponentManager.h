@@ -89,7 +89,7 @@ namespace core::ecs
 		template<typename T>
 		ComponentArray<T>* getComponentArray()
 		{
-			std::type_index type = typeid(T);
+			std::type_index type{typeid(T)};
 			if (m_componentArrays.find(type) == m_componentArrays.end())
 				m_componentArrays[type] = std::make_unique<ComponentArray<T>>();
 			return static_cast<ComponentArray<T>*>(m_componentArrays[type].get());

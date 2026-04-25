@@ -14,13 +14,13 @@ namespace game::factory
 
 	core::ecs::EntityId GroundFactory::create(int modelHandle, const data::GroundData& groundData)
 	{
-		auto ground = std::make_unique<stage::Ground>(
+		auto ground{std::make_unique<stage::Ground>(
 			m_entityManager,
 			m_componentManager,
 			modelHandle,
-			groundData);
+			groundData)};
 
-		core::ecs::EntityId id = ground->getId();
+		core::ecs::EntityId id{ground->getId()};
 		m_grounds.push_back(std::move(ground));
 
 		return id;

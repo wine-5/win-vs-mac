@@ -15,7 +15,7 @@ namespace game::system
 	void AISystem::update(float deltaTime)
 	{
 		// AIComponentを持つ全エンティティを取得
-		auto entities = m_componentManager.getAllEntities<component::AIComponent>();
+		auto entities{m_componentManager.getAllEntities<component::AIComponent>()};
 		for (auto entityId : entities)
 		{
 			auto& ai = m_componentManager.get<component::AIComponent>(entityId);
@@ -37,7 +37,7 @@ namespace game::system
 			direction.y = 0.0f; // Y軸は無視（今後Y軸も追従する可能性あり）
 			direction.z = targetTransform.m_position.z - transform.m_position.z;
 
-			float distance = std::sqrt(direction.x * direction.x + direction.z * direction.z);
+			float distance{std::sqrt(direction.x * direction.x + direction.z * direction.z)};
 
 			if (distance > ai.m_detectionRange)
 				continue;

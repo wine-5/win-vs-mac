@@ -12,10 +12,10 @@ namespace infrastructure
     ResourceManager::ResourceManager()
     {
         // resources.jsonから全リソースを読み込む
-        auto resourceList = loadResourceList("assets/config/resources.json");
+        auto resourceList{loadResourceList("assets/config/resources.json")};
         for (const auto& res : resourceList)
         {
-            auto metadata = parseJsonFile(res.m_path);
+            auto metadata{parseJsonFile(res.m_path)};
             m_metadata[res.m_id] = metadata;
         }
     }
@@ -24,7 +24,7 @@ namespace infrastructure
     {
         std::string modelIdStr(modelId);
         // メタデータを取得
-        auto it = m_metadata.find(modelIdStr);
+        auto it{m_metadata.find(modelIdStr)};
         if (it == m_metadata.end())
         {
             LOG_E("モデルID '%s' が見つかりません", modelIdStr.c_str());
@@ -34,14 +34,14 @@ namespace infrastructure
         const auto& metadata = it->second;
 
         // 既にロード済みか確認
-        auto handleIt = m_modelHandles.find(modelIdStr);
+        auto handleIt{m_modelHandles.find(modelIdStr)};
         if (handleIt != m_modelHandles.end())
         {
             return handleIt->second;
         }
 
         // モデルをロード
-        int handle = MV1LoadModel(metadata.modelPath.c_str());
+        int handle{MV1LoadModel(metadata.modelPath.c_str())};
         if (handle == -1)
         {
             LOG_E("モデルの読み込みに失敗しました: %s", metadata.modelPath.c_str());
@@ -81,7 +81,7 @@ namespace infrastructure
     std::optional<core::data::ModelMetadata> ResourceManager::getMetadata(const std::string_view modelId) const
     {
         std::string modelIdStr(modelId);
-        auto it = m_metadata.find(modelIdStr);
+        auto it{m_metadata.find(modelIdStr)};
         if (it == m_metadata.end())
             return std::nullopt;
 

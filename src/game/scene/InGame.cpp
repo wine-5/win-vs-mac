@@ -53,7 +53,7 @@ namespace game::scene
 		m_resourceManager.loadModelById(constant::model_id::PLAYER);
 
 		// モデルロード後に再度メタデータを取得してPlayerDataを更新
-		auto playerMeta = m_resourceManager.getMetadata(constant::model_id::PLAYER);
+		auto playerMeta{m_resourceManager.getMetadata(constant::model_id::PLAYER)};
 		if (!playerMeta.has_value()) {
 			LOG("ERROR: Playerのメタデータが見つかりません");
 			throw std::runtime_error("Playerのメタデータの読み込みに失敗しました");

@@ -28,17 +28,17 @@ namespace game::system
 		auto& render = m_componentManager.get<component::RenderComponent>(m_entityId);
 
 		// 速度から次の状態を決める
-		bool isMoving = (velocity.m_velocity.x != 0.0f || velocity.m_velocity.z != 0.0f);
-		constant::PlayerAnimationState nextState = isMoving
+		bool isMoving{(velocity.m_velocity.x != 0.0f || velocity.m_velocity.z != 0.0f)};
+		constant::PlayerAnimationState nextState{isMoving
 			? constant::PlayerAnimationState::Walk
-			: constant::PlayerAnimationState::Idle;
+			: constant::PlayerAnimationState::Idle};
 
 		// 状態が変わったときだけアニメーションを切り替える
 		if (anim.m_state != nextState)
 		{
-			int nextHandle = (nextState == constant::PlayerAnimationState::Walk)
+			int nextHandle{(nextState == constant::PlayerAnimationState::Walk)
 				? m_walkAnimHandle
-				: m_idleAnimHandle;
+				: m_idleAnimHandle};
 
 			changeAnimation(anim, render.m_modelHandle, nextState, nextHandle);
 		}
