@@ -135,6 +135,7 @@
     <ClCompile Include="src\core\interface\ILogger.h" />
     <ClCompile Include="src\game\actor\Enemy.cpp" />
     <ClCompile Include="src\game\attack\BaseAttackHandler.cpp" />
+    <ClCompile Include="src\game\attack\DefenseHandler.cpp" />
     <ClCompile Include="src\game\factory\EnemyFactory.cpp" />
     <ClCompile Include="src\game\scene\Loading.cpp" />
     <ClCompile Include="src\game\scene\Result.cpp" />
@@ -205,6 +206,7 @@
     <ClInclude Include="src\game\actor\Enemy.h" />
     <ClInclude Include="src\game\attack\BaseAttackHandler.h" />
     <ClInclude Include="src\game\attack\DamageChain.h" />
+    <ClInclude Include="src\game\attack\DefenseHandler.h" />
     <ClInclude Include="src\game\attack\IDamageHandler.h" />
     <ClInclude Include="src\game\component\AIComponent.h" />
     <ClInclude Include="src\game\component\AttackComponent.h" />
