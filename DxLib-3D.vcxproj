@@ -202,6 +202,7 @@
     <ClInclude Include="src\core\interface\IScreen.h" />
     <ClInclude Include="src\core\interface\IUIRenderer.h" />
     <ClInclude Include="src\game\actor\Enemy.h" />
+    <ClInclude Include="src\game\attack\DamageChain.h" />
     <ClInclude Include="src\game\component\AIComponent.h" />
     <ClInclude Include="src\game\component\AttackComponent.h" />
     <ClInclude Include="src\game\component\HealthComponent.h" />

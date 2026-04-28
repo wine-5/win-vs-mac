@@ -4,7 +4,7 @@
 namespace game::component
 {
 	/**
-     * @brief AI追従行動を制御するコンポーネント
+     * @brief AI追従行動を制御するコンポーネント	
      */
 	struct AIComponent
 	{
