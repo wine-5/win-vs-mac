@@ -369,5 +369,8 @@
     <ClInclude Include="src\game\attack\DamageChain.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\attack\IDamageHandlere.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
