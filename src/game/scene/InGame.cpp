@@ -75,6 +75,11 @@ namespace game::scene
 		m_groundId = initializer.initializeGround();
 
 		m_enemyId = initializer.initializeEnemy();
+		// Enemyの初期位置をずらす
+		auto& enemyTransform{ m_componentManager.get<component::TransformComponent>(m_enemyId) };
+		enemyTransform.m_position.x = 100.0f;
+		enemyTransform.m_position.z = 100.0f;
+
 		auto& ai = m_componentManager.get<component::AIComponent>(m_enemyId);
 		ai.m_targetEntity = core::ecs::Entity(m_playerId);
 
