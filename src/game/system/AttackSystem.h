@@ -5,11 +5,24 @@
 
 namespace game::system
 {
+	/**
+	 * @brief AttackComponentを持つEntityの攻撃処理・ダメージ計算を行うSystem
+	 */
 	class AttackSystem : public core::ecs::ISystem
 	{
 	public:
+		/**
+		 * @brief AttackSystemのコンストラクタ
+		 * @param componentManager ComponentManagerの参照
+		 * @param eventBus EventBusの参照
+		 */
 		AttackSystem(core::ecs::ComponentManager& componentManager, EventBus& eventBus);
 
+		
+		/**
+		 * @brief 攻撃処理・ダメージ計算を更新する
+		 * @param deltaTime フレーム間の時間差
+		 */
 		void update(float deltaTime) override;
 
 	private:
