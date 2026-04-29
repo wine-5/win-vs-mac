@@ -15,12 +15,14 @@
 #include "game/component/RenderComponent.h"
 #include "game/system/AnimationSystem.h"
 #include "game/system/CollisionSystem.h"
+#include "game/system/AttackSystem.h"
 #include "game/component/ColliderComponent.h"
 #include "game/constant/ModelId.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
 #include "game/system/AISystem.h"
 #include "game/component/AIComponent.h"
+#include "game/event/InGameEvents.h"
 
 /* 標準のインクルード */
 #include <cassert>
@@ -97,6 +99,13 @@ namespace game::scene
 
 		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
 		m_systemManager.registerSystem<game::system::AISystem>(m_componentManager);
+
+		m_systemManager.registerSystem<game::system::AttackSystem>(m_componentManager, m_eventBus);
+		m_eventBus.subscribe<event::AttackHitEvent>([](const event::AttackHitEvent& e)
+			{
+				LOG("AttackHit: 攻撃者のId=%u 被攻撃者のId=%u ダメージ=%.1f",
+					e.m_attackerId, e.m_targetId, e.m_damage);
+			});
 	}
 
 	void InGame::update(float deltaTime)

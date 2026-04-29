@@ -6,6 +6,7 @@
 #include "game/component/ColliderComponent.h"
 #include "game/component/AIComponent.h"
 #include "game/component/HealthComponent.h"
+#include "game/component/AttackComponent.h"
 #include "game/constant/EnemyAnimationState.h"
 #include "game/constant/CollisionTag.h"
 
@@ -22,6 +23,7 @@ namespace game::actor
 		componentManager.add<component::AnimationComponent<constant::EnemyAnimationState>>(m_entity.getId(), {});
 		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
 		componentManager.add<component::HealthComponent>(m_entity.getId(), {});
+		componentManager.add<component::AttackComponent>(m_entity.getId(), {});
 
 		component::ColliderComponent collider;
 		collider.m_size = enemyData.getColliderSize();
