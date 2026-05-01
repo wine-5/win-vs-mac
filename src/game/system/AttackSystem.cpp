@@ -41,6 +41,7 @@ namespace game::system
 
 				auto& targetTransform{ m_componentManager.get<component::TransformComponent>(targetId) };
 
+				// 最短距離を求める
 				float dx{ attackerTransform.m_position.x - targetTransform.m_position.x };
 				float dz{ attackerTransform.m_position.z - targetTransform.m_position.z };
 				float distance{ std::sqrt(dx * dx + dz * dz) };
