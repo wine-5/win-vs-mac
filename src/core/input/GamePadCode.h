@@ -12,7 +12,8 @@ namespace core::input
         LeftStickY,
 
         // ボタン
-        ButtonB, // ジャンプ
+        ButtonA, // 攻撃（〇）
+        ButtonB, // ジャンプ（×）
 
         // 十字
         DPadUp,

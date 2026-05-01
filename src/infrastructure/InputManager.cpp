@@ -56,6 +56,7 @@ namespace infrastructure
 		input = GetJoypadInputState(DX_INPUT_PAD1);
 		switch (code)
 		{
+		case core::input::GamePadCode::ButtonA:  return (input & PAD_INPUT_A) != 0;
 		case core::input::GamePadCode::ButtonB:  return (input & PAD_INPUT_B) != 0;
 		case core::input::GamePadCode::DPadUp:   return (input & PAD_INPUT_UP) != 0;
 		case core::input::GamePadCode::DPadDown:  return (input & PAD_INPUT_DOWN) != 0;
