@@ -28,7 +28,7 @@ namespace game::system
 			if (attack.m_currentCooldown > 0.0f)
 			{
 				attack.m_currentCooldown -= deltaTime;
-				continue;
+				continue; // まだ攻撃できないためスキップ
 			}
 			
 			auto& attackerTransform{ m_componentManager.get<component::TransformComponent>(attackerId) };
