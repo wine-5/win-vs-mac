@@ -44,6 +44,11 @@ namespace game::data
             if (detectionRangeIt != metadata.floatProperties.end())
                 data.m_detectionRange = detectionRangeIt->second;
 
+            auto attackRangeIt{ metadata.floatProperties.find(
+                std::string(constant::metadata_keys::ATTACK_RANGE)) };
+            if (attackRangeIt != metadata.floatProperties.end())
+                data.m_attackRange = attackRangeIt->second;
+
             return data;
         }
 
@@ -57,6 +62,8 @@ namespace game::data
         [[nodiscard]] float              getMoveSpeed()      const noexcept { return m_moveSpeed; }
         /** @brief 索敵範囲を取得 */
         [[nodiscard]] float              getDetectionRange() const noexcept { return m_detectionRange; }
+        /** @brief 攻撃範囲を取得 */
+        [[nodiscard]] float getAttackRange() const noexcept { return m_attackRange; }
         /** @brief コライダーサイズを取得 */
         [[nodiscard]] core::Vector3      getColliderSize()   const noexcept { return m_colliderSize; }
         /** @brief コライダーオフセットを取得 */
@@ -66,6 +73,7 @@ namespace game::data
         std::string m_modelPath;
         std::string m_idleAnimPath;
         std::string m_walkAnimPath;
+       float m_attackRange{ 100.0f };
         float m_moveSpeed{ 2.0f };
         float m_detectionRange{ 10.0f };
         core::Vector3 m_colliderSize;

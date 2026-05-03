@@ -10,5 +10,6 @@ namespace game::constant
 		constexpr std::string_view WALK_ANIM = "walkAnim";
 		constexpr std::string_view MOVE_SPEED = "moveSpeed";
 		constexpr std::string_view DETECTION_RANGE = "detectionRange";
+		constexpr std::string_view ATTACK_RANGE = "attackRange";
 	}
 }
