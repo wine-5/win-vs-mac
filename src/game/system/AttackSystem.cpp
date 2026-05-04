@@ -2,10 +2,12 @@
 #include "game/component/AttackComponent.h"
 #include "game/component/HealthComponent.h"
 #include "game/component/InputComponent.h"
+#include "game/component/TransformComponent.h"
 #include "game/attack/DamageChain.h"
 #include "game/attack/BaseAttackHandler.h"
 #include "game/attack/DefenseHandler.h"
 #include "game/event/InGameEvents.h"
+#include <cmath>
 
 namespace game::system
 {
@@ -37,6 +39,7 @@ namespace game::system
 				if (input.m_attackPressed)
 					attack.m_attackRequested = true;
 			}
+
 			if (!attack.m_attackRequested)
 				continue;
 
@@ -46,6 +49,16 @@ namespace game::system
 			for (auto targetId : targets)
 			{
 				if (targetId == attackerId)
+					continue;
+
+				// AttackComponentを持つEntityの攻撃範囲チェック
+				auto& attackerTransform{ m_componentManager.get<component::TransformComponent>(attackerId) };
+				auto& targetTransform{ m_componentManager.get<component::TransformComponent>(targetId) };
+				float dx{ attackerTransform.m_position.x - targetTransform.m_position.x };
+				float dz{ attackerTransform.m_position.z - targetTransform.m_position.z };
+				float distance{ std::sqrt(dx * dx + dz * dz) };
+
+				if (distance > attack.m_attackRange) // 攻撃範囲外の場合
 					continue;
 
 				// CORチェーンでダメージ計算を行う

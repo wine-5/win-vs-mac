@@ -34,7 +34,6 @@ namespace game::actor
 		component::AIComponent ai;
 		ai.m_moveSpeed = enemyData.getMoveSpeed();
 		ai.m_detectionRange = enemyData.getDetectionRange();
-		ai.m_attackRange = enemyData.getAttackRange();
 		componentManager.add<component::AIComponent>(m_entity.getId(), ai);
 	}
 
