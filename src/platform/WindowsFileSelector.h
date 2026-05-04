@@ -6,7 +6,7 @@ namespace platform
 	/**
 	 * @brief Windows APIを使ったファイル選択クラス
 	 */
-	class WindowsFileSelector : public core::iface::IFileSelector
+	class WindowsFileSelector : public core::iface::IPlatformDataProvider
 	{
 	public:
 		/**
