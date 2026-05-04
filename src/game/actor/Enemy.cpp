@@ -7,8 +7,9 @@
 #include "game/component/AIComponent.h"
 #include "game/component/HealthComponent.h"
 #include "game/component/AttackComponent.h"
+#include "game/component/TagComponent.h"
 #include "game/constant/EnemyAnimationState.h"
-#include "game/constant/CollisionTag.h"
+#include "game/constant/Tag.h"
 
 namespace game::actor
 {
@@ -28,8 +29,11 @@ namespace game::actor
 		component::ColliderComponent collider;
 		collider.m_size = enemyData.getColliderSize();
 		collider.m_offset = enemyData.getColliderOffset();
-		collider.m_tag = constant::CollisionTag::Enemy;
 		componentManager.add<component::ColliderComponent>(m_entity.getId(), collider);
+
+		component::TagComponent tag{};
+		tag.m_tag = constant::Tag::Enemy;
+		componentManager.add<component::TagComponent>(m_entity.getId(), tag);
 
 		component::AIComponent ai;
 		ai.m_moveSpeed = enemyData.getMoveSpeed();

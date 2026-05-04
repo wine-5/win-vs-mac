@@ -5,8 +5,10 @@
 #include "game/component/RenderComponent.h"
 #include "game/component/AnimationComponent.h"
 #include "game/component/ColliderComponent.h"
+#include "game/component/TagComponent.h"
 #include "game/component/HealthComponent.h"
 #include "game/component/AttackComponent.h"
+#include "game/constant/Tag.h"
 #include "game/constant/PlayerAnimationState.h"
 
 namespace game::actor
@@ -27,8 +29,11 @@ namespace game::actor
 		component::ColliderComponent collider;
 		collider.m_size = playerData.getColliderSize();
 		collider.m_offset = playerData.getColliderOffset();
-		collider.m_tag = constant::CollisionTag::Player;
 		componentManager.add<component::ColliderComponent>(m_entity.getId(), collider);
+
+		component::TagComponent tag{};
+		tag.m_tag = constant::Tag::Player;
+		componentManager.add<component::TagComponent>(m_entity.getId(), tag);
 	}
 
 	core::ecs::EntityId Player::getId() const noexcept

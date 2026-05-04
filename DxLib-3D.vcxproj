@@ -212,6 +212,7 @@
     <ClInclude Include="src\game\component\AIComponent.h" />
     <ClInclude Include="src\game\component\AttackComponent.h" />
     <ClInclude Include="src\game\component\HealthComponent.h" />
+    <ClInclude Include="src\game\component\TagComponent.h" />
     <ClInclude Include="src\game\constant\EnemyAnimationState.h" />
     <ClInclude Include="src\game\constant\MetadataKeys.h" />
     <ClInclude Include="src\game\data\EnemyData.h" />
@@ -229,7 +230,7 @@
     <ClInclude Include="src\core\Vector3.h" />
     <ClInclude Include="src\game\component\AnimationComponent.h" />
     <ClInclude Include="src\game\component\ColliderComponent.h" />
-    <ClInclude Include="src\game\constant\CollisionTag.h" />
+    <ClInclude Include="src\game\constant\Tag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
     <ClInclude Include="src\game\constant\UI.h" />
     <ClInclude Include="src\game\data\GroundData.h" />

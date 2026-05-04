@@ -1,7 +1,9 @@
 ﻿#include "CollisionSystem.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/ColliderComponent.h"
+#include "game/component/TagComponent.h"
 #include "game/component/VelocityComponent.h"
+#include "game/constant/Tag.h"
 #include <cmath>
 
 namespace game::system
@@ -62,14 +64,15 @@ namespace game::system
 		core::ecs::EntityId playerId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId groundId{core::ecs::INVALID_ENTITY_ID};
 
-		if (colliderA.m_tag == constant::CollisionTag::Player &&
-			colliderB.m_tag == constant::CollisionTag::Ground)
+		auto& tagA{ m_componentManager.get<component::TagComponent>(a) };
+		auto& tagB{ m_componentManager.get<component::TagComponent>(b) };
+
+		if (tagA.m_tag == constant::Tag::Player && tagB.m_tag == constant::Tag::Ground)
 		{
 			playerId = a;
 			groundId = b;
 		}
-		else if (colliderA.m_tag == constant::CollisionTag::Ground &&
-			colliderB.m_tag == constant::CollisionTag::Player)
+		else if (tagA.m_tag == constant::Tag::Ground && tagB.m_tag == constant::Tag::Player)
 		{
 			playerId = b;
 			groundId = a;
@@ -107,17 +110,15 @@ namespace game::system
 		}
 
 		// Enemy vs Ground の組み合わせを特定する
-		core::ecs::EntityId enemyId = core::ecs::INVALID_ENTITY_ID;
+		core::ecs::EntityId enemyId{ core::ecs::INVALID_ENTITY_ID };
 		groundId = core::ecs::INVALID_ENTITY_ID;
 
-		if (colliderA.m_tag == constant::CollisionTag::Enemy &&
-			colliderB.m_tag == constant::CollisionTag::Ground)
+		if (tagA.m_tag == constant::Tag::Enemy && tagB.m_tag == constant::Tag::Ground)
 		{
 			enemyId = a;
 			groundId = b;
 		}
-		else if (colliderA.m_tag == constant::CollisionTag::Ground &&
-			colliderB.m_tag == constant::CollisionTag::Enemy)
+		else if (tagA.m_tag == constant::Tag::Ground && tagB.m_tag == constant::Tag::Enemy)
 		{
 			enemyId = b;
 			groundId = a;
