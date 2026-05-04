@@ -3,6 +3,8 @@
 #include "game/component/HealthComponent.h"
 #include "game/component/InputComponent.h"
 #include "game/component/TransformComponent.h"
+#include "game/component/TagComponent.h"
+#include "game/constant/Tag.h"
 #include "game/attack/DamageChain.h"
 #include "game/attack/BaseAttackHandler.h"
 #include "game/attack/DefenseHandler.h"
@@ -78,6 +80,17 @@ namespace game::system
 
 				if (health.m_currentHp < 0.0f)
 					health.m_currentHp = 0.0f;
+
+				// 死亡判定と死亡の場合はエンティティに応じたイベントを発行する
+				if (health.m_currentHp <= 0.0f && !health.m_isDead)
+				{
+					health.m_isDead = true;
+					auto& tag{ m_componentManager.get<component::TagComponent>(targetId) };
+					if (tag.m_tag == constant::Tag::Player)
+						m_eventBus.publish(event::PlayerDeadEvent{});
+					else if (tag.m_tag == constant::Tag::Enemy)
+						m_eventBus.publish(event::EnemyDeadEvent{targetId});
+				}
 
 				// AttackHitイベントを発行する
 				event::AttackHitEvent hitEvent{};

@@ -13,6 +13,7 @@
 #include "game/component/TransformComponent.h"
 #include "game/actor/Player.h"
 #include "game/component/RenderComponent.h"
+#include "game/component/HealthComponent.h"
 #include "game/system/AnimationSystem.h"
 #include "game/system/CollisionSystem.h"
 #include "game/system/AttackSystem.h"
@@ -47,6 +48,7 @@ namespace game::scene
 		loadResources();
 		spawnEntities();
 		setupSystems();
+		setupEvents();
 	}
 
 	void InGame::loadResources()
@@ -104,12 +106,60 @@ namespace game::scene
 
 		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
 		m_systemManager.registerSystem<game::system::AISystem>(m_componentManager);
-
 		m_systemManager.registerSystem<game::system::AttackSystem>(m_componentManager, m_eventBus);
+	}
+
+
+	void InGame::setupEvents()
+	{
+		// Hitイベントの購読
 		m_eventBus.subscribe<event::AttackHitEvent>([](const event::AttackHitEvent& e)
 			{
 				LOG("AttackHit: 攻撃者のId=%u 被攻撃者のId=%u ダメージ=%.1f",
 					e.m_attackerId, e.m_targetId, e.m_damage);
+			});
+
+		// プレイヤー死亡イベントの購読
+		m_eventBus.subscribe<event::PlayerDeadEvent>([this](const event::PlayerDeadEvent&)
+			{
+				LOG("PlayerDead: プレイヤーが死亡しました");
+				if (m_componentManager.has<component::RenderComponent>(m_playerId))
+				{
+					auto& render{ m_componentManager.get<component::RenderComponent>(m_playerId) };
+					render.m_isVisible = false;
+				}
+
+				auto* SceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
+				SceneManager->changeScene(game::scene::SceneType::Result);
+			});
+
+		// 敵の死亡イベントの購読
+		m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
+			{
+				LOG("敵が死んだ：Id=%u", e.m_entityId);
+				if (m_componentManager.has<component::RenderComponent>(e.m_entityId))
+				{
+					auto& render{ m_componentManager.get<component::RenderComponent>(e.m_entityId) };
+					render.m_isVisible = false;
+				}
+
+				// 敵が全滅しているかチェック
+				auto enemies{ m_componentManager.getAllEntities<component::AIComponent>() };
+				bool allDead{ true };
+				for (auto enemyId : enemies)
+				{
+					auto& health{ m_componentManager.get<component::HealthComponent>(enemyId) };
+					if (!health.m_isDead)
+					{
+						allDead = false;
+						break;
+					}
+				}
+				if (allDead)
+				{
+					auto* SceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
+					SceneManager->changeScene(game::scene::SceneType::Result);
+				}
 			});
 	}
 

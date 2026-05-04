@@ -58,6 +58,7 @@ namespace game::scene
 		void loadResources();
 		void spawnEntities();
 		void setupSystems();
+		void setupEvents();
 
 		core::ecs::EntityManager    m_entityManager;
 		core::ecs::ComponentManager m_componentManager;
