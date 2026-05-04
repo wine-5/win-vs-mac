@@ -144,6 +144,7 @@
     <ClCompile Include="src\game\scene\Title.cpp" />
     <ClCompile Include="src\game\system\AISystem.cpp" />
     <ClCompile Include="src\game\system\AttackSystem.cpp" />
+    <ClCompile Include="src\game\system\HitEffectSystem.cpp" />
     <ClCompile Include="src\infrastructure\Screen.cpp" />
     <ClCompile Include="src\core\ServiceLocator.cpp" />
     <ClCompile Include="src\game\factory\FactoryInitializer.cpp" />
@@ -212,6 +213,7 @@
     <ClInclude Include="src\game\component\AIComponent.h" />
     <ClInclude Include="src\game\component\AttackComponent.h" />
     <ClInclude Include="src\game\component\HealthComponent.h" />
+    <ClInclude Include="src\game\component\HitEffectComponent.h" />
     <ClInclude Include="src\game\component\TagComponent.h" />
     <ClInclude Include="src\game\constant\EnemyAnimationState.h" />
     <ClInclude Include="src\game\constant\MetadataKeys.h" />
@@ -224,6 +226,7 @@
     <ClInclude Include="src\game\scene\Title.h" />
     <ClInclude Include="src\game\system\AISystem.h" />
     <ClInclude Include="src\game\system\AttackSystem.h" />
+    <ClInclude Include="src\game\system\HitEffectSystem.h" />
     <ClInclude Include="src\infrastructure\Screen.h" />
     <ClInclude Include="src\core\ServiceLocator.h" />
     <ClInclude Include="src\core\utility\Color.h" />
