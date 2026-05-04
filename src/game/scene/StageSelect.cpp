@@ -19,10 +19,14 @@ namespace game::scene
 
     StageSelect::StageSelect(core::iface::IInputProvider& inputProvider,
         core::iface::IUIRenderer& uiRenderer,
-        core::iface::IScreen& screen)
+        core::iface::IScreen& screen,
+        core::iface::IFileProvider& fileProvider,
+        data::FileEquipmentData& fileEquipmentData)
         : m_inputProvider{inputProvider}
         , m_uiRenderer{uiRenderer}
         , m_screen{screen}
+        , m_fileProvider{ fileProvider }
+        , m_fileEquipmentData{ fileEquipmentData }
     {
         setupUI();
     }
@@ -66,5 +70,20 @@ namespace game::scene
             });
 
         m_uiManager.addElement(std::move(startButton));
+
+        // ファイル選択ボタンのY位置（スタートボタンの上）
+        constexpr float FILE_BUTTON_Y_RATIO = 0.35f;
+        const int fileButtonY = static_cast<int>(screenHeight * FILE_BUTTON_Y_RATIO);
+
+        auto fileSelectButton{ std::make_unique<ui::Button>(
+            "ファイルを選択", buttonX, fileButtonY, buttonWidth, buttonHeight, m_inputProvider) };
+
+        fileSelectButton->setOnClick([this]() {
+            const std::string path = m_fileProvider.selectFile();
+            if (!path.empty())
+                m_fileEquipmentData.setFilePath(path);
+            });
+
+        m_uiManager.addElement(std::move(fileSelectButton));
     }
 }

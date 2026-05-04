@@ -33,19 +33,14 @@
 
 namespace game::scene
 {
-	InGame::InGame(core::iface::ICamera& camera,
-		core::iface::IRenderer& renderer,
-		core::iface::IAnimator& animator,
-		core::iface::IResourceManager& resourceManager,
-		core::iface::IInputProvider& inputProvider)
-		: m_camera{camera}
-		, m_renderer{renderer}
-		, m_animator{animator}
-		, m_resourceManager{resourceManager}
-		, m_inputProvider{inputProvider}
-		, m_factoryManager{m_entityManager, m_componentManager, m_resourceManager}
-		, m_playerData{game::data::PlayerData::fromMetadata(
-			m_resourceManager.getMetadata(constant::model_id::PLAYER).value())}
+	InGame::InGame(core::iface::ICamera &camera,
+				   core::iface::IRenderer &renderer,
+				   core::iface::IAnimator &animator,
+				   core::iface::IResourceManager &resourceManager,
+				   core::iface::IInputProvider &inputProvider,
+				   data::FileEquipmentData &fileEquipmentData)
+		: m_camera{camera}, m_renderer{renderer}, m_animator{animator}, m_resourceManager{resourceManager}, m_inputProvider{inputProvider}, m_fileEquipmentData{fileEquipmentData}, m_factoryManager{m_entityManager, m_componentManager, m_resourceManager}, m_playerData{game::data::PlayerData::fromMetadata(
+																																																																  m_resourceManager.getMetadata(constant::model_id::PLAYER).value())}
 	{
 		loadResources();
 		spawnEntities();
@@ -60,18 +55,18 @@ namespace game::scene
 
 		// モデルロード後に再度メタデータを取得してPlayerDataを更新
 		auto playerMeta{m_resourceManager.getMetadata(constant::model_id::PLAYER)};
-		if (!playerMeta.has_value()) {
+		if (!playerMeta.has_value())
+		{
 			LOG("ERROR: Playerのメタデータが見つかりません");
 			throw std::runtime_error("Playerのメタデータの読み込みに失敗しました");
 		}
 		assert(playerMeta.has_value() && "Playerのメタデータが見つかりません");
 		m_playerData = game::data::PlayerData::fromMetadata(playerMeta.value());
-
 	}
 
 	void InGame::spawnEntities()
 	{
-		
+
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
 		initializer.initializePlayer(m_playerData);
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
@@ -80,26 +75,25 @@ namespace game::scene
 
 		m_enemyId = initializer.initializeEnemy();
 		// Enemyの初期位置をずらす
-		auto& enemyTransform{ m_componentManager.get<component::TransformComponent>(m_enemyId) };
+		auto &enemyTransform{m_componentManager.get<component::TransformComponent>(m_enemyId)};
 		enemyTransform.m_position.x = 100.0f;
 		enemyTransform.m_position.z = 100.0f;
 
-		auto& ai = m_componentManager.get<component::AIComponent>(m_enemyId);
+		auto &ai = m_componentManager.get<component::AIComponent>(m_enemyId);
 		ai.m_targetEntity = core::ecs::Entity(m_playerId);
-
 	}
 
 	void InGame::setupSystems()
 	{
 		// アニメーションハンドルをロード
-		//int idleAnimHandle = m_resourceManager.loadModelById(m_playerData.getIdleAnimPath());
-		//int walkAnimHandle = m_resourceManager.loadModelById(m_playerData.getWalkAnimPath());
+		// int idleAnimHandle = m_resourceManager.loadModelById(m_playerData.getIdleAnimPath());
+		// int walkAnimHandle = m_resourceManager.loadModelById(m_playerData.getWalkAnimPath());
 
 		// システム登録
 		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_playerId, m_inputProvider);
 		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed());
 		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager);
-		//m_systemManager.registerSystem<game::system::AnimationSystem>(
+		// m_systemManager.registerSystem<game::system::AnimationSystem>(
 		//	m_componentManager,
 		//	m_factoryManager.getPlayerFactory().getPlayer().getId(),
 		//	m_animator,
@@ -112,12 +106,11 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::HitEffectSystem>(m_componentManager);
 	}
 
-
 	void InGame::setupEvents()
 	{
 		// Hitイベントの購読
-		m_eventBus.subscribe<event::AttackHitEvent>([this](const event::AttackHitEvent& e)
-			{
+		m_eventBus.subscribe<event::AttackHitEvent>([this](const event::AttackHitEvent &e)
+													{
 				LOG("AttackHit: 攻撃者のId=%u 被攻撃者のId=%u ダメージ=%.1f",
 					e.m_attackerId, e.m_targetId, e.m_damage);
 
@@ -128,12 +121,11 @@ namespace game::scene
 					effect.m_isActive = true;
 					effect.m_durationTimer = effect.m_duration;
 					effect.m_blinkTimer = effect.m_blinkInterval;
-				}
-			});
+				} });
 
 		// プレイヤー死亡イベントの購読
-		m_eventBus.subscribe<event::PlayerDeadEvent>([this](const event::PlayerDeadEvent&)
-			{
+		m_eventBus.subscribe<event::PlayerDeadEvent>([this](const event::PlayerDeadEvent &)
+													 {
 				LOG("PlayerDead: プレイヤーが死亡しました");
 				if (m_componentManager.has<component::RenderComponent>(m_playerId))
 				{
@@ -142,12 +134,11 @@ namespace game::scene
 				}
 
 				auto* sceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
-				sceneManager->changeScene(game::scene::SceneType::Result);
-			});
+				sceneManager->changeScene(game::scene::SceneType::Result); });
 
 		// 敵の死亡イベントの購読
-		m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
-			{
+		m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent &e)
+													{
 				LOG("敵が死んだ：Id=%u", e.m_entityId);
 				if (m_componentManager.has<component::RenderComponent>(e.m_entityId))
 				{
@@ -171,8 +162,7 @@ namespace game::scene
 				{
 					auto* sceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
 					sceneManager->changeScene(game::scene::SceneType::Result);
-				}
-			});
+				} });
 	}
 
 	void InGame::update(float deltaTime)
@@ -181,14 +171,14 @@ namespace game::scene
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::R))
 		{
 			LOG("INFO: Rキーでリザルト画面へ遷移");
-			auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
+			auto *sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
 			sceneManager->changeScene(game::scene::SceneType::Result);
 			return;
 		}
 		m_systemManager.update(deltaTime);
-		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
+		auto &transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
 		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
-		
+
 		// フレーム最後に入力状態を更新
 		m_inputProvider.updatePreviousState();
 	}
@@ -196,30 +186,30 @@ namespace game::scene
 	void InGame::draw()
 	{
 		// コンポーネントの取得
-		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
-		//auto& anim = m_componentManager.get<game::component::AnimationComponent<game::constant::PlayerAnimationState>>(m_playerId);
-		auto& groundRender = m_componentManager.get<game::component::RenderComponent>(m_groundId);
-		auto& render = m_componentManager.get<game::component::RenderComponent>(m_playerId);
-		auto& groundTransform = m_componentManager.get<game::component::TransformComponent>(m_groundId);
+		auto &transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
+		// auto& anim = m_componentManager.get<game::component::AnimationComponent<game::constant::PlayerAnimationState>>(m_playerId);
+		auto &groundRender = m_componentManager.get<game::component::RenderComponent>(m_groundId);
+		auto &render = m_componentManager.get<game::component::RenderComponent>(m_playerId);
+		auto &groundTransform = m_componentManager.get<game::component::TransformComponent>(m_groundId);
 
 		// モデルの描画
 		if (render.m_isVisible)
-			m_renderer.drawModel(render.m_modelHandle, transform.m_position,transform.m_rotation,transform.m_scale);
+			m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
 		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
 
 		// 敵の描画
-		auto& enemyRenderer = m_componentManager.get<component::RenderComponent>(m_enemyId);
-		auto& enemyTransform = m_componentManager.get<component::TransformComponent>(m_enemyId);
+		auto &enemyRenderer = m_componentManager.get<component::RenderComponent>(m_enemyId);
+		auto &enemyTransform = m_componentManager.get<component::TransformComponent>(m_enemyId);
 		if (enemyRenderer.m_isVisible)
 			m_renderer.drawModel(enemyRenderer.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
 
 		// デバッグ: コライダーを可視化
-		auto& playerCollider = m_componentManager.get<game::component::ColliderComponent>(m_playerId);
-		auto& groundCollider = m_componentManager.get<game::component::ColliderComponent>(m_groundId);
-		
+		auto &playerCollider = m_componentManager.get<game::component::ColliderComponent>(m_playerId);
+		auto &groundCollider = m_componentManager.get<game::component::ColliderComponent>(m_groundId);
+
 		core::Vector3 playerColliderCenter = transform.m_position + playerCollider.m_offset;
 		core::Vector3 groundColliderCenter = groundTransform.m_position + groundCollider.m_offset;
-		
+
 		m_renderer.drawCollider(playerColliderCenter, playerCollider.m_size, core::utility::Color::GREEN);
 		m_renderer.drawCollider(groundColliderCenter, groundCollider.m_size, core::utility::Color::BLUE);
 	}

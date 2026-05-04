@@ -16,9 +16,9 @@
 #include "game/factory/FactoryManager.h"
 #include "game/component/RenderComponent.h"
 #include "game/data/PlayerData.h"
+#include "game/data/FileEquipmentData.h"
 
 #include <memory>
-
 
 namespace game::scene
 {
@@ -35,12 +35,14 @@ namespace game::scene
 		 * @param animator アニメーションのインターフェース
 		 * @param resourceManager リソース管理のインターフェース
 		 * @param inputProvider 入力のインターフェース
+		 * @param fileEquipmentData 選択ファイルデータの参照
 		 */
-		InGame(core::iface::ICamera& camera,
-			core::iface::IRenderer& renderer,
-			core::iface::IAnimator& animator,
-			core::iface::IResourceManager& resourceManager,
-			core::iface::IInputProvider& inputProvider);
+		InGame(core::iface::ICamera &camera,
+			   core::iface::IRenderer &renderer,
+			   core::iface::IAnimator &animator,
+			   core::iface::IResourceManager &resourceManager,
+			   core::iface::IInputProvider &inputProvider,
+			   data::FileEquipmentData &fileEquipmentData);
 
 		/**
 		 * @brief シーンの更新処理
@@ -60,25 +62,26 @@ namespace game::scene
 		void setupSystems();
 		void setupEvents();
 
-		core::ecs::EntityManager    m_entityManager;
+		core::ecs::EntityManager m_entityManager;
 		core::ecs::ComponentManager m_componentManager;
-		core::ecs::SystemManager    m_systemManager;
+		core::ecs::SystemManager m_systemManager;
 
-		core::iface::ICamera& m_camera;
-		core::iface::IRenderer& m_renderer;
-		core::iface::IAnimator& m_animator;
-		core::iface::IResourceManager& m_resourceManager;
-		core::iface::IInputProvider& m_inputProvider;
+		core::iface::ICamera &m_camera;
+		core::iface::IRenderer &m_renderer;
+		core::iface::IAnimator &m_animator;
+		core::iface::IResourceManager &m_resourceManager;
+		core::iface::IInputProvider &m_inputProvider;
+		data::FileEquipmentData &m_fileEquipmentData;
 
 		game::factory::FactoryManager m_factoryManager;
 		game::data::PlayerData m_playerData;
 
 		core::ecs::EntityId m_groundId{core::ecs::INVALID_ENTITY_ID};
-		core::ecs::EntityId m_playerId{ core::ecs::INVALID_ENTITY_ID };
-		core::ecs::EntityId m_enemyId{ core::ecs::INVALID_ENTITY_ID };
+		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
+		core::ecs::EntityId m_enemyId{core::ecs::INVALID_ENTITY_ID};
 
 		EventBus m_eventBus;
-		
+
 		// カメラ設定
 		static constexpr float CAMERA_OFFSET_X = 0.0f;
 		static constexpr float CAMERA_OFFSET_Y = 200.0f;
