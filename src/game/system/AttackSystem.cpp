@@ -10,7 +10,6 @@
 #include "game/attack/DefenseHandler.h"
 #include "game/event/InGameEvents.h"
 #include <cmath>
-#include <core\interface\ILogger.h>
 
 namespace game::system
 {
@@ -18,6 +17,10 @@ namespace game::system
 		: m_componentManager{ componentManager }
 		, m_eventBus{ eventBus }
 	{
+		auto base{ std::make_unique<attack::BaseAttackHandler>(m_componentManager) };
+		auto defense{ std::make_unique<attack::DefenseHandler>(m_componentManager) };
+		base->setNext(std::move(defense));
+		m_damageChain = std::move(base);
 	}
 
 	void AttackSystem::update(float deltaTime)
@@ -69,15 +72,10 @@ namespace game::system
 					continue;
 
 				// CORチェーンでダメージ計算を行う
-				auto base{ std::make_unique<attack::BaseAttackHandler>(m_componentManager) };
-				auto defense{ std::make_unique<attack::DefenseHandler>(m_componentManager) };
-				base->setNext(std::move(defense));
-
 				attack::DamageChain chain{};
 				chain.m_attackId = attackerId;
 				chain.m_targetId = targetId;
-
-				base->handle(chain);
+				m_damageChain->handle(chain);
 
 				// HPを減らす
 				auto& health{ m_componentManager.get<component::HealthComponent>(targetId) };

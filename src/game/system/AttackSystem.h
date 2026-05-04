@@ -2,6 +2,7 @@
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/EventBus.h"
+#include "game/attack/IDamageHandler.h"
 
 namespace game::system
 {
@@ -28,5 +29,6 @@ namespace game::system
 	private:
 		core::ecs::ComponentManager& m_componentManager;
 		EventBus& m_eventBus;
+		std::unique_ptr<attack::IDamageHandler> m_damageChain;
 	};
 }
