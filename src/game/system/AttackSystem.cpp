@@ -35,6 +35,10 @@ namespace game::system
 				continue; // まだ攻撃できないためスキップ
 			}
 
+			// 攻撃範囲が0もしくは未設定の場合はスキップ
+			if (attack.m_attackRange <= 0.0f)
+				continue;
+
 			if (m_componentManager.has<component::InputComponent>(attackerId))
 			{
 
