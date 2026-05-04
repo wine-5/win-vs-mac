@@ -11,5 +11,9 @@ namespace game::constant
 		constexpr std::string_view MOVE_SPEED = "moveSpeed";
 		constexpr std::string_view DETECTION_RANGE = "detectionRange";
 		constexpr std::string_view ATTACK_RANGE = "attackRange";
+		constexpr std::string_view MAX_HP = "maxHp";
+		constexpr std::string_view DEFENCE = "defence";
+		constexpr std::string_view ATTACK_POWER = "attackPower";
+		constexpr std::string_view ATTACK_COOLDOWN = "attackCooldown";
 	}
 }

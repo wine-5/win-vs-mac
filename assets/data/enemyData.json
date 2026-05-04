@@ -20,7 +20,11 @@
   },
   "gameplay": {
     "moveSpeed": 5.0,
-    "detectionRange": 300.0,
-    "attackRange": 100.0
+    "detectionRange": 500.0,
+    "attackRange": 100.0,
+    "maxHp": 50.0,
+    "defence": 2.0,
+    "attackPower": 10.0,
+    "attackCooldown": 2.0
   }
 }
