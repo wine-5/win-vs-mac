@@ -141,8 +141,8 @@ namespace game::scene
 					render.m_isVisible = false;
 				}
 
-				auto* SceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
-				SceneManager->changeScene(game::scene::SceneType::Result);
+				auto* sceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
+				sceneManager->changeScene(game::scene::SceneType::Result);
 			});
 
 		// 敵の死亡イベントの購読
@@ -169,8 +169,8 @@ namespace game::scene
 				}
 				if (allDead)
 				{
-					auto* SceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
-					SceneManager->changeScene(game::scene::SceneType::Result);
+					auto* sceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
+					sceneManager->changeScene(game::scene::SceneType::Result);
 				}
 			});
 	}
