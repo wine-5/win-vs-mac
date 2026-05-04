@@ -180,6 +180,16 @@ namespace infrastructure
 
             if (j[json_keys::GAMEPLAY].contains(json_keys::DETECTION_RANGE))
                 metadata.floatProperties["detectionRange"] = j[json_keys::GAMEPLAY][json_keys::DETECTION_RANGE];
+            if (j[json_keys::GAMEPLAY].contains(json_keys::ATTACK_RANGE))
+                metadata.floatProperties["attackRange"] = j[json_keys::GAMEPLAY][json_keys::ATTACK_RANGE];
+            if (j[json_keys::GAMEPLAY].contains(json_keys::MAX_HP))
+                metadata.floatProperties["maxHp"] = j[json_keys::GAMEPLAY][json_keys::MAX_HP];
+            if (j[json_keys::GAMEPLAY].contains(json_keys::DEFENCE))
+                metadata.floatProperties["defence"] = j[json_keys::GAMEPLAY][json_keys::DEFENCE];
+            if (j[json_keys::GAMEPLAY].contains(json_keys::ATTACK_POWER))
+                metadata.floatProperties["attackPower"] = j[json_keys::GAMEPLAY][json_keys::ATTACK_POWER];
+            if (j[json_keys::GAMEPLAY].contains(json_keys::ATTACK_COOLDOWN))
+                metadata.floatProperties["attackCooldown"] = j[json_keys::GAMEPLAY][json_keys::ATTACK_COOLDOWN];
         }
 
         return metadata;

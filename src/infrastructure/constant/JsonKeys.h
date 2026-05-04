@@ -27,7 +27,12 @@ namespace infrastructure::constant
         constexpr const char* WALK = "walk";
 
         // gameplay配下
-        constexpr const char* MOVE_SPEED = "moveSpeed";
-        constexpr const char* DETECTION_RANGE = "detectionRange";
+        constexpr const char* MOVE_SPEED      = "moveSpeed";
+        constexpr const char* DETECTION_RANGE  = "detectionRange";
+        constexpr const char* ATTACK_RANGE     = "attackRange";
+        constexpr const char* MAX_HP           = "maxHp";
+        constexpr const char* DEFENCE          = "defence";
+        constexpr const char* ATTACK_POWER     = "attackPower";
+        constexpr const char* ATTACK_COOLDOWN  = "attackCooldown";
     }
 }
