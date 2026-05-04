@@ -59,6 +59,9 @@ namespace game::system
 				if (targetId == attackerId)
 					continue;
 
+				if (!m_componentManager.has<component::TransformComponent>(targetId))
+					continue;
+
 				// AttackComponentを持つEntityの攻撃範囲チェック
 				auto &attackerTransform{m_componentManager.get<component::TransformComponent>(attackerId)};
 				auto &targetTransform{m_componentManager.get<component::TransformComponent>(targetId)};
