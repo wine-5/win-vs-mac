@@ -23,8 +23,18 @@ namespace game::actor
 		componentManager.add<component::VelocityComponent>(m_entity.getId(), {});
 		componentManager.add<component::AnimationComponent<constant::EnemyAnimationState>>(m_entity.getId(), {});
 		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
-		componentManager.add<component::HealthComponent>(m_entity.getId(), {});
-		componentManager.add<component::AttackComponent>(m_entity.getId(), {});
+
+		component::HealthComponent health{};
+		health.m_maxHp = enemyData.getMaxHp();
+		health.m_currentHp = enemyData.getMaxHp();
+		health.m_defence = enemyData.getDefence();
+		componentManager.add<component::HealthComponent>(m_entity.getId(), health);
+
+		component::AttackComponent attack{};
+		attack.m_attackPower = enemyData.getAttackPower();
+		attack.m_attackRange = enemyData.getAttackRange();
+		attack.m_attackCooldown = enemyData.getAttackCooldown();
+		componentManager.add<component::AttackComponent>(m_entity.getId(), attack);
 
 		component::ColliderComponent collider;
 		collider.m_size = enemyData.getColliderSize();
