@@ -10,6 +10,7 @@
 #include "game/attack/DefenseHandler.h"
 #include "game/event/InGameEvents.h"
 #include <cmath>
+#include <core\interface\ILogger.h>
 
 namespace game::system
 {

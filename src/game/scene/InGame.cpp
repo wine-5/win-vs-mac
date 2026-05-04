@@ -14,7 +14,9 @@
 #include "game/actor/Player.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/HealthComponent.h"
+#include "game/component/HitEffectComponent.h"
 #include "game/system/AnimationSystem.h"
+#include "game/system/HitEffectSystem.h"
 #include "game/system/CollisionSystem.h"
 #include "game/system/AttackSystem.h"
 #include "game/component/ColliderComponent.h"
@@ -107,16 +109,26 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
 		m_systemManager.registerSystem<game::system::AISystem>(m_componentManager);
 		m_systemManager.registerSystem<game::system::AttackSystem>(m_componentManager, m_eventBus);
+		m_systemManager.registerSystem<game::system::HitEffectSystem>(m_componentManager);
 	}
 
 
 	void InGame::setupEvents()
 	{
 		// Hitイベントの購読
-		m_eventBus.subscribe<event::AttackHitEvent>([](const event::AttackHitEvent& e)
+		m_eventBus.subscribe<event::AttackHitEvent>([this](const event::AttackHitEvent& e)
 			{
 				LOG("AttackHit: 攻撃者のId=%u 被攻撃者のId=%u ダメージ=%.1f",
 					e.m_attackerId, e.m_targetId, e.m_damage);
+
+				// ヒットエフェクト開始
+				if (m_componentManager.has<component::HitEffectComponent>(e.m_targetId))
+				{
+					auto& effect{ m_componentManager.get<component::HitEffectComponent>(e.m_targetId) };
+					effect.m_isActive = true;
+					effect.m_durationTimer = effect.m_duration;
+					effect.m_blinkTimer = effect.m_blinkInterval;
+				}
 			});
 
 		// プレイヤー死亡イベントの購読
@@ -191,13 +203,15 @@ namespace game::scene
 		auto& groundTransform = m_componentManager.get<game::component::TransformComponent>(m_groundId);
 
 		// モデルの描画
-		m_renderer.drawModel(render.m_modelHandle, transform.m_position,transform.m_rotation,transform.m_scale);
+		if (render.m_isVisible)
+			m_renderer.drawModel(render.m_modelHandle, transform.m_position,transform.m_rotation,transform.m_scale);
 		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
 
 		// 敵の描画
 		auto& enemyRenderer = m_componentManager.get<component::RenderComponent>(m_enemyId);
 		auto& enemyTransform = m_componentManager.get<component::TransformComponent>(m_enemyId);
-		m_renderer.drawModel(enemyRenderer.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
+		if (enemyRenderer.m_isVisible)
+			m_renderer.drawModel(enemyRenderer.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
 
 		// デバッグ: コライダーを可視化
 		auto& playerCollider = m_componentManager.get<game::component::ColliderComponent>(m_playerId);

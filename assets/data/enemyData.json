@@ -24,7 +24,7 @@
     "attackRange": 100.0,
     "maxHp": 50.0,
     "defence": 2.0,
-    "attackPower": 10.0,
+    "attackPower": 20.0,
     "attackCooldown": 2.0
   }
 }
