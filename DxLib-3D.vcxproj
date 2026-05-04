@@ -199,6 +199,7 @@
     <ClInclude Include="src\core\EventBus.h" />
     <ClInclude Include="src\core\input\GamePadCode.h" />
     <ClInclude Include="src\core\interface\IAnimator.h" />
+    <ClInclude Include="src\core\interface\IFileSelector.h" />
     <ClInclude Include="src\core\interface\IInputProvider.h" />
     <ClInclude Include="src\core\interface\IRenderer.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
