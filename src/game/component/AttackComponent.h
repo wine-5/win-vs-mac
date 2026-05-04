@@ -7,9 +7,10 @@ namespace game::component
 	 */
 	struct AttackComponent
 	{
-		float m_attackPower{ 10.0f };
-		float m_attackRange{ 100.0f };
-		float m_attackCooldown{ 2.0f };
+		// 0はJSON未設定時に即座に異常検知できるようにするための意図的な初期値
+		float m_attackPower{ 0.0f };
+		float m_attackRange{ 0.0f };
+		float m_attackCooldown{ 0.0f };
 		float m_currentCooldown{ 0.0f };
 		bool  m_attackRequested{ false };
 	};

@@ -6,9 +6,10 @@ namespace game::component
 	 */
 	struct HealthComponent
 	{
-		float m_maxHp{ 100.0f };
-		float m_currentHp{ 100.0f };
-		float m_defence{ 5.0f };
-		bool m_isDead{ false };
+		// 0はJSON未設定時に即座に異常検知できるようにするための意図的な初期値
+		float m_maxHp{ 0.0f };
+		float m_currentHp{ 0.0f };
+		float m_defence{ 0.0f };
+		bool  m_isDead{ false };
 	};
 }
