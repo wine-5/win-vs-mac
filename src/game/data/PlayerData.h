@@ -41,6 +41,31 @@ namespace game::data
             if (moveSpeedIt != metadata.floatProperties.end())
                 data.m_moveSpeed = moveSpeedIt->second;
 
+            auto maxHpIt{metadata.floatProperties.find(
+                std::string(constant::metadata_keys::MAX_HP))};
+            if (maxHpIt != metadata.floatProperties.end())
+                data.m_maxHp = maxHpIt->second;
+
+            auto defenceIt{metadata.floatProperties.find(
+                std::string(constant::metadata_keys::DEFENCE))};
+            if (defenceIt != metadata.floatProperties.end())
+                data.m_defence = defenceIt->second;
+
+            auto attackPowerIt{metadata.floatProperties.find(
+                std::string(constant::metadata_keys::ATTACK_POWER))};
+            if (attackPowerIt != metadata.floatProperties.end())
+                data.m_attackPower = attackPowerIt->second;
+
+            auto attackRangeIt{metadata.floatProperties.find(
+                std::string(constant::metadata_keys::ATTACK_RANGE))};
+            if (attackRangeIt != metadata.floatProperties.end())
+                data.m_attackRange = attackRangeIt->second;
+
+            auto attackCooldownIt{metadata.floatProperties.find(
+                std::string(constant::metadata_keys::ATTACK_COOLDOWN))};
+            if (attackCooldownIt != metadata.floatProperties.end())
+                data.m_attackCooldown = attackCooldownIt->second;
+
             return data;
         }
 
@@ -51,18 +76,32 @@ namespace game::data
         /** @brief Walkアニメーションパスを取得 */
         [[nodiscard]] const std::string& getWalkAnimPath() const noexcept { return m_walkAnimPath; }
         /** @brief 移動速度を取得 */
-        [[nodiscard]] float              getMoveSpeed()    const noexcept { return m_moveSpeed; }
+        [[nodiscard]] float              getMoveSpeed()      const noexcept { return m_moveSpeed; }
+        /** @brief 最大HPを取得 */
+        [[nodiscard]] float              getMaxHp()          const noexcept { return m_maxHp; }
+        /** @brief 防御力を取得 */
+        [[nodiscard]] float              getDefence()        const noexcept { return m_defence; }
+        /** @brief 攻撃力を取得 */
+        [[nodiscard]] float              getAttackPower()    const noexcept { return m_attackPower; }
+        /** @brief 攻撃範囲を取得 */
+        [[nodiscard]] float              getAttackRange()    const noexcept { return m_attackRange; }
+        /** @brief 攻撃クールダウンを取得 */
+        [[nodiscard]] float              getAttackCooldown() const noexcept { return m_attackCooldown; }
         /** @brief コライダーサイズを取得 */
-        [[nodiscard]] core::Vector3      getColliderSize() const noexcept { return m_colliderSize; }
+        [[nodiscard]] core::Vector3      getColliderSize()   const noexcept { return m_colliderSize; }
         /** @brief コライダーオフセットを取得 */
         [[nodiscard]] core::Vector3      getColliderOffset() const noexcept { return m_colliderOffset; }
 
     private:
-        // JSON読み込み失敗時はFail Fast
         std::string   m_modelPath;
         std::string   m_idleAnimPath;
         std::string   m_walkAnimPath;
-        float         m_moveSpeed{0.0f};
+        float         m_moveSpeed{ 0.0f };
+        float         m_maxHp{ 0.0f };
+        float         m_defence{ 0.0f };
+        float         m_attackPower{ 0.0f };
+        float         m_attackRange{ 0.0f };
+        float         m_attackCooldown{ 0.0f };
         core::Vector3 m_colliderSize;
         core::Vector3 m_colliderOffset;
     };

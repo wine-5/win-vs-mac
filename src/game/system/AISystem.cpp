@@ -2,6 +2,7 @@
 #include "game/component/AIComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
+#include "game/component/AttackComponent.h"
 #include "core/Vector3.h"
 #include <cmath>
 
@@ -26,7 +27,7 @@ namespace game::system
 
 			// 追跡対象が設定されていない場合はスキップ
 			if(ai.m_targetEntity.getId() == 0)
-			continue;
+				continue;
 
 			auto& transform = m_componentManager.get<component::TransformComponent>(entityId);
 			auto& targetTransform = m_componentManager.get<component::TransformComponent>(ai.m_targetEntity.getId());
@@ -57,6 +58,21 @@ namespace game::system
 
 			if (distance > 0.0f)
 				transform.m_rotation.y = std::atan2f(-direction.x, -direction.z);
+
+			// 攻撃のクールダウンを更新
+			if (ai.m_currentAttackCooldown > 0.0f)
+				ai.m_currentAttackCooldown -= deltaTime;
+
+			// クールダウンが0なら、AttackComponentに攻撃要求をセットする
+			if (ai.m_currentAttackCooldown <= 0.0f)
+			{
+				if (m_componentManager.has<component::AttackComponent>(entityId))
+				{
+					auto& attack{ m_componentManager.get<component::AttackComponent>(entityId) };
+					attack.m_attackRequested = true;
+					ai.m_currentAttackCooldown = ai.m_attackCooldown;
+				}
+			}
 		}
 	}
 }

@@ -13,14 +13,19 @@
 #include "game/component/TransformComponent.h"
 #include "game/actor/Player.h"
 #include "game/component/RenderComponent.h"
+#include "game/component/HealthComponent.h"
+#include "game/component/HitEffectComponent.h"
 #include "game/system/AnimationSystem.h"
+#include "game/system/HitEffectSystem.h"
 #include "game/system/CollisionSystem.h"
+#include "game/system/AttackSystem.h"
 #include "game/component/ColliderComponent.h"
 #include "game/constant/ModelId.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
 #include "game/system/AISystem.h"
 #include "game/component/AIComponent.h"
+#include "game/event/InGameEvents.h"
 
 /* 標準のインクルード */
 #include <cassert>
@@ -45,6 +50,7 @@ namespace game::scene
 		loadResources();
 		spawnEntities();
 		setupSystems();
+		setupEvents();
 	}
 
 	void InGame::loadResources()
@@ -73,6 +79,11 @@ namespace game::scene
 		m_groundId = initializer.initializeGround();
 
 		m_enemyId = initializer.initializeEnemy();
+		// Enemyの初期位置をずらす
+		auto& enemyTransform{ m_componentManager.get<component::TransformComponent>(m_enemyId) };
+		enemyTransform.m_position.x = 100.0f;
+		enemyTransform.m_position.z = 100.0f;
+
 		auto& ai = m_componentManager.get<component::AIComponent>(m_enemyId);
 		ai.m_targetEntity = core::ecs::Entity(m_playerId);
 
@@ -97,6 +108,71 @@ namespace game::scene
 
 		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
 		m_systemManager.registerSystem<game::system::AISystem>(m_componentManager);
+		m_systemManager.registerSystem<game::system::AttackSystem>(m_componentManager, m_eventBus);
+		m_systemManager.registerSystem<game::system::HitEffectSystem>(m_componentManager);
+	}
+
+
+	void InGame::setupEvents()
+	{
+		// Hitイベントの購読
+		m_eventBus.subscribe<event::AttackHitEvent>([this](const event::AttackHitEvent& e)
+			{
+				LOG("AttackHit: 攻撃者のId=%u 被攻撃者のId=%u ダメージ=%.1f",
+					e.m_attackerId, e.m_targetId, e.m_damage);
+
+				// ヒットエフェクト開始
+				if (m_componentManager.has<component::HitEffectComponent>(e.m_targetId))
+				{
+					auto& effect{ m_componentManager.get<component::HitEffectComponent>(e.m_targetId) };
+					effect.m_isActive = true;
+					effect.m_durationTimer = effect.m_duration;
+					effect.m_blinkTimer = effect.m_blinkInterval;
+				}
+			});
+
+		// プレイヤー死亡イベントの購読
+		m_eventBus.subscribe<event::PlayerDeadEvent>([this](const event::PlayerDeadEvent&)
+			{
+				LOG("PlayerDead: プレイヤーが死亡しました");
+				if (m_componentManager.has<component::RenderComponent>(m_playerId))
+				{
+					auto& render{ m_componentManager.get<component::RenderComponent>(m_playerId) };
+					render.m_isVisible = false;
+				}
+
+				auto* SceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
+				SceneManager->changeScene(game::scene::SceneType::Result);
+			});
+
+		// 敵の死亡イベントの購読
+		m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
+			{
+				LOG("敵が死んだ：Id=%u", e.m_entityId);
+				if (m_componentManager.has<component::RenderComponent>(e.m_entityId))
+				{
+					auto& render{ m_componentManager.get<component::RenderComponent>(e.m_entityId) };
+					render.m_isVisible = false;
+				}
+
+				// 敵が全滅しているかチェック
+				auto enemies{ m_componentManager.getAllEntities<component::AIComponent>() };
+				bool allDead{ true };
+				for (auto enemyId : enemies)
+				{
+					auto& health{ m_componentManager.get<component::HealthComponent>(enemyId) };
+					if (!health.m_isDead)
+					{
+						allDead = false;
+						break;
+					}
+				}
+				if (allDead)
+				{
+					auto* SceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
+					SceneManager->changeScene(game::scene::SceneType::Result);
+				}
+			});
 	}
 
 	void InGame::update(float deltaTime)
@@ -127,13 +203,15 @@ namespace game::scene
 		auto& groundTransform = m_componentManager.get<game::component::TransformComponent>(m_groundId);
 
 		// モデルの描画
-		m_renderer.drawModel(render.m_modelHandle, transform.m_position,transform.m_rotation,transform.m_scale);
+		if (render.m_isVisible)
+			m_renderer.drawModel(render.m_modelHandle, transform.m_position,transform.m_rotation,transform.m_scale);
 		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
 
 		// 敵の描画
 		auto& enemyRenderer = m_componentManager.get<component::RenderComponent>(m_enemyId);
 		auto& enemyTransform = m_componentManager.get<component::TransformComponent>(m_enemyId);
-		m_renderer.drawModel(enemyRenderer.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
+		if (enemyRenderer.m_isVisible)
+			m_renderer.drawModel(enemyRenderer.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
 
 		// デバッグ: コライダーを可視化
 		auto& playerCollider = m_componentManager.get<game::component::ColliderComponent>(m_playerId);

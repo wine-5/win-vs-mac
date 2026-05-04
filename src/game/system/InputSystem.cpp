@@ -20,8 +20,13 @@ namespace game::system
 		input.m_moveX = INPUT_NEUTRAL;
 		input.m_moveZ = INPUT_NEUTRAL;
 		input.m_jumpPressed = false;
+		input.m_attackPressed = false;
 
-		// キーボード入力
+		// -------------------------------------------------------
+		// PCでの操作の入力
+		// -------------------------------------------------------
+
+		// キー入力
 		if (m_inputProvider.isKeyDown(core::input::KeyCode::D) || m_inputProvider.isKeyDown(core::input::KeyCode::Right))
 			input.m_moveX = INPUT_POSITIVE;
 		if (m_inputProvider.isKeyDown(core::input::KeyCode::A) || m_inputProvider.isKeyDown(core::input::KeyCode::Left))
@@ -33,9 +38,17 @@ namespace game::system
 		if (m_inputProvider.isKeyDown(core::input::KeyCode::Space))
 			input.m_jumpPressed = true;
 
+		// マウスの入力
+		if (m_inputProvider.isMouseLeftPressed())
+			input.m_attackPressed = true;
+
 		if (!m_inputProvider.isPadConnected()) return;
 
-		// コントローラースティック入力
+		// -------------------------------------------------------
+		// コントローラーの入力
+		// -------------------------------------------------------
+		
+		// スティック入力
 		float axisX{m_inputProvider.getPadAxis(core::input::GamePadCode::LeftStickX)};
 		float axisY{m_inputProvider.getPadAxis(core::input::GamePadCode::LeftStickY)};
 		if (axisX != 0.0f)
@@ -43,7 +56,7 @@ namespace game::system
 		if (axisY != 0.0f)
 			input.m_moveZ = axisY;
 
-		// コントローラー十字・ボタン入力
+		// 十字
 		if(m_inputProvider.isPadButtonDown(core::input::GamePadCode::DPadRight))
 			input.m_moveX = INPUT_POSITIVE;
 		if (m_inputProvider.isPadButtonDown(core::input::GamePadCode::DPadLeft))
@@ -52,6 +65,10 @@ namespace game::system
 			input.m_moveZ = INPUT_POSITIVE;
 		if (m_inputProvider.isPadButtonDown(core::input::GamePadCode::DPadDown))
 			input.m_moveZ = INPUT_NEGATIVE;
+
+		// ボタン
+		if (m_inputProvider.isPadButtonDown(core::input::GamePadCode::ButtonA))
+			input.m_attackPressed = true;
 		if (m_inputProvider.isPadButtonDown(core::input::GamePadCode::ButtonB))
 			input.m_jumpPressed = true;
 	}
