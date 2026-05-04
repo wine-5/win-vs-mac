@@ -1,12 +1,12 @@
 #pragma once
-#include "core/interface/IFileSelector.h"
+#include "core/interface/IFileProvider.h"
 
 namespace platform
 {
 	/**
-	 * @brief Windows APIを使ったファイル選択クラス
+	 * @brief Windows API を使ってプラットフォーム情報を提供するクラス
 	 */
-	class WindowsFileSelector : public core::iface::IPlatformDataProvider
+	class WindowsDataProvider : public core::iface::IFileProvider
 	{
 	public:
 		/**

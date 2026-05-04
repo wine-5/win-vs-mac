@@ -170,7 +170,7 @@
     <ClCompile Include="src\infrastructure\UIRenderer.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\infrastructure\utility\LogUtil.cpp" />
-    <ClCompile Include="src\platform\WindowsFileSelector.cpp" />
+    <ClCompile Include="src\platform\WindowsDataProvider.cpp" />
     <ClCompile Include="src\ServiceLocatorInitializer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -200,7 +200,7 @@
     <ClInclude Include="src\core\EventBus.h" />
     <ClInclude Include="src\core\input\GamePadCode.h" />
     <ClInclude Include="src\core\interface\IAnimator.h" />
-    <ClInclude Include="src\core\interface\IFileSelector.h" />
+    <ClInclude Include="src\core\interface\IFileProvider.h" />
     <ClInclude Include="src\core\interface\IInputProvider.h" />
     <ClInclude Include="src\core\interface\IRenderer.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
@@ -286,7 +286,7 @@
     <ClInclude Include="src\game\event\InGameEvents.h" />
     <ClInclude Include="src\infrastructure\UIRenderer.h" />
     <ClInclude Include="src\infrastructure\utility\LogUtil.h" />
-    <ClInclude Include="src\platform\WindowsFileSelector.h" />
+    <ClInclude Include="src\platform\WindowsDataProvider.h" />
     <ClInclude Include="src\ServiceLocatorInitializer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,9 +1,9 @@
-#include "WindowsFileSelector.h"
+#include "WindowsDataProvider.h"
 #include <Windows.h>
 
 namespace platform
 {
-	std::string WindowsFileSelector::selectFile()
+	std::string WindowsDataProvider::selectFile()
 	{
 		char filePath[MAX_PATH]{}; // Windowsが保証するパスの最大文字数（{}でゼロ初期化）
 		filePath[0] = '\0';		   // 静的解析の警告抑制

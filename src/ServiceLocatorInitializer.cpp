@@ -2,12 +2,23 @@
 #include "core/ServiceLocator.h"
 #include "core/interface/ILogger.h"
 #include "core/interface/IScreen.h"
+#include "core/interface/IFileProvider.h"
+#include "platform/WindowsDataProvider.h"
 #include "infrastructure/Screen.h"
 #include "infrastructure/utility/LogUtil.h"
 #include "game/scene/SceneManager.h"
+#include "game/GameManager.h"
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 {
+	core::ServiceLocator::provide(
+		std::make_unique<game::GameManager>()
+	);
+
+	core::ServiceLocator::provide<core::iface::IFileProvider>(
+		std::make_unique<platform::WindowsDataProvider>()
+	);
+
 	// DEBUG:デバック用のためリリース時は消すこと
 	core::ServiceLocator::provide<core::iface::ILogger>(
 		std::make_unique<infrastructure::utility::LogUtil>()

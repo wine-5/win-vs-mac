@@ -4,13 +4,13 @@
 namespace core::iface
 {
     /**
-     * @brief プラットフォーム由来のデータを提供する抽象インターフェース
+     * @brief ファイル選択機能の抽象インターフェース
      * Platform層の実装（WindowsDataProvider）への依存を隠蔽する
      */
-    class IPlatformDataProvider
+    class IFileProvider
     {
     public:
-        virtual ~IPlatformDataProvider() = default;
+        virtual ~IFileProvider() = default;
 
         /**
          * @brief ファイル選択ダイアログを開き、選択されたファイルのフルパスを返す
