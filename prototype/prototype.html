@@ -4,31 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WIN vs MAC - Prototype</title>
+    <title>WIN vs MAC - Prototype v2</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Rajdhani:wght@300;400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&family=Share+Tech+Mono&family=VT323&display=swap"
         rel="stylesheet">
     <style>
         :root {
-            --bg: #0a0a0f;
-            --surface: #0f0f1a;
-            --surface2: #151525;
-            --border: #1e1e3a;
+            --win-gray: #d4d0c8;
+            --win-gray-dark: #808080;
+            --win-gray-light: #f0ece0;
+            --win-blue-title: #0a246a;
+            --win-blue-grad-start: #1659c7;
+            --win-blue-grad-end: #0a246a;
+            --win-taskbar: #245edc;
+            --win-start: #1f7c1f;
+            --win-border-light: #ffffff;
+            --win-border-dark: #404040;
+            --win-border-mid: #808080;
+            --win-desktop: #5b8dd9;
             --neon-cyan: #00f5ff;
-            --neon-blue: #0080ff;
-            --neon-purple: #8000ff;
             --neon-red: #ff003c;
             --neon-green: #00ff88;
             --neon-yellow: #ffcc00;
-            --win-gray: #c0c0c0;
-            --win-dark: #808080;
-            --win-blue: #000080;
-            --win-bg: #008080;
-            --text: #e0e0ff;
+            --bg-dark: #050510;
             --text-dim: #606080;
             --glow-cyan: 0 0 10px #00f5ff, 0 0 20px #00f5ff40;
-            --glow-red: 0 0 10px #ff003c, 0 0 20px #ff003c40;
-            --glow-green: 0 0 10px #00ff88, 0 0 20px #00ff8840;
         }
 
         * {
@@ -39,628 +39,984 @@
 
         body {
             font-family: 'Share Tech Mono', monospace;
-            background: var(--bg);
-            color: var(--text);
+            background: #000;
             height: 100vh;
             overflow: hidden;
-            position: relative;
+            user-select: none;
         }
 
-        /* Scanline overlay */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: repeating-linear-gradient(0deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0, 0, 0, 0.08) 2px,
-                    rgba(0, 0, 0, 0.08) 4px);
-            pointer-events: none;
-            z-index: 9999;
-        }
-
-        /* CRT flicker */
-        @keyframes flicker {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            92% {
-                opacity: 1;
-            }
-
-            93% {
-                opacity: 0.85;
-            }
-
-            94% {
-                opacity: 1;
-            }
-
-            96% {
-                opacity: 0.9;
-            }
-
-            97% {
-                opacity: 1;
-            }
-        }
-
-        body {
-            animation: flicker 8s infinite;
-        }
-
+        /* ===== SCENES ===== */
         .scene {
             position: absolute;
             inset: 0;
             display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
         }
 
         .scene.active {
             display: flex;
+            flex-direction: column;
         }
 
-        /* ========== TITLE SCENE ========== */
+        #scene-stage.active {
+            display: block;
+        }
+
+        #scene-ingame.active {
+            display: flex;
+            flex-direction: row;
+        }
+
+        #scene-result-win.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #scene-result-lose.active {
+            display: flex;
+        }
+
+        /* ===== DEV NAV ===== */
+        .dev-nav {
+            position: fixed;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 4px;
+            z-index: 99999;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .dev-nav-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.4);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 9px;
+            padding: 3px 8px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .dev-nav-btn:hover,
+        .dev-nav-btn.active {
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+
+        /* ===================================================
+   TITLE SCENE — Windows 10 Lock Screen
+   =================================================== */
         #scene-title {
-            background: #001020;
-            background-image:
-                radial-gradient(ellipse at 50% 100%, #00204060 0%, transparent 60%),
-                linear-gradient(180deg, #0a0a0f 0%, #001020 100%);
+            background: #1a1a2e;
+            cursor: pointer;
+            overflow: hidden;
         }
 
-        .title-bg-grid {
+        .lockscreen-bg {
             position: absolute;
             inset: 0;
-            background-image:
-                linear-gradient(rgba(0, 245, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 245, 255, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
-            transform: perspective(500px) rotateX(60deg) translateY(30%);
-            transform-origin: bottom;
+            background:
+                radial-gradient(ellipse at 30% 60%, #1a3a6a 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, #0d2a4a 0%, transparent 50%),
+                linear-gradient(160deg, #0d1b3e 0%, #1a2744 40%, #0a1628 100%);
         }
 
-        .title-login-box {
-            background: rgba(0, 15, 30, 0.95);
-            border: 1px solid var(--neon-cyan);
-            box-shadow: var(--glow-cyan), inset 0 0 30px rgba(0, 245, 255, 0.03);
-            padding: 48px 64px;
-            text-align: center;
-            position: relative;
-            min-width: 480px;
-        }
-
-        .title-login-box::before {
-            content: '';
+        /* Subtle Windows 10 wallpaper-like blob shapes */
+        .lockscreen-blob {
             position: absolute;
-            top: -1px;
-            left: 20px;
-            right: 20px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
         }
 
-        .title-os-bar {
+        .blob1 {
+            width: 600px;
+            height: 400px;
+            background: #1e5799;
+            top: -100px;
+            left: -100px;
+        }
+
+        .blob2 {
+            width: 500px;
+            height: 500px;
+            background: #2980b9;
+            bottom: -150px;
+            right: -100px;
+        }
+
+        .blob3 {
+            width: 300px;
+            height: 300px;
+            background: #3498db;
+            top: 40%;
+            left: 40%;
+        }
+
+        /* Top status bar */
+        .lockscreen-topbar {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 28px;
-            background: linear-gradient(180deg, #1a3a5a, #0a1a2a);
-            border-bottom: 1px solid var(--neon-cyan);
+            height: 40px;
             display: flex;
             align-items: center;
-            padding: 0 12px;
-            font-size: 11px;
-            color: var(--neon-cyan);
-            letter-spacing: 2px;
+            padding: 0 20px;
+            gap: 16px;
+            justify-content: flex-end;
+            z-index: 10;
         }
 
-        .title-os-bar .dots {
+        .lockscreen-topbar-icon {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Center content */
+        .lockscreen-center {
+            position: absolute;
+            inset: 0;
             display: flex;
-            gap: 6px;
-            margin-left: auto;
-        }
-
-        .title-os-bar .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            border: 1px solid currentColor;
-        }
-
-        .title-os-bar .dot.red {
-            color: var(--neon-red);
-        }
-
-        .title-os-bar .dot.yellow {
-            color: var(--neon-yellow);
-        }
-
-        .title-os-bar .dot.green {
-            color: var(--neon-green);
-        }
-
-        .title-user-icon {
-            width: 80px;
-            height: 80px;
-            border: 2px solid var(--neon-cyan);
-            border-radius: 50%;
-            margin: 36px auto 16px;
-            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
-            box-shadow: var(--glow-cyan);
-            position: relative;
+            gap: 0;
+            z-index: 5;
         }
 
-        .title-user-icon::after {
-            content: '';
-            position: absolute;
-            inset: -6px;
-            border-radius: 50%;
-            border: 1px solid rgba(0, 245, 255, 0.2);
-            animation: pulse-ring 2s ease-in-out infinite;
+        .lockscreen-time {
+            font-family: 'Segoe UI', 'Share Tech Mono', sans-serif;
+            font-size: 96px;
+            font-weight: 200;
+            color: white;
+            letter-spacing: -2px;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+            line-height: 1;
+            margin-bottom: 8px;
         }
 
-        @keyframes pulse-ring {
+        .lockscreen-date {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 22px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.9);
+            letter-spacing: 1px;
+            margin-bottom: 60px;
+        }
+
+        .lockscreen-hint {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 2px;
+            animation: hint-pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes hint-pulse {
 
             0%,
             100% {
-                transform: scale(1);
+                opacity: 0.6;
+                transform: translateY(0);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translateY(-4px);
+            }
+        }
+
+        .lockscreen-arrow {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 8px;
+            animation: arrow-bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes arrow-bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
                 opacity: 0.5;
             }
 
             50% {
-                transform: scale(1.1);
-                opacity: 0.1;
+                transform: translateY(-6px);
+                opacity: 1;
             }
         }
 
-        .title-game-name {
-            font-family: 'VT323', monospace;
-            font-size: 52px;
-            color: var(--neon-cyan);
-            text-shadow: var(--glow-cyan);
-            letter-spacing: 8px;
-            margin-bottom: 4px;
-            animation: text-glow 3s ease-in-out infinite;
-        }
-
-        @keyframes text-glow {
-
-            0%,
-            100% {
-                text-shadow: 0 0 10px #00f5ff, 0 0 20px #00f5ff40;
-            }
-
-            50% {
-                text-shadow: 0 0 20px #00f5ff, 0 0 40px #00f5ff60, 0 0 60px #00f5ff20;
-            }
-        }
-
-        .title-subtitle {
-            font-size: 10px;
-            color: var(--text-dim);
-            letter-spacing: 4px;
-            margin-bottom: 32px;
-        }
-
-        .title-username {
-            font-size: 13px;
-            color: var(--win-gray);
-            margin-bottom: 20px;
-            letter-spacing: 2px;
-        }
-
-        .btn-primary {
-            background: transparent;
-            border: 1px solid var(--neon-cyan);
-            color: var(--neon-cyan);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 13px;
-            letter-spacing: 4px;
-            padding: 12px 40px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
-        }
-
-        .btn-primary::before {
-            content: '';
+        /* Slide up animation */
+        .lockscreen-slide {
             position: absolute;
             inset: 0;
-            background: var(--neon-cyan);
-            transform: translateX(-100%);
-            transition: transform 0.3s;
-            z-index: -1;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 20;
         }
 
-        .btn-primary:hover {
-            color: var(--bg);
-            box-shadow: var(--glow-cyan);
+        .lockscreen-slide.sliding-up {
+            transform: translateY(-100%);
         }
 
-        .btn-primary:hover::before {
-            transform: translateX(0);
-        }
-
-        .title-version {
+        /* Login screen behind */
+        .loginscreen {
             position: absolute;
-            bottom: 20px;
-            right: 24px;
-            font-size: 10px;
-            color: var(--text-dim);
-        }
-
-        /* ========== STAGE SELECT SCENE ========== */
-        #scene-stage {
-            background: var(--win-bg);
-            align-items: stretch;
-            justify-content: stretch;
-            font-family: 'Share Tech Mono', monospace;
-        }
-
-        .win-desktop {
-            width: 100%;
-            height: 100%;
-            background: var(--win-bg);
-            position: relative;
+            inset: 0;
+            background: linear-gradient(135deg, #1a3a5c, #0d2035);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 20px;
-            flex-wrap: wrap;
-            padding: 40px;
         }
 
-        .win-taskbar {
+        .login-user-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2980b9, #1a5276);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .login-username {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 22px;
+            font-weight: 300;
+            color: white;
+            letter-spacing: 1px;
+        }
+
+        .login-start-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+            letter-spacing: 3px;
+            padding: 12px 48px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+
+        .login-start-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .login-game-badge {
+            position: absolute;
+            bottom: 80px;
+            font-family: 'VT323', monospace;
+            font-size: 28px;
+            color: rgba(255, 255, 255, 0.15);
+            letter-spacing: 6px;
+        }
+
+        /* ===================================================
+   STAGE SELECT — Windows 10 Desktop
+   =================================================== */
+        #scene-stage {
+            background: var(--win-desktop);
+            background-image:
+                radial-gradient(ellipse at 60% 40%, #4a7fc1 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, #2e5fa3 0%, transparent 50%);
+            font-family: 'Segoe UI', 'Share Tech Mono', sans-serif;
+        }
+
+        /* Desktop icons */
+        .desktop-icons {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 6px;
+            width: 72px;
+            border: 1px solid transparent;
+            transition: all 0.1s;
+        }
+
+        .desktop-icon:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .desktop-icon-img {
+            font-size: 32px;
+        }
+
+        .desktop-icon-label {
+            font-size: 11px;
+            color: white;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            line-height: 1.2;
+        }
+
+        /* Windows 10 Taskbar */
+        .win10-taskbar {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 32px;
-            background: var(--win-gray);
-            border-top: 2px solid white;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
             display: flex;
             align-items: center;
             padding: 0 4px;
-            gap: 4px;
+            gap: 2px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .win-start-btn {
-            background: var(--win-gray);
-            border: 2px outset var(--win-gray);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 2px 8px;
-            cursor: pointer;
+        .win10-start {
+            width: 48px;
+            height: 40px;
             display: flex;
             align-items: center;
-            gap: 4px;
-        }
-
-        .win-taskbar-time {
-            margin-left: auto;
-            border: 2px inset var(--win-gray);
-            padding: 2px 8px;
-            font-size: 11px;
-            color: #000;
-        }
-
-        .win-dialog {
-            background: var(--win-gray);
-            border: 2px outset var(--win-gray);
-            min-width: 360px;
-            font-size: 12px;
-            color: #000;
-            box-shadow: 4px 4px 0 #000;
-        }
-
-        .win-dialog-title {
-            background: var(--win-blue);
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: background 0.1s;
             color: white;
+        }
+
+        .win10-start:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .win10-search {
+            height: 28px;
+            width: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            gap: 8px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+        }
+
+        .win10-taskbar-apps {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-left: 8px;
+        }
+
+        .win10-taskbar-app {
+            height: 38px;
+            min-width: 48px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.7);
+            border-bottom: 2px solid transparent;
+            transition: all 0.1s;
+            position: relative;
+        }
+
+        .win10-taskbar-app:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .win10-taskbar-app.active {
+            border-bottom-color: #0078d4;
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .win10-taskbar-app.minimized {
+            opacity: 0.5;
+        }
+
+        .win10-tray {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 12px;
+            height: 40px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 11px;
+        }
+
+        .win10-tray:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Win10 Window */
+        .win10-window {
+            position: absolute;
+            background: #f0f0f0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+            min-width: 300px;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .win10-window.minimized {
+            display: none;
+        }
+
+        .win10-titlebar {
+            height: 32px;
+            background: linear-gradient(180deg, var(--win-blue-grad-start), var(--win-blue-grad-end));
+            display: flex;
+            align-items: center;
+            padding: 0 0 0 10px;
+            cursor: move;
+            flex-shrink: 0;
+            gap: 8px;
+        }
+
+        .win10-titlebar-icon {
+            font-size: 14px;
+        }
+
+        .win10-titlebar-title {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 12px;
+            color: white;
+            font-weight: 400;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .win10-window-controls {
+            display: flex;
+            height: 32px;
+            margin-left: auto;
+        }
+
+        .win10-wctrl {
+            width: 46px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 11px;
+            transition: background 0.1s;
+            border: none;
+            background: transparent;
+        }
+
+        .win10-wctrl:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .win10-wctrl.close:hover {
+            background: #e81123;
+        }
+
+        .win10-wctrl svg {
+            width: 10px;
+            height: 10px;
+            fill: white;
+        }
+
+        .win10-window-body {
+            flex: 1;
+            background: #f0f0f0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Job Select Window */
+        #win-job {
+            top: 80px;
+            left: 60px;
+            width: 380px;
+        }
+
+        .job-select-body {
+            padding: 16px;
+        }
+
+        .job-select-label {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 12px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .job-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-bottom: 16px;
+        }
+
+        .job-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 10px;
+            background: white;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .job-item:hover {
+            background: #cce8ff;
+            border-color: #0078d4;
+        }
+
+        .job-item.selected {
+            background: #0078d4;
+            color: white;
+            border-color: #005a9e;
+        }
+
+        .job-item.selected .job-item-sub {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .job-item-icon {
+            font-size: 24px;
+            width: 32px;
+            text-align: center;
+        }
+
+        .job-item-info {
+            flex: 1;
+        }
+
+        .job-item-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .job-item-sub {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .job-item-skill {
+            font-size: 10px;
+            color: #0078d4;
+            margin-left: auto;
+            white-space: nowrap;
+        }
+
+        .job-item.selected .job-item-skill {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .win10-btn-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #ccc;
+        }
+
+        .win10-btn {
+            background: #e1e1e1;
+            border: 1px solid #adadad;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 12px;
+            padding: 6px 20px;
+            cursor: pointer;
+            min-width: 80px;
+            transition: all 0.1s;
+        }
+
+        .win10-btn:hover {
+            background: #cce8ff;
+            border-color: #0078d4;
+            color: #003399;
+        }
+
+        .win10-btn:active {
+            background: #b3d7ff;
+        }
+
+        .win10-btn.primary {
+            background: #0078d4;
+            color: white;
+            border-color: #005a9e;
+        }
+
+        .win10-btn.primary:hover {
+            background: #006cbf;
+        }
+
+        /* Explorer Window */
+        #win-explorer {
+            top: 60px;
+            left: 480px;
+            width: 500px;
+        }
+
+        .explorer-ribbon {
+            background: #f0f0f0;
+            border-bottom: 1px solid #ccc;
             padding: 4px 8px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            font-size: 12px;
-            font-weight: bold;
+            gap: 4px;
         }
 
-        .win-dialog-controls {
-            display: flex;
-            gap: 2px;
-        }
-
-        .win-ctrl-btn {
-            background: var(--win-gray);
-            border: 2px outset var(--win-gray);
-            width: 16px;
-            height: 14px;
-            font-size: 10px;
+        .explorer-nav-btn {
+            width: 28px;
+            height: 28px;
+            background: transparent;
+            border: 1px solid transparent;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #000;
-            font-family: monospace;
+            font-size: 14px;
+            border-radius: 2px;
+            transition: all 0.1s;
         }
 
-        .win-dialog-body {
-            padding: 16px;
+        .explorer-nav-btn:hover {
+            background: #cce8ff;
+            border-color: #0078d4;
         }
 
-        .win-section-label {
+        .explorer-addressbar {
+            flex: 1;
+            height: 24px;
+            background: white;
+            border: 1px solid #ccc;
+            padding: 0 8px;
+            font-family: 'Segoe UI', sans-serif;
             font-size: 11px;
-            color: #444;
-            margin-bottom: 8px;
-        }
-
-        .job-options {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            margin-bottom: 16px;
-        }
-
-        .job-option {
+            color: #333;
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 8px;
-            border: 2px inset var(--win-gray);
-            background: white;
+            gap: 4px;
+        }
+
+        .explorer-addressbar-path {
+            color: #0078d4;
+        }
+
+        .explorer-toolbar2 {
+            background: #fafafa;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 11px;
+            color: #555;
+        }
+
+        .explorer-pane {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .explorer-sidebar {
+            width: 140px;
+            background: #f0f0f0;
+            border-right: 1px solid #ddd;
+            padding: 8px 0;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 11px;
+            overflow-y: auto;
+        }
+
+        .explorer-sidebar-item {
+            padding: 4px 12px;
             cursor: pointer;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 6px;
             transition: background 0.1s;
         }
 
-        .job-option:hover {
-            background: var(--win-blue);
-            color: white;
+        .explorer-sidebar-item:hover {
+            background: #cce8ff;
         }
 
-        .job-option.selected {
-            background: var(--win-blue);
-            color: white;
+        .explorer-sidebar-item.active {
+            background: #d0e8ff;
         }
 
-        .job-icon {
-            font-size: 18px;
-        }
-
-        .job-name {
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .job-desc {
-            font-size: 10px;
-            opacity: 0.8;
-            margin-left: auto;
-        }
-
-        .win-divider {
-            border: none;
-            border-top: 1px solid var(--win-dark);
-            border-bottom: 1px solid white;
-            margin: 12px 0;
-        }
-
-        .win-btn-row {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .win-btn {
-            background: var(--win-gray);
-            border: 2px outset var(--win-gray);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 11px;
-            padding: 4px 16px;
-            cursor: pointer;
-            color: #000;
-            min-width: 75px;
-        }
-
-        .win-btn:hover {
-            background: #d0d0d0;
-        }
-
-        .win-btn:active {
-            border-style: inset;
-        }
-
-        .win-btn.primary {
-            font-weight: bold;
-        }
-
-        /* Explorer window */
-        .win-explorer {
-            min-width: 420px;
-            font-size: 12px;
-        }
-
-        .explorer-toolbar {
-            background: var(--win-gray);
-            border-bottom: 1px solid var(--win-dark);
-            padding: 4px 8px;
-            display: flex;
-            gap: 8px;
-            font-size: 11px;
-        }
-
-        .explorer-path {
-            border: 2px inset var(--win-gray);
-            background: white;
-            padding: 2px 8px;
-            font-size: 11px;
+        .explorer-content {
             flex: 1;
-            color: #000;
-        }
-
-        .explorer-body {
             background: white;
-            border: 2px inset var(--win-gray);
-            margin: 8px;
-            height: 160px;
             overflow-y: auto;
             padding: 4px;
         }
 
-        .file-item {
+        .explorer-file {
             display: flex;
             align-items: center;
-            gap: 6px;
-            padding: 3px 4px;
+            gap: 8px;
+            padding: 4px 8px;
             cursor: pointer;
-            font-size: 11px;
-            color: #000;
-            border: 1px solid transparent;
-        }
-
-        .file-item:hover {
-            background: #0000aa;
-            color: white;
-            border-color: #0000aa;
-        }
-
-        .file-item.selected {
-            background: #0000aa;
-            color: white;
-            border-color: #0000aa;
-        }
-
-        .file-icon {
-            font-size: 14px;
-        }
-
-        .explorer-status {
-            border-top: 1px solid var(--win-dark);
-            padding: 3px 8px;
-            font-size: 10px;
-            color: #444;
-            background: var(--win-gray);
-        }
-
-        .selected-count {
-            font-size: 10px;
-            color: #444;
-            margin-top: 4px;
-        }
-
-        .selected-count.max {
-            color: var(--neon-red);
-        }
-
-        /* ========== LOADING SCENE ========== */
-        #scene-loading {
-            background: #000020;
-            background-image: radial-gradient(ellipse at 50% 50%, #00103040 0%, transparent 70%);
-        }
-
-        .loading-win-box {
-            background: var(--win-gray);
-            border: 2px outset var(--win-gray);
-            min-width: 440px;
-            box-shadow: 4px 4px 0 #000;
+            font-family: 'Segoe UI', sans-serif;
             font-size: 12px;
-            color: #000;
+            color: #222;
+            border: 1px solid transparent;
+            transition: all 0.1s;
         }
 
-        .loading-content {
-            padding: 24px;
-            text-align: center;
+        .explorer-file:hover {
+            background: #e8f4fd;
+            border-color: #bee3f8;
         }
 
-        .loading-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            animation: spin-slow 3s linear infinite;
+        .explorer-file.selected {
+            background: #cce8ff;
+            border-color: #0078d4;
         }
 
-        @keyframes spin-slow {
+        .explorer-file-icon {
+            font-size: 16px;
+            width: 20px;
+        }
+
+        .explorer-file-name {
+            flex: 1;
+        }
+
+        .explorer-file-type {
+            width: 80px;
+            color: #666;
+            font-size: 11px;
+        }
+
+        .explorer-file-size {
+            width: 70px;
+            color: #666;
+            font-size: 11px;
+            text-align: right;
+        }
+
+        .explorer-file-bonus {
+            width: 80px;
+            color: #0078d4;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .explorer-statusbar {
+            background: #f0f0f0;
+            border-top: 1px solid #ccc;
+            padding: 3px 10px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 11px;
+            color: #555;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .explorer-goto-btn {
+            background: #0078d4;
+            color: white;
+            border: none;
+            padding: 3px 12px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .explorer-goto-btn:hover {
+            background: #006cbf;
+        }
+
+        /* ===================================================
+   LOADING — Windows 10 Boot Screen
+   =================================================== */
+        #scene-loading {
+            background: #000;
+        }
+
+        #scene-loading.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .win10-boot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            width: 100%;
+        }
+
+        .win10-logo {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .win10-logo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3px;
+            width: 56px;
+            height: 56px;
+        }
+
+        .win10-logo-tile {
+            background: white;
+            border-radius: 1px;
+            opacity: 0;
+            animation: logo-appear 0.6s ease forwards;
+        }
+
+        .win10-logo-tile:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .win10-logo-tile:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .win10-logo-tile:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .win10-logo-tile:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes logo-appear {
             from {
-                transform: rotate(0deg);
+                opacity: 0;
+                transform: scale(0.8);
             }
 
             to {
-                transform: rotate(360deg);
+                opacity: 1;
+                transform: scale(1);
             }
         }
 
-        .loading-title-text {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 16px;
-            color: #000;
+        .win10-logo-text {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 28px;
+            font-weight: 200;
+            color: white;
+            letter-spacing: 2px;
+            margin-left: 12px;
         }
 
-        .loading-progress-container {
-            border: 2px inset var(--win-gray);
+        /* Windows 10 spinner */
+        .win10-spinner {
+            display: flex;
+            gap: 6px;
+        }
+
+        .win10-spinner-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
             background: white;
-            height: 20px;
-            margin-bottom: 8px;
-            overflow: hidden;
-            position: relative;
+            animation: win10-spin 1.4s ease-in-out infinite;
+            opacity: 0;
         }
 
-        .loading-progress-bar {
-            height: 100%;
-            background: var(--win-blue);
-            width: 0%;
-            transition: width 0.1s;
-            position: relative;
+        .win10-spinner-dot:nth-child(1) {
+            animation-delay: 0s;
         }
 
-        .loading-progress-bar::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(90deg,
-                    transparent 0px,
-                    transparent 10px,
-                    rgba(255, 255, 255, 0.15) 10px,
-                    rgba(255, 255, 255, 0.15) 20px);
+        .win10-spinner-dot:nth-child(2) {
+            animation-delay: 0.16s;
         }
 
-        .loading-status {
-            font-size: 11px;
-            color: #444;
-            height: 16px;
-            margin-bottom: 4px;
+        .win10-spinner-dot:nth-child(3) {
+            animation-delay: 0.32s;
         }
 
-        .loading-percent {
-            font-size: 11px;
-            color: #000;
-            font-weight: bold;
+        .win10-spinner-dot:nth-child(4) {
+            animation-delay: 0.48s;
         }
 
-        /* ========== INGAME SCENE ========== */
+        .win10-spinner-dot:nth-child(5) {
+            animation-delay: 0.64s;
+        }
+
+        @keyframes win10-spin {
+
+            0%,
+            100% {
+                opacity: 0;
+                transform: scale(0.6);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .win10-boot-status {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 1px;
+            min-height: 20px;
+        }
+
+        /* ===================================================
+   INGAME
+   =================================================== */
         #scene-ingame {
-            background: var(--bg);
-            overflow: hidden;
+            background: var(--bg-dark);
         }
 
         .ingame-container {
             width: 100%;
             height: 100%;
-            position: relative;
             display: flex;
+            position: relative;
         }
 
-        /* dungeon view */
         .dungeon-view {
             flex: 1;
             position: relative;
@@ -668,26 +1024,6 @@
             background: #050510;
         }
 
-        /* isometric grid */
-        .dungeon-grid {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .iso-room {
-            position: absolute;
-            width: 120px;
-            height: 60px;
-            background: rgba(0, 245, 255, 0.05);
-            border: 1px solid rgba(0, 245, 255, 0.2);
-            transform: rotateX(60deg) rotateZ(-45deg);
-            box-shadow: inset 0 0 20px rgba(0, 245, 255, 0.05);
-        }
-
-        /* fake isometric dungeon using CSS */
         .dungeon-scene {
             position: absolute;
             inset: 0;
@@ -703,20 +1039,6 @@
             transform: perspective(800px) rotateX(35deg) rotateZ(-15deg);
         }
 
-        .floor-tile {
-            position: absolute;
-            background: linear-gradient(135deg, #0a0a1a, #0f0f22);
-            border: 1px solid rgba(0, 245, 255, 0.15);
-        }
-
-        .wall-tile {
-            position: absolute;
-            background: linear-gradient(180deg, #0f1525, #08101e);
-            border: 1px solid rgba(0, 128, 255, 0.2);
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Player */
         .player-sprite {
             position: absolute;
             width: 24px;
@@ -741,15 +1063,6 @@
             }
         }
 
-        .player-body {
-            width: 16px;
-            height: 20px;
-            background: linear-gradient(180deg, #00c8ff, #0060aa);
-            border: 1px solid var(--neon-cyan);
-            border-radius: 2px;
-            position: relative;
-        }
-
         .player-head {
             width: 12px;
             height: 12px;
@@ -759,7 +1072,14 @@
             margin-bottom: 2px;
         }
 
-        /* Enemy sprites */
+        .player-body {
+            width: 16px;
+            height: 20px;
+            background: linear-gradient(180deg, #00c8ff, #0060aa);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 2px;
+        }
+
         .enemy-sprite {
             position: absolute;
             animation: enemy-idle 1.5s ease-in-out infinite;
@@ -791,7 +1111,23 @@
             color: white;
         }
 
-        /* HUD */
+        .enemy-hpbar {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 4px;
+            background: rgba(255, 0, 0, 0.3);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+        }
+
+        .enemy-hpbar-fill {
+            height: 100%;
+            background: var(--neon-red);
+            box-shadow: 0 0 4px var(--neon-red);
+        }
+
         .ingame-hud {
             position: absolute;
             inset: 0;
@@ -848,7 +1184,7 @@
 
         .hud-value {
             font-size: 10px;
-            color: var(--text);
+            color: #e0e0ff;
             margin-top: 2px;
         }
 
@@ -877,9 +1213,6 @@
             bottom: 12px;
             left: 50%;
             transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            align-items: center;
         }
 
         .hud-room-info {
@@ -897,25 +1230,6 @@
             font-size: 13px;
         }
 
-        /* enemy health bars */
-        .enemy-hpbar {
-            position: absolute;
-            top: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 30px;
-            height: 4px;
-            background: rgba(255, 0, 0, 0.3);
-            border: 1px solid rgba(255, 0, 0, 0.5);
-        }
-
-        .enemy-hpbar-fill {
-            height: 100%;
-            background: var(--neon-red);
-            box-shadow: 0 0 4px var(--neon-red);
-        }
-
-        /* attack animation */
         @keyframes attack-flash {
             0% {
                 opacity: 0;
@@ -944,7 +1258,32 @@
             z-index: 15;
         }
 
-        /* sidebar */
+        /* Damage flash */
+        @keyframes damage-flash {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .damage-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 0, 0, 0.3);
+            pointer-events: none;
+            z-index: 25;
+            opacity: 0;
+        }
+
+        .damage-overlay.flashing {
+            animation: damage-flash 0.3s ease;
+        }
+
         .ingame-sidebar {
             width: 200px;
             background: rgba(0, 5, 15, 0.95);
@@ -953,7 +1292,6 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            pointer-events: all;
         }
 
         .sidebar-section-title {
@@ -1015,7 +1353,6 @@
             padding: 8px;
             cursor: pointer;
             transition: all 0.2s;
-            pointer-events: all;
             width: 100%;
         }
 
@@ -1025,84 +1362,141 @@
             box-shadow: 0 0 8px rgba(0, 245, 255, 0.2);
         }
 
-        /* ========== RESULT SCENE ========== */
+        /* Pause overlay */
+        .pause-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .pause-overlay.active {
+            display: flex;
+        }
+
+        .pause-dialog {
+            background: #f0f0f0;
+            border: 1px solid rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            width: 340px;
+        }
+
+        .pause-dialog-title {
+            background: linear-gradient(180deg, #1659c7, #0a246a);
+            height: 32px;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 12px;
+            color: white;
+            cursor: default;
+        }
+
+        .pause-dialog-body {
+            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .pause-icon {
+            font-size: 32px;
+            float: left;
+            margin-right: 16px;
+        }
+
+        .pause-text {
+            font-size: 13px;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .pause-btn-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        /* ===================================================
+   RESULT WIN — Shutdown
+   =================================================== */
         #scene-result-win {
-            background: #000010;
-        }
-
-        #scene-result-lose {
-            background: #100000;
-        }
-
-        .result-win-container {
-            text-align: center;
-            position: relative;
-        }
-
-        /* Shutdown screen */
-        .shutdown-screen {
             background: #000;
-            width: 100vw;
-            height: 100vh;
+        }
+
+        .shutdown-screen {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 24px;
+            gap: 28px;
+            width: 100%;
         }
 
-        .shutdown-logo {
-            font-size: 64px;
-            opacity: 0.8;
-            animation: logo-pulse 3s ease-in-out infinite;
+        .shutdown-win-logo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            width: 72px;
+            height: 72px;
+            animation: shutdown-pulse 3s ease-in-out infinite;
         }
 
-        @keyframes logo-pulse {
+        @keyframes shutdown-pulse {
 
             0%,
             100% {
-                filter: drop-shadow(0 0 10px var(--neon-cyan));
+                filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
             }
 
             50% {
-                filter: drop-shadow(0 0 30px var(--neon-cyan));
+                filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.6));
             }
         }
 
+        .shutdown-tile {
+            background: white;
+            border-radius: 1px;
+        }
+
         .shutdown-title {
-            font-family: 'VT323', monospace;
-            font-size: 48px;
-            color: var(--neon-cyan);
-            text-shadow: var(--glow-cyan);
-            letter-spacing: 4px;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 22px;
+            font-weight: 200;
+            color: rgba(255, 255, 255, 0.9);
+            letter-spacing: 2px;
         }
 
         .shutdown-message {
+            font-family: 'Share Tech Mono', monospace;
             font-size: 13px;
-            color: var(--text-dim);
+            color: rgba(255, 255, 255, 0.5);
             letter-spacing: 3px;
         }
 
-        .shutdown-detail {
+        .shutdown-code {
+            font-family: 'Share Tech Mono', monospace;
             font-size: 11px;
-            color: #304050;
-            letter-spacing: 1px;
-            margin-top: -16px;
+            color: rgba(255, 255, 255, 0.2);
         }
 
         .shutdown-spinner {
             display: flex;
             gap: 8px;
-            margin-top: 8px;
+            margin-top: 4px;
         }
 
         .shutdown-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--neon-cyan);
+            background: rgba(255, 255, 255, 0.6);
             animation: dot-bounce 1.2s ease-in-out infinite;
-            box-shadow: 0 0 6px var(--neon-cyan);
         }
 
         .shutdown-dot:nth-child(2) {
@@ -1135,65 +1529,69 @@
             }
         }
 
-        /* Error dialog - Game Over */
-        .error-screen {
-            background: rgba(10, 0, 0, 0.98);
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        .shutdown-restart-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+            padding: 10px 32px;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.2s;
+            margin-top: 8px;
         }
 
-        .bsod-container {
-            background: var(--neon-red);
+        .shutdown-restart-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
             color: white;
-            padding: 48px 64px;
+        }
+
+        /* ===================================================
+   RESULT LOSE — BSOD
+   =================================================== */
+        #scene-result-lose {
+            background: #0078d4;
+        }
+
+        .bsod-screen {
             max-width: 640px;
             width: 90%;
-            position: relative;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
         }
 
-        .bsod-header {
-            font-size: 14px;
-            letter-spacing: 2px;
+        .bsod-emoji {
+            font-size: 80px;
             margin-bottom: 24px;
-            opacity: 0.9;
-        }
-
-        .bsod-icon {
-            font-size: 64px;
             display: block;
-            margin-bottom: 16px;
         }
 
         .bsod-title {
-            font-family: 'VT323', monospace;
-            font-size: 42px;
-            letter-spacing: 4px;
-            margin-bottom: 16px;
-            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+            font-size: 52px;
+            font-weight: 200;
+            margin-bottom: 24px;
+            letter-spacing: -1px;
         }
 
-        .bsod-code {
-            font-size: 11px;
-            opacity: 0.8;
-            letter-spacing: 1px;
-            margin-bottom: 24px;
+        .bsod-text {
+            font-size: 14px;
             line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 24px;
         }
 
-        .bsod-progress {
-            font-size: 11px;
-            opacity: 0.9;
-            margin-bottom: 24px;
+        .bsod-progress-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 8px;
         }
 
         .bsod-progress-bar {
             height: 4px;
             background: rgba(255, 255, 255, 0.3);
-            margin-top: 8px;
+            margin-bottom: 32px;
             position: relative;
             overflow: hidden;
         }
@@ -1204,7 +1602,7 @@
             top: 0;
             bottom: 0;
             background: white;
-            animation: bsod-fill 3s ease-in-out infinite;
+            animation: bsod-fill 4s ease-in-out infinite;
         }
 
         @keyframes bsod-fill {
@@ -1217,62 +1615,50 @@
             }
         }
 
-        /* scene transition */
-        @keyframes fade-in {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        .scene.active {
-            animation: fade-in 0.5s ease;
-        }
-
-        /* ======= SCENE NAV (dev helper) ======= */
-        .dev-nav {
-            position: fixed;
-            top: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 4px;
-            z-index: 99999;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .dev-nav-btn {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: rgba(255, 255, 255, 0.4);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 9px;
-            padding: 3px 8px;
-            cursor: pointer;
+        .bsod-qr {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
             letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .bsod-stopcode {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .bsod-restart-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+            padding: 10px 32px;
+            cursor: pointer;
+            letter-spacing: 2px;
             transition: all 0.2s;
+            margin-top: 16px;
         }
 
-        .dev-nav-btn:hover,
-        .dev-nav-btn.active {
-            border-color: var(--neon-cyan);
-            color: var(--neon-cyan);
+        .bsod-restart-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
         }
 
-        .time-display {
-            color: #000;
+        /* Scanlines */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px);
+            pointer-events: none;
+            z-index: 99998;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Dev nav -->
     <div class="dev-nav">
         <button class="dev-nav-btn active" onclick="showScene('title')">TITLE</button>
         <button class="dev-nav-btn" onclick="showScene('stage')">STAGE</button>
@@ -1282,213 +1668,282 @@
         <button class="dev-nav-btn" onclick="showScene('result-lose')">LOSE</button>
     </div>
 
-    <!-- ========== TITLE ========== -->
+    <!-- ===== TITLE ===== -->
     <div id="scene-title" class="scene active">
-        <div class="title-bg-grid"></div>
-        <div class="title-login-box">
-            <div class="title-os-bar">
-                DUNGEON_DRIVE.EXE
-                <div class="dots">
-                    <div class="dot red"></div>
-                    <div class="dot yellow"></div>
-                    <div class="dot green"></div>
-                </div>
-            </div>
-            <div class="title-user-icon">⚔</div>
-            <div class="title-game-name">WIN vs MAC</div>
-            <div class="title-subtitle">WINDOWS INTERNAL SYSTEM v1.0.0</div>
-            <div class="title-username">USER: PLAYER_001</div>
-            <button class="btn-primary" onclick="showScene('stage')">[ BOOT SYSTEM ]</button>
+        <!-- Background -->
+        <div class="lockscreen-bg">
+            <div class="lockscreen-blob blob1"></div>
+            <div class="lockscreen-blob blob2"></div>
+            <div class="lockscreen-blob blob3"></div>
         </div>
-        <div class="title-version">BUILD 2026.05 // DxLib + ECS // WIN vs MAC</div>
+
+        <!-- Lock screen (slides up on click) -->
+        <div class="lockscreen-slide" id="lockscreen">
+            <div class="lockscreen-bg">
+                <div class="lockscreen-blob blob1"></div>
+                <div class="lockscreen-blob blob2"></div>
+            </div>
+            <div class="lockscreen-topbar">
+                <span class="lockscreen-topbar-icon">📶</span>
+                <span class="lockscreen-topbar-icon">🔋</span>
+            </div>
+            <div class="lockscreen-center">
+                <div class="lockscreen-time" id="lock-time">00:00</div>
+                <div class="lockscreen-date" id="lock-date">2026年5月5日 火曜日</div>
+                <div class="lockscreen-hint">クリックしてロック解除</div>
+                <div class="lockscreen-arrow">↑</div>
+            </div>
+        </div>
+
+        <!-- Login screen (revealed after slide) -->
+        <div class="loginscreen">
+            <div class="login-user-icon">⚔</div>
+            <div class="login-username">PLAYER_001</div>
+            <button class="login-start-btn" onclick="showScene('stage')">ゲームを開始</button>
+            <div class="login-game-badge">WIN vs MAC</div>
+        </div>
     </div>
 
-    <!-- ========== STAGE SELECT ========== -->
+    <!-- ===== STAGE SELECT ===== -->
     <div id="scene-stage" class="scene">
-        <div class="win-desktop">
+        <!-- Desktop icons -->
+        <div class="desktop-icons">
+            <div class="desktop-icon" ondblclick="restoreWindow('win-job')">
+                <div class="desktop-icon-img">⚔</div>
+                <div class="desktop-icon-label">職業選択</div>
+            </div>
+            <div class="desktop-icon" ondblclick="restoreWindow('win-explorer')">
+                <div class="desktop-icon-img">📁</div>
+                <div class="desktop-icon-label">ファイル選択</div>
+            </div>
+        </div>
 
-            <!-- Job Select Dialog -->
-            <div class="win-dialog" id="dialog-job">
-                <div class="win-dialog-title">
-                    ⚔ 職業の選択
-                    <div class="win-dialog-controls">
-                        <div class="win-ctrl-btn">_</div>
-                        <div class="win-ctrl-btn">□</div>
-                        <div class="win-ctrl-btn">✕</div>
-                    </div>
+        <!-- Job Select Window -->
+        <div class="win10-window" id="win-job">
+            <div class="win10-titlebar" onmousedown="startDrag(event, 'win-job')">
+                <span class="win10-titlebar-icon">⚔</span>
+                <span class="win10-titlebar-title">職業の選択 — WIN vs MAC</span>
+                <div class="win10-window-controls">
+                    <button class="win10-wctrl" onclick="minimizeWindow('win-job')" title="最小化">─</button>
+                    <button class="win10-wctrl" onclick="maximizeWindow('win-job')" title="最大化">□</button>
+                    <button class="win10-wctrl close" onclick="closeWindow('win-job')" title="閉じる">✕</button>
                 </div>
-                <div class="win-dialog-body">
-                    <div class="win-section-label">職業を選択してください：</div>
-                    <div class="job-options">
-                        <div class="job-option selected" onclick="selectJob(this, '剣士')">
-                            <span class="job-icon">⚔</span>
-                            <div>
-                                <div class="job-name">剣士 [Warrior]</div>
-                                <div style="font-size:10px;color:#666">近接・前方扇形攻撃</div>
+            </div>
+            <div class="win10-window-body">
+                <div class="job-select-body">
+                    <div class="job-select-label">職業を選択してください：</div>
+                    <div class="job-list">
+                        <div class="job-item selected" onclick="selectJob(this,'剣士','slash','全方位斬り')">
+                            <div class="job-item-icon">⚔</div>
+                            <div class="job-item-info">
+                                <div class="job-item-name">剣士 [Warrior]</div>
+                                <div class="job-item-sub">近接・前方扇形攻撃 / 攻撃タイプ: slash</div>
                             </div>
-                            <span class="job-desc">必殺: 全方位斬り</span>
+                            <div class="job-item-skill">必殺: 全方位斬り</div>
                         </div>
-                        <div class="job-option" onclick="selectJob(this, '魔法使い')">
-                            <span class="job-icon">🔮</span>
-                            <div>
-                                <div class="job-name">魔法使い [Mage]</div>
-                                <div style="font-size:10px;color:#666">遠距離・魔法弾</div>
+                        <div class="job-item" onclick="selectJob(this,'魔法使い','magic','巨大魔法弾')">
+                            <div class="job-item-icon">🔮</div>
+                            <div class="job-item-info">
+                                <div class="job-item-name">魔法使い [Mage]</div>
+                                <div class="job-item-sub">遠距離・魔法弾 / 攻撃タイプ: magic</div>
                             </div>
-                            <span class="job-desc">必殺: 巨大魔法弾</span>
+                            <div class="job-item-skill">必殺: 巨大魔法弾</div>
                         </div>
-                        <div class="job-option" onclick="selectJob(this, '忍者')">
-                            <span class="job-icon">🗡</span>
-                            <div>
-                                <div class="job-name">忍者 [Ninja]</div>
-                                <div style="font-size:10px;color:#666">近接・高速</div>
+                        <div class="job-item" onclick="selectJob(this,'忍者','pierce','分身一斉攻撃')">
+                            <div class="job-item-icon">🗡</div>
+                            <div class="job-item-info">
+                                <div class="job-item-name">忍者 [Ninja]</div>
+                                <div class="job-item-sub">近接・高速 / 攻撃タイプ: pierce</div>
                             </div>
-                            <span class="job-desc">必殺: 分身一斉攻撃</span>
+                            <div class="job-item-skill">必殺: 分身一斉攻撃</div>
                         </div>
                     </div>
-                    <hr class="win-divider">
-                    <div class="win-btn-row">
-                        <button class="win-btn primary" onclick="confirmJob()">OK</button>
-                        <button class="win-btn" onclick="showScene('title')">キャンセル</button>
+                    <div class="win10-btn-row">
+                        <button class="win10-btn primary" onclick="confirmJob()">OK</button>
+                        <button class="win10-btn" onclick="closeWindow('win-job')">キャンセル</button>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- File Explorer Dialog -->
-            <div class="win-dialog win-explorer" id="dialog-explorer">
-                <div class="win-dialog-title">
-                    📁 ファイルの選択 — ダンジョンフォルダを指定
-                    <div class="win-dialog-controls">
-                        <div class="win-ctrl-btn">_</div>
-                        <div class="win-ctrl-btn">□</div>
-                        <div class="win-ctrl-btn">✕</div>
-                    </div>
+        <!-- Explorer Window -->
+        <div class="win10-window win-explorer" id="win-explorer">
+            <div class="win10-titlebar" onmousedown="startDrag(event, 'win-explorer')">
+                <span class="win10-titlebar-icon">📁</span>
+                <span class="win10-titlebar-title">ドキュメント\Projects — エクスプローラー</span>
+                <div class="win10-window-controls">
+                    <button class="win10-wctrl" onclick="minimizeWindow('win-explorer')" title="最小化">─</button>
+                    <button class="win10-wctrl" onclick="maximizeWindow('win-explorer')" title="最大化">□</button>
+                    <button class="win10-wctrl close" onclick="closeWindow('win-explorer')" title="閉じる">✕</button>
                 </div>
-                <div class="win-dialog-body" style="padding:8px">
-                    <div class="explorer-toolbar">
+            </div>
+            <div class="win10-window-body" style="display:flex;flex-direction:column;">
+                <div class="explorer-ribbon">
+                    <button class="explorer-nav-btn">←</button>
+                    <button class="explorer-nav-btn">→</button>
+                    <button class="explorer-nav-btn">↑</button>
+                    <div class="explorer-addressbar">
                         <span>📁</span>
-                        <div class="explorer-path">C:\Users\Player\Documents\Projects</div>
+                        <span class="explorer-addressbar-path">PC > ドキュメント > Projects</span>
                     </div>
-                    <div class="explorer-body" id="file-list">
-                        <div class="file-item" onclick="toggleFile(this, 'project_final.exe', '.exe')">
-                            <span class="file-icon">⚙</span> project_final.exe <span
-                                style="margin-left:auto;font-size:10px;color:#888">2.4 MB</span>
+                    <button class="explorer-nav-btn">🔍</button>
+                </div>
+                <div class="explorer-toolbar2">
+                    <span>ファイルを最大3つ選択 → 「選択完了」でゲームへ</span>
+                </div>
+                <div class="explorer-pane" style="flex:1;min-height:0;">
+                    <div class="explorer-sidebar">
+                        <div class="explorer-sidebar-item active">⭐ クイックアクセス</div>
+                        <div class="explorer-sidebar-item">🖥 デスクトップ</div>
+                        <div class="explorer-sidebar-item">📥 ダウンロード</div>
+                        <div class="explorer-sidebar-item">📄 ドキュメント</div>
+                        <div class="explorer-sidebar-item">🖼 ピクチャ</div>
+                        <div class="explorer-sidebar-item">🎵 ミュージック</div>
+                        <div class="explorer-sidebar-item">💾 PC</div>
+                    </div>
+                    <div class="explorer-content" id="explorer-file-list">
+                        <div class="explorer-file" onclick="toggleExFile(this,'project_final.exe','.exe','ATK +10')">
+                            <div class="explorer-file-icon">⚙</div>
+                            <div class="explorer-file-name">project_final.exe</div>
+                            <div class="explorer-file-type">アプリケーション</div>
+                            <div class="explorer-file-size">2.4 MB</div>
+                            <div class="explorer-file-bonus">ATK +10</div>
                         </div>
-                        <div class="file-item" onclick="toggleFile(this, 'readme.txt', '.txt')">
-                            <span class="file-icon">📄</span> readme.txt <span
-                                style="margin-left:auto;font-size:10px;color:#888">12 KB</span>
+                        <div class="explorer-file" onclick="toggleExFile(this,'readme.txt','.txt','SPD +1.5')">
+                            <div class="explorer-file-icon">📄</div>
+                            <div class="explorer-file-name">readme.txt</div>
+                            <div class="explorer-file-type">テキスト</div>
+                            <div class="explorer-file-size">12 KB</div>
+                            <div class="explorer-file-bonus">SPD +1.5</div>
                         </div>
-                        <div class="file-item" onclick="toggleFile(this, 'screenshot.png', '.png')">
-                            <span class="file-icon">🖼</span> screenshot.png <span
-                                style="margin-left:auto;font-size:10px;color:#888">3.1 MB</span>
+                        <div class="explorer-file" onclick="toggleExFile(this,'screenshot.png','.png','DEF +8')">
+                            <div class="explorer-file-icon">🖼</div>
+                            <div class="explorer-file-name">screenshot.png</div>
+                            <div class="explorer-file-type">PNG 画像</div>
+                            <div class="explorer-file-size">3.1 MB</div>
+                            <div class="explorer-file-bonus">DEF +8</div>
                         </div>
-                        <div class="file-item" onclick="toggleFile(this, 'bgm.mp3', '.mp3')">
-                            <span class="file-icon">🎵</span> bgm.mp3 <span
-                                style="margin-left:auto;font-size:10px;color:#888">8.7 MB</span>
+                        <div class="explorer-file" onclick="toggleExFile(this,'bgm.mp3','.mp3','HP +20')">
+                            <div class="explorer-file-icon">🎵</div>
+                            <div class="explorer-file-name">bgm.mp3</div>
+                            <div class="explorer-file-type">MP3 オーディオ</div>
+                            <div class="explorer-file-size">8.7 MB</div>
+                            <div class="explorer-file-bonus">HP +20</div>
                         </div>
-                        <div class="file-item" onclick="toggleFile(this, 'backup.zip', '.zip')">
-                            <span class="file-icon">📦</span> backup.zip <span
-                                style="margin-left:auto;font-size:10px;color:#888">45 MB</span>
+                        <div class="explorer-file" onclick="toggleExFile(this,'backup.zip','.zip','ALL +')">
+                            <div class="explorer-file-icon">📦</div>
+                            <div class="explorer-file-name">backup.zip</div>
+                            <div class="explorer-file-type">圧縮フォルダー</div>
+                            <div class="explorer-file-size">45 MB</div>
+                            <div class="explorer-file-bonus">ALL +</div>
                         </div>
-                        <div class="file-item" onclick="toggleFile(this, 'data.dll', '.dll')">
-                            <span class="file-icon">⚙</span> data.dll <span
-                                style="margin-left:auto;font-size:10px;color:#888">512 KB</span>
+                        <div class="explorer-file" onclick="toggleExFile(this,'data.dll','.dll','ATK +10')">
+                            <div class="explorer-file-icon">⚙</div>
+                            <div class="explorer-file-name">data.dll</div>
+                            <div class="explorer-file-type">DLL ファイル</div>
+                            <div class="explorer-file-size">512 KB</div>
+                            <div class="explorer-file-bonus">ATK +10</div>
                         </div>
-                        <div class="file-item" onclick="toggleFile(this, 'notes.docx', '.docx')">
-                            <span class="file-icon">📝</span> notes.docx <span
-                                style="margin-left:auto;font-size:10px;color:#888">280 KB</span>
+                        <div class="explorer-file" onclick="toggleExFile(this,'notes.docx','.docx','SPD +1.5')">
+                            <div class="explorer-file-icon">📝</div>
+                            <div class="explorer-file-name">notes.docx</div>
+                            <div class="explorer-file-type">Word 文書</div>
+                            <div class="explorer-file-size">280 KB</div>
+                            <div class="explorer-file-bonus">SPD +1.5</div>
+                        </div>
+                        <div class="explorer-file" onclick="toggleExFile(this,'mystery.???','.???','射程 +20')">
+                            <div class="explorer-file-icon">❓</div>
+                            <div class="explorer-file-name">mystery.???</div>
+                            <div class="explorer-file-type">不明なファイル</div>
+                            <div class="explorer-file-size">1 KB</div>
+                            <div class="explorer-file-bonus">射程 +20</div>
                         </div>
                     </div>
-                    <div class="explorer-status">
-                        <span id="file-status">ファイルを最大3つ選択してください</span>
-                    </div>
-                    <div class="win-btn-row" style="margin-top:8px">
-                        <button class="win-btn primary" onclick="confirmFiles()">選択完了</button>
-                        <button class="win-btn">キャンセル</button>
-                    </div>
+                </div>
+                <div class="explorer-statusbar">
+                    <span id="ex-status">ファイルを選択してください（最大3つ）</span>
+                    <button class="explorer-goto-btn" onclick="goToGame()">選択完了 →</button>
                 </div>
             </div>
+        </div>
 
-            <div class="win-taskbar">
-                <button class="win-start-btn">🪟 スタート</button>
-                <button class="win-start-btn">⚔ 職業選択</button>
-                <button class="win-start-btn">📁 ファイル選択</button>
-                <div class="win-taskbar-time">
-                    <span class="time-display" id="taskbar-time">00:00</span>
+        <!-- Windows 10 Taskbar -->
+        <div class="win10-taskbar">
+            <div class="win10-start" title="スタート">⊞</div>
+            <div class="win10-search">🔍 <span>検索</span></div>
+            <div class="win10-taskbar-apps" id="taskbar-apps">
+                <div class="win10-taskbar-app active" id="tb-win-job" onclick="toggleWindow('win-job')">
+                    <span>⚔</span><span>職業選択</span>
                 </div>
+                <div class="win10-taskbar-app active" id="tb-win-explorer" onclick="toggleWindow('win-explorer')">
+                    <span>📁</span><span>エクスプローラー</span>
+                </div>
+            </div>
+            <div class="win10-tray">
+                <span>📶</span><span>🔋</span>
+                <span id="taskbar-time" style="font-family:'Segoe UI',sans-serif;font-size:11px;">00:00</span>
             </div>
         </div>
     </div>
 
-    <!-- ========== LOADING ========== -->
+    <!-- ===== LOADING ===== -->
     <div id="scene-loading" class="scene">
-        <div class="loading-win-box">
-            <div class="win-dialog-title">
-                🖥 WIN vs MAC — システム起動中
-                <div class="win-dialog-controls">
-                    <div class="win-ctrl-btn" style="opacity:0.3">_</div>
-                    <div class="win-ctrl-btn" style="opacity:0.3">□</div>
-                    <div class="win-ctrl-btn" style="opacity:0.3">✕</div>
+        <div class="win10-boot">
+            <div class="win10-logo">
+                <div class="win10-logo-grid">
+                    <div class="win10-logo-tile"></div>
+                    <div class="win10-logo-tile"></div>
+                    <div class="win10-logo-tile"></div>
+                    <div class="win10-logo-tile"></div>
                 </div>
+                <div class="win10-logo-text">Windows</div>
             </div>
-            <div class="loading-content">
-                <div class="loading-icon">⚙</div>
-                <div class="loading-title-text">ダンジョンを解析中...</div>
-                <div class="loading-progress-container">
-                    <div class="loading-progress-bar" id="loading-bar"></div>
-                </div>
-                <div class="loading-status" id="loading-status">フォルダ構造を読み込んでいます...</div>
-                <div class="loading-percent" id="loading-percent">0%</div>
+            <div class="win10-spinner">
+                <div class="win10-spinner-dot"></div>
+                <div class="win10-spinner-dot"></div>
+                <div class="win10-spinner-dot"></div>
+                <div class="win10-spinner-dot"></div>
+                <div class="win10-spinner-dot"></div>
             </div>
+            <div class="win10-boot-status" id="boot-status">ダンジョンを生成しています...</div>
         </div>
     </div>
 
-    <!-- ========== INGAME ========== -->
+    <!-- ===== INGAME ===== -->
     <div id="scene-ingame" class="scene">
         <div class="ingame-container">
             <div class="dungeon-view">
-                <!-- Dungeon visual -->
                 <div class="dungeon-scene">
                     <div class="iso-container" id="dungeon-iso">
-                        <!-- Floor tiles -->
-                        <div class="floor-tile"
-                            style="left:100px;top:150px;width:400px;height:200px;background:linear-gradient(135deg,#080818,#0c0c20);border:1px solid rgba(0,245,255,0.1)">
+                        <div
+                            style="position:absolute;left:100px;top:150px;width:400px;height:200px;background:linear-gradient(135deg,#080818,#0c0c20);border:1px solid rgba(0,245,255,0.1)">
                         </div>
-
-                        <!-- Wall highlights -->
                         <div
                             style="position:absolute;left:100px;top:150px;width:400px;height:3px;background:linear-gradient(90deg,transparent,rgba(0,245,255,0.4),transparent)">
                         </div>
                         <div
                             style="position:absolute;left:100px;top:348px;width:400px;height:3px;background:linear-gradient(90deg,transparent,rgba(0,128,255,0.3),transparent)">
                         </div>
-
-                        <!-- Grid lines on floor -->
-                        <div style="position:absolute;left:100px;top:150px;width:400px;height:200px;
-            background-image:linear-gradient(rgba(0,245,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.05) 1px,transparent 1px);
-            background-size:40px 40px;pointer-events:none"></div>
-
-                        <!-- Neon accent corners -->
                         <div
-                            style="position:absolute;left:100px;top:150px;width:20px;height:20px;border-left:2px solid var(--neon-cyan);border-top:2px solid var(--neon-cyan);box-shadow:var(--glow-cyan)">
+                            style="position:absolute;left:100px;top:150px;width:400px;height:200px;background-image:linear-gradient(rgba(0,245,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.05) 1px,transparent 1px);background-size:40px 40px;pointer-events:none">
                         </div>
                         <div
-                            style="position:absolute;left:480px;top:150px;width:20px;height:20px;border-right:2px solid var(--neon-cyan);border-top:2px solid var(--neon-cyan);box-shadow:var(--glow-cyan)">
+                            style="position:absolute;left:100px;top:150px;width:20px;height:20px;border-left:2px solid var(--neon-cyan);border-top:2px solid var(--neon-cyan)">
                         </div>
                         <div
-                            style="position:absolute;left:100px;top:330px;width:20px;height:20px;border-left:2px solid var(--neon-cyan);border-bottom:2px solid var(--neon-cyan);box-shadow:var(--glow-cyan)">
+                            style="position:absolute;left:480px;top:150px;width:20px;height:20px;border-right:2px solid var(--neon-cyan);border-top:2px solid var(--neon-cyan)">
                         </div>
                         <div
-                            style="position:absolute;left:480px;top:330px;width:20px;height:20px;border-right:2px solid var(--neon-cyan);border-bottom:2px solid var(--neon-cyan);box-shadow:var(--glow-cyan)">
+                            style="position:absolute;left:100px;top:330px;width:20px;height:20px;border-left:2px solid var(--neon-cyan);border-bottom:2px solid var(--neon-cyan)">
                         </div>
-
-                        <!-- Player -->
-                        <div class="player-sprite" style="left:270px;top:210px" id="player">
+                        <div
+                            style="position:absolute;left:480px;top:330px;width:20px;height:20px;border-right:2px solid var(--neon-cyan);border-bottom:2px solid var(--neon-cyan)">
+                        </div>
+                        <div class="player-sprite" style="left:270px;top:210px">
                             <div class="player-head"></div>
                             <div class="player-body"></div>
                         </div>
-
-                        <!-- Enemies -->
-                        <div class="enemy-sprite" style="left:160px;top:180px" id="enemy1">
+                        <div class="enemy-sprite" style="left:160px;top:180px">
                             <div style="position:relative">
                                 <div class="enemy-hpbar">
                                     <div class="enemy-hpbar-fill" style="width:70%"></div>
@@ -1496,8 +1951,7 @@
                                 <div class="enemy-body">👾</div>
                             </div>
                         </div>
-
-                        <div class="enemy-sprite" style="left:380px;top:260px;animation-delay:0.5s" id="enemy2">
+                        <div class="enemy-sprite" style="left:380px;top:260px;animation-delay:0.5s">
                             <div style="position:relative">
                                 <div class="enemy-hpbar">
                                     <div class="enemy-hpbar-fill" style="width:45%"></div>
@@ -1505,8 +1959,7 @@
                                 <div class="enemy-body">🦊</div>
                             </div>
                         </div>
-
-                        <div class="enemy-sprite" style="left:280px;top:300px;animation-delay:1s" id="enemy3">
+                        <div class="enemy-sprite" style="left:280px;top:300px;animation-delay:1s">
                             <div style="position:relative">
                                 <div class="enemy-hpbar">
                                     <div class="enemy-hpbar-fill" style="width:90%"></div>
@@ -1516,60 +1969,74 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- HUD overlay -->
+                <div class="damage-overlay" id="damage-overlay"></div>
                 <div class="ingame-hud">
                     <div class="hud-top">
                         <div class="hud-panel">
                             <div class="hud-label">HP</div>
                             <div class="hud-bar-container">
-                                <div class="hud-bar hp" id="hud-hp"></div>
+                                <div class="hud-bar hp"></div>
                             </div>
                             <div class="hud-value">75 / 100</div>
                         </div>
                         <div class="hud-panel">
                             <div class="hud-label">SP</div>
                             <div class="hud-bar-container">
-                                <div class="hud-bar sp" id="hud-sp"></div>
+                                <div class="hud-bar sp"></div>
                             </div>
                             <div class="hud-value">60 / 100</div>
                         </div>
                         <div class="hud-job-panel">
                             <div class="hud-job-name" id="hud-job">⚔ 剣士</div>
-                            <div class="hud-skill-indicator">必殺: 全方位斬り</div>
+                            <div class="hud-skill-indicator" id="hud-skill">必殺: 全方位斬り</div>
                         </div>
                     </div>
-
                     <div class="hud-bottom">
                         <div class="hud-room-info">
-                            ROOM <span id="hud-room">1</span>/4 &nbsp;|&nbsp; FLOOR <span>1</span>/1 &nbsp;|&nbsp;
-                            DIFFICULTY: <span style="color:var(--neon-green)">EASY</span>
+                            ROOM <span>1</span>/4 &nbsp;|&nbsp; FLOOR <span>1</span>/1 &nbsp;|&nbsp; DIFFICULTY: <span
+                                style="color:var(--neon-green)">EASY</span>
                         </div>
                     </div>
                 </div>
-
-                <!-- Attack btn overlay -->
                 <div style="position:absolute;bottom:60px;right:20px;display:flex;gap:8px;z-index:30">
                     <button onclick="doAttack()"
                         style="background:rgba(0,245,255,0.1);border:1px solid var(--neon-cyan);color:var(--neon-cyan);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;">ATTACK</button>
                     <button onclick="doSpecial()"
                         style="background:rgba(255,0,60,0.1);border:1px solid var(--neon-red);color:var(--neon-red);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;">SPECIAL</button>
+                    <button onclick="takeDamage()"
+                        style="background:rgba(255,165,0,0.1);border:1px solid #ff8c00;color:#ff8c00;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;">DAMAGE</button>
+                </div>
+                <!-- Pause overlay -->
+                <div class="pause-overlay" id="pause-overlay">
+                    <div class="pause-dialog">
+                        <div class="pause-dialog-title">
+                            ⚠ WIN vs MAC
+                        </div>
+                        <div class="pause-dialog-body">
+                            <div class="pause-icon">⚠</div>
+                            <div class="pause-text">
+                                ゲームを終了しますか？<br>
+                                進行中のデータは保存されません。
+                            </div>
+                            <div style="clear:both"></div>
+                            <div class="pause-btn-row">
+                                <button class="win10-btn primary" onclick="showScene('title')">タイトルへ戻る</button>
+                                <button class="win10-btn" onclick="togglePause()">ゲームを続ける</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- Sidebar -->
             <div class="ingame-sidebar">
                 <div>
                     <div class="sidebar-section-title">PARAMETERS</div>
                     <div class="attr-row"><span class="attr-label">ATK</span><span class="attr-value"
                             id="stat-atk">45</span></div>
-                    <div class="attr-row"><span class="attr-label">DEF</span><span class="attr-value"
-                            id="stat-def">28</span></div>
-                    <div class="attr-row"><span class="attr-label">SPD</span><span class="attr-value"
-                            id="stat-spd">31</span></div>
+                    <div class="attr-row"><span class="attr-label">DEF</span><span class="attr-value">28</span></div>
+                    <div class="attr-row"><span class="attr-label">SPD</span><span class="attr-value">31</span></div>
                     <div class="attr-row"><span class="attr-label">HP</span><span class="attr-value">75/100</span></div>
-                    <div class="attr-row"><span class="attr-label">TYPE</span><span class="attr-value">SLASH</span>
-                    </div>
+                    <div class="attr-row"><span class="attr-label">TYPE</span><span class="attr-value"
+                            id="stat-type">SLASH</span></div>
                 </div>
                 <div>
                     <div class="sidebar-section-title">MINIMAP</div>
@@ -1583,27 +2050,32 @@
                 </div>
                 <div>
                     <div class="sidebar-section-title">EQUIPPED FILES</div>
-                    <div style="font-size:10px;color:var(--text-dim);line-height:2">
+                    <div style="font-size:10px;color:var(--text-dim);line-height:2" id="equipped-files">
                         <div>⚙ project.exe <span style="color:var(--neon-cyan)">ATK+10</span></div>
                         <div>📄 readme.txt <span style="color:var(--neon-cyan)">SPD+1.5</span></div>
                         <div>📦 backup.zip <span style="color:var(--neon-cyan)">ALL+</span></div>
                     </div>
                 </div>
-                <button class="ingame-btn" onclick="showScene('result-win')" style="margin-top:auto">BOSS CLEAR
-                    →</button>
+                <button class="ingame-btn" onclick="togglePause()" style="margin-top:auto">PAUSE [ESC]</button>
+                <button class="ingame-btn" onclick="showScene('result-win')">BOSS CLEAR →</button>
                 <button class="ingame-btn" onclick="showScene('result-lose')"
                     style="border-color:rgba(255,0,60,0.3);color:rgba(255,0,60,0.5)">GAME OVER →</button>
             </div>
         </div>
     </div>
 
-    <!-- ========== RESULT WIN ========== -->
+    <!-- ===== RESULT WIN ===== -->
     <div id="scene-result-win" class="scene">
         <div class="shutdown-screen">
-            <div class="shutdown-logo">🖥</div>
-            <div class="shutdown-title">SYSTEM SHUTDOWN</div>
+            <div class="shutdown-win-logo">
+                <div class="shutdown-tile"></div>
+                <div class="shutdown-tile"></div>
+                <div class="shutdown-tile"></div>
+                <div class="shutdown-tile"></div>
+            </div>
+            <div class="shutdown-title">シャットダウンしています...</div>
             <div class="shutdown-message">MacBookをシャットダウンしました</div>
-            <div class="shutdown-detail">mac_os.exe — プロセスを正常に終了しました (0x00000000)</div>
+            <div class="shutdown-code">mac_os.exe — プロセスを正常に終了しました (0x00000000)</div>
             <div class="shutdown-spinner">
                 <div class="shutdown-dot"></div>
                 <div class="shutdown-dot"></div>
@@ -1611,85 +2083,188 @@
                 <div class="shutdown-dot"></div>
                 <div class="shutdown-dot"></div>
             </div>
-            <div style="margin-top:32px;display:flex;gap:16px">
-                <button class="btn-primary" onclick="showScene('title')" style="font-size:11px">[ RETURN TO TITLE
-                    ]</button>
-            </div>
+            <button class="shutdown-restart-btn" onclick="showScene('title')">タイトルに戻る</button>
         </div>
     </div>
 
-    <!-- ========== RESULT LOSE ========== -->
+    <!-- ===== RESULT LOSE ===== -->
     <div id="scene-result-lose" class="scene">
-        <div class="error-screen">
-            <div class="bsod-container">
-                <div class="bsod-header">⚠ WIN_vs_MAC — 致命的なエラー</div>
-                <span class="bsod-icon">💀</span>
-                <div class="bsod-title">GAME OVER</div>
-                <div class="bsod-code">
-                    問題が発生したため、プロセスを停止しました。<br>
-                    STOP CODE: PLAYER_HP_DEPLETED<br>
-                    エラーコード: 0x0000DEAD
-                </div>
-                <div class="bsod-progress">
-                    問題を収集しています... 0%完了<br>
-                    再起動するとタイトルに戻ります。
-                    <div class="bsod-progress-bar">
-                        <div class="bsod-progress-fill"></div>
-                    </div>
-                </div>
-                <button onclick="showScene('title')"
-                    style="background:white;border:none;color:var(--neon-red);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;padding:10px 24px;cursor:pointer;font-weight:bold">[
-                    RESTART ]</button>
+        <div class="bsod-screen">
+            <span class="bsod-emoji">:(</span>
+            <div class="bsod-title">GAME OVER</div>
+            <div class="bsod-text">
+                問題が発生したため、PCを再起動する必要があります。<br>
+                エラー情報を収集しています。自動的に再起動します。
             </div>
+            <div class="bsod-progress-label">0% 完了</div>
+            <div class="bsod-progress-bar">
+                <div class="bsod-progress-fill"></div>
+            </div>
+            <div class="bsod-qr">詳細については、次のエラーを検索してください：</div>
+            <div class="bsod-stopcode">
+                STOP CODE: PLAYER_HP_DEPLETED (0x0000DEAD)<br>
+                失敗した内容: mac_os.exe による致命的攻撃
+            </div>
+            <button class="bsod-restart-btn" onclick="showScene('title')">[ 再起動 ]</button>
         </div>
     </div>
 
     <script>
         let selectedJob = '剣士';
+        let selectedJobType = 'slash';
+        let selectedJobSkill = '全方位斬り';
         let selectedFiles = [];
-        let loadingInterval = null;
+        let loadingTimer = null;
+        let isPaused = false;
 
+        // ===== SCENE =====
         function showScene(name) {
             document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.dev-nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('scene-' + name).classList.add('active');
             document.querySelector(`.dev-nav-btn[onclick="showScene('${name}')"]`).classList.add('active');
-
-            if (name === 'loading') startLoading();
+            if (name === 'loading') startBoot();
         }
 
-        function selectJob(el, job) {
-            document.querySelectorAll('.job-option').forEach(o => o.classList.remove('selected'));
+        // ===== TITLE =====
+        document.getElementById('scene-title').addEventListener('click', function () {
+            const ls = document.getElementById('lockscreen');
+            if (!ls.classList.contains('sliding-up')) {
+                ls.classList.add('sliding-up');
+            }
+        });
+
+        function updateLockTime() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('lock-time').textContent = `${h}:${m}`;
+            const days = ['日', '月', '火', '水', '木', '金', '土'];
+            const day = days[now.getDay()];
+            document.getElementById('lock-date').textContent =
+                `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 ${day}曜日`;
+        }
+        updateLockTime();
+        setInterval(updateLockTime, 30000);
+
+        // ===== WINDOWS DRAG =====
+        let dragState = null;
+
+        function startDrag(e, winId) {
+            if (e.target.classList.contains('win10-wctrl')) return;
+            const el = document.getElementById(winId);
+            const rect = el.getBoundingClientRect();
+            dragState = {
+                winId,
+                startX: e.clientX - rect.left,
+                startY: e.clientY - rect.top
+            };
+            el.style.zIndex = 100;
+            e.preventDefault();
+        }
+
+        document.addEventListener('mousemove', e => {
+            if (!dragState) return;
+            const el = document.getElementById(dragState.winId);
+            const x = e.clientX - dragState.startX;
+            const y = e.clientY - dragState.startY;
+            el.style.left = Math.max(0, x) + 'px';
+            el.style.top = Math.max(0, y) + 'px';
+            el.style.right = 'auto';
+        });
+
+        document.addEventListener('mouseup', () => { dragState = null; });
+
+        // ===== WINDOW CONTROLS =====
+        const windowStates = {};
+
+        function closeWindow(id) {
+            const el = document.getElementById(id);
+            el.style.display = 'none';
+            updateTaskbarApp(id, 'closed');
+        }
+
+        function minimizeWindow(id) {
+            const el = document.getElementById(id);
+            el.style.display = 'none';
+            updateTaskbarApp(id, 'minimized');
+        }
+
+        function maximizeWindow(id) {
+            const el = document.getElementById(id);
+            if (el.dataset.maximized === 'true') {
+                el.style.cssText = el.dataset.prevStyle || '';
+                el.dataset.maximized = 'false';
+            } else {
+                el.dataset.prevStyle = el.style.cssText;
+                el.style.left = '0';
+                el.style.top = '0';
+                el.style.width = '100%';
+                el.style.height = 'calc(100% - 40px)';
+                el.dataset.maximized = 'true';
+            }
+        }
+
+        function restoreWindow(id) {
+            const el = document.getElementById(id);
+            el.style.display = 'flex';
+            el.style.zIndex = 100;
+            updateTaskbarApp(id, 'active');
+        }
+
+        function toggleWindow(id) {
+            const el = document.getElementById(id);
+            if (el.style.display === 'none') {
+                restoreWindow(id);
+            } else {
+                minimizeWindow(id);
+            }
+        }
+
+        function updateTaskbarApp(id, state) {
+            const tb = document.getElementById('tb-' + id);
+            if (!tb) return;
+            if (state === 'closed') { tb.classList.remove('active'); tb.classList.add('minimized'); }
+            else if (state === 'minimized') { tb.classList.remove('active'); tb.classList.add('minimized'); }
+            else if (state === 'active') { tb.classList.add('active'); tb.classList.remove('minimized'); }
+        }
+
+        // ===== JOB SELECT =====
+        function selectJob(el, job, type, skill) {
+            document.querySelectorAll('.job-item').forEach(j => j.classList.remove('selected'));
             el.classList.add('selected');
             selectedJob = job;
+            selectedJobType = type;
+            selectedJobSkill = skill;
         }
 
         function confirmJob() {
-            alert(`職業「${selectedJob}」を選択しました`);
+            alert(`職業「${selectedJob}」を選択しました\n攻撃タイプ: ${selectedJobType}\n必殺技: ${selectedJobSkill}`);
+            closeWindow('win-job');
         }
 
-        function toggleFile(el, name, ext) {
+        // ===== FILE SELECT =====
+        function toggleExFile(el, name, ext, bonus) {
             if (el.classList.contains('selected')) {
                 el.classList.remove('selected');
                 selectedFiles = selectedFiles.filter(f => f.name !== name);
             } else {
                 if (selectedFiles.length >= 3) {
-                    document.getElementById('file-status').textContent = '⚠ 最大3つまで選択できます';
-                    document.getElementById('file-status').style.color = 'red';
+                    document.getElementById('ex-status').textContent = '⚠ 最大3つまで選択できます';
+                    document.getElementById('ex-status').style.color = 'red';
                     return;
                 }
                 el.classList.add('selected');
-                selectedFiles.push({ name, ext });
+                selectedFiles.push({ name, ext, bonus });
             }
-            const count = selectedFiles.length;
-            const status = document.getElementById('file-status');
+            const status = document.getElementById('ex-status');
             status.style.color = '';
-            status.textContent = count === 0
-                ? 'ファイルを最大3つ選択してください'
-                : `${count}個のファイルを選択中`;
+            status.textContent = selectedFiles.length === 0
+                ? 'ファイルを選択してください（最大3つ）'
+                : `${selectedFiles.length}個選択中: ${selectedFiles.map(f => f.name).join(', ')}`;
         }
 
-        function confirmFiles() {
+        function goToGame() {
             if (selectedFiles.length === 0) {
                 alert('ファイルを1つ以上選択してください');
                 return;
@@ -1697,7 +2272,8 @@
             showScene('loading');
         }
 
-        const loadingMessages = [
+        // ===== LOADING (BOOT) =====
+        const bootMessages = [
             'フォルダ構造を読み込んでいます...',
             'ファイルサイズを解析しています...',
             '難易度を計算しています...',
@@ -1707,48 +2283,69 @@
             '起動完了...',
         ];
 
-        function startLoading() {
-            let progress = 0;
-            const bar = document.getElementById('loading-bar');
-            const status = document.getElementById('loading-status');
-            const percent = document.getElementById('loading-percent');
-
-            if (loadingInterval) clearInterval(loadingInterval);
-
-            bar.style.width = '0%';
-            progress = 0;
-
-            loadingInterval = setInterval(() => {
-                progress += Math.random() * 8 + 2;
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(loadingInterval);
-                    setTimeout(() => showScene('ingame'), 600);
+        function startBoot() {
+            if (loadingTimer) clearInterval(loadingTimer);
+            let idx = 0;
+            const statusEl = document.getElementById('boot-status');
+            statusEl.textContent = bootMessages[0];
+            loadingTimer = setInterval(() => {
+                idx++;
+                if (idx >= bootMessages.length) {
+                    clearInterval(loadingTimer);
+                    setTimeout(() => {
+                        // Apply selections to ingame
+                        document.getElementById('hud-job').textContent = `${selectedJob === '剣士' ? '⚔' : selectedJob === '魔法使い' ? '🔮' : '🗡'} ${selectedJob}`;
+                        document.getElementById('hud-skill').textContent = `必殺: ${selectedJobSkill}`;
+                        document.getElementById('stat-type').textContent = selectedJobType.toUpperCase();
+                        if (selectedFiles.length > 0) {
+                            const icons = { '.exe': '⚙', '.dll': '⚙', '.bat': '⚙', '.txt': '📄', '.pdf': '📄', '.docx': '📝', '.png': '🖼', '.jpg': '🖼', '.bmp': '🖼', '.mp3': '🎵', '.wav': '🎵', '.zip': '📦', '.7z': '📦', '.rar': '📦' };
+                            document.getElementById('equipped-files').innerHTML = selectedFiles.map(f =>
+                                `<div>${icons[f.ext] || '❓'} ${f.name} <span style="color:var(--neon-cyan)">${f.bonus}</span></div>`
+                            ).join('');
+                        }
+                        showScene('ingame');
+                    }, 600);
+                    return;
                 }
-                bar.style.width = progress + '%';
-                percent.textContent = Math.floor(progress) + '%';
-                const msgIdx = Math.min(Math.floor(progress / 15), loadingMessages.length - 1);
-                status.textContent = loadingMessages[msgIdx];
-            }, 200);
+                statusEl.textContent = bootMessages[idx];
+            }, 900);
         }
 
+        // ===== INGAME =====
         function doAttack() {
             const iso = document.getElementById('dungeon-iso');
             const effect = document.createElement('div');
             effect.className = 'attack-effect';
-            effect.style.left = (250 + Math.random() * 100) + 'px';
-            effect.style.top = (200 + Math.random() * 100) + 'px';
+            effect.style.left = (220 + Math.random() * 160) + 'px';
+            effect.style.top = (180 + Math.random() * 140) + 'px';
             iso.appendChild(effect);
             setTimeout(() => effect.remove(), 400);
         }
 
         function doSpecial() {
-            for (let i = 0; i < 5; i++) {
-                setTimeout(() => doAttack(), i * 80);
-            }
+            for (let i = 0; i < 6; i++) setTimeout(() => doAttack(), i * 80);
         }
 
-        // Taskbar clock
+        function takeDamage() {
+            const overlay = document.getElementById('damage-overlay');
+            overlay.classList.remove('flashing');
+            void overlay.offsetWidth;
+            overlay.classList.add('flashing');
+            setTimeout(() => overlay.classList.remove('flashing'), 400);
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            document.getElementById('pause-overlay').classList.toggle('active', isPaused);
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && document.getElementById('scene-ingame').classList.contains('active')) {
+                togglePause();
+            }
+        });
+
+        // ===== TASKBAR CLOCK =====
         function updateClock() {
             const now = new Date();
             const h = String(now.getHours()).padStart(2, '0');
