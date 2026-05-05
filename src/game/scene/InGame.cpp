@@ -26,6 +26,7 @@
 #include "game/system/AISystem.h"
 #include "game/component/AIComponent.h"
 #include "game/event/InGameEvents.h"
+#include "game/utility/ExtensionBonusCalculator.h"
 
 /* 標準のインクルード */
 #include <cassert>
@@ -68,6 +69,13 @@ namespace game::scene
 	{
 
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
+		// 拡張子ボーナスをPlayerDataに反映
+		if (m_fileEquipmentData.hasSelection())
+		{
+			const auto bonus = utility::ExtensionBonusCalculator::calculate(
+				m_fileEquipmentData.getExtensionType());
+			m_playerData.applyExtensionBonus(bonus);
+		}
 		initializer.initializePlayer(m_playerData);
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
 

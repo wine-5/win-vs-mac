@@ -33,7 +33,7 @@ namespace game::utility
                 return { .atk = 3.0f, .spd = 0.5f, .def = 3.0f, .hp = 5.0f, .attackRange = 0.5f };
             case data::FileExtensionType::Unknown:
             default:
-                return { .attackRange = 2.0f };
+                return { .attackRange = 20.0f };
             }
         }
     };
