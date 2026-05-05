@@ -103,7 +103,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -121,7 +121,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -170,6 +170,7 @@
     <ClCompile Include="src\infrastructure\UIRenderer.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\infrastructure\utility\LogUtil.cpp" />
+    <ClCompile Include="src\platform\WindowsDataProvider.cpp" />
     <ClCompile Include="src\ServiceLocatorInitializer.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -199,6 +200,7 @@
     <ClInclude Include="src\core\EventBus.h" />
     <ClInclude Include="src\core\input\GamePadCode.h" />
     <ClInclude Include="src\core\interface\IAnimator.h" />
+    <ClInclude Include="src\core\interface\IFileProvider.h" />
     <ClInclude Include="src\core\interface\IInputProvider.h" />
     <ClInclude Include="src\core\interface\IRenderer.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
@@ -218,7 +220,11 @@
     <ClInclude Include="src\game\constant\EnemyAnimationState.h" />
     <ClInclude Include="src\game\constant\MetadataKeys.h" />
     <ClInclude Include="src\game\data\EnemyData.h" />
+    <ClInclude Include="src\game\data\FileEquipmentData.h" />
+    <ClInclude Include="src\game\data\FileExtensionBonus.h" />
+    <ClInclude Include="src\game\data\FileExtensionType.h" />
     <ClInclude Include="src\game\factory\EnemyFactory.h" />
+    <ClInclude Include="src\game\GameManager.h" />
     <ClInclude Include="src\game\scene\Loading.h" />
     <ClInclude Include="src\game\scene\Result.h" />
     <ClInclude Include="src\game\scene\SceneFactory.h" />
@@ -227,6 +233,8 @@
     <ClInclude Include="src\game\system\AISystem.h" />
     <ClInclude Include="src\game\system\AttackSystem.h" />
     <ClInclude Include="src\game\system\HitEffectSystem.h" />
+    <ClInclude Include="src\game\utility\ExtensionBonusCalculator.h" />
+    <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
     <ClInclude Include="src\infrastructure\Screen.h" />
     <ClInclude Include="src\core\ServiceLocator.h" />
     <ClInclude Include="src\core\utility\Color.h" />
@@ -278,6 +286,7 @@
     <ClInclude Include="src\game\event\InGameEvents.h" />
     <ClInclude Include="src\infrastructure\UIRenderer.h" />
     <ClInclude Include="src\infrastructure\utility\LogUtil.h" />
+    <ClInclude Include="src\platform\WindowsDataProvider.h" />
     <ClInclude Include="src\ServiceLocatorInitializer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

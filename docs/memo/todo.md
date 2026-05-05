@@ -1,37 +1,89 @@
-## AttackSystem リファクタリング TODO
+## ファイル拡張子スロット機能 実装TODO
 
-### ① `AttackComponent` の変更
-- `m_isAutoAttack` / `m_isAttacking` を削除
-- `m_attackRequested` フラグを追加
-
-### ② `AIComponent` の変更
-- `m_attackRange` を追加（攻撃範囲の判定に使用）
-- `m_attackCooldown` / `m_currentAttackCooldown` を追加（1秒に1回攻撃フラグを立てる）
-
-### ③ `AISystem` の変更
-- 攻撃クールダウンを毎フレーム更新
-- ターゲットが `m_attackRange` 内 かつ クールダウン = 0 のとき `AttackComponent::m_attackRequested = true` にセット
-
-### ④ `InputComponent` の変更
-- `m_attackPressed` フラグを追加
-
-### ⑤ `InputSystem` の変更
-- 左クリック（`isMouseLeftPressed`）で `m_attackPressed = true` にセット
-- 毎フレームリセット処理を追加
-
-### ⑥ `AttackSystem` の変更
-- 距離計算を削除
-- `m_attackRequested = true` のEntityだけ処理する
-- InputComponentを持つEntityは `m_attackPressed` を確認してからCORを実行
-- 処理後 `m_attackRequested = false` にリセット
-
-### ⑦ `Enemy.cpp` の変更
-- `AttackComponent` から `m_isAutoAttack` 関連の設定を削除
-
-### ⑧ `Player.cpp` の変更
-- `AttackComponent` に `m_attackRequested = false` のみ設定
+### 概要
+セレクト画面でWindowsのファイルを選択し、拡張子に応じてPlayerのパラメータを補正する。
+シーン間のデータ受け渡しは `FileEquipmentData`（Bridge役）で行う。
 
 ---
+
+### クラス設計一覧
+
+| クラス名 | 層 | ファイル | 責務 |
+|---|---|---|---|
+| `IFileSelector` | Core/interface | `core/interface/IFileSelector.h` | ファイル選択処理の抽象インターフェース |
+| `WindowsFileSelector` | Platform | `platform/WindowsFileSelector.h/.cpp` | `GetOpenFileName` を使ったファイル選択の実装 |
+| `FileEquipmentData` | Game/data | `game/data/FileEquipmentData.h` | 選択ファイルのパス・hasSelection を保持するデータ構造体。`GameManager` が唯一の所有者 |
+| `ExtensionBonus` | Game/data | `game/data/ExtensionBonus.h` | 拡張子ボーナス値（atk/spd/def/hp/range）の構造体 |
+| `ExtensionBonusCalculator` | Game/utility | `game/utility/ExtensionBonusCalculator.h` | 拡張子文字列 → `ExtensionBonus` を算出するロジック |
+| `GameManager` | Game | `game/GameManager.h/.cpp` | ゲーム全体の状態管理。`FileEquipmentData` を所有し、ServiceLocator に登録される |
+
+---
+
+### 拡張子ボーナス仕様
+
+| 拡張子グループ | 補正パラメータ |
+|---|---|
+| .exe .dll .bat | ATK+ |
+| .txt .pdf .docx | SPD (moveSpeed)+ |
+| .png .jpg .bmp | DEF+ |
+| .mp3 .wav .flac | MaxHP+ |
+| .zip .7z .rar | 全パラメータ小+ |
+| それ以外 | attackRange+ |
+
+---
+
+### 実装フェーズ
+
+---
+
+#### フェーズ1：ファイル1つ選択・パラメータ補正
+
+**新規作成**
+- [ ] `core/interface/IFileSelector.h` ― ファイル選択IF（`selectFile()` → `std::string` を返す）
+- [ ] `platform/WindowsFileSelector.h/.cpp` ― GetOpenFileName 実装（フィルタ：すべてのファイル）
+- [ ] `game/data/FileEquipmentData.h` ― `selectedFilePath` / `hasSelection` の1ファイル構造体
+- [ ] `game/data/ExtensionBonus.h` ― ボーナス値構造体（atk/spd/def/hp/range）
+- [ ] `game/utility/ExtensionBonusCalculator.h` ― 拡張子文字列 → `ExtensionBonus` を算出
+- [ ] `game/GameManager.h/.cpp` ― `FileEquipmentData` 所有・ServiceLocator 登録
+
+**既存ファイル変更**
+- [ ] `ServiceLocatorInitializer.cpp` ― GameManager・WindowsFileSelector を登録
+- [ ] `SceneFactory.cpp` ― GameManager から FileEquipmentData 参照を取得し StageSelect・InGame へ注入
+- [ ] `StageSelect.h/.cpp` ― ファイル選択ボタン追加・IFileSelector 依存追加・FileEquipmentData 書き込み
+- [ ] `InGame.h/.cpp` ― FileEquipmentData 参照受け取り・ExtensionBonus を計算して Player パラメータ補正
+
+---
+
+#### フェーズ2：ファイル最大5つ選択・パラメータ合算（フェーズ1完了後）
+
+**変更方針**
+- `FileEquipmentData` の `selectedFilePath` を `std::array<std::string, MAX_SLOT>` に変更
+- `hasSelection` を `std::array<bool, MAX_SLOT>` に変更（または有効スロット数で管理）
+- UI に「スロット1〜5」のファイル選択ボタンを追加
+- InGame 側で全スロットの `ExtensionBonus` を合算して Player に適用
+
+**変更が必要なファイル**
+- [ ] `game/data/FileEquipmentData.h` ― `MAX_SLOT = 5` のスロット配列へ変更
+- [ ] `StageSelect.h/.cpp` ― スロットボタンを5個に拡張
+- [ ] `InGame.h/.cpp` ― 全スロット分のボーナスを合算する処理に変更
+
+---
+
+### データフロー（フェーズ1）
+
+```
+[StageSelect] ファイル選択ボタン押下
+     ↓ IFileSelector::selectFile()
+[WindowsFileSelector] GetOpenFileName → ファイルパスを返す
+     ↓
+[StageSelect] FileEquipmentData に selectedFilePath / hasSelection を書き込み
+     ↓（シーン遷移）
+[InGame] FileEquipmentData を読み取り
+     ↓ ExtensionBonusCalculator::calculate(extension)
+[ExtensionBonus] atk/spd/def/hp/range のボーナス値
+     ↓
+[Player] 基礎パラメータにボーナスを加算して生成
+```
 
 ## 開発が進んだときに行うべきこと
 
