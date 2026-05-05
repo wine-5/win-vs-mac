@@ -15,9 +15,10 @@ namespace platform
 		ofn.lpstrFile = filePath;
 		ofn.nMaxFile = MAX_PATH;
 
-		// OFN_FILEMUSTEXIST : 存在しないファイルを入力できないようにする
-		// OFN_PATHMUSTEXIST : 存在しないフォルダパスを入力できないようにする
-		ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST;
+		// OFN_FILEMUSTEXIST  : 存在しないファイルを入力できないようにする
+		// OFN_PATHMUSTEXIST  : 存在しないフォルダパスを入力できないようにする
+		// OFN_NOCHANGEDIR    : ダイアログがカレントディレクトリを変更するのを防ぐ（相対パスの保護）
+		ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
 
 		// ダイアログを表示する
 		if (GetOpenFileNameA(&ofn))
