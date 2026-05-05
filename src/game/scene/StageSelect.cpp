@@ -82,11 +82,11 @@ namespace game::scene
 		m_uiManager.addElement(std::move(startButton));
 
 		// ファイル選択ボタンのY位置（スタートボタンの上）
-		constexpr float FILE_BUTTON_Y_RATIO = 0.35f;
-		
+		constexpr float fileButtonYRatio{ 0.35f };
+
 		for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
 		{
-			const int fileButtonY{ static_cast<int>(screenHeight * (FILE_BUTTON_Y_RATIO - i * 0.08f)) };
+			const int fileButtonY{ static_cast<int>(screenHeight * (fileButtonYRatio - i * 0.08f)) };
 			const std::string label{ "ファイル" + std::to_string(i + 1) + "を選択" };
 
 			auto fileSelectButton{ std::make_unique<ui::Button>(
