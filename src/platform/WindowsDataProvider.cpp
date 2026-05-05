@@ -11,7 +11,7 @@ namespace platform
 		OPENFILENAMEA ofn{};
 		ofn.lStructSize = sizeof(ofn); // 構造体のサイズを設定する
 		ofn.hwndOwner = nullptr;	   // nullptrにすることでデスクトップが親になる
-		ofn.lpstrFilter = "すべてのファイル\0*.*\0";
+		ofn.lpstrFilter = "All Files\0*.*\0";
 		ofn.lpstrFile = filePath;
 		ofn.nMaxFile = MAX_PATH;
 
