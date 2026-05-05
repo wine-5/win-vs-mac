@@ -1,0 +1,538 @@
+/* ===================================================
+   STAGE SELECT — Windows 10 Desktop
+   =================================================== */
+#scene-stage {
+    background: var(--win-desktop);
+    background-image:
+        radial-gradient(ellipse at 60% 40%, #4a7fc1 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 80%, #2e5fa3 0%, transparent 50%);
+    font-family: 'Segoe UI', 'Share Tech Mono', sans-serif;
+}
+
+/* Desktop icons */
+.desktop-icons {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.desktop-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 6px;
+    width: 72px;
+    border: 1px solid transparent;
+    transition: all 0.1s;
+}
+
+.desktop-icon:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.desktop-icon-img {
+    font-size: 32px;
+}
+
+.desktop-icon-label {
+    font-size: 11px;
+    color: white;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    line-height: 1.2;
+}
+
+/* Windows 10 Taskbar */
+.win10-taskbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    gap: 2px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.win10-start {
+    width: 48px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    transition: background 0.1s;
+    color: white;
+}
+
+.win10-start:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.win10-search {
+    height: 28px;
+    width: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    gap: 8px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+}
+
+.win10-taskbar-apps {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 8px;
+}
+
+.win10-taskbar-app {
+    height: 38px;
+    min-width: 48px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    border-bottom: 2px solid transparent;
+    transition: all 0.1s;
+    position: relative;
+}
+
+.win10-taskbar-app:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.win10-taskbar-app.active {
+    border-bottom-color: #0078d4;
+    color: white;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.win10-taskbar-app.minimized {
+    opacity: 0.5;
+}
+
+.win10-tray {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    height: 40px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 11px;
+}
+
+.win10-tray:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Win10 Window */
+.win10-window {
+    position: absolute;
+    background: #f0f0f0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+    min-width: 300px;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.win10-window.minimized {
+    display: none;
+}
+
+.win10-titlebar {
+    height: 32px;
+    background: linear-gradient(180deg, var(--win-blue-grad-start), var(--win-blue-grad-end));
+    display: flex;
+    align-items: center;
+    padding: 0 0 0 10px;
+    cursor: move;
+    flex-shrink: 0;
+    gap: 8px;
+}
+
+.win10-titlebar-icon {
+    font-size: 14px;
+}
+
+.win10-titlebar-title {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    color: white;
+    font-weight: 400;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.win10-window-controls {
+    display: flex;
+    height: 32px;
+    margin-left: auto;
+}
+
+.win10-wctrl {
+    width: 46px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    font-size: 11px;
+    transition: background 0.1s;
+    border: none;
+    background: transparent;
+}
+
+.win10-wctrl:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.win10-wctrl.close:hover {
+    background: #e81123;
+}
+
+.win10-wctrl svg {
+    width: 10px;
+    height: 10px;
+    fill: white;
+}
+
+.win10-window-body {
+    flex: 1;
+    background: #f0f0f0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Job Select Window */
+#win-job {
+    top: 80px;
+    left: 60px;
+    width: 380px;
+}
+
+.job-select-body {
+    padding: 16px;
+}
+
+.job-select-label {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.job-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 16px;
+}
+
+.job-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    background: white;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    transition: all 0.1s;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.job-item:hover {
+    background: #cce8ff;
+    border-color: #0078d4;
+}
+
+.job-item.selected {
+    background: #0078d4;
+    color: white;
+    border-color: #005a9e;
+}
+
+.job-item.selected .job-item-sub {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.job-item-icon {
+    font-size: 24px;
+    width: 32px;
+    text-align: center;
+}
+
+.job-item-info {
+    flex: 1;
+}
+
+.job-item-name {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.job-item-sub {
+    font-size: 10px;
+    color: #666;
+}
+
+.job-item-skill {
+    font-size: 10px;
+    color: #0078d4;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.job-item.selected .job-item-skill {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.win10-btn-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #ccc;
+}
+
+.win10-btn {
+    background: #e1e1e1;
+    border: 1px solid #adadad;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    padding: 6px 20px;
+    cursor: pointer;
+    min-width: 80px;
+    transition: all 0.1s;
+}
+
+.win10-btn:hover {
+    background: #cce8ff;
+    border-color: #0078d4;
+    color: #003399;
+}
+
+.win10-btn:active {
+    background: #b3d7ff;
+}
+
+.win10-btn.primary {
+    background: #0078d4;
+    color: white;
+    border-color: #005a9e;
+}
+
+.win10-btn.primary:hover {
+    background: #006cbf;
+}
+
+/* Explorer Window */
+#win-explorer {
+    top: 60px;
+    left: 480px;
+    width: 500px;
+}
+
+.explorer-ribbon {
+    background: #f0f0f0;
+    border-bottom: 1px solid #ccc;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.explorer-nav-btn {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border-radius: 2px;
+    transition: all 0.1s;
+}
+
+.explorer-nav-btn:hover {
+    background: #cce8ff;
+    border-color: #0078d4;
+}
+
+.explorer-addressbar {
+    flex: 1;
+    height: 24px;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 0 8px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 11px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.explorer-addressbar-path {
+    color: #0078d4;
+}
+
+.explorer-toolbar2 {
+    background: #fafafa;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 11px;
+    color: #555;
+}
+
+.explorer-pane {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.explorer-sidebar {
+    width: 140px;
+    background: #f0f0f0;
+    border-right: 1px solid #ddd;
+    padding: 8px 0;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 11px;
+    overflow-y: auto;
+}
+
+.explorer-sidebar-item {
+    padding: 4px 12px;
+    cursor: pointer;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.1s;
+}
+
+.explorer-sidebar-item:hover {
+    background: #cce8ff;
+}
+
+.explorer-sidebar-item.active {
+    background: #d0e8ff;
+}
+
+.explorer-content {
+    flex: 1;
+    background: white;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.explorer-file {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    color: #222;
+    border: 1px solid transparent;
+    transition: all 0.1s;
+}
+
+.explorer-file:hover {
+    background: #e8f4fd;
+    border-color: #bee3f8;
+}
+
+.explorer-file.selected {
+    background: #cce8ff;
+    border-color: #0078d4;
+}
+
+.explorer-file-icon {
+    font-size: 16px;
+    width: 20px;
+}
+
+.explorer-file-name {
+    flex: 1;
+}
+
+.explorer-file-type {
+    width: 80px;
+    color: #666;
+    font-size: 11px;
+}
+
+.explorer-file-size {
+    width: 70px;
+    color: #666;
+    font-size: 11px;
+    text-align: right;
+}
+
+.explorer-file-bonus {
+    width: 80px;
+    color: #0078d4;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.explorer-statusbar {
+    background: #f0f0f0;
+    border-top: 1px solid #ccc;
+    padding: 3px 10px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 11px;
+    color: #555;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.explorer-goto-btn {
+    background: #0078d4;
+    color: white;
+    border: none;
+    padding: 3px 12px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.explorer-goto-btn:hover {
+    background: #006cbf;
+}

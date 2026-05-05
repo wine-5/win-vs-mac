@@ -1,0 +1,220 @@
+/* ===================================================
+   RESULT WIN — Shutdown
+   =================================================== */
+#scene-result-win {
+    background: #000;
+}
+
+.shutdown-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    width: 100%;
+}
+
+.shutdown-win-logo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    width: 72px;
+    height: 72px;
+    animation: shutdown-pulse 3s ease-in-out infinite;
+}
+
+@keyframes shutdown-pulse {
+    0%,
+    100% {
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+    }
+
+    50% {
+        filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.6));
+    }
+}
+
+.shutdown-tile {
+    background: white;
+    border-radius: 1px;
+}
+
+.shutdown-title {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 22px;
+    font-weight: 200;
+    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: 2px;
+}
+
+.shutdown-message {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 3px;
+}
+
+.shutdown-code {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.shutdown-spinner {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.shutdown-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    animation: dot-bounce 1.2s ease-in-out infinite;
+}
+
+.shutdown-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.shutdown-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.shutdown-dot:nth-child(4) {
+    animation-delay: 0.6s;
+}
+
+.shutdown-dot:nth-child(5) {
+    animation-delay: 0.8s;
+}
+
+@keyframes dot-bounce {
+    0%,
+    100% {
+        transform: scale(0.5);
+        opacity: 0.3;
+    }
+
+    50% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.shutdown-restart-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+    padding: 10px 32px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.2s;
+    margin-top: 8px;
+}
+
+.shutdown-restart-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: white;
+}
+
+/* ===================================================
+   RESULT LOSE — BSOD
+   =================================================== */
+#scene-result-lose {
+    background: #0078d4;
+}
+
+.bsod-screen {
+    max-width: 640px;
+    width: 90%;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.bsod-emoji {
+    font-size: 80px;
+    margin-bottom: 24px;
+    display: block;
+}
+
+.bsod-title {
+    font-size: 52px;
+    font-weight: 200;
+    margin-bottom: 24px;
+    letter-spacing: -1px;
+}
+
+.bsod-text {
+    font-size: 14px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 24px;
+}
+
+.bsod-progress-label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 8px;
+}
+
+.bsod-progress-bar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+}
+
+.bsod-progress-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: white;
+    animation: bsod-fill 4s ease-in-out infinite;
+}
+
+@keyframes bsod-fill {
+    0% {
+        width: 0%;
+    }
+
+    100% {
+        width: 100%;
+    }
+}
+
+.bsod-qr {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+}
+
+.bsod-stopcode {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.bsod-restart-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+    padding: 10px 32px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.2s;
+    margin-top: 16px;
+}
+
+.bsod-restart-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}

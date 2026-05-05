@@ -1,0 +1,215 @@
+/* ===================================================
+   TITLE SCENE — Windows 10 Lock Screen
+   =================================================== */
+#scene-title {
+    background: #1a1a2e;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.lockscreen-bg {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 30% 60%, #1a3a6a 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, #0d2a4a 0%, transparent 50%),
+        linear-gradient(160deg, #0d1b3e 0%, #1a2744 40%, #0a1628 100%);
+}
+
+/* Subtle Windows 10 wallpaper-like blob shapes */
+.lockscreen-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.3;
+}
+
+.blob1 {
+    width: 600px;
+    height: 400px;
+    background: #1e5799;
+    top: -100px;
+    left: -100px;
+}
+
+.blob2 {
+    width: 500px;
+    height: 500px;
+    background: #2980b9;
+    bottom: -150px;
+    right: -100px;
+}
+
+.blob3 {
+    width: 300px;
+    height: 300px;
+    background: #3498db;
+    top: 40%;
+    left: 40%;
+}
+
+/* Top status bar */
+.lockscreen-topbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    justify-content: flex-end;
+    z-index: 10;
+}
+
+.lockscreen-topbar-icon {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Center content */
+.lockscreen-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    z-index: 5;
+}
+
+.lockscreen-time {
+    font-family: 'Segoe UI', 'Share Tech Mono', sans-serif;
+    font-size: 96px;
+    font-weight: 200;
+    color: white;
+    letter-spacing: -2px;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.lockscreen-date {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: 1px;
+    margin-bottom: 60px;
+}
+
+.lockscreen-hint {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 2px;
+    animation: hint-pulse 3s ease-in-out infinite;
+}
+
+@keyframes hint-pulse {
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: translateY(0);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateY(-4px);
+    }
+}
+
+.lockscreen-arrow {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 8px;
+    animation: arrow-bounce 2s ease-in-out infinite;
+}
+
+@keyframes arrow-bounce {
+    0%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: translateY(-6px);
+        opacity: 1;
+    }
+}
+
+/* Slide up animation */
+.lockscreen-slide {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 20;
+}
+
+.lockscreen-slide.sliding-up {
+    transform: translateY(-100%);
+}
+
+/* Login screen behind */
+.loginscreen {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #1a3a5c, #0d2035);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.login-user-icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2980b9, #1a5276);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.login-username {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: white;
+    letter-spacing: 1px;
+}
+
+.login-start-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+    letter-spacing: 3px;
+    padding: 12px 48px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.2s;
+    margin-top: 8px;
+}
+
+.login-start-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.login-game-badge {
+    position: absolute;
+    bottom: 80px;
+    font-family: 'VT323', monospace;
+    font-size: 28px;
+    color: rgba(255, 255, 255, 0.15);
+    letter-spacing: 6px;
+}

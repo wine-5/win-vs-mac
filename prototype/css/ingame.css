@@ -1,0 +1,417 @@
+/* ===================================================
+   INGAME
+   =================================================== */
+#scene-ingame {
+    background: var(--bg-dark);
+}
+
+.ingame-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    position: relative;
+}
+
+.dungeon-view {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #050510;
+}
+
+.dungeon-scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iso-container {
+    position: relative;
+    width: 600px;
+    height: 400px;
+    transform: perspective(800px) rotateX(35deg) rotateZ(-15deg);
+}
+
+.player-sprite {
+    position: absolute;
+    width: 24px;
+    height: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: player-float 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px var(--neon-cyan));
+    z-index: 10;
+}
+
+@keyframes player-float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.player-head {
+    width: 12px;
+    height: 12px;
+    background: #e0c090;
+    border-radius: 50%;
+    border: 1px solid var(--neon-cyan);
+    margin-bottom: 2px;
+}
+
+.player-body {
+    width: 16px;
+    height: 20px;
+    background: linear-gradient(180deg, #00c8ff, #0060aa);
+    border: 1px solid var(--neon-cyan);
+    border-radius: 2px;
+}
+
+.enemy-sprite {
+    position: absolute;
+    animation: enemy-idle 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 6px var(--neon-red));
+}
+
+@keyframes enemy-idle {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.enemy-body {
+    width: 20px;
+    height: 24px;
+    background: linear-gradient(180deg, #cc0020, #880010);
+    border: 1px solid var(--neon-red);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: white;
+}
+
+.enemy-hpbar {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 4px;
+    background: rgba(255, 0, 0, 0.3);
+    border: 1px solid rgba(255, 0, 0, 0.5);
+}
+
+.enemy-hpbar-fill {
+    height: 100%;
+    background: var(--neon-red);
+    box-shadow: 0 0 4px var(--neon-red);
+}
+
+/* HUD */
+.ingame-hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.hud-top {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.hud-panel {
+    background: rgba(0, 5, 15, 0.85);
+    border: 1px solid rgba(0, 245, 255, 0.3);
+    padding: 8px 12px;
+    backdrop-filter: blur(4px);
+}
+
+.hud-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+
+.hud-bar-container {
+    width: 140px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.hud-bar {
+    height: 100%;
+    transition: width 0.3s;
+}
+
+.hud-bar.hp {
+    background: linear-gradient(90deg, #00ff88, #00cc66);
+    width: 75%;
+}
+
+.hud-bar.sp {
+    background: linear-gradient(90deg, #0080ff, #0040cc);
+    width: 60%;
+}
+
+.hud-value {
+    font-size: 10px;
+    color: #e0e0ff;
+    margin-top: 2px;
+}
+
+.hud-job-panel {
+    background: rgba(0, 5, 15, 0.85);
+    border: 1px solid rgba(0, 245, 255, 0.3);
+    padding: 8px 12px;
+    margin-left: auto;
+    text-align: right;
+}
+
+.hud-job-name {
+    font-size: 11px;
+    color: var(--neon-cyan);
+    letter-spacing: 2px;
+}
+
+.hud-skill-indicator {
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-top: 4px;
+}
+
+.hud-bottom {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.hud-room-info {
+    background: rgba(0, 5, 15, 0.85);
+    border: 1px solid rgba(0, 245, 255, 0.2);
+    padding: 6px 16px;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.hud-room-info span {
+    color: var(--neon-cyan);
+    font-size: 13px;
+}
+
+@keyframes attack-flash {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+.attack-effect {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--neon-cyan);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: attack-flash 0.3s ease-out forwards;
+    z-index: 15;
+}
+
+/* Damage flash */
+@keyframes damage-flash {
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+.damage-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 0, 0, 0.3);
+    pointer-events: none;
+    z-index: 25;
+    opacity: 0;
+}
+
+.damage-overlay.flashing {
+    animation: damage-flash 0.3s ease;
+}
+
+/* Sidebar */
+.ingame-sidebar {
+    width: 200px;
+    background: rgba(0, 5, 15, 0.95);
+    border-left: 1px solid rgba(0, 245, 255, 0.2);
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sidebar-section-title {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    border-bottom: 1px solid rgba(0, 245, 255, 0.1);
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+}
+
+.attr-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-bottom: 4px;
+}
+
+.attr-label {
+    color: var(--text-dim);
+}
+
+.attr-value {
+    color: var(--neon-cyan);
+}
+
+.minimap {
+    width: 100%;
+    aspect-ratio: 1;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 245, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.minimap-room {
+    position: absolute;
+    background: rgba(0, 245, 255, 0.15);
+    border: 1px solid rgba(0, 245, 255, 0.4);
+}
+
+.minimap-player {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: var(--neon-cyan);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--neon-cyan);
+    transform: translate(-50%, -50%);
+}
+
+.ingame-btn {
+    background: transparent;
+    border: 1px solid rgba(0, 245, 255, 0.3);
+    color: var(--text-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.ingame-btn:hover {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+    box-shadow: 0 0 8px rgba(0, 245, 255, 0.2);
+}
+
+/* Pause overlay */
+.pause-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.pause-overlay.active {
+    display: flex;
+}
+
+.pause-dialog {
+    background: #f0f0f0;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+    width: 340px;
+}
+
+.pause-dialog-title {
+    background: linear-gradient(180deg, #1659c7, #0a246a);
+    height: 32px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    color: white;
+    cursor: default;
+}
+
+.pause-dialog-body {
+    padding: 20px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.pause-icon {
+    font-size: 32px;
+    float: left;
+    margin-right: 16px;
+}
+
+.pause-text {
+    font-size: 13px;
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.pause-btn-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
