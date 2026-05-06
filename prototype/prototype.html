@@ -30,6 +30,22 @@
 
     <!-- ===== TITLE ===== -->
     <div id="scene-title" class="scene active">
+        <!-- Splash Screen -->
+        <div class="splash-screen">
+            <div class="splash-logo">
+                <div class="splash-tile"></div>
+                <div class="splash-tile"></div>
+                <div class="splash-tile"></div>
+                <div class="splash-tile"></div>
+            </div>
+            <div class="splash-text">Windows を起動しています...</div>
+            <div class="splash-spinner">
+                <div class="splash-dot"></div>
+                <div class="splash-dot"></div>
+                <div class="splash-dot"></div>
+            </div>
+        </div>
+
         <!-- Background -->
         <div class="lockscreen-bg">
             <div class="lockscreen-blob blob1"></div>
@@ -37,30 +53,16 @@
             <div class="lockscreen-blob blob3"></div>
         </div>
 
-        <!-- Lock screen (slides up on click) -->
-        <div class="lockscreen-slide" id="lockscreen">
-            <div class="lockscreen-bg">
-                <div class="lockscreen-blob blob1"></div>
-                <div class="lockscreen-blob blob2"></div>
-            </div>
-            <div class="lockscreen-topbar">
-                <span class="lockscreen-topbar-icon">📶</span>
-                <span class="lockscreen-topbar-icon">🔋</span>
-            </div>
-            <div class="lockscreen-center">
-                <div class="lockscreen-time" id="lock-time">00:00</div>
-                <div class="lockscreen-date" id="lock-date">2026年5月5日 火曜日</div>
-                <div class="lockscreen-hint">クリックしてロック解除</div>
-                <div class="lockscreen-arrow">↑</div>
-            </div>
-        </div>
+        <!-- Particles container -->
+        <div id="particles-container" style="position:absolute;inset:0;pointer-events:none;z-index:1;"></div>
 
-        <!-- Login screen (revealed after slide) -->
-        <div class="loginscreen">
-            <div class="login-user-icon">⚔</div>
-            <div class="login-username">PLAYER_001</div>
-            <button class="login-start-btn" onclick="showScene('stage')">ゲームを開始</button>
-            <div class="login-game-badge">WIN vs MAC</div>
+        <!-- Title screen (shown after splash) -->
+        <div class="title-screen" id="title-screen">
+            <div class="title-content">
+                <div class="title-main">WIN vs MAC</div>
+                <div class="title-subtitle">Windows 内部ダンジョンRPG</div>
+                <button class="title-start-btn" onclick="showScene('stage')">ゲームを開始</button>
+            </div>
         </div>
     </div>
 

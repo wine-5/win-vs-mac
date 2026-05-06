@@ -2,15 +2,18 @@
    TITLE SCENE — Windows 10 Lock Screen
    =================================================== */
 #scene-title {
-    background: #1a1a2e;
-    cursor: pointer;
+    background: linear-gradient(135deg, #0d1b3e 0%, #1a2744 40%, #0a1628 100%);
+    cursor: default;
     overflow: hidden;
-    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
 
 /* Splash screen */
 .splash-screen {
-    position: absolute;
+    position: fixed;
     inset: 0;
     background: linear-gradient(135deg, #0d1b3e 0%, #1a2744 50%, #0a1628 100%);
     display: flex;
@@ -19,7 +22,8 @@
     flex-direction: column;
     gap: 40px;
     z-index: 100;
-    animation: splash-fade-out 0.8s ease-in-out 3.2s forwards;
+    animation: splash-fade-out 0.4s ease-in-out 3.2s forwards;
+    pointer-events: none;
 }
 
 @keyframes splash-fade-out {
@@ -358,14 +362,85 @@
     border-color: rgba(255, 255, 255, 0.6);
 }
 
-.login-game-badge {
+/* Title screen */
+.title-screen {
     position: absolute;
-    top: 40px;
-    left: 50%;
-    transform: translateX(-50%);
+    inset: 0;
+    background: linear-gradient(180deg, rgba(13, 27, 62, 0.9) 0%, rgba(26, 39, 68, 0.95) 50%, rgba(10, 22, 40, 0.9) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+}
+
+.title-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.title-main {
     font-family: 'VT323', monospace;
-    font-size: 32px;
-    color: rgba(255, 255, 255, 0.25);
-    letter-spacing: 8px;
-    z-index: 6;
+    font-size: 72px;
+    color: #00ffcc;
+    letter-spacing: 12px;
+    text-shadow:
+        0 0 20px rgba(0, 255, 200, 0.8),
+        0 0 40px rgba(0, 255, 200, 0.4),
+        0 0 60px rgba(255, 100, 200, 0.2);
+    animation: title-glow 2s ease-in-out 0.8s infinite;
+}
+
+@keyframes title-glow {
+    0%,
+    100% {
+        text-shadow:
+            0 0 20px rgba(0, 255, 200, 0.8),
+            0 0 40px rgba(0, 255, 200, 0.4),
+            0 0 60px rgba(255, 100, 200, 0.2);
+    }
+    50% {
+        text-shadow:
+            0 0 40px rgba(0, 255, 200, 1),
+            0 0 80px rgba(0, 255, 200, 0.6),
+            0 0 120px rgba(255, 100, 200, 0.4);
+    }
+}
+
+.title-subtitle {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 2px;
+    margin-top: -40px;
+}
+
+.title-start-btn {
+    background: linear-gradient(135deg, rgba(0, 255, 200, 0.3), rgba(100, 150, 255, 0.3));
+    border: 2px solid #00ffcc;
+    color: #00ffcc;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 18px;
+    padding: 18px 60px;
+    cursor: pointer;
+    letter-spacing: 3px;
+    transition: all 0.3s;
+    font-weight: 600;
+    box-shadow: 0 0 20px rgba(0, 255, 200, 0.4);
+    text-shadow: 0 0 10px rgba(0, 255, 200, 0.5);
+}
+
+.title-start-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 200, 0.5), rgba(100, 150, 255, 0.5));
+    border-color: #00ffff;
+    color: #00ffff;
+    box-shadow: 0 0 30px rgba(0, 255, 200, 0.8), inset 0 0 20px rgba(0, 255, 200, 0.2);
+    transform: translateY(-2px);
 }

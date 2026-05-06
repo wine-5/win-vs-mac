@@ -1,6 +1,6 @@
 /* ===== SCENES ===== */
 .scene {
-    position: absolute;
+    position: fixed;
     inset: 0;
     display: none;
 }
@@ -27,4 +27,7 @@
 
 #scene-result-lose.active {
     display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 100px 80px;
 }

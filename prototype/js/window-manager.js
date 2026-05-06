@@ -1,4 +1,6 @@
-/* ===== WINDOWS DRAG ===== */
+/* ===== WINDOWS DRAG & RESIZE ===== */
+let resizeState = null;
+
 function startDrag(e, winId) {
     if (e.target.classList.contains('win10-wctrl')) return;
     const el = document.getElementById(winId);
@@ -12,17 +14,71 @@ function startDrag(e, winId) {
     e.preventDefault();
 }
 
+function startResize(e, winId, direction) {
+    const el = document.getElementById(winId);
+    const rect = el.getBoundingClientRect();
+    resizeState = {
+        winId,
+        direction,
+        startX: e.clientX,
+        startY: e.clientY,
+        startWidth: rect.width,
+        startHeight: rect.height,
+        startLeft: rect.left,
+        startTop: rect.top
+    };
+    el.style.zIndex = 100;
+    e.preventDefault();
+    e.stopPropagation();
+}
+
 document.addEventListener('mousemove', e => {
-    if (!dragState) return;
-    const el = document.getElementById(dragState.winId);
-    const x = e.clientX - dragState.startX;
-    const y = e.clientY - dragState.startY;
-    el.style.left = Math.max(0, x) + 'px';
-    el.style.top = Math.max(0, y) + 'px';
-    el.style.right = 'auto';
+    if (resizeState) {
+        const el = document.getElementById(resizeState.winId);
+        const deltaX = e.clientX - resizeState.startX;
+        const deltaY = e.clientY - resizeState.startY;
+        const dir = resizeState.direction;
+
+        let newWidth = resizeState.startWidth;
+        let newHeight = resizeState.startHeight;
+        let newLeft = resizeState.startLeft;
+        let newTop = resizeState.startTop;
+
+        if (dir.includes('e')) {
+            newWidth = Math.max(300, resizeState.startWidth + deltaX);
+        }
+        if (dir.includes('w')) {
+            newWidth = Math.max(300, resizeState.startWidth - deltaX);
+            newLeft = resizeState.startLeft + deltaX;
+        }
+        if (dir.includes('s')) {
+            newHeight = Math.max(200, resizeState.startHeight + deltaY);
+        }
+        if (dir.includes('n')) {
+            newHeight = Math.max(200, resizeState.startHeight - deltaY);
+            newTop = resizeState.startTop + deltaY;
+        }
+
+        el.style.width = newWidth + 'px';
+        el.style.height = newHeight + 'px';
+        el.style.left = Math.max(0, newLeft) + 'px';
+        el.style.top = Math.max(0, newTop) + 'px';
+        el.style.right = 'auto';
+        el.style.bottom = 'auto';
+    } else if (dragState) {
+        const el = document.getElementById(dragState.winId);
+        const x = e.clientX - dragState.startX;
+        const y = e.clientY - dragState.startY;
+        el.style.left = Math.max(0, x) + 'px';
+        el.style.top = Math.max(0, y) + 'px';
+        el.style.right = 'auto';
+    }
 });
 
-document.addEventListener('mouseup', () => { dragState = null; });
+document.addEventListener('mouseup', () => {
+    dragState = null;
+    resizeState = null;
+});
 
 /* ===== WINDOW CONTROLS ===== */
 const windowStates = {};
@@ -77,3 +133,21 @@ function updateTaskbarApp(id, state) {
     else if (state === 'minimized') { tb.classList.remove('active'); tb.classList.add('minimized'); }
     else if (state === 'active') { tb.classList.add('active'); tb.classList.remove('minimized'); }
 }
+
+/* ===== INITIALIZE RESIZE HANDLES ===== */
+function initializeResizeHandles() {
+    const resizeDirections = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'];
+    const windows = document.querySelectorAll('.win10-window');
+
+    windows.forEach(winEl => {
+        const winId = winEl.id;
+        resizeDirections.forEach(dir => {
+            const handle = document.createElement('div');
+            handle.className = `win10-resize-handle ${dir}`;
+            handle.onmousedown = (e) => startResize(e, winId, dir);
+            winEl.appendChild(handle);
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', initializeResizeHandles);
