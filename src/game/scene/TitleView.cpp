@@ -33,9 +33,21 @@ namespace game::scene
 					m_uiRenderer, m_screen, FADE_DURATION, false);
 				m_state = State::SplashFadeOut;
 			}
-		break;
+			break;
 
 		case State::SplashFadeOut:
+			m_fade->update(deltaTime);
+			if (m_fade->isFinished())
+			{
+				m_startButton->setVisible(true);
+				m_exitButton->setVisible(true);
+				m_fade = std::make_unique<ui::FadeTransition>(
+					m_uiRenderer, m_screen, FADE_DURATION, true);
+				m_state = State::TitleFadeIn;
+			}
+			break;
+
+		case State::TitleFadeIn:
 			m_fade->update(deltaTime);
 			m_uiManager.update();
 			if (m_fade->isFinished())
@@ -79,7 +91,7 @@ namespace game::scene
 			const char* title{ "Win vs Mac" };
 			const int titleWidth{ m_uiRenderer.getTextWidth(title) };
 			const int titleX{ (m_screen.getWidth() - titleWidth) / 2 };
-			const int titleY{ (m_screen.getHeight() * TITLE_Y_RATIO) };
+			const int titleY{ static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO) };
 			m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE,
 				core::constant::ui::FONT_SIZE_LARGE);
 			m_uiManager.draw(m_uiRenderer);
@@ -92,7 +104,7 @@ namespace game::scene
 
 	bool TitleView::isReadyToChange() const
 	{
-		return m_state == State::FadingOut && m_fade->isFinished();
+		return m_state == State::FadingOut && m_fade && m_fade->isFinished();
 	}
 
 	TitleView::Action TitleView::getNextAction() const
