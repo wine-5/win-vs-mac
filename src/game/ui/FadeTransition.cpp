@@ -1,5 +1,6 @@
 #include "FadeTransition.h"
 #include "core/utility/Color.h"
+#include "core/constant/UI.h"
 
 namespace game::ui
 {
@@ -30,9 +31,10 @@ namespace game::ui
 		const float alpha{ m_isFadeIn ? (1.0f - t) : t };
 		const int a{ static_cast<int>(alpha * 255) };
 
-		// TODO: IUIRendererにsetAlpha/resetAlphaを追加後、アルファブレンドで描画する
-		const unsigned int color{ core::utility::Color::argb(a,0,0,0) };
-		m_uiRenderer.drawBox(0, 0, m_screen.getWidth(), m_screen.getHeight(), color, true);
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, a);
+		m_uiRenderer.drawBox(0, 0, m_screen.getWidth(), m_screen.getHeight(),
+			core::utility::Color::BLACK, true);
+		m_uiRenderer.resetBlendMode();
 
 	}
 

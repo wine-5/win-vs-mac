@@ -21,4 +21,14 @@ namespace infrastructure
 	{
 		return GetDrawStringWidth(text, static_cast<int>(std::strlen(text)));
 	}
+
+	void UIRenderer::setBlendMode(int blendMode, int alpha)
+	{
+		SetDrawBlendMode(blendMode, alpha);
+	}
+
+	void UIRenderer::resetBlendMode()
+	{
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+	}
 }

@@ -15,5 +15,9 @@ namespace core::constant
 
         // デフォルトのフォントサイズ
         constexpr int DEFAULT_FONT_SIZE = FONT_SIZE_NORMAL;
+
+        // ブレンドモード（DxLib の DX_BLENDMODE_ * と対応）
+        constexpr int BLEND_MODE_NONE = 0;
+        constexpr int BLEND_MODE_ALPHA = 1;
     }
 }

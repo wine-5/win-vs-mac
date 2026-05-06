@@ -35,5 +35,17 @@ namespace infrastructure
          * @return 描画幅（ピクセル）
          */
         [[nodiscard]] int getTextWidth(const char* text) const override;
+
+        /**
+         * @brief 描画ブレンドモードを設定する
+         * @param blendMode ブレンドモード
+         * @param alpha アルファ値（0〜255）
+         */
+        void setBlendMode(int blendMode, int alpha) override;
+
+        /**
+         * @brief 描画ブレンドモードをリセットする
+         */
+        void resetBlendMode() override;
     };
 }

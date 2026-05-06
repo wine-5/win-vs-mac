@@ -6,6 +6,7 @@ namespace core::iface
     /**
      * @brief UI描画のインターフェース
      * Game層がInfrastructure層（DxLib）に直接依存しないための抽象化
+     * そのため基本的にはDxLibを用いた描画関数を書くこと
      */
     class IUIRenderer
     {
@@ -40,5 +41,17 @@ namespace core::iface
          * @return 描画幅（ピクセル）
          */
         virtual int getTextWidth(const char* text) const = 0;
+
+        /**
+         * @brief 描画ブレンドモードを設定する
+         * @param blendMode ブレンドモード（DX_BLENDMODE_ALPHA 等）
+         * @param alpha アルファ値（0〜255）
+         */
+        virtual void setBlendMode(int blendMode, int alpha) = 0;
+
+        /**
+         * @brief 描画ブレンドモードをリセットする（通常描画に戻す）
+         */
+        virtual void resetBlendMode() = 0;
     };
 }
