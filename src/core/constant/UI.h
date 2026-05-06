@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace game::constant
+namespace core::constant
 {
     /**
      * @brief UI関連の定数

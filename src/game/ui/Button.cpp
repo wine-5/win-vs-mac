@@ -1,6 +1,6 @@
 ﻿#include "Button.h"
 #include "core/utility/Color.h"
-#include "game/constant/UI.h"
+#include "core/constant/UI.h"
 #include <utility>
 
 namespace game::ui
@@ -61,7 +61,7 @@ namespace game::ui
 
         int textWidth{uiRenderer.getTextWidth(m_text.c_str())};
         int textX{m_x + (m_width - textWidth) / 2};
-        int textY{m_y + (m_height - game::constant::ui::FONT_SIZE_NORMAL) / 2};
+        int textY{m_y + (m_height - core::constant::ui::FONT_SIZE_NORMAL) / 2};
         uiRenderer.drawText(textX, textY, m_text.c_str(), core::utility::Color::BLUE);
     }
 

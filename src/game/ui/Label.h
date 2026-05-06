@@ -1,6 +1,6 @@
 #pragma once
 #include "IUIElement.h"
-#include "game/constant/UI.h"
+#include "core/constant/UI.h"
 #include <string>
 
 namespace game::ui
@@ -20,7 +20,7 @@ namespace game::ui
 		 * @param fontSize フォントサイズ（省略時はDEFAULT_FONT_SIZE）
 		 */
 		Label(std::string text, int x, int y, unsigned int color,
-			int fontSize = game::constant::ui::DEFAULT_FONT_SIZE);
+			int fontSize = core::constant::ui::DEFAULT_FONT_SIZE);
 
 		void update() override;
 		void draw(core::iface::IUIRenderer& uiRenderer) const override;

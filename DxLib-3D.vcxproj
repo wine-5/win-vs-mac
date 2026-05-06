@@ -245,7 +245,7 @@
     <ClInclude Include="src\game\component\ColliderComponent.h" />
     <ClInclude Include="src\game\constant\Tag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
-    <ClInclude Include="src\game\constant\UI.h" />
+    <ClInclude Include="src\core\constant\UI.h" />
     <ClInclude Include="src\game\data\GroundData.h" />
     <ClInclude Include="src\game\factory\FactoryInitializer.h" />
     <ClInclude Include="src\game\factory\FactoryManager.h" />

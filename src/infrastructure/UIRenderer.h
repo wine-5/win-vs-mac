@@ -27,7 +27,7 @@ namespace infrastructure
          * @param text テキスト
          * @param color 色（ARGB形式：0xAARRGGBB）
          */
-        void drawText(int x, int y, const char* text, unsigned int color) override;
+        void drawText(int x, int y, const char* text, unsigned int color,int fontSize) override;
 
         /**
          * @brief テキストの描画幅を取得する

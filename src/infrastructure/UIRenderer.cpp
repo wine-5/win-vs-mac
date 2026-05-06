@@ -12,7 +12,7 @@ namespace infrastructure
 			DrawBox(x, y, x + width, y + height, color, FALSE);
 	}
 
-	void UIRenderer::drawText(int x, int y, const char* text, unsigned int color)
+	void UIRenderer::drawText(int x, int y, const char* text, unsigned int color, int fontSize)
 	{
 		DrawString(x, y, text, color);
 	}
