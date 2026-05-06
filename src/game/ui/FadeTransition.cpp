@@ -24,10 +24,10 @@ namespace game::ui
 	void FadeTransition::draw() const
 	{
 		float t{ m_elapsed / m_duration };
-		if (t > 1.0)
+		if (t > 1.0f)
 			t = 1.0f;
 
-		const float alpha{ m_isFadeIn ? (1.0 - t) : t };
+		const float alpha{ m_isFadeIn ? (1.0f - t) : t };
 		const int a{ static_cast<int>(alpha * 255) };
 
 		// TODO: IUIRendererにsetAlpha/resetAlphaを追加後、アルファブレンドで描画する
