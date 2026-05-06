@@ -11,13 +11,37 @@ namespace infrastructure
 {
     ResourceManager::ResourceManager()
     {
-        // resources.jsonから全リソースを読み込む
-        auto resourceList{loadResourceList("assets/config/resources.json")};
-        for (const auto& res : resourceList)
+        std::ifstream file("assets/config/resources.json");
+        if (!file.is_open())
+        {
+            LOG_E("FATAL: resources.jsonを開けませんでした");
+            assert(false && "致命的エラー: resources.jsonが見つかりません。");
+            throw std::runtime_error("resources.jsonを開けませんでした");
+        }
+        const nlohmann::json j = nlohmann::json::parse(file);
+
+        // モデルリソースを読み込む
+        auto resourceList{loadResourceList(j)};
+        for (const auto &res : resourceList)
         {
             auto metadata{parseJsonFile(res.m_path)};
             m_metadata[res.m_id] = metadata;
         }
+
+        // フォントを読み込む
+        auto fontList{loadFontList(j)};
+        for (const auto &font : fontList)
+        {
+            AddFontResourceEx(font.m_path.c_str(), FR_PRIVATE, nullptr);
+            m_fontNames[font.m_id] = font.m_name;
+            m_fontPaths[font.m_id] = font.m_path;
+        }
+    }
+
+    ResourceManager::~ResourceManager()
+    {
+        for (const auto &[id, path] : m_fontPaths)
+            RemoveFontResourceEx(path.c_str(), FR_PRIVATE, nullptr);
     }
 
     int ResourceManager::loadModelById(const std::string_view modelId)
@@ -31,7 +55,7 @@ namespace infrastructure
             return -1;
         }
 
-        const auto& metadata = it->second;
+        const auto &metadata = it->second;
 
         // 既にロード済みか確認
         auto handleIt{m_modelHandles.find(modelIdStr)};
@@ -58,7 +82,7 @@ namespace infrastructure
             metadata.colliderSize.z == 0.0f)
         {
             // 非constなメタデータを取得して更新
-            auto& mutableMetadata = m_metadata[modelIdStr];
+            auto &mutableMetadata = m_metadata[modelIdStr];
 
             VECTOR vMin = MV1GetFrameMinVertexLocalPosition(handle, -1);
             VECTOR vMax = MV1GetFrameMaxVertexLocalPosition(handle, -1);
@@ -88,20 +112,37 @@ namespace infrastructure
         return it->second;
     }
 
-    std::vector<ResourceManager::ResourceDefinition> ResourceManager::loadResourceList(const std::string& filePath)
+    std::optional<std::string> ResourceManager::getFontName(const std::string_view fontId) const
     {
-        std::ifstream file(filePath);
-        if (!file.is_open())
-        {
-            LOG_E("FATAL: resources.jsonを開けませんでした: %s", filePath.c_str());
-            assert(false && "致命的エラー: resources.jsonが見つかりません。ファイルパスを確認してください。");
-            throw std::runtime_error("resources.jsonを開けませんでした: " + filePath);
-        }
+        std::string key{fontId};
+        auto it{m_fontNames.find(key)};
+        if (it == m_fontNames.end())
+            return std::nullopt;
+        return it->second;
+    }
 
-        nlohmann::json j = nlohmann::json::parse(file);
+    std::vector<ResourceManager::FontDataDefinition> ResourceManager::loadFontList(const nlohmann::json &json)
+    {
+        std::vector<FontDataDefinition> fonts;
+        if (!json.contains("fonts"))
+            return fonts;
+
+        for (const auto &item : json["fonts"])
+        {
+            FontDataDefinition def;
+            def.m_id = item["id"];
+            def.m_path = item["path"];
+            def.m_name = item["name"];
+            fonts.push_back(def);
+        }
+        return fonts;
+    }
+
+    std::vector<ResourceManager::ResourceDefinition> ResourceManager::loadResourceList(const nlohmann::json &json)
+    {
         std::vector<ResourceDefinition> resources;
 
-        for (const auto& item : j["resources"])
+        for (const auto &item : json["resources"])
         {
             ResourceDefinition def;
             def.m_id = item["id"];
@@ -112,9 +153,9 @@ namespace infrastructure
         return resources;
     }
 
-    core::data::ModelMetadata ResourceManager::parseJsonFile(const std::string& filePath)
+    core::data::ModelMetadata ResourceManager::parseJsonFile(const std::string &filePath)
     {
-        using namespace infrastructure::constant;  // json_keysを使いやすく
+        using namespace infrastructure::constant; // json_keysを使いやすく
 
         std::ifstream file(filePath);
         if (!file.is_open())

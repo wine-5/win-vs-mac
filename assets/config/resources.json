@@ -3,5 +3,9 @@
     {"id": "player", "path": "assets/data/playerData.json"},
     {"id": "ground", "path": "assets/data/groundData.json"},
     {"id": "enemy" , "path": "assets/data/enemyData.json"}
+  ],
+  "fonts": [
+    {"id": "main",   "path": "assets/fonts/MaruMonica.ttf",  "name": "x12y16pxMaruMonica"},
+    {"id": "normal", "path": "assets/fonts/NotoSansJP.ttf",  "name": "Noto Sans JP"}
   ]
 }

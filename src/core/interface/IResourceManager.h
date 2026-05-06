@@ -28,5 +28,12 @@ namespace core::iface
 		 * @return メタデータ（存在しない場合nullopt）
 		 */
 		virtual std::optional<core::data::ModelMetadata> getMetadata(const std::string_view modelId) const = 0;
+
+		/**
+		 * @brief フォントIDからフォント名を取得する
+		 * @param fontId フォントID
+		 * @return フォントファミリー名（存在しない場合nullopt）
+		 */
+		virtual std::optional<std::string> getFontName(const std::string_view fontId) const = 0;
 	};
 }
