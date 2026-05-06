@@ -3,10 +3,12 @@
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
-#include "game/ui/UIManager.h"
+#include <memory>
 
 namespace game::scene
 {
+    class TitleView;
+
     /**
      * @brief タイトルシーンのクラス
      */
@@ -35,14 +37,6 @@ namespace game::scene
         void draw() override;
 
     private:
-        /**
-         * @brief UIを構築する
-         */
-        void setupUI();
-
-        core::iface::IInputProvider& m_inputProvider;
-        core::iface::IUIRenderer& m_uiRenderer;
-        core::iface::IScreen& m_screen;
-        ui::UIManager m_uiManager;
+        std::unique_ptr<TitleView> m_view;
     };
 }
