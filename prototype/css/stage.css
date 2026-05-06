@@ -12,21 +12,21 @@
 /* Desktop icons */
 .desktop-icons {
     position: absolute;
-    top: 20px;
-    left: 20px;
+    top: 40px;
+    right: 40px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 32px;
 }
 
 .desktop-icon {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
     cursor: pointer;
-    padding: 6px;
-    width: 72px;
+    padding: 12px;
+    width: 120px;
     border: 1px solid transparent;
     transition: all 0.1s;
 }
@@ -37,15 +37,16 @@
 }
 
 .desktop-icon-img {
-    font-size: 32px;
+    font-size: 64px;
 }
 
 .desktop-icon-label {
-    font-size: 11px;
+    font-size: 14px;
     color: white;
     text-align: center;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-    line-height: 1.2;
+    line-height: 1.3;
+    font-weight: 500;
 }
 
 /* Windows 10 Taskbar */
@@ -162,6 +163,76 @@
     display: none;
 }
 
+/* Resize handles */
+.win10-resize-handle {
+    position: absolute;
+    z-index: 1000;
+}
+
+.win10-resize-handle.n {
+    top: -4px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    cursor: ns-resize;
+}
+
+.win10-resize-handle.s {
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    cursor: ns-resize;
+}
+
+.win10-resize-handle.w {
+    top: 0;
+    left: -4px;
+    bottom: 0;
+    width: 8px;
+    cursor: ew-resize;
+}
+
+.win10-resize-handle.e {
+    top: 0;
+    right: -4px;
+    bottom: 0;
+    width: 8px;
+    cursor: ew-resize;
+}
+
+.win10-resize-handle.nw {
+    top: -4px;
+    left: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: nwse-resize;
+}
+
+.win10-resize-handle.ne {
+    top: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: nesw-resize;
+}
+
+.win10-resize-handle.sw {
+    bottom: -4px;
+    left: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: nesw-resize;
+}
+
+.win10-resize-handle.se {
+    bottom: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    cursor: nwse-resize;
+}
+
 .win10-titlebar {
     height: 32px;
     background: linear-gradient(180deg, var(--win-blue-grad-start), var(--win-blue-grad-end));
@@ -232,20 +303,22 @@
 
 /* Job Select Window */
 #win-job {
-    top: 80px;
-    left: 60px;
-    width: 380px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
 }
 
 .job-select-body {
-    padding: 16px;
+    padding: 20px;
 }
 
 .job-select-label {
     font-family: 'Segoe UI', sans-serif;
-    font-size: 12px;
+    font-size: 14px;
     color: #333;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
+    font-weight: 600;
 }
 
 .job-list {
@@ -258,13 +331,14 @@
 .job-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 8px 10px;
+    gap: 16px;
+    padding: 14px 14px;
     background: white;
-    border: 1px solid #ccc;
+    border: 2px solid #ccc;
     cursor: pointer;
     transition: all 0.1s;
     font-family: 'Segoe UI', sans-serif;
+    border-radius: 4px;
 }
 
 .job-item:hover {
@@ -283,8 +357,8 @@
 }
 
 .job-item-icon {
-    font-size: 24px;
-    width: 32px;
+    font-size: 40px;
+    width: 50px;
     text-align: center;
 }
 
@@ -293,20 +367,22 @@
 }
 
 .job-item-name {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 700;
 }
 
 .job-item-sub {
-    font-size: 10px;
+    font-size: 12px;
     color: #666;
+    margin-top: 2px;
 }
 
 .job-item-skill {
-    font-size: 10px;
+    font-size: 12px;
     color: #0078d4;
     margin-left: auto;
     white-space: nowrap;
+    font-weight: 600;
 }
 
 .job-item.selected .job-item-skill {
@@ -316,20 +392,22 @@
 .win10-btn-row {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
-    padding-top: 8px;
+    gap: 10px;
+    padding-top: 14px;
     border-top: 1px solid #ccc;
 }
 
 .win10-btn {
     background: #e1e1e1;
-    border: 1px solid #adadad;
+    border: 2px solid #adadad;
     font-family: 'Segoe UI', sans-serif;
-    font-size: 12px;
-    padding: 6px 20px;
+    font-size: 13px;
+    padding: 10px 28px;
     cursor: pointer;
-    min-width: 80px;
+    min-width: 100px;
     transition: all 0.1s;
+    font-weight: 600;
+    border-radius: 2px;
 }
 
 .win10-btn:hover {
@@ -354,9 +432,10 @@
 
 /* Explorer Window */
 #win-explorer {
-    top: 60px;
-    left: 480px;
-    width: 500px;
+    top: 20px;
+    left: 20px;
+    width: 600px;
+    height: 500px;
 }
 
 .explorer-ribbon {

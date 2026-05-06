@@ -5,6 +5,159 @@
     background: #1a1a2e;
     cursor: pointer;
     overflow: hidden;
+    position: relative;
+}
+
+/* Splash screen */
+.splash-screen {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #0d1b3e 0%, #1a2744 50%, #0a1628 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 40px;
+    z-index: 100;
+    animation: splash-fade-out 0.8s ease-in-out 3.2s forwards;
+}
+
+@keyframes splash-fade-out {
+    from {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    to {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+.splash-logo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    width: 100px;
+    height: 100px;
+}
+
+.splash-tile {
+    background: white;
+    border-radius: 2px;
+    animation: splash-tile-rotate 3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.splash-tile:nth-child(1) {
+    background: #0078d4;
+    animation-delay: 0s;
+}
+
+.splash-tile:nth-child(2) {
+    background: #50e6ff;
+    animation-delay: 0.1s;
+}
+
+.splash-tile:nth-child(3) {
+    background: #ffb900;
+    animation-delay: 0.2s;
+}
+
+.splash-tile:nth-child(4) {
+    background: #107c10;
+    animation-delay: 0.3s;
+}
+
+@keyframes splash-tile-rotate {
+    0% {
+        transform: scale(0) rotateZ(-180deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) rotateZ(0deg);
+        opacity: 1;
+    }
+}
+
+.splash-text {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 28px;
+    font-weight: 200;
+    color: white;
+    letter-spacing: 2px;
+    animation: splash-text-appear 0.6s ease-in-out 0.8s forwards;
+    opacity: 0;
+}
+
+@keyframes splash-text-appear {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.splash-spinner {
+    display: flex;
+    gap: 6px;
+}
+
+.splash-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    animation: splash-spin 1.4s ease-in-out infinite;
+}
+
+.splash-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.splash-dot:nth-child(2) {
+    animation-delay: 0.16s;
+}
+
+.splash-dot:nth-child(3) {
+    animation-delay: 0.32s;
+}
+
+@keyframes splash-spin {
+    0%,
+    100% {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Particles */
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(0, 100, 200, 0.3));
+    pointer-events: none;
+}
+
+.particle.small {
+    width: 2px;
+    height: 2px;
+}
+
+.particle.medium {
+    width: 4px;
+    height: 4px;
+}
+
+.particle.large {
+    width: 6px;
+    height: 6px;
 }
 
 .lockscreen-bg {
@@ -207,9 +360,12 @@
 
 .login-game-badge {
     position: absolute;
-    bottom: 80px;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
     font-family: 'VT323', monospace;
-    font-size: 28px;
-    color: rgba(255, 255, 255, 0.15);
-    letter-spacing: 6px;
+    font-size: 32px;
+    color: rgba(255, 255, 255, 0.25);
+    letter-spacing: 8px;
+    z-index: 6;
 }
