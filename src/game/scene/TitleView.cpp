@@ -131,7 +131,7 @@ namespace game::scene
 
 		auto startBtn{ std::make_unique<ui::Button>(
 			"選択画面へ", buttonX, startButtonY, buttonWidth, buttonHeight, m_inputProvider) };
-		startBtn->setOnClick([this]() { startFadeOut(Action::GoToStageSelect); });
+		startBtn->setOnClick([this]() { startFadeOut(Action::GoToSelect); });
 		startBtn->setVisible(false);
 		m_startButton = startBtn.get();
 		m_uiManager.addElement(std::move(startBtn));

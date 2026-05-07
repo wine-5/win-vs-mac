@@ -18,11 +18,11 @@ namespace game::scene
 	SceneFactory::SceneFactory()
 		: m_inGameScene{}
 		, m_titleScene{}
-		, m_stageSelectScene{}
+		, m_selectScene{}
 		, m_loadingScene{}
 		, m_resultScene{}
 		, m_titleUIRenderer{ MAIN_FONT_NAME }
-		, m_stageSelectUIRenderer{ MAIN_FONT_NAME }
+		, m_selectUIRenderer{ MAIN_FONT_NAME }
 		, m_loadingUIRenderer{ MAIN_FONT_NAME }
 		, m_resultUIRenderer{ MAIN_FONT_NAME }
 	{
@@ -45,18 +45,18 @@ namespace game::scene
 				*screen);
 			return m_titleScene.get();
 
-		case SceneType::StageSelect:
+		case SceneType::Select:
 		{
 			auto* fileProvider = core::ServiceLocator::get<core::iface::IFileProvider>();
 			auto* gameManager = core::ServiceLocator::get<game::GameManager>();
 
-			m_stageSelectScene = std::make_unique<Select>(
-				m_stageSelectInputManager,
-				m_stageSelectUIRenderer,
+			m_selectScene = std::make_unique<Select>(
+				m_selectInputManager,
+				m_selectUIRenderer,
 				*screen,
 				*fileProvider,
 				gameManager->getFileEquipmentData());
-			return m_stageSelectScene.get();
+			return m_selectScene.get();
 		}
 
 		case SceneType::Loading:

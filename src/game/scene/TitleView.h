@@ -23,7 +23,7 @@ namespace game::scene
 		enum class Action
 		{
 			None,
-			GoToStageSelect,
+			GoToSelect,
 			Exit
 		};
 

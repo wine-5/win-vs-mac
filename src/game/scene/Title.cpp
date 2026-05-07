@@ -26,10 +26,10 @@ namespace game::scene
 
         switch (m_view->getNextAction())
         {
-        case TitleView::Action::GoToStageSelect:
+        case TitleView::Action::GoToSelect:
         {
             auto* sceneManager{ core::ServiceLocator::get<SceneManager>() };
-            sceneManager->changeScene(SceneType::StageSelect);
+            sceneManager->changeScene(SceneType::Select);
             break;
         }
         case TitleView::Action::Exit:

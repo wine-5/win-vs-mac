@@ -8,7 +8,7 @@ namespace game::scene
     enum class SceneType
     {
         Title,
-        StageSelect,
+        Select,
         Loading,
         InGame,
         Result

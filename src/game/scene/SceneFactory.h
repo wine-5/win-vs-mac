@@ -46,10 +46,10 @@ namespace game::scene
         infrastructure::UIRenderer m_titleUIRenderer;
         std::unique_ptr<Title> m_titleScene;
 
-        // StageSelect用の依存関係と実体
-        infrastructure::InputManager m_stageSelectInputManager;
-        infrastructure::UIRenderer m_stageSelectUIRenderer;
-        std::unique_ptr<Select> m_stageSelectScene;
+        // Select用の依存関係と実体
+        infrastructure::InputManager m_selectInputManager;
+        infrastructure::UIRenderer m_selectUIRenderer;
+        std::unique_ptr<Select> m_selectScene;
 
         // Loading用の依存関係と実体
         infrastructure::UIRenderer m_loadingUIRenderer;

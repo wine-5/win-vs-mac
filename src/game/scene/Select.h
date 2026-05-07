@@ -16,7 +16,7 @@ namespace game::scene
     {
     public:
         /**
-         * @brief StageSelectのコンストラクタ
+         * @brief Selectのコンストラクタ
          * @param inputProvider 入力インターフェース
          * @param uiRenderer UI描画インターフェース
          * @param screen 画面情報インターフェース
