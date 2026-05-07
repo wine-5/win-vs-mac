@@ -141,6 +141,7 @@
     <ClCompile Include="src\game\scene\Result.cpp" />
     <ClCompile Include="src\game\scene\SceneFactory.cpp" />
     <ClCompile Include="src\game\scene\Select.cpp" />
+    <ClCompile Include="src\game\scene\SelectView.cpp" />
     <ClCompile Include="src\game\scene\Title.cpp" />
     <ClCompile Include="src\game\scene\TitleView.cpp" />
     <ClCompile Include="src\game\system\AISystem.cpp" />
@@ -232,6 +233,7 @@
     <ClInclude Include="src\game\scene\Result.h" />
     <ClInclude Include="src\game\scene\SceneFactory.h" />
     <ClInclude Include="src\game\scene\Select.h" />
+    <ClInclude Include="src\game\scene\SelectView.h" />
     <ClInclude Include="src\game\scene\Title.h" />
     <ClInclude Include="src\game\scene\TitleView.h" />
     <ClInclude Include="src\game\system\AISystem.h" />

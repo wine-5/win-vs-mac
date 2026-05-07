@@ -4,13 +4,15 @@
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IFileProvider.h"
-#include "game/data/FileEquipmentData.h"   
-#include "game/ui/UIManager.h"
+#include "game/data/FileEquipmentData.h"
+#include <memory>
 
 namespace game::scene
 {
+    class SelectView;
+
     /**
-     * @brief ステージ選択シーンのクラス
+     * @brief 選択シーンのクラス
      */
     class Select : public IScene
     {
@@ -23,11 +25,11 @@ namespace game::scene
          * @param fileProvider ファイル選択インターフェース
          * @param fileEquipmentData 選択ファイルデータの参照
          */
-        Select(core::iface::IInputProvider& inputProvider,
-            core::iface::IUIRenderer& uiRenderer,
-            core::iface::IScreen& screen,
-            core::iface::IFileProvider& fileProvider,
-            data::FileEquipmentData& fileEquipmentData);
+        Select(core::iface::IInputProvider &inputProvider,
+               core::iface::IUIRenderer &uiRenderer,
+               core::iface::IScreen &screen,
+               core::iface::IFileProvider &fileProvider,
+               data::FileEquipmentData &fileEquipmentData);
 
         /**
          * @brief シーンの更新処理
@@ -41,16 +43,6 @@ namespace game::scene
         void draw() override;
 
     private:
-        /**
-         * @brief UIを構築する
-         */
-        void setupUI();
-
-        core::iface::IInputProvider& m_inputProvider;
-        core::iface::IUIRenderer& m_uiRenderer;
-        core::iface::IScreen& m_screen;
-        core::iface::IFileProvider& m_fileProvider;
-        data::FileEquipmentData& m_fileEquipmentData; 
-        ui::UIManager m_uiManager;
+        std::unique_ptr<SelectView> m_view;
     };
 }
