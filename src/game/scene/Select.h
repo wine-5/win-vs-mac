@@ -12,7 +12,7 @@ namespace game::scene
     /**
      * @brief ステージ選択シーンのクラス
      */
-    class StageSelect : public IScene
+    class Select : public IScene
     {
     public:
         /**
@@ -23,7 +23,7 @@ namespace game::scene
          * @param fileProvider ファイル選択インターフェース
          * @param fileEquipmentData 選択ファイルデータの参照
          */
-        StageSelect(core::iface::IInputProvider& inputProvider,
+        Select(core::iface::IInputProvider& inputProvider,
             core::iface::IUIRenderer& uiRenderer,
             core::iface::IScreen& screen,
             core::iface::IFileProvider& fileProvider,

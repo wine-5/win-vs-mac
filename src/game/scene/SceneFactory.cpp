@@ -1,6 +1,6 @@
 ﻿#include "SceneFactory.h"
 #include "Title.h"
-#include "StageSelect.h"
+#include "Select.h"
 #include "Loading.h"
 #include "InGame.h"
 #include "Result.h"
@@ -50,7 +50,7 @@ namespace game::scene
 			auto* fileProvider = core::ServiceLocator::get<core::iface::IFileProvider>();
 			auto* gameManager = core::ServiceLocator::get<game::GameManager>();
 
-			m_stageSelectScene = std::make_unique<StageSelect>(
+			m_stageSelectScene = std::make_unique<Select>(
 				m_stageSelectInputManager,
 				m_stageSelectUIRenderer,
 				*screen,

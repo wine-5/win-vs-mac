@@ -1,4 +1,4 @@
-﻿#include "StageSelect.h"
+﻿#include "Select.h"
 #include "SceneManager.h"
 #include "SceneType.h"
 #include "game/ui/Button.h"
@@ -18,7 +18,7 @@ namespace game::scene
 		constexpr float BUTTON_HEIGHT_RATIO = 0.06f;  // 画面高さの6%
 	}
 
-	StageSelect::StageSelect(core::iface::IInputProvider& inputProvider,
+	Select::Select(core::iface::IInputProvider& inputProvider,
 		core::iface::IUIRenderer& uiRenderer,
 		core::iface::IScreen& screen,
 		core::iface::IFileProvider& fileProvider,
@@ -28,12 +28,12 @@ namespace game::scene
 		setupUI();
 	}
 
-	void StageSelect::update(float deltaTime)
+	void Select::update(float deltaTime)
 	{
 		m_uiManager.update();
 	}
 
-	void StageSelect::draw()
+	void Select::draw()
 	{
 		const char* title{ "難易度と武器、ファイルを３つ選択してください" };
 		int titleWidth{ m_uiRenderer.getTextWidth(title) };
@@ -58,7 +58,7 @@ namespace game::scene
 		}
 	}
 
-	void StageSelect::setupUI()
+	void Select::setupUI()
 	{
 		// 画面サイズを取得
 		const int screenWidth = m_screen.getWidth();
