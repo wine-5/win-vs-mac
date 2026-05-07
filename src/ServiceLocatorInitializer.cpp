@@ -8,6 +8,8 @@
 #include "infrastructure/utility/LogUtil.h"
 #include "game/scene/SceneManager.h"
 #include "game/GameManager.h"
+#include "core/interface/IResourceManager.h"
+#include "infrastructure/ResourceManager.h"
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 {
@@ -17,6 +19,10 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 
 	core::ServiceLocator::provide<core::iface::IFileProvider>(
 		std::make_unique<platform::WindowsDataProvider>()
+	);
+
+	core::ServiceLocator::provide<core::iface::IResourceManager>(
+		std::make_unique<infrastructure::ResourceManager>()
 	);
 
 	// DEBUG:デバック用のためリリース時は消すこと

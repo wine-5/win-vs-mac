@@ -1,5 +1,8 @@
 ﻿#pragma once
 #include "core/interface/IUIRenderer.h"
+#include <string>
+#include <map>
+#include <utility>
 
 namespace infrastructure
 {
@@ -9,6 +12,8 @@ namespace infrastructure
     class UIRenderer : public core::iface::IUIRenderer
     {
     public:
+        ~UIRenderer();
+
         /**
          * @brief 矩形を描画する
          * @param x X座標
@@ -47,5 +52,20 @@ namespace infrastructure
          * @brief 描画ブレンドモードをリセットする
          */
         void resetBlendMode() override;
+
+        /**
+         * @brief 描画に使うフォントを設定する
+         * @param fontName フォント名
+         */
+        void setFont(const char* fontName) override;
+
+        /**
+         * @brief フォントをデフォルトに戻す
+         */
+        void resetFont() override;
+
+    private:
+        std::string m_currentFontName{};
+        std::map<std::pair<std::string, int>, int> m_fontHandles{};
     };
 }

@@ -1,5 +1,4 @@
 #pragma once
-#include "SceneType.h"
 #include "game/ui/UIManager.h"
 #include "game/ui/FadeTransition.h"
 #include "core/interface/IInputProvider.h"
@@ -36,7 +35,8 @@ namespace game::scene
 		 */
 		TitleView(core::iface::IInputProvider& inputProvider,
 			core::iface::IUIRenderer& uiRenderer,
-			core::iface::IScreen& screen);
+			core::iface::IScreen& screen,
+			std::string mainFontName);
 
 		/**
 		 * @brief 更新処理
@@ -98,6 +98,7 @@ namespace game::scene
 		float  m_dotTimer{};
 		int    m_dotCount{};
 		Action m_nextAction{ Action::None };
+		std::string m_mainFontName{};
 
 		static constexpr float SPLASH_DURATION = 3.0f;
 		static constexpr float FADE_DURATION = 0.5f;

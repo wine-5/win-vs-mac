@@ -4,6 +4,12 @@
 
 namespace infrastructure
 {
+	UIRenderer::~UIRenderer()
+	{
+		for (auto& [key, handle] : m_fontHandles)
+			DeleteFontToHandle(handle);
+	}
+
 	void UIRenderer::drawBox(int x, int y, int width, int height, unsigned int color, bool isFilled)
 	{
 		if (isFilled)
@@ -14,7 +20,13 @@ namespace infrastructure
 
 	void UIRenderer::drawText(int x, int y, const char* text, unsigned int color, int fontSize)
 	{
-		DrawString(x, y, text, color);
+		const auto key{ std::make_pair(m_currentFontName,fontSize) };
+		if (m_fontHandles.find(key) == m_fontHandles.end())
+		{
+			const char* fontName{ m_currentFontName.empty() ? nullptr : m_currentFontName.c_str() };
+			m_fontHandles[key] = CreateFontToHandle(fontName, fontSize, -1, DX_FONTTYPE_NORMAL);
+		}
+		DrawStringToHandle(x, y, text, color,m_fontHandles[key]);
 	}
 
 	int UIRenderer::getTextWidth(const char* text) const
@@ -30,5 +42,15 @@ namespace infrastructure
 	void UIRenderer::resetBlendMode()
 	{
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+	}
+
+	void UIRenderer::setFont(const char* fontName)
+	{
+		m_currentFontName = fontName;
+	}
+
+	void UIRenderer::resetFont()
+	{
+		m_currentFontName = {};
 	}
 }

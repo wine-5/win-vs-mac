@@ -7,10 +7,12 @@ namespace game::scene
 {
 	TitleView::TitleView(core::iface::IInputProvider& inputProvider,
 		core::iface::IUIRenderer& uiRenderer,
-		core::iface::IScreen& screen)
+		core::iface::IScreen& screen,
+		std::string mainFontName)
 		: m_inputProvider{ inputProvider }
 		, m_uiRenderer{ uiRenderer }
 		, m_screen{ screen }
+		, m_mainFontName{ std::move(mainFontName) }
 	{
 		setupUI();
 	}
@@ -69,6 +71,9 @@ namespace game::scene
 
 	void TitleView::draw()
 	{
+		// 一旦すべて同一フォント(TODO: 将来的に一部分だけフォントを変更したい場合はresetFont()やsetFont()を参照する必要がある)
+		m_uiRenderer.setFont(m_mainFontName.c_str());
+		
 		switch (m_state)
 		{
 		case State::Splash:
@@ -78,6 +83,7 @@ namespace game::scene
 			const int textWidth{ m_uiRenderer.getTextWidth(text.c_str()) };
 			const int x{ (m_screen.getWidth() - textWidth) / 2 };
 			const int y{ (m_screen.getHeight() - core::constant::ui::FONT_SIZE_NORMAL) / 2 };
+
 			m_uiRenderer.drawText(x, y, text.c_str(), core::utility::Color::WHITE);
 			if (m_fade)
 				m_fade->draw();
@@ -92,6 +98,7 @@ namespace game::scene
 			const int titleWidth{ m_uiRenderer.getTextWidth(title) };
 			const int titleX{ (m_screen.getWidth() - titleWidth) / 2 };
 			const int titleY{ static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO) };
+
 			m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE,
 				core::constant::ui::FONT_SIZE_LARGE);
 			m_uiManager.draw(m_uiRenderer);

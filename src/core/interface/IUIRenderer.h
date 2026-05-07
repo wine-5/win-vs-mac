@@ -53,5 +53,16 @@ namespace core::iface
          * @brief 描画ブレンドモードをリセットする（通常描画に戻す）
          */
         virtual void resetBlendMode() = 0;
+
+        /**
+         * @brief 描画に使うフォントを設定する
+         * @param fontName フォント名
+         */
+        virtual void setFont(const char* fontName) = 0;
+
+        /**
+         * @brief フォントをデフォルトに戻す
+         */
+        virtual void resetFont() = 0;
     };
 }

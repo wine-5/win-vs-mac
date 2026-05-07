@@ -3,6 +3,7 @@
 #include "SceneManager.h"
 #include "SceneType.h"
 #include "core/ServiceLocator.h"
+#include "core/interface/IResourceManager.h"
 #include <cstdlib>
 
 namespace game::scene
@@ -10,8 +11,11 @@ namespace game::scene
     Title::Title(core::iface::IInputProvider& inputProvider,
         core::iface::IUIRenderer& uiRenderer,
         core::iface::IScreen& screen)
-        : m_view{std::make_unique<TitleView>(inputProvider, uiRenderer,screen)}
     {
+        auto* res{ core::ServiceLocator::get<core::iface::IResourceManager>() };
+        std::string mainFontName{ res->getFontName("main").value_or("") };
+        m_view = std::make_unique<TitleView>(inputProvider, uiRenderer, screen,
+            std::move(mainFontName));
     }
 
     void Title::update(float deltaTime)
