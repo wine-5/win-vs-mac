@@ -4,9 +4,14 @@
 
 namespace infrastructure
 {
+	UIRenderer::UIRenderer(std::string defaultFontName)
+		: m_defaultFontName{std::move(defaultFontName)}, m_currentFontName{m_defaultFontName}
+	{
+	}
+
 	UIRenderer::~UIRenderer()
 	{
-		for (auto& [key, handle] : m_fontHandles)
+		for (auto &[key, handle] : m_fontHandles)
 			DeleteFontToHandle(handle);
 	}
 
@@ -18,18 +23,18 @@ namespace infrastructure
 			DrawBox(x, y, x + width, y + height, color, FALSE);
 	}
 
-	void UIRenderer::drawText(int x, int y, const char* text, unsigned int color, int fontSize)
+	void UIRenderer::drawText(int x, int y, const char *text, unsigned int color, int fontSize)
 	{
-		const auto key{ std::make_pair(m_currentFontName,fontSize) };
+		const auto key{std::make_pair(m_currentFontName, fontSize)};
 		if (m_fontHandles.find(key) == m_fontHandles.end())
 		{
-			const char* fontName{ m_currentFontName.empty() ? nullptr : m_currentFontName.c_str() };
+			const char *fontName{m_currentFontName.empty() ? nullptr : m_currentFontName.c_str()};
 			m_fontHandles[key] = CreateFontToHandle(fontName, fontSize, -1, DX_FONTTYPE_NORMAL);
 		}
-		DrawStringToHandle(x, y, text, color,m_fontHandles[key]);
+		DrawStringToHandle(x, y, text, color, m_fontHandles[key]);
 	}
 
-	int UIRenderer::getTextWidth(const char* text) const
+	int UIRenderer::getTextWidth(const char *text) const
 	{
 		return GetDrawStringWidth(text, static_cast<int>(std::strlen(text)));
 	}
@@ -44,13 +49,13 @@ namespace infrastructure
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 	}
 
-	void UIRenderer::setFont(const char* fontName)
+	void UIRenderer::setFont(const char *fontName)
 	{
 		m_currentFontName = fontName;
 	}
 
 	void UIRenderer::resetFont()
 	{
-		m_currentFontName = {};
+		m_currentFontName = m_defaultFontName;
 	}
 }

@@ -12,6 +12,12 @@ namespace infrastructure
     class UIRenderer : public core::iface::IUIRenderer
     {
     public:
+        /**
+         * @brief コンストラクタ
+         * @param defaultFontName デフォルトで使用するフォント名（空文字でDxLib組み込みフォント）
+         */
+        explicit UIRenderer(std::string defaultFontName = {});
+
         ~UIRenderer();
 
         /**
@@ -32,14 +38,14 @@ namespace infrastructure
          * @param text テキスト
          * @param color 色（ARGB形式：0xAARRGGBB）
          */
-        void drawText(int x, int y, const char* text, unsigned int color,int fontSize) override;
+        void drawText(int x, int y, const char *text, unsigned int color, int fontSize) override;
 
         /**
          * @brief テキストの描画幅を取得する
          * @param text テキスト
          * @return 描画幅（ピクセル）
          */
-        [[nodiscard]] int getTextWidth(const char* text) const override;
+        [[nodiscard]] int getTextWidth(const char *text) const override;
 
         /**
          * @brief 描画ブレンドモードを設定する
@@ -57,7 +63,7 @@ namespace infrastructure
          * @brief 描画に使うフォントを設定する
          * @param fontName フォント名
          */
-        void setFont(const char* fontName) override;
+        void setFont(const char *fontName) override;
 
         /**
          * @brief フォントをデフォルトに戻す
@@ -65,6 +71,7 @@ namespace infrastructure
         void resetFont() override;
 
     private:
+        std::string m_defaultFontName{};
         std::string m_currentFontName{};
         std::map<std::pair<std::string, int>, int> m_fontHandles{};
     };
