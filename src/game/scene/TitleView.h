@@ -1,9 +1,9 @@
 #pragma once
 #include "game/ui/UIManager.h"
-#include "game/ui/FadeTransition.h"
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -15,100 +15,62 @@ namespace game::ui
 namespace game::scene
 {
 	/**
-	 * @brief タイトルシーンの描画・UI管理クラス
+	 * @brief タイトルシーンの描画クラス
 	 */
 	class TitleView
 	{
 	public:
-		enum class Action
-		{
-			None,
-			GoToSelect,
-			Exit
-		};
-
 		/**
 		 * @brief TitleViewのコンストラクタ
 		 * @param inputProvider 入力インターフェース
 		 * @param uiRenderer UI描画インターフェース
-		 * @param screen 画面サイズインターフェース
+		 * @param screen 画面情報インターフェース
+		 * @param mainFontName 使用するフォント名
+		 * @param onGoToSelect 「選択画面へ」ボタン押下時コールバック
+		 * @param onExit 「終了」ボタン押下時コールバック
 		 */
 		TitleView(core::iface::IInputProvider& inputProvider,
 			core::iface::IUIRenderer& uiRenderer,
 			core::iface::IScreen& screen,
-			std::string mainFontName);
+			std::string mainFontName,
+			std::function<void()> onGoToSelect,
+			std::function<void()> onExit);
 
 		/**
-		 * @brief 更新処理
-		 * @param deltaTime 経過時間（秒）
+		 * @brief ボタン入力を更新する
 		 */
-		void update(float deltaTime);
+		void update();
 
 		/**
-		 * @brief 描画処理
+		 * @brief スプラッシュ画面を描画する
+		 * @param dotCount 末尾に表示するドットの数（0〜3）
 		 */
-		void draw();
+		void drawSplash(int dotCount) const;
 
 		/**
-		 * @brief シーン切替の準備ができているか
-		 * @return フェードアウト完了時にtrue
+		 * @brief タイトル画面を描画する
 		 */
-		[[nodiscard]] bool isReadyToChange() const;
+		void drawTitle() const;
 
 		/**
-		 * @brief 次に行うアクションを取得する
-		 * @return アクション種別
+		 * @brief ボタンの表示・非表示を設定する
+		 * @param visible trueで表示
 		 */
-		[[nodiscard]] Action getNextAction() const;
+		void setButtonsVisible(bool visible);
 
 	private:
-		enum class State
-		{
-			Splash,
-			SplashFadeOut,
-			TitleFadeIn,
-			Idle,
-			FadingOut
-		};
-
-		void setupUI();
-
-		void startFadeOut(Action action);
-
-		/**
-		 * @brief スプラッシュのドットアニメーション文字列を取得する
-		 * @return "Win VS Max.exe を起動しています" + ドット
-		 */
-		[[nodiscard]] std::string getSplashText() const;
-
-		/* メンバ変数 */
-
-		core::iface::IInputProvider& m_inputProvider;
 		core::iface::IUIRenderer& m_uiRenderer;
-		core::iface::IScreen& m_screen;
+		core::iface::IScreen&     m_screen;
+		std::string               m_mainFontName;
 
-		ui::UIManager                       m_uiManager;
-		std::unique_ptr<ui::FadeTransition> m_fade;
+		ui::UIManager m_uiManager;
+		ui::Button*   m_startButton{};
+		ui::Button*   m_exitButton{};
 
-		ui::Button* m_startButton{};
-		ui::Button* m_exitButton{};
-
-		State  m_state{ State::Splash };
-		float  m_splashTimer{};
-		float  m_dotTimer{};
-		int    m_dotCount{};
-		Action m_nextAction{ Action::None };
-		std::string m_mainFontName{};
-
-		static constexpr float SPLASH_DURATION = 3.0f;
-		static constexpr float FADE_DURATION = 0.5f;
-		static constexpr float DOT_INTERVAL = 0.4f;
-		static constexpr int   MAX_DOTS = 3;
-
-		static constexpr float TITLE_Y_RATIO = 0.35f;
-		static constexpr float START_BUTTON_Y_RATIO = 0.50f;
-		static constexpr float EXIT_BUTTON_Y_RATIO = 0.62f;
-		static constexpr float BUTTON_WIDTH_RATIO = 0.15f;
-		static constexpr float BUTTON_HEIGHT_RATIO = 0.06f;
+		static constexpr float TITLE_Y_RATIO         = 0.35f;
+		static constexpr float START_BUTTON_Y_RATIO  = 0.50f;
+		static constexpr float EXIT_BUTTON_Y_RATIO   = 0.62f;
+		static constexpr float BUTTON_WIDTH_RATIO    = 0.15f;
+		static constexpr float BUTTON_HEIGHT_RATIO   = 0.06f;
 	};
 }

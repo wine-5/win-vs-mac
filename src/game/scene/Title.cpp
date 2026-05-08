@@ -11,36 +11,106 @@ namespace game::scene
     Title::Title(core::iface::IInputProvider& inputProvider,
         core::iface::IUIRenderer& uiRenderer,
         core::iface::IScreen& screen)
+        : m_inputProvider{ inputProvider }
+        , m_uiRenderer{ uiRenderer }
+        , m_screen{ screen }
     {
         auto* res{ core::ServiceLocator::get<core::iface::IResourceManager>() };
         std::string mainFontName{ res->getFontName("main").value_or("") };
-        m_view = std::make_unique<TitleView>(inputProvider, uiRenderer, screen,
-            std::move(mainFontName));
+
+        m_view = std::make_unique<TitleView>(
+            inputProvider, uiRenderer, screen,
+            std::move(mainFontName),
+            [this]() { goToSelect(); },
+            [this]() { exitApp(); });
     }
 
     void Title::update(float deltaTime)
     {
-        m_view->update(deltaTime);
-
-        if (!m_view->isReadyToChange()) return;
-
-        switch (m_view->getNextAction())
+        switch (m_state)
         {
-        case TitleView::Action::GoToSelect:
-        {
-            auto* sceneManager{ core::ServiceLocator::get<SceneManager>() };
-            sceneManager->changeScene(SceneType::Select);
+        case State::Splash:
+            m_splashTimer += deltaTime;
+            m_dotTimer    += deltaTime;
+            if (m_dotTimer >= DOT_INTERVAL)
+            {
+                m_dotTimer -= DOT_INTERVAL;
+                m_dotCount = (m_dotCount + 1) % (MAX_DOTS + 1);
+            }
+            if (m_splashTimer >= SPLASH_DURATION)
+            {
+                m_fade  = std::make_unique<ui::FadeTransition>(
+                    m_uiRenderer, m_screen, FADE_DURATION, false);
+                m_state = State::SplashFadeOut;
+            }
             break;
-        }
-        case TitleView::Action::Exit:
-            std::exit(0);
-        default:
+
+        case State::SplashFadeOut:
+            m_fade->update(deltaTime);
+            if (m_fade->isFinished())
+            {
+                m_view->setButtonsVisible(true);
+                m_fade  = std::make_unique<ui::FadeTransition>(
+                    m_uiRenderer, m_screen, FADE_DURATION, true);
+                m_state = State::TitleFadeIn;
+            }
+            break;
+
+        case State::TitleFadeIn:
+            m_fade->update(deltaTime);
+            m_view->update();
+            if (m_fade->isFinished())
+            {
+                m_fade  = nullptr;
+                m_state = State::Idle;
+            }
+            break;
+
+        case State::Idle:
+            m_view->update();
+            break;
+
+        case State::FadingOut:
+            m_fade->update(deltaTime);
+            if (m_fade->isFinished())
+            {
+                auto* sceneManager{ core::ServiceLocator::get<SceneManager>() };
+                sceneManager->changeScene(SceneType::Select);
+            }
             break;
         }
     }
 
     void Title::draw()
     {
-        m_view->draw();
+        switch (m_state)
+        {
+        case State::Splash:
+        case State::SplashFadeOut:
+            m_view->drawSplash(m_dotCount);
+            if (m_fade) m_fade->draw();
+            break;
+
+        case State::TitleFadeIn:
+        case State::Idle:
+        case State::FadingOut:
+            m_view->drawTitle();
+            if (m_fade) m_fade->draw();
+            break;
+        }
+    }
+
+    void Title::goToSelect()
+    {
+        if (m_state != State::Idle) return;
+        m_fade  = std::make_unique<ui::FadeTransition>(
+            m_uiRenderer, m_screen, FADE_DURATION, false);
+        m_state = State::FadingOut;
+    }
+
+    void Title::exitApp()
+    {
+        if (m_state != State::Idle) return;
+        std::exit(0);
     }
 }

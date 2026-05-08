@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "IScene.h"
+#include "game/ui/FadeTransition.h"
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
@@ -37,6 +38,33 @@ namespace game::scene
         void draw() override;
 
     private:
-        std::unique_ptr<TitleView> m_view;
+        enum class State
+        {
+            Splash,
+            SplashFadeOut,
+            TitleFadeIn,
+            Idle,
+            FadingOut
+        };
+
+        void goToSelect();
+        void exitApp();
+
+        core::iface::IInputProvider& m_inputProvider;
+        core::iface::IUIRenderer&    m_uiRenderer;
+        core::iface::IScreen&        m_screen;
+
+        std::unique_ptr<TitleView>          m_view;
+        std::unique_ptr<ui::FadeTransition> m_fade;
+
+        State m_state{ State::Splash };
+        float m_splashTimer{};
+        float m_dotTimer{};
+        int   m_dotCount{};
+
+        static constexpr float SPLASH_DURATION = 3.0f;
+        static constexpr float FADE_DURATION   = 0.5f;
+        static constexpr float DOT_INTERVAL    = 0.4f;
+        static constexpr int   MAX_DOTS        = 3;
     };
 }
