@@ -59,16 +59,23 @@
 /* Main STAGE SELECT Window */
 #win-stage {
     position: absolute;
-    top: 5%;
-    left: 5%;
-    width: 90%;
-    height: calc(100% - 100px);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 40px);
     z-index: 100;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+#win-stage .win10-titlebar {
+    z-index: 200;
 }
 
 #win-stage .win10-window-body {
     display: flex;
     flex-direction: column;
+    background: transparent !important;
 }
 
 .stage-inner-container {
@@ -77,7 +84,7 @@
     flex-direction: row;
     padding: 0;
     gap: 0;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
 }
 
@@ -115,7 +122,7 @@
     left: 0;
     width: 28.86%;
     height: 100%;
-    z-index: 20;
+    z-index: 101;
 }
 
 #win-explorer {
@@ -123,7 +130,7 @@
     left: 28.86%;
     width: 45.77%;
     height: 100%;
-    z-index: 20;
+    z-index: 101;
 }
 
 #win-params {
@@ -131,7 +138,7 @@
     left: 74.63%;
     width: 25.37%;
     height: 100%;
-    z-index: 20;
+    z-index: 101;
 }
 
 /* ── Win10 Window Chrome ── */
@@ -293,110 +300,159 @@
 .job-desc-type { font-size: 11px; color: #999; }
 
 /* ── Explorer Window ── */
-.explorer-ribbon {
+.explorer-header {
     background: #f0f0f0;
     border-bottom: 1px solid #ccc;
-    padding: 4px 8px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+    padding: 12px 14px;
     flex-shrink: 0;
 }
 
-.explorer-nav-btn {
-    width: 26px;
-    height: 26px;
-    background: transparent;
-    border: 1px solid transparent;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    border-radius: 2px;
-    transition: all 0.1s;
-}
-
-.explorer-nav-btn:hover { background: #cce8ff; border-color: #0078d4; }
-
-.explorer-addressbar {
-    flex: 1;
-    height: 22px;
-    background: white;
-    border: 1px solid #ccc;
-    padding: 0 8px;
+.explorer-title {
     font-family: 'Segoe UI', sans-serif;
-    font-size: 11px;
+    font-size: 13px;
+    font-weight: 700;
     color: #333;
-    display: flex;
-    align-items: center;
-    gap: 4px;
 }
 
-.explorer-addressbar-path { color: #0078d4; }
-
-.explorer-pane {
-    display: flex;
+.explorer-main {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+    gap: 8px;
+    padding: 8px;
+}
+
+.explorer-slots-section {
+    flex-shrink: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 12px;
+}
+
+.explorer-slots-title {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.explorer-slots-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.explorer-slot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #f5f5f5;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Segoe UI', sans-serif;
+    text-align: left;
+}
+
+.explorer-slot:hover {
+    background: #e8f4fd;
+    border-color: #0078d4;
+}
+
+.explorer-slot.selected {
+    background: #0078d4;
+    border-color: #005a9e;
+    color: white;
+}
+
+.slot-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.slot-name {
+    font-size: 12px;
+    color: inherit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.explorer-file-list-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
     overflow: hidden;
     min-height: 0;
 }
 
-.explorer-sidebar {
-    width: 130px;
-    background: #f0f0f0;
-    border-right: 1px solid #ddd;
-    padding: 6px 0;
+.explorer-file-list-title {
     font-family: 'Segoe UI', sans-serif;
-    font-size: 11px;
-    overflow-y: auto;
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+    padding: 8px 12px;
+    background: #f0f0f0;
+    border-bottom: 1px solid #ddd;
     flex-shrink: 0;
 }
 
-.explorer-sidebar-item {
-    padding: 4px 10px;
-    cursor: pointer;
-    color: #333;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: background 0.1s;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.explorer-sidebar-item:hover { background: #cce8ff; }
-.explorer-sidebar-item.active { background: #d0e8ff; }
-
-.explorer-content {
+.explorer-file-list {
     flex: 1;
-    background: white;
     overflow-y: auto;
-    padding: 2px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px;
 }
 
-.explorer-file {
+.explorer-file-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 5px 8px;
+    padding: 6px 10px;
+    background: white;
+    border: 1px solid transparent;
+    border-radius: 2px;
     cursor: pointer;
+    transition: all 0.1s;
     font-family: 'Segoe UI', sans-serif;
     font-size: 12px;
-    color: #222;
-    border: 1px solid transparent;
-    transition: all 0.1s;
+    color: #333;
 }
 
-.explorer-file:hover { background: #e8f4fd; border-color: #bee3f8; }
-.explorer-file.selected { background: #cce8ff; border-color: #0078d4; }
+.explorer-file-item:hover {
+    background: #e8f4fd;
+    border-color: #bee3f8;
+}
 
-.explorer-file-icon { font-size: 15px; width: 18px; flex-shrink: 0; }
-.explorer-file-name { flex: 1; }
-.explorer-file-type { width: 90px; color: #777; font-size: 11px; flex-shrink: 0; }
-.explorer-file-size { width: 55px; color: #777; font-size: 11px; text-align: right; flex-shrink: 0; }
-.explorer-file-bonus { width: 72px; color: #0078d4; font-size: 11px; font-weight: 700; text-align: right; flex-shrink: 0; }
+.file-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.file-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-bonus {
+    font-size: 11px;
+    color: #0078d4;
+    font-weight: 700;
+    flex-shrink: 0;
+}
 
 .explorer-statusbar {
     background: #f0f0f0;
@@ -531,9 +587,9 @@
 .stage-bottom-bar {
     position: relative;
     height: 5vh;
-    background: rgba(10, 18, 35, 0.82);
+    background: rgba(10, 18, 35, 0.95);
     backdrop-filter: blur(16px);
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid rgba(255,255,255,0.2);
     display: flex;
     align-items: center;
     gap: 1.5%;

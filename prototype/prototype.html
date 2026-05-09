@@ -161,82 +161,70 @@
                 </div>
             </div>
             <div class="win10-window-body">
-                <div class="explorer-ribbon">
-                    <button class="explorer-nav-btn">←</button>
-                    <button class="explorer-nav-btn">→</button>
-                    <button class="explorer-nav-btn">↑</button>
-                    <div class="explorer-addressbar">
-                        <span>📁</span>
-                        <span class="explorer-addressbar-path">PC &gt; ドキュメント &gt; Projects</span>
-                    </div>
-                    <button class="explorer-nav-btn">🔍</button>
+                <div class="explorer-header">
+                    <div class="explorer-title">ファイル拡張子を選択（最大3つ）</div>
                 </div>
-                <div class="explorer-pane">
-                    <div class="explorer-sidebar">
-                        <div class="explorer-sidebar-item active">⭐ クイックアクセス</div>
-                        <div class="explorer-sidebar-item">🖥 デスクトップ</div>
-                        <div class="explorer-sidebar-item">📥 ダウンロード</div>
-                        <div class="explorer-sidebar-item">📄 ドキュメント</div>
-                        <div class="explorer-sidebar-item">🖼 ピクチャ</div>
-                        <div class="explorer-sidebar-item">🎵 ミュージック</div>
-                        <div class="explorer-sidebar-item">💾 PC</div>
+                <div class="explorer-main">
+                    <div class="explorer-slots-section">
+                        <div class="explorer-slots-title">装備スロット</div>
+                        <div class="explorer-slots-grid">
+                            <button class="explorer-slot" id="slot-0" onclick="selectFileSlot(0)">
+                                <div class="slot-icon">📎</div>
+                                <div class="slot-name" id="slot-name-0">test.txt</div>
+                            </button>
+                            <button class="explorer-slot" id="slot-1" onclick="selectFileSlot(1)">
+                                <div class="slot-icon">📎</div>
+                                <div class="slot-name" id="slot-name-1">２つ目のファイルを選択する</div>
+                            </button>
+                            <button class="explorer-slot" id="slot-2" onclick="selectFileSlot(2)">
+                                <div class="slot-icon">📎</div>
+                                <div class="slot-name" id="slot-name-2">３つ目のファイルを選択する</div>
+                            </button>
+                        </div>
                     </div>
-                    <div class="explorer-content" id="explorer-file-list">
-                        <div class="explorer-file" onclick="toggleExFile(this,'project_final.exe','atk',10)">
-                            <div class="explorer-file-icon">⚙</div>
-                            <div class="explorer-file-name">project_final.exe</div>
-                            <div class="explorer-file-type">アプリケーション</div>
-                            <div class="explorer-file-size">2.4 MB</div>
-                            <div class="explorer-file-bonus">ATK +10</div>
-                        </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'readme.txt','spd',5)">
-                            <div class="explorer-file-icon">📄</div>
-                            <div class="explorer-file-name">readme.txt</div>
-                            <div class="explorer-file-type">テキスト</div>
-                            <div class="explorer-file-size">12 KB</div>
-                            <div class="explorer-file-bonus">SPD +5</div>
-                        </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'screenshot.png','def',8)">
-                            <div class="explorer-file-icon">🖼</div>
-                            <div class="explorer-file-name">screenshot.png</div>
-                            <div class="explorer-file-type">PNG 画像</div>
-                            <div class="explorer-file-size">3.1 MB</div>
-                            <div class="explorer-file-bonus">DEF +8</div>
-                        </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'bgm.mp3','hp',20)">
-                            <div class="explorer-file-icon">🎵</div>
-                            <div class="explorer-file-name">bgm.mp3</div>
-                            <div class="explorer-file-type">MP3 オーディオ</div>
-                            <div class="explorer-file-size">8.7 MB</div>
-                            <div class="explorer-file-bonus">HP +20</div>
-                        </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'backup.zip','all',5)">
-                            <div class="explorer-file-icon">📦</div>
-                            <div class="explorer-file-name">backup.zip</div>
-                            <div class="explorer-file-type">圧縮フォルダー</div>
-                            <div class="explorer-file-size">45 MB</div>
-                            <div class="explorer-file-bonus">ALL +5</div>
-                        </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'data.dll','atk',10)">
-                            <div class="explorer-file-icon">⚙</div>
-                            <div class="explorer-file-name">data.dll</div>
-                            <div class="explorer-file-type">DLL ファイル</div>
-                            <div class="explorer-file-size">512 KB</div>
-                            <div class="explorer-file-bonus">ATK +10</div>
-                        </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'notes.docx','spd',5)">
-                            <div class="explorer-file-icon">📝</div>
-                            <div class="explorer-file-name">notes.docx</div>
-                            <div class="explorer-file-type">Word 文書</div>
-                            <div class="explorer-file-size">280 KB</div>
-                            <div class="explorer-file-bonus">SPD +5</div>
-                        </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'mystery.???','mystery',0)">
-                            <div class="explorer-file-icon">❓</div>
-                            <div class="explorer-file-name">mystery.???</div>
-                            <div class="explorer-file-type">不明なファイル</div>
-                            <div class="explorer-file-size">1 KB</div>
-                            <div class="explorer-file-bonus" style="color:#c42b1c">???</div>
+                    <div class="explorer-file-list-section">
+                        <div class="explorer-file-list-title">利用可能なファイル</div>
+                        <div class="explorer-file-list" id="explorer-file-list">
+                            <div class="explorer-file-item" onclick="selectFileForSlot('project_final.exe','atk',10)">
+                                <span class="file-icon">⚙</span>
+                                <span class="file-name">project_final.exe</span>
+                                <span class="file-bonus">ATK +10</span>
+                            </div>
+                            <div class="explorer-file-item" onclick="selectFileForSlot('readme.txt','spd',5)">
+                                <span class="file-icon">📄</span>
+                                <span class="file-name">readme.txt</span>
+                                <span class="file-bonus">SPD +5</span>
+                            </div>
+                            <div class="explorer-file-item" onclick="selectFileForSlot('screenshot.png','def',8)">
+                                <span class="file-icon">🖼</span>
+                                <span class="file-name">screenshot.png</span>
+                                <span class="file-bonus">DEF +8</span>
+                            </div>
+                            <div class="explorer-file-item" onclick="selectFileForSlot('bgm.mp3','hp',20)">
+                                <span class="file-icon">🎵</span>
+                                <span class="file-name">bgm.mp3</span>
+                                <span class="file-bonus">HP +20</span>
+                            </div>
+                            <div class="explorer-file-item" onclick="selectFileForSlot('backup.zip','all',5)">
+                                <span class="file-icon">📦</span>
+                                <span class="file-name">backup.zip</span>
+                                <span class="file-bonus">ALL +5</span>
+                            </div>
+                            <div class="explorer-file-item" onclick="selectFileForSlot('data.dll','atk',10)">
+                                <span class="file-icon">⚙</span>
+                                <span class="file-name">data.dll</span>
+                                <span class="file-bonus">ATK +10</span>
+                            </div>
+                            <div class="explorer-file-item" onclick="selectFileForSlot('notes.docx','spd',5)">
+                                <span class="file-icon">📝</span>
+                                <span class="file-name">notes.docx</span>
+                                <span class="file-bonus">SPD +5</span>
+                            </div>
+                            <div class="explorer-file-item" onclick="selectFileForSlot('mystery.???','mystery',0)">
+                                <span class="file-icon">❓</span>
+                                <span class="file-name">mystery.???</span>
+                                <span class="file-bonus" style="color:#c42b1c">???</span>
+                            </div>
                         </div>
                     </div>
                 </div>

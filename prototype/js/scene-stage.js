@@ -54,31 +54,42 @@ function setDifficulty(diff) {
     document.getElementById('difficulty-desc').textContent = DIFFICULTY_DATA[diff].desc;
 }
 
-/* ===== FILE SELECT ===== */
-function toggleExFile(el, name, stat, amount) {
-    if (el.classList.contains('selected')) {
-        el.classList.remove('selected');
-        selectedFiles = selectedFiles.filter(f => f.name !== name);
-    } else {
-        if (selectedFiles.length >= 3) {
-            const status = document.getElementById('ex-status');
-            status.textContent = '⚠ 最大3つまで選択できます';
-            status.style.color = '#c42b1c';
-            setTimeout(() => {
-                status.style.color = '';
-                status.textContent = `${selectedFiles.length}個選択中: ${selectedFiles.map(f => f.name).join(', ')}`;
-            }, 1500);
-            return;
-        }
-        el.classList.add('selected');
-        selectedFiles.push({ name, stat, amount });
+/* ===== FILE SELECT (Slot-based) ===== */
+let selectedSlotIndex = -1;
+
+function selectFileSlot(slotIndex) {
+    selectedSlotIndex = slotIndex;
+    document.querySelectorAll('.explorer-slot').forEach(slot => slot.classList.remove('selected'));
+    document.getElementById(`slot-${slotIndex}`).classList.add('selected');
+}
+
+function selectFileForSlot(name, stat, amount) {
+    if (selectedSlotIndex === -1) return;
+
+    const slotId = `slot-name-${selectedSlotIndex}`;
+    const slotNameEl = document.getElementById(slotId);
+
+    // Remove old file if exists
+    const oldFile = selectedFiles.find(f => f.slotIndex === selectedSlotIndex);
+    if (oldFile) {
+        selectedFiles = selectedFiles.filter(f => f.slotIndex !== selectedSlotIndex);
     }
+
+    // Add new file
+    selectedFiles.push({ name, stat, amount, slotIndex: selectedSlotIndex });
+
+    // Update slot display
+    slotNameEl.textContent = name;
+
+    // Update status bar
     const status = document.getElementById('ex-status');
     status.style.color = '';
     status.textContent = selectedFiles.length === 0
         ? 'ファイルを選択してください（最大3つ）'
         : `${selectedFiles.length}個選択中: ${selectedFiles.map(f => f.name).join(', ')}`;
+
     updateParams();
+    selectedSlotIndex = -1;
 }
 
 /* ===== PARAMS UPDATE ===== */
