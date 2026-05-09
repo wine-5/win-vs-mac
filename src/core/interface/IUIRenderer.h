@@ -38,9 +38,11 @@ namespace core::iface
         /**
          * @brief テキストの描画幅を取得する
          * @param text テキスト
+         * @param fontSize フォントサイズ（省略時はDEFAULT_FONT_SIZE）
          * @return 描画幅（ピクセル）
          */
-        virtual int getTextWidth(const char* text) const = 0;
+        virtual int getTextWidth(const char* text,
+            int fontSize = core::constant::ui::DEFAULT_FONT_SIZE) const = 0;
 
         /**
          * @brief 描画ブレンドモードを設定する

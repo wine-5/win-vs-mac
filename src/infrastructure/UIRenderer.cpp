@@ -34,9 +34,17 @@ namespace infrastructure
 		DrawStringToHandle(x, y, text, color, m_fontHandles[key]);
 	}
 
-	int UIRenderer::getTextWidth(const char *text) const
+	int UIRenderer::getTextWidth(const char *text, int fontSize) const
 	{
-		return GetDrawStringWidth(text, static_cast<int>(std::strlen(text)));
+		const auto key{ std::make_pair(m_currentFontName, fontSize) };
+		auto it{ m_fontHandles.find(key) };
+		if (it == m_fontHandles.end())
+		{
+			const char* fontName{ m_currentFontName.empty() ? nullptr : m_currentFontName.c_str() };
+			m_fontHandles[key] = CreateFontToHandle(fontName, fontSize, -1, DX_FONTTYPE_NORMAL);
+			it = m_fontHandles.find(key);
+		}
+		return GetDrawStringWidthToHandle(text, static_cast<int>(std::strlen(text)), it->second);
 	}
 
 	void UIRenderer::setBlendMode(int blendMode, int alpha)

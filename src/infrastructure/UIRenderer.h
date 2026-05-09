@@ -43,9 +43,11 @@ namespace infrastructure
         /**
          * @brief テキストの描画幅を取得する
          * @param text テキスト
+         * @param fontSize フォントサイズ（省略時はDEFAULT_FONT_SIZE）
          * @return 描画幅（ピクセル）
          */
-        [[nodiscard]] int getTextWidth(const char *text) const override;
+        [[nodiscard]] int getTextWidth(const char *text,
+            int fontSize = core::constant::ui::DEFAULT_FONT_SIZE) const override;
 
         /**
          * @brief 描画ブレンドモードを設定する
@@ -73,6 +75,8 @@ namespace infrastructure
     private:
         std::string m_defaultFontName{};
         std::string m_currentFontName{};
-        std::map<std::pair<std::string, int>, int> m_fontHandles{};
+        // mutable: getTextWidth はフォントハンドルを遅延生成してキャッシュする
+        // キャッシュは内部実装の詳細であり論理的な const 性を損なわないため mutable としている
+        mutable std::map<std::pair<std::string, int>, int> m_fontHandles{};
     };
 }
