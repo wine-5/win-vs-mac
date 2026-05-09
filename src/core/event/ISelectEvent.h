@@ -2,7 +2,9 @@
 
 namespace core::event
 {
-	/// @brief Selectシーン用のイベントのマーカーインターフェース
+	/**
+	 * @brief Selectシーン用のイベントのマーカーインターフェース
+	 */
 	class ISelectEvent
 	{
 	public:

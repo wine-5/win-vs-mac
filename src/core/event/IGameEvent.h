@@ -2,7 +2,10 @@
 
 namespace core::event
 {
-	/// @brief InGameシーン用のイベントのマーカーインターフェース
+
+	/**
+	 * @brief InGameシーン用のイベントのマーカーインターフェース
+	 */
 	class IGameEvent
 	{
 	public:

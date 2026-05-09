@@ -2,7 +2,9 @@
 
 namespace core::constant
 {
-	/// @brief Windowの識別子の列挙型
+	/**
+	 * @brief Windowの識別子の列挙型
+	 */
 	enum class SelectWindowId
 	{
 		Stage = 0,
