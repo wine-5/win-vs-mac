@@ -1,89 +1,92 @@
-## ファイル拡張子スロット機能 実装TODO
+## セレクト画面 複数OSWindow方式 実装TODO
 
 ### 概要
-セレクト画面でWindowsのファイルを選択し、拡張子に応じてPlayerのパラメータを補正する。
-シーン間のデータ受け渡しは `FileEquipmentData`（Bridge役）で行う。
+Windows APIを使ってセレクト画面を複数のOS Windowで実装する。
+- 職業選択Window（ListBox）
+- ファイル選択Window（3スロット + ListView）
+- パラメータ表示Window（GDI描画）
+- STAGE SELECTメインWindow（外枠のみ、中身は透明）
+
+各Windowは独立してタスクバーに表示され、EventBus経由でGame層と通信する。
+Game層はWindows APIに触れず、インターフェース経由で操作する。
 
 ---
 
 ### クラス設計一覧
 
-| クラス名 | 層 | ファイル | 責務 |
-|---|---|---|---|
-| `IFileSelector` | Core/interface | `core/interface/IFileSelector.h` | ファイル選択処理の抽象インターフェース |
-| `WindowsFileSelector` | Platform | `platform/WindowsFileSelector.h/.cpp` | `GetOpenFileName` を使ったファイル選択の実装 |
-| `FileEquipmentData` | Game/data | `game/data/FileEquipmentData.h` | 選択ファイルのパス・hasSelection を保持するデータ構造体。`GameManager` が唯一の所有者 |
-| `ExtensionBonus` | Game/data | `game/data/ExtensionBonus.h` | 拡張子ボーナス値（atk/spd/def/hp/range）の構造体 |
-| `ExtensionBonusCalculator` | Game/utility | `game/utility/ExtensionBonusCalculator.h` | 拡張子文字列 → `ExtensionBonus` を算出するロジック |
-| `GameManager` | Game | `game/GameManager.h/.cpp` | ゲーム全体の状態管理。`FileEquipmentData` を所有し、ServiceLocator に登録される |
+#### Core層（インターフェース・定数・イベント）
 
----
+| クラス名 | ファイル | 責務 |
+|---|---|---|
+| `SelectWindowId` | `core/constant/SelectWindowId.h` | Window識別子列挙型（Stage/Job/FileSelect/Parameter） |
+| `JobChangedEvent` | `core/event/SelectEvents.h` | 職業選択変更イベント |
+| `FileSlotChangedEvent` | `core/event/SelectEvents.h` | ファイルスロット変更イベント |
+| `GameStartRequestedEvent` | `core/event/SelectEvents.h` | ゲーム開始要求イベント |
+| `IJobProvider` | `core/interface/IJobProvider.h` | 職業データ取得インターフェース |
+| `ISelectWindowManager` | `core/interface/ISelectWindowManager.h` | Window管理インターフェース |
 
-### 拡張子ボーナス仕様
+#### Game層
 
-| 拡張子グループ | 補正パラメータ |
+| クラス名 | ファイル | 責務 |
+|---|---|---|
+| `JobDataProvider` | `game/data/JobDataProvider.h/.cpp` | IJobProvider実装（3職業の定数データ保持） |
+| `Select`（修正） | `game/scene/Select.h/.cpp` | シーンロジック・EventBus購読・Window管理 |
+
+#### Platform層
+
+| クラス名 | ファイル | 責務 |
+|---|---|---|
+| `SelectWindowBase` | `platform/select/window/SelectWindowBase.h/.cpp` | Win32Window基底クラス（CreateWindowEx・WndProc・ドラッグ移動） |
+| `Win32DrawHelper` | `platform/select/helper/Win32DrawHelper.h/.cpp` | GDI描画ヘルパー（static）（fillRect/drawText/drawProgressBar等） |
+| `StageWindow` | `platform/select/window/StageWindow.h/.cpp` | メインWindow外枠（WS_EX_LAYERED で透明） |
+| `JobWindow` | `platform/select/window/JobWindow.h/.cpp` | 職業選択Window（ListBox + JobChangedEvent発行） |
+| `FileSelectWindow` | `platform/select/window/FileSelectWindow.h/.cpp` | ファイル選択Window（3スロット + ListView + FileSlotChangedEvent発行） |
+| `ParameterWindow` | `platform/select/window/ParameterWindow.h/.cpp` | パラメータ表示Window（GDI全描画・EventBus購読） |
+| `WindowFactory` | `platform/select/factory/WindowFactory.h/.cpp` | Window生成・破棄の専門クラス |
+| `Win32SelectWindowManager` | `platform/select/Win32SelectWindowManager.h/.cpp` | ISelectWindowManager実装（4Window統括管理） |
+
+#### 修正対象
+
+| ファイル | 修正内容 |
 |---|---|
-| .exe .dll .bat | ATK+ |
-| .txt .pdf .docx | SPD (moveSpeed)+ |
-| .png .jpg .bmp | DEF+ |
-| .mp3 .wav .flac | MaxHP+ |
-| .zip .7z .rar | 全パラメータ小+ |
-| それ以外 | attackRange+ |
+| `ServiceLocatorInitializer.h/.cpp` | EventBus / IJobProvider / ISelectWindowManager をServiceLocatorに登録 |
 
 ---
 
-### 実装フェーズ
+### 実装順序（9ステップ）
 
----
+#### ステップ 1-2：Core層（依存なし）
+- [ ] `core/constant/SelectWindowId.h` 作成
+- [ ] `core/event/SelectEvents.h` 作成
 
-#### フェーズ1：ファイル1つ選択・パラメータ補正
+#### ステップ 2：Core層インターフェース
+- [ ] `core/interface/IJobProvider.h` 作成
+- [ ] `core/interface/ISelectWindowManager.h` 作成
 
-**新規作成**
-- [ ] `core/interface/IFileSelector.h` ― ファイル選択IF（`selectFile()` → `std::string` を返す）
-- [ ] `platform/WindowsFileSelector.h/.cpp` ― GetOpenFileName 実装（フィルタ：すべてのファイル）
-- [ ] `game/data/FileEquipmentData.h` ― `selectedFilePath` / `hasSelection` の1ファイル構造体
-- [ ] `game/data/ExtensionBonus.h` ― ボーナス値構造体（atk/spd/def/hp/range）
-- [ ] `game/utility/ExtensionBonusCalculator.h` ― 拡張子文字列 → `ExtensionBonus` を算出
-- [ ] `game/GameManager.h/.cpp` ― `FileEquipmentData` 所有・ServiceLocator 登録
+#### ステップ 3：Game層（職業データ）
+- [ ] `game/data/JobDataProvider.h/.cpp` 作成（IJobProvider実装）
 
-**既存ファイル変更**
-- [ ] `ServiceLocatorInitializer.cpp` ― GameManager・WindowsFileSelector を登録
-- [ ] `SceneFactory.cpp` ― GameManager から FileEquipmentData 参照を取得し StageSelect・InGame へ注入
-- [ ] `StageSelect.h/.cpp` ― ファイル選択ボタン追加・IFileSelector 依存追加・FileEquipmentData 書き込み
-- [ ] `InGame.h/.cpp` ― FileEquipmentData 参照受け取り・ExtensionBonus を計算して Player パラメータ補正
+#### ステップ 4：Platform層ヘルパー
+- [ ] `platform/select/helper/Win32DrawHelper.h/.cpp` 作成
 
----
+#### ステップ 5：Platform層基底
+- [ ] `platform/select/window/SelectWindowBase.h/.cpp` 作成
 
-#### フェーズ2：ファイル最大5つ選択・パラメータ合算（フェーズ1完了後）
+#### ステップ 6：Platform層Window実装
+- [ ] `platform/select/window/StageWindow.h/.cpp` 作成
+- [ ] `platform/select/window/JobWindow.h/.cpp` 作成
+- [ ] `platform/select/window/FileSelectWindow.h/.cpp` 作成
+- [ ] `platform/select/window/ParameterWindow.h/.cpp` 作成
 
-**変更方針**
-- `FileEquipmentData` の `selectedFilePath` を `std::array<std::string, MAX_SLOT>` に変更
-- `hasSelection` を `std::array<bool, MAX_SLOT>` に変更（または有効スロット数で管理）
-- UI に「スロット1〜5」のファイル選択ボタンを追加
-- InGame 側で全スロットの `ExtensionBonus` を合算して Player に適用
+#### ステップ 7：Platform層Factory・Manager
+- [ ] `platform/select/factory/WindowFactory.h/.cpp` 作成
+- [ ] `platform/select/Win32SelectWindowManager.h/.cpp` 作成
 
-**変更が必要なファイル**
-- [ ] `game/data/FileEquipmentData.h` ― `MAX_SLOT = 5` のスロット配列へ変更
-- [ ] `StageSelect.h/.cpp` ― スロットボタンを5個に拡張
-- [ ] `InGame.h/.cpp` ― 全スロット分のボーナスを合算する処理に変更
+#### ステップ 8：初期化
+- [ ] `ServiceLocatorInitializer.cpp` 修正（EventBus / JobDataProvider / Win32SelectWindowManager を登録）
 
----
-
-### データフロー（フェーズ1）
-
-```
-[StageSelect] ファイル選択ボタン押下
-     ↓ IFileSelector::selectFile()
-[WindowsFileSelector] GetOpenFileName → ファイルパスを返す
-     ↓
-[StageSelect] FileEquipmentData に selectedFilePath / hasSelection を書き込み
-     ↓（シーン遷移）
-[InGame] FileEquipmentData を読み取り
-     ↓ ExtensionBonusCalculator::calculate(extension)
-[ExtensionBonus] atk/spd/def/hp/range のボーナス値
-     ↓
-[Player] 基礎パラメータにボーナスを加算して生成
-```
+#### ステップ 9：Game層シーン修正
+- [ ] `game/scene/Select.h/.cpp` 修正（ISelectWindowManager・EventBus注入、pumpMessages呼び出し）
 
 ## 開発が進んだときに行うべきこと
 
