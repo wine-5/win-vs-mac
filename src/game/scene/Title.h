@@ -8,63 +8,70 @@
 
 namespace game::scene
 {
-    class TitleView;
+	class LockscreenView;
+	class TitleView;
 
-    /**
-     * @brief タイトルシーンのクラス
-     */
-    class Title : public IScene
-    {
-    public:
-        /**
-         * @brief Titleのコンストラクタ
-         * @param inputProvider 入力インターフェース
-         * @param uiRenderer UI描画インターフェース
-         * @param screen 画面情報インターフェース
-         */
-        Title(core::iface::IInputProvider& inputProvider,
-            core::iface::IUIRenderer& uiRenderer,
-            core::iface::IScreen& screen);
+	/**
+	 * @brief タイトルシーンのクラス
+	 */
+	class Title : public IScene
+	{
+	public:
+		/**
+		 * @brief Titleのコンストラクタ
+		 * @param inputProvider 入力インターフェース
+		 * @param uiRenderer UI描画インターフェース
+		 * @param screen 画面情報インターフェース
+		 */
+		Title(core::iface::IInputProvider& inputProvider,
+			core::iface::IUIRenderer& uiRenderer,
+			core::iface::IScreen& screen);
 
-        /**
-         * @brief シーンの更新処理
-         * @param deltaTime フレーム間の時間差
-         */
-        void update(float deltaTime) override;
+		/**
+		 * @brief シーンの更新処理
+		 * @param deltaTime フレーム間の時間差
+		 */
+		void update(float deltaTime) override;
 
-        /**
-         * @brief シーンの描画処理
-         */
-        void draw() override;
+		/**
+		 * @brief シーンの描画処理
+		 */
+		void draw() override;
 
-    private:
-        enum class State
-        {
-            Splash,
-            SplashFadeOut,
-            TitleFadeIn,
-            Idle,
-            FadingOut
-        };
+	private:
+		enum class State
+		{
+			Lockscreen,
+			LockscreenSliding,
+			Splash,
+			SplashFadeOut,
+			TitleFadeIn,
+			Idle,
+			FadingOut
+		};
 
-        void goToSelect();
-        void exitApp();
+		void goToSelect();
+		void exitApp();
 
-        core::iface::IInputProvider& m_inputProvider;
-        core::iface::IUIRenderer&    m_uiRenderer;
-        core::iface::IScreen&        m_screen;
+		core::iface::IInputProvider& m_inputProvider;
+		core::iface::IUIRenderer& m_uiRenderer;
+		core::iface::IScreen& m_screen;
 
-        std::unique_ptr<TitleView>          m_view;
-        std::unique_ptr<ui::FadeTransition> m_fade;
+		std::unique_ptr<TitleView>          m_view;
+		std::unique_ptr<LockscreenView> m_lockscreenView;
+		std::unique_ptr<ui::FadeTransition> m_fade;
 
-        State m_state{ State::Splash };
-        float m_splashTimer{};
-        float m_dotTimer{};
-        int   m_dotCount{};
+		State m_state{ State::Lockscreen };
 
-        static constexpr float SPLASH_DURATION = 3.0f;
-        static constexpr float FADE_DURATION   = 0.5f;
-        static constexpr float DOT_INTERVAL    = 0.4f;
-        static constexpr int   MAX_DOTS        = 3;
-    };
+		float m_lockscreenOffsetY{};
+		float m_splashTimer{};
+		float m_dotTimer{};
+		int   m_dotCount{};
+
+		static constexpr float LOCKSCREEN_SLIDE_DURATION = 0.7f;
+		static constexpr float SPLASH_DURATION = 3.0f;
+		static constexpr float FADE_DURATION = 0.5f;
+		static constexpr float DOT_INTERVAL = 0.4f;
+		static constexpr int   MAX_DOTS = 3;
+	};
 }

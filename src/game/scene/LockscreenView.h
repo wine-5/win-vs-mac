@@ -16,11 +16,11 @@ namespace game::scene
 		 * @brief LockscreenViewのコンストラクタ
 		 * @param uiRenderer UI描画インターフェース
 		 * @param screen 画面情報インターフェース
-		 * @param mainFontName 使用するフォント名
+		 * @param lockFontName 使用するフォント名
 		 */
 		LockscreenView(core::iface::IUIRenderer& uiRenderer,
 			core::iface::IScreen& screen,
-			std::string mainFontName);
+			std::string lockFontName);
 
 		/**
 		 * @brief ヒントタイマーを更新する
