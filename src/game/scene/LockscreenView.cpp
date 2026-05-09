@@ -1,10 +1,9 @@
-#include "LockscreenView.h"
+﻿#include "LockscreenView.h"
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
 #include <cmath>
 #include <ctime>
 #include <string>
-#include <format>
 
 namespace game::scene
 {
@@ -28,15 +27,16 @@ namespace game::scene
 		m_uiRenderer.drawBox(0, offsetY, m_screen.getWidth(), m_screen.getHeight() + offsetY,
 			BG_COLOR, true);
 
-		//// 現在時刻の取得
+		// 現在時刻の取得
 		const std::time_t currentTime{ std::time(nullptr) };
-		const std::tm* t{ std::localtime(&currentTime) };
+		std::tm t{};
+		localtime_s(&t, &currentTime);
 
 		m_uiRenderer.setFont(m_mainFontName.c_str());
 
 		// 時刻(HH:MMの部分）
 		char timeStr[6]{};
-		std::snprintf(timeStr, sizeof(timeStr), "%02d:%02d", t->tm_hour, t->tm_min);  // %02dは幅2桁で表示して足りない場合は0で埋める
+		std::snprintf(timeStr, sizeof(timeStr), "%02d:%02d", t.tm_hour, t.tm_min);  // %02dは幅2桁で表示して足りない場合は0で埋める
 		
 		const int timeWidth{ m_uiRenderer.getTextWidth(timeStr) };
 		const int timeX{ (m_screen.getWidth() - timeWidth) / 2 };
@@ -45,18 +45,22 @@ namespace game::scene
 			core::constant::ui::FONT_SIZE_LARGE);
 
 		// 日付(M月D日(曜))
-		const char* weekdays[]{ "日","月", "火", "水", "木", "金", "土" };
-		const std::string dateStr{ std::format("{}月{}日({})",
-			t->tm_mon + 1, t->tm_mday,weekdays[t->tm_wday])};
+		const char* weekdays[]{ "日", "月", "火", "水", "木", "金", "土" };
+		char dateStr[32]{};
+		std::snprintf(dateStr, sizeof(dateStr), "%d月%d日(%s)",
+			t.tm_mon + 1, t.tm_mday, weekdays[t.tm_wday]);
 
-		const int dateWidth{ m_uiRenderer.getTextWidth(dateStr.c_str()) };
+		const int dateWidth{ m_uiRenderer.getTextWidth(dateStr) };
 		const int dateX{ (m_screen.getWidth() - dateWidth) / 2 };
 		const int dateY{ static_cast<int>(m_screen.getHeight() * DATE_Y_RATIO) + offsetY };
-		m_uiRenderer.drawText(dateX, dateY, dateStr.c_str(), core::utility::Color::WHITE);
+		m_uiRenderer.drawText(dateX, dateY, dateStr, core::utility::Color::WHITE);
 
 		// ヒント描画
-		//const int 
-		const char* hint{ "クリックまたきキーを押してください" };
+		const float sinVal{ std::sin(m_hintTimer * HINT_PULSE_SPEED) };
+		const int alpha{ static_cast<int>((sinVal * 0.3f + 0.7f) * 255) };
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+
+		const char* hint{ "クリックまたはキーを押してください" };
 		const int hintWidth{ m_uiRenderer.getTextWidth(hint) };
 		const int hintX{ (m_screen.getWidth() - hintWidth) / 2 };
 		const int hintY{ static_cast<int>(m_screen.getHeight() * HINT_Y_RATIO) + offsetY };
@@ -64,4 +68,4 @@ namespace game::scene
 
 		m_uiRenderer.resetBlendMode();
 	}
-};
+}
