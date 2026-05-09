@@ -2,6 +2,7 @@
 #include "core/interface/IScreen.h"
 #include "core/interface/IUIRenderer.h"
 #include <string>
+#include "core/utility/Color.h"
 
 namespace game::scene
 {
@@ -44,5 +45,6 @@ namespace game::scene
 		static constexpr float TIME_Y_RATIO = 0.42f;  // 時刻のY位置
 		static constexpr float DATE_Y_RATIO = 0.55f;  // 日付のY位置
 		static constexpr float HINT_Y_RATIO = 0.65f;  // ヒントのY位置
+		static constexpr unsigned int BG_COLOR = core::utility::Color::rgb(10, 27, 62);
 	};
 }
