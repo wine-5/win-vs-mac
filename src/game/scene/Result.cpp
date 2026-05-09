@@ -34,11 +34,12 @@ namespace game::scene
 
     void Result::draw()
     {
+        const int titleFontSize{static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO)};
         const char* title{"リザルト画面"};
-        int titleWidth{m_uiRenderer.getTextWidth(title)};
+        int titleWidth{m_uiRenderer.getTextWidth(title, titleFontSize)};
         int titleX{(m_screen.getWidth() - titleWidth) / 2};
         int titleY{static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO)};
-        m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE);
+        m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE, titleFontSize);
 
         // UI要素を描画
         m_uiManager.draw(m_uiRenderer);
@@ -55,9 +56,10 @@ namespace game::scene
         const int buttonHeight = static_cast<int>(screenHeight * BUTTON_HEIGHT_RATIO);
         const int buttonX = (screenWidth - buttonWidth) / 2;
         const int returnButtonY = static_cast<int>(screenHeight * RETURN_BUTTON_Y_RATIO);
+        const int buttonFontSize = static_cast<int>(screenHeight * core::constant::ui::DEFAULT_FONT_SIZE_RATIO);
 
         auto returnButton{std::make_unique<ui::Button>(
-            "タイトルへ戻る", buttonX, returnButtonY, buttonWidth, buttonHeight, m_inputProvider)};
+            "タイトルへ戻る", buttonX, returnButtonY, buttonWidth, buttonHeight, m_inputProvider, buttonFontSize)};
 
         // ボタンが押されたときの処理（Titleシーンへ遷移）
         returnButton->setOnClick([]() {

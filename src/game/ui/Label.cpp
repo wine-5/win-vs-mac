@@ -22,8 +22,7 @@ namespace game::ui
     {
         if (!m_visible) return;
 
-        // TODO: 将来的にここにFontSizeの引数を追加する
-        uiRenderer.drawText(m_x, m_y, m_text.c_str(), m_color);
+        uiRenderer.drawText(m_x, m_y, m_text.c_str(), m_color, m_fontSize);
     }
 
     void Label::setVisible(bool visible)

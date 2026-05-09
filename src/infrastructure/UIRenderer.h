@@ -43,11 +43,10 @@ namespace infrastructure
         /**
          * @brief テキストの描画幅を取得する
          * @param text テキスト
-         * @param fontSize フォントサイズ（省略時はDEFAULT_FONT_SIZE）
+         * @param fontSize フォントサイズ
          * @return 描画幅（ピクセル）
          */
-        [[nodiscard]] int getTextWidth(const char *text,
-            int fontSize = core::constant::ui::DEFAULT_FONT_SIZE) const override;
+        [[nodiscard]] int getTextWidth(const char *text, int fontSize) const override;
 
         /**
          * @brief 描画ブレンドモードを設定する

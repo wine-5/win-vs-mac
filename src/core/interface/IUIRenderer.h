@@ -30,19 +30,17 @@ namespace core::iface
          * @param y Y座標
          * @param text テキスト
          * @param color 色（ARGB形式：0xAARRGGBB）
-         * @param fontSize フォントサイズ（省略時はDEFAULT_FONT_SIZE）
+         * @param fontSize フォントサイズ
          */
-        virtual void drawText(int x, int y, const char* text, unsigned int color,
-            int fontSize = core::constant::ui::DEFAULT_FONT_SIZE) = 0;
+        virtual void drawText(int x, int y, const char* text, unsigned int color, int fontSize) = 0;
 
         /**
          * @brief テキストの描画幅を取得する
          * @param text テキスト
-         * @param fontSize フォントサイズ（省略時はDEFAULT_FONT_SIZE）
+         * @param fontSize フォントサイズ
          * @return 描画幅（ピクセル）
          */
-        virtual int getTextWidth(const char* text,
-            int fontSize = core::constant::ui::DEFAULT_FONT_SIZE) const = 0;
+        virtual int getTextWidth(const char* text, int fontSize) const = 0;
 
         /**
          * @brief 描画ブレンドモードを設定する

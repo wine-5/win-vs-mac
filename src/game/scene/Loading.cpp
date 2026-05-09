@@ -2,6 +2,7 @@
 #include "SceneManager.h"
 #include "SceneType.h"
 #include "core/utility/Color.h"
+#include "core/constant/UI.h"
 #include "core/ServiceLocator.h"
 #include <string>
 #include <cmath>
@@ -36,21 +37,23 @@ namespace game::scene
 
     void Loading::draw()
     {
+        const int fontSize{static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO)};
+
         // ローディングタイトル表示
         const char* title{"Loading..."};
-        int titleWidth{m_uiRenderer.getTextWidth(title)};
+        int titleWidth{m_uiRenderer.getTextWidth(title, fontSize)};
         int titleX{(m_screen.getWidth() - titleWidth) / 2};
         int titleY{static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO)};
-        m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE);
+        m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE, fontSize);
 
         // 経過時間表示（切り上げ）
         float remainingTime{TEST_LOADING_DURATION - m_elapsedTime};
         if (remainingTime < 0.0f) remainingTime = 0.0f;
 
         std::string timerText = std::to_string(static_cast<int>(std::ceil(remainingTime))) + "秒";
-        int timerWidth{m_uiRenderer.getTextWidth(timerText.c_str())};
+        int timerWidth{m_uiRenderer.getTextWidth(timerText.c_str(), fontSize)};
         int timerX{(m_screen.getWidth() - timerWidth) / 2};
         int timerY{static_cast<int>(m_screen.getHeight() * TIMER_Y_RATIO)};
-        m_uiRenderer.drawText(timerX, timerY, timerText.c_str(), core::utility::Color::YELLOW);
+        m_uiRenderer.drawText(timerX, timerY, timerText.c_str(), core::utility::Color::YELLOW, fontSize);
     }
 }

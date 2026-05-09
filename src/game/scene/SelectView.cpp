@@ -22,9 +22,10 @@ namespace game::scene
         const int buttonHeight{ static_cast<int>(screenHeight * BUTTON_HEIGHT_RATIO) };
         const int buttonX{ (screenWidth - buttonWidth) / 2 };
         const int startButtonY{ static_cast<int>(screenHeight * START_BUTTON_Y_RATIO) };
+        const int buttonFontSize{ static_cast<int>(screenHeight * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
 
         auto startButton{ std::make_unique<ui::Button>(
-            "ゲームスタート", buttonX, startButtonY, buttonWidth, buttonHeight, inputProvider) };
+            "ゲームスタート", buttonX, startButtonY, buttonWidth, buttonHeight, inputProvider, buttonFontSize) };
         startButton->setOnClick(std::move(onGameStart));
         m_uiManager.addElement(std::move(startButton));
 
@@ -35,7 +36,7 @@ namespace game::scene
             const std::string label{ "ファイル" + std::to_string(i + 1) + "を選択" };
 
             auto fileSelectButton{ std::make_unique<ui::Button>(
-                label.c_str(), buttonX, fileButtonY, buttonWidth, buttonHeight, inputProvider) };
+                label.c_str(), buttonX, fileButtonY, buttonWidth, buttonHeight, inputProvider, buttonFontSize) };
             fileSelectButton->setOnClick([onFileSelect, i]() { onFileSelect(i); });
             m_uiManager.addElement(std::move(fileSelectButton));
         }
@@ -48,11 +49,12 @@ namespace game::scene
 
     void SelectView::draw() const
     {
+        const int titleFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
         const char* title{ "難易度と武器、ファイルを３つ選択してください" };
-        const int titleWidth{ m_uiRenderer.getTextWidth(title) };
+        const int titleWidth{ m_uiRenderer.getTextWidth(title, titleFontSize) };
         const int titleX{ (m_screen.getWidth() - titleWidth) / 2 };
         const int titleY{ static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO) };
-        m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE);
+        m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE, titleFontSize);
 
         m_uiManager.draw(m_uiRenderer);
 
@@ -66,7 +68,8 @@ namespace game::scene
                     ? fullPath.substr(slashPos + 1) : fullPath };
                 const std::string text{ "スロット" + std::to_string(i + 1) + ": " + fileName };
                 const int textY{ static_cast<int>(m_screen.getHeight() * (FILE_NAME_BASE_Y_RATIO + i * FILE_NAME_Y_STEP)) };
-                m_uiRenderer.drawText(FILE_NAME_X, textY, text.c_str(), core::utility::Color::WHITE);
+                const int textFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
+                m_uiRenderer.drawText(FILE_NAME_X, textY, text.c_str(), core::utility::Color::WHITE, textFontSize);
             }
         }
     }

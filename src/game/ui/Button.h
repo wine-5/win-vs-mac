@@ -20,9 +20,10 @@ namespace game::ui
          * @param width 幅
          * @param height 高さ
          * @param inputProvider 入力インターフェース
+         * @param fontSize フォントサイズ
          */
         Button(std::string text, int x, int y, int width, int height,
-            core::iface::IInputProvider& inputProvider);
+            core::iface::IInputProvider& inputProvider, int fontSize);
 
         void update() override;
         void draw(core::iface::IUIRenderer& uiRenderer) const override;
@@ -52,6 +53,7 @@ namespace game::ui
         int m_y{};
         int m_width{};
         int m_height{};
+        int m_fontSize{};
         UIState m_state = UIState::Normal;
         bool m_visible{};
         bool m_wasPressed{};

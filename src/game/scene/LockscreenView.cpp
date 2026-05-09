@@ -37,12 +37,12 @@ namespace game::scene
 		// 時刻(HH:MMの部分）
 		char timeStr[6]{};
 		std::snprintf(timeStr, sizeof(timeStr), "%02d:%02d", t.tm_hour, t.tm_min);  // %02dは幅2桁で表示して足りない場合は0で埋める
-		
-		const int timeWidth{ m_uiRenderer.getTextWidth(timeStr, core::constant::ui::FONT_SIZE_CLOCK) };
+
+		const int clockFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::FONT_SIZE_CLOCK_RATIO) };
+		const int timeWidth{ m_uiRenderer.getTextWidth(timeStr, clockFontSize) };
 		const int timeX{ (m_screen.getWidth() - timeWidth) / 2 };
 		const int timeY{ static_cast<int>(m_screen.getHeight() * TIME_Y_RATIO) + offsetY };
-		m_uiRenderer.drawText(timeX, timeY, timeStr, core::utility::Color::WHITE,
-			core::constant::ui::FONT_SIZE_CLOCK);
+		m_uiRenderer.drawText(timeX, timeY, timeStr, core::utility::Color::WHITE, clockFontSize);
 
 		// 日付(M月D日(曜))
 		const char* weekdays[]{ "日", "月", "火", "水", "木", "金", "土" };
@@ -50,10 +50,11 @@ namespace game::scene
 		std::snprintf(dateStr, sizeof(dateStr), "%d月%d日(%s)",
 			t.tm_mon + 1, t.tm_mday, weekdays[t.tm_wday]);
 
-		const int dateWidth{ m_uiRenderer.getTextWidth(dateStr, core::constant::ui::DEFAULT_FONT_SIZE) };
+		const int normalFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
+		const int dateWidth{ m_uiRenderer.getTextWidth(dateStr, normalFontSize) };
 		const int dateX{ (m_screen.getWidth() - dateWidth) / 2 };
 		const int dateY{ static_cast<int>(m_screen.getHeight() * DATE_Y_RATIO) + offsetY };
-		m_uiRenderer.drawText(dateX, dateY, dateStr, core::utility::Color::WHITE);
+		m_uiRenderer.drawText(dateX, dateY, dateStr, core::utility::Color::WHITE, normalFontSize);
 
 		// ヒント描画
 		const float sinVal{ std::sin(m_hintTimer * HINT_PULSE_SPEED) };
@@ -61,10 +62,10 @@ namespace game::scene
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
 
 		const char* hint{ "クリックまたはキーを押してください" };
-		const int hintWidth{ m_uiRenderer.getTextWidth(hint, core::constant::ui::DEFAULT_FONT_SIZE) };
+		const int hintWidth{ m_uiRenderer.getTextWidth(hint, normalFontSize) };
 		const int hintX{ (m_screen.getWidth() - hintWidth) / 2 };
 		const int hintY{ static_cast<int>(m_screen.getHeight() * HINT_Y_RATIO) + offsetY };
-		m_uiRenderer.drawText(hintX, hintY, hint, core::utility::Color::WHITE);
+		m_uiRenderer.drawText(hintX, hintY, hint, core::utility::Color::WHITE, normalFontSize);
 
 		m_uiRenderer.resetBlendMode();
 	}

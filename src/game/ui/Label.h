@@ -17,10 +17,9 @@ namespace game::ui
 		 * @param x X座標
 		 * @param y Y座標
 		 * @param color 文字色（ARGB）
-		 * @param fontSize フォントサイズ（省略時はDEFAULT_FONT_SIZE）
+		 * @param fontSize フォントサイズ
 		 */
-		Label(std::string text, int x, int y, unsigned int color,
-			int fontSize = core::constant::ui::DEFAULT_FONT_SIZE);
+		Label(std::string text, int x, int y, unsigned int color, int fontSize);
 
 		void update() override;
 		void draw(core::iface::IUIRenderer& uiRenderer) const override;
