@@ -17,8 +17,9 @@ namespace game::scene
 		, m_screen{ screen }
 	{
 		auto* res{ core::ServiceLocator::get<core::iface::IResourceManager>() };
-		std::string mainFontName{ res->getFontName("normal").value_or("") };
-		m_lockscreenView = std::make_unique<LockscreenView>(uiRenderer, screen, mainFontName);
+		std::string mainFontName{ res->getFontName("main").value_or("") };
+		std::string lockFontName{ res->getFontName("normal").value_or("") };
+		m_lockscreenView = std::make_unique<LockscreenView>(uiRenderer, screen, std::move(lockFontName));
 
 		m_view = std::make_unique<TitleView>(
 			inputProvider, uiRenderer, screen,
