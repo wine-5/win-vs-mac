@@ -8,7 +8,7 @@ namespace core::iface
 	 */
 	struct JobInfo
 	{
-		int m_job{};
+		int m_id{};
 		std::string m_name{};
 		std::string m_skillName{};
 		float m_hp{};
