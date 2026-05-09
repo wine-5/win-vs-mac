@@ -119,11 +119,28 @@ function restoreWindow(id) {
 
 function toggleWindow(id) {
     const el = document.getElementById(id);
-    if (el.style.display === 'none') {
+    if (el.style.display === 'none' || el.classList.contains('minimized')) {
         restoreWindow(id);
     } else {
         minimizeWindow(id);
     }
+}
+
+function showWindow(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = 'flex';
+    el.classList.remove('minimized');
+    el.style.zIndex = 100;
+    updateTaskbarApp(id, 'active');
+}
+
+function bringToFront(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const maxZ = Math.max(...Array.from(document.querySelectorAll('.win10-window'))
+        .map(e => parseInt(window.getComputedStyle(e).zIndex) || 20), 100);
+    el.style.zIndex = maxZ + 1;
 }
 
 function updateTaskbarApp(id, state) {

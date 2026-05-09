@@ -68,23 +68,45 @@
 
     <!-- ===== STAGE SELECT ===== -->
     <div id="scene-stage" class="scene">
-        <!-- Desktop icons -->
-        <div class="desktop-icons">
-            <div class="desktop-icon" ondblclick="restoreWindow('win-job')">
-                <div class="desktop-icon-img">⚔</div>
-                <div class="desktop-icon-label">職業選択</div>
+
+        <!-- Desktop Icons -->
+        <div class="stage-desktop-icons" id="desktop-icons">
+            <div class="desktop-icon" onclick="showWindow('win-stage')">
+                <div class="desktop-icon-img">🎮</div>
+                <div class="desktop-icon-label">STAGE<br>SELECT</div>
             </div>
-            <div class="desktop-icon" ondblclick="restoreWindow('win-explorer')">
+            <div class="desktop-icon" onclick="showWindow('win-job')">
+                <div class="desktop-icon-img">⚔</div>
+                <div class="desktop-icon-label">職業<br>選択</div>
+            </div>
+            <div class="desktop-icon" onclick="showWindow('win-explorer')">
                 <div class="desktop-icon-img">📁</div>
-                <div class="desktop-icon-label">ファイル選択</div>
+                <div class="desktop-icon-label">ファイル<br>選択</div>
+            </div>
+            <div class="desktop-icon" onclick="showWindow('win-params')">
+                <div class="desktop-icon-img">📊</div>
+                <div class="desktop-icon-label">パラ<br>メータ</div>
             </div>
         </div>
 
-        <!-- Job Select Window -->
-        <div class="win10-window" id="win-job">
+        <!-- ===== Window: STAGE SELECT (Main Container) ===== -->
+        <div class="win10-window" id="win-stage" onmousedown="bringToFront('win-stage')">
+            <div class="win10-titlebar" onmousedown="startDrag(event, 'win-stage')">
+                <span class="win10-titlebar-icon">🎮</span>
+                <span class="win10-titlebar-title">STAGE SELECT — WIN vs MAC</span>
+                <div class="win10-window-controls">
+                    <button class="win10-wctrl" onclick="minimizeWindow('win-stage')" title="最小化">─</button>
+                    <button class="win10-wctrl" onclick="maximizeWindow('win-stage')" title="最大化">□</button>
+                    <button class="win10-wctrl close" onclick="closeWindow('win-stage')" title="閉じる">✕</button>
+                </div>
+            </div>
+            <div class="win10-window-body" style="background:#e8e8e8">
+                <div class="stage-inner-container">
+                    <!-- ===== Window: Job Select ===== -->
+                    <div class="win10-window" id="win-job" onmousedown="bringToFront('win-job')">
             <div class="win10-titlebar" onmousedown="startDrag(event, 'win-job')">
                 <span class="win10-titlebar-icon">⚔</span>
-                <span class="win10-titlebar-title">職業の選択 — WIN vs MAC</span>
+                <span class="win10-titlebar-title">職業選択</span>
                 <div class="win10-window-controls">
                     <button class="win10-wctrl" onclick="minimizeWindow('win-job')" title="最小化">─</button>
                     <button class="win10-wctrl" onclick="maximizeWindow('win-job')" title="最大化">□</button>
@@ -92,44 +114,43 @@
                 </div>
             </div>
             <div class="win10-window-body">
-                <div class="job-select-body">
-                    <div class="job-select-label">職業を選択してください：</div>
-                    <div class="job-list">
-                        <div class="job-item selected" onclick="selectJob(this,'剣士','slash','全方位斬り')">
-                            <div class="job-item-icon">⚔</div>
-                            <div class="job-item-info">
-                                <div class="job-item-name">剣士 [Warrior]</div>
-                                <div class="job-item-sub">近接・前方扇形攻撃 / 攻撃タイプ: slash</div>
-                            </div>
-                            <div class="job-item-skill">必殺: 全方位斬り</div>
-                        </div>
-                        <div class="job-item" onclick="selectJob(this,'魔法使い','magic','巨大魔法弾')">
-                            <div class="job-item-icon">🔮</div>
-                            <div class="job-item-info">
-                                <div class="job-item-name">魔法使い [Mage]</div>
-                                <div class="job-item-sub">遠距離・魔法弾 / 攻撃タイプ: magic</div>
-                            </div>
-                            <div class="job-item-skill">必殺: 巨大魔法弾</div>
-                        </div>
-                        <div class="job-item" onclick="selectJob(this,'忍者','pierce','分身一斉攻撃')">
-                            <div class="job-item-icon">🗡</div>
-                            <div class="job-item-info">
-                                <div class="job-item-name">忍者 [Ninja]</div>
-                                <div class="job-item-sub">近接・高速 / 攻撃タイプ: pierce</div>
-                            </div>
-                            <div class="job-item-skill">必殺: 分身一斉攻撃</div>
+                <div class="job-list" id="job-list">
+                    <div class="job-item selected" onclick="selectJob(this,'剣士')">
+                        <div class="job-item-icon">⚔</div>
+                        <div class="job-item-info">
+                            <div class="job-item-name">剣士 <span class="job-item-en">Warrior</span></div>
+                            <div class="job-item-sub">近接・前方扇形攻撃</div>
                         </div>
                     </div>
-                    <div class="win10-btn-row">
-                        <button class="win10-btn primary" onclick="confirmJob()">OK</button>
-                        <button class="win10-btn" onclick="closeWindow('win-job')">キャンセル</button>
+                    <div class="job-item" onclick="selectJob(this,'魔法使い')">
+                        <div class="job-item-icon">🔮</div>
+                        <div class="job-item-info">
+                            <div class="job-item-name">魔法使い <span class="job-item-en">Mage</span></div>
+                            <div class="job-item-sub">遠距離・魔法弾</div>
+                        </div>
                     </div>
+                    <div class="job-item" onclick="selectJob(this,'忍者')">
+                        <div class="job-item-icon">🗡</div>
+                        <div class="job-item-info">
+                            <div class="job-item-name">忍者 <span class="job-item-en">Ninja</span></div>
+                            <div class="job-item-sub">近接・高速移動</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="job-desc-box">
+                    <div class="job-desc-name" id="job-desc-name">剣士 / Warrior</div>
+                    <div class="job-desc-text" id="job-desc-text">近接戦闘を得意とする前衛職。前方扇形への斬撃で複数の敵をまとめて攻撃できる。防御力が高く初心者にもおすすめ。</div>
+                    <div class="job-desc-skill">
+                        <span class="job-desc-skill-label">必殺技</span>
+                        <span id="job-desc-skill">全方位斬り</span>
+                    </div>
+                    <div class="job-desc-type">攻撃タイプ: <span id="job-desc-type">slash</span></div>
                 </div>
             </div>
         </div>
 
-        <!-- Explorer Window -->
-        <div class="win10-window win-explorer" id="win-explorer">
+        <!-- ===== Window: File Explorer ===== -->
+        <div class="win10-window" id="win-explorer" onmousedown="bringToFront('win-explorer')">
             <div class="win10-titlebar" onmousedown="startDrag(event, 'win-explorer')">
                 <span class="win10-titlebar-icon">📁</span>
                 <span class="win10-titlebar-title">ドキュメント\Projects — エクスプローラー</span>
@@ -139,21 +160,18 @@
                     <button class="win10-wctrl close" onclick="closeWindow('win-explorer')" title="閉じる">✕</button>
                 </div>
             </div>
-            <div class="win10-window-body" style="display:flex;flex-direction:column;">
+            <div class="win10-window-body">
                 <div class="explorer-ribbon">
                     <button class="explorer-nav-btn">←</button>
                     <button class="explorer-nav-btn">→</button>
                     <button class="explorer-nav-btn">↑</button>
                     <div class="explorer-addressbar">
                         <span>📁</span>
-                        <span class="explorer-addressbar-path">PC > ドキュメント > Projects</span>
+                        <span class="explorer-addressbar-path">PC &gt; ドキュメント &gt; Projects</span>
                     </div>
                     <button class="explorer-nav-btn">🔍</button>
                 </div>
-                <div class="explorer-toolbar2">
-                    <span>ファイルを最大3つ選択 → 「選択完了」でゲームへ</span>
-                </div>
-                <div class="explorer-pane" style="flex:1;min-height:0;">
+                <div class="explorer-pane">
                     <div class="explorer-sidebar">
                         <div class="explorer-sidebar-item active">⭐ クイックアクセス</div>
                         <div class="explorer-sidebar-item">🖥 デスクトップ</div>
@@ -164,68 +182,139 @@
                         <div class="explorer-sidebar-item">💾 PC</div>
                     </div>
                     <div class="explorer-content" id="explorer-file-list">
-                        <div class="explorer-file" onclick="toggleExFile(this,'project_final.exe','.exe','ATK +10')">
+                        <div class="explorer-file" onclick="toggleExFile(this,'project_final.exe','atk',10)">
                             <div class="explorer-file-icon">⚙</div>
                             <div class="explorer-file-name">project_final.exe</div>
                             <div class="explorer-file-type">アプリケーション</div>
                             <div class="explorer-file-size">2.4 MB</div>
                             <div class="explorer-file-bonus">ATK +10</div>
                         </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'readme.txt','.txt','SPD +1.5')">
+                        <div class="explorer-file" onclick="toggleExFile(this,'readme.txt','spd',5)">
                             <div class="explorer-file-icon">📄</div>
                             <div class="explorer-file-name">readme.txt</div>
                             <div class="explorer-file-type">テキスト</div>
                             <div class="explorer-file-size">12 KB</div>
-                            <div class="explorer-file-bonus">SPD +1.5</div>
+                            <div class="explorer-file-bonus">SPD +5</div>
                         </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'screenshot.png','.png','DEF +8')">
+                        <div class="explorer-file" onclick="toggleExFile(this,'screenshot.png','def',8)">
                             <div class="explorer-file-icon">🖼</div>
                             <div class="explorer-file-name">screenshot.png</div>
                             <div class="explorer-file-type">PNG 画像</div>
                             <div class="explorer-file-size">3.1 MB</div>
                             <div class="explorer-file-bonus">DEF +8</div>
                         </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'bgm.mp3','.mp3','HP +20')">
+                        <div class="explorer-file" onclick="toggleExFile(this,'bgm.mp3','hp',20)">
                             <div class="explorer-file-icon">🎵</div>
                             <div class="explorer-file-name">bgm.mp3</div>
                             <div class="explorer-file-type">MP3 オーディオ</div>
                             <div class="explorer-file-size">8.7 MB</div>
                             <div class="explorer-file-bonus">HP +20</div>
                         </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'backup.zip','.zip','ALL +')">
+                        <div class="explorer-file" onclick="toggleExFile(this,'backup.zip','all',5)">
                             <div class="explorer-file-icon">📦</div>
                             <div class="explorer-file-name">backup.zip</div>
                             <div class="explorer-file-type">圧縮フォルダー</div>
                             <div class="explorer-file-size">45 MB</div>
-                            <div class="explorer-file-bonus">ALL +</div>
+                            <div class="explorer-file-bonus">ALL +5</div>
                         </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'data.dll','.dll','ATK +10')">
+                        <div class="explorer-file" onclick="toggleExFile(this,'data.dll','atk',10)">
                             <div class="explorer-file-icon">⚙</div>
                             <div class="explorer-file-name">data.dll</div>
                             <div class="explorer-file-type">DLL ファイル</div>
                             <div class="explorer-file-size">512 KB</div>
                             <div class="explorer-file-bonus">ATK +10</div>
                         </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'notes.docx','.docx','SPD +1.5')">
+                        <div class="explorer-file" onclick="toggleExFile(this,'notes.docx','spd',5)">
                             <div class="explorer-file-icon">📝</div>
                             <div class="explorer-file-name">notes.docx</div>
                             <div class="explorer-file-type">Word 文書</div>
                             <div class="explorer-file-size">280 KB</div>
-                            <div class="explorer-file-bonus">SPD +1.5</div>
+                            <div class="explorer-file-bonus">SPD +5</div>
                         </div>
-                        <div class="explorer-file" onclick="toggleExFile(this,'mystery.???','.???','射程 +20')">
+                        <div class="explorer-file" onclick="toggleExFile(this,'mystery.???','mystery',0)">
                             <div class="explorer-file-icon">❓</div>
                             <div class="explorer-file-name">mystery.???</div>
                             <div class="explorer-file-type">不明なファイル</div>
                             <div class="explorer-file-size">1 KB</div>
-                            <div class="explorer-file-bonus">射程 +20</div>
+                            <div class="explorer-file-bonus" style="color:#c42b1c">???</div>
                         </div>
                     </div>
                 </div>
                 <div class="explorer-statusbar">
                     <span id="ex-status">ファイルを選択してください（最大3つ）</span>
-                    <button class="explorer-goto-btn" onclick="goToGame()">選択完了 →</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- ===== Window: Parameters ===== -->
+        <div class="win10-window" id="win-params" onmousedown="bringToFront('win-params')">
+            <div class="win10-titlebar" onmousedown="startDrag(event, 'win-params')">
+                <span class="win10-titlebar-icon">📊</span>
+                <span class="win10-titlebar-title">パラメータ</span>
+                <div class="win10-window-controls">
+                    <button class="win10-wctrl" onclick="minimizeWindow('win-params')" title="最小化">─</button>
+                    <button class="win10-wctrl" onclick="maximizeWindow('win-params')" title="最大化">□</button>
+                    <button class="win10-wctrl close" onclick="closeWindow('win-params')" title="閉じる">✕</button>
+                </div>
+            </div>
+            <div class="win10-window-body">
+                <div class="param-job-badge">
+                    <span class="param-job-icon" id="param-job-icon">⚔</span>
+                    <span class="param-job-name" id="param-job-name">剣士 / Warrior</span>
+                </div>
+                <div class="param-stats">
+                    <div class="param-stat-row">
+                        <div class="param-stat-label">HP</div>
+                        <div class="param-stat-bar-wrap">
+                            <div class="param-stat-bar hp" id="bar-hp" style="width:60%"></div>
+                        </div>
+                        <div class="param-stat-val" id="val-hp">120</div>
+                    </div>
+                    <div class="param-stat-row">
+                        <div class="param-stat-label">ATK</div>
+                        <div class="param-stat-bar-wrap">
+                            <div class="param-stat-bar atk" id="bar-atk" style="width:45%"></div>
+                        </div>
+                        <div class="param-stat-val" id="val-atk">45</div>
+                    </div>
+                    <div class="param-stat-row">
+                        <div class="param-stat-label">DEF</div>
+                        <div class="param-stat-bar-wrap">
+                            <div class="param-stat-bar def" id="bar-def" style="width:44%"></div>
+                        </div>
+                        <div class="param-stat-val" id="val-def">35</div>
+                    </div>
+                    <div class="param-stat-row">
+                        <div class="param-stat-label">SPD</div>
+                        <div class="param-stat-bar-wrap">
+                            <div class="param-stat-bar spd" id="bar-spd" style="width:30%"></div>
+                        </div>
+                        <div class="param-stat-val" id="val-spd">30</div>
+                    </div>
+                </div>
+                <div class="param-divider"></div>
+                <div class="param-section-header">装備ファイル</div>
+                <div class="param-equip-list" id="param-equip-list">
+                    <div class="param-equip-empty">— なし —</div>
+                </div>
+                <div class="param-divider"></div>
+                <div class="param-section-header">必殺技</div>
+                <div class="param-skill-name" id="param-skill-name">全方位斬り</div>
+            </div>
+        </div>
+                </div>
+
+                <!-- ===== Bottom bar: Difficulty + Start ===== -->
+                <div class="stage-bottom-bar">
+            <div class="difficulty-group">
+                <span class="difficulty-label">難易度</span>
+                <button class="diff-btn" id="diff-easy" onclick="setDifficulty('EASY')">EASY</button>
+                <button class="diff-btn active" id="diff-normal" onclick="setDifficulty('NORMAL')">NORMAL</button>
+                <button class="diff-btn danger" id="diff-hard" onclick="setDifficulty('HARD')">HARD</button>
+            </div>
+            <div class="difficulty-desc" id="difficulty-desc">標準的な難易度。バランスよく楽しめます。</div>
+            <button class="start-btn" id="start-btn" onclick="goToGame()">ゲームを開始 →</button>
+            </div>
             </div>
         </div>
 
@@ -234,11 +323,17 @@
             <div class="win10-start" title="スタート">⊞</div>
             <div class="win10-search">🔍 <span>検索</span></div>
             <div class="win10-taskbar-apps" id="taskbar-apps">
+                <div class="win10-taskbar-app active" id="tb-win-stage" onclick="toggleWindow('win-stage')">
+                    <span>🎮</span><span>STAGE SELECT</span>
+                </div>
                 <div class="win10-taskbar-app active" id="tb-win-job" onclick="toggleWindow('win-job')">
                     <span>⚔</span><span>職業選択</span>
                 </div>
                 <div class="win10-taskbar-app active" id="tb-win-explorer" onclick="toggleWindow('win-explorer')">
-                    <span>📁</span><span>エクスプローラー</span>
+                    <span>📁</span><span>ファイル選択</span>
+                </div>
+                <div class="win10-taskbar-app active" id="tb-win-params" onclick="toggleWindow('win-params')">
+                    <span>📊</span><span>パラメータ</span>
                 </div>
             </div>
             <div class="win10-tray">
