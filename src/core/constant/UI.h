@@ -8,10 +8,11 @@ namespace core::constant
     namespace ui
     {
         // フォントサイズ
-        constexpr int FONT_SIZE_SMALL = 12;
-        constexpr int FONT_SIZE_NORMAL = 16;
-        constexpr int FONT_SIZE_LARGE = 24;
-        constexpr int FONT_SIZE_TITLE = 32;
+        constexpr int FONT_SIZE_SMALL  = 16;
+        constexpr int FONT_SIZE_NORMAL = 20;
+        constexpr int FONT_SIZE_LARGE  = 32;
+        constexpr int FONT_SIZE_TITLE  = 48;
+        constexpr int FONT_SIZE_CLOCK  = 72;
 
         // デフォルトのフォントサイズ
         constexpr int DEFAULT_FONT_SIZE = FONT_SIZE_NORMAL;

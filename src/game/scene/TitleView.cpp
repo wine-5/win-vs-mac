@@ -52,7 +52,7 @@ namespace game::scene
 		for (int i{ 0 }; i < dotCount; ++i)
 			text += '.';
 
-		const int textWidth{ m_uiRenderer.getTextWidth(text.c_str()) };
+		const int textWidth{ m_uiRenderer.getTextWidth(text.c_str(), core::constant::ui::DEFAULT_FONT_SIZE) };
 		const int x{ (m_screen.getWidth() - textWidth) / 2 };
 		const int y{ (m_screen.getHeight() - core::constant::ui::FONT_SIZE_NORMAL) / 2 };
 		m_uiRenderer.drawText(x, y, text.c_str(), core::utility::Color::WHITE);
@@ -63,7 +63,7 @@ namespace game::scene
 		m_uiRenderer.setFont(m_mainFontName.c_str());
 
 		const char* title{ "Win vs Mac" };
-		const int titleWidth{ m_uiRenderer.getTextWidth(title) };
+		const int titleWidth{ m_uiRenderer.getTextWidth(title, core::constant::ui::FONT_SIZE_LARGE) };
 		const int titleX{ (m_screen.getWidth() - titleWidth) / 2 };
 		const int titleY{ static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO) };
 
