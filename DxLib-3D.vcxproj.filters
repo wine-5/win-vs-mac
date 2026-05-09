@@ -459,5 +459,8 @@
     <ClInclude Include="src\game\scene\LockscreenView.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\constant\SelectWindowId.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
