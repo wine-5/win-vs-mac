@@ -57,7 +57,7 @@ namespace game::scene
 
 		// ヒント描画
 		const float sinVal{ std::sin(m_hintTimer * HINT_PULSE_SPEED) };
-		const int alpha{ static_cast<int>((sinVal * 0.3f + 0.7f) * 255) };
+		const int alpha{ static_cast<int>((sinVal * HINT_ALPHA_RANGE + HINT_ALPHA_MIN) * 255) };
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
 
 		const char* hint{ "クリックまたはキーを押してください" };

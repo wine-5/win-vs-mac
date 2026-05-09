@@ -52,9 +52,14 @@ namespace game::scene
 		data::FileEquipmentData&  m_fileEquipmentData;
 		ui::UIManager             m_uiManager{};
 
-		static constexpr float TITLE_Y_RATIO = 0.20f;
-		static constexpr float START_BUTTON_Y_RATIO = 0.45f;
-		static constexpr float BUTTON_WIDTH_RATIO = 0.15f;
-		static constexpr float BUTTON_HEIGHT_RATIO = 0.06f;
+		static constexpr float TITLE_Y_RATIO            = 0.20f;
+		static constexpr float START_BUTTON_Y_RATIO      = 0.45f;
+		static constexpr float BUTTON_WIDTH_RATIO        = 0.15f;
+		static constexpr float BUTTON_HEIGHT_RATIO       = 0.06f;
+		static constexpr float FILE_BUTTON_BASE_Y_RATIO  = 0.35f;
+		static constexpr float FILE_BUTTON_Y_STEP        = 0.08f;
+		static constexpr float FILE_NAME_BASE_Y_RATIO    = 0.28f;
+		static constexpr float FILE_NAME_Y_STEP          = 0.04f;
+		static constexpr int   FILE_NAME_X               = 10;
 	};
 }

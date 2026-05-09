@@ -28,10 +28,10 @@ namespace game::scene
         startButton->setOnClick(std::move(onGameStart));
         m_uiManager.addElement(std::move(startButton));
 
-        constexpr float fileButtonYRatio{ 0.35f };
+        constexpr float fileButtonYRatio{ FILE_BUTTON_BASE_Y_RATIO };
         for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
         {
-            const int fileButtonY{ static_cast<int>(screenHeight * (fileButtonYRatio - i * 0.08f)) };
+            const int fileButtonY{ static_cast<int>(screenHeight * (fileButtonYRatio - i * FILE_BUTTON_Y_STEP)) };
             const std::string label{ "ファイル" + std::to_string(i + 1) + "を選択" };
 
             auto fileSelectButton{ std::make_unique<ui::Button>(
@@ -65,8 +65,8 @@ namespace game::scene
                 const std::string fileName{ slashPos != std::string::npos
                     ? fullPath.substr(slashPos + 1) : fullPath };
                 const std::string text{ "スロット" + std::to_string(i + 1) + ": " + fileName };
-                const int textY{ static_cast<int>(m_screen.getHeight() * (0.28f + i * 0.04f)) };
-                m_uiRenderer.drawText(10, textY, text.c_str(), core::utility::Color::WHITE);
+                const int textY{ static_cast<int>(m_screen.getHeight() * (FILE_NAME_BASE_Y_RATIO + i * FILE_NAME_Y_STEP)) };
+                m_uiRenderer.drawText(FILE_NAME_X, textY, text.c_str(), core::utility::Color::WHITE);
             }
         }
     }
