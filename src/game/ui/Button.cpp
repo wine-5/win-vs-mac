@@ -63,7 +63,7 @@ namespace game::ui
         int textWidth{uiRenderer.getTextWidth(m_text.c_str(), m_fontSize)};
         int textX{m_x + (m_width - textWidth) / 2};
         int textY{m_y + (m_height - m_fontSize) / 2};
-        uiRenderer.drawText(textX, textY, m_text.c_str(), core::utility::Color::BLUE, m_fontSize);
+        uiRenderer.drawText(textX, textY, m_text.c_str(), core::utility::Color::WHITE, m_fontSize);
     }
 
     void Button::setVisible(bool visible)

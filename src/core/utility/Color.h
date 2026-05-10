@@ -50,9 +50,9 @@ namespace core::utility
         // ========== UI用の色 ==========
 
         // ボタンの色
-        static constexpr unsigned int BUTTON_NORMAL = 0xFF6464C8;
-        static constexpr unsigned int BUTTON_FOCUSED = 0xFF9696FF;
-        static constexpr unsigned int BUTTON_PRESSED = 0xFF5050B4;
+        static constexpr unsigned int BUTTON_NORMAL = 0xFF4848A0;
+        static constexpr unsigned int BUTTON_FOCUSED = 0xFF6868D0;
+        static constexpr unsigned int BUTTON_PRESSED = 0xFF383880;
         static constexpr unsigned int BUTTON_DISABLED = GRAY;
     };
 }
