@@ -1,5 +1,6 @@
 #pragma once
 #include "core/event/ISelectEvent.h"
+#include "core/constant/JobType.h"
 #include <string>
 
 namespace core::event
@@ -9,11 +10,11 @@ namespace core::event
 	 */
 	struct JobChangedEvent : public ISelectEvent
 	{
-		/** @brief 選択された職業のID */
-		int m_jobId{ -1 }; // 初期値は無効値
+		/** @brief 選択された職業のタイプ */
+		core::constant::JobType m_jobType{ core::constant::JobType::Warrior };
 
 		JobChangedEvent() = default;
-		JobChangedEvent(int jobId) : m_jobId(jobId) {}
+		JobChangedEvent(core::constant::JobType jobType) : m_jobType(jobType) {}
 	};
 
 	/**

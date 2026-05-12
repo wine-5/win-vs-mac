@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "core/constant/JobType.h"
 
 namespace core::iface
 {
@@ -33,9 +34,9 @@ namespace core::iface
 
 		/**
 		 * @brief 職業情報を取得
-		 * @param jobId 職業ID（0-2）
+		 * @param jobType 職業タイプ
 		 * @return 職業情報
 		 */
-		virtual JobInfo getJobInfo(int jobId) const = 0;
+		virtual JobInfo getJobInfo(core::constant::JobType jobType) const = 0;
 	};
 }
