@@ -477,5 +477,8 @@
     <ClInclude Include="src\core\interface\ISelectWindowManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\data\JobDataProvider.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
