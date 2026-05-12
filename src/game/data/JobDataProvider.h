@@ -1,5 +1,6 @@
 #pragma once
-#include "core/iface/IJobProvider.h"
+#include <array>
+#include "core/interface/IJobProvider.h"
 #include "core/constant/JobType.h"
 
 namespace game::data
@@ -25,6 +26,6 @@ namespace game::data
 
 	private:
 		/// @brief 職業データテーブル
-		static constexpr std::array<core::iface::JobInfo, core::constant::JOB_COUNT> JOB_TABLE{};
+		static const std::array<core::iface::JobInfo, core::constant::JOB_COUNT> JOB_TABLE;
 	};
 }

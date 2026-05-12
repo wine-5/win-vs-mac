@@ -136,6 +136,7 @@
     <ClCompile Include="src\game\actor\Enemy.cpp" />
     <ClCompile Include="src\game\attack\BaseAttackHandler.cpp" />
     <ClCompile Include="src\game\attack\DefenseHandler.cpp" />
+    <ClCompile Include="src\game\data\JobDataProvider.cpp" />
     <ClCompile Include="src\game\factory\EnemyFactory.cpp" />
     <ClCompile Include="src\game\scene\Loading.cpp" />
     <ClCompile Include="src\game\scene\LockscreenView.cpp" />
