@@ -10,6 +10,7 @@
 #include "game/GameManager.h"
 #include "core/interface/IResourceManager.h"
 #include "infrastructure/ResourceManager.h"
+#include "core/interface/IJobProvider.h"
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 {
@@ -21,7 +22,13 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 		std::make_unique<platform::WindowsDataProvider>()
 	);
 
+	// TODO: 現在はインスタンスを２つ作成していて無駄があるため、
+	// シングルトン基底クラス実装時、ResourceManagerの単一インスタンスを共有するように修正
 	core::ServiceLocator::provide<core::iface::IResourceManager>(
+		std::make_unique<infrastructure::ResourceManager>()
+	);
+
+	core::ServiceLocator::provide<core::iface::IJobProvider>(
 		std::make_unique<infrastructure::ResourceManager>()
 	);
 
