@@ -4,7 +4,7 @@
 #include "game/ui/Button.h"
 #include "core/constant/UI.h"
 #include "core/utility/Color.h"
-#include "core/ServiceLocator.h"
+#include "core/base/ServiceLocator.h"
 
 namespace game::scene
 {
@@ -63,7 +63,7 @@ namespace game::scene
 
         // ボタンが押されたときの処理（Titleシーンへ遷移）
         returnButton->setOnClick([]() {
-            auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
+            auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
             sceneManager->changeScene(SceneType::Title);
             });
 

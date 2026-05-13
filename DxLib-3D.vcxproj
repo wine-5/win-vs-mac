@@ -76,6 +76,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -90,6 +92,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -104,6 +108,8 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -122,6 +128,8 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/FS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -131,8 +139,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\core\interface\ICamera.h" />
-    <ClCompile Include="src\core\interface\ILogger.h" />
     <ClCompile Include="src\game\actor\Enemy.cpp" />
     <ClCompile Include="src\game\attack\BaseAttackHandler.cpp" />
     <ClCompile Include="src\game\attack\DefenseHandler.cpp" />
@@ -152,7 +158,7 @@
     <ClCompile Include="src\game\ui\FadeTransition.cpp" />
     <ClCompile Include="src\game\ui\Label.cpp" />
     <ClCompile Include="src\infrastructure\Screen.cpp" />
-    <ClCompile Include="src\core\ServiceLocator.cpp" />
+    <ClCompile Include="src\core\base\ServiceLocator.cpp" />
     <ClCompile Include="src\game\factory\FactoryInitializer.cpp" />
     <ClCompile Include="src\game\factory\FactoryManager.cpp" />
     <ClCompile Include="src\game\factory\GroundFactory.cpp" />
@@ -205,7 +211,7 @@
     <ClInclude Include="src\core\constant\JobType.h" />
     <ClInclude Include="src\core\constant\SelectWindowId.h" />
     <ClInclude Include="src\core\data\ModelMetadata.h" />
-    <ClInclude Include="src\core\EventBus.h" />
+    <ClInclude Include="src\core\base\EventBus.h" />
     <ClInclude Include="src\core\input\GamePadCode.h" />
     <ClInclude Include="src\core\interface\IAnimator.h" />
     <ClInclude Include="src\core\interface\IFileProvider.h" />
@@ -255,9 +261,9 @@
     <ClInclude Include="src\game\utility\ExtensionBonusCalculator.h" />
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
     <ClInclude Include="src\infrastructure\Screen.h" />
-    <ClInclude Include="src\core\ServiceLocator.h" />
+    <ClInclude Include="src\core\base\ServiceLocator.h" />
     <ClInclude Include="src\core\utility\Color.h" />
-    <ClInclude Include="src\core\Vector3.h" />
+    <ClInclude Include="src\core\utility\Vector3.h" />
     <ClInclude Include="src\game\component\AnimationComponent.h" />
     <ClInclude Include="src\game\component\ColliderComponent.h" />
     <ClInclude Include="src\game\constant\Tag.h" />

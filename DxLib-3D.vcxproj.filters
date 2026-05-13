@@ -18,7 +18,7 @@
     <ClCompile Include="src\Main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\ServiceLocator.cpp">
+    <ClCompile Include="src\core\base\ServiceLocator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\system\InputSystem.cpp">
@@ -192,10 +192,10 @@
     <ClInclude Include="src\core\ecs\EntityManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\EventBus.h">
+    <ClInclude Include="src\core\base\EventBus.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\ServiceLocator.h">
+    <ClInclude Include="src\core\base\ServiceLocator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\event\InGameEvents.h">
@@ -222,7 +222,7 @@
     <ClInclude Include="src\game\actor\Player.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\Vector3.h">
+    <ClInclude Include="src\core\utility\Vector3.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\infrastructure\Camera.h">

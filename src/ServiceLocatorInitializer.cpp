@@ -1,5 +1,5 @@
 ﻿#include "ServiceLocatorInitializer.h"
-#include "core/ServiceLocator.h"
+#include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IFileProvider.h"
@@ -15,35 +15,35 @@
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 {
-	core::ServiceLocator::provide(
+	core::base::ServiceLocator::provide(
 		std::make_unique<game::GameManager>()
 	);
 
-	core::ServiceLocator::provide<core::iface::IFileProvider>(
+	core::base::ServiceLocator::provide<core::iface::IFileProvider>(
 		std::make_unique<platform::WindowsDataProvider>()
 	);
 
 	// ResourceManagerを登録（モデル・メタデータ・フォント管理用）
-	core::ServiceLocator::provide<core::iface::IResourceManager>(
+	core::base::ServiceLocator::provide<core::iface::IResourceManager>(
 		std::make_unique<infrastructure::ResourceManager>()
 	);
 
 	// JobDataProviderを登録（職業情報提供用）
-	core::ServiceLocator::provide<core::iface::IJobProvider>(
+	core::base::ServiceLocator::provide<core::iface::IJobProvider>(
 		std::make_unique<game::data::JobDataProvider>()
 	);
 
 	// DEBUG:デバック用のためリリース時は消すこと
-	core::ServiceLocator::provide<core::iface::ILogger>(
+	core::base::ServiceLocator::provide<core::iface::ILogger>(
 		std::make_unique<infrastructure::utility::LogUtil>()
 	);
 	// Screen登録（SetGraphMode()で設定した画面サイズを渡す）
-	core::ServiceLocator::provide<core::iface::IScreen>(
+	core::base::ServiceLocator::provide<core::iface::IScreen>(
 		std::make_unique<infrastructure::Screen>(screenWidth, screenHeight)
 	);
 	
 	// SceneManager登録（内部でSceneFactoryを所有）
-	core::ServiceLocator::provide(
+	core::base::ServiceLocator::provide(
 		std::make_unique<game::scene::SceneManager>()
 	);
 	

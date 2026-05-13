@@ -2,7 +2,7 @@
 #include "TitleView.h"
 #include "SceneManager.h"
 #include "SceneType.h"
-#include "core/ServiceLocator.h"
+#include "core/base/ServiceLocator.h"
 #include "core/interface/IResourceManager.h"
 #include <cstdlib>
 #include "LockscreenView.h"
@@ -16,7 +16,7 @@ namespace game::scene
 		, m_uiRenderer{ uiRenderer }
 		, m_screen{ screen }
 	{
-		auto* res{ core::ServiceLocator::get<core::iface::IResourceManager>() };
+		auto* res{ core::base::ServiceLocator::get<core::iface::IResourceManager>() };
 		std::string mainFontName{ res->getFontName("main").value_or("") };
 		std::string lockFontName{ res->getFontName("normal").value_or("") };
 		m_lockscreenView = std::make_unique<LockscreenView>(uiRenderer, screen, std::move(lockFontName));
@@ -97,7 +97,7 @@ namespace game::scene
 			m_fade->update(deltaTime);
 			if (m_fade->isFinished())
 			{
-				auto* sceneManager{ core::ServiceLocator::get<SceneManager>() };
+				auto* sceneManager{ core::base::ServiceLocator::get<SceneManager>() };
 				sceneManager->changeScene(SceneType::Select);
 			}
 			break;

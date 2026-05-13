@@ -1,6 +1,6 @@
 ﻿#include "DxLib.h"
 #include "ServiceLocatorInitializer.h"
-#include "core/ServiceLocator.h"
+#include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
@@ -32,7 +32,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	ServiceLocatorInitializer::init(screenWidth, screenHeight);
 
 	// ServiceLocatorからSceneManagerを取得
-	auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
+	auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
 	
 	// 初期シーンをTitleに設定
 	//sceneManager->changeScene(game::scene::SceneType::Title);

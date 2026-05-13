@@ -3,7 +3,7 @@
 /* core層 */
 #include "core/interface/ILogger.h"
 #include "core/utility/Color.h"
-#include "core/ServiceLocator.h"
+#include "core/base/ServiceLocator.h"
 
 /* game層 */
 #include "game/factory/FactoryInitializer.h"
@@ -161,7 +161,7 @@ namespace game::scene
 							render.m_isVisible = false;
 						}
 
-						auto* sceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
+						auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 						sceneManager->changeScene(game::scene::SceneType::Result); });
 
 				// 敵の死亡イベントの購読
@@ -188,7 +188,7 @@ namespace game::scene
 						}
 						if (allDead)
 						{
-							auto* sceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
+							auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 							sceneManager->changeScene(game::scene::SceneType::Result);
 						} });
 	}
@@ -199,7 +199,7 @@ namespace game::scene
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::R))
 		{
 			LOG("INFO: Rキーでリザルト画面へ遷移");
-			auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
+			auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
 			sceneManager->changeScene(game::scene::SceneType::Result);
 			return;
 		}

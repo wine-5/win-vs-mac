@@ -2,7 +2,7 @@
 #include "SelectView.h"
 #include "SceneManager.h"
 #include "SceneType.h"
-#include "core/ServiceLocator.h"
+#include "core/base/ServiceLocator.h"
 
 namespace game::scene
 {
@@ -49,7 +49,7 @@ namespace game::scene
 		case State::FadeOut:
 			if (m_fade && m_fade->isFinished())
 			{
-				auto *sceneManager{core::ServiceLocator::get<SceneManager>()};
+				auto* sceneManager{ core::base::ServiceLocator::get<SceneManager>() };
 				sceneManager->changeScene(SceneType::Loading);
 			}
 			break;
@@ -70,4 +70,6 @@ namespace game::scene
 		m_fade = std::make_unique<ui::FadeTransition>(m_uiRenderer, m_screen, FADE_DURATION, false);
 		m_state = State::FadeOut;
 	}
+
 }
+

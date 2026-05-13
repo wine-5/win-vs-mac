@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <string>
-#include "core/Vector3.h"
+#include "core/utility/Vector3.h"
 #include "core/data/ModelMetadata.h"
 #include "game/constant/MetadataKeys.h"
 

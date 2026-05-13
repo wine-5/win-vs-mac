@@ -10,7 +10,7 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IAnimator.h"
-#include "core/EventBus.h"
+#include "core/base/EventBus.h"
 
 /* game層のインクルード */
 #include "game/factory/FactoryManager.h"
@@ -80,7 +80,7 @@ namespace game::scene
 		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_enemyId{core::ecs::INVALID_ENTITY_ID};
 
-		EventBus m_eventBus;
+		core::base::EventBus m_eventBus;
 
 		// カメラ設定
 		static constexpr float CAMERA_OFFSET_X = 0.0f;

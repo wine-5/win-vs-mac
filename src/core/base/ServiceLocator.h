@@ -3,7 +3,7 @@
 #include <typeindex>
 #include <memory>
 #include <cassert>
-namespace core
+namespace core::base
 {
 	/**
 	 * @brief グローバルなサービスへのアクセスを管理するクラス
@@ -49,21 +49,6 @@ namespace core
 			assert(it != m_services.end() && "ServiceLocator: サービスが登録されていません");
 
 			return static_cast<T*>(it->second.get());
-		}
-
-		/**
-		 * @brief 1つのインスタンスを複数のインターフェース型で登録する
-		 * @tparam T 実装型
-		 * @tparam TInterface1 1つ目のインターフェース型
-		 * @tparam TInterface2 2つ目のインターフェース型
-		 * @param service 登録するサービス
-		 */
-		template<typename T, typename TInterface1, typename TInterface2>
-		static void provideForMultiple(std::unique_ptr<T> service)
-		{
-			auto ptr = std::shared_ptr<void>(std::move(service));
-			m_services[std::type_index(typeid(TInterface1))] = ptr;
-			m_services[std::type_index(typeid(TInterface2))] = ptr;
 		}
 
 		/**

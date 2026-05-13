@@ -3,7 +3,7 @@
 #include "SceneType.h"
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
-#include "core/ServiceLocator.h"
+#include "core/base/ServiceLocator.h"
 #include <string>
 #include <cmath>
 
@@ -30,7 +30,7 @@ namespace game::scene
         // 2秒経過したらInGameシーンへ遷移
         if (m_elapsedTime >= TEST_LOADING_DURATION)
         {
-            auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
+            auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
             sceneManager->changeScene(SceneType::InGame);
         }
     }
