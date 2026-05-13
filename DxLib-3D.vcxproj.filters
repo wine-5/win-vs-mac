@@ -54,12 +54,6 @@
     <ClCompile Include="src\infrastructure\InputManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\interface\ICamera.h">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\core\interface\ILogger.h">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="src\game\stage\Ground.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -484,6 +478,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\constant\JobType.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\base\Singleton.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
