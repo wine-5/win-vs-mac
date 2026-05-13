@@ -195,25 +195,83 @@ struct DungeonClearedEvent : public IGameEvent {};
 
 ---
 
-## グローバルアクセス：ServiceLocator
+## グローバルアクセス
 
-ServiceLocatorはシングルトンの倉庫。
-ゲーム全体で1つだけ存在するManagerクラスを預けてどこからでも取り出せる仕組み。
-Core層に置くことでGame層・Infrastructure層の両方から使える。
+### Singleton基底クラス
 
-複数の場所から使われるサービス（AudioManagerなど）のみを登録する。
-特定の1箇所からしか使われないクラスはコンストラクタインジェクションで渡す。
+ゲーム全体で**絶対に1つだけ存在すべき**クラスに使用する。
+インスタンスの唯一性がコンパイル時に保証される。
 
+**用途：**
+- `SceneManager` — シーン管理（複製されてはいけない）
+- `GameManager` — ゲーム全体の進行管理（複製されてはいけない）
+- `InGameManager` — ゲーム進行中の管理（複製されてはいけない）
+- `AudioManager` — 音声管理（複製されてはいけない）
+
+**使用方法：**
+```cpp
+// 定義
+class SceneManager : public core::base::Singleton<SceneManager> {
+    friend core::base::Singleton<SceneManager>;
+private:
+    SceneManager() = default;
+};
+
+// 使用
+auto& sceneManager = SceneManager::getInstance();
+```
+
+**重要ルール：**
+- Singleton基底クラスを継承したクラスは、ServiceLocatorに登録してはいけない
+- 理由：インスタンスの唯一性の保証とServiceLocatorの登録（複数インスタンス可能）が矛盾するため
+
+---
+
+### ServiceLocator
+
+複数の場所から使われ、かつ**実装を差し替えたい**サービスを登録する。
+テスト時に異なる実装に置き換え可能。
+
+**用途：**
+- `IInputProvider` — 入力処理（キーボード/ゲームパッド/別入力方式に差し替え可能）
+- `IResourceManager` — リソース管理（複数実装が存在する可能性）
+- `IJobProvider` — 職業情報提供（複数実装が存在する可能性）
+- その他インターフェースベースのサービス
+
+**使用方法：**
 ```cpp
 // ServiceLocatorInitializerで登録する
-ServiceLocator::provide(std::make_unique<AudioManager>());
-
-// インターフェースを指定して登録する場合
-ServiceLocator::provide<IResourceManager>(std::make_unique<ResourceManager>());
+ServiceLocator::provide<IInputProvider>(
+    std::make_unique<KeyboardInputProvider>()
+);
 
 // どこからでも取り出せる
-ServiceLocator::get<AudioManager>()->play("attack");
+auto* inputProvider = ServiceLocator::get<IInputProvider>();
+inputProvider->isKeyPressed(KeyCode::Space);
+
+// テスト時は実装を差し替える
+ServiceLocator::provide<IInputProvider>(
+    std::make_unique<MockInputProvider>()
+);
 ```
+
+**重要ルール：**
+- ServiceLocatorに登録するクラスはSingleton基底クラスを継承してはいけない
+- 理由：複数の実装を持つ可能性があるため
+
+---
+
+### 使い分けの判断基準
+
+| 観点 | Singleton基底クラス | ServiceLocator |
+|---|---|---|
+| **インスタンス数** | 絶対に1つ | 複数実装が存在する可能性 |
+| **アクセス方法** | `ClassName::getInstance()` | `ServiceLocator::get<IInterface>()` |
+| **目的** | インスタンス唯一性の保証 | 実装の差し替え可能性・テスト対応 |
+| **例** | SceneManager, GameManager | IInputProvider, IResourceManager |
+| **ServiceLocator登録** | ❌ 禁止 | ✅ 推奨 |
+
+
 
 ---
 
