@@ -97,7 +97,7 @@ namespace game::scene
 			m_fade->update(deltaTime);
 			if (m_fade->isFinished())
 			{
-				auto* sceneManager{ core::base::ServiceLocator::get<SceneManager>() };
+				auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 				sceneManager->changeScene(SceneType::Select);
 			}
 			break;

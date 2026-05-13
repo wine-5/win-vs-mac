@@ -4,7 +4,6 @@
 #include "infrastructure/Camera.h"
 #include "infrastructure/Renderer.h"
 #include "infrastructure/Animator.h"
-#include "infrastructure/ResourceManager.h"
 #include "infrastructure/InputManager.h"
 #include "infrastructure/UIRenderer.h"
 #include "InGame.h"
@@ -37,7 +36,6 @@ namespace game::scene
         infrastructure::Camera m_inGameCamera;
         infrastructure::Renderer m_inGameRenderer;
         infrastructure::Animator m_inGameAnimator;
-        infrastructure::ResourceManager m_inGameResourceManager;
         infrastructure::InputManager m_inGameInputManager;
         std::unique_ptr<InGame> m_inGameScene;
 

@@ -7,6 +7,7 @@
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IFileProvider.h"
 #include "core/interface/IJobProvider.h"
+#include "core/interface/IResourceManager.h"
 #include "game/GameManager.h"
 
 namespace
@@ -71,12 +72,13 @@ namespace game::scene
 		case SceneType::InGame:
 		{
 			auto* gameManager = core::base::ServiceLocator::get<game::GameManager>();
+			auto* resourceManager = core::base::ServiceLocator::get<core::iface::IResourceManager>();
 
 			m_inGameScene = std::make_unique<InGame>(
 				m_inGameCamera,
 				m_inGameRenderer,
 				m_inGameAnimator,
-				m_inGameResourceManager,
+				*resourceManager,
 				m_inGameInputManager,
 				gameManager->getFileEquipmentData());
 			return m_inGameScene.get();

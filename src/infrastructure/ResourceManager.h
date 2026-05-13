@@ -6,6 +6,7 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IJobProvider.h"
 #include "core/constant/JobType.h"
+#include "core/base/Singleton.h"
 #include "thirdparty/nlohmann/json.hpp"
 
 namespace infrastructure
@@ -15,13 +16,12 @@ namespace infrastructure
 	 * 現在ResourceManagerが肥大化かつ責務が複数あるため
 	 * 将来的に分離してResourceManagerがFacadeの役割を果たすように設計しなおす
 	 */
-	class ResourceManager : public core::iface::IResourceManager, public core::iface::IJobProvider
+	class ResourceManager : public core::iface::IResourceManager,
+	                        public core::iface::IJobProvider,
+	                        public core::base::Singleton<ResourceManager>
 	{
 	public:
-		/**
-		 * @brief ResourceManagerのコンストラクタ
-		 */
-		ResourceManager();
+		friend class core::base::Singleton<ResourceManager>;
 
 		/**
 		 * @brief modelIDからモデルを読み込み、ハンドルを返す
@@ -60,6 +60,11 @@ namespace infrastructure
 		~ResourceManager();
 
 	private:
+
+		/**
+		 * @brief ResourceManagerのコンストラクタ
+		 */
+		ResourceManager();
 		/// @brief リソース定義（resources.jsonの1エントリ）
 		struct ResourceDefinition
 		{
