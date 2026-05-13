@@ -12,12 +12,7 @@ namespace infrastructure
 	ResourceManager::ResourceManager()
 	{
 		std::ifstream file("assets/config/resources.json");
-		if (!file.is_open())
-		{
-			LOG_E("FATAL: resources.jsonを開けませんでした");
-			assert(false && "致命的エラー: resources.jsonが見つかりません。");
-			throw std::runtime_error("resources.jsonを開けませんでした");
-		}
+		throwIfFileNotOpen(file, "assets/config/resources.json");
 		const nlohmann::json j = nlohmann::json::parse(file);
 
 		// モデルリソースを読み込む
@@ -160,12 +155,7 @@ namespace infrastructure
 		using namespace infrastructure::constant; // json_keysを使いやすく
 
 		std::ifstream file(filePath);
-		if (!file.is_open())
-		{
-			LOG_E("FATAL: JSONファイルを開けませんでした: %s", filePath.c_str());
-			assert(false && "致命的エラー: JSONファイルが見つかりません。ファイルパスを確認してください。");
-			throw std::runtime_error("JSONファイルを開けませんでした: " + filePath);
-		}
+		throwIfFileNotOpen(file, filePath);
 
 		nlohmann::json j = nlohmann::json::parse(file);
 
@@ -241,7 +231,7 @@ namespace infrastructure
 	void ResourceManager::loadJobsFromJson()
 	{
 		std::ifstream file("assets/data/jobData.json");
-		if (!file.is_open()) return;
+		throwIfFileNotOpen(file, "assets/data/jobData.json");
 
 		auto json = nlohmann::json::parse(file);
 		const auto& jobs{ json["jobs"] };
@@ -265,7 +255,15 @@ namespace infrastructure
 
 	core::iface::JobInfo ResourceManager::getJobInfo(core::constant::JobType jobType) const
 	{
-
 		return m_jobTable[static_cast<int>(jobType)];
+	}
+
+	void ResourceManager::throwIfFileNotOpen(const std::ifstream& file, const std::string& filePath)
+	{
+		if (file.is_open()) return;
+
+		LOG_E("FATAL: ファイルを開けませんでした: %s", filePath.c_str());
+		assert(false && "致命的エラー: ファイルが見つかりません。ファイルパスを確認してください。");
+		throw std::runtime_error("ファイルを開けませんでした: " + filePath);
 	}
 }

@@ -82,6 +82,8 @@ namespace infrastructure
 		std::vector<FontDataDefinition> loadFontList(const nlohmann::json& json);
 		/// @brief jobData.jsonから職業データを読み込む
 		void loadJobsFromJson();
+		/// @brief ファイルが開けない場合、ログ・アサート・例外を発生させる
+		void throwIfFileNotOpen(const std::ifstream& file, const std::string& filePath);
 
 		// ファイルパスをキーにしてモデルを管理
 		std::unordered_map<std::string, int> m_modelCache;
