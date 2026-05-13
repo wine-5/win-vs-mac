@@ -51,7 +51,6 @@ namespace game::scene
 		{
 			auto* fileProvider = core::base::ServiceLocator::get<core::iface::IFileProvider>();
 			auto* jobProvider = core::base::ServiceLocator::get<core::iface::IJobProvider>();
-			auto* gameManager = core::base::ServiceLocator::get<game::GameManager>();
 
 			m_selectScene = std::make_unique<Select>(
 				m_selectInputManager,
@@ -59,7 +58,7 @@ namespace game::scene
 				*screen,
 				*fileProvider,
 				*jobProvider,
-				gameManager->getFileEquipmentData());
+				game::GameManager::getInstance().getFileEquipmentData());
 			return m_selectScene.get();
 		}
 
@@ -71,7 +70,6 @@ namespace game::scene
 
 		case SceneType::InGame:
 		{
-			auto* gameManager = core::base::ServiceLocator::get<game::GameManager>();
 			auto* resourceManager = core::base::ServiceLocator::get<core::iface::IResourceManager>();
 
 			m_inGameScene = std::make_unique<InGame>(
@@ -80,7 +78,7 @@ namespace game::scene
 				m_inGameAnimator,
 				*resourceManager,
 				m_inGameInputManager,
-				gameManager->getFileEquipmentData());
+				game::GameManager::getInstance().getFileEquipmentData());
 			return m_inGameScene.get();
 		}
 

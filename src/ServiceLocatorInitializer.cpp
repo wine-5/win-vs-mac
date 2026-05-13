@@ -15,10 +15,6 @@
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 {
-	core::base::ServiceLocator::provide(
-		std::make_unique<game::GameManager>()
-	);
-
 	core::base::ServiceLocator::provide<core::iface::IFileProvider>(
 		std::make_unique<platform::WindowsDataProvider>()
 	);
@@ -41,10 +37,10 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 	core::base::ServiceLocator::provide<core::iface::IScreen>(
 		std::make_unique<infrastructure::Screen>(screenWidth, screenHeight)
 	);
-	
+
 	// SceneManager登録（内部でSceneFactoryを所有）
 	core::base::ServiceLocator::provide(
 		std::make_unique<game::scene::SceneManager>()
 	);
-	
+
 }
