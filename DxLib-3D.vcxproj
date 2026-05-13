@@ -184,6 +184,7 @@
     <ClCompile Include="src\infrastructure\utility\LogUtil.cpp" />
     <ClCompile Include="src\platform\WindowsDataProvider.cpp" />
     <ClCompile Include="src\ServiceLocatorInitializer.cpp" />
+    <ClCompile Include="src\SingletonInitializer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -314,6 +315,7 @@
     <ClInclude Include="src\infrastructure\utility\LogUtil.h" />
     <ClInclude Include="src\platform\WindowsDataProvider.h" />
     <ClInclude Include="src\ServiceLocatorInitializer.h" />
+    <ClInclude Include="src\SingletonInitializer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

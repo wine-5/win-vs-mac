@@ -3,13 +3,13 @@
 #include "core/interface/ILogger.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IFileProvider.h"
+#include "core/interface/IResourceManager.h"
 #include "platform/WindowsDataProvider.h"
 #include "infrastructure/Screen.h"
 #include "infrastructure/utility/LogUtil.h"
+#include "infrastructure/ResourceManager.h"
 #include "game/scene/SceneManager.h"
 #include "game/GameManager.h"
-#include "core/interface/IResourceManager.h"
-#include "infrastructure/ResourceManager.h"
 #include "core/interface/IJobProvider.h"
 #include "game/data/JobDataProvider.h"
 
@@ -23,9 +23,9 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 		std::make_unique<platform::WindowsDataProvider>()
 	);
 
-	// ResourceManagerを登録（モデル・メタデータ・フォント管理用）
-	core::base::ServiceLocator::provide<core::iface::IResourceManager>(
-		std::make_unique<infrastructure::ResourceManager>()
+	// ResourceManagerをIResourceManagerインターフェースで登録（所有権を持たない）
+	core::base::ServiceLocator::provideExisting<core::iface::IResourceManager>(
+		&infrastructure::ResourceManager::getInstance()
 	);
 
 	// JobDataProviderを登録（職業情報提供用）

@@ -1,4 +1,5 @@
 ﻿#include "DxLib.h"
+#include "SingletonInitializer.h"
 #include "ServiceLocatorInitializer.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
@@ -29,6 +30,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	if (DxLib_Init() == -1) return -1;
 	SetUseLighting(FALSE);
 
+	// Singletonインスタンスを初期化（ServiceLocatorInitializer より先に呼ぶ）
+	SingletonInitializer::init();
+
+	// サービスを登録
 	ServiceLocatorInitializer::init(screenWidth, screenHeight);
 
 	// ServiceLocatorからSceneManagerを取得
