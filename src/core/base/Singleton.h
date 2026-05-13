@@ -35,7 +35,7 @@ namespace core::base
 		Singleton() = default;
 
 		/**
-		 * @brief デストラクタ
+		 * @brief デフォルトデストラクタ
 		 */
 		~Singleton() = default;
 	};
