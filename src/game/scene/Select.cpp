@@ -10,13 +10,14 @@ namespace game::scene
 		core::iface::IUIRenderer& uiRenderer,
 		core::iface::IScreen& screen,
 		core::iface::IFileProvider& fileProvider,
+		core::iface::IJobProvider& jobProvider,
 		data::FileEquipmentData& fileEquipmentData)
 		: m_uiRenderer{ uiRenderer }
 		, m_screen{ screen }
 		, m_fade{ std::make_unique<ui::FadeTransition>(uiRenderer, screen, FADE_DURATION, true) }
 	{
 		m_view = std::make_unique<SelectView>(
-			inputProvider, uiRenderer, screen, fileEquipmentData,
+			inputProvider, uiRenderer, screen, fileEquipmentData, jobProvider,
 			[this]() { startFadeOut(); },
 			[&fileProvider, &fileEquipmentData](int slotIndex)
 			{

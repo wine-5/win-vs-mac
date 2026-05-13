@@ -5,6 +5,7 @@
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IFileProvider.h"
+#include "core/interface/IJobProvider.h"
 #include "game/data/FileEquipmentData.h"
 #include <memory>
 
@@ -24,12 +25,14 @@ namespace game::scene
          * @param uiRenderer UI描画インターフェース
          * @param screen 画面情報インターフェース
          * @param fileProvider ファイル選択インターフェース
+         * @param jobProvider 職業情報プロバイダー
          * @param fileEquipmentData 選択ファイルデータの参照
          */
         Select(core::iface::IInputProvider &inputProvider,
                core::iface::IUIRenderer &uiRenderer,
                core::iface::IScreen &screen,
                core::iface::IFileProvider &fileProvider,
+               core::iface::IJobProvider &jobProvider,
                data::FileEquipmentData &fileEquipmentData);
 
         /**

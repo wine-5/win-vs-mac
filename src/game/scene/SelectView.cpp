@@ -10,6 +10,7 @@ namespace game::scene
         core::iface::IUIRenderer& uiRenderer,
         core::iface::IScreen& screen,
         data::FileEquipmentData& fileEquipmentData,
+        core::iface::IJobProvider& jobProvider,
         std::function<void()> onGameStart,
         std::function<void(int)> onFileSelect)
         : m_uiRenderer{ uiRenderer }
@@ -39,6 +40,23 @@ namespace game::scene
                 label.c_str(), buttonX, fileButtonY, buttonWidth, buttonHeight, inputProvider, buttonFontSize) };
             fileSelectButton->setOnClick([onFileSelect, i]() { onFileSelect(i); });
             m_uiManager.addElement(std::move(fileSelectButton));
+        }
+
+        // ジョブボタンを表示（クリック機能は後で追加）
+        const int jobButtonX{ static_cast<int>(screenWidth * 0.65f) };
+        const int jobButtonBaseY{ static_cast<int>(screenHeight * 0.50f) };
+        const int jobCount{ jobProvider.getJobCount() };
+        const float jobButtonYStep{ 0.08f };
+
+        for (int i{ 0 }; i < jobCount; ++i)
+        {
+            const core::constant::JobType jobType{ static_cast<core::constant::JobType>(i) };
+            const auto jobInfo{ jobProvider.getJobInfo(jobType) };
+            const int jobButtonY{ static_cast<int>(jobButtonBaseY - i * jobButtonYStep * screenHeight) };
+
+            auto jobBtn{ std::make_unique<ui::Button>(
+                jobInfo.m_name.c_str(), jobButtonX, jobButtonY, buttonWidth, buttonHeight, inputProvider, buttonFontSize) };
+            m_uiManager.addElement(std::move(jobBtn));
         }
     }
 

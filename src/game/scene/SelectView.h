@@ -3,6 +3,7 @@
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "core/interface/IJobProvider.h"
 #include "game/data/FileEquipmentData.h"
 #include <functional>
 #include <memory>
@@ -26,6 +27,7 @@ namespace game::scene
 		 * @param uiRenderer UI描画インターフェース
 		 * @param screen 画面情報インターフェース
 		 * @param fileEquipmentData 選択ファイルデータ（表示用）
+		 * @param jobProvider 職業情報プロバイダー
 		 * @param onGameStart ゲームスタートボタン押下時コールバック
 		 * @param onFileSelect ファイル選択ボタン押下時コールバック（スロット番号）
 		 */
@@ -33,6 +35,7 @@ namespace game::scene
 			core::iface::IUIRenderer& uiRenderer,
 			core::iface::IScreen& screen,
 			data::FileEquipmentData& fileEquipmentData,
+			core::iface::IJobProvider& jobProvider,
 			std::function<void()> onGameStart,
 			std::function<void(int)> onFileSelect);
 
