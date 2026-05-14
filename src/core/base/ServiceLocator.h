@@ -66,7 +66,7 @@ namespace core::base
 			auto key{std::type_index(typeid(TInterface))};
 			// デリータを空にして、削除時にインスタンスを破棄しない
 			m_services[key] = std::shared_ptr<void>(
-				static_cast<void*>(service),
+				static_cast<void*>(static_cast<TInterface*>(service)),
 				[](void*) {}  // 削除しない（インスタンスの所有権を持たないため）
 			);
 		}
