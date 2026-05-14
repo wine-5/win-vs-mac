@@ -12,7 +12,8 @@ namespace game::scene
         data::FileEquipmentData& fileEquipmentData,
         core::iface::IJobProvider& jobProvider,
         std::function<void()> onGameStart,
-        std::function<void(int)> onFileSelect)
+        std::function<void(int)> onFileSelect,
+        std::function<void(int)> onJobSelect)
         : m_uiRenderer{ uiRenderer }
         , m_screen{ screen }
         , m_fileEquipmentData{ fileEquipmentData }
@@ -42,7 +43,6 @@ namespace game::scene
             m_uiManager.addElement(std::move(fileSelectButton));
         }
 
-        // ジョブボタンを表示（クリック機能は後で追加）
         const int jobButtonX{ static_cast<int>(screenWidth * 0.65f) };
         const int jobButtonBaseY{ static_cast<int>(screenHeight * 0.50f) };
         const int jobCount{ jobProvider.getJobCount() };
@@ -56,6 +56,7 @@ namespace game::scene
 
             auto jobBtn{ std::make_unique<ui::Button>(
                 jobInfo.m_name.c_str(), jobButtonX, jobButtonY, buttonWidth, buttonHeight, inputProvider, buttonFontSize) };
+            jobBtn->setOnClick([onJobSelect, i]() { onJobSelect(i); });
             m_uiManager.addElement(std::move(jobBtn));
         }
     }

@@ -1,5 +1,6 @@
 #pragma once
 #include "game/data/FileEquipmentData.h"
+#include "game/data/JobSelectionData.h"
 #include "core/base/Singleton.h"
 
 namespace game
@@ -22,9 +23,19 @@ namespace game
             return m_fileEquipmentData;
         }
 
+        /**
+         * @brief JobSelectionData への参照を返す
+         * @return JobSelectionData の参照
+         */
+        [[nodiscard]] data::JobSelectionData& getJobSelectionData() noexcept
+        {
+            return m_jobSelectionData;
+        }
+
     private:
         GameManager() = default;
 
         data::FileEquipmentData m_fileEquipmentData{};
+        data::JobSelectionData m_jobSelectionData{};
     };
 }

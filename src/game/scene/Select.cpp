@@ -3,6 +3,7 @@
 #include "SceneManager.h"
 #include "SceneType.h"
 #include "core/base/ServiceLocator.h"
+#include "game/GameManager.h"
 
 namespace game::scene
 {
@@ -24,6 +25,10 @@ namespace game::scene
 				const std::string path{ fileProvider.selectFile() };
 				if (!path.empty())
 					fileEquipmentData.setFilePath(slotIndex, path);
+			},
+			[this](int jobId)
+			{
+				game::GameManager::getInstance().getJobSelectionData().setSelectedJobId(jobId);
 			});
 	}
 

@@ -239,6 +239,7 @@
     <ClInclude Include="src\game\constant\MetadataKeys.h" />
     <ClInclude Include="src\game\data\EnemyData.h" />
     <ClInclude Include="src\game\data\FileEquipmentData.h" />
+    <ClInclude Include="src\game\data\JobSelectionData.h" />
     <ClInclude Include="src\game\data\FileExtensionBonus.h" />
     <ClInclude Include="src\game\data\FileExtensionType.h" />
     <ClInclude Include="src\core\event\IGameEvent.h" />

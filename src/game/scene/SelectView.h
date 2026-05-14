@@ -37,7 +37,8 @@ namespace game::scene
 			data::FileEquipmentData& fileEquipmentData,
 			core::iface::IJobProvider& jobProvider,
 			std::function<void()> onGameStart,
-			std::function<void(int)> onFileSelect);
+			std::function<void(int)> onFileSelect,
+			std::function<void(int)> onJobSelect);
 
 		/**
 		 * @brief ボタン入力を更新する

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <functional>
 #include <unordered_map>
 #include <vector>
@@ -31,7 +31,7 @@ namespace core::base
 		}
 
 		/**
-		 * @brief イベントを発行する_
+		 * @brief イベントを発行する
 		 * @tparam TEvent イベントの型
 		 * @param event 発行するイベント
 		 */
@@ -49,8 +49,6 @@ namespace core::base
 		}
 
 	private:
-		// イベントの型→コールバックのリスト
 		std::unordered_map<std::type_index, std::vector<std::function<void(const std::any&)>>> m_listeners;
 	};
 }
-
