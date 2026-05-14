@@ -4,6 +4,8 @@
 #include "core/interface/ILogger.h"
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
+#include "core/interface/IJobProvider.h"
+#include "core/constant/JobType.h"
 
 /* game層 */
 #include "game/factory/FactoryInitializer.h"
@@ -12,6 +14,7 @@
 #include "game/system/PhysicsSystem.h"
 #include "game/component/TransformComponent.h"
 #include "game/actor/Player.h"
+#include "game/GameManager.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/HealthComponent.h"
 #include "game/component/HitEffectComponent.h"
@@ -70,12 +73,33 @@ namespace game::scene
 
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
 
-		// テストとして表示するようにベースパラメータを保存
-		const float baseHp{ m_playerData.getMaxHp() };
-		const float baseAtk{ m_playerData.getAttackPower() };
-		const float baseDef{ m_playerData.getDefence() };
-		const float baseSpd{ m_playerData.getMoveSpeed() };
-		const float baseRange{ m_playerData.getAttackRange() };
+		// 初期値を保存
+		const float initialHp{ m_playerData.getMaxHp() };
+		const float initialAtk{ m_playerData.getAttackPower() };
+		const float initialDef{ m_playerData.getDefence() };
+		const float initialSpd{ m_playerData.getMoveSpeed() };
+		const float initialRange{ m_playerData.getAttackRange() };
+
+		// 職業パラメータをPlayerDataに反映
+		const auto& jobSelectionData{ GameManager::getInstance().getJobSelectionData() };
+		if (jobSelectionData.hasJobSelected())
+		{
+			const core::constant::JobType jobType{ jobSelectionData.getSelectedJobType() };
+
+			// IJobProvider を ServiceLocator から取得
+			auto* jobProvider{ core::base::ServiceLocator::get<core::iface::IJobProvider>() };
+			if (jobProvider)
+			{
+				const auto jobInfo{ jobProvider->getJobInfo(jobType) };
+				m_playerData.applyJobParameters(jobInfo.m_hp, jobInfo.m_atk, jobInfo.m_def, jobInfo.m_spd);
+			}
+		}
+
+		// 職業適用後の値を保存
+		const float afterJobHp{ m_playerData.getMaxHp() };
+		const float afterJobAtk{ m_playerData.getAttackPower() };
+		const float afterJobDef{ m_playerData.getDefence() };
+		const float afterJobSpd{ m_playerData.getMoveSpeed() };
 
 		// 拡張子ボーナスをPlayerDataに反映
 		for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
@@ -87,13 +111,21 @@ namespace game::scene
 				m_playerData.applyExtensionBonus(bonus);
 			}
 		}
-		// テスト用に表示
+
+		// 最終値を保存
+		const float finalHp{ m_playerData.getMaxHp() };
+		const float finalAtk{ m_playerData.getAttackPower() };
+		const float finalDef{ m_playerData.getDefence() };
+		const float finalSpd{ m_playerData.getMoveSpeed() };
+		const float finalRange{ m_playerData.getAttackRange() };
+
+		// テスト用に詳細ログを表示
 		LOG("=== Player パラメータ ===");
-		LOG("  HP        : %.1f -> %.1f", baseHp, m_playerData.getMaxHp());
-		LOG("  ATK       : %.1f -> %.1f", baseAtk, m_playerData.getAttackPower());
-		LOG("  DEF       : %.1f -> %.1f", baseDef, m_playerData.getDefence());
-		LOG("  SPD       : %.1f -> %.1f", baseSpd, m_playerData.getMoveSpeed());
-		LOG("  ATK Range : %.1f -> %.1f", baseRange, m_playerData.getAttackRange());
+		LOG("  HP        : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialHp, afterJobHp, finalHp);
+		LOG("  ATK       : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialAtk, afterJobAtk, finalAtk);
+		LOG("  DEF       : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialDef, afterJobDef, finalDef);
+		LOG("  SPD       : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialSpd, afterJobSpd, finalSpd);
+		LOG("  ATK Range : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialRange, initialRange, finalRange);
 		LOG("========================");
 
 		initializer.initializePlayer(m_playerData);

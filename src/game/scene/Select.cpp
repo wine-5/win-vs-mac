@@ -27,9 +27,10 @@ namespace game::scene
 				if (!path.empty())
 					fileEquipmentData.setFilePath(slotIndex, path);
 			},
-			[this](int jobId)
+			[this](int jobIdInt)
 			{
-				game::GameManager::getInstance().getJobSelectionData().setSelectedJobId(jobId);
+				const core::constant::JobType jobType{ static_cast<core::constant::JobType>(jobIdInt) };
+				game::GameManager::getInstance().getJobSelectionData().setSelectedJobType(jobType);
 			});
 	}
 

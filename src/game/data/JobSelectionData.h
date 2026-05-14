@@ -1,4 +1,5 @@
 #pragma once
+#include "core/constant/JobType.h"
 
 namespace game::data
 {
@@ -9,21 +10,22 @@ namespace game::data
 	{
 	public:
 		/**
-		 * @brief 選択された職業IDを設定
-		 * @param jobId 職業ID
+		 * @brief 選択された職業を設定
+		 * @param jobType 職業の種類
 		 */
-		void setSelectedJobId(int jobId) noexcept
+		void setSelectedJobType(core::constant::JobType jobType) noexcept
 		{
-			m_selectedJobId = jobId;
+			m_selectedJobType = jobType;
+			m_hasSelection = true;
 		}
 
 		/**
-		 * @brief 選択された職業IDを取得
-		 * @return 選択された職業ID（未選択の場合は-1）
+		 * @brief 選択された職業を取得
+		 * @return 選択された職業の種類
 		 */
-		[[nodiscard]] int getSelectedJobId() const noexcept
+		[[nodiscard]] core::constant::JobType getSelectedJobType() const noexcept
 		{
-			return m_selectedJobId;
+			return m_selectedJobType;
 		}
 
 		/**
@@ -32,10 +34,11 @@ namespace game::data
 		 */
 		[[nodiscard]] bool hasJobSelected() const noexcept
 		{
-			return m_selectedJobId != -1;
+			return m_hasSelection;
 		}
 
 	private:
-		int m_selectedJobId{ -1 };
+		core::constant::JobType m_selectedJobType{ static_cast<core::constant::JobType>(0) };
+		bool m_hasSelection{ false };
 	};
 }

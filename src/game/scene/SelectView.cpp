@@ -59,7 +59,7 @@ namespace game::scene
 
             auto jobBtn{ std::make_unique<ui::Button>(
                 jobInfo.m_name.c_str(), jobButtonX, jobButtonY, buttonWidth, buttonHeight, inputProvider, buttonFontSize) };
-            jobBtn->setOnClick([onJobSelect, i]() { onJobSelect(i); });
+            jobBtn->setOnClick([onJobSelect, i]() { onJobSelect(static_cast<int>(static_cast<core::constant::JobType>(i))); });
             m_uiManager.addElement(std::move(jobBtn));
         }
     }
@@ -97,8 +97,7 @@ namespace game::scene
 
         if (m_jobSelectionData.hasJobSelected())
         {
-            const int selectedJobId{ m_jobSelectionData.getSelectedJobId() };
-            const core::constant::JobType jobType{ static_cast<core::constant::JobType>(selectedJobId) };
+            const core::constant::JobType jobType{ m_jobSelectionData.getSelectedJobType() };
             const auto jobInfo{ m_jobProvider.getJobInfo(jobType) };
 
             const int paramTextFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
