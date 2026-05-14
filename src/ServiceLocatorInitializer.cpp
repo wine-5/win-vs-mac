@@ -11,7 +11,6 @@
 #include "game/scene/SceneManager.h"
 #include "game/GameManager.h"
 #include "core/interface/IJobProvider.h"
-#include "game/data/JobDataProvider.h"
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 {
@@ -24,9 +23,9 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 		&infrastructure::ResourceManager::getInstance()
 	);
 
-	// JobDataProviderを登録（職業情報提供用）
-	core::base::ServiceLocator::provide<core::iface::IJobProvider>(
-		std::make_unique<game::data::JobDataProvider>()
+	// ResourceManagerをIJobProviderインターフェースでも登録（所有権を持たない）
+	core::base::ServiceLocator::provideExisting<core::iface::IJobProvider>(
+		&infrastructure::ResourceManager::getInstance()
 	);
 
 	// DEBUG:デバック用のためリリース時は消すこと
