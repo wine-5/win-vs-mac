@@ -11,12 +11,15 @@ namespace game::scene
         core::iface::IScreen& screen,
         data::FileEquipmentData& fileEquipmentData,
         core::iface::IJobProvider& jobProvider,
+        data::JobSelectionData& jobSelectionData,
         std::function<void()> onGameStart,
         std::function<void(int)> onFileSelect,
         std::function<void(int)> onJobSelect)
         : m_uiRenderer{ uiRenderer }
         , m_screen{ screen }
         , m_fileEquipmentData{ fileEquipmentData }
+        , m_jobProvider{ jobProvider }
+        , m_jobSelectionData{ jobSelectionData }
     {
         const int screenWidth{ screen.getWidth() };
         const int screenHeight{ screen.getHeight() };
@@ -90,6 +93,33 @@ namespace game::scene
                 const int textFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
                 m_uiRenderer.drawText(FILE_NAME_X, textY, text.c_str(), core::utility::Color::WHITE, textFontSize);
             }
+        }
+
+        if (m_jobSelectionData.hasJobSelected())
+        {
+            const int selectedJobId{ m_jobSelectionData.getSelectedJobId() };
+            const core::constant::JobType jobType{ static_cast<core::constant::JobType>(selectedJobId) };
+            const auto jobInfo{ m_jobProvider.getJobInfo(jobType) };
+
+            const int paramTextFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
+            const int paramStartX{ m_screen.getWidth() - 250 };
+            const int paramStartY{ static_cast<int>(m_screen.getHeight() * 0.15f) };
+            const int paramLineHeight{ static_cast<int>(m_screen.getHeight() * 0.04f) };
+
+            const std::string jobNameText{ "職業: " + jobInfo.m_name };
+            m_uiRenderer.drawText(paramStartX, paramStartY, jobNameText.c_str(), core::utility::Color::WHITE, paramTextFontSize);
+
+            const std::string hpText{ "HP: " + std::to_string(static_cast<int>(jobInfo.m_hp)) };
+            m_uiRenderer.drawText(paramStartX, paramStartY + paramLineHeight, hpText.c_str(), core::utility::Color::WHITE, paramTextFontSize);
+
+            const std::string atkText{ "ATK: " + std::to_string(static_cast<int>(jobInfo.m_atk)) };
+            m_uiRenderer.drawText(paramStartX, paramStartY + paramLineHeight * 2, atkText.c_str(), core::utility::Color::WHITE, paramTextFontSize);
+
+            const std::string defText{ "DEF: " + std::to_string(static_cast<int>(jobInfo.m_def)) };
+            m_uiRenderer.drawText(paramStartX, paramStartY + paramLineHeight * 3, defText.c_str(), core::utility::Color::WHITE, paramTextFontSize);
+
+            const std::string spdText{ "SPD: " + std::to_string(static_cast<int>(jobInfo.m_spd)) };
+            m_uiRenderer.drawText(paramStartX, paramStartY + paramLineHeight * 4, spdText.c_str(), core::utility::Color::WHITE, paramTextFontSize);
         }
     }
 

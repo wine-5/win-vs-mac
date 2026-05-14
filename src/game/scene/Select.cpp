@@ -19,6 +19,7 @@ namespace game::scene
 	{
 		m_view = std::make_unique<SelectView>(
 			inputProvider, uiRenderer, screen, fileEquipmentData, jobProvider,
+			game::GameManager::getInstance().getJobSelectionData(),
 			[this]() { startFadeOut(); },
 			[&fileProvider, &fileEquipmentData](int slotIndex)
 			{

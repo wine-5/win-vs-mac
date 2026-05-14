@@ -5,6 +5,7 @@
 #include "core/interface/IScreen.h"
 #include "core/interface/IJobProvider.h"
 #include "game/data/FileEquipmentData.h"
+#include "game/data/JobSelectionData.h"
 #include <functional>
 #include <memory>
 
@@ -36,6 +37,7 @@ namespace game::scene
 			core::iface::IScreen& screen,
 			data::FileEquipmentData& fileEquipmentData,
 			core::iface::IJobProvider& jobProvider,
+			data::JobSelectionData& jobSelectionData,
 			std::function<void()> onGameStart,
 			std::function<void(int)> onFileSelect,
 			std::function<void(int)> onJobSelect);
@@ -54,6 +56,8 @@ namespace game::scene
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen&     m_screen;
 		data::FileEquipmentData&  m_fileEquipmentData;
+		core::iface::IJobProvider& m_jobProvider;
+		data::JobSelectionData&   m_jobSelectionData;
 		ui::UIManager             m_uiManager{};
 
 		static constexpr float TITLE_Y_RATIO            = 0.12f;
