@@ -6,13 +6,42 @@
 #include <cassert>
 #include <stdexcept>
 #include "constant/JsonKeys.h"
+#include <Windows.h>
 
 namespace infrastructure
 {
+	namespace
+	{
+		std::string utf8ToShiftJis(const std::string& utf8Str)
+		{
+			if (utf8Str.empty())
+				return "";
+
+			// UTF-8 → UTF-16（ワイド文字）
+			int wideSize = MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, nullptr, 0);
+			if (wideSize == 0)
+				return utf8Str;
+
+			std::vector<wchar_t> wide(wideSize);
+			MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, wide.data(), wideSize);
+
+			// UTF-16 → Shift_JIS
+			int sjisSize = WideCharToMultiByte(CP_ACP, 0, wide.data(), -1, nullptr, 0, nullptr, nullptr);
+			if (sjisSize == 0)
+				return utf8Str;
+
+			std::string result(sjisSize - 1, '\0');
+			WideCharToMultiByte(CP_ACP, 0, wide.data(), -1, &result[0], sjisSize, nullptr, nullptr);
+
+			return result;
+		}
+	}
+
 	ResourceManager::ResourceManager()
 	{
 		std::ifstream file("assets/config/resources.json");
 		throwIfFileNotOpen(file, "assets/config/resources.json");
+		file.imbue(std::locale(".UTF8"));
 		const nlohmann::json j = nlohmann::json::parse(file);
 
 		// モデルリソースを読み込む
@@ -156,6 +185,7 @@ namespace infrastructure
 
 		std::ifstream file(filePath);
 		throwIfFileNotOpen(file, filePath);
+		file.imbue(std::locale(".UTF8"));
 
 		nlohmann::json j = nlohmann::json::parse(file);
 
@@ -232,6 +262,7 @@ namespace infrastructure
 	{
 		std::ifstream file("assets/data/jobData.json");
 		throwIfFileNotOpen(file, "assets/data/jobData.json");
+		file.imbue(std::locale(".UTF8"));
 
 		auto json = nlohmann::json::parse(file);
 		const auto& jobs{ json["jobs"] };
@@ -239,8 +270,8 @@ namespace infrastructure
 		for (size_t i = 0; i < jobs.size() && i < m_jobTable.size(); ++i)
 		{
 			m_jobTable[i].m_id = jobs[i]["id"];
-			m_jobTable[i].m_name = jobs[i]["name"];
-			m_jobTable[i].m_skillName = jobs[i]["skillName"];
+			m_jobTable[i].m_name = utf8ToShiftJis(jobs[i]["name"].get<std::string>());
+			m_jobTable[i].m_skillName = utf8ToShiftJis(jobs[i]["skillName"].get<std::string>());
 			m_jobTable[i].m_hp = jobs[i]["hp"];
 			m_jobTable[i].m_atk = jobs[i]["atk"];
 			m_jobTable[i].m_def = jobs[i]["def"];

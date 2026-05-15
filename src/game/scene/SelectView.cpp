@@ -46,11 +46,13 @@ namespace game::scene
             m_uiManager.addElement(std::move(fileSelectButton));
         }
 
+        // 職業ボタンの配置の定義
         const int jobButtonX{ static_cast<int>(screenWidth * 0.65f) };
         const int jobButtonBaseY{ static_cast<int>(screenHeight * 0.50f) };
         const int jobCount{ jobProvider.getJobCount() };
         const float jobButtonYStep{ 0.08f };
 
+        // 職業ボタンの描画
         for (int i{ 0 }; i < jobCount; ++i)
         {
             const core::constant::JobType jobType{ static_cast<core::constant::JobType>(i) };
