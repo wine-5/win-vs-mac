@@ -2,6 +2,8 @@
 #include <fstream>
 #include <stdexcept>
 #include "thirdparty/nlohmann/json.hpp"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IStringConverter.h"
 
 namespace infrastructure
 {
@@ -14,11 +16,16 @@ namespace infrastructure
 		auto json = nlohmann::json::parse(file);
 		const auto& jobs{ json["jobs"] };
 
+		auto* stringConverter = core::base::ServiceLocator::get<core::iface::IStringConverter>();
+
 		for (size_t i = 0; i < jobs.size() && i < m_jobTable.size(); ++i)
 		{
+			std::string nameUtf8 = jobs[i]["name"];
+			std::string skillNameUtf8 = jobs[i]["skillName"];
+
 			m_jobTable[i].m_id        = jobs[i]["id"];
-			m_jobTable[i].m_name      = jobs[i]["name"];
-			m_jobTable[i].m_skillName = jobs[i]["skillName"];
+			m_jobTable[i].m_name      = stringConverter->utf8ToShiftJis(nameUtf8);
+			m_jobTable[i].m_skillName = stringConverter->utf8ToShiftJis(skillNameUtf8);
 			m_jobTable[i].m_hp        = jobs[i]["hp"];
 			m_jobTable[i].m_atk       = jobs[i]["atk"];
 			m_jobTable[i].m_def       = jobs[i]["def"];
