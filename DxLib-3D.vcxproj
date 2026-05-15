@@ -182,6 +182,7 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\infrastructure\utility\LogUtil.cpp" />
     <ClCompile Include="src\platform\WindowsDataProvider.cpp" />
+    <ClCompile Include="src\platform\utility\StringConverter.cpp" />
     <ClCompile Include="src\ServiceLocatorInitializer.cpp" />
     <ClCompile Include="src\SingletonInitializer.cpp" />
   </ItemGroup>
@@ -220,6 +221,7 @@
     <ClInclude Include="src\core\interface\IJobProvider.h" />
     <ClInclude Include="src\core\interface\IRenderer.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
+    <ClInclude Include="src\core\interface\IStringConverter.h" />
     <ClInclude Include="src\core\input\KeyCode.h" />
     <ClInclude Include="src\core\interface\IScreen.h" />
     <ClInclude Include="src\core\interface\ISelectWindowManager.h" />
@@ -313,6 +315,7 @@
     <ClInclude Include="src\infrastructure\UIRenderer.h" />
     <ClInclude Include="src\infrastructure\utility\LogUtil.h" />
     <ClInclude Include="src\platform\WindowsDataProvider.h" />
+    <ClInclude Include="src\platform\utility\StringConverter.h" />
     <ClInclude Include="src\ServiceLocatorInitializer.h" />
     <ClInclude Include="src\SingletonInitializer.h" />
   </ItemGroup>

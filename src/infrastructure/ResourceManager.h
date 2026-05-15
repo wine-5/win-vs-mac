@@ -5,6 +5,7 @@
 
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IJobProvider.h"
+#include "core/interface/IStringConverter.h"
 #include "core/constant/JobType.h"
 #include "core/base/Singleton.h"
 #include "thirdparty/nlohmann/json.hpp"
@@ -63,8 +64,9 @@ namespace infrastructure
 
 		/**
 		 * @brief ResourceManagerのコンストラクタ
+		 * @param stringConverter 文字列エンコーディング変換用インターフェース
 		 */
-		ResourceManager();
+		ResourceManager(const core::iface::IStringConverter& stringConverter);
 		/// @brief リソース定義（resources.jsonの1エントリ）
 		struct ResourceDefinition
 		{
@@ -97,5 +99,6 @@ namespace infrastructure
 		std::unordered_map<std::string, std::string> m_fontNames;  // fontId -> fontFamilyName
 		std::unordered_map<std::string, std::string> m_fontPaths;  // fontId -> filePath（解放用）
 		std::array<core::iface::JobInfo, core::constant::JOB_COUNT> m_jobTable;
+		const core::iface::IStringConverter& m_stringConverter;
 	};
 }

@@ -4,7 +4,9 @@
 #include "core/interface/IScreen.h"
 #include "core/interface/IFileProvider.h"
 #include "core/interface/IResourceManager.h"
+#include "core/interface/IStringConverter.h"
 #include "platform/WindowsDataProvider.h"
+#include "platform/utility/StringConverter.h"
 #include "infrastructure/Screen.h"
 #include "infrastructure/utility/LogUtil.h"
 #include "infrastructure/ResourceManager.h"
@@ -16,6 +18,10 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 {
 	core::base::ServiceLocator::provide<core::iface::IFileProvider>(
 		std::make_unique<platform::WindowsDataProvider>()
+	);
+
+	core::base::ServiceLocator::provide<core::iface::IStringConverter>(
+		std::make_unique<platform::utility::StringConverter>()
 	);
 
 	// ResourceManagerをIResourceManagerインターフェースで登録（所有権を持たない）
