@@ -156,6 +156,7 @@
     <ClCompile Include="src\game\system\HitEffectSystem.cpp" />
     <ClCompile Include="src\game\ui\FadeTransition.cpp" />
     <ClCompile Include="src\game\ui\Label.cpp" />
+    <ClCompile Include="src\infrastructure\repository\ModelRepository.cpp" />
     <ClCompile Include="src\infrastructure\Screen.cpp" />
     <ClCompile Include="src\core\base\ServiceLocator.cpp" />
     <ClCompile Include="src\game\factory\FactoryInitializer.cpp" />
@@ -263,6 +264,7 @@
     <ClInclude Include="src\game\ui\Label.h" />
     <ClInclude Include="src\game\utility\ExtensionBonusCalculator.h" />
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
+    <ClInclude Include="src\infrastructure\repository\ModelRepository.h" />
     <ClInclude Include="src\infrastructure\Screen.h" />
     <ClInclude Include="src\core\base\ServiceLocator.h" />
     <ClInclude Include="src\core\utility\Color.h" />
