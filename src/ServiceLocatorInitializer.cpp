@@ -16,28 +16,42 @@
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 {
+	// ファイルプロバイダを登録
 	core::base::ServiceLocator::provide<core::iface::IFileProvider>(
 		std::make_unique<platform::WindowsDataProvider>()
 	);
 
+	// 文字列変換プロバイダを登録
 	core::base::ServiceLocator::provide<core::iface::IStringConverter>(
 		std::make_unique<platform::utility::StringConverter>()
 	);
 
-	// ResourceManagerをIResourceManagerインターフェースで登録（所有権を持たない）
-	core::base::ServiceLocator::provideExisting<core::iface::IResourceManager>(
-		&infrastructure::ResourceManager::getInstance()
-	);
+	// ResourceManager を生成して登録（Facade パターン：内部でリポジトリが管理）
+	try
+	{
+		auto resourceManager = std::make_unique<infrastructure::ResourceManager>();
+		auto* resourceManagerPtr = resourceManager.get();
 
-	// ResourceManagerをIJobProviderインターフェースでも登録（所有権を持たない）
-	core::base::ServiceLocator::provideExisting<core::iface::IJobProvider>(
-		&infrastructure::ResourceManager::getInstance()
-	);
+		core::base::ServiceLocator::provide<core::iface::IResourceManager>(
+			std::move(resourceManager)
+		);
 
-	// DEBUG:デバック用のためリリース時は消すこと
+		// ResourceManager を IJobProvider インターフェースでも登録
+		core::base::ServiceLocator::provideExisting<core::iface::IJobProvider>(
+			resourceManagerPtr
+		);
+	}
+	catch (const std::exception& e)
+	{
+		LOG_E("ResourceManager の初期化に失敗しました: %s", e.what());
+		return;
+	}
+
+	// デバッグ用ロガーを登録
 	core::base::ServiceLocator::provide<core::iface::ILogger>(
 		std::make_unique<infrastructure::utility::LogUtil>()
 	);
+
 	// Screen登録（SetGraphMode()で設定した画面サイズを渡す）
 	core::base::ServiceLocator::provide<core::iface::IScreen>(
 		std::make_unique<infrastructure::Screen>(screenWidth, screenHeight)
@@ -47,5 +61,4 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 	core::base::ServiceLocator::provide(
 		std::make_unique<game::scene::SceneManager>()
 	);
-
 }
