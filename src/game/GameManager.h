@@ -32,8 +32,12 @@ namespace game
             return m_jobSelectionData;
         }
 
-    private:
+        /**
+         * @brief デフォルトコンストラクタ（Singleton初期化用）
+         */
         GameManager() = default;
+
+    private:
 
         data::FileEquipmentData m_fileEquipmentData{};
         data::JobSelectionData m_jobSelectionData{};

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include <string_view>
 #include <optional>
@@ -8,12 +8,37 @@
 
 namespace infrastructure
 {
+	/**
+	 * @brief フォントリソースを管理するリポジトリクラス
+	 *
+	 * resources.jsonからフォント情報を読み込み、
+	 * DxLibのAddFontResourceExでフォントを登録する
+	 */
 	class FontRepository
 	{
 	public:
+		/**
+		 * @brief コンストラクタ
+		 *
+		 * コンストラクト時にresources.jsonからすべてのフォントを読み込み、
+		 * DxLibに登録する
+		 * @throw std::runtime_error ファイルが見つからないか、JSONパースに失敗した場合
+		 */
 		FontRepository();
+
+		/**
+		 * @brief デストラクタ
+		 *
+		 * デストラクト時に登録済みフォントをRemoveFontResourceExでクリーンアップする
+		 */
 		~FontRepository();
 
+		/**
+		 * @brief フォントIDからフォント名を取得する
+		 *
+		 * @param fontId フォント識別子
+		 * @return フォントファミリー名（存在しない場合nullopt）
+		 */
 		std::optional<std::string> getFontName(std::string_view fontId) const;
 
 	private:

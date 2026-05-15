@@ -1,4 +1,4 @@
-#include "ModelRepository.h"
+﻿#include "ModelRepository.h"
 #include <DxLib.h>
 #include <fstream>
 #include <stdexcept>
@@ -25,8 +25,7 @@ namespace infrastructure
 		auto metaIt{ m_metadata.find(id) };
 		if (metaIt == m_metadata.end())
 		{
-			auto* logger = core::base::ServiceLocator::get<core::iface::ILogger>();
-			logger->error("モデルID '%s' が見つかりません", id.c_str());
+			LOG_E("モデルID '%s' が見つかりません", id.c_str());
 			return -1;
 		}
 
@@ -38,8 +37,7 @@ namespace infrastructure
 		int handle{ MV1LoadModel(metadata.modelPath.c_str()) };
 		if (handle == -1)
 		{
-			auto* logger = core::base::ServiceLocator::get<core::iface::ILogger>();
-			logger->error("モデルの読み込みに失敗しました: %s", metadata.modelPath.c_str());
+			LOG_E("モデルの読み込みに失敗しました: %s", metadata.modelPath.c_str());
 			return -1;
 		}
 
@@ -57,8 +55,7 @@ namespace infrastructure
 			mutableMeta.colliderSize.y = vMax.y - vMin.y;
 			mutableMeta.colliderSize.z = vMax.z - vMin.z;
 
-			auto* logger = core::base::ServiceLocator::get<core::iface::ILogger>();
-			logger->info("'%s' のコライダーサイズを自動計算: (%.2f, %.2f, %.2f)",
+			LOG("'%s' のコライダーサイズを自動計算: (%.2f, %.2f, %.2f)",
 				id.c_str(),
 				mutableMeta.colliderSize.x,
 				mutableMeta.colliderSize.y,

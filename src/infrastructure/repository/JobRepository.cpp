@@ -1,4 +1,4 @@
-#include "JobRepository.h"
+﻿#include "JobRepository.h"
 #include <fstream>
 #include <stdexcept>
 #include "thirdparty/nlohmann/json.hpp"
@@ -9,7 +9,7 @@ namespace infrastructure
 	{
 		std::ifstream file("assets/data/jobData.json");
 		if (!file.is_open())
-			throw std::runtime_error("assets/data/jobData.json not found");
+			throw std::runtime_error("assets/data/jobData.json を開けませんでした");
 
 		auto json = nlohmann::json::parse(file);
 		const auto& jobs{ json["jobs"] };

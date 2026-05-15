@@ -1,4 +1,4 @@
-#include "FontRepository.h"
+﻿#include "FontRepository.h"
 #include <DxLib.h>
 #include <fstream>
 #include <stdexcept>
