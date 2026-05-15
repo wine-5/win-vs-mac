@@ -157,6 +157,7 @@
     <ClCompile Include="src\game\ui\FadeTransition.cpp" />
     <ClCompile Include="src\game\ui\Label.cpp" />
     <ClCompile Include="src\infrastructure\repository\FontRepository.cpp" />
+    <ClCompile Include="src\infrastructure\repository\JobRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\ModelRepository.cpp" />
     <ClCompile Include="src\infrastructure\Screen.cpp" />
     <ClCompile Include="src\core\base\ServiceLocator.cpp" />
@@ -266,6 +267,7 @@
     <ClInclude Include="src\game\utility\ExtensionBonusCalculator.h" />
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
     <ClInclude Include="src\infrastructure\repository\FontRepository.h" />
+    <ClInclude Include="src\infrastructure\repository\JobRepository.h" />
     <ClInclude Include="src\infrastructure\repository\ModelRepository.h" />
     <ClInclude Include="src\infrastructure\Screen.h" />
     <ClInclude Include="src\core\base\ServiceLocator.h" />
