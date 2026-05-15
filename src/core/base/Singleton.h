@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 
 namespace core::base
 {
@@ -61,6 +62,6 @@ namespace core::base
 		~Singleton() = default;
 
 	private:
-		static std::unique_ptr<T> m_instance;
+		static inline std::unique_ptr<T> m_instance;
 	};
 }
