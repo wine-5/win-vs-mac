@@ -61,7 +61,6 @@ namespace infrastructure
 		~ResourceManager();
 
 	private:
-
 		/**
 		 * @brief ResourceManagerのコンストラクタ
 		 * @param stringConverter 文字列エンコーディング変換用インターフェース

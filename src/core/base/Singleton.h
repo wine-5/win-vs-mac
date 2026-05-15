@@ -11,13 +11,34 @@ namespace core::base
 	{
 	public:
 		/**
+		 * @brief シングルトンのインスタンスを初期化（依存関係注入用）
+		 * 初期化処理を行うクラス（ServiceLocatorInitializer など）から呼び出される
+		 * @tparam Args コンストラクタの引数型
+		 * @param args コンストラクタの引数
+		 */
+		template<typename... Args>
+		static void initialize(Args&&... args)
+		{
+			if (!m_instance)
+				m_instance = std::make_unique<T>(std::forward<Args>(args)...);
+		}
+
+		/**
 		 * @brief シングルトンのインスタンスを取得
+		 * initialize() が呼び出されていることが前提。
 		 * @return 唯一のインスタンスへの参照
 		 */
 		static T& getInstance()
 		{
-			static T instance;
-			return instance;
+			return *m_instance;
+		}
+
+		/**
+		 * @brief シングルトンのインスタンスをクリア
+		 */
+		static void destroy()
+		{
+			m_instance.reset();
 		}
 
 		// コピーコンストラクタ削除にして禁止にする
@@ -38,5 +59,8 @@ namespace core::base
 		 * @brief デフォルトデストラクタ
 		 */
 		~Singleton() = default;
+
+	private:
+		static std::unique_ptr<T> m_instance;
 	};
 }
