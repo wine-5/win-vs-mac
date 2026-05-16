@@ -27,8 +27,6 @@ namespace platform::window
     {
         if (m_hwnd != nullptr) return true;
 
-        LOG("[WindowBase] Creating window: %ls", m_title.c_str());
-
         // RegisterClass してから CreateWindowEx する
         WNDCLASSW wndClass{};
         wndClass.lpfnWndProc = &WindowBase::staticWindowProc;
@@ -38,11 +36,7 @@ namespace platform::window
         wndClass.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
 
         ATOM atom = RegisterClassW(&wndClass);
-        if (atom == 0)
-        {
-            LOG("[WindowBase] RegisterClassW failed");
-            return false;
-        }
+        if (atom == 0) return false;
 
         m_hwnd = CreateWindowExW(
             0,
@@ -56,13 +50,7 @@ namespace platform::window
             this
         );
 
-        if (m_hwnd == nullptr)
-        {
-            LOG("[WindowBase] CreateWindowExW failed");
-            return false;
-        }
-
-        LOG("[WindowBase] Window created successfully: %ls", m_title.c_str());
+        if (m_hwnd == nullptr) return false;
 
         hide();
 
@@ -146,12 +134,10 @@ namespace platform::window
         switch (msg)
         {
         case WM_CREATE:
-            LOG("[WindowBase] WM_CREATE received, calling onCreateControls");
             onCreateControls(hwnd);
             return 0;
 
         case WM_CLOSE:
-            LOG("[WindowBase] WM_CLOSE received");
             hide();
             return 0;
 

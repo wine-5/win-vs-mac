@@ -1,7 +1,6 @@
 #include <windows.h>
 #include "JobWindow.h"
 #include "core/constant/JobType.h"
-#include "core/interface/ILogger.h"
 
 namespace platform::window
 {
@@ -41,7 +40,6 @@ namespace platform::window
 			startX, startY, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_JOB1_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
-		LOG(m_job1Button ? "[JobWindow] Job 1 button created successfully" : "[JobWindow] Job 1 button FAILED to create");
 		::SendMessage(m_job1Button, BM_SETCHECK, BST_CHECKED, 0);
 
 		m_job2Button = CreateWindowW(
@@ -51,7 +49,6 @@ namespace platform::window
 			startX, startY + spacing, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_JOB2_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
-		OutputDebugStringW(m_job2Button ? L"[JobWindow] Job 2 button created successfully\n" : L"[JobWindow] Job 2 button FAILED to create\n");
 
 		m_job3Button = CreateWindowW(
 			L"BUTTON",
@@ -60,7 +57,6 @@ namespace platform::window
 			startX, startY + spacing * 2, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_JOB3_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
-		OutputDebugStringW(m_job3Button ? L"[JobWindow] Job 3 button created successfully\n" : L"[JobWindow] Job 3 button FAILED to create\n");
 	}
 
 	LRESULT JobWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept

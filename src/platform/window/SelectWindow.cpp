@@ -12,7 +12,6 @@ namespace platform::window
 	void SelectWindow::setOnGameStart(std::function<void()> callback) noexcept
 	{
 		m_onGameStart = callback;
-		LOG("[SelectWindow] setOnGameStart callback %s", callback ? "set" : "set to NULL");
 	}
 
 	int SelectWindow::getSelectedDifficulty() const noexcept
@@ -40,7 +39,6 @@ namespace platform::window
 			startX, startY, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_EASY_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
-		LOG(m_easyButton ? "[SelectWindow] EASY button created successfully" : "[SelectWindow] EASY button FAILED to create");
 
 		m_normalButton = CreateWindowW(
 			L"BUTTON",
@@ -49,7 +47,6 @@ namespace platform::window
 			startX, startY + spacing, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_NORMAL_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
-		OutputDebugStringW(m_normalButton ? L"[SelectWindow] NORMAL button created successfully\n" : L"[SelectWindow] NORMAL button FAILED to create\n");
 		::SendMessage(m_normalButton, BM_SETCHECK, BST_CHECKED, 0);
 
 		m_hardButton = CreateWindowW(
@@ -59,7 +56,6 @@ namespace platform::window
 			startX, startY + spacing * 2, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_HARD_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
-		OutputDebugStringW(m_hardButton ? L"[SelectWindow] HARD button created successfully\n" : L"[SelectWindow] HARD button FAILED to create\n");
 
 		m_gameStartButton = CreateWindowW(
 			L"BUTTON",
@@ -68,7 +64,6 @@ namespace platform::window
 			startX, startY + spacing * 3 + windowHeight * 5 / 100, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_GAME_START_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
-		OutputDebugStringW(m_gameStartButton ? L"[SelectWindow] Start Game button created successfully\n" : L"[SelectWindow] Start Game button FAILED to create\n");
 	}
 
 	LRESULT SelectWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
@@ -80,35 +75,22 @@ namespace platform::window
 			int controlId = LOWORD(wParam);
 			int notificationCode = HIWORD(wParam);
 
-			LOG("[SelectWindow] WM_COMMAND: controlId=%d, notificationCode=%d", controlId, notificationCode);
-
 			if (notificationCode == BN_CLICKED)
 			{
 				switch (controlId)
 				{
 				case IDC_EASY_BUTTON:
-					LOG("[SelectWindow] EASY button clicked");
 					m_selectedDifficulty = Difficulty::Easy;
 					return 0;
 				case IDC_NORMAL_BUTTON:
-					LOG("[SelectWindow] NORMAL button clicked");
 					m_selectedDifficulty = Difficulty::Normal;
 					return 0;
 				case IDC_HARD_BUTTON:
-					LOG("[SelectWindow] HARD button clicked");
 					m_selectedDifficulty = Difficulty::Hard;
 					return 0;
 				case IDC_GAME_START_BUTTON:
-					LOG("[SelectWindow] Start Game button clicked");
 					if (m_onGameStart)
-					{
-						LOG("[SelectWindow] Calling m_onGameStart callback");
 						m_onGameStart();
-					}
-					else
-					{
-						LOG("[SelectWindow] ERROR: m_onGameStart callback is NULL");
-					}
 					return 0;
 				}
 			}

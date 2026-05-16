@@ -59,7 +59,6 @@ namespace platform::window
             startX, startY, labelWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
-        LOG(m_nameLabel ? "[ParameterWindow] Name label created successfully" : "[ParameterWindow] Name label FAILED to create");
 
         // Name 値表示(空文字列で初期化、後で refresh() で更新)
         // SS_LEFT - テキスト左寄せ
@@ -68,7 +67,6 @@ namespace platform::window
             startX + labelWidth, startY, valueWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
-        LOG(m_nameValue ? "[ParameterWindow] Name value created successfully" : "[ParameterWindow] Name value FAILED to create");
 
         // Skill ラベルと値
         m_skillLabel = CreateWindowW(
@@ -76,14 +74,12 @@ namespace platform::window
             startX, startY + spacing, labelWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
-        LOG(m_skillLabel ? "[ParameterWindow] Skill label created successfully" : "[ParameterWindow] Skill label FAILED to create");
 
         m_skillValue = CreateWindowW(
             L"STATIC", L"", WS_VISIBLE | WS_CHILD | SS_LEFT,
             startX + labelWidth, startY + spacing, valueWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
-        LOG(m_skillValue ? "[ParameterWindow] Skill value created successfully" : "[ParameterWindow] Skill value FAILED to create");
 
         // HP ラベルと値(SS_RIGHT - 右寄せで数値表示)
         m_hpLabel = CreateWindowW(
@@ -91,14 +87,12 @@ namespace platform::window
             startX, startY + spacing * 2, labelWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
-        LOG(m_hpLabel ? "[ParameterWindow] HP label created successfully" : "[ParameterWindow] HP label FAILED to create");
 
         m_hpValue = CreateWindowW(
             L"STATIC", L"", WS_VISIBLE | WS_CHILD | SS_RIGHT,
             startX + labelWidth, startY + spacing * 2, valueWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
-        LOG(m_hpValue ? "[ParameterWindow] HP value created successfully" : "[ParameterWindow] HP value FAILED to create");
 
         // ATK ラベルと値
         m_atkLabel = CreateWindowW(
@@ -106,14 +100,12 @@ namespace platform::window
             startX, startY + spacing * 3, labelWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
-        LOG(m_atkLabel ? "[ParameterWindow] ATK label created successfully" : "[ParameterWindow] ATK label FAILED to create");
 
         m_atkValue = CreateWindowW(
             L"STATIC", L"", WS_VISIBLE | WS_CHILD | SS_RIGHT,
             startX + labelWidth, startY + spacing * 3, valueWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
-        LOG(m_atkValue ? "[ParameterWindow] ATK value created successfully" : "[ParameterWindow] ATK value FAILED to create");
 
         // DEF ラベルと値
         m_defLabel = CreateWindowW(
@@ -121,14 +113,12 @@ namespace platform::window
             startX, startY + spacing * 4, labelWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
-        LOG(m_defLabel ? "[ParameterWindow] DEF label created successfully" : "[ParameterWindow] DEF label FAILED to create");
 
         m_defValue = CreateWindowW(
             L"STATIC", L"", WS_VISIBLE | WS_CHILD | SS_RIGHT,
             startX + labelWidth, startY + spacing * 4, valueWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
-        LOG(m_defValue ? "[ParameterWindow] DEF value created successfully" : "[ParameterWindow] DEF value FAILED to create");
 
         // SPD ラベルと値
         m_spdLabel = CreateWindowW(
@@ -136,13 +126,11 @@ namespace platform::window
             startX, startY + spacing * 5, labelWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
-        LOG(m_spdLabel ? "[ParameterWindow] SPD label created successfully" : "[ParameterWindow] SPD label FAILED to create");
 
         m_spdValue = CreateWindowW(
             L"STATIC", L"", WS_VISIBLE | WS_CHILD | SS_RIGHT,
             startX + labelWidth, startY + spacing * 5, valueWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
-        LOG(m_spdValue ? "[ParameterWindow] SPD value created successfully" : "[ParameterWindow] SPD value FAILED to create");
     }
 }

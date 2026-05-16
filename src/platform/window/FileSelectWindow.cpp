@@ -42,7 +42,6 @@ namespace platform::window
 			startX, startY, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_SLOT1_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
-		LOG(m_slotButtons[0] ? "[FileSelectWindow] Slot 1 button created successfully" : "[FileSelectWindow] Slot 1 button FAILED to create");
 
 		m_slotButtons[1] = CreateWindowW(
 			L"BUTTON",
@@ -51,7 +50,6 @@ namespace platform::window
 			startX, startY + spacing, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_SLOT2_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
-		OutputDebugStringW(m_slotButtons[1] ? L"[FileSelectWindow] Slot 2 button created successfully\n" : L"[FileSelectWindow] Slot 2 button FAILED to create\n");
 
 		m_slotButtons[2] = CreateWindowW(
 			L"BUTTON",
@@ -60,7 +58,6 @@ namespace platform::window
 			startX, startY + spacing * 2, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_SLOT3_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
-		OutputDebugStringW(m_slotButtons[2] ? L"[FileSelectWindow] Slot 3 button created successfully\n" : L"[FileSelectWindow] Slot 3 button FAILED to create\n");
 	}
 
 	LRESULT FileSelectWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
