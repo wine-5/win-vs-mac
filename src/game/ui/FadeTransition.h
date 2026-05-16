@@ -30,8 +30,10 @@ namespace game::ui
 
         /**
          * @brief 遷移アニメーションを描画する
+         * @param uiRenderer UI描画インターフェース
+         * @param screen 画面サイズインターフェース
          */
-        void draw() const;
+        void draw(core::iface::IUIRenderer& uiRenderer, core::iface::IScreen& screen) const;
 
         /**
          * @brief 遷移が完了したか

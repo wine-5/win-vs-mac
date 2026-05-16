@@ -38,6 +38,11 @@ namespace game::scene
                std::unique_ptr<core::iface::ISelectWindowManager> windowManager);
 
         /**
+         * @brief Selectのデストラクタ
+         */
+        ~Select() noexcept;
+
+        /**
          * @brief シーンの更新処理
          * @param deltaTime フレーム間の時間差
          */

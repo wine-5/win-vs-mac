@@ -3,6 +3,7 @@
 #include "SceneType.h"
 #include "core/base/ServiceLocator.h"
 #include "game/GameManager.h"
+#include "core/interface/ILogger.h"
 
 namespace game::scene
 {
@@ -21,6 +22,13 @@ namespace game::scene
 	{
 		if (m_windowManager)
 			m_windowManager->createAllWindows();
+	}
+
+	Select::~Select() noexcept
+	{
+		m_fade.reset();
+		if (m_windowManager)
+			m_windowManager->destroyAllWindows();
 	}
 
 	void Select::update(float deltaTime)
@@ -56,17 +64,23 @@ namespace game::scene
 	void Select::draw()
 	{
 		if (m_fade)
-			m_fade->draw();
+			m_fade->draw(m_uiRenderer, m_screen);
 	}
 
 	void Select::startFadeOut()
 	{
-		if (m_state != State::Idle)
+		LOG("[Select] startFadeOut called, m_state=%d (FadeIn=0, Idle=1, FadeOut=2)", static_cast<int>(m_state));
+		if (m_state == State::FadeOut)
+		{
+			LOG("[Select] Fade out is already in progress");
 			return;
+		}
+		LOG("[Select] Destroying windows and starting fade out");
 		if (m_windowManager)
 			m_windowManager->destroyAllWindows();
 		m_fade = std::make_unique<ui::FadeTransition>(m_uiRenderer, m_screen, FADE_DURATION, false);
 		m_state = State::FadeOut;
+		LOG("[Select] Fade out started successfully");
 	}
 
 	void Select::setWindowManager(std::unique_ptr<core::iface::ISelectWindowManager> windowManager) noexcept
@@ -78,6 +92,7 @@ namespace game::scene
 
 	void Select::notifyGameStart() noexcept
 	{
+		LOG("[Select] notifyGameStart called");
 		startFadeOut();
 	}
 

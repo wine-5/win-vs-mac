@@ -22,7 +22,7 @@ namespace game::ui
 			m_elapsed += deltaTime;
 	}
 
-	void FadeTransition::draw() const
+	void FadeTransition::draw(core::iface::IUIRenderer& uiRenderer, core::iface::IScreen& screen) const
 	{
 		float t{ m_elapsed / m_duration };
 		if (t > 1.0f)
@@ -31,11 +31,10 @@ namespace game::ui
 		const float alpha{ m_isFadeIn ? (1.0f - t) : t };
 		const int a{ static_cast<int>(alpha * 255) };
 
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, a);
-		m_uiRenderer.drawBox(0, 0, m_screen.getWidth(), m_screen.getHeight(),
+		uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, a);
+		uiRenderer.drawBox(0, 0, screen.getWidth(), screen.getHeight(),
 			core::utility::Color::BLACK, true);
-		m_uiRenderer.resetBlendMode();
-
+		uiRenderer.resetBlendMode();
 	}
 
 	bool FadeTransition::isFinished() const

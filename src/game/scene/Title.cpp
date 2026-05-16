@@ -116,14 +116,14 @@ namespace game::scene
 		case State::Splash:
 		case State::SplashFadeOut:
 			m_view->drawSplash(m_dotCount);
-			if (m_fade) m_fade->draw();
+			if (m_fade) m_fade->draw(m_uiRenderer, m_screen);
 			break;
 
 		case State::TitleFadeIn:
 		case State::Idle:
 		case State::FadingOut:
 			m_view->drawTitle();
-			if (m_fade) m_fade->draw();
+			if (m_fade) m_fade->draw(m_uiRenderer, m_screen);
 			break;
 		}
 	}
