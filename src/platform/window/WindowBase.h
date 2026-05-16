@@ -64,6 +64,18 @@ namespace platform::window
         */
         [[nodiscard]] bool isCreated() const noexcept;
 
+        /**
+         * @brief ウィンドウの幅を取得
+         * @return ウィンドウの幅（ピクセル）
+         */
+        [[nodiscard]] int getWidth() const noexcept;
+
+        /**
+         * @brief ウィンドウの高さを取得
+         * @return ウィンドウの高さ（ピクセル）
+         */
+        [[nodiscard]] int getHeight() const noexcept;
+
     protected:
         /**
          * @brief コントロール作成時のコールバック

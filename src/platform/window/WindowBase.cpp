@@ -6,6 +6,7 @@
 #endif
 
 #include "WindowBase.h"
+#include "core/interface/ILogger.h"
 
 namespace platform::window
 {
@@ -26,6 +27,8 @@ namespace platform::window
     {
         if (m_hwnd != nullptr) return true;
 
+        LOG("[WindowBase] Creating window: %ls", m_title.c_str());
+
         // RegisterClass してから CreateWindowEx する
         WNDCLASSW wndClass{};
         wndClass.lpfnWndProc = &WindowBase::staticWindowProc;
@@ -35,7 +38,11 @@ namespace platform::window
         wndClass.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
 
         ATOM atom = RegisterClassW(&wndClass);
-        if (atom == 0) return false;
+        if (atom == 0)
+        {
+            LOG("[WindowBase] RegisterClassW failed");
+            return false;
+        }
 
         m_hwnd = CreateWindowExW(
             0,
@@ -46,13 +53,16 @@ namespace platform::window
             nullptr,
             nullptr,
             GetModuleHandleW(nullptr),
-            nullptr
+            this
         );
 
-        if (m_hwnd == nullptr) return false;
+        if (m_hwnd == nullptr)
+        {
+            LOG("[WindowBase] CreateWindowExW failed");
+            return false;
+        }
 
-        // static 関数の staticWindowProc から this を復元できるようにする
-        SetWindowLongPtrW(m_hwnd, GWL_USERDATA, (LONG_PTR)this);
+        LOG("[WindowBase] Window created successfully: %ls", m_title.c_str());
 
         hide();
 
@@ -104,8 +114,26 @@ namespace platform::window
         return m_hwnd != nullptr && ::IsWindow(m_hwnd);
     }
 
+    [[nodiscard]] int WindowBase::getWidth() const noexcept
+    {
+        return m_width;
+    }
+
+    [[nodiscard]] int WindowBase::getHeight() const noexcept
+    {
+        return m_height;
+    }
+
     LRESULT CALLBACK WindowBase::staticWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
     {
+        if (msg == WM_CREATE)
+        {
+            CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+            WindowBase* pThis = reinterpret_cast<WindowBase*>(pCreate->lpCreateParams);
+            SetWindowLongPtrW(hwnd, GWL_USERDATA, (LONG_PTR)pThis);
+            return pThis->onMessage(hwnd, msg, wParam, lParam);
+        }
+
         WindowBase* pThis = reinterpret_cast<WindowBase*>(GetWindowLongPtrW(hwnd, GWL_USERDATA));
 
         if (pThis != nullptr) return pThis->onMessage(hwnd, msg, wParam, lParam);
@@ -118,10 +146,12 @@ namespace platform::window
         switch (msg)
         {
         case WM_CREATE:
+            LOG("[WindowBase] WM_CREATE received, calling onCreateControls");
             onCreateControls(hwnd);
             return 0;
 
         case WM_CLOSE:
+            LOG("[WindowBase] WM_CLOSE received");
             hide();
             return 0;
 

@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "SelectWindow.h"
+#include "core/interface/ILogger.h"
 
 namespace platform::window
 {
@@ -20,43 +21,53 @@ namespace platform::window
 
 	void SelectWindow::onCreateControls(HWND hwnd)
 	{
-		constexpr int buttonWidth{ 100 };
-		constexpr int buttonHeight{ 30 };
-		constexpr int startY{ 20 };
-		constexpr int spacing{ 40 };
+		RECT clientRect{};
+		GetClientRect(hwnd, &clientRect);
+		int windowWidth{ clientRect.right - clientRect.left };
+		int windowHeight{ clientRect.bottom - clientRect.top };
+
+		int buttonWidth{ windowWidth * 40 / 100 };
+		int buttonHeight{ windowHeight * 10 / 100 };
+		int startY{ windowHeight * 5 / 100 };
+		int spacing{ windowHeight * 15 / 100 };
+		int startX{ windowWidth * 10 / 100 };
 
 		m_easyButton = CreateWindowW(
 			L"BUTTON",
 			L"EASY",
 			WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
-			20, startY, buttonWidth, buttonHeight,
+			startX, startY, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_EASY_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
+		LOG(m_easyButton ? "[SelectWindow] EASY button created successfully" : "[SelectWindow] EASY button FAILED to create");
 
 		m_normalButton = CreateWindowW(
 			L"BUTTON",
 			L"NORMAL",
 			WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
-			20, startY + spacing, buttonWidth, buttonHeight,
+			startX, startY + spacing, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_NORMAL_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
+		OutputDebugStringW(m_normalButton ? L"[SelectWindow] NORMAL button created successfully\n" : L"[SelectWindow] NORMAL button FAILED to create\n");
 		::SendMessage(m_normalButton, BM_SETCHECK, BST_CHECKED, 0);
 
 		m_hardButton = CreateWindowW(
 			L"BUTTON",
 			L"HARD",
 			WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
-			20, startY + spacing * 2, buttonWidth, buttonHeight,
+			startX, startY + spacing * 2, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_HARD_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
+		OutputDebugStringW(m_hardButton ? L"[SelectWindow] HARD button created successfully\n" : L"[SelectWindow] HARD button FAILED to create\n");
 
 		m_gameStartButton = CreateWindowW(
 			L"BUTTON",
 			L"Start Game",
 			WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-			20, startY + spacing * 3 + 10, buttonWidth + 20, buttonHeight,
+			startX, startY + spacing * 3 + windowHeight * 5 / 100, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_GAME_START_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
+		OutputDebugStringW(m_gameStartButton ? L"[SelectWindow] Start Game button created successfully\n" : L"[SelectWindow] Start Game button FAILED to create\n");
 	}
 
 	LRESULT SelectWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept

@@ -2,6 +2,7 @@
 #include <commdlg.h>
 #include "FileSelectWindow.h"
 #include "platform/utility/StringConverter.h"
+#include "core/interface/ILogger.h"
 
 namespace platform::window
 {
@@ -23,38 +24,43 @@ namespace platform::window
 
 	void FileSelectWindow::onCreateControls(HWND hwnd)
 	{
-		constexpr int buttonWidth{ 120 };
-		constexpr int buttonHeight{ 30 };
-		constexpr int startY{ 20 };
-		constexpr int spacing{ 40 };
+		RECT clientRect{};
+		GetClientRect(hwnd, &clientRect);
+		int windowWidth{ clientRect.right - clientRect.left };
+		int windowHeight{ clientRect.bottom - clientRect.top };
 
-		// Slot 1ボタン作成
-		// BS_PUSHBUTTON: 通常のプッシュボタン
+		int buttonWidth{ windowWidth * 80 / 100 };
+		int buttonHeight{ windowHeight * 20 / 100 };
+		int startY{ windowHeight * 5 / 100 };
+		int spacing{ windowHeight * 30 / 100 };
+		int startX{ windowWidth * 10 / 100 };
+
 		m_slotButtons[0] = CreateWindowW(
 			L"BUTTON",
 			L"Slot 1",
 			WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-			20, startY, buttonWidth, buttonHeight,
+			startX, startY, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_SLOT1_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
+		LOG(m_slotButtons[0] ? "[FileSelectWindow] Slot 1 button created successfully" : "[FileSelectWindow] Slot 1 button FAILED to create");
 
-		// Slot 2ボタン作成
 		m_slotButtons[1] = CreateWindowW(
 			L"BUTTON",
 			L"Slot 2",
 			WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-			20, startY + spacing, buttonWidth, buttonHeight,
+			startX, startY + spacing, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_SLOT2_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
+		OutputDebugStringW(m_slotButtons[1] ? L"[FileSelectWindow] Slot 2 button created successfully\n" : L"[FileSelectWindow] Slot 2 button FAILED to create\n");
 
-		// Slot 3ボタン作成
 		m_slotButtons[2] = CreateWindowW(
 			L"BUTTON",
 			L"Slot 3",
 			WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-			20, startY + spacing * 2, buttonWidth, buttonHeight,
+			startX, startY + spacing * 2, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_SLOT3_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
+		OutputDebugStringW(m_slotButtons[2] ? L"[FileSelectWindow] Slot 3 button created successfully\n" : L"[FileSelectWindow] Slot 3 button FAILED to create\n");
 	}
 
 	LRESULT FileSelectWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
@@ -63,7 +69,6 @@ namespace platform::window
 		{
 		case WM_COMMAND:
 		{
-			// Slot ボタンが押下されたら対応するファイルダイアログを開く
 			int controlId = LOWORD(wParam);
 			int notificationCode = HIWORD(wParam);
 
@@ -93,21 +98,17 @@ namespace platform::window
 
 	void FileSelectWindow::openFileDialog(int slotIndex)
 	{
-		// OPENFILENAMEA: ファイルダイアログの構造体（A=ANSI版）
 		OPENFILENAMEA ofn{};
-		char szFile[260]{};  // ファイルパスを格納するバッファ
+		char szFile[260]{};
 
-		// ファイルダイアログの設定
 		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner = getHwnd();  // オーナーウィンドウ
-		ofn.lpstrFile = szFile;  // 選択されたファイルパスが格納される
-		ofn.nMaxFile = sizeof(szFile);  // バッファサイズ
-		ofn.lpstrFilter = "All Files\0*.*\0";  // ファイルフィルタ
-		ofn.nFilterIndex = 1;  // デフォルトフィルタインデックス
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;  // パス・ファイルが存在するかチェック
+		ofn.hwndOwner = getHwnd();
+		ofn.lpstrFile = szFile;
+		ofn.nMaxFile = sizeof(szFile);
+		ofn.lpstrFilter = "All Files\0*.*\0";
+		ofn.nFilterIndex = 1;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
-		// GetOpenFileNameA: Windows標準のファイル選択ダイアログ表示（モーダル）
-		// 返り値が非ゼロならユーザーがファイルを選択した
 		if (GetOpenFileNameA(&ofn))
 		{
 			m_filePaths[slotIndex] = szFile;

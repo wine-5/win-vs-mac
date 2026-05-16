@@ -1,5 +1,4 @@
 ﻿#include "Select.h"
-#include "SelectView.h"
 #include "SceneManager.h"
 #include "SceneType.h"
 #include "core/base/ServiceLocator.h"
@@ -12,30 +11,16 @@ namespace game::scene
 		core::iface::IScreen& screen,
 		core::iface::IFileProvider& fileProvider,
 		core::iface::IResourceManager& resourceManager,
-		data::FileEquipmentData& fileEquipmentData)
+		data::FileEquipmentData& fileEquipmentData,
+		std::unique_ptr<core::iface::ISelectWindowManager> windowManager)
 		: m_uiRenderer{ uiRenderer }
 		, m_screen{ screen }
 		, m_resourceManager{ resourceManager }
+		, m_windowManager{ std::move(windowManager) }
 		, m_fade{ std::make_unique<ui::FadeTransition>(uiRenderer, screen, FADE_DURATION, true) }
 	{
-		auto& jobSelectionData{ game::GameManager::getInstance().getJobSelectionData() };
-
-		m_view = std::make_unique<SelectView>(
-			inputProvider, uiRenderer, screen, fileEquipmentData,
-			resourceManager, jobSelectionData,
-			[this]() { startFadeOut(); },
-			[&fileProvider, &fileEquipmentData](int slotIndex)
-			{
-				const std::string path{ fileProvider.selectFile() };
-				if (!path.empty())
-					fileEquipmentData.setFilePath(slotIndex, path);
-			},
-			[this](int jobIdInt)
-			{
-				const core::constant::JobType jobType{ static_cast<core::constant::JobType>(jobIdInt) };
-				auto& jobSelectionData{ game::GameManager::getInstance().getJobSelectionData() };
-				jobSelectionData.setSelectedJobType(jobType);
-			});
+		if (m_windowManager)
+			m_windowManager->createAllWindows();
 	}
 
 	void Select::update(float deltaTime)
@@ -54,7 +39,8 @@ namespace game::scene
 			break;
 
 		case State::Idle:
-			m_view->update();
+			if (m_windowManager)
+				m_windowManager->pumpMessages();
 			break;
 
 		case State::FadeOut:
@@ -69,7 +55,6 @@ namespace game::scene
 
 	void Select::draw()
 	{
-		m_view->draw();
 		if (m_fade)
 			m_fade->draw();
 	}
@@ -78,8 +63,28 @@ namespace game::scene
 	{
 		if (m_state != State::Idle)
 			return;
+		if (m_windowManager)
+			m_windowManager->destroyAllWindows();
 		m_fade = std::make_unique<ui::FadeTransition>(m_uiRenderer, m_screen, FADE_DURATION, false);
 		m_state = State::FadeOut;
+	}
+
+	void Select::setWindowManager(std::unique_ptr<core::iface::ISelectWindowManager> windowManager) noexcept
+	{
+		m_windowManager = std::move(windowManager);
+		if (m_windowManager)
+			m_windowManager->createAllWindows();
+	}
+
+	void Select::notifyGameStart() noexcept
+	{
+		startFadeOut();
+	}
+
+	void Select::notifyJobSelected(core::constant::JobType jobType) noexcept
+	{
+		if (m_windowManager)
+			m_windowManager->updateParameterWindowForJob(jobType);
 	}
 
 }

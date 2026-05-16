@@ -1,6 +1,7 @@
 #include <windows.h>
 #include "JobWindow.h"
 #include "core/constant/JobType.h"
+#include "core/interface/ILogger.h"
 
 namespace platform::window
 {
@@ -22,35 +23,44 @@ namespace platform::window
 
 	void JobWindow::onCreateControls(HWND hwnd)
 	{
-		constexpr int buttonWidth{ 120 };
-		constexpr int buttonHeight{ 30 };
-		constexpr int startY{ 20 };
-		constexpr int spacing{ 40 };
+		RECT clientRect{};
+		GetClientRect(hwnd, &clientRect);
+		int windowWidth{ clientRect.right - clientRect.left };
+		int windowHeight{ clientRect.bottom - clientRect.top };
+
+		int buttonWidth{ windowWidth * 80 / 100 };
+		int buttonHeight{ windowHeight * 15 / 100 };
+		int startY{ windowHeight * 5 / 100 };
+		int spacing{ windowHeight * 25 / 100 };
+		int startX{ windowWidth * 10 / 100 };
 
 		m_job1Button = CreateWindowW(
 			L"BUTTON",
 			L"Job 1",
 			WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
-			20, startY, buttonWidth, buttonHeight,
+			startX, startY, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_JOB1_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
+		LOG(m_job1Button ? "[JobWindow] Job 1 button created successfully" : "[JobWindow] Job 1 button FAILED to create");
 		::SendMessage(m_job1Button, BM_SETCHECK, BST_CHECKED, 0);
 
 		m_job2Button = CreateWindowW(
 			L"BUTTON",
 			L"Job 2",
 			WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
-			20, startY + spacing, buttonWidth, buttonHeight,
+			startX, startY + spacing, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_JOB2_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
+		OutputDebugStringW(m_job2Button ? L"[JobWindow] Job 2 button created successfully\n" : L"[JobWindow] Job 2 button FAILED to create\n");
 
 		m_job3Button = CreateWindowW(
 			L"BUTTON",
 			L"Job 3",
 			WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
-			20, startY + spacing * 2, buttonWidth, buttonHeight,
+			startX, startY + spacing * 2, buttonWidth, buttonHeight,
 			hwnd, (HMENU)IDC_JOB3_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
+		OutputDebugStringW(m_job3Button ? L"[JobWindow] Job 3 button created successfully\n" : L"[JobWindow] Job 3 button FAILED to create\n");
 	}
 
 	LRESULT JobWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept

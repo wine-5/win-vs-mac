@@ -8,6 +8,7 @@
 #include "core/interface/IFileProvider.h"
 #include "core/interface/IResourceManager.h"
 #include "game/GameManager.h"
+#include "platform/window/Win32SelectWindowManager.h"
 
 namespace
 {
@@ -57,7 +58,23 @@ namespace game::scene
 				*screen,
 				*fileProvider,
 				*resourceManager,
-				game::GameManager::getInstance().getFileEquipmentData());
+				game::GameManager::getInstance().getFileEquipmentData(),
+				nullptr);
+
+			auto windowManager = std::make_unique<platform::window::Win32SelectWindowManager>(
+				[selectPtr = m_selectScene.get()]() { selectPtr->notifyGameStart(); },
+				[selectPtr = m_selectScene.get()](core::constant::JobType jt) {
+					game::GameManager::getInstance().getJobSelectionData().setSelectedJobType(jt);
+					selectPtr->notifyJobSelected(jt);
+				},
+				[fileProvider](int slot, const std::string& path) {
+					game::GameManager::getInstance().getFileEquipmentData().setFilePath(slot, path);
+				},
+				*resourceManager,
+				*screen
+			);
+
+			m_selectScene->setWindowManager(std::move(windowManager));
 			return m_selectScene.get();
 		}
 
