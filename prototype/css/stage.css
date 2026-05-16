@@ -118,26 +118,26 @@
 }
 
 #win-job {
-    top: 0;
-    left: 0;
-    width: 28.86%;
-    height: 100%;
+    top: 20px;
+    bottom: 0;
+    left: 20px;
+    width: 340px;
     z-index: 101;
 }
 
 #win-explorer {
-    top: 0;
-    left: 28.86%;
-    width: 45.77%;
-    height: 100%;
+    top: 20px;
+    bottom: 0;
+    left: 370px;
+    width: 460px;
     z-index: 101;
 }
 
 #win-params {
-    top: 0;
-    left: 74.63%;
-    width: 25.37%;
-    height: 100%;
+    top: 20px;
+    bottom: 0;
+    left: 850px;
+    width: 340px;
     z-index: 101;
 }
 

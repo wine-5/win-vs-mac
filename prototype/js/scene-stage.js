@@ -58,16 +58,31 @@ function setDifficulty(diff) {
 let selectedSlotIndex = -1;
 
 function selectFileSlot(slotIndex) {
+    // C++ 側のファイル選択ダイアログを呼び出す（実装時）
+    // ここではプロトタイプなので、デモ用のダイアログをシミュレート
     selectedSlotIndex = slotIndex;
-    document.querySelectorAll('.explorer-slot').forEach(slot => slot.classList.remove('selected'));
-    document.getElementById(`slot-${slotIndex}`).classList.add('selected');
+
+    // デモ用：ファイル選択をシミュレート（実装時は C++ の GetOpenFileName を呼び出す）
+    const demoFiles = [
+        { name: 'project_final.exe', stat: 'atk', amount: 10 },
+        { name: 'readme.txt', stat: 'spd', amount: 5 },
+        { name: 'screenshot.png', stat: 'def', amount: 8 },
+        { name: 'bgm.mp3', stat: 'hp', amount: 20 },
+        { name: 'backup.zip', stat: 'all', amount: 5 },
+        { name: 'data.dll', stat: 'atk', amount: 10 },
+        { name: 'notes.docx', stat: 'spd', amount: 5 },
+        { name: 'mystery.???', stat: 'mystery', amount: 0 }
+    ];
+
+    // ダイアログが閉じたと仮定してファイルを選択
+    if (selectedSlotIndex !== -1 && selectedSlotIndex < 3) {
+        const selectedFile = demoFiles[selectedSlotIndex];
+        updateFileSlot(selectedFile.name, selectedFile.stat, selectedFile.amount);
+    }
 }
 
-function selectFileForSlot(name, stat, amount) {
+function updateFileSlot(name, stat, amount) {
     if (selectedSlotIndex === -1) return;
-
-    const slotId = `slot-name-${selectedSlotIndex}`;
-    const slotNameEl = document.getElementById(slotId);
 
     // Remove old file if exists
     const oldFile = selectedFiles.find(f => f.slotIndex === selectedSlotIndex);
@@ -79,17 +94,20 @@ function selectFileForSlot(name, stat, amount) {
     selectedFiles.push({ name, stat, amount, slotIndex: selectedSlotIndex });
 
     // Update slot display
-    slotNameEl.textContent = name;
-
-    // Update status bar
-    const status = document.getElementById('ex-status');
-    status.style.color = '';
-    status.textContent = selectedFiles.length === 0
-        ? 'ファイルを選択してください（最大3つ）'
-        : `${selectedFiles.length}個選択中: ${selectedFiles.map(f => f.name).join(', ')}`;
+    const slotDisplayId = `slot-selected-${selectedSlotIndex + 1}`;
+    const slotDisplayEl = document.getElementById(slotDisplayId);
+    if (slotDisplayEl) {
+        slotDisplayEl.textContent = `${name} (${stat === 'all' ? 'ALL +' + amount : stat.toUpperCase() + ' +' + amount})`;
+        slotDisplayEl.style.color = '#00a4ef';
+    }
 
     updateParams();
     selectedSlotIndex = -1;
+}
+
+function selectFileForSlot(name, stat, amount) {
+    // 古い UI から呼び出される可能性があるため互換性を保つ
+    updateFileSlot(name, stat, amount);
 }
 
 /* ===== PARAMS UPDATE ===== */

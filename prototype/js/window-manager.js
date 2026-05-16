@@ -92,6 +92,14 @@ function closeWindow(id) {
 function minimizeWindow(id) {
     const el = document.getElementById(id);
     el.style.display = 'none';
+
+    // Show the corresponding desktop icon
+    const iconId = 'icon-' + id.replace('win-', '');
+    const iconEl = document.getElementById(iconId);
+    if (iconEl) {
+        iconEl.style.display = 'flex';
+    }
+
     updateTaskbarApp(id, 'minimized');
 }
 
@@ -114,6 +122,14 @@ function restoreWindow(id) {
     const el = document.getElementById(id);
     el.style.display = 'flex';
     el.style.zIndex = 100;
+
+    // Hide the corresponding desktop icon
+    const iconId = 'icon-' + id.replace('win-', '');
+    const iconEl = document.getElementById(iconId);
+    if (iconEl) {
+        iconEl.style.display = 'none';
+    }
+
     updateTaskbarApp(id, 'active');
 }
 
