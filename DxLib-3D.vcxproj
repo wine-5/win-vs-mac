@@ -187,7 +187,11 @@
     <ClCompile Include="src\platform\WindowsDataProvider.cpp" />
     <ClCompile Include="src\platform\utility\StringConverter.cpp" />
     <ClCompile Include="src\platform\window\JobWindow.cpp" />
+    <ClCompile Include="src\platform\window\SelectWindow.cpp" />
+    <ClCompile Include="src\platform\window\FileSelectWindow.cpp" />
+    <ClCompile Include="src\platform\window\ParameterWindow.cpp" />
     <ClCompile Include="src\platform\window\WindowBase.cpp" />
+    <ClCompile Include="src\platform\window\Win32SelectWindowManager.cpp" />
     <ClCompile Include="src\ServiceLocatorInitializer.cpp" />
     <ClCompile Include="src\SingletonInitializer.cpp" />
   </ItemGroup>
