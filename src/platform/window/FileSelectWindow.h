@@ -1,0 +1,59 @@
+#pragma once
+
+#include <windows.h>
+#include <string>
+#include <array>
+#include "WindowBase.h"
+#include <functional>
+
+namespace platform::window
+{
+    /**
+     * @class FileSelectWindow
+     * @brief ファイルスロット選択ウィンドウ
+     */
+    class FileSelectWindow : public WindowBase
+    {
+    public:
+        /**
+         * @brief コンストラクタ
+         * @param x ウィンドウの左上角 X 座標
+         * @param y ウィンドウの左上角 Y 座標
+         * @param width ウィンドウの幅
+         * @param height ウィンドウの高さ
+         */
+        FileSelectWindow(int x, int y, int width, int height) noexcept;
+
+        /// @brief デストラクタ
+        virtual ~FileSelectWindow() noexcept = default;
+
+        /**
+         * @brief ファイルスロット変更時のコールバック設定
+         * @param callback スロットインデックスとファイルパスを受け取るコールバック関数
+         */
+        void setOnFileSlotChanged(std::function<void(int, const std::string&)> callback) noexcept;
+
+        /**
+         * @brief ファイルパスを取得
+         * @param slot スロットインデックス（0-2）
+         * @return ファイルパス
+         */
+        std::string getFilePath(int slot) const noexcept;
+
+    protected:
+        void onCreateControls(HWND hwnd) override;
+        LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
+
+    private:
+        static constexpr int SLOT_COUNT = 3;
+        static constexpr int IDC_SLOT1_BUTTON = 3001;
+        static constexpr int IDC_SLOT2_BUTTON = 3002;
+        static constexpr int IDC_SLOT3_BUTTON = 3003;
+
+        std::array<HWND, SLOT_COUNT> m_slotButtons{};
+        std::array<std::string, SLOT_COUNT> m_filePaths{};
+        std::function<void(int, const std::string&)> m_onFileSlotChanged{};
+
+        void openFileDialog(int slotIndex);
+    };
+}
