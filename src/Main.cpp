@@ -43,7 +43,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//sceneManager->changeScene(game::scene::SceneType::Title);
 
 	// デバック用：初期シーンをgameに設定
-	sceneManager->changeScene(game::scene::SceneType::Title);
+	sceneManager->changeScene(game::scene::SceneType::Select);
 	
 	while (ProcessMessage() == 0)
 	{

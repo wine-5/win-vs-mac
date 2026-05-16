@@ -1,0 +1,51 @@
+#pragma once
+
+#include "core/interface/ISelectWindowManager.h"
+#include "core/constant/JobType.h"
+#include "core/data/JobInfo.h"
+#include "SelectWindow.h"
+#include "JobWindow.h"
+#include "FileSelectWindow.h"
+#include "ParameterWindow.h"
+#include <memory>
+#include <functional>
+
+namespace core::iface
+{
+    class IResourceManager;
+}
+
+namespace platform::window
+{
+    class Win32SelectWindowManager : public core::iface::ISelectWindowManager
+    {
+    public:
+        Win32SelectWindowManager(
+            std::function<void()> onGameStart,
+            std::function<void(core::constant::JobType)> onJobSelect,
+            std::function<void(int, const std::string&)> onFileSlotChanged,
+            core::iface::IResourceManager& resourceManager
+        ) noexcept;
+
+        virtual ~Win32SelectWindowManager() noexcept = default;
+
+        void createAllWindows() override;
+        void destroyAllWindows() override;
+        void pumpMessages() override;
+        void bringToFront(core::constant::SelectWindowId id) override;
+
+        void updateParameterWindowForJob(core::constant::JobType jobType) noexcept;
+
+    private:
+        std::unique_ptr<SelectWindow> m_selectWindow{};
+        std::unique_ptr<JobWindow> m_jobWindow{};
+        std::unique_ptr<FileSelectWindow> m_fileSelectWindow{};
+        std::unique_ptr<ParameterWindow> m_parameterWindow{};
+
+        std::function<void()> m_onGameStart{};
+        std::function<void(core::constant::JobType)> m_onJobSelect{};
+        std::function<void(int, const std::string&)> m_onFileSlotChanged{};
+
+        core::iface::IResourceManager& m_resourceManager;
+    };
+}
