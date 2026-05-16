@@ -10,22 +10,22 @@ namespace infrastructure::utility
     {
 #ifdef _DEBUG
         // Windowsコンソールウィンドウを作成（不要な場合はコメントアウト）
-        AllocConsole();
-        
-        // 標準出力をコンソールにリダイレクト
-        FILE* fp;
-        freopen_s(&fp, "CONOUT$", "w", stdout);
-        freopen_s(&fp, "CONOUT$", "w", stderr);
-        
-        // コンソールハンドルを取得
-        m_consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-        
-        // コンソールウィンドウのタイトルを設定
-        SetConsoleTitleA("DxLib-3D Debug Console");
-        
-        printf("===========================================\n");
-        printf("  DxLib-3D Debug Console\n");
-        printf("===========================================\n\n");
+        //AllocConsole();
+        //
+        //// 標準出力をコンソールにリダイレクト
+        //FILE* fp;
+        //freopen_s(&fp, "CONOUT$", "w", stdout);
+        //freopen_s(&fp, "CONOUT$", "w", stderr);
+        //
+        //// コンソールハンドルを取得
+        //m_consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+        //
+        //// コンソールウィンドウのタイトルを設定
+        //SetConsoleTitleA("DxLib-3D Debug Console");
+        //
+        //printf("===========================================\n");
+        //printf("  DxLib-3D Debug Console\n");
+        //printf("===========================================\n\n");
 #endif
     }
     
