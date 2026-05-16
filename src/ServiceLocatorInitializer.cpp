@@ -12,7 +12,6 @@
 #include "infrastructure/ResourceManager.h"
 #include "game/scene/SceneManager.h"
 #include "game/GameManager.h"
-#include "core/interface/IJobProvider.h"
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 {
@@ -34,11 +33,6 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 
 		core::base::ServiceLocator::provide<core::iface::IResourceManager>(
 			std::move(resourceManager)
-		);
-
-		// ResourceManager を IJobProvider インターフェースでも登録
-		core::base::ServiceLocator::provideExisting<core::iface::IJobProvider>(
-			resourceManagerPtr
 		);
 	}
 	catch (const std::exception& e)

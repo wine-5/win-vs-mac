@@ -5,7 +5,7 @@
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IFileProvider.h"
-#include "core/interface/IJobProvider.h"
+#include "core/interface/IResourceManager.h"
 #include "game/data/FileEquipmentData.h"
 #include <memory>
 
@@ -25,14 +25,14 @@ namespace game::scene
          * @param uiRenderer UI描画インターフェース
          * @param screen 画面情報インターフェース
          * @param fileProvider ファイル選択インターフェース
-         * @param jobProvider 職業情報プロバイダー
+         * @param resourceManager リソース管理インターフェース
          * @param fileEquipmentData 選択ファイルデータの参照
          */
         Select(core::iface::IInputProvider &inputProvider,
                core::iface::IUIRenderer &uiRenderer,
                core::iface::IScreen &screen,
                core::iface::IFileProvider &fileProvider,
-               core::iface::IJobProvider &jobProvider,
+               core::iface::IResourceManager &resourceManager,
                data::FileEquipmentData &fileEquipmentData);
 
         /**
@@ -58,6 +58,7 @@ namespace game::scene
 
         core::iface::IUIRenderer &m_uiRenderer;
         core::iface::IScreen &m_screen;
+        core::iface::IResourceManager &m_resourceManager;
 
         std::unique_ptr<SelectView> m_view;
         std::unique_ptr<ui::FadeTransition> m_fade;

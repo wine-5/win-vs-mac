@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <array>
-#include "core/interface/IJobProvider.h"
+#include "core/data/JobInfo.h"
 #include "core/constant/JobType.h"
 
 namespace infrastructure
@@ -23,21 +23,14 @@ namespace infrastructure
 		JobRepository();
 
 		/**
-		 * @brief 利用可能なジョブの総数を取得する
-		 *
-		 * @return JOB_COUNTで定義されたジョブ数
-		 */
-		int getJobCount() const noexcept;
-
-		/**
 		 * @brief ジョブタイプでジョブ情報を取得する
 		 *
 		 * @param jobType ジョブタイプ列挙値
 		 * @return ジョブ情報（ステータス、名前、スキルなど）
 		 */
-		core::iface::JobInfo getJobInfo(core::constant::JobType jobType) const;
+		core::data::JobInfo getJobInfo(core::constant::JobType jobType) const;
 
 	private:
-		std::array<core::iface::JobInfo, core::constant::JOB_COUNT> m_jobTable;
+		std::array<core::data::JobInfo, core::constant::JOB_COUNT> m_jobTable;
 	};
 }

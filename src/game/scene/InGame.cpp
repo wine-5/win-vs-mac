@@ -4,7 +4,6 @@
 #include "core/interface/ILogger.h"
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
-#include "core/interface/IJobProvider.h"
 #include "core/constant/JobType.h"
 
 /* game層 */
@@ -84,15 +83,9 @@ namespace game::scene
 		const auto& jobSelectionData{ GameManager::getInstance().getJobSelectionData() };
 		if (jobSelectionData.hasJobSelected())
 		{
-			const core::constant::JobType jobType{ jobSelectionData.getSelectedJobType() };
-
-			// IJobProvider を ServiceLocator から取得
-			auto* jobProvider{ core::base::ServiceLocator::get<core::iface::IJobProvider>() };
-			if (jobProvider)
-			{
-				const auto jobInfo{ jobProvider->getJobInfo(jobType) };
-				m_playerData.applyJobParameters(jobInfo.m_hp, jobInfo.m_atk, jobInfo.m_def, jobInfo.m_spd);
-			}
+			const auto jobType{ jobSelectionData.getSelectedJobType() };
+			const auto jobInfo{ m_resourceManager.getJobInfo(jobType) };
+			m_playerData.applyJobParameters(jobInfo.m_hp, jobInfo.m_atk, jobInfo.m_def, jobInfo.m_spd);
 		}
 
 		// 職業適用後の値を保存

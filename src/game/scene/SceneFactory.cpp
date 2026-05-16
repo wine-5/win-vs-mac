@@ -6,7 +6,6 @@
 #include "Result.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IFileProvider.h"
-#include "core/interface/IJobProvider.h"
 #include "core/interface/IResourceManager.h"
 #include "game/GameManager.h"
 
@@ -50,14 +49,14 @@ namespace game::scene
 		case SceneType::Select:
 		{
 			auto* fileProvider = core::base::ServiceLocator::get<core::iface::IFileProvider>();
-			auto* jobProvider = core::base::ServiceLocator::get<core::iface::IJobProvider>();
+			auto* resourceManager = core::base::ServiceLocator::get<core::iface::IResourceManager>();
 
 			m_selectScene = std::make_unique<Select>(
 				m_selectInputManager,
 				m_selectUIRenderer,
 				*screen,
 				*fileProvider,
-				*jobProvider,
+				*resourceManager,
 				game::GameManager::getInstance().getFileEquipmentData());
 			return m_selectScene.get();
 		}

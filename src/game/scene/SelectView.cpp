@@ -10,7 +10,7 @@ namespace game::scene
         core::iface::IUIRenderer& uiRenderer,
         core::iface::IScreen& screen,
         data::FileEquipmentData& fileEquipmentData,
-        core::iface::IJobProvider& jobProvider,
+        core::iface::IResourceManager& resourceManager,
         data::JobSelectionData& jobSelectionData,
         std::function<void()> onGameStart,
         std::function<void(int)> onFileSelect,
@@ -18,7 +18,7 @@ namespace game::scene
         : m_uiRenderer{ uiRenderer }
         , m_screen{ screen }
         , m_fileEquipmentData{ fileEquipmentData }
-        , m_jobProvider{ jobProvider }
+        , m_resourceManager{ resourceManager }
         , m_jobSelectionData{ jobSelectionData }
     {
         const int screenWidth{ screen.getWidth() };
@@ -49,14 +49,13 @@ namespace game::scene
         // 職業ボタンの配置の定義
         const int jobButtonX{ static_cast<int>(screenWidth * 0.65f) };
         const int jobButtonBaseY{ static_cast<int>(screenHeight * 0.50f) };
-        const int jobCount{ jobProvider.getJobCount() };
         const float jobButtonYStep{ 0.08f };
 
         // 職業ボタンの描画
-        for (int i{ 0 }; i < jobCount; ++i)
+        for (int i{ 0 }; i < core::constant::JOB_COUNT; ++i)
         {
             const core::constant::JobType jobType{ static_cast<core::constant::JobType>(i) };
-            const auto jobInfo{ jobProvider.getJobInfo(jobType) };
+            const auto jobInfo{ resourceManager.getJobInfo(jobType) };
             const int jobButtonY{ static_cast<int>(jobButtonBaseY - i * jobButtonYStep * screenHeight) };
 
             auto jobBtn{ std::make_unique<ui::Button>(
@@ -100,7 +99,7 @@ namespace game::scene
         if (m_jobSelectionData.hasJobSelected())
         {
             const core::constant::JobType jobType{ m_jobSelectionData.getSelectedJobType() };
-            const auto jobInfo{ m_jobProvider.getJobInfo(jobType) };
+            const auto jobInfo{ m_resourceManager.getJobInfo(jobType) };
 
             const int paramTextFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
             const int paramStartX{ m_screen.getWidth() - 250 };

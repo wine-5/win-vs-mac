@@ -11,15 +11,18 @@ namespace game::scene
 		core::iface::IUIRenderer& uiRenderer,
 		core::iface::IScreen& screen,
 		core::iface::IFileProvider& fileProvider,
-		core::iface::IJobProvider& jobProvider,
+		core::iface::IResourceManager& resourceManager,
 		data::FileEquipmentData& fileEquipmentData)
 		: m_uiRenderer{ uiRenderer }
 		, m_screen{ screen }
+		, m_resourceManager{ resourceManager }
 		, m_fade{ std::make_unique<ui::FadeTransition>(uiRenderer, screen, FADE_DURATION, true) }
 	{
+		auto& jobSelectionData{ game::GameManager::getInstance().getJobSelectionData() };
+
 		m_view = std::make_unique<SelectView>(
-			inputProvider, uiRenderer, screen, fileEquipmentData, jobProvider,
-			game::GameManager::getInstance().getJobSelectionData(),
+			inputProvider, uiRenderer, screen, fileEquipmentData,
+			resourceManager, jobSelectionData,
 			[this]() { startFadeOut(); },
 			[&fileProvider, &fileEquipmentData](int slotIndex)
 			{
@@ -30,7 +33,8 @@ namespace game::scene
 			[this](int jobIdInt)
 			{
 				const core::constant::JobType jobType{ static_cast<core::constant::JobType>(jobIdInt) };
-				game::GameManager::getInstance().getJobSelectionData().setSelectedJobType(jobType);
+				auto& jobSelectionData{ game::GameManager::getInstance().getJobSelectionData() };
+				jobSelectionData.setSelectedJobType(jobType);
 			});
 	}
 

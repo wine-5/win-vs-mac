@@ -3,7 +3,7 @@
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
-#include "core/interface/IJobProvider.h"
+#include "core/interface/IResourceManager.h"
 #include "game/data/FileEquipmentData.h"
 #include "game/data/JobSelectionData.h"
 #include <functional>
@@ -28,15 +28,17 @@ namespace game::scene
 		 * @param uiRenderer UI描画インターフェース
 		 * @param screen 画面情報インターフェース
 		 * @param fileEquipmentData 選択ファイルデータ（表示用）
-		 * @param jobProvider 職業情報プロバイダー
+		 * @param resourceManager リソース管理インターフェース
+		 * @param jobSelectionData ジョブ選択データ
 		 * @param onGameStart ゲームスタートボタン押下時コールバック
 		 * @param onFileSelect ファイル選択ボタン押下時コールバック（スロット番号）
+		 * @param onJobSelect ジョブ選択ボタン押下時コールバック（ジョブID）
 		 */
 		SelectView(core::iface::IInputProvider& inputProvider,
 			core::iface::IUIRenderer& uiRenderer,
 			core::iface::IScreen& screen,
 			data::FileEquipmentData& fileEquipmentData,
-			core::iface::IJobProvider& jobProvider,
+			core::iface::IResourceManager& resourceManager,
 			data::JobSelectionData& jobSelectionData,
 			std::function<void()> onGameStart,
 			std::function<void(int)> onFileSelect,
@@ -56,7 +58,7 @@ namespace game::scene
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen&     m_screen;
 		data::FileEquipmentData&  m_fileEquipmentData;
-		core::iface::IJobProvider& m_jobProvider;
+		core::iface::IResourceManager& m_resourceManager;
 		data::JobSelectionData&   m_jobSelectionData;
 		ui::UIManager             m_uiManager{};
 

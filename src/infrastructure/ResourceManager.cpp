@@ -40,14 +40,7 @@ namespace infrastructure
 		return m_fontRepo->getFontName(fontId);
 	}
 
-	int ResourceManager::getJobCount() const noexcept
-	{
-		if (!m_jobRepo)
-			return 0;
-		return m_jobRepo->getJobCount();
-	}
-
-	core::iface::JobInfo ResourceManager::getJobInfo(core::constant::JobType jobType) const
+	core::data::JobInfo ResourceManager::getJobInfo(core::constant::JobType jobType) const
 	{
 		if (!m_jobRepo)
 			throw std::runtime_error("JobRepository が初期化されていません");

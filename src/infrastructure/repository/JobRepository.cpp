@@ -33,12 +33,7 @@ namespace infrastructure
 		}
 	}
 
-	int JobRepository::getJobCount() const noexcept
-	{
-		return core::constant::JOB_COUNT;
-	}
-
-	core::iface::JobInfo JobRepository::getJobInfo(core::constant::JobType jobType) const
+	core::data::JobInfo JobRepository::getJobInfo(core::constant::JobType jobType) const
 	{
 		return m_jobTable[static_cast<int>(jobType)];
 	}
