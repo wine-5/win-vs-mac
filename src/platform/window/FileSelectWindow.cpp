@@ -17,10 +17,8 @@ namespace platform::window
 
     std::string FileSelectWindow::getFilePath(int slot) const noexcept
     {
-        if (slot < 0 || slot >= SLOT_COUNT)
-        {
-            return "";
-        }
+        if (slot < 0 || slot >= SLOT_COUNT) return "";
+            
         return m_filePaths[slot];
     }
 
@@ -115,9 +113,7 @@ namespace platform::window
         {
             m_filePaths[slotIndex] = szFile;
             if (m_onFileSlotChanged)
-            {
                 m_onFileSlotChanged(slotIndex, m_filePaths[slotIndex]);
-            }
         }
     }
 }
