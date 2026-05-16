@@ -35,10 +35,15 @@ namespace platform::window
         /**
          * @brief ウィンドウを破棄する
          */
-        void destory() noexcept;
+        void destroy() noexcept;
 
         /**
-         * @brief ウィンドウ非表示にする
+         * @brief ウィンドウを表示する
+         */
+        void show() noexcept;
+
+        /**
+         * @brief ウィンドウを非表示にする
          */
         void hide() noexcept;
 
@@ -68,12 +73,13 @@ namespace platform::window
 
         /**
          * @brief ウィンドウメッセージハンドラ
+         * @param hwnd ウィンドウハンドル
          * @param msg ウィンドウメッセージ
          * @param wParam メッセージパラメータ
          * @param lParam メッセージパラメータ
          * @return メッセージ処理結果
          */
-        virtual LRESULT onMessage(UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
+        virtual LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 
         std::wstring m_className{};
         std::wstring m_title{};
