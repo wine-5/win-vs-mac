@@ -62,10 +62,11 @@ namespace game::scene
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
 
 		const char* hint{ "クリックまたはキーを押してください" };
-		const int hintWidth{ m_uiRenderer.getTextWidth(hint, normalFontSize) };
+		const int hintFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::FONT_SIZE_EXTRA_SMALL_RATIO) };
+		const int hintWidth{ m_uiRenderer.getTextWidth(hint, hintFontSize) };
 		const int hintX{ (m_screen.getWidth() - hintWidth) / 2 };
 		const int hintY{ static_cast<int>(m_screen.getHeight() * HINT_Y_RATIO) + offsetY };
-		m_uiRenderer.drawText(hintX, hintY, hint, core::utility::Color::WHITE, normalFontSize);
+		m_uiRenderer.drawText(hintX, hintY, hint, core::utility::Color::WHITE, hintFontSize);
 
 		m_uiRenderer.resetBlendMode();
 	}

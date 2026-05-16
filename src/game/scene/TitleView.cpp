@@ -65,12 +65,12 @@ namespace game::scene
 		m_uiRenderer.setFont(m_mainFontName.c_str());
 
 		const char* title{ "Win vs Mac" };
-		const int largeFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::FONT_SIZE_LARGE_RATIO) };
-		const int titleWidth{ m_uiRenderer.getTextWidth(title, largeFontSize) };
+		const int titleFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::FONT_SIZE_CLOCK_RATIO) };
+		const int titleWidth{ m_uiRenderer.getTextWidth(title, titleFontSize) };
 		const int titleX{ (m_screen.getWidth() - titleWidth) / 2 };
 		const int titleY{ static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO) };
 
-		m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE, largeFontSize);
+		m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE, titleFontSize);
 		m_uiManager.draw(m_uiRenderer);
 	}
 
