@@ -1,6 +1,5 @@
 #include <windows.h>
 #include <sstream>
-#include <iomanip>
 #include "ParameterWindow.h"
 #include "core/data/JobInfo.h"
 
@@ -14,10 +13,7 @@ namespace platform::window
     void ParameterWindow::refresh(const core::data::JobInfo& jobInfo) noexcept
     {
         // ウィンドウが作成されていない場合は何もしない
-        if (!isCreated())
-        {
-            return;
-        }
+        if (!isCreated()) return;
 
         // SetWindowTextW: STATIC コントロールのテキストを更新
         // ウィンドウハンドルと表示する文字列を指定
@@ -62,9 +58,7 @@ namespace platform::window
         // Name ラベル作成（"Name:"という文字列を表示する読み取り専用のSTATICコントロール）
         // STATIC: テキストラベル用のコントロール（編集不可）
         m_nameLabel = CreateWindowW(
-            L"STATIC",
-            L"Name:",
-            WS_VISIBLE | WS_CHILD,
+            L"STATIC", L"Name:", WS_VISIBLE | WS_CHILD,
             10, startY, labelWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
@@ -72,94 +66,71 @@ namespace platform::window
         // Name 値表示（空文字列で初期化、後で refresh() で更新）
         // SS_LEFT: テキスト左寄せ
         m_nameValue = CreateWindowW(
-            L"STATIC",
-            L"",
-            WS_VISIBLE | WS_CHILD | SS_LEFT,
+            L"STATIC", L"", WS_VISIBLE | WS_CHILD | SS_LEFT,
             labelWidth + 20, startY, valueWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
 
         // Skill ラベルと値
         m_skillLabel = CreateWindowW(
-            L"STATIC",
-            L"Skill:",
-            WS_VISIBLE | WS_CHILD,
+            L"STATIC", L"Skill:", WS_VISIBLE | WS_CHILD,
             10, startY + spacing, labelWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
 
         m_skillValue = CreateWindowW(
-            L"STATIC",
-            L"",
-            WS_VISIBLE | WS_CHILD | SS_LEFT,
+            L"STATIC", L"", WS_VISIBLE | WS_CHILD | SS_LEFT,
             labelWidth + 20, startY + spacing, valueWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
 
         // HP ラベルと値（SS_RIGHT: 右寄せで数値表示）
         m_hpLabel = CreateWindowW(
-            L"STATIC",
-            L"HP:",
-            WS_VISIBLE | WS_CHILD,
             10, startY + spacing * 2, labelWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
 
         m_hpValue = CreateWindowW(
-            L"STATIC",
-            L"",
-            WS_VISIBLE | WS_CHILD | SS_RIGHT,
+            L"STATIC", L"", WS_VISIBLE | WS_CHILD | SS_RIGHT,
             labelWidth + 20, startY + spacing * 2, valueWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
 
         // ATK ラベルと値
         m_atkLabel = CreateWindowW(
-            L"STATIC",
-            L"ATK:",
-            WS_VISIBLE | WS_CHILD,
+            L"STATIC", L"ATK:", WS_VISIBLE | WS_CHILD,
             10, startY + spacing * 3, labelWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
 
         m_atkValue = CreateWindowW(
-            L"STATIC",
-            L"",
-            WS_VISIBLE | WS_CHILD | SS_RIGHT,
+            L"STATIC", L"", WS_VISIBLE | WS_CHILD | SS_RIGHT,
             labelWidth + 20, startY + spacing * 3, valueWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
 
         // DEF ラベルと値
         m_defLabel = CreateWindowW(
-            L"STATIC",
-            L"DEF:",
-            WS_VISIBLE | WS_CHILD,
+            L"STATIC", L"DEF:", WS_VISIBLE | WS_CHILD,
             10, startY + spacing * 4, labelWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
 
         m_defValue = CreateWindowW(
-            L"STATIC",
-            L"",
-            WS_VISIBLE | WS_CHILD | SS_RIGHT,
+            L"STATIC", L"", WS_VISIBLE | WS_CHILD | SS_RIGHT,
             labelWidth + 20, startY + spacing * 4, valueWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
 
         // SPD ラベルと値
         m_spdLabel = CreateWindowW(
-            L"STATIC",
-            L"SPD:",
-            WS_VISIBLE | WS_CHILD,
+            L"STATIC", L"SPD:", WS_VISIBLE | WS_CHILD,
             10, startY + spacing * 5, labelWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );
 
         m_spdValue = CreateWindowW(
-            L"STATIC",
-            L"",
-            WS_VISIBLE | WS_CHILD | SS_RIGHT,
+            L"STATIC", L"", WS_VISIBLE | WS_CHILD | SS_RIGHT,
             labelWidth + 20, startY + spacing * 5, valueWidth, height,
             hwnd, nullptr, GetModuleHandleW(nullptr), nullptr
         );

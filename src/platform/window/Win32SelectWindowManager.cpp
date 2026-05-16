@@ -1,5 +1,6 @@
 #include "Win32SelectWindowManager.h"
 #include "core/interface/IResourceManager.h"
+#include "core/interface/IScreen.h"
 #include "core/constant/SelectWindowId.h"
 #include "core/constant/JobType.h"
 
@@ -9,35 +10,65 @@ namespace platform::window
         std::function<void()> onGameStart,
         std::function<void(core::constant::JobType)> onJobSelect,
         std::function<void(int, const std::string&)> onFileSlotChanged,
-        core::iface::IResourceManager& resourceManager
+        core::iface::IResourceManager& resourceManager,
+        core::iface::IScreen& screen
     ) noexcept
         : m_onGameStart(onGameStart),
         m_onJobSelect(onJobSelect),
         m_onFileSlotChanged(onFileSlotChanged),
-        m_resourceManager(resourceManager)
+        m_resourceManager(resourceManager),
+        m_screen(screen)
     {
     }
 
     void Win32SelectWindowManager::createAllWindows()
     {
-        int screenWidth{ ::GetSystemMetrics(SM_CXSCREEN) };
-        int screenHeight{ ::GetSystemMetrics(SM_CYSCREEN) };
-        int halfWidth{ screenWidth / 2 };
-        int halfHeight{ screenHeight / 2 };
+        int screenWidth{ m_screen.getWidth() };
+        int screenHeight{ m_screen.getHeight() };
 
-        m_selectWindow = std::make_unique<SelectWindow>(0, 0, halfWidth, halfHeight);
+        int marginX{ screenWidth * 1 / 100 };
+        int marginY{ screenHeight * 1 / 100 };
+        int leftPanelWidth{ screenWidth * 19 / 100 };
+        int centerWidth{ screenWidth * 43 / 100 };
+        int rightPanelWidth{ screenWidth * 34 / 100 };
+
+        int usableHeight{ screenHeight - marginY * 2 };
+        int jobWindowHeight{ usableHeight / 2 - marginY / 2 };
+        int fileSelectWindowHeight{ usableHeight / 2 - marginY / 2 };
+
+        m_selectWindow = std::make_unique<SelectWindow>(
+            marginX + leftPanelWidth + marginX,
+            marginY,
+            centerWidth,
+            usableHeight
+        );
         if (!m_selectWindow->create()) return;
         m_selectWindow->setOnGameStart(m_onGameStart);
 
-        m_jobWindow = std::make_unique<JobWindow>(halfWidth, 0, halfWidth, halfHeight);
+        m_jobWindow = std::make_unique<JobWindow>(
+            marginX,
+            marginY,
+            leftPanelWidth,
+            jobWindowHeight
+        );
         if (!m_jobWindow->create()) return;
         m_jobWindow->setOnJobSelect(m_onJobSelect);
 
-        m_fileSelectWindow = std::make_unique<FileSelectWindow>(0, halfHeight, halfWidth, halfHeight);
+        m_fileSelectWindow = std::make_unique<FileSelectWindow>(
+            marginX,
+            marginY + jobWindowHeight + marginY,
+            leftPanelWidth,
+            fileSelectWindowHeight
+        );
         if (!m_fileSelectWindow->create()) return;
         m_fileSelectWindow->setOnFileSlotChanged(m_onFileSlotChanged);
 
-        m_parameterWindow = std::make_unique<ParameterWindow>(halfWidth, halfHeight, halfWidth, halfHeight);
+        m_parameterWindow = std::make_unique<ParameterWindow>(
+            marginX + leftPanelWidth + marginX + centerWidth + marginX,
+            marginY,
+            rightPanelWidth,
+            usableHeight
+        );
         if (!m_parameterWindow->create()) return;
 
         m_selectWindow->show();

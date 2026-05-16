@@ -1,5 +1,6 @@
 #pragma once
 #include "core/constant/SelectWindowId.h"
+#include "core/constant/JobType.h"
 
 namespace core::iface
 {
@@ -15,7 +16,7 @@ namespace core::iface
 		 * @brief すべてのWindowを作成する
 		 */
 		virtual void createAllWindows() = 0;
-		
+
 		/**
 		 * @brief すべてのWindowを破棄する
 		 */
@@ -31,5 +32,11 @@ namespace core::iface
 		 * @param id Window識別子
 		 */
 		virtual void bringToFront(core::constant::SelectWindowId id) = 0;
+
+		/**
+		 * @brief 職業選択時にパラメータウィンドウを更新する
+		 * @param jobType 職業タイプ
+		 */
+		virtual void updateParameterWindowForJob(core::constant::JobType jobType) = 0;
 	};
 }

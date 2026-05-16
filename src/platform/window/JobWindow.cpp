@@ -5,12 +5,12 @@
 namespace platform::window
 {
 	JobWindow::JobWindow(int x, int y, int width, int height) noexcept
-		: WindowBase(L"JobWindowClass", L"Select Job", x, y, width, height),
+		: WindowBase(L"JobWindowClass", L"Job Selection", x, y, width, height),
 		m_selectedJob(core::constant::JobType::Warrior)
 	{
 	}
 
-	void JobWindow::setOnJobSelect(std::function<void(core::constant::JobType)> callback)noexcept
+	void JobWindow::setOnJobSelect(std::function<void(core::constant::JobType)> callback) noexcept
 	{
 		m_onJobSelect = callback;
 	}
@@ -35,7 +35,6 @@ namespace platform::window
 			hwnd, (HMENU)IDC_JOB1_BUTTON, GetModuleHandleW(nullptr), nullptr
 		);
 		::SendMessage(m_job1Button, BM_SETCHECK, BST_CHECKED, 0);
-
 
 		m_job2Button = CreateWindowW(
 			L"BUTTON",

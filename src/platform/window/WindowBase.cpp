@@ -19,17 +19,12 @@ namespace platform::window
     WindowBase::~WindowBase() noexcept
     {
         if (m_hwnd != nullptr)
-        {
             destroy();
-        }
     }
 
     bool WindowBase::create() noexcept
     {
-        if (m_hwnd != nullptr)
-        {
-            return true;
-        }
+        if (m_hwnd != nullptr) return true;
 
         // RegisterClass してから CreateWindowEx する
         WNDCLASSW wndClass{};
@@ -40,10 +35,7 @@ namespace platform::window
         wndClass.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
 
         ATOM atom = RegisterClassW(&wndClass);
-        if (atom == 0)
-        {
-            return false;
-        }
+        if (atom == 0) return false;
 
         m_hwnd = CreateWindowExW(
             0,
@@ -57,10 +49,7 @@ namespace platform::window
             nullptr
         );
 
-        if (m_hwnd == nullptr)
-        {
-            return false;
-        }
+        if (m_hwnd == nullptr) return false;
 
         // static 関数の staticWindowProc から this を復元できるようにする
         SetWindowLongPtrW(m_hwnd, GWL_USERDATA, (LONG_PTR)this);
@@ -72,16 +61,11 @@ namespace platform::window
 
     void WindowBase::destroy() noexcept
     {
-        if (m_hwnd == nullptr)
-        {
-            return;
-        }
+        if (m_hwnd == nullptr) return;
 
         // PostQuitMessage は呼ばない（DxLib のメインループが止まるため）
         if (::DestroyWindow(m_hwnd))
-        {
             m_hwnd = nullptr;
-        }
 
         UnregisterClassW(m_className.c_str(), GetModuleHandleW(nullptr));
     }
@@ -98,17 +82,12 @@ namespace platform::window
     void WindowBase::hide() noexcept
     {
         if (m_hwnd != nullptr)
-        {
             ::ShowWindow(m_hwnd, SW_HIDE);
-        }
     }
 
     void WindowBase::bringToFront() noexcept
     {
-        if (m_hwnd == nullptr)
-        {
-            return;
-        }
+        if (m_hwnd == nullptr) return;
 
         ::SetForegroundWindow(m_hwnd);
         SetWindowPos(m_hwnd, HWND_TOP, 0, 0, 0, 0,
@@ -129,10 +108,7 @@ namespace platform::window
     {
         WindowBase* pThis = reinterpret_cast<WindowBase*>(GetWindowLongPtrW(hwnd, GWL_USERDATA));
 
-        if (pThis != nullptr)
-        {
-            return pThis->onMessage(hwnd, msg, wParam, lParam);
-        }
+        if (pThis != nullptr) return pThis->onMessage(hwnd, msg, wParam, lParam);
 
         return DefWindowProcW(hwnd, msg, wParam, lParam);
     }

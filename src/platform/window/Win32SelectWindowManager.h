@@ -13,6 +13,7 @@
 namespace core::iface
 {
     class IResourceManager;
+    class IScreen;
 }
 
 namespace platform::window
@@ -24,7 +25,8 @@ namespace platform::window
             std::function<void()> onGameStart,
             std::function<void(core::constant::JobType)> onJobSelect,
             std::function<void(int, const std::string&)> onFileSlotChanged,
-            core::iface::IResourceManager& resourceManager
+            core::iface::IResourceManager& resourceManager,
+            core::iface::IScreen& screen
         ) noexcept;
 
         virtual ~Win32SelectWindowManager() noexcept = default;
@@ -47,5 +49,6 @@ namespace platform::window
         std::function<void(int, const std::string&)> m_onFileSlotChanged{};
 
         core::iface::IResourceManager& m_resourceManager;
+        core::iface::IScreen& m_screen;
     };
 }
