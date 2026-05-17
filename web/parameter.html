@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="common.css">
+    <style>
+        body { display: flex; flex-direction: column; padding: 18px; gap: 0; }
+
+        .section-label { margin-bottom: 10px; }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-row:last-child { border-bottom: none; }
+
+        .stat-key { color: var(--text-muted); font-size: 12px; }
+
+        .stat-val { font-weight: 600; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="section-label">ステータス</div>
+    <div class="stat-row"><span class="stat-key">Name</span> <span class="stat-val" id="v-name">—</span></div>
+    <div class="stat-row"><span class="stat-key">Skill</span><span class="stat-val" id="v-skill">—</span></div>
+    <div class="stat-row"><span class="stat-key">HP</span>   <span class="stat-val" id="v-hp">—</span></div>
+    <div class="stat-row"><span class="stat-key">ATK</span>  <span class="stat-val" id="v-atk">—</span></div>
+    <div class="stat-row"><span class="stat-key">DEF</span>  <span class="stat-val" id="v-def">—</span></div>
+    <div class="stat-row"><span class="stat-key">SPD</span>  <span class="stat-val" id="v-spd">—</span></div>
+
+    <script src="common.js"></script>
+    <script>
+        function onMessageFromGame(data) {
+            if (data.type === 'refresh') {
+                document.getElementById('v-name').textContent  = data.name  ?? '—';
+                document.getElementById('v-skill').textContent = data.skill ?? '—';
+                document.getElementById('v-hp').textContent    = data.hp    ?? '—';
+                document.getElementById('v-atk').textContent   = data.atk   ?? '—';
+                document.getElementById('v-def').textContent   = data.def   ?? '—';
+                document.getElementById('v-spd').textContent   = data.spd   ?? '—';
+            }
+        }
+    </script>
+</body>
+</html>

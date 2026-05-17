@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="common.css">
+    <style>
+        body { display: flex; flex-direction: column; padding: 18px; gap: 8px; }
+
+        .slot-btn {
+            width: 100%;
+            padding: 12px 14px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            overflow: hidden;
+        }
+
+        .slot-label { font-weight: 600; font-size: 13px; }
+
+        .slot-path {
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .slot-btn.active .slot-path { color: rgba(255, 255, 255, 0.65); }
+    </style>
+</head>
+<body>
+    <div class="section-label">セーブファイル</div>
+
+    <button class="slot-btn" id="slot-0" onclick="openDialog(0)">
+        <span class="slot-label">Slot 1</span>
+        <span class="slot-path" id="path-0">（未選択）</span>
+    </button>
+
+    <button class="slot-btn" id="slot-1" onclick="openDialog(1)">
+        <span class="slot-label">Slot 2</span>
+        <span class="slot-path" id="path-1">（未選択）</span>
+    </button>
+
+    <button class="slot-btn" id="slot-2" onclick="openDialog(2)">
+        <span class="slot-label">Slot 3</span>
+        <span class="slot-path" id="path-2">（未選択）</span>
+    </button>
+
+    <script src="common.js"></script>
+    <script>
+        function openDialog(slot) {
+            sendToGame({ type: 'openFileDialog', slot: slot });
+        }
+
+        function onMessageFromGame(data) {
+            if (data.type === 'fileSelected') {
+                const parts = data.path.replace(/\\/g, '/').split('/');
+                const filename = parts[parts.length - 1] || '（未選択）';
+                document.getElementById('path-' + data.slot).textContent = filename;
+                document.getElementById('slot-' + data.slot).classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
