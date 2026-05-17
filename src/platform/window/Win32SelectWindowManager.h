@@ -7,6 +7,7 @@
 #include "JobWindow.h"
 #include "FileSelectWindow.h"
 #include "ParameterWindow.h"
+#include "DifficultyWindow.h"
 #include <memory>
 #include <functional>
 #include <string>
@@ -47,10 +48,12 @@ namespace platform::window
         std::unique_ptr<JobWindow>          m_jobWindow{};
         std::unique_ptr<FileSelectWindow>   m_fileSelectWindow{};
         std::unique_ptr<ParameterWindow>    m_parameterWindow{};
+        std::unique_ptr<DifficultyWindow>   m_difficultyWindow{};
 
         bool m_jobVisible{true};
         bool m_fileVisible{true};
         bool m_paramVisible{true};
+        bool m_diffVisible{true};
 
         std::function<void()> m_onGameStart{};
         std::function<void(core::constant::JobType)> m_onJobSelect{};

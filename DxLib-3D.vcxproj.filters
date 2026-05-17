@@ -177,6 +177,9 @@
     <ClCompile Include="src\platform\window\DesktopWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\platform\window\DifficultyWindow.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="src\platform\window\ParameterWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>

@@ -101,21 +101,38 @@ namespace platform::window
             notifyWindowState("param", false);
         });
 
+        // DifficultyWindow (左列 下 / Job の下)
+        m_difficultyWindow = std::make_unique<DifficultyWindow>(
+            originX + marginX,
+            winY + jobH + gapY,
+            colWidth,
+            fileH
+        );
+        if (!m_difficultyWindow->create(m_desktopWindow->getHwnd())) return;
+        m_difficultyWindow->setOnMinimize([this]() noexcept {
+            m_difficultyWindow->hide();
+            m_diffVisible = false;
+            notifyWindowState("diff", false);
+        });
+
         m_jobWindow->show();
         m_fileSelectWindow->show();
         m_parameterWindow->show();
+        m_difficultyWindow->show();
     }
 
     void Win32SelectWindowManager::destroyAllWindows()
     {
-        if (m_jobWindow)        m_jobWindow->destroy();
-        if (m_fileSelectWindow) m_fileSelectWindow->destroy();
-        if (m_parameterWindow)  m_parameterWindow->destroy();
-        if (m_desktopWindow)    m_desktopWindow->destroy();
+        if (m_jobWindow)          m_jobWindow->destroy();
+        if (m_fileSelectWindow)   m_fileSelectWindow->destroy();
+        if (m_parameterWindow)    m_parameterWindow->destroy();
+        if (m_difficultyWindow)   m_difficultyWindow->destroy();
+        if (m_desktopWindow)      m_desktopWindow->destroy();
 
         m_jobWindow.reset();
         m_fileSelectWindow.reset();
         m_parameterWindow.reset();
+        m_difficultyWindow.reset();
         m_desktopWindow.reset();
     }
 
@@ -189,6 +206,12 @@ namespace platform::window
                     m_paramVisible = !m_paramVisible;
                     m_paramVisible ? m_parameterWindow->show() : m_parameterWindow->hide();
                     notifyWindowState("param", m_paramVisible);
+                }
+                else if (name == "diff" && m_difficultyWindow)
+                {
+                    m_diffVisible = !m_diffVisible;
+                    m_diffVisible ? m_difficultyWindow->show() : m_difficultyWindow->hide();
+                    notifyWindowState("diff", m_diffVisible);
                 }
             }
         }
