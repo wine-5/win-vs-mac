@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -12,9 +12,59 @@
             background: linear-gradient(160deg, #1a2a4a 0%, #0d1520 100%);
         }
 
-        .desktop-area { flex: 1; }
+        .desktop-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
 
-        /* ── Taskbar ── */
+        /* -- Difficulty Panel (center column) -- */
+        .difficulty-panel {
+            position: absolute;
+            left: 33.3%;
+            top: 0;
+            width: 33.4%;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 24px;
+            gap: 20px;
+        }
+
+        .diff-title {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .diff-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .diff-btn {
+            padding: 8px 22px;
+            font-size: 13px;
+            font-weight: 600;
+            min-width: 80px;
+        }
+
+        .diff-desc {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 18px 20px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.75);
+            line-height: 1.8;
+            width: 100%;
+        }
+
+        /* -- Taskbar -- */
         .taskbar {
             height: 48px;
             background: rgba(12, 12, 12, 0.92);
@@ -27,26 +77,6 @@
             position: relative;
         }
 
-        /* 難易度グループ (左) */
-        .diff-group {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-        }
-
-        .diff-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-right: 4px;
-        }
-
-        .diff-btn {
-            padding: 4px 11px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        /* アプリアイコン (中央) */
         .taskbar-apps {
             position: absolute;
             left: 50%;
@@ -89,7 +119,6 @@
 
         .app-icon { font-size: 14px; }
 
-        /* 右ゾーン */
         .taskbar-right {
             margin-left: auto;
             display: flex;
@@ -123,18 +152,19 @@
     </style>
 </head>
 <body>
-    <div class="desktop-area"></div>
+    <div class="desktop-area">
+        <div class="difficulty-panel">
+            <div class="diff-title">難易度選択</div>
+            <div class="diff-buttons">
+                <button id="btn-easy"   class="diff-btn"        onclick="setDiff('EASY')">EASY</button>
+                <button id="btn-normal" class="diff-btn active"  onclick="setDiff('NORMAL')">NORMAL</button>
+                <button id="btn-hard"   class="diff-btn danger"  onclick="setDiff('HARD')">HARD</button>
+            </div>
+            <div class="diff-desc" id="diff-desc">標準的な難易度。バランスの取れた戦闘が楽しめます。</div>
+        </div>
+    </div>
 
     <div class="taskbar">
-        <!-- 難易度 (左) -->
-        <div class="diff-group">
-            <span class="diff-label">難易度</span>
-            <button id="btn-easy"   class="diff-btn"        onclick="setDiff('EASY')">EASY</button>
-            <button id="btn-normal" class="diff-btn active"  onclick="setDiff('NORMAL')">NORMAL</button>
-            <button id="btn-hard"   class="diff-btn danger"  onclick="setDiff('HARD')">HARD</button>
-        </div>
-
-        <!-- アプリアイコン (中央) -->
         <div class="taskbar-apps">
             <div class="taskbar-app active" id="app-job"   onclick="toggleWindow('job')">
                 <span class="app-icon">⚔</span> 職業選択
@@ -147,7 +177,6 @@
             </div>
         </div>
 
-        <!-- 右ゾーン -->
         <div class="taskbar-right">
             <div class="clock" id="clock">00:00<br>--/--</div>
             <button class="start-btn" onclick="startGame()">ゲームを開始 →</button>
@@ -159,12 +188,19 @@
         const winStates = { job: true, file: true, param: true };
         let currentDiff = 'NORMAL';
 
+        const diffDescriptions = {
+            EASY:   'ゲーム初心者向け。敌の攻撃力・防御力が低く、余裕を持って攻略できます。',
+            NORMAL: '標準的な難易度。バランスの取れた戦闘が楽しめます。',
+            HARD:   '上級者向け。敌が強力になり、戦略的なプレイが求められます。'
+        };
+
         function setDiff(d) {
             currentDiff = d;
             ['easy', 'normal', 'hard'].forEach(function(id) {
                 document.getElementById('btn-' + id).classList.remove('active');
             });
             document.getElementById('btn-' + d.toLowerCase()).classList.add('active');
+            document.getElementById('diff-desc').textContent = diffDescriptions[d];
             sendToGame({ type: 'difficultyChanged', difficulty: d });
         }
 

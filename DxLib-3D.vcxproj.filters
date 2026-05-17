@@ -171,10 +171,10 @@
     <ClCompile Include="src\platform\window\JobWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\window\SelectWindow.cpp">
+    <ClCompile Include="src\platform\window\FileSelectWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\window\FileSelectWindow.cpp">
+    <ClCompile Include="src\platform\window\DesktopWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\window\ParameterWindow.cpp">
