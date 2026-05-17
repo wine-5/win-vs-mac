@@ -43,6 +43,7 @@ namespace platform::webview
                                 controller->put_Bounds(bounds);
 
                                 // "game.web" → 実行時 CWD + "\\web" の絶対パスへマッピング
+                                // "assets.game.web" → 実行時 CWD + "\\assets" へマッピング
                                 ComPtr<ICoreWebView2_3> webview3;
                                 if (SUCCEEDED(webview.As(&webview3)))
                                 {
@@ -51,6 +52,11 @@ namespace platform::webview
                                     std::wstring webFolderPath = std::wstring(cwd) + L"\\web";
                                     webview3->SetVirtualHostNameToFolderMapping(
                                         L"game.web", webFolderPath.c_str(),
+                                        COREWEBVIEW2_HOST_RESOURCE_ACCESS_KIND_ALLOW);
+
+                                    std::wstring assetsFolderPath = std::wstring(cwd) + L"\\assets";
+                                    webview3->SetVirtualHostNameToFolderMapping(
+                                        L"assets.game.web", assetsFolderPath.c_str(),
                                         COREWEBVIEW2_HOST_RESOURCE_ACCESS_KIND_ALLOW);
                                 }
 
