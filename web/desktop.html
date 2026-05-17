@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="common.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(160deg, #1a2a4a 0%, #0d1520 100%);
+        }
+
+        .desktop-area { flex: 1; }
+
+        /* ── Taskbar ── */
+        .taskbar {
+            height: 48px;
+            background: rgba(12, 12, 12, 0.92);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            gap: 8px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        /* 難易度グループ (左) */
+        .diff-group {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .diff-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-right: 4px;
+        }
+
+        .diff-btn {
+            padding: 4px 11px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* アプリアイコン (中央) */
+        .taskbar-apps {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 2px;
+        }
+
+        .taskbar-app {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            user-select: none;
+        }
+
+        .taskbar-app:hover { background: rgba(255, 255, 255, 0.1); }
+
+        .taskbar-app.active::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 2px;
+            background: #0078d4;
+            border-radius: 2px;
+        }
+
+        .taskbar-app.hidden-win {
+            color: rgba(255, 255, 255, 0.38);
+        }
+
+        .app-icon { font-size: 14px; }
+
+        /* 右ゾーン */
+        .taskbar-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .clock {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.75);
+            text-align: center;
+            line-height: 1.4;
+            min-width: 40px;
+        }
+
+        .start-btn {
+            padding: 7px 16px;
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+
+        .start-btn:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="desktop-area"></div>
+
+    <div class="taskbar">
+        <!-- 難易度 (左) -->
+        <div class="diff-group">
+            <span class="diff-label">難易度</span>
+            <button id="btn-easy"   class="diff-btn"        onclick="setDiff('EASY')">EASY</button>
+            <button id="btn-normal" class="diff-btn active"  onclick="setDiff('NORMAL')">NORMAL</button>
+            <button id="btn-hard"   class="diff-btn danger"  onclick="setDiff('HARD')">HARD</button>
+        </div>
+
+        <!-- アプリアイコン (中央) -->
+        <div class="taskbar-apps">
+            <div class="taskbar-app active" id="app-job"   onclick="toggleWindow('job')">
+                <span class="app-icon">⚔</span> 職業選択
+            </div>
+            <div class="taskbar-app active" id="app-file"  onclick="toggleWindow('file')">
+                <span class="app-icon">📁</span> ファイル
+            </div>
+            <div class="taskbar-app active" id="app-param" onclick="toggleWindow('param')">
+                <span class="app-icon">📊</span> パラメータ
+            </div>
+        </div>
+
+        <!-- 右ゾーン -->
+        <div class="taskbar-right">
+            <div class="clock" id="clock">00:00<br>--/--</div>
+            <button class="start-btn" onclick="startGame()">ゲームを開始 →</button>
+        </div>
+    </div>
+
+    <script src="common.js"></script>
+    <script>
+        const winStates = { job: true, file: true, param: true };
+        let currentDiff = 'NORMAL';
+
+        function setDiff(d) {
+            currentDiff = d;
+            ['easy', 'normal', 'hard'].forEach(function(id) {
+                document.getElementById('btn-' + id).classList.remove('active');
+            });
+            document.getElementById('btn-' + d.toLowerCase()).classList.add('active');
+            sendToGame({ type: 'difficultyChanged', difficulty: d });
+        }
+
+        function toggleWindow(name) {
+            sendToGame({ type: 'toggleWindow', window: name });
+        }
+
+        function startGame() {
+            sendToGame({ type: 'startGame', difficulty: currentDiff });
+        }
+
+        function setWindowVisible(name, visible) {
+            winStates[name] = visible;
+            var el = document.getElementById('app-' + name);
+            if (!el) return;
+            if (visible) {
+                el.classList.add('active');
+                el.classList.remove('hidden-win');
+            } else {
+                el.classList.remove('active');
+                el.classList.add('hidden-win');
+            }
+        }
+
+        function onMessageFromGame(data) {
+            if (data.type === 'windowStateChanged') {
+                setWindowVisible(data.window, data.visible);
+            }
+        }
+
+        function updateClock() {
+            var now = new Date();
+            var h  = String(now.getHours()).padStart(2, '0');
+            var m  = String(now.getMinutes()).padStart(2, '0');
+            var mo = now.getMonth() + 1;
+            var d  = now.getDate();
+            document.getElementById('clock').innerHTML = h + ':' + m + '<br>' + mo + '/' + d;
+        }
+
+        updateClock();
+        setInterval(updateClock, 10000);
+    </script>
+</body>
+</html>
