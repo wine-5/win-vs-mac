@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "DifficultyWindow.h"
+#include "platform/utility/StringConverter.h"
 #include "thirdparty/nlohmann/json.hpp"
 
 namespace platform::window
@@ -40,11 +41,31 @@ namespace platform::window
         {
             auto j = nlohmann::json::parse(json);
             const std::string type{ j.value("type", "") };
+
             if (type == "difficultyChanged")
             {
                 const std::string diff{ j.value("difficulty", "NORMAL") };
                 if (diff == "EASY" || diff == "NORMAL" || diff == "HARD")
                     m_selectedDifficulty = diff;
+            }
+            else if (type == "confirmHard")
+            {
+                const std::string message = "HARD モードを選択しようとしています。\n"
+                                           "敵の攻撃力・防御力が大幅に上昇し、\n"
+                                           "攻略が非常に困難になります。\n\n"
+                                           "本当に続行しますか？";
+                const std::string title = "警告 - Win vs Mac.exe";
+                const int result = MessageBoxW(
+                    m_hwnd,
+                    platform::utility::utf8ToWide(message.c_str()).c_str(),
+                    platform::utility::utf8ToWide(title.c_str()).c_str(),
+                    MB_OKCANCEL | MB_ICONWARNING
+                );
+                if (result == IDOK)
+                {
+                    m_selectedDifficulty = "HARD";
+                    m_webView.postMessage(std::string{R"({"type":"hardConfirmed"})"});
+                }
             }
         }
         catch (...) {}
