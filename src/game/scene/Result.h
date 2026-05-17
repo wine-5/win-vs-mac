@@ -41,8 +41,8 @@ namespace game::scene
         void setupUI();
 
         core::iface::IInputProvider& m_inputProvider;
-        core::iface::IUIRenderer& m_uiRenderer;
-        core::iface::IScreen& m_screen;
-        ui::UIManager m_uiManager;
+        core::iface::IUIRenderer&    m_uiRenderer;
+        core::iface::IScreen&        m_screen;
+        ui::UIManager                m_uiManager;
     };
 }

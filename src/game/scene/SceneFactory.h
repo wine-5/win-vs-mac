@@ -33,29 +33,29 @@ namespace game::scene
 
     private:
         // InGame用の依存関係と実体
-        infrastructure::Camera m_inGameCamera;
-        infrastructure::Renderer m_inGameRenderer;
-        infrastructure::Animator m_inGameAnimator;
+        infrastructure::Camera       m_inGameCamera;
+        infrastructure::Renderer     m_inGameRenderer;
+        infrastructure::Animator     m_inGameAnimator;
         infrastructure::InputManager m_inGameInputManager;
-        std::unique_ptr<InGame> m_inGameScene;
+        std::unique_ptr<InGame>      m_inGameScene;
 
         // Title用の依存関係と実体
         infrastructure::InputManager m_titleInputManager;
-        infrastructure::UIRenderer m_titleUIRenderer;
-        std::unique_ptr<Title> m_titleScene;
+        infrastructure::UIRenderer   m_titleUIRenderer;
+        std::unique_ptr<Title>       m_titleScene;
 
         // Select用の依存関係と実体
         infrastructure::InputManager m_selectInputManager;
-        infrastructure::UIRenderer m_selectUIRenderer;
-        std::unique_ptr<Select> m_selectScene;
+        infrastructure::UIRenderer   m_selectUIRenderer;
+        std::unique_ptr<Select>      m_selectScene;
 
         // Loading用の依存関係と実体
-        infrastructure::UIRenderer m_loadingUIRenderer;
-        std::unique_ptr<Loading> m_loadingScene;
+        infrastructure::UIRenderer   m_loadingUIRenderer;
+        std::unique_ptr<Loading>     m_loadingScene;
 
         // Result用の依存関係と実体
         infrastructure::InputManager m_resultInputManager;
-        infrastructure::UIRenderer m_resultUIRenderer;
-        std::unique_ptr<Result> m_resultScene;
+        infrastructure::UIRenderer   m_resultUIRenderer;
+        std::unique_ptr<Result>      m_resultScene;
     };
 }
