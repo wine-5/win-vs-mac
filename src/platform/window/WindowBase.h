@@ -87,6 +87,12 @@ namespace platform::window
 
     protected:
         /**
+         * @brief ウィンドウアイコンを設定する
+         * @param iconPath .ico ファイルのパス（実行ディレクトリからの相対パス）
+         */
+        void setIcon(HWND hwnd, const wchar_t* iconPath) noexcept;
+
+        /**
          * @brief コントロール作成時のコールバック
          * @param hwnd ウィンドウハンドル
          */
@@ -110,6 +116,7 @@ namespace platform::window
         int m_width{};
         int m_height{};
         HWND m_hwnd{};
+        HICON m_hIcon{};
 
     private:
         static LRESULT CALLBACK staticWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;

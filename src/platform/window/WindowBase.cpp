@@ -21,6 +21,8 @@ namespace platform::window
     {
         if (m_hwnd != nullptr)
             destroy();
+        if (m_hIcon != nullptr)
+            DestroyIcon(m_hIcon);
     }
 
     bool WindowBase::create(HWND ownerHwnd) noexcept
@@ -132,6 +134,17 @@ namespace platform::window
     void WindowBase::setOnMinimize(std::function<void()> callback) noexcept
     {
         m_onMinimize = std::move(callback);
+    }
+
+    void WindowBase::setIcon(HWND hwnd, const wchar_t* iconPath) noexcept
+    {
+        m_hIcon = static_cast<HICON>(LoadImageW(
+            nullptr, iconPath, IMAGE_ICON, 0, 0,
+            LR_LOADFROMFILE | LR_DEFAULTSIZE
+        ));
+        if (m_hIcon == nullptr) return;
+        SendMessageW(hwnd, WM_SETICON, ICON_BIG,   reinterpret_cast<LPARAM>(m_hIcon));
+        SendMessageW(hwnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(m_hIcon));
     }
 
     LRESULT WindowBase::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept

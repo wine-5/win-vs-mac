@@ -37,6 +37,8 @@ namespace platform::window
         LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
 
     private:
+        static constexpr const wchar_t* ICON_PATH = L"assets/images/ui/icons/diff.ico";
+
         platform::webview::WebView2Host m_webView{};
         std::string m_selectedDifficulty{"NORMAL"};
 

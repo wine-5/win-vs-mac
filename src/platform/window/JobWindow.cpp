@@ -23,6 +23,7 @@ namespace platform::window
 
 	void JobWindow::onCreateControls(HWND hwnd)
 	{
+		setIcon(hwnd, ICON_PATH);
 		m_webView.setOnMessage([this](const std::string& json) noexcept {
 			handleMessage(json);
 		});

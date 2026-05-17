@@ -46,6 +46,7 @@ namespace platform::window
 
     void ParameterWindow::onCreateControls(HWND hwnd)
     {
+        setIcon(hwnd, ICON_PATH);
         m_webView.initialize(hwnd, L"https://game.web/param/param.html");
     }
 
