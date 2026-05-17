@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="common.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            padding: 18px;
+            gap: 12px;
+        }
+
+        .diff-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .diff-group button {
+            flex: 1;
+            padding: 9px 0;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+        }
+
+        .diff-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            min-height: 2.4em;
+            line-height: 1.5;
+        }
+
+        .spacer { flex: 1; }
+
+        .start-btn {
+            width: 100%;
+            padding: 11px;
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        .start-btn:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="section-label">難易度を選択</div>
+
+    <div class="diff-group">
+        <button id="btn-easy"   onclick="setDiff('EASY')">EASY</button>
+        <button id="btn-normal" onclick="setDiff('NORMAL')" class="active">NORMAL</button>
+        <button id="btn-hard"   onclick="setDiff('HARD')" class="danger">HARD</button>
+    </div>
+
+    <div class="diff-desc" id="diff-desc">標準的な難易度。バランスよく楽しめます。</div>
+
+    <div class="spacer"></div>
+
+    <button class="start-btn" onclick="startGame()">ゲームを開始 →</button>
+
+    <script src="common.js"></script>
+    <script>
+        const DESCS = {
+            EASY:   '気軽に楽しめる難易度。じっくりゲームを体験したい方に。',
+            NORMAL: '標準的な難易度。バランスよく楽しめます。',
+            HARD:   '高難度。高い戦略性が要求されます。'
+        };
+
+        let currentDiff = 'NORMAL';
+
+        function setDiff(d) {
+            currentDiff = d;
+            ['easy', 'normal', 'hard'].forEach(function (id) {
+                const btn = document.getElementById('btn-' + id);
+                btn.classList.remove('active');
+            });
+            document.getElementById('btn-' + d.toLowerCase()).classList.add('active');
+            document.getElementById('diff-desc').textContent = DESCS[d];
+            sendToGame({ type: 'difficultyChanged', difficulty: d });
+        }
+
+        function startGame() {
+            sendToGame({ type: 'startGame', difficulty: currentDiff });
+        }
+
+        function onMessageFromGame(data) {
+            // C++ からのメッセージ（例: 外部から難易度リセット等）
+        }
+    </script>
+</body>
+</html>
