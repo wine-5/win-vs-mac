@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="common.css">
+    <base href="https://game.web/">
+    <link rel="stylesheet" href="common/common.css">
     <style>
         body { display: flex; flex-direction: column; padding: 18px; gap: 8px; }
 
@@ -47,7 +48,7 @@
         <span class="slot-path" id="path-2">（未選択）</span>
     </button>
 
-    <script src="common.js"></script>
+    <script src="common/messaging.js"></script>
     <script>
         function openDialog(slot) {
             sendToGame({ type: 'openFileDialog', slot: slot });

@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="common.css">
+    <base href="https://game.web/">
+    <link rel="stylesheet" href="common/common.css">
     <style>
         body { display: flex; flex-direction: column; padding: 18px; gap: 0; }
 
@@ -32,7 +33,7 @@
     <div class="stat-row"><span class="stat-key">DEF</span>  <span class="stat-val" id="v-def">—</span></div>
     <div class="stat-row"><span class="stat-key">SPD</span>  <span class="stat-val" id="v-spd">—</span></div>
 
-    <script src="common.js"></script>
+    <script src="common/messaging.js"></script>
     <script>
         function onMessageFromGame(data) {
             if (data.type === 'refresh') {

@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="common.css">
+    <base href="https://game.web/">
+    <link rel="stylesheet" href="common/common.css">
     <style>
         body { display: flex; flex-direction: column; padding: 18px; gap: 8px; }
 
@@ -40,7 +41,7 @@
         <span class="job-skill">Skill: 分身一斉攻撃</span>
     </button>
 
-    <script src="common.js"></script>
+    <script src="common/messaging.js"></script>
     <script>
         const JOB_IDS = { Warrior: 'warrior', Mage: 'mage', Ninja: 'ninja' };
         let currentJob = null;
