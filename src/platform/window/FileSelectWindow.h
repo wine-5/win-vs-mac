@@ -4,6 +4,7 @@
 #include <string>
 #include <array>
 #include "WindowBase.h"
+#include "platform/webview/WebView2Host.h"
 #include <functional>
 
 namespace platform::window
@@ -46,14 +47,12 @@ namespace platform::window
 
     private:
         static constexpr int SLOT_COUNT = 3;
-        static constexpr int IDC_SLOT1_BUTTON = 3001;
-        static constexpr int IDC_SLOT2_BUTTON = 3002;
-        static constexpr int IDC_SLOT3_BUTTON = 3003;
 
-        std::array<HWND, SLOT_COUNT> m_slotButtons{};
+        platform::webview::WebView2Host m_webView{};
         std::array<std::string, SLOT_COUNT> m_filePaths{};
         std::function<void(int, const std::string&)> m_onFileSlotChanged{};
 
+        void handleMessage(const std::string& json) noexcept;
         void openFileDialog(int slotIndex);
     };
 }

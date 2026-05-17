@@ -1,8 +1,8 @@
 #include <windows.h>
 #include <commdlg.h>
 #include "FileSelectWindow.h"
-#include "platform/utility/StringConverter.h"
 #include "core/interface/ILogger.h"
+#include "thirdparty/nlohmann/json.hpp"
 
 namespace platform::window
 {
@@ -24,73 +24,35 @@ namespace platform::window
 
 	void FileSelectWindow::onCreateControls(HWND hwnd)
 	{
-		RECT clientRect{};
-		GetClientRect(hwnd, &clientRect);
-		int windowWidth{ clientRect.right - clientRect.left };
-		int windowHeight{ clientRect.bottom - clientRect.top };
-
-		int buttonWidth{ windowWidth * 80 / 100 };
-		int buttonHeight{ windowHeight * 20 / 100 };
-		int startY{ windowHeight * 5 / 100 };
-		int spacing{ windowHeight * 30 / 100 };
-		int startX{ windowWidth * 10 / 100 };
-
-		m_slotButtons[0] = CreateWindowW(
-			L"BUTTON",
-			L"Slot 1",
-			WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-			startX, startY, buttonWidth, buttonHeight,
-			hwnd, (HMENU)IDC_SLOT1_BUTTON, GetModuleHandleW(nullptr), nullptr
-		);
-
-		m_slotButtons[1] = CreateWindowW(
-			L"BUTTON",
-			L"Slot 2",
-			WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-			startX, startY + spacing, buttonWidth, buttonHeight,
-			hwnd, (HMENU)IDC_SLOT2_BUTTON, GetModuleHandleW(nullptr), nullptr
-		);
-
-		m_slotButtons[2] = CreateWindowW(
-			L"BUTTON",
-			L"Slot 3",
-			WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-			startX, startY + spacing * 2, buttonWidth, buttonHeight,
-			hwnd, (HMENU)IDC_SLOT3_BUTTON, GetModuleHandleW(nullptr), nullptr
-		);
+		m_webView.setOnMessage([this](const std::string& json) noexcept {
+			handleMessage(json);
+		});
+		m_webView.initialize(hwnd, L"https://game.web/file-select.html");
 	}
 
 	LRESULT FileSelectWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 	{
-		switch (msg)
+		if (msg == WM_SIZE)
 		{
-		case WM_COMMAND:
-		{
-			int controlId = LOWORD(wParam);
-			int notificationCode = HIWORD(wParam);
-
-			if (notificationCode == BN_CLICKED)
-			{
-				switch (controlId)
-				{
-				case IDC_SLOT1_BUTTON:
-					openFileDialog(0);
-					return 0;
-				case IDC_SLOT2_BUTTON:
-					openFileDialog(1);
-					return 0;
-				case IDC_SLOT3_BUTTON:
-					openFileDialog(2);
-					return 0;
-				}
-			}
-			break;
+			m_webView.resize(LOWORD(lParam), HIWORD(lParam));
+			return 0;
 		}
-		default:
-			break;
-		}
-
 		return WindowBase::onMessage(hwnd, msg, wParam, lParam);
+	}
+
+	void FileSelectWindow::handleMessage(const std::string& json) noexcept
+	{
+		try
+		{
+			auto j = nlohmann::json::parse(json);
+			if (j.value("type", "") == "openFileDialog")
+			{
+				int slot = j.value("slot", 0);
+				if (slot >= 0 && slot < SLOT_COUNT)
+					openFileDialog(slot);
+			}
+		}
+		catch (...) {}
 	}
 
 	void FileSelectWindow::openFileDialog(int slotIndex)
@@ -111,6 +73,13 @@ namespace platform::window
 			m_filePaths[slotIndex] = szFile;
 			if (m_onFileSlotChanged)
 				m_onFileSlotChanged(slotIndex, m_filePaths[slotIndex]);
+
+			// JS 側にファイルパスを通知
+			nlohmann::json resp;
+			resp["type"] = "fileSelected";
+			resp["slot"] = slotIndex;
+			resp["path"] = m_filePaths[slotIndex];
+			m_webView.postMessage(resp.dump());
 		}
 	}
 }
