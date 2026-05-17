@@ -114,6 +114,7 @@ $RECYCLE.BIN/
 vcpkg_installed/
 vcpkg/
 .conan/
+packages/
 
 # -------------------------------------------------------
 # エディタ・IDE 汎用
