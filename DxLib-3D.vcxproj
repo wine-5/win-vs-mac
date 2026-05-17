@@ -220,6 +220,13 @@
       <SubType>
       </SubType>
     </None>
+    <None Include="web\common.css" />
+    <None Include="web\common.js" />
+    <None Include="web\desktop.html" />
+    <None Include="web\difficulty.html" />
+    <None Include="web\file-select.html" />
+    <None Include="web\job.html" />
+    <None Include="web\parameter.html" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\base\Singleton.h" />
