@@ -1,7 +1,9 @@
 #pragma once
 
 #include <windows.h>
+#include <string>
 #include "WindowBase.h"
+#include "platform/webview/WebView2Host.h"
 #include <functional>
 
 namespace core::constant
@@ -47,14 +49,10 @@ namespace platform::window
         LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
 
     private:
-        HWND m_job1Button{};
-        HWND m_job2Button{};
-        HWND m_job3Button{};
+        platform::webview::WebView2Host m_webView{};
         core::constant::JobType m_selectedJob{};
         std::function<void(core::constant::JobType)> m_onJobSelect{};
 
-        static constexpr int IDC_JOB1_BUTTON = 2001;
-        static constexpr int IDC_JOB2_BUTTON = 2002;
-        static constexpr int IDC_JOB3_BUTTON = 2003;
+        void handleMessage(const std::string& json) noexcept;
     };
 }

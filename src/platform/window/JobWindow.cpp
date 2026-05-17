@@ -1,6 +1,7 @@
 #include <windows.h>
 #include "JobWindow.h"
 #include "core/constant/JobType.h"
+#include "thirdparty/nlohmann/json.hpp"
 
 namespace platform::window
 {
@@ -22,83 +23,40 @@ namespace platform::window
 
 	void JobWindow::onCreateControls(HWND hwnd)
 	{
-		RECT clientRect{};
-		GetClientRect(hwnd, &clientRect);
-		int windowWidth{ clientRect.right - clientRect.left };
-		int windowHeight{ clientRect.bottom - clientRect.top };
-
-		int buttonWidth{ windowWidth * 80 / 100 };
-		int buttonHeight{ windowHeight * 15 / 100 };
-		int startY{ windowHeight * 5 / 100 };
-		int spacing{ windowHeight * 25 / 100 };
-		int startX{ windowWidth * 10 / 100 };
-
-		m_job1Button = CreateWindowW(
-			L"BUTTON",
-			L"Job 1",
-			WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_TABSTOP,
-			startX, startY, buttonWidth, buttonHeight,
-			hwnd, (HMENU)IDC_JOB1_BUTTON, GetModuleHandleW(nullptr), nullptr
-		);
-		::SendMessage(m_job1Button, BM_SETCHECK, BST_CHECKED, 0);
-
-		m_job2Button = CreateWindowW(
-			L"BUTTON",
-			L"Job 2",
-			WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
-			startX, startY + spacing, buttonWidth, buttonHeight,
-			hwnd, (HMENU)IDC_JOB2_BUTTON, GetModuleHandleW(nullptr), nullptr
-		);
-
-		m_job3Button = CreateWindowW(
-			L"BUTTON",
-			L"Job 3",
-			WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON,
-			startX, startY + spacing * 2, buttonWidth, buttonHeight,
-			hwnd, (HMENU)IDC_JOB3_BUTTON, GetModuleHandleW(nullptr), nullptr
-		);
+		m_webView.setOnMessage([this](const std::string& json) noexcept {
+			handleMessage(json);
+		});
+		m_webView.initialize(hwnd, L"https://game.web/job.html");
 	}
 
 	LRESULT JobWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 	{
-		switch (msg)
+		if (msg == WM_SIZE)
 		{
-		case WM_COMMAND:
-		{
-			int controlId = LOWORD(wParam);
-			int notificationCode = HIWORD(wParam);
+			m_webView.resize(LOWORD(lParam), HIWORD(lParam));
+			return 0;
+		}
+		return WindowBase::onMessage(hwnd, msg, wParam, lParam);
+	}
 
-			if (notificationCode == BN_CLICKED)
+	void JobWindow::handleMessage(const std::string& json) noexcept
+	{
+		try
+		{
+			auto j = nlohmann::json::parse(json);
+			const std::string type = j.value("type", "");
+
+			if (type == "jobSelected")
 			{
-				core::constant::JobType selectedJob = m_selectedJob;
+				const std::string job = j.value("job", "Warrior");
+				if (job == "Warrior")    m_selectedJob = core::constant::JobType::Warrior;
+				else if (job == "Mage")  m_selectedJob = core::constant::JobType::Mage;
+				else if (job == "Ninja") m_selectedJob = core::constant::JobType::Ninja;
 
-				switch (controlId)
-				{
-				case IDC_JOB1_BUTTON:
-					selectedJob = core::constant::JobType::Warrior;
-					break;
-				case IDC_JOB2_BUTTON:
-					selectedJob = core::constant::JobType::Mage;
-					break;
-				case IDC_JOB3_BUTTON:
-					selectedJob = core::constant::JobType::Ninja;
-					break;
-				default:
-					return WindowBase::onMessage(hwnd, msg, wParam, lParam);
-				}
-
-				m_selectedJob = selectedJob;
 				if (m_onJobSelect)
 					m_onJobSelect(m_selectedJob);
-
-				return 0;
 			}
-			break;
 		}
-		default:
-			break;
-		}
-
-		return WindowBase::onMessage(hwnd, msg, wParam, lParam);
+		catch (...) {}
 	}
 }
