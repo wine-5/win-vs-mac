@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="common.css">
+    <style>
+        body { display: flex; flex-direction: column; padding: 18px; gap: 12px; }
+
+        .diff-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .diff-btn {
+            flex: 1;
+            padding: 8px 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .diff-desc {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px 14px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="section-label">&#38522;&#26131;&#24230;&#12434;&#36984;&#25246;</div>
+
+    <div class="diff-buttons">
+        <button id="btn-easy"   class="diff-btn"        onclick="setDiff('EASY')">EASY</button>
+        <button id="btn-normal" class="diff-btn active"  onclick="setDiff('NORMAL')">NORMAL</button>
+        <button id="btn-hard"   class="diff-btn danger"  onclick="setDiff('HARD')">HARD</button>
+    </div>
+
+    <div class="diff-desc" id="diff-desc">&#26631;&#20934;&#30340;&#12394;&#38522;&#26131;&#24230;&#12290;&#12496;&#12521;&#12531;&#12473;&#12398;&#21462;&#12428;&#12383;&#25126;&#38360;&#12364;&#27005;&#12375;&#12417;&#12414;&#12377;&#12290;</div>
+
+    <script src="common.js"></script>
+    <script>
+        var diffDescriptions = {
+            EASY:   '\u30b2\u30fc\u30e0\u521d\u5fc3\u8005\u5411\u3051\u3002\u654c\u306e\u653b\u6483\u529b\u30fb\u9632\u5fa1\u529b\u304c\u4f4e\u304f\u3001\u4f59\u88d5\u3092\u6301\u3063\u3066\u653b\u7565\u3067\u304d\u307e\u3059\u3002',
+            NORMAL: '\u6a19\u6e96\u7684\u306a\u96e3\u6613\u5ea6\u3002\u30d0\u30e9\u30f3\u30b9\u306e\u53d6\u308c\u305f\u6226\u95d8\u304c\u697d\u3057\u3081\u307e\u3059\u3002',
+            HARD:   '\u4e0a\u7d1a\u8005\u5411\u3051\u3002\u654c\u304c\u5f37\u529b\u306b\u306a\u308a\u3001\u6226\u7565\u7684\u306a\u30d7\u30ec\u30a4\u304c\u6c42\u3081\u3089\u308c\u307e\u3059\u3002'
+        };
+
+        var currentDiff = 'NORMAL';
+
+        function setDiff(d) {
+            currentDiff = d;
+            ['easy', 'normal', 'hard'].forEach(function(id) {
+                document.getElementById('btn-' + id).classList.remove('active');
+            });
+            document.getElementById('btn-' + d.toLowerCase()).classList.add('active');
+            document.getElementById('diff-desc').textContent = diffDescriptions[d];
+            sendToGame({ type: 'difficultyChanged', difficulty: d });
+        }
+
+        function onMessageFromGame(data) {}
+    </script>
+</body>
+</html>
