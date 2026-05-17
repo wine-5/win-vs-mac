@@ -52,7 +52,7 @@ namespace platform::window
         int marginY{ screenHeight * 2 / 100 };
         int colWidth{ (screenWidth  - marginX * 4) / 3 };
         int availH{    screenHeight - taskbarH - marginY * 2 };
-        int jobH{   availH * 3 / 5 };
+        int jobH{   availH / 2 };
         int fileH{  availH - jobH - gapY };
 
         int winY{ originY + marginY };
