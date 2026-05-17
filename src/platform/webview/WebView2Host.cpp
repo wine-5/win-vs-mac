@@ -42,12 +42,15 @@ namespace platform::webview
                                 GetClientRect(parentHwnd, &bounds);
                                 controller->put_Bounds(bounds);
 
-                                // "game.web" → "web/" フォルダへ仮想ホストマッピング
+                                // "game.web" → 実行時 CWD + "\\web" の絶対パスへマッピング
                                 ComPtr<ICoreWebView2_3> webview3;
                                 if (SUCCEEDED(webview.As(&webview3)))
                                 {
+                                    wchar_t cwd[MAX_PATH] = {};
+                                    GetCurrentDirectoryW(MAX_PATH, cwd);
+                                    std::wstring webFolderPath = std::wstring(cwd) + L"\\web";
                                     webview3->SetVirtualHostNameToFolderMapping(
-                                        L"game.web", L"web",
+                                        L"game.web", webFolderPath.c_str(),
                                         COREWEBVIEW2_HOST_RESOURCE_ACCESS_KIND_ALLOW);
                                 }
 
@@ -78,10 +81,20 @@ namespace platform::webview
                                         }).Get(),
                                     &m_webMessageToken);
 
+                                // ページ読み込み完了後に m_ready = true をセット
+                                webview->add_NavigationCompleted(
+                                    Callback<ICoreWebView2NavigationCompletedEventHandler>(
+                                        [this](ICoreWebView2*,
+                                            ICoreWebView2NavigationCompletedEventArgs*) -> HRESULT
+                                        {
+                                            m_ready = true;
+                                            return S_OK;
+                                        }).Get(),
+                                    &m_navToken);
+
                                 // HTML ページへ移動
                                 webview->Navigate(htmlPath.c_str());
 
-                                m_ready = true;
                                 return S_OK;
                             }).Get()
                     );
@@ -95,6 +108,16 @@ namespace platform::webview
     {
         if (!m_ready || !m_webview) return;
         m_webview->PostWebMessageAsString(json.c_str());
+    }
+
+    void WebView2Host::postMessage(const std::string& utf8Json) noexcept
+    {
+        if (!m_ready || !m_webview) return;
+        int len = MultiByteToWideChar(CP_UTF8, 0, utf8Json.c_str(), -1, nullptr, 0);
+        if (len <= 0) return;
+        std::wstring wide(len - 1, L'\0');
+        MultiByteToWideChar(CP_UTF8, 0, utf8Json.c_str(), -1, wide.data(), len);
+        m_webview->PostWebMessageAsString(wide.c_str());
     }
 
     void WebView2Host::setOnMessage(MessageCallback callback) noexcept

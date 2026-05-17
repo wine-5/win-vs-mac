@@ -40,6 +40,12 @@ namespace platform::webview
         void postMessage(const std::wstring& json) noexcept;
 
         /**
+         * @brief C++ から JS へ UTF-8 JSON 文字列を送信する（内部で UTF-16 変換）
+         * @param utf8Json 送信する JSON 文字列（UTF-8）
+         */
+        void postMessage(const std::string& utf8Json) noexcept;
+
+        /**
          * @brief JS から C++ へのメッセージ受信コールバックを設定する
          * @param callback JSON 文字列（UTF-8）を受け取るコールバック
          */
@@ -64,5 +70,6 @@ namespace platform::webview
         MessageCallback m_onMessage{};
         bool m_ready{false};
         EventRegistrationToken m_webMessageToken{};
+        EventRegistrationToken m_navToken{};
     };
 }
