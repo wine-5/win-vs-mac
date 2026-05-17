@@ -64,5 +64,15 @@ namespace core::iface
          * @brief フォントをデフォルトに戻す
          */
         virtual void resetFont() = 0;
+
+        /**
+         * @brief 画像を指定矩形に拡大縮小して描画する
+         * @param handle IResourceManager::loadImageById で取得したハンドル
+         * @param x      左上 X 座標
+         * @param y      左上 Y 座標
+         * @param width  描画幅
+         * @param height 描画高さ
+         */
+        virtual void drawImage(int handle, int x, int y, int width, int height) = 0;
     };
 }

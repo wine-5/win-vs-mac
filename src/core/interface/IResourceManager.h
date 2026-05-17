@@ -44,5 +44,12 @@ namespace core::iface
 		 * @return ジョブ情報
 		 */
 		[[nodiscard]] virtual core::data::JobInfo getJobInfo(core::constant::JobType jobType) const = 0;
+
+		/**
+		 * @brief 画像IDから画像を読み込みハンドルを返す（キャッシュ付き）
+		 * @param imageId 画像ID（resources.json の images セクションで定義）
+		 * @return DxLib 画像ハンドル、失敗時は -1
+		 */
+		virtual int loadImageById(std::string_view imageId) = 0;
 	};
 }

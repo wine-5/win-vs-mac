@@ -12,6 +12,7 @@ namespace infrastructure
 			m_modelRepo = std::make_unique<ModelRepository>();
 			m_fontRepo = std::make_unique<FontRepository>();
 			m_jobRepo = std::make_unique<JobRepository>();
+			m_imageRepo = std::make_unique<ImageRepository>();
 		}
 		catch (const std::exception& e)
 		{
@@ -45,5 +46,12 @@ namespace infrastructure
 		if (!m_jobRepo)
 			throw std::runtime_error("JobRepository が初期化されていません");
 		return m_jobRepo->getJobInfo(jobType);
+	}
+
+	int ResourceManager::loadImageById(std::string_view imageId)
+	{
+		if (!m_imageRepo)
+			return -1;
+		return m_imageRepo->loadImageById(imageId);
 	}
 }

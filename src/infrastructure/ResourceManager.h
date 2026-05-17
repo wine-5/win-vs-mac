@@ -4,6 +4,7 @@
 #include "infrastructure/repository/ModelRepository.h"
 #include "infrastructure/repository/FontRepository.h"
 #include "infrastructure/repository/JobRepository.h"
+#include "infrastructure/repository/ImageRepository.h"
 
 namespace infrastructure
 {
@@ -45,9 +46,17 @@ namespace infrastructure
 		 */
 		[[nodiscard]] core::data::JobInfo getJobInfo(core::constant::JobType jobType) const override;
 
+		/**
+		 * @brief 画像IDから画像を読み込みハンドルを返す（キャッシュ付き）
+		 * @param imageId 画像ID
+		 * @return DxLib 画像ハンドル、失敗時は -1
+		 */
+		int loadImageById(std::string_view imageId) override;
+
 	private:
 		std::unique_ptr<ModelRepository> m_modelRepo;
 		std::unique_ptr<FontRepository>  m_fontRepo;
 		std::unique_ptr<JobRepository>   m_jobRepo;
+		std::unique_ptr<ImageRepository> m_imageRepo;
 	};
 }

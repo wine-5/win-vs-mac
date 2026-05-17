@@ -9,11 +9,13 @@ namespace game::scene
 {
 	LockscreenView::LockscreenView(core::iface::IUIRenderer& uiRenderer,
 		core::iface::IScreen& screen,
+		core::iface::IResourceManager& resourceManager,
 		std::string mainFontName)
 		: m_uiRenderer{ uiRenderer }
 		, m_screen{screen}
 		, m_mainFontName{ std::move(mainFontName)}
 	{
+		m_bgHandle = resourceManager.loadImageById("lock-bg");
 	}
 
 	void LockscreenView::update(float deltaTime)
@@ -23,9 +25,12 @@ namespace game::scene
 
 	void LockscreenView::draw(int offsetY) const
 	{
-		// 背景 TODO: もしかしたら画像に差し替える可能性がある
-		m_uiRenderer.drawBox(0, offsetY, m_screen.getWidth(), m_screen.getHeight() + offsetY,
-			BG_COLOR, true);
+		// 背景を描画する
+		if (m_bgHandle != -1)
+			m_uiRenderer.drawImage(m_bgHandle, 0, offsetY, m_screen.getWidth(), m_screen.getHeight());
+		else
+			m_uiRenderer.drawBox(0, offsetY, m_screen.getWidth(), m_screen.getHeight() + offsetY,
+				BG_COLOR, true);
 
 		// 現在時刻の取得
 		const std::time_t currentTime{ std::time(nullptr) };

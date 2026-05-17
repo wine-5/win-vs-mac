@@ -66,4 +66,10 @@ namespace infrastructure
 	{
 		m_currentFontName = m_defaultFontName;
 	}
+
+	void UIRenderer::drawImage(int handle, int x, int y, int width, int height)
+	{
+		if (handle == -1) return;
+		DrawExtendGraph(x, y, x + width, y + height, handle, FALSE);
+	}
 }

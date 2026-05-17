@@ -1,6 +1,7 @@
 #pragma once
 #include "core/interface/IScreen.h"
 #include "core/interface/IUIRenderer.h"
+#include "core/interface/IResourceManager.h"
 #include <string>
 #include "core/utility/Color.h"
 
@@ -16,10 +17,12 @@ namespace game::scene
 		 * @brief LockscreenViewのコンストラクタ
 		 * @param uiRenderer UI描画インターフェース
 		 * @param screen 画面情報インターフェース
+		 * @param resourceManager リソース管理インターフェース
 		 * @param lockFontName 使用するフォント名
 		 */
 		LockscreenView(core::iface::IUIRenderer& uiRenderer,
 			core::iface::IScreen& screen,
+			core::iface::IResourceManager& resourceManager,
 			std::string lockFontName);
 
 		/**
@@ -40,6 +43,7 @@ namespace game::scene
 		std::string m_mainFontName;
 
 		float m_hintTimer{};
+		int   m_bgHandle{-1};
 
 		static constexpr float HINT_PULSE_SPEED  = 2.0f;  // sin波の速さ
 		static constexpr float TIME_Y_RATIO      = 0.42f; // 時刻のY位置
