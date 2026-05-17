@@ -62,16 +62,16 @@ namespace game::scene
 		void setupSystems();
 		void setupEvents();
 
-		core::ecs::EntityManager m_entityManager;
+		core::ecs::EntityManager 	m_entityManager;
 		core::ecs::ComponentManager m_componentManager;
-		core::ecs::SystemManager m_systemManager;
+		core::ecs::SystemManager 	m_systemManager;
 
-		core::iface::ICamera &m_camera;
-		core::iface::IRenderer &m_renderer;
-		core::iface::IAnimator &m_animator;
+		core::iface::ICamera          &m_camera;
+		core::iface::IRenderer        &m_renderer;
+		core::iface::IAnimator        &m_animator;
 		core::iface::IResourceManager &m_resourceManager;
-		core::iface::IInputProvider &m_inputProvider;
-		data::FileEquipmentData &m_fileEquipmentData;
+		core::iface::IInputProvider   &m_inputProvider;
+		data::FileEquipmentData       &m_fileEquipmentData;
 
 		game::factory::FactoryManager m_factoryManager;
 		game::data::PlayerData m_playerData;

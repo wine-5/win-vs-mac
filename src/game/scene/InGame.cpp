@@ -42,8 +42,14 @@ namespace game::scene
 		core::iface::IResourceManager& resourceManager,
 		core::iface::IInputProvider& inputProvider,
 		data::FileEquipmentData& fileEquipmentData)
-		: m_camera{ camera }, m_renderer{ renderer }, m_animator{ animator }, m_resourceManager{ resourceManager }, m_inputProvider{ inputProvider }, m_fileEquipmentData{ fileEquipmentData }, m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }, m_playerData{ game::data::PlayerData::fromMetadata(
-																																																																  m_resourceManager.getMetadata(constant::model_id::PLAYER).value()) }
+		: m_camera{ camera }
+		, m_renderer{ renderer }
+		, m_animator{ animator }
+		, m_resourceManager{ resourceManager }
+		, m_inputProvider{ inputProvider }
+		, m_fileEquipmentData{ fileEquipmentData }
+		, m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }
+		, m_playerData{ game::data::PlayerData::fromMetadata(m_resourceManager.getMetadata(constant::model_id::PLAYER).value()) }
 	{
 		loadResources();
 		spawnEntities();
@@ -69,7 +75,6 @@ namespace game::scene
 
 	void InGame::spawnEntities()
 	{
-
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
 
 		// 初期値を保存

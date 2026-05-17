@@ -20,7 +20,7 @@ namespace platform::window
         RegisterClassW(&wc);
 
         m_hwnd = CreateWindowExW(
-            WS_EX_NOACTIVATE,
+            WS_EX_NOACTIVATE | WS_EX_TOPMOST,
             CLASS_NAME,
             L"",
             WS_POPUP,
@@ -95,7 +95,24 @@ namespace platform::window
     {
         if (msg == WM_SIZE)
         {
-            m_webView.resize(LOWORD(lParam), HIWORD(lParam));
+            if (wParam != SIZE_MINIMIZED)
+                m_webView.resize(LOWORD(lParam), HIWORD(lParam));
+            return 0;
+        }
+        if (msg == WM_ACTIVATEAPP)
+        {
+            // アプリがアクティブな間だけ TOPMOST にする（DxLib より前面を保証しつつ他アプリへの切り替えも可能）
+            SetWindowPos(m_hwnd,
+                wParam ? HWND_TOPMOST : HWND_NOTOPMOST,
+                0, 0, 0, 0,
+                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+            if (wParam != 0)
+            {
+                RECT rc{};
+                GetClientRect(hwnd, &rc);
+                if (rc.right > 0 && rc.bottom > 0)
+                    m_webView.resize(rc.right, rc.bottom);
+            }
             return 0;
         }
         if (msg == WM_DESTROY)

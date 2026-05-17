@@ -59,6 +59,12 @@ namespace platform::webview
         void resize(int width, int height) noexcept;
 
         /**
+         * @brief WebView2 コントローラの表示状態を設定する（WM_SHOWWINDOW 時に呼ぶ）
+         * @param visible true なら表示、false なら非表示
+         */
+        void setVisible(bool visible) noexcept;
+
+        /**
          * @brief WebView2 コントローラが初期化済みか
          * @return 初期化完了なら true
          */

@@ -136,6 +136,14 @@ namespace platform::webview
         if (!m_controller) return;
         RECT bounds{0, 0, width, height};
         m_controller->put_Bounds(bounds);
+        if (width > 0 && height > 0)
+            m_controller->put_IsVisible(TRUE);
+    }
+
+    void WebView2Host::setVisible(bool visible) noexcept
+    {
+        if (!m_controller) return;
+        m_controller->put_IsVisible(visible ? TRUE : FALSE);
     }
 
     bool WebView2Host::isReady() const noexcept

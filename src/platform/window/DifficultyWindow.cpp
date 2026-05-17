@@ -28,8 +28,20 @@ namespace platform::window
     {
         if (msg == WM_SIZE)
         {
-            m_webView.resize(LOWORD(lParam), HIWORD(lParam));
+            if (wParam == SIZE_MINIMIZED)
+                m_webView.setVisible(false);
+            else
+                m_webView.resize(LOWORD(lParam), HIWORD(lParam));
             return 0;
+        }
+        if (msg == WM_SHOWWINDOW)
+            m_webView.setVisible(wParam != 0);
+        if (msg == WM_ACTIVATEAPP && wParam != 0)
+        {
+            RECT rc{};
+            GetClientRect(hwnd, &rc);
+            if (rc.right > 0 && rc.bottom > 0)
+                m_webView.resize(rc.right, rc.bottom);
         }
         return WindowBase::onMessage(hwnd, msg, wParam, lParam);
     }
