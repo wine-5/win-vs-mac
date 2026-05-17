@@ -23,7 +23,7 @@ namespace platform::window
             destroy();
     }
 
-    bool WindowBase::create() noexcept
+    bool WindowBase::create(HWND ownerHwnd) noexcept
     {
         if (m_hwnd != nullptr) return true;
 
@@ -44,7 +44,7 @@ namespace platform::window
             m_title.c_str(),
             WS_OVERLAPPEDWINDOW,
             m_x, m_y, m_width, m_height,
-            nullptr,
+            ownerHwnd,
             nullptr,
             GetModuleHandleW(nullptr),
             this
@@ -129,6 +129,11 @@ namespace platform::window
         return DefWindowProcW(hwnd, msg, wParam, lParam);
     }
 
+    void WindowBase::setOnMinimize(std::function<void()> callback) noexcept
+    {
+        m_onMinimize = std::move(callback);
+    }
+
     LRESULT WindowBase::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
     {
         switch (msg)
@@ -136,6 +141,14 @@ namespace platform::window
         case WM_CREATE:
             onCreateControls(hwnd);
             return 0;
+
+        case WM_SYSCOMMAND:
+            if ((wParam & 0xFFF0) == SC_MINIMIZE && m_onMinimize)
+            {
+                m_onMinimize();
+                return 0;
+            }
+            return DefWindowProcW(hwnd, msg, wParam, lParam);
 
         case WM_CLOSE:
             hide();

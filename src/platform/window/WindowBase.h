@@ -2,6 +2,7 @@
 
 #include <windows.h>
 #include <string>
+#include <functional>
 
 namespace platform::window
 {
@@ -28,9 +29,10 @@ namespace platform::window
 
         /**
          * @brief ウィンドウを作成する
+         * @param ownerHwnd オーナーウィンドウ (nullptr でオーナーなし)
          * @return 成功時 true
          */
-        bool create() noexcept;
+        bool create(HWND ownerHwnd = nullptr) noexcept;
 
         /**
          * @brief ウィンドウを破棄する
@@ -51,6 +53,13 @@ namespace platform::window
          * @brief ウィンドウを最前面に持ってくる
          */
         void bringToFront() noexcept;
+
+        /**
+         * @brief 最小化ボタン押下時のコールバックを設定する
+         * @details 設定するとデフォルトの最小化を抑制してコールバックを呼ぶ
+         * @param callback 最小化時に呼ぶコールバック
+         */
+        void setOnMinimize(std::function<void()> callback) noexcept;
 
         /**
          * @brief ウィンドウハンドルを取得
@@ -93,6 +102,7 @@ namespace platform::window
          */
         virtual LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 
+        std::function<void()> m_onMinimize{};
         std::wstring m_className{};
         std::wstring m_title{};
         int m_x{};

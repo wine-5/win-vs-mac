@@ -3,12 +3,13 @@
 #include "core/interface/ISelectWindowManager.h"
 #include "core/constant/JobType.h"
 #include "core/data/JobInfo.h"
-#include "SelectWindow.h"
+#include "DesktopWindow.h"
 #include "JobWindow.h"
 #include "FileSelectWindow.h"
 #include "ParameterWindow.h"
 #include <memory>
 #include <functional>
+#include <string>
 
 namespace core::iface
 {
@@ -39,10 +40,17 @@ namespace platform::window
         void updateParameterWindowForJob(core::constant::JobType jobType) noexcept;
 
     private:
-        std::unique_ptr<SelectWindow> m_selectWindow{};
-        std::unique_ptr<JobWindow> m_jobWindow{};
-        std::unique_ptr<FileSelectWindow> m_fileSelectWindow{};
-        std::unique_ptr<ParameterWindow> m_parameterWindow{};
+        void handleDesktopMessage(const std::string& json) noexcept;
+        void notifyWindowState(const std::string& name, bool visible) noexcept;
+
+        std::unique_ptr<DesktopWindow>      m_desktopWindow{};
+        std::unique_ptr<JobWindow>          m_jobWindow{};
+        std::unique_ptr<FileSelectWindow>   m_fileSelectWindow{};
+        std::unique_ptr<ParameterWindow>    m_parameterWindow{};
+
+        bool m_jobVisible{true};
+        bool m_fileVisible{true};
+        bool m_paramVisible{true};
 
         std::function<void()> m_onGameStart{};
         std::function<void(core::constant::JobType)> m_onJobSelect{};

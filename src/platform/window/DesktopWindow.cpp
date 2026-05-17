@@ -20,7 +20,7 @@ namespace platform::window
         RegisterClassW(&wc);
 
         m_hwnd = CreateWindowExW(
-            0,
+            WS_EX_NOACTIVATE,
             CLASS_NAME,
             L"",
             WS_POPUP,
