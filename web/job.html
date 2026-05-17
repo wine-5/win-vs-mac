@@ -25,7 +25,7 @@
 <body>
     <div class="section-label">職業を選択</div>
 
-    <button class="job-btn active" id="btn-warrior" onclick="selectJob('Warrior')">
+    <button class="job-btn" id="btn-warrior" onclick="selectJob('Warrior')">
         <span class="job-name">剣士</span>
         <span class="job-skill">Skill: 全方位斬り</span>
     </button>
@@ -43,7 +43,7 @@
     <script src="common.js"></script>
     <script>
         const JOB_IDS = { Warrior: 'warrior', Mage: 'mage', Ninja: 'ninja' };
-        let currentJob = 'Warrior';
+        let currentJob = null;
 
         function selectJob(job) {
             currentJob = job;

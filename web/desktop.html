@@ -16,52 +16,9 @@
             flex: 1;
             position: relative;
             overflow: hidden;
-        }
-
-        /* -- Difficulty Panel (left column bottom) -- */
-        .difficulty-panel {
-            position: absolute;
-            left: 2%;
-            width: 30.4%;
-            top: 60%;
-            bottom: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 16px 20px;
-            gap: 16px;
-        }
-
-        .diff-title {
-            font-size: 13px;
-            color: var(--text-muted);
-            font-weight: 600;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-        }
-
-        .diff-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        .diff-btn {
-            padding: 8px 22px;
-            font-size: 13px;
-            font-weight: 600;
-            min-width: 80px;
-        }
-
-        .diff-desc {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 18px 20px;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.75);
-            line-height: 1.8;
-            width: 100%;
+            background-image: url('https://assets.game.web/images/background/DesktopBG.jpg');
+            background-size: cover;
+            background-position: center;
         }
 
         /* -- Taskbar -- */
@@ -152,17 +109,7 @@
     </style>
 </head>
 <body>
-    <div class="desktop-area">
-        <div class="difficulty-panel">
-            <div class="diff-title">難易度選択</div>
-            <div class="diff-buttons">
-                <button id="btn-easy"   class="diff-btn"        onclick="setDiff('EASY')">EASY</button>
-                <button id="btn-normal" class="diff-btn active"  onclick="setDiff('NORMAL')">NORMAL</button>
-                <button id="btn-hard"   class="diff-btn danger"  onclick="setDiff('HARD')">HARD</button>
-            </div>
-            <div class="diff-desc" id="diff-desc">標準的な難易度。バランスの取れた戦闘が楽しめます。</div>
-        </div>
-    </div>
+    <div class="desktop-area"></div>
 
     <div class="taskbar">
         <div class="taskbar-apps">
@@ -175,6 +122,9 @@
             <div class="taskbar-app active" id="app-param" onclick="toggleWindow('param')">
                 <span class="app-icon">📊</span> パラメータ
             </div>
+            <div class="taskbar-app active" id="app-diff" onclick="toggleWindow('diff')">
+                <span class="app-icon">🎯</span> 難易度
+            </div>
         </div>
 
         <div class="taskbar-right">
@@ -185,31 +135,13 @@
 
     <script src="common.js"></script>
     <script>
-        const winStates = { job: true, file: true, param: true };
-        let currentDiff = 'NORMAL';
-
-        const diffDescriptions = {
-            EASY:   'ゲーム初心者向け。敌の攻撃力・防御力が低く、余裕を持って攻略できます。',
-            NORMAL: '標準的な難易度。バランスの取れた戦闘が楽しめます。',
-            HARD:   '上級者向け。敌が強力になり、戦略的なプレイが求められます。'
-        };
-
-        function setDiff(d) {
-            currentDiff = d;
-            ['easy', 'normal', 'hard'].forEach(function(id) {
-                document.getElementById('btn-' + id).classList.remove('active');
-            });
-            document.getElementById('btn-' + d.toLowerCase()).classList.add('active');
-            document.getElementById('diff-desc').textContent = diffDescriptions[d];
-            sendToGame({ type: 'difficultyChanged', difficulty: d });
-        }
-
+        const winStates = { job: true, file: true, param: true, diff: true };
         function toggleWindow(name) {
             sendToGame({ type: 'toggleWindow', window: name });
         }
 
         function startGame() {
-            sendToGame({ type: 'startGame', difficulty: currentDiff });
+            sendToGame({ type: 'startGame' });
         }
 
         function setWindowVisible(name, visible) {
