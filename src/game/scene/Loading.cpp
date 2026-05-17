@@ -4,6 +4,7 @@
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
 #include "core/base/ServiceLocator.h"
+#include "core/interface/IStringConverter.h"
 #include <string>
 #include <cmath>
 
@@ -37,6 +38,8 @@ namespace game::scene
 
     void Loading::draw()
     {
+        auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+
         const int fontSize{static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO)};
 
         // ローディングタイトル表示
@@ -51,6 +54,8 @@ namespace game::scene
         if (remainingTime < 0.0f) remainingTime = 0.0f;
 
         std::string timerText = std::to_string(static_cast<int>(std::ceil(remainingTime))) + "秒";
+        if (converter)
+            timerText = converter->utf8ToShiftJis(timerText);
         int timerWidth{m_uiRenderer.getTextWidth(timerText.c_str(), fontSize)};
         int timerX{(m_screen.getWidth() - timerWidth) / 2};
         int timerY{static_cast<int>(m_screen.getHeight() * TIMER_Y_RATIO)};

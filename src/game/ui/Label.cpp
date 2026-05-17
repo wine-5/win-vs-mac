@@ -1,4 +1,6 @@
 #include "Label.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IStringConverter.h"
 #include <utility>
 
 namespace game::ui
@@ -11,6 +13,9 @@ namespace game::ui
         , m_color{ color }
         , m_visible{ true }
     {
+        auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+        if (converter)
+            m_text = converter->utf8ToShiftJis(m_text);
     }
 
     void Label::update()
@@ -33,5 +38,8 @@ namespace game::ui
     void Label::setText(const std::string& text)
     {
         m_text = text;
+        auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+        if (converter)
+            m_text = converter->utf8ToShiftJis(m_text);
     }
 }

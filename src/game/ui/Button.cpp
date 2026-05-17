@@ -1,6 +1,8 @@
 ﻿#include "Button.h"
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IStringConverter.h"
 #include <utility>
 
 namespace game::ui
@@ -17,6 +19,9 @@ namespace game::ui
         , m_onClick{}
         , m_inputProvider{inputProvider}
     {
+        auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+        if (converter)
+            m_text = converter->utf8ToShiftJis(m_text);
     }
 
     void Button::update()

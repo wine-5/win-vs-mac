@@ -2,6 +2,8 @@
 #include "game/ui/Button.h"
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IStringConverter.h"
 #include <string>
 
 namespace game::scene
@@ -52,6 +54,10 @@ namespace game::scene
 		std::string text{ "Win vs Mac.exeを起動しています" };
 		for (int i{ 0 }; i < dotCount; ++i)
 			text += '.';
+
+		auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+		if (converter)
+			text = converter->utf8ToShiftJis(text);
 
 		const int normalFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
 		const int textWidth{ m_uiRenderer.getTextWidth(text.c_str(), normalFontSize) };

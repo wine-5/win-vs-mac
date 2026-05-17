@@ -1,6 +1,8 @@
 ﻿#include "LockscreenView.h"
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IStringConverter.h"
 #include <cmath>
 #include <ctime>
 #include <string>
@@ -55,23 +57,31 @@ namespace game::scene
 		std::snprintf(dateStr, sizeof(dateStr), "%d月%d日(%s)",
 			t.tm_mon + 1, t.tm_mday, weekdays[t.tm_wday]);
 
+		auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+		std::string convertedDateStr{ dateStr };
+		if (converter)
+			convertedDateStr = converter->utf8ToShiftJis(convertedDateStr);
+
 		const int normalFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
-		const int dateWidth{ m_uiRenderer.getTextWidth(dateStr, normalFontSize) };
+		const int dateWidth{ m_uiRenderer.getTextWidth(convertedDateStr.c_str(), normalFontSize) };
 		const int dateX{ (m_screen.getWidth() - dateWidth) / 2 };
 		const int dateY{ static_cast<int>(m_screen.getHeight() * DATE_Y_RATIO) + offsetY };
-		m_uiRenderer.drawText(dateX, dateY, dateStr, core::utility::Color::WHITE, normalFontSize);
+		m_uiRenderer.drawText(dateX, dateY, convertedDateStr.c_str(), core::utility::Color::WHITE, normalFontSize);
 
 		// ヒント描画
 		const float sinVal{ std::sin(m_hintTimer * HINT_PULSE_SPEED) };
 		const int alpha{ static_cast<int>((sinVal * HINT_ALPHA_RANGE + HINT_ALPHA_MIN) * 255) };
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
 
-		const char* hint{ "クリックまたはキーを押してください" };
+		std::string hint{ "クリックまたはキーを押してください" };
+		if (converter)
+			hint = converter->utf8ToShiftJis(hint);
+
 		const int hintFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::FONT_SIZE_EXTRA_SMALL_RATIO) };
-		const int hintWidth{ m_uiRenderer.getTextWidth(hint, hintFontSize) };
+		const int hintWidth{ m_uiRenderer.getTextWidth(hint.c_str(), hintFontSize) };
 		const int hintX{ (m_screen.getWidth() - hintWidth) / 2 };
 		const int hintY{ static_cast<int>(m_screen.getHeight() * HINT_Y_RATIO) + offsetY };
-		m_uiRenderer.drawText(hintX, hintY, hint, core::utility::Color::WHITE, hintFontSize);
+		m_uiRenderer.drawText(hintX, hintY, hint.c_str(), core::utility::Color::WHITE, hintFontSize);
 
 		m_uiRenderer.resetBlendMode();
 	}

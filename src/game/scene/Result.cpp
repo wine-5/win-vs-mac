@@ -5,6 +5,7 @@
 #include "core/constant/UI.h"
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
+#include "core/interface/IStringConverter.h"
 
 namespace game::scene
 {
@@ -34,12 +35,16 @@ namespace game::scene
 
     void Result::draw()
     {
+        auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+
         const int titleFontSize{static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO)};
-        const char* title{"リザルト画面"};
-        int titleWidth{m_uiRenderer.getTextWidth(title, titleFontSize)};
+        std::string title{"リザルト画面"};
+        if (converter)
+            title = converter->utf8ToShiftJis(title);
+        int titleWidth{m_uiRenderer.getTextWidth(title.c_str(), titleFontSize)};
         int titleX{(m_screen.getWidth() - titleWidth) / 2};
         int titleY{static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO)};
-        m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE, titleFontSize);
+        m_uiRenderer.drawText(titleX, titleY, title.c_str(), core::utility::Color::WHITE, titleFontSize);
 
         // UI要素を描画
         m_uiManager.draw(m_uiRenderer);

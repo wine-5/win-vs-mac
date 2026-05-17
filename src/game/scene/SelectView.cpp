@@ -2,6 +2,8 @@
 #include "game/ui/Button.h"
 #include "core/constant/UI.h"
 #include "core/utility/Color.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IStringConverter.h"
 #include <string>
 
 namespace game::scene
@@ -72,12 +74,16 @@ namespace game::scene
 
     void SelectView::draw() const
     {
+        auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+
         const int titleFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
-        const char* title{ "難易度と武器、ファイルを３つ選択してください" };
-        const int titleWidth{ m_uiRenderer.getTextWidth(title, titleFontSize) };
+        std::string title{ "難易度と武器、ファイルを３つ選択してください" };
+        if (converter)
+            title = converter->utf8ToShiftJis(title);
+        const int titleWidth{ m_uiRenderer.getTextWidth(title.c_str(), titleFontSize) };
         const int titleX{ (m_screen.getWidth() - titleWidth) / 2 };
         const int titleY{ static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO) };
-        m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE, titleFontSize);
+        m_uiRenderer.drawText(titleX, titleY, title.c_str(), core::utility::Color::WHITE, titleFontSize);
 
         m_uiManager.draw(m_uiRenderer);
 
@@ -89,7 +95,9 @@ namespace game::scene
                 const auto slashPos{ fullPath.rfind('\\') };
                 const std::string fileName{ slashPos != std::string::npos
                     ? fullPath.substr(slashPos + 1) : fullPath };
-                const std::string text{ "スロット" + std::to_string(i + 1) + ": " + fileName };
+                std::string text{ "スロット" + std::to_string(i + 1) + ": " + fileName };
+                if (converter)
+                    text = converter->utf8ToShiftJis(text);
                 const int textY{ static_cast<int>(m_screen.getHeight() * (FILE_NAME_BASE_Y_RATIO + i * FILE_NAME_Y_STEP)) };
                 const int textFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
                 m_uiRenderer.drawText(FILE_NAME_X, textY, text.c_str(), core::utility::Color::WHITE, textFontSize);
@@ -106,7 +114,9 @@ namespace game::scene
             const int paramStartY{ static_cast<int>(m_screen.getHeight() * 0.15f) };
             const int paramLineHeight{ static_cast<int>(m_screen.getHeight() * 0.04f) };
 
-            const std::string jobNameText{ "職業: " + jobInfo.m_name };
+            std::string jobNameText{ "職業: " + jobInfo.m_name };
+            if (converter)
+                jobNameText = converter->utf8ToShiftJis(jobNameText);
             m_uiRenderer.drawText(paramStartX, paramStartY, jobNameText.c_str(), core::utility::Color::WHITE, paramTextFontSize);
 
             const std::string hpText{ "HP: " + std::to_string(static_cast<int>(jobInfo.m_hp)) };
