@@ -41,6 +41,8 @@
             transform: translateX(-50%);
             display: flex;
             gap: 2px;
+            max-width: calc(100% - 260px);
+            overflow: hidden;
         }
 
         .taskbar-app {
@@ -75,7 +77,13 @@
             color: rgba(255, 255, 255, 0.38);
         }
 
-        .app-icon { font-size: 14px; }
+        .app-icon {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+        }
+
+        .taskbar-app.hidden-win .app-icon { opacity: 0.38; }
 
         .taskbar-right {
             margin-left: auto;
@@ -115,16 +123,16 @@
     <div class="taskbar">
         <div class="taskbar-apps">
             <div class="taskbar-app active" id="app-job"   onclick="toggleWindow('job')">
-                <span class="app-icon">⚔</span> 職業選択
+                <img class="app-icon" src="https://assets.game.web/images/ui/icons/job.png"> 職業選択
             </div>
             <div class="taskbar-app active" id="app-file"  onclick="toggleWindow('file')">
-                <span class="app-icon">📁</span> ファイル
+                <img class="app-icon" src="https://assets.game.web/images/ui/icons/file.png"> ファイル
             </div>
             <div class="taskbar-app active" id="app-param" onclick="toggleWindow('param')">
-                <span class="app-icon">📊</span> パラメータ
+                <img class="app-icon" src="https://assets.game.web/images/ui/icons/param.png"> パラメータ
             </div>
             <div class="taskbar-app active" id="app-diff" onclick="toggleWindow('diff')">
-                <span class="app-icon">🎯</span> 難易度
+                <img class="app-icon" src="https://assets.game.web/images/ui/icons/diff.png"> 難易度
             </div>
         </div>
 

@@ -5,11 +5,15 @@
     <base href="https://game.web/">
     <link rel="stylesheet" href="common/common.css">
     <style>
-        body { display: flex; flex-direction: column; padding: 18px; gap: 8px; }
+        body { display: flex; flex-direction: column; height: 100%; padding: 12px; gap: 6px; }
+
+        .section-label { flex-shrink: 0; }
 
         .slot-btn {
+            flex: 1;
+            min-height: 0;
             width: 100%;
-            padding: 12px 14px;
+            padding: 8px 12px;
             text-align: left;
             display: flex;
             flex-direction: column;

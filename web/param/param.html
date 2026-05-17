@@ -5,15 +5,17 @@
     <base href="https://game.web/">
     <link rel="stylesheet" href="common/common.css">
     <style>
-        body { display: flex; flex-direction: column; padding: 18px; gap: 0; }
+        body { display: flex; flex-direction: column; height: 100%; padding: 12px; gap: 0; }
 
-        .section-label { margin-bottom: 10px; }
+        .section-label { flex-shrink: 0; margin-bottom: 8px; }
 
         .stat-row {
+            flex: 1;
+            min-height: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
+            padding: 0 2px;
             border-bottom: 1px solid var(--border);
         }
 

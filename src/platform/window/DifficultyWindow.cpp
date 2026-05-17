@@ -1,6 +1,5 @@
-#include <windows.h>
+﻿#include <windows.h>
 #include "DifficultyWindow.h"
-#include "platform/utility/StringConverter.h"
 #include "thirdparty/nlohmann/json.hpp"
 
 namespace platform::window
@@ -50,15 +49,13 @@ namespace platform::window
             }
             else if (type == "confirmHard")
             {
-                const std::string message = "HARD モードを選択しようとしています。\n"
-                                           "敵の攻撃力・防御力が大幅に上昇し、\n"
-                                           "攻略が非常に困難になります。\n\n"
-                                           "本当に続行しますか？";
-                const std::string title = "警告 - Win vs Mac.exe";
                 const int result = MessageBoxW(
                     m_hwnd,
-                    platform::utility::utf8ToWide(message.c_str()).c_str(),
-                    platform::utility::utf8ToWide(title.c_str()).c_str(),
+                    L"HARD モードを選択しようとしています。\n"
+                    L"敵の攻撃力・防御力が大幅に上昇し、\n"
+                    L"攻略が非常に困難になります。\n\n"
+                    L"本当に続行しますか？",
+                    L"警告 - Win vs Mac.exe",
                     MB_OKCANCEL | MB_ICONWARNING
                 );
                 if (result == IDOK)
