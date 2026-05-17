@@ -165,6 +165,9 @@
     <ClCompile Include="src\platform\window\WindowBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\platform\webview\WebView2Host.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="src\platform\window\JobWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>

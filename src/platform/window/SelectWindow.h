@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <string>
 #include "WindowBase.h"
+#include "platform/webview/WebView2Host.h"
 #include <functional>
 
 namespace platform::window
@@ -45,16 +46,10 @@ namespace platform::window
     private:
         enum class Difficulty { Easy = 0, Normal = 1, Hard = 2 };
 
-        HWND m_easyButton{};
-        HWND m_normalButton{};
-        HWND m_hardButton{};
-        HWND m_gameStartButton{};
-        Difficulty m_selectedDifficulty{ Difficulty::Normal };
+        platform::webview::WebView2Host m_webView{};
+        Difficulty m_selectedDifficulty{Difficulty::Normal};
         std::function<void()> m_onGameStart{};
 
-        static constexpr int IDC_EASY_BUTTON = 1001;
-        static constexpr int IDC_NORMAL_BUTTON = 1002;
-        static constexpr int IDC_HARD_BUTTON = 1003;
-        static constexpr int IDC_GAME_START_BUTTON = 1004;
+        void handleMessage(const std::string& json) noexcept;
     };
 }
