@@ -27,6 +27,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	ChangeWindowMode(FALSE);
 #endif
 
+	SetAlwaysRunFlag(TRUE); // ファイルダイアログ等でウィンドウが非アクティブになっても描画を継続する
 	if (DxLib_Init() == -1) return -1;
 	SetUseLighting(FALSE);
 
