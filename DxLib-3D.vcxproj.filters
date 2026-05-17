@@ -156,6 +156,9 @@
     <ClCompile Include="src\infrastructure\repository\ModelRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\infrastructure\repository\ImageRepository.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="src\infrastructure\repository\FontRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>

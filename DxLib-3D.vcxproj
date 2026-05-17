@@ -159,6 +159,7 @@
     <ClCompile Include="src\infrastructure\repository\FontRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\JobRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\ModelRepository.cpp" />
+    <ClCompile Include="src\infrastructure\repository\ImageRepository.cpp" />
     <ClCompile Include="src\infrastructure\Screen.cpp" />
     <ClCompile Include="src\core\base\ServiceLocator.cpp" />
     <ClCompile Include="src\game\factory\FactoryInitializer.cpp" />
