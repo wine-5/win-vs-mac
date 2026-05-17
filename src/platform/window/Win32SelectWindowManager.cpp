@@ -23,8 +23,17 @@ namespace platform::window
 
     void Win32SelectWindowManager::createAllWindows()
     {
-        int screenWidth{ m_screen.getWidth() };
-        int screenHeight{ m_screen.getHeight() };
+        HWND dxlibHwnd = static_cast<HWND>(m_screen.getNativeWindowHandle());
+
+        RECT clientRect{};
+        GetClientRect(dxlibHwnd, &clientRect);
+        int screenWidth{ clientRect.right };
+        int screenHeight{ clientRect.bottom };
+
+        POINT origin{ 0, 0 };
+        ClientToScreen(dxlibHwnd, &origin);
+        int originX{ origin.x };
+        int originY{ origin.y };
 
         int marginX{ screenWidth * 1 / 100 };
         int marginY{ screenHeight * 1 / 100 };
@@ -37,8 +46,8 @@ namespace platform::window
         int fileSelectWindowHeight{ usableHeight / 2 - marginY / 2 };
 
         m_selectWindow = std::make_unique<SelectWindow>(
-            marginX + leftPanelWidth + marginX,
-            marginY,
+            originX + marginX + leftPanelWidth + marginX,
+            originY + marginY,
             centerWidth,
             usableHeight
         );
@@ -46,8 +55,8 @@ namespace platform::window
         m_selectWindow->setOnGameStart(m_onGameStart);
 
         m_jobWindow = std::make_unique<JobWindow>(
-            marginX,
-            marginY,
+            originX + marginX,
+            originY + marginY,
             leftPanelWidth,
             jobWindowHeight
         );
@@ -55,8 +64,8 @@ namespace platform::window
         m_jobWindow->setOnJobSelect(m_onJobSelect);
 
         m_fileSelectWindow = std::make_unique<FileSelectWindow>(
-            marginX,
-            marginY + jobWindowHeight + marginY,
+            originX + marginX,
+            originY + marginY + jobWindowHeight + marginY,
             leftPanelWidth,
             fileSelectWindowHeight
         );
@@ -64,8 +73,8 @@ namespace platform::window
         m_fileSelectWindow->setOnFileSlotChanged(m_onFileSlotChanged);
 
         m_parameterWindow = std::make_unique<ParameterWindow>(
-            marginX + leftPanelWidth + marginX + centerWidth + marginX,
-            marginY,
+            originX + marginX + leftPanelWidth + marginX + centerWidth + marginX,
+            originY + marginY,
             rightPanelWidth,
             usableHeight
         );

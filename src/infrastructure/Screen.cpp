@@ -1,4 +1,5 @@
 ﻿#include "Screen.h"
+#include "DxLib.h"
 
 namespace infrastructure
 {
@@ -16,6 +17,11 @@ namespace infrastructure
 	int Screen::getHeight() const noexcept
 	{
 		return m_height;
+	}
+
+	void* Screen::getNativeWindowHandle() const noexcept
+	{
+		return GetMainWindowHandle();
 	}
 
 }
