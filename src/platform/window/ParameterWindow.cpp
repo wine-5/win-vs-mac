@@ -46,7 +46,7 @@ namespace platform::window
 
     void ParameterWindow::onCreateControls(HWND hwnd)
     {
-        m_webView.initialize(hwnd, L"https://game.web/parameter.html");
+        m_webView.initialize(hwnd, L"https://game.web/param/param.html");
     }
 
     LRESULT ParameterWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept

@@ -19,7 +19,7 @@ namespace platform::window
         m_webView.setOnMessage([this](const std::string& json) noexcept {
             handleMessage(json);
         });
-        m_webView.initialize(hwnd, L"https://game.web/difficulty.html");
+        m_webView.initialize(hwnd, L"https://game.web/difficulty/difficulty.html");
     }
 
     LRESULT DifficultyWindow::onMessage(
