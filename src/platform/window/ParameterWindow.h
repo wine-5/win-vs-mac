@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <string>
 #include "WindowBase.h"
+#include "platform/webview/WebView2Host.h"
 
 namespace core::data
 {
@@ -38,20 +39,9 @@ namespace platform::window
 
     protected:
         void onCreateControls(HWND hwnd) override;
+        LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
 
     private:
-        HWND m_nameLabel{};
-        HWND m_skillLabel{};
-        HWND m_hpLabel{};
-        HWND m_atkLabel{};
-        HWND m_defLabel{};
-        HWND m_spdLabel{};
-
-        HWND m_nameValue{};
-        HWND m_skillValue{};
-        HWND m_hpValue{};
-        HWND m_atkValue{};
-        HWND m_defValue{};
-        HWND m_spdValue{};
+        platform::webview::WebView2Host m_webView{};
     };
 }
