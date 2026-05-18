@@ -1,12 +1,15 @@
 'use strict';
 
+// 表示専用データ（名前・アイコン・スキル名はラベルのため JS 側で保持）
+// hp/atk/def/spd は C++ から jobStats メッセージで受け取る
 const JOBS = [
-    { id: 'Warrior', name: '剣士',    icon: '⚔️',  skill: '全方位斬り',    hp: 1000, atk: 1000, def: 1000, spd: 1000 },
-    { id: 'Mage',    name: '魔法使い', icon: '✨',  skill: '巨大魔法弾',    hp:   80, atk:   60, def:   20, spd:   40 },
-    { id: 'Ninja',   name: '忍者',    icon: '🥷', skill: '分身一斉攻撃',  hp:   90, atk:   50, def:   25, spd:   55 },
+    { id: 'Warrior', name: '剣士',    icon: '⚔️',  skill: '全方位斬り' },
+    { id: 'Mage',    name: '魔法使い', icon: '✨',  skill: '巨大魔法弾' },
+    { id: 'Ninja',   name: '忍者',    icon: '🥷', skill: '分身一斉攻撃' },
 ];
 
 let currentJob = null;
+let jobStats = null; // C++ から受け取るステータス配列 [{ id, hp, atk, def, spd }, ...]
 
 function selectJob(jobId) {
     currentJob = jobId;
@@ -20,16 +23,11 @@ function updateSelection() {
     });
 }
 
-function onMessageFromGame(data) {
-    if (data.type === 'refresh' && data.job != null) {
-        currentJob = data.job;
-        updateSelection();
-    }
-}
-
-(function () {
+function renderJobs() {
     const list = document.getElementById('job-list');
-    JOBS.forEach(function (job) {
+    list.innerHTML = '';
+    JOBS.forEach(function (job, i) {
+        const stats = jobStats ? jobStats[i] : null;
         const card = document.createElement('div');
         card.className = 'job-card';
         card.dataset.id = job.id;
@@ -43,11 +41,27 @@ function onMessageFromGame(data) {
                 '</div>' +
             '</div>' +
             '<div class="job-stats">' +
-                '<div class="stat-chip"><span class="k">HP</span> <span class="v">'  + job.hp  + '</span></div>' +
-                '<div class="stat-chip"><span class="k">ATK</span><span class="v">' + job.atk + '</span></div>' +
-                '<div class="stat-chip"><span class="k">DEF</span><span class="v">' + job.def + '</span></div>' +
-                '<div class="stat-chip"><span class="k">SPD</span><span class="v">' + job.spd + '</span></div>' +
+                '<div class="stat-chip"><span class="k">HP</span> <span class="v stat-hp">'  + (stats ? stats.hp  : '—') + '</span></div>' +
+                '<div class="stat-chip"><span class="k">ATK</span><span class="v stat-atk">' + (stats ? stats.atk : '—') + '</span></div>' +
+                '<div class="stat-chip"><span class="k">DEF</span><span class="v stat-def">' + (stats ? stats.def : '—') + '</span></div>' +
+                '<div class="stat-chip"><span class="k">SPD</span><span class="v stat-spd">' + (stats ? stats.spd : '—') + '</span></div>' +
             '</div>';
         list.appendChild(card);
     });
+    updateSelection();
+}
+
+function onMessageFromGame(data) {
+    if (data.type === 'jobStats') {
+        jobStats = data.stats;
+        renderJobs();
+    } else if (data.type === 'refresh' && data.job != null) {
+        currentJob = data.job;
+        updateSelection();
+    }
+}
+
+(function () {
+    renderJobs();
+    sendToGame({ type: 'requestJobStats' });
 }());

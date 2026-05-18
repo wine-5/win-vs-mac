@@ -1,5 +1,6 @@
 #include <windows.h>
 #include <commdlg.h>
+#include <sstream>
 #include "FileSelectWindow.h"
 #include "core/interface/ILogger.h"
 #include "thirdparty/nlohmann/json.hpp"
@@ -58,11 +59,16 @@ namespace platform::window
 		try
 		{
 			auto j = nlohmann::json::parse(json);
-			if (j.value("type", "") == "slotSelected")
+			const std::string type = j.value("type", "");
+			if (type == "slotSelected")
 			{
 				int slot = j.value("slot", 0);
 				if (slot >= 0 && slot < SLOT_COUNT)
 					openFileDialog(slot);
+			}
+			else if (type == "requestBonusInfo")
+			{
+				sendBonusInfo();
 			}
 		}
 		catch (...) {}
@@ -71,12 +77,12 @@ namespace platform::window
 	void FileSelectWindow::openFileDialog(int slotIndex)
 	{
 		OPENFILENAMEA ofn{};
-		char szFile[260]{};
+		char szFile[MAX_PATH]{};
 
 		ofn.lStructSize = sizeof(ofn);
 		ofn.hwndOwner = getHwnd();
 		ofn.lpstrFile = szFile;
-		ofn.nMaxFile = sizeof(szFile);
+		ofn.nMaxFile = MAX_PATH;
 		ofn.lpstrFilter = "All Files\0*.*\0";
 		ofn.nFilterIndex = 1;
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
@@ -145,6 +151,57 @@ namespace platform::window
 				}
 				resp["slots"].push_back(s);
 			}
+			m_webView.postMessage(resp.dump());
+		}
+		catch (...) {}
+	}
+
+	void FileSelectWindow::sendBonusInfo() noexcept
+	{
+		// ExtensionBonusCalculator の定数から説明文を生成（C++ が正とする）
+		struct Entry { const char* key; game::data::FileExtensionType type; };
+		constexpr Entry entries[] = {
+			{ "Executable", game::data::FileExtensionType::Executable },
+			{ "Document",   game::data::FileExtensionType::Document   },
+			{ "Image",      game::data::FileExtensionType::Image      },
+			{ "Audio",      game::data::FileExtensionType::Audio      },
+			{ "Archive",    game::data::FileExtensionType::Archive    },
+			{ "Unknown",    game::data::FileExtensionType::Unknown    },
+		};
+
+		auto fmt = [](float v) -> std::string {
+			if (v == static_cast<int>(v))
+				return std::to_string(static_cast<int>(v));
+			std::ostringstream oss;
+			oss << v;
+			return oss.str();
+		};
+
+		auto describe = [&](game::data::FileExtensionType t) -> std::string {
+			auto b = game::utility::ExtensionBonusCalculator::calculate(t);
+			std::string result;
+			auto append = [&](const char* label, float val) {
+				if (val == 0.0f) return;
+				if (!result.empty()) result += ' ';
+				result += label;
+				result += '+';
+				result += fmt(val);
+			};
+			append("HP",    b.hp);
+			append("ATK",   b.atk);
+			append("DEF",   b.def);
+			append("SPD",   b.spd);
+			append("Range", b.attackRange);
+			return result;
+		};
+
+		try
+		{
+			nlohmann::json resp;
+			resp["type"]  = "bonusInfo";
+			resp["descs"] = nlohmann::json::object();
+			for (const auto& e : entries)
+				resp["descs"][e.key] = describe(e.type);
 			m_webView.postMessage(resp.dump());
 		}
 		catch (...) {}

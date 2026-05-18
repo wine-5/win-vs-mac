@@ -4,6 +4,7 @@
 #include <wrl.h>
 #include <string>
 #include <functional>
+#include <vector>
 
 namespace platform::webview
 {
@@ -75,7 +76,10 @@ namespace platform::webview
         Microsoft::WRL::ComPtr<ICoreWebView2> m_webview{};
         MessageCallback m_onMessage{};
         bool m_ready{false};
+        std::vector<std::wstring> m_pendingMessages{};
         EventRegistrationToken m_webMessageToken{};
         EventRegistrationToken m_navToken{};
+
+        void flushPendingMessages() noexcept;
     };
 }

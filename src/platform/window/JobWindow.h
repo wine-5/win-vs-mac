@@ -1,9 +1,11 @@
 #pragma once
 
 #include <windows.h>
+#include <optional>
 #include <string>
 #include "WindowBase.h"
 #include "platform/webview/WebView2Host.h"
+#include "infrastructure/repository/JobRepository.h"
 #include <functional>
 
 namespace core::constant
@@ -53,7 +55,9 @@ namespace platform::window
         platform::webview::WebView2Host m_webView{};
         core::constant::JobType m_selectedJob{};
         std::function<void(core::constant::JobType)> m_onJobSelect{};
+        std::optional<infrastructure::JobRepository> m_jobRepository{};
 
         void handleMessage(const std::string& json) noexcept;
+        void sendJobStats() noexcept;
     };
 }

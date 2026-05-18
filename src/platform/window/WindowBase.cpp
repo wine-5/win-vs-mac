@@ -2,7 +2,7 @@
 #pragma comment(lib, "user32.lib")
 
 #ifndef GWL_USERDATA
-#define GWL_USERDATA (-21)
+constexpr int GWL_USERDATA{-21};
 #endif
 
 #include "WindowBase.h"

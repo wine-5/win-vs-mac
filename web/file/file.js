@@ -10,14 +10,8 @@ const EXT_ICON  = {
 };
 const EXT_LABEL = { Executable: 'EXE', Document: 'DOC', Image: 'IMG', Audio: 'AUD', Archive: 'ARC', Unknown: '???' };
 const EXT_CLASS = { Executable: 'exe', Document: 'doc', Image: 'img', Audio: 'aud', Archive: 'arc', Unknown: 'unk' };
-const EXT_DESC  = {
-    Executable: 'ATK +10',
-    Document:   'SPD +1.5',
-    Image:      'DEF +8',
-    Audio:      'HP +20',
-    Archive:    'ATK+3 HP+5 DEF+3',
-    Unknown:    '(射程 +20)',
-};
+// ボーナス説明は C++ から bonusInfo メッセージで受け取る（ExtensionBonusCalculator が正）
+let extBonusDescs = {};
 
 const slots = [
     { isEmpty: true, fileName: null, extType: null },
@@ -94,7 +88,7 @@ function renderSlots() {
         const badge = isEmpty ? '<span></span>' :
             '<span class="ext-badge ' + (EXT_CLASS[et] || 'unk') + '">' + (EXT_LABEL[et] || '???') + '</span>';
 
-        const bonusText = (!isEmpty && EXT_DESC[et]) ? EXT_DESC[et] : null;
+        const bonusText = (!isEmpty && extBonusDescs[et]) ? extBonusDescs[et] : null;
         const bonus = bonusText
             ? '<span class="bonus-text has-bonus">' + bonusText + '</span>'
             : '<span class="bonus-text">—</span>';
@@ -115,8 +109,19 @@ function renderSlots() {
     updateBonusHighlights();
 }
 
+function renderBonusPanel() {
+    document.querySelectorAll('.bonus-entry[data-ext]').forEach(function (el) {
+        const desc = extBonusDescs[el.dataset.ext];
+        const valEl = el.querySelector('.bonus-entry-val');
+        if (valEl && desc) valEl.textContent = desc;
+    });
+}
+
 function onMessageFromGame(data) {
-    if (data.type === 'refresh' && Array.isArray(data.slots)) {
+    if (data.type === 'bonusInfo' && data.descs) {
+        extBonusDescs = data.descs;
+        renderBonusPanel();
+    } else if (data.type === 'refresh' && Array.isArray(data.slots)) {
         data.slots.forEach(function (info) {
             if (info.slot >= 0 && info.slot < 3) slots[info.slot] = info;
         });
@@ -125,3 +130,4 @@ function onMessageFromGame(data) {
 }
 
 renderSlots();
+sendToGame({ type: 'requestBonusInfo' });

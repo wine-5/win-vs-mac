@@ -2,12 +2,13 @@
 #include "JobWindow.h"
 #include "core/constant/JobType.h"
 #include "thirdparty/nlohmann/json.hpp"
+#include <sstream>
 
 namespace platform::window
 {
 	JobWindow::JobWindow(int x, int y, int width, int height) noexcept
 		: WindowBase(L"JobWindowClass", L"Job Selection", x, y, width, height),
-		m_selectedJob(core::constant::JobType::Warrior)
+		m_selectedJob{core::constant::JobType::Warrior}
 	{
 	}
 
@@ -23,6 +24,7 @@ namespace platform::window
 
 	void JobWindow::onCreateControls(HWND hwnd)
 	{
+		try { m_jobRepository.emplace(); } catch (...) {}
 		setIcon(hwnd, ICON_PATH);
 		m_webView.setOnMessage([this](const std::string& json) noexcept {
 			handleMessage(json);
@@ -69,6 +71,34 @@ namespace platform::window
 				if (m_onJobSelect)
 					m_onJobSelect(m_selectedJob);
 			}
+			else if (type == "requestJobStats")
+			{
+				sendJobStats();
+			}
+		}
+		catch (...) {}
+	}
+
+	void JobWindow::sendJobStats() noexcept
+	{
+		if (!m_jobRepository) return;
+		try
+		{
+			nlohmann::json resp;
+			resp["type"]  = "jobStats";
+			resp["stats"] = nlohmann::json::array();
+			for (int i{0}; i < core::constant::JOB_COUNT; ++i)
+			{
+				auto info = m_jobRepository->getJobInfo(static_cast<core::constant::JobType>(i));
+				nlohmann::json s;
+				s["id"]  = i;
+				s["hp"]  = info.m_hp;
+				s["atk"] = info.m_atk;
+				s["def"] = info.m_def;
+				s["spd"] = info.m_spd;
+				resp["stats"].push_back(s);
+			}
+			m_webView.postMessage(resp.dump());
 		}
 		catch (...) {}
 	}

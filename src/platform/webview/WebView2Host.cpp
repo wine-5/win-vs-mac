@@ -87,13 +87,14 @@ namespace platform::webview
                                         }).Get(),
                                     &m_webMessageToken);
 
-                                // ページ読み込み完了後に m_ready = true をセット
+                                // ページ読み込み完了後に m_ready = true をセットし pending メッセージをフラッシュ
                                 webview->add_NavigationCompleted(
                                     Callback<ICoreWebView2NavigationCompletedEventHandler>(
                                         [this](ICoreWebView2*,
                                             ICoreWebView2NavigationCompletedEventArgs*) -> HRESULT
                                         {
                                             m_ready = true;
+                                            flushPendingMessages();
                                             return S_OK;
                                         }).Get(),
                                     &m_navToken);
@@ -112,18 +113,27 @@ namespace platform::webview
 
     void WebView2Host::postMessage(const std::wstring& json) noexcept
     {
-        if (!m_ready || !m_webview) return;
+        if (!m_webview) return;
+        if (!m_ready) { m_pendingMessages.push_back(json); return; }
         m_webview->PostWebMessageAsString(json.c_str());
     }
 
     void WebView2Host::postMessage(const std::string& utf8Json) noexcept
     {
-        if (!m_ready || !m_webview) return;
+        if (!m_webview) return;
         int len = MultiByteToWideChar(CP_UTF8, 0, utf8Json.c_str(), -1, nullptr, 0);
         if (len <= 0) return;
         std::wstring wide(len - 1, L'\0');
         MultiByteToWideChar(CP_UTF8, 0, utf8Json.c_str(), -1, wide.data(), len);
+        if (!m_ready) { m_pendingMessages.push_back(std::move(wide)); return; }
         m_webview->PostWebMessageAsString(wide.c_str());
+    }
+
+    void WebView2Host::flushPendingMessages() noexcept
+    {
+        for (const auto& msg : m_pendingMessages)
+            m_webview->PostWebMessageAsString(msg.c_str());
+        m_pendingMessages.clear();
     }
 
     void WebView2Host::setOnMessage(MessageCallback callback) noexcept

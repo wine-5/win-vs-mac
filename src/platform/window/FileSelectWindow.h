@@ -8,6 +8,7 @@
 #include "platform/webview/WebView2Host.h"
 #include "game/data/FileExtensionType.h"
 #include "game/utility/FileExtensionTypeResolver.h"
+#include "game/utility/ExtensionBonusCalculator.h"
 #include <functional>
 
 namespace platform::window
@@ -64,5 +65,6 @@ namespace platform::window
         void handleMessage(const std::string& json) noexcept;
         void openFileDialog(int slotIndex);
         void sendSlotsRefresh() noexcept;
+        void sendBonusInfo() noexcept;
     };
 }
