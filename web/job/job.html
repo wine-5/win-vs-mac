@@ -4,62 +4,12 @@
     <meta charset="UTF-8">
     <base href="https://game.web/">
     <link rel="stylesheet" href="common/common.css">
-    <style>
-        body { display: flex; flex-direction: column; height: 100%; padding: 12px; gap: 6px; }
-
-        .section-label { flex-shrink: 0; }
-
-        .job-btn {
-            flex: 1;
-            min-height: 0;
-            width: 100%;
-            padding: 8px 12px;
-            text-align: left;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .job-name { font-weight: 600; font-size: 13px; }
-
-        .job-skill { font-size: 11px; color: var(--text-muted); }
-
-        .job-btn.active .job-skill { color: rgba(255, 255, 255, 0.65); }
-    </style>
+    <link rel="stylesheet" href="job/job.css">
 </head>
 <body>
     <div class="section-label">職業を選択</div>
-
-    <button class="job-btn" id="btn-warrior" onclick="selectJob('Warrior')">
-        <span class="job-name">剣士</span>
-        <span class="job-skill">Skill: 全方位斬り</span>
-    </button>
-
-    <button class="job-btn" id="btn-mage" onclick="selectJob('Mage')">
-        <span class="job-name">魔法使い</span>
-        <span class="job-skill">Skill: 巨大魔法弾</span>
-    </button>
-
-    <button class="job-btn" id="btn-ninja" onclick="selectJob('Ninja')">
-        <span class="job-name">忍者</span>
-        <span class="job-skill">Skill: 分身一斉攻撃</span>
-    </button>
-
+    <div id="job-list" class="job-list"></div>
     <script src="common/messaging.js"></script>
-    <script>
-        const JOB_IDS = { Warrior: 'warrior', Mage: 'mage', Ninja: 'ninja' };
-        let currentJob = null;
-
-        function selectJob(job) {
-            currentJob = job;
-            Object.keys(JOB_IDS).forEach(function (j) {
-                document.getElementById('btn-' + JOB_IDS[j]).classList.remove('active');
-            });
-            document.getElementById('btn-' + JOB_IDS[job]).classList.add('active');
-            sendToGame({ type: 'jobSelected', job: job });
-        }
-
-        function onMessageFromGame(data) {}
-    </script>
+    <script src="job/job.js"></script>
 </body>
 </html>
