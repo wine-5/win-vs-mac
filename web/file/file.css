@@ -63,7 +63,7 @@ body {
 }
 
 .file-list {
-    flex: 1;
+    flex: 2;
     min-height: 0;
     overflow-y: auto;
     display: flex;
@@ -133,3 +133,102 @@ body {
 }
 
 .status-text { font-size: 11px; color: var(--text-muted); }
+
+/* ── 拡張子ボーナス一覧パネル ── */
+.bonus-panel {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 2px solid var(--border);
+    background: var(--bg);
+}
+
+.bonus-panel-header {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 7px 12px 4px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.bonus-panel-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bonus-entry {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+
+.bonus-entry-name {
+    flex: 1;
+    color: var(--text-muted);
+}
+
+.bonus-entry-val {
+    font-weight: 700;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.bonus-entry-val.atk   { color: #e8a030; }
+.bonus-entry-val.def   { color: #5090d0; }
+.bonus-entry-val.hp    { color: #4ec94e; }
+.bonus-entry-val.spd   { color: #c050e0; }
+.bonus-entry-val.multi { color: #c0c040; }
+.bonus-entry-val.range { color: var(--text-muted); }
+
+/* ── アニメーション ── */
+
+/* スロット行クリック時のパルス */
+@keyframes rowPulse {
+    0%   { background: rgba(0, 120, 212, 0.55); }
+    100% { background: rgba(0, 120, 212, 0.18); }
+}
+
+.file-row.selected.pulse {
+    animation: rowPulse 0.4s ease-out forwards;
+}
+
+/* 新規ファイル装備時のスライドイン */
+@keyframes rowSlideIn {
+    from { opacity: 0; transform: translateX(-12px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.file-row.anim-in {
+    animation: rowSlideIn 0.28s ease-out;
+}
+
+/* ボーナス一覧：装備中の拡張子行をハイライト */
+@keyframes bonusActivate {
+    0%   { background: rgba(255, 255, 255, 0.14); }
+    100% { background: rgba(255, 255, 255, 0.06); }
+}
+
+.bonus-entry {
+    border-radius: 4px;
+    padding: 1px 4px;
+    margin: 0 -4px;
+    transition: background 0.3s;
+}
+
+.bonus-entry.active {
+    background: rgba(255, 255, 255, 0.06);
+    animation: bonusActivate 0.45s ease-out;
+}
+
+.bonus-entry.active .bonus-entry-val {
+    text-shadow: 0 0 8px currentColor;
+}

@@ -5,38 +5,27 @@ body {
     overflow: hidden;
 }
 
-.tab-bar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    padding: 0 8px;
-    flex-shrink: 0;
-}
-
-.tab {
-    padding: 6px 14px;
-    font-size: 11px;
-    cursor: pointer;
-    color: var(--text-muted);
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    transition: color 0.1s;
-    user-select: none;
-}
-
-.tab:hover { color: var(--text); }
-.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-
 .param-content {
-    flex: 1;
     padding: 12px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    overflow-y: auto;
 }
 
-.param-content.hidden { display: none; }
+.param-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 12px 0;
+}
+
+.detail-content {
+    flex: 1;
+    padding: 4px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+}
 
 .metric-row {
     display: flex;
@@ -144,14 +133,12 @@ body {
 
 .detail-content {
     flex: 1;
-    padding: 12px;
-    display: none;
+    padding: 4px 12px 12px;
+    display: flex;
     flex-direction: column;
     gap: 0;
     overflow-y: auto;
 }
-
-.detail-content.visible { display: flex; }
 
 .meta-row {
     display: flex;

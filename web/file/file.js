@@ -25,15 +25,46 @@ const slots = [
     { isEmpty: true, fileName: null, extType: null },
 ];
 
+// 前回のスロット状態（空→埋まり の検出用）
+const prevEmpty = [true, true, true];
+
 let selectedSlot = null;
 
 function selectSlot(i) {
     selectedSlot = i;
     document.querySelectorAll('.file-row').forEach(function (row) {
-        row.classList.toggle('selected', parseInt(row.dataset.slot, 10) === selectedSlot);
+        const isSelected = parseInt(row.dataset.slot, 10) === selectedSlot;
+        row.classList.toggle('selected', isSelected);
+        if (isSelected) {
+            row.classList.remove('pulse');
+            void row.offsetWidth;
+            row.classList.add('pulse');
+            row.addEventListener('animationend', function () {
+                row.classList.remove('pulse');
+            }, { once: true });
+        }
     });
     updateStatus();
     sendToGame({ type: 'slotSelected', slot: i });
+}
+
+function updateBonusHighlights() {
+    const activeExts = new Set();
+    slots.forEach(function (s) {
+        if (!s.isEmpty && s.extType) activeExts.add(s.extType);
+    });
+    document.querySelectorAll('.bonus-entry[data-ext]').forEach(function (el) {
+        const wasActive = el.classList.contains('active');
+        const isActive  = activeExts.has(el.dataset.ext);
+        if (isActive && !wasActive) {
+            el.classList.add('active');
+            el.style.animation = 'none';
+            void el.offsetWidth;
+            el.style.animation = '';
+        } else if (!isActive) {
+            el.classList.remove('active');
+        }
+    });
 }
 
 function updateStatus() {
@@ -52,10 +83,11 @@ function renderSlots() {
     const list = document.getElementById('file-list');
     list.innerHTML = '';
     slots.forEach(function (s, i) {
-        const et      = s.extType || 'Unknown';
-        const isEmpty = s.isEmpty;
-        const row     = document.createElement('div');
-        row.className    = 'file-row' + (i === selectedSlot ? ' selected' : '');
+        const et         = s.extType || 'Unknown';
+        const isEmpty    = s.isEmpty;
+        const justLoaded = prevEmpty[i] && !isEmpty;
+        const row        = document.createElement('div');
+        row.className    = 'file-row' + (i === selectedSlot ? ' selected' : '') + (justLoaded ? ' anim-in' : '');
         row.dataset.slot = i;
         row.onclick      = function () { selectSlot(i); };
 
@@ -76,8 +108,11 @@ function renderSlots() {
             '</div>' +
             badge + bonus;
         list.appendChild(row);
+
+        prevEmpty[i] = isEmpty;
     });
     updateStatus();
+    updateBonusHighlights();
 }
 
 function onMessageFromGame(data) {
