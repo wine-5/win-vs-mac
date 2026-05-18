@@ -4,68 +4,27 @@
     <meta charset="UTF-8">
     <base href="https://game.web/">
     <link rel="stylesheet" href="common/common.css">
-    <style>
-        body { display: flex; flex-direction: column; height: 100%; padding: 12px; gap: 6px; }
-
-        .section-label { flex-shrink: 0; }
-
-        .slot-btn {
-            flex: 1;
-            min-height: 0;
-            width: 100%;
-            padding: 8px 12px;
-            text-align: left;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            overflow: hidden;
-        }
-
-        .slot-label { font-weight: 600; font-size: 13px; }
-
-        .slot-path {
-            font-size: 11px;
-            color: var(--text-muted);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .slot-btn.active .slot-path { color: rgba(255, 255, 255, 0.65); }
-    </style>
+    <link rel="stylesheet" href="file/file.css">
 </head>
 <body>
-    <div class="section-label">セーブファイル</div>
-
-    <button class="slot-btn" id="slot-0" onclick="openDialog(0)">
-        <span class="slot-label">Slot 1</span>
-        <span class="slot-path" id="path-0">（未選択）</span>
-    </button>
-
-    <button class="slot-btn" id="slot-1" onclick="openDialog(1)">
-        <span class="slot-label">Slot 2</span>
-        <span class="slot-path" id="path-1">（未選択）</span>
-    </button>
-
-    <button class="slot-btn" id="slot-2" onclick="openDialog(2)">
-        <span class="slot-label">Slot 3</span>
-        <span class="slot-path" id="path-2">（未選択）</span>
-    </button>
-
+    <div class="exp-toolbar">
+        <button class="nav-btn" disabled>&#9664;</button>
+        <button class="nav-btn" disabled>&#9654;</button>
+        <div class="address-bar">
+            <span>&#9881;&#65039;</span>
+            <span>装備ファイルを選択</span>
+        </div>
+    </div>
+    <div class="file-list-header">
+        <span>ファイル名</span>
+        <span>種別</span>
+        <span>ボーナス</span>
+    </div>
+    <div id="file-list" class="file-list"></div>
+    <div class="exp-statusbar">
+        <span id="status-text" class="status-text">ファイルをクリックして選択</span>
+    </div>
     <script src="common/messaging.js"></script>
-    <script>
-        function openDialog(slot) {
-            sendToGame({ type: 'openFileDialog', slot: slot });
-        }
-
-        function onMessageFromGame(data) {
-            if (data.type === 'fileSelected') {
-                const parts = data.path.replace(/\\/g, '/').split('/');
-                const filename = parts[parts.length - 1] || '（未選択）';
-                document.getElementById('path-' + data.slot).textContent = filename;
-                document.getElementById('slot-' + data.slot).classList.add('active');
-            }
-        }
-    </script>
+    <script src="file/file.js"></script>
 </body>
 </html>
