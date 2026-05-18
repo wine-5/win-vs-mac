@@ -80,6 +80,11 @@ namespace platform::webview
         EventRegistrationToken m_webMessageToken{};
         EventRegistrationToken m_navToken{};
 
+        HRESULT onControllerCreated(HRESULT result, ICoreWebView2Controller* controller,
+            HWND parentHwnd, const std::wstring& htmlPath) noexcept;
+        void setupVirtualHostMappings(ICoreWebView2_3* webview3) noexcept;
+        void registerMessageHandler(ICoreWebView2* webview) noexcept;
+        void registerNavigationHandler(ICoreWebView2* webview) noexcept;
         void flushPendingMessages() noexcept;
     };
 }
