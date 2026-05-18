@@ -55,7 +55,7 @@ namespace platform::window::select
     void ParameterWindow::onCreateControls(HWND hwnd)
     {
         setIcon(hwnd, ICON_PATH);
-        m_webView.initialize(hwnd, L"https://game.web/param/param.html");
+        m_webView.initialize(hwnd, L"https://game.web/select/param/param.html");
     }
 
     LRESULT ParameterWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept

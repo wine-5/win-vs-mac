@@ -29,7 +29,7 @@ namespace platform::window::select
 		m_webView.setOnMessage([this](const std::string& json) noexcept {
 			handleMessage(json);
 		});
-		m_webView.initialize(hwnd, L"https://game.web/file/file.html");
+		m_webView.initialize(hwnd, L"https://game.web/select/file/file.html");
 	}
 
 	LRESULT FileSelectWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept

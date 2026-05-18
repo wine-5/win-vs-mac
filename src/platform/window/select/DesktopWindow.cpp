@@ -32,7 +32,7 @@ namespace platform::window::select
 
         if (!m_hwnd) return false;
 
-        m_webView.initialize(m_hwnd, L"https://game.web/desktop/desktop.html");
+        m_webView.initialize(m_hwnd, L"https://game.web/select/desktop/desktop.html");
         return true;
     }
 

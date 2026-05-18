@@ -29,7 +29,7 @@ namespace platform::window::select
 		m_webView.setOnMessage([this](const std::string& json) noexcept {
 			handleMessage(json);
 		});
-		m_webView.initialize(hwnd, L"https://game.web/job/job.html");
+		m_webView.initialize(hwnd, L"https://game.web/select/job/job.html");
 	}
 
 	LRESULT JobWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
