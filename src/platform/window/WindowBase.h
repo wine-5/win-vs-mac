@@ -123,6 +123,8 @@ namespace platform::window
         int m_y{};
         int m_width{};
         int m_height{};
+        /// @brief CreateWindowExW に渡すウィンドウスタイル（サブクラスで上書き可能）
+        DWORD m_windowStyle{ WS_OVERLAPPEDWINDOW };
         HWND m_hwnd{};
         HICON m_hIcon{};
 

@@ -127,4 +127,18 @@ namespace game::scene
 			return nullptr;
 		}
 	}
+
+	void SceneFactory::resetScene(SceneType sceneType) noexcept
+	{
+		// 指定シーンを破棄してウィンドウなどのリソースを解放する
+		switch (sceneType)
+		{
+		case SceneType::Title:   m_titleScene.reset();   break;
+		case SceneType::Select:  m_selectScene.reset();  break;
+		case SceneType::Loading: m_loadingScene.reset(); break;
+		case SceneType::InGame:  m_inGameScene.reset();  break;
+		case SceneType::Result:  m_resultScene.reset();  break;
+		default: break;
+		}
+	}
 }

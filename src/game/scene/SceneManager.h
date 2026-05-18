@@ -2,6 +2,7 @@
 #include "IScene.h"
 #include "SceneType.h"
 #include <memory>
+#include <optional>
 
 namespace game::scene
 {
@@ -45,5 +46,7 @@ namespace game::scene
 		std::unique_ptr<SceneFactory> m_sceneFactory;
 		IScene* m_currentScene;
 		SceneType m_currentSceneType{};
+		/// @brief 翌フレームに破棄するシーンの種類（use-after-free 防止のための遅延リセット）
+		std::optional<SceneType> m_pendingReset{};
 	};
 }

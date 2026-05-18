@@ -31,6 +31,13 @@ namespace game::scene
          */
         IScene* createScene(SceneType sceneType);
 
+        /**
+         * @brief 指定されたタイプのシーンを破棄する
+         * @details シーンが保持するウィンドウなどのリソースも合わせて解放する
+         * @param sceneType 破棄するシーンの種類
+         */
+        void resetScene(SceneType sceneType) noexcept;
+
     private:
         // InGame用の依存関係と実体
         infrastructure::Camera       m_inGameCamera;

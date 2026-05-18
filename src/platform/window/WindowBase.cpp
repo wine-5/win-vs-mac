@@ -44,7 +44,7 @@ namespace platform::window
             0,
             m_className.c_str(),
             m_title.c_str(),
-            WS_OVERLAPPEDWINDOW,
+            m_windowStyle,
             m_x, m_y, m_width, m_height,
             ownerHwnd,
             nullptr,

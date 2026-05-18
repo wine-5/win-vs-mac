@@ -252,6 +252,13 @@ namespace platform::window::select
 
             if (type == "startGame")
             {
+                // ゲーム開始前に全サブウィンドウを非表示にしてからコールバックを呼ぶ
+                if (m_desktopWindow && m_desktopWindow->getHwnd())
+                    ShowWindow(m_desktopWindow->getHwnd(), SW_HIDE);
+                if (m_jobWindow)        m_jobWindow->hide();
+                if (m_fileSelectWindow) m_fileSelectWindow->hide();
+                if (m_parameterWindow)  m_parameterWindow->hide();
+                if (m_difficultyWindow) m_difficultyWindow->hide();
                 if (m_onGameStart) m_onGameStart();
             }
             else if (type == "toggleWindow")
