@@ -1,4 +1,4 @@
-# 画像一覧
+# ほしい画像一覧
 
 ## ジョブアイコン
 | ファイル名 | 職業 |
@@ -26,3 +26,9 @@
 | dot_normal.png | NORMAL インジケーター |
 | dot_hard.png | HARD インジケーター |
 | warning.png | 警告マーク |
+
+## パラメータアイコン
+- HP
+- atk
+- def
+- spd
