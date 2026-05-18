@@ -827,6 +827,103 @@
             #scene-result-lose.active {
                 background-color: #0a0a0a;
             }
+
+            /* === 評価ランク === */
+            .result-rank-section {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 20px;
+                padding: 8px 0;
+            }
+            .result-rank-label {
+                font-size: 12px;
+                color: #aaaaaa;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+            }
+            .result-rank-value {
+                font-size: 72px;
+                font-weight: 700;
+                line-height: 1;
+                font-family: 'Share Tech Mono', monospace;
+                animation: rankAppear 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.15s both;
+            }
+            @keyframes rankAppear {
+                from { transform: scale(0); opacity: 0; }
+                to   { transform: scale(1); opacity: 1; }
+            }
+            .rank-s { color: #ffd700; text-shadow: 0 0 24px rgba(255, 215, 0, 0.7); }
+            .rank-a { color: #00ccff; text-shadow: 0 0 24px rgba(0, 204, 255, 0.7); }
+            .rank-b { color: #00ff88; text-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
+            .rank-c { color: #ffaa00; text-shadow: 0 0 20px rgba(255, 170, 0, 0.5); }
+            .rank-d { color: #ff4444; text-shadow: 0 0 20px rgba(255, 68, 68, 0.5); }
+
+            /* === BSOD オーバーレイ === */
+            .bsod-overlay {
+                position: fixed;
+                inset: 0;
+                background: #1e4d78;
+                z-index: 200;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                color: #ffffff;
+                font-family: 'Segoe UI', sans-serif;
+            }
+            .bsod-overlay.bsod-fade-out {
+                animation: bsodFadeOut 0.6s ease forwards;
+            }
+            @keyframes bsodFadeOut {
+                to { opacity: 0; }
+            }
+            .bsod-content {
+                max-width: 640px;
+                padding: 0 40px;
+            }
+            .bsod-face {
+                font-size: 84px;
+                font-weight: 300;
+                line-height: 1;
+                margin-bottom: 28px;
+            }
+            .bsod-title {
+                font-size: 22px;
+                font-weight: 400;
+                line-height: 1.6;
+                margin-bottom: 32px;
+            }
+            .bsod-progress-area {
+                margin-bottom: 32px;
+            }
+            .bsod-bar-track {
+                width: 220px;
+                height: 4px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 2px;
+                margin-bottom: 10px;
+                overflow: hidden;
+            }
+            .bsod-bar-fill {
+                height: 100%;
+                background: #ffffff;
+                border-radius: 2px;
+                width: 0%;
+                transition: width 0.08s linear;
+            }
+            .bsod-progress-text {
+                font-size: 14px;
+                color: rgba(255, 255, 255, 0.85);
+            }
+            .bsod-stop-code {
+                font-size: 13px;
+                color: rgba(255, 255, 255, 0.7);
+                line-height: 1.9;
+            }
+            .bsod-stop-code span {
+                color: #ffffff;
+                font-weight: 600;
+            }
         </style>
 
         <div class="result-window-container good-end">
@@ -844,7 +941,12 @@
                 <div class="result-screen good-end-result active">
                     <div class="result-message-section">
                         <div class="result-message-icon checkmark">✅</div>
-                        <div class="result-message-text">MacBook.exe を正常に終了しました。</div>
+                        <div class="result-message-text">MacBook を無事に停止させました。</div>
+                    </div>
+
+                    <div class="result-rank-section">
+                        <div class="result-rank-label">評価</div>
+                        <div class="result-rank-value rank-a">A</div>
                     </div>
 
                     <div class="result-divider"></div>
@@ -884,6 +986,27 @@
 
     <!-- ===== RESULT LOSE ===== -->
     <div id="scene-result-lose" class="scene">
+
+        <div class="bsod-overlay" id="bsod-overlay">
+            <div class="bsod-content">
+                <div class="bsod-face">:(</div>
+                <div class="bsod-title">
+                    ご使用の PC で問題が発生したため、再起動する必要があります。<br>
+                    エラーの収集が完了したら、再起動します。
+                </div>
+                <div class="bsod-progress-area">
+                    <div class="bsod-bar-track">
+                        <div class="bsod-bar-fill" id="bsod-bar"></div>
+                    </div>
+                    <div class="bsod-progress-text"><span id="bsod-pct">0</span>% 完了</div>
+                </div>
+                <div class="bsod-stop-code">
+                    詳細については、以下のエラーを検索してください:<br>
+                    停止コード: <span>PLAYER_DEFEATED</span>
+                </div>
+            </div>
+        </div>
+
         <div class="result-window-container bad-end">
             <div class="result-titlebar">
                 <div class="result-titlebar-icon">🪟</div>
@@ -900,8 +1023,8 @@
                     <div class="result-message-section">
                         <div class="result-message-icon error">⛔</div>
                         <div>
-                            <div class="result-message-text">Win vs Mac.exe は動作を停止しました。</div>
-                            <div class="result-sub-message">問題が発生したため、プロセスを終了します。</div>
+                            <div class="result-message-text">Windows が致命的なエラーで停止しました。</div>
+                            <div class="result-sub-message">敵の攻撃により、プロセスを強制終了します。</div>
                         </div>
                     </div>
 
@@ -914,7 +1037,7 @@
                         </div>
                         <div class="result-stat-row">
                             <span class="result-stat-label">発生場所</span>
-                            <span class="result-stat-value">Safari.exe</span>
+                            <span class="result-stat-value">MacBook.exe</span>
                         </div>
                         <div class="result-stat-row">
                             <span class="result-stat-label">生存時間</span>
@@ -945,6 +1068,48 @@
     <script src="js/scene-loading.js"></script>
     <script src="js/scene-ingame.js"></script>
     <script src="js/utils.js"></script>
+
+    <script>
+        // ===== BSOD 演出 =====
+        function startBSOD() {
+            var overlay = document.getElementById('bsod-overlay');
+            var pct     = document.getElementById('bsod-pct');
+            var bar     = document.getElementById('bsod-bar');
+            if (!overlay) return;
+            overlay.classList.remove('bsod-fade-out');
+            overlay.style.display = 'flex';
+            pct.textContent = '0';
+            bar.style.width = '0%';
+
+            var progress = 0;
+            var interval = setInterval(function () {
+                progress += Math.random() * 2.5 + 0.4;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    setTimeout(function () {
+                        overlay.classList.add('bsod-fade-out');
+                        overlay.addEventListener('animationend', function () {
+                            overlay.style.display = 'none';
+                        }, { once: true });
+                    }, 700);
+                }
+                pct.textContent = Math.floor(progress);
+                bar.style.width = progress + '%';
+            }, 60);
+        }
+
+        // showScene をラップして result-lose 遷移時に BSOD を起動
+        (function () {
+            var orig = window.showScene;
+            window.showScene = function (name) {
+                orig(name);
+                if (name === 'result-lose') {
+                    setTimeout(startBSOD, 80);
+                }
+            };
+        }());
+    </script>
 </body>
 
 </html>
