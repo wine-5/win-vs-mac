@@ -195,6 +195,7 @@
     <ClCompile Include="src\platform\window\select\ParameterWindow.cpp" />
     <ClCompile Include="src\platform\window\WindowBase.cpp" />
     <ClCompile Include="src\platform\window\select\Win32SelectWindowManager.cpp" />
+    <ClCompile Include="src\platform\window\result\ResultWindow.cpp" />
     <ClCompile Include="src\ServiceLocatorInitializer.cpp" />
     <ClCompile Include="src\SingletonInitializer.cpp" />
   </ItemGroup>
@@ -244,6 +245,8 @@
     <ClInclude Include="src\core\input\KeyCode.h" />
     <ClInclude Include="src\core\interface\IScreen.h" />
     <ClInclude Include="src\core\interface\ISelectWindowManager.h" />
+    <ClInclude Include="src\core\interface\IResultWindowManager.h" />
+    <ClInclude Include="src\core\data\ResultData.h" />
     <ClInclude Include="src\core\interface\IUIRenderer.h" />
     <ClInclude Include="src\game\actor\Enemy.h" />
     <ClInclude Include="src\game\attack\BaseAttackHandler.h" />
@@ -340,6 +343,7 @@
     <ClInclude Include="src\platform\utility\StringConverter.h" />
     <ClInclude Include="src\platform\window\select\JobWindow.h" />
     <ClInclude Include="src\platform\window\WindowBase.h" />
+    <ClInclude Include="src\platform\window\result\ResultWindow.h" />
     <ClInclude Include="src\ServiceLocatorInitializer.h" />
     <ClInclude Include="src\SingletonInitializer.h" />
   </ItemGroup>

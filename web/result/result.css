@@ -1,0 +1,239 @@
+/* ===== 基本スタイル ===== */
+body {
+    margin: 0;
+    padding: 0;
+    background: #0a0a12;
+    color: #e0e0e0;
+    font-family: 'Consolas', 'Courier New', monospace;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#result-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== 共通スタイル ===== */
+.result-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 24px;
+    margin: 16px 0;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+.stat-label {
+    color: #8890a0;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+}
+
+.stat-value {
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.result-files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 12px 0;
+}
+
+.file-tag {
+    background: rgba(80, 120, 200, 0.2);
+    border: 1px solid rgba(80, 120, 200, 0.5);
+    border-radius: 3px;
+    padding: 5px 12px;
+    font-size: 13px;
+    color: #88aadd;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.result-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    justify-content: center;
+}
+
+.result-buttons button {
+    padding: 14px 40px;
+    border: none;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+}
+
+.result-buttons button:hover  { opacity: 0.85; transform: translateY(-1px); }
+.result-buttons button:active { transform: translateY(0); }
+
+/* ===== 勝利画面 ===== */
+.result-win {
+    background: linear-gradient(160deg, #0d1a2a 0%, #0a1220 100%);
+    border: 1px solid rgba(0, 200, 120, 0.3);
+    border-radius: 12px;
+    padding: 60px 80px;
+    width: min(860px, 72vw);
+    box-shadow: 0 0 60px rgba(0, 200, 120, 0.1);
+}
+
+.result-win .result-icon {
+    font-size: 72px;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.result-win .result-title {
+    text-align: center;
+    font-size: 42px;
+    font-weight: bold;
+    color: #00cc88;
+    letter-spacing: 0.06em;
+    margin: 0 0 6px;
+    text-shadow: 0 0 24px rgba(0, 200, 120, 0.6);
+}
+
+.result-win .result-subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: #445566;
+    margin: 0 0 28px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.result-win .stat-value { color: #00ee99; }
+
+.result-win .btn-retry {
+    background: #00995c;
+    color: #fff;
+}
+
+.result-win .btn-title {
+    background: rgba(255,255,255,0.08);
+    color: #aab8cc;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+}
+
+/* ===== 敗北画面（BSOD） ===== */
+.result-lose {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bsod-overlay {
+    background: #0078d7;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 60px 80px;
+    box-sizing: border-box;
+    animation: bsodFadeIn 0.3s ease-in;
+}
+
+@keyframes bsodFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.bsod-emoji {
+    font-size: 96px;
+    color: #fff;
+    margin-bottom: 32px;
+    font-style: normal;
+}
+
+.bsod-title {
+    font-size: 28px;
+    color: #fff;
+    font-weight: normal;
+    margin: 0 0 12px;
+    max-width: 640px;
+    line-height: 1.5;
+}
+
+.bsod-subtitle {
+    font-size: 18px;
+    color: rgba(255,255,255,0.8);
+    margin: 0 0 32px;
+    font-family: 'Courier New', monospace;
+}
+
+.bsod-progress-bar {
+    width: 480px;
+    height: 6px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+    margin-bottom: 40px;
+    overflow: hidden;
+}
+
+.bsod-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #fff;
+    border-radius: 2px;
+    animation: bsodProgress 2.5s ease-out forwards;
+    animation-delay: 0.4s;
+}
+
+@keyframes bsodProgress {
+    0%   { width: 0%; }
+    60%  { width: 70%; }
+    85%  { width: 88%; }
+    100% { width: 100%; }
+}
+
+.bsod-bottom {
+    border-top: 1px solid rgba(255,255,255,0.25);
+    padding-top: 24px;
+    width: 100%;
+}
+
+.bsod-bottom .stat-row {
+    background: rgba(255,255,255,0.1);
+}
+
+.bsod-bottom .stat-label { color: rgba(255,255,255,0.6); }
+.bsod-bottom .stat-value { color: #fff; }
+
+.bsod-bottom .btn-retry {
+    background: #fff;
+    color: #0078d7;
+}
+
+.bsod-bottom .btn-title {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+}
