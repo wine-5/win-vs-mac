@@ -12,7 +12,7 @@ namespace platform::window::result
         std::function<void()> onRetry,
         std::function<void()> onTitle) noexcept
         : WindowBase(L"ResultWindowClass", L"Result - Win vs Mac.exe",
-            0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+            0, 0, 0, 0)
         , m_screen{ screen }
         , m_onRetry{ std::move(onRetry) }
         , m_onTitle{ std::move(onTitle) }
@@ -27,18 +27,27 @@ namespace platform::window::result
         {
             HWND dxlibHwnd{ static_cast<HWND>(m_screen.getNativeWindowHandle()) };
 
-            // タイトルバー・ボーダーなしのポップアップウィンドウにする
-            m_windowStyle = WS_POPUP;
+            // 勝敗に応じてウィンドウタイトルを設定
+            m_title = data.m_isVictory
+                ? L"Mission Complete - Win vs Mac.exe"
+                : L"Win vs Mac.exe \u2014 \u30A8\u30E9\u30FC";
 
-            // DxLib ウィンドウのクライアント領域（ゲーム描画部分）の位置・サイズを取得
+            // リサイズ不可のダイアログ風ウィンドウスタイル
+            m_windowStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+
+            // DxLib ウィンドウの実ピクセルサイズを取得（Win32SelectWindowManager と同じ方法）
             RECT cr{};
             GetClientRect(dxlibHwnd, &cr);
-            POINT pt{ cr.left, cr.top };
-            ClientToScreen(dxlibHwnd, &pt);
-            m_x      = pt.x;
-            m_y      = pt.y;
-            m_width  = cr.right  - cr.left;
-            m_height = cr.bottom - cr.top;
+            int screenW{ cr.right  - cr.left };
+            int screenH{ cr.bottom - cr.top  };
+
+            POINT origin{ cr.left, cr.top };
+            ClientToScreen(dxlibHwnd, &origin);
+
+            m_width  = screenW;
+            m_height = screenH;
+            m_x = origin.x + (screenW - m_width)  / 2;
+            m_y = origin.y + (screenH - m_height) / 2;
 
             create(dxlibHwnd);
         }
@@ -101,15 +110,17 @@ namespace platform::window::result
             }
             else if (type == "retry")
             {
-                // シーン遷移前にウィンドウを非表示にする
+                // シーン遷移前にウィンドウを非表示にし、DxLib ウィンドウにフォーカスを戻す
                 hide();
+                SetForegroundWindow(static_cast<HWND>(m_screen.getNativeWindowHandle()));
                 if (m_onRetry)
                     m_onRetry();
             }
             else if (type == "title")
             {
-                // シーン遷移前にウィンドウを非表示にする
+                // シーン遷移前にウィンドウを非表示にし、DxLib ウィンドウにフォーカスを戻す
                 hide();
+                SetForegroundWindow(static_cast<HWND>(m_screen.getNativeWindowHandle()));
                 if (m_onTitle)
                     m_onTitle();
             }

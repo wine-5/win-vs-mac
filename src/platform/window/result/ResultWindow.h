@@ -46,8 +46,6 @@ namespace platform::window::result
         LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
 
     private:
-        static constexpr int WINDOW_WIDTH  = 700;
-        static constexpr int WINDOW_HEIGHT = 520;
 
         core::iface::IScreen& m_screen;
         platform::webview::WebView2Host m_webView{};
