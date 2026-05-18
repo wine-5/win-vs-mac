@@ -26,13 +26,14 @@ namespace platform::window::result
         if (!isCreated())
         {
             HWND dxlibHwnd{ static_cast<HWND>(m_screen.getNativeWindowHandle()) };
-            RECT clientRect{};
-            GetClientRect(dxlibHwnd, &clientRect);
-            POINT origin{ 0, 0 };
-            ClientToScreen(dxlibHwnd, &origin);
 
-            m_x = origin.x + (clientRect.right  - WINDOW_WIDTH)  / 2;
-            m_y = origin.y + (clientRect.bottom - WINDOW_HEIGHT) / 2;
+            // DxLib ウィンドウの外形サイズ・位置に合わせる
+            RECT wr{};
+            GetWindowRect(dxlibHwnd, &wr);
+            m_x      = wr.left;
+            m_y      = wr.top;
+            m_width  = wr.right  - wr.left;
+            m_height = wr.bottom - wr.top;
 
             create(dxlibHwnd);
         }

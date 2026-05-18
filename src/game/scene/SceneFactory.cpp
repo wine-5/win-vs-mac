@@ -4,11 +4,13 @@
 #include "Loading.h"
 #include "InGame.h"
 #include "Result.h"
+#include "SceneManager.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IFileProvider.h"
 #include "core/interface/IResourceManager.h"
 #include "game/GameManager.h"
 #include "platform/window/select/Win32SelectWindowManager.h"
+#include "platform/window/result/ResultWindow.h"
 
 namespace
 {
@@ -99,11 +101,27 @@ namespace game::scene
 		}
 
 		case SceneType::Result:
+		{
 			m_resultScene = std::make_unique<Result>(
 				m_resultInputManager,
 				m_resultUIRenderer,
 				*screen);
+
+			auto resultWindow{ std::make_unique<platform::window::result::ResultWindow>(
+				*screen,
+				[]() {
+					auto* sm{ core::base::ServiceLocator::get<SceneManager>() };
+					sm->changeScene(SceneType::Select);
+				},
+				[]() {
+					auto* sm{ core::base::ServiceLocator::get<SceneManager>() };
+					sm->changeScene(SceneType::Title);
+				}
+			) };
+
+			m_resultScene->setWindowManager(std::move(resultWindow));
 			return m_resultScene.get();
+		}
 
 		default:
 			return nullptr;

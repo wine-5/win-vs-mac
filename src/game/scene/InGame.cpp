@@ -5,6 +5,7 @@
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
 #include "core/constant/JobType.h"
+#include "core/data/ResultData.h"
 
 /* game層 */
 #include "game/factory/FactoryInitializer.h"
@@ -172,6 +173,10 @@ namespace game::scene
 				LOG("AttackHit: 攻撃者のId=%u 被攻撃者のId=%u ダメージ=%.1f",
 					e.m_attackerId, e.m_targetId, e.m_damage);
 
+				// 被ダメージ追跡（プレイヤーが攻撃を受けた場合）
+				if (e.m_targetId == m_playerId)
+					m_totalDamageTaken += e.m_damage;
+
 				// ヒットエフェクト開始
 				if (m_componentManager.has<component::HitEffectComponent>(e.m_targetId))
 				{
@@ -191,6 +196,7 @@ namespace game::scene
 							render.m_isVisible = false;
 						}
 
+						saveResultData(false);
 						auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 						sceneManager->changeScene(game::scene::SceneType::Result); });
 
@@ -203,6 +209,8 @@ namespace game::scene
 							auto& render{ m_componentManager.get<component::RenderComponent>(e.m_entityId) };
 							render.m_isVisible = false;
 						}
+
+						m_killCount++;
 
 						// 敵が全滅しているかチェック
 						auto enemies{ m_componentManager.getAllEntities<component::AIComponent>() };
@@ -218,6 +226,7 @@ namespace game::scene
 						}
 						if (allDead)
 						{
+							saveResultData(true);
 							auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 							sceneManager->changeScene(game::scene::SceneType::Result);
 						} });
@@ -225,10 +234,13 @@ namespace game::scene
 
 	void InGame::update(float deltaTime)
 	{
+		m_elapsedTime += deltaTime;
+
 		// デバッグ用：Rキーでリザルト画面へ
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::R))
 		{
 			LOG("INFO: Rキーでリザルト画面へ遷移");
+			saveResultData(false);
 			auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
 			sceneManager->changeScene(game::scene::SceneType::Result);
 			return;
@@ -270,5 +282,22 @@ namespace game::scene
 
 		m_renderer.drawCollider(playerColliderCenter, playerCollider.m_size, core::utility::Color::GREEN);
 		m_renderer.drawCollider(groundColliderCenter, groundCollider.m_size, core::utility::Color::BLUE);
+	}
+
+	void InGame::saveResultData(bool isVictory) noexcept
+	{
+		core::data::ResultData result{};
+		result.m_isVictory        = isVictory;
+		result.m_elapsedTime      = m_elapsedTime;
+		result.m_killCount        = m_killCount;
+		result.m_totalDamageTaken = m_totalDamageTaken;
+
+		for (int i{0}; i < data::FileEquipmentData::MAX_SLOTS; ++i)
+		{
+			if (m_fileEquipmentData.hasSelection(i))
+				result.m_usedFiles.push_back(m_fileEquipmentData.getFilePath(i));
+		}
+
+		game::GameManager::getInstance().setResultData(result);
 	}
 }

@@ -62,6 +62,12 @@ namespace game::scene
 		void setupSystems();
 		void setupEvents();
 
+		/**
+		 * @brief GameManager にリザルトデータを保存する
+		 * @param isVictory 勝利かどうか
+		 */
+		void saveResultData(bool isVictory) noexcept;
+
 		core::ecs::EntityManager 	m_entityManager;
 		core::ecs::ComponentManager m_componentManager;
 		core::ecs::SystemManager 	m_systemManager;
@@ -81,6 +87,11 @@ namespace game::scene
 		core::ecs::EntityId m_enemyId{core::ecs::INVALID_ENTITY_ID};
 
 		core::base::EventBus m_eventBus;
+
+		// 進行トラッキング
+		float m_elapsedTime{0.0f};
+		int   m_killCount{0};
+		float m_totalDamageTaken{0.0f};
 
 		// カメラ設定
 		static constexpr float CAMERA_OFFSET_X = 0.0f;

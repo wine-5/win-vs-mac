@@ -2,6 +2,7 @@
 #include "game/data/FileEquipmentData.h"
 #include "game/data/JobSelectionData.h"
 #include "core/base/Singleton.h"
+#include "core/data/ResultData.h"
 
 namespace game
 {
@@ -33,6 +34,24 @@ namespace game
         }
 
         /**
+         * @brief ResultData を保存する
+         * @param data リザルトデータ
+         */
+        void setResultData(const core::data::ResultData& data) noexcept
+        {
+            m_resultData = data;
+        }
+
+        /**
+         * @brief ResultData への参照を返す
+         * @return ResultData の定数参照
+         */
+        [[nodiscard]] const core::data::ResultData& getResultData() const noexcept
+        {
+            return m_resultData;
+        }
+
+        /**
          * @brief デフォルトコンストラクタ（Singleton初期化用）
          */
         GameManager() = default;
@@ -41,5 +60,6 @@ namespace game
 
         data::FileEquipmentData m_fileEquipmentData{};
         data::JobSelectionData m_jobSelectionData{};
+        core::data::ResultData m_resultData{};
     };
 }
