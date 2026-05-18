@@ -136,6 +136,11 @@ namespace platform::window
         m_onMinimize = std::move(callback);
     }
 
+    void WindowBase::setOnClose(std::function<void()> callback) noexcept
+    {
+        m_onClose = std::move(callback);
+    }
+
     void WindowBase::setIcon(HWND hwnd, const wchar_t* iconPath) noexcept
     {
         m_hIcon = static_cast<HICON>(LoadImageW(
@@ -164,6 +169,10 @@ namespace platform::window
             return DefWindowProcW(hwnd, msg, wParam, lParam);
 
         case WM_CLOSE:
+            if (m_onClose)
+            {
+                m_onClose();
+            }
             hide();
             return 0;
 

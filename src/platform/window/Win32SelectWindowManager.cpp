@@ -71,6 +71,10 @@ namespace platform::window
             m_jobVisible = false;
             notifyWindowState("job", false);
         });
+        m_jobWindow->setOnClose([this]() noexcept {
+            m_jobVisible = false;
+            notifyWindowState("job", false);
+        });
 
         // FileSelect ウィンドウ（中央列 全高）
         m_fileSelectWindow = std::make_unique<FileSelectWindow>(
@@ -83,6 +87,10 @@ namespace platform::window
         m_fileSelectWindow->setOnFileSlotChanged(m_onFileSlotChanged);
         m_fileSelectWindow->setOnMinimize([this]() noexcept {
             m_fileSelectWindow->hide();
+            m_fileVisible = false;
+            notifyWindowState("file", false);
+        });
+        m_fileSelectWindow->setOnClose([this]() noexcept {
             m_fileVisible = false;
             notifyWindowState("file", false);
         });
@@ -100,6 +108,10 @@ namespace platform::window
             m_paramVisible = false;
             notifyWindowState("param", false);
         });
+        m_parameterWindow->setOnClose([this]() noexcept {
+            m_paramVisible = false;
+            notifyWindowState("param", false);
+        });
 
         // DifficultyWindow (左列 下 / Job の下)
         m_difficultyWindow = std::make_unique<DifficultyWindow>(
@@ -111,6 +123,10 @@ namespace platform::window
         if (!m_difficultyWindow->create(m_desktopWindow->getHwnd())) return;
         m_difficultyWindow->setOnMinimize([this]() noexcept {
             m_difficultyWindow->hide();
+            m_diffVisible = false;
+            notifyWindowState("diff", false);
+        });
+        m_difficultyWindow->setOnClose([this]() noexcept {
             m_diffVisible = false;
             notifyWindowState("diff", false);
         });

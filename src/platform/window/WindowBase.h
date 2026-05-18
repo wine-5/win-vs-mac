@@ -62,6 +62,13 @@ namespace platform::window
         void setOnMinimize(std::function<void()> callback) noexcept;
 
         /**
+         * @brief ウィンドウ閉じボタン（×）押下時のコールバックを設定する
+         * @details 設定するとデフォルトの閉じるを抑制してコールバックを呼ぶ
+         * @param callback ウィンドウ閉時に呼ぶコールバック
+         */
+        void setOnClose(std::function<void()> callback) noexcept;
+
+        /**
          * @brief ウィンドウハンドルを取得
          * @return ウィンドウの HWND
          */
@@ -109,6 +116,7 @@ namespace platform::window
         virtual LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 
         std::function<void()> m_onMinimize{};
+        std::function<void()> m_onClose{};
         std::wstring m_className{};
         std::wstring m_title{};
         int m_x{};
