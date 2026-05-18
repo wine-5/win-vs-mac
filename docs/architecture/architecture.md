@@ -39,6 +39,75 @@ platform → infrastructure → game → core
 
 ---
 
+## Web UI 層
+
+### 概要
+
+WebView2 上で動作する HTML / CSS / JS による UI 層。
+C++ の層とは**別の実行環境（ブラウザランタイム）**であり、Platform 層が生成・制御する。
+C++ の層を直接参照・インクルードすることはできない。
+
+### 全体における位置づけ
+
+```
+┌─────────────────────────────────────────────────┐
+│  Web UI 層（HTML / CSS / JS）                     │
+│  ※ C++ の層に直接アクセスできない                 │
+│  ※ Platform 層との JSON メッセージのみが唯一の接点 │
+└─────────────────────────────────────────────────┘
+               ↕  WebView2 postMessage（JSON）
+┌─────────────────────────────────────────────────┐
+│  Platform 層                                     │
+│  ↓                                              │
+│  Infrastructure 層 → Game 層 → Core 層           │
+└─────────────────────────────────────────────────┘
+```
+
+Platform 層が WebView2 ウィンドウを生成・管理し、メッセージ送受信を担う。
+
+### メッセージプロトコル
+
+C++ ↔ Web UI の唯一の通信経路。JSON スキーマがこの境界における事実上のインターフェース定義になる。
+
+```
+C++ → JS : webView->PostMessage(json)        受信側: onMessageFromGame(data)
+JS → C++ : sendToGame({ type, ... })         受信側: handleMessage(json)   ← messaging.js 経由
+```
+
+### フォルダ構成
+
+```
+web/
+├── common/              ← 全ウィンドウから参照可能な共通基盤
+│   ├── messaging.js     ← sendToGame() / onMessageFromGame() ブリッジ
+│   └── common.css       ← 共通 CSS 変数・スタイル
+├── desktop/             ← タスクバー・デスクトップ UI
+├── job/                 ← 職業選択ウィンドウ
+├── file/                ← ファイル選択ウィンドウ
+├── param/               ← パラメータ表示ウィンドウ
+└── difficulty/          ← 難易度選択ウィンドウ
+```
+
+各ウィンドウフォルダは `[name].html` / `[name].css` / `[name].js` の3ファイル構成。
+
+### Web UI 層の規則
+
+1. **C++ との通信は `messaging.js` 経由の JSON メッセージのみ**  
+   `assets/` フォルダや外部ファイルへの直接アクセス禁止。データは C++ が送信した JSON から受け取る
+
+2. **ウィンドウ間の直接参照禁止**  
+   `job/` と `param/` はお互いを知らない。ウィンドウ間の連携は必ず C++ 経由
+
+3. **`common/` は全ウィンドウから参照可**（逆方向は禁止）
+
+4. **ゲームデータの数値を JS にハードコードしない**  
+   `jobData.json` などの値は C++ から `init` / `refresh` メッセージで受け取る
+
+5. **表示専用の静的データは例外的に許容**  
+   アイコン文字列・ラベル文字列など、表示にのみ使用するものはこの限りではない
+
+---
+
 ## 各レイヤーの責務
 
 ### Core層
@@ -128,150 +197,19 @@ game/Player                     → uses       → core/IResourceManager
 
 ## Game層内部：ECS設計
 
-### ECSとは
-- **Entity**：ただのID番号
-- **Component**：データだけを持つ
-- **System**：処理だけを行う
-
-PlayerやEnemyという独立したクラスは存在しない。
-EntityにComponentを組み合わせることで実体を表現する。
-
-```cpp
-// Playerの生成
-EntityId player = entityManager.create();
-componentManager.add<TransformComponent>(player, {});
-componentManager.add<HealthComponent>(player, {});
-componentManager.add<RenderComponent>(player, { handle });
-
-// Enemyの生成（Componentの組み合わせが違うだけ）
-EntityId enemy = entityManager.create();
-componentManager.add<TransformComponent>(enemy, {});
-componentManager.add<HealthComponent>(enemy, {});
-componentManager.add<AIComponent>(enemy, {});
-```
+詳細は [patterns.md](patterns.md) を参照。
 
 ---
 
 ## イベント駆動：EventBus
 
-SystemがSystemを直接呼ばないようにEventBusを使う。
-EventBusはCore層に置くことでGame層・Infrastructure層の両方から使える。
-
-```cpp
-// BattleSystemがイベントを発行する（Game層）
-eventBus.emit<EnemyDefeatedEvent>({ enemyId, "chrome.exe" });
-
-// SoundManagerがイベントを受信する（Infrastructure層）
-eventBus.subscribe<EnemyDefeatedEvent>([](const EnemyDefeatedEvent& e) {
-    // 効果音を鳴らす
-});
-```
-
-### イベントの定義
-`IGameEvent`をマーカーとして継承し1ファイルにまとめて定義する。
-
-```cpp
-// game/event/InGameEvents.h
-class IGameEvent {};
-
-struct EnemyDefeatedEvent : public IGameEvent
-{
-    EntityId m_enemyId;
-    std::string m_processName;
-};
-
-struct PlayerDamagedEvent : public IGameEvent
-{
-    int m_damage;
-};
-
-struct RoomClearedEvent : public IGameEvent
-{
-    int m_roomId;
-};
-
-struct DungeonClearedEvent : public IGameEvent {};
-```
+詳細は [patterns.md](patterns.md) を参照。
 
 ---
 
 ## グローバルアクセス
 
-### Singleton基底クラス
-
-ゲーム全体で**絶対に1つだけ存在すべき**クラスに使用する。
-インスタンスの唯一性がコンパイル時に保証される。
-
-**用途：**
-- `SceneManager` — シーン管理（複製されてはいけない）
-- `GameManager` — ゲーム全体の進行管理（複製されてはいけない）
-- `InGameManager` — ゲーム進行中の管理（複製されてはいけない）
-- `AudioManager` — 音声管理（複製されてはいけない）
-
-**使用方法：**
-```cpp
-// 定義
-class SceneManager : public core::base::Singleton<SceneManager> {
-    friend core::base::Singleton<SceneManager>;
-private:
-    SceneManager() = default;
-};
-
-// 使用
-auto& sceneManager = SceneManager::getInstance();
-```
-
-**重要ルール：**
-- Singleton基底クラスを継承したクラスは、ServiceLocatorに登録してはいけない
-- 理由：インスタンスの唯一性の保証とServiceLocatorの登録（複数インスタンス可能）が矛盾するため
-
----
-
-### ServiceLocator
-
-複数の場所から使われ、かつ**実装を差し替えたい**サービスを登録する。
-テスト時に異なる実装に置き換え可能。
-
-**用途：**
-- `IInputProvider` — 入力処理（キーボード/ゲームパッド/別入力方式に差し替え可能）
-- `IResourceManager` — リソース管理（複数実装が存在する可能性）
-- `IJobProvider` — 職業情報提供（複数実装が存在する可能性）
-- その他インターフェースベースのサービス
-
-**使用方法：**
-```cpp
-// ServiceLocatorInitializerで登録する
-ServiceLocator::provide<IInputProvider>(
-    std::make_unique<KeyboardInputProvider>()
-);
-
-// どこからでも取り出せる
-auto* inputProvider = ServiceLocator::get<IInputProvider>();
-inputProvider->isKeyPressed(KeyCode::Space);
-
-// テスト時は実装を差し替える
-ServiceLocator::provide<IInputProvider>(
-    std::make_unique<MockInputProvider>()
-);
-```
-
-**重要ルール：**
-- ServiceLocatorに登録するクラスはSingleton基底クラスを継承してはいけない
-- 理由：複数の実装を持つ可能性があるため
-
----
-
-### 使い分けの判断基準
-
-| 観点 | Singleton基底クラス | ServiceLocator |
-|---|---|---|
-| **インスタンス数** | 絶対に1つ | 複数実装が存在する可能性 |
-| **アクセス方法** | `ClassName::getInstance()` | `ServiceLocator::get<IInterface>()` |
-| **目的** | インスタンス唯一性の保証 | 実装の差し替え可能性・テスト対応 |
-| **例** | SceneManager, GameManager | IInputProvider, IResourceManager |
-| **ServiceLocator登録** | ❌ 禁止 | ✅ 推奨 |
-
-
+Singleton基底クラスと ServiceLocator の設計・使い分けについては [patterns.md](patterns.md) を参照。
 
 ---
 
