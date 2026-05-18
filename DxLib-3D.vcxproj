@@ -200,6 +200,9 @@
     <ClCompile Include="src\SingletonInitializer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include=".gitignore" />
     <None Include="assets\data\enemyData.json" />
     <None Include="assets\data\groundData.json" />

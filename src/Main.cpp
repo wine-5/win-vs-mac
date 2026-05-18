@@ -1,4 +1,5 @@
 ﻿#include "DxLib.h"
+#include "resource.h"
 #include "SingletonInitializer.h"
 #include "ServiceLocatorInitializer.h"
 #include "core/base/ServiceLocator.h"
@@ -28,6 +29,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #endif
 
 	SetAlwaysRunFlag(TRUE); // ファイルダイアログ等でウィンドウが非アクティブになっても描画を継続する
+	SetWindowIconID(IDI_GAMEICON); // アプリケーションアイコンを設定
+	SetMainWindowText("Win VS Mac"); // ウィンドウタイトルを設定
 	if (DxLib_Init() == -1) return -1;
 	SetMouseDispFlag(TRUE); // リリース・デバッグ問わずマウスカーソルを常時表示
 	SetUseLighting(FALSE);
