@@ -3,9 +3,9 @@
 // 表示専用データ（名前・アイコン・スキル名はラベルのため JS 側で保持）
 // hp/atk/def/spd は C++ から jobStats メッセージで受け取る
 const JOBS = [
-    { id: 'Warrior', name: '剣士',    icon: '⚔️',  skill: '全方位斬り' },
-    { id: 'Mage',    name: '魔法使い', icon: '✨',  skill: '巨大魔法弾' },
-    { id: 'Ninja',   name: '忍者',    icon: '🥷', skill: '分身一斉攻撃' },
+    { id: 'Warrior', name: '剣士',    icon: 'https://assets.game.web/images/ui/select/warrior.png',  skill: '全方位斬り' },
+    { id: 'Mage',    name: '魔法使い', icon: 'https://assets.game.web/images/ui/select/mage.png',    skill: '巨大魔法弾' },
+    { id: 'Ninja',   name: '忍者',    icon: 'https://assets.game.web/images/ui/select/ninja.png', skill: '分身一斉攻撃' },
 ];
 
 let currentJob = null;
@@ -34,7 +34,7 @@ function renderJobs() {
         card.onclick = function () { selectJob(job.id); };
         card.innerHTML =
             '<div class="job-header">' +
-                '<span class="job-icon">' + job.icon + '</span>' +
+                '<img class="job-icon" src="' + job.icon + '" alt="' + job.name + '">' +
                 '<div class="job-info">' +
                     '<div class="job-name">' + job.name + '</div>' +
                     '<div class="job-skill">Skill: ' + job.skill + '</div>' +

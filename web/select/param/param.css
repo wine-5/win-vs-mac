@@ -40,12 +40,25 @@ body {
     align-items: baseline;
 }
 
+.metric-key-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .metric-key {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.metric-key-label {
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.08em;
     color: var(--text-muted);
     text-transform: uppercase;
+    min-width: 24px;
 }
 
 .metric-val { font-size: 12px; font-weight: 700; color: var(--text); }

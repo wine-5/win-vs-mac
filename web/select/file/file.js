@@ -1,12 +1,12 @@
 'use strict';
 
 const EXT_ICON  = {
-    Executable: '⚙️',
-    Document:   '📝',
-    Image:      '🖻️',
-    Audio:      '🎵',
-    Archive:    '📦',
-    Unknown:    '❓',
+    Executable: 'https://assets.game.web/images/ui/select/exe.png',
+    Document:   'https://assets.game.web/images/ui/select/doc.png',
+    Image:      'https://assets.game.web/images/ui/select/img.png',
+    Audio:      'https://assets.game.web/images/ui/select/aud.png',
+    Archive:    'https://assets.game.web/images/ui/select/arc.png',
+    Unknown:    'https://assets.game.web/images/ui/select/gameicon.png',
 };
 const EXT_LABEL = { Executable: 'EXE', Document: 'DOC', Image: 'IMG', Audio: 'AUD', Archive: 'ARC', Unknown: '???' };
 const EXT_CLASS = { Executable: 'exe', Document: 'doc', Image: 'img', Audio: 'aud', Archive: 'arc', Unknown: 'unk' };
@@ -93,9 +93,13 @@ function renderSlots() {
             ? '<span class="bonus-text has-bonus">' + bonusText + '</span>'
             : '<span class="bonus-text">—</span>';
 
+        const iconHtml = isEmpty ?
+            '<img class="file-icon" src="https://assets.game.web/images/ui/select/emp.png" alt="未選択">' :
+            '<img class="file-icon" src="' + (EXT_ICON[et] || EXT_ICON.Unknown) + '" alt="' + (EXT_LABEL[et] || '?') + '">';
+
         row.innerHTML =
             '<div class="file-name-cell">' +
-                '<span class="file-icon">' + (isEmpty ? '📄' : (EXT_ICON[et] || '📄')) + '</span>' +
+                iconHtml +
                 '<span class="file-name' + (isEmpty ? ' empty' : '') + '">' +
                     (isEmpty ? '─ 未選択 ─' : (s.fileName || '—')) +
                 '</span>' +

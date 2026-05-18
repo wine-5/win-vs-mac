@@ -94,7 +94,7 @@ body {
     min-width: 0;
 }
 
-.file-icon { font-size: 15px; flex-shrink: 0; }
+.file-icon { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
 
 .file-name {
     font-size: 12px;

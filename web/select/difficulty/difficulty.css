@@ -16,7 +16,7 @@ body {
     flex-shrink: 0;
 }
 
-.uac-shield { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.uac-shield { width: 28px; height: 28px; object-fit: contain; flex-shrink: 0; }
 
 .uac-title-main {
     font-size: 12px;
@@ -87,7 +87,7 @@ body {
     letter-spacing: 0.04em;
 }
 
-.diff-shield { font-size: 14px; line-height: 1; }
+.diff-shield { width: 16px; height: 16px; object-fit: contain; }
 
 .diff-btn.active-easy   { background: #1a5c1a; border-color: #2ea02e; color: #4ec94e; }
 .diff-btn.active-normal { background: var(--accent); border-color: var(--accent); color: #fff; }
