@@ -5,7 +5,7 @@
 #include <string>
 #include <functional>
 
-namespace platform::window
+namespace platform::window::select
 {
     /**
      * @class DifficultyWindow

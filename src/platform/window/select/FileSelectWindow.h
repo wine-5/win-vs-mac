@@ -11,7 +11,7 @@
 #include "game/utility/ExtensionBonusCalculator.h"
 #include <functional>
 
-namespace platform::window
+namespace platform::window::select
 {
     /**
      * @class FileSelectWindow

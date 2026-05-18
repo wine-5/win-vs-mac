@@ -3,7 +3,7 @@
 #include <windows.h>
 #include <optional>
 #include <string>
-#include "WindowBase.h"
+#include "platform/window/WindowBase.h"
 #include "platform/webview/WebView2Host.h"
 #include "infrastructure/repository/JobRepository.h"
 #include <functional>
@@ -13,7 +13,7 @@ namespace core::constant
     enum class JobType;
 }
 
-namespace platform::window
+namespace platform::window::select
 {
     /**
      * @class JobWindow

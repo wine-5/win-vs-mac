@@ -5,7 +5,7 @@
 #include "core/interface/ILogger.h"
 #include "thirdparty/nlohmann/json.hpp"
 
-namespace platform::window
+namespace platform::window::select
 {
 	FileSelectWindow::FileSelectWindow(int x, int y, int width, int height) noexcept
 		: WindowBase(L"FileSelectWindowClass", L"File Selection", x, y, width, height)

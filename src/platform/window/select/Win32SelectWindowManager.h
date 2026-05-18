@@ -23,7 +23,7 @@ namespace core::iface
     class IScreen;
 }
 
-namespace platform::window
+namespace platform::window::select
 {
     class Win32SelectWindowManager : public core::iface::ISelectWindowManager
     {

@@ -2,10 +2,10 @@
 
 #include <windows.h>
 #include <string>
-#include "WindowBase.h"
+#include "platform/window/WindowBase.h"
 #include "platform/webview/WebView2Host.h"
 
-namespace platform::window
+namespace platform::window::select
 {
     /**
      * @class ParameterWindow

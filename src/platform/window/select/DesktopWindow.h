@@ -5,7 +5,7 @@
 #include <functional>
 #include "platform/webview/WebView2Host.h"
 
-namespace platform::window
+namespace platform::window::select
 {
     /**
      * @brief デスクトップ背景ウィンドウ

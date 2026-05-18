@@ -5,7 +5,7 @@
 #include "core/constant/JobType.h"
 #include "thirdparty/nlohmann/json.hpp"
 
-namespace platform::window
+namespace platform::window::select
 {
     Win32SelectWindowManager::Win32SelectWindowManager(
         std::function<void()> onGameStart,

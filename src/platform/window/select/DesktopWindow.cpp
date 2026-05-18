@@ -1,7 +1,7 @@
 #include <windows.h>
 #include "DesktopWindow.h"
 
-namespace platform::window
+namespace platform::window::select
 {
     DesktopWindow::~DesktopWindow() noexcept
     {

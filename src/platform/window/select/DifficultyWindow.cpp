@@ -2,7 +2,7 @@
 #include "DifficultyWindow.h"
 #include "thirdparty/nlohmann/json.hpp"
 
-namespace platform::window
+namespace platform::window::select
 {
     DifficultyWindow::DifficultyWindow(int x, int y, int width, int height) noexcept
         : WindowBase(L"DifficultyWindowClass", L"Difficulty Selection", x, y, width, height)

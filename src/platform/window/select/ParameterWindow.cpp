@@ -2,7 +2,7 @@
 #include "ParameterWindow.h"
 #include "thirdparty/nlohmann/json.hpp"
 
-namespace platform::window
+namespace platform::window::select
 {
     ParameterWindow::ParameterWindow(int x, int y, int width, int height) noexcept
         : WindowBase(L"ParameterWindowClass", L"Status Display", x, y, width, height)

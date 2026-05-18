@@ -4,7 +4,7 @@
 #include "thirdparty/nlohmann/json.hpp"
 #include <sstream>
 
-namespace platform::window
+namespace platform::window::select
 {
 	JobWindow::JobWindow(int x, int y, int width, int height) noexcept
 		: WindowBase(L"JobWindowClass", L"Job Selection", x, y, width, height),

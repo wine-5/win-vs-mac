@@ -171,22 +171,22 @@
     <ClCompile Include="src\platform\webview\WebView2Host.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\window\JobWindow.cpp">
+    <ClCompile Include="src\platform\window\select\JobWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\window\FileSelectWindow.cpp">
+    <ClCompile Include="src\platform\window\select\FileSelectWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\window\DesktopWindow.cpp">
+    <ClCompile Include="src\platform\window\select\DesktopWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\window\DifficultyWindow.cpp">
+    <ClCompile Include="src\platform\window\select\DifficultyWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\window\ParameterWindow.cpp">
+    <ClCompile Include="src\platform\window\select\ParameterWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\platform\window\Win32SelectWindowManager.cpp">
+    <ClCompile Include="src\platform\window\select\Win32SelectWindowManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -203,6 +203,13 @@
     <None Include="assets\config\resources.json" />
     <None Include="assets\data\enemyData.json" />
     <None Include="packages.config" />
+    <None Include="web\common.css" />
+    <None Include="web\common.js" />
+    <None Include="web\desktop.html" />
+    <None Include="web\difficulty.html" />
+    <None Include="web\file-select.html" />
+    <None Include="web\job.html" />
+    <None Include="web\parameter.html" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\ecs\Entity.h">
@@ -541,7 +548,7 @@
     <ClInclude Include="src\platform\window\WindowBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\platform\window\JobWindow.h">
+    <ClInclude Include="src\platform\window\select\JobWindow.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

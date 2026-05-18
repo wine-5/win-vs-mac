@@ -5,7 +5,7 @@
 constexpr int GWL_USERDATA{-21};
 #endif
 
-#include "WindowBase.h"
+#include "platform/window/WindowBase.h"
 #include "core/interface/ILogger.h"
 
 namespace platform::window
