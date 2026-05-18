@@ -65,7 +65,10 @@ namespace platform::window
             jobH
         );
         if (!m_jobWindow->create(m_desktopWindow->getHwnd())) return;
-        m_jobWindow->setOnJobSelect(m_onJobSelect);
+        m_jobWindow->setOnJobSelect([this](core::constant::JobType jobType) noexcept {
+            if (m_onJobSelect) m_onJobSelect(jobType);
+            updateParameterWindowForJob(jobType);
+        });
         m_jobWindow->setOnMinimize([this]() noexcept {
             m_jobWindow->hide();
             m_jobVisible = false;
@@ -84,7 +87,33 @@ namespace platform::window
             availH
         );
         if (!m_fileSelectWindow->create(m_desktopWindow->getHwnd())) return;
-        m_fileSelectWindow->setOnFileSlotChanged(m_onFileSlotChanged);
+        m_fileSelectWindow->setOnFileSlotChanged([this](int slot, const std::string& path) noexcept {
+            if (m_onFileSlotChanged) m_onFileSlotChanged(slot, path);
+            if (slot >= 0 && slot < 3)
+            {
+                m_slotPaths[slot] = path;
+                if (!path.empty())
+                {
+                    std::string ext{ path };
+                    auto dotPos = ext.rfind('.');
+                    if (dotPos != std::string::npos)
+                    {
+                        ext = ext.substr(dotPos);
+                        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+                        m_slotExtTypes[slot] = game::utility::FileExtensionTypeResolver::toFileExtensionType(ext);
+                    }
+                    else
+                    {
+                        m_slotExtTypes[slot] = game::data::FileExtensionType::Unknown;
+                    }
+                }
+                else
+                {
+                    m_slotExtTypes[slot] = game::data::FileExtensionType::Unknown;
+                }
+            }
+            updateParameterWindowForJob(m_currentJobType);
+        });
         m_fileSelectWindow->setOnMinimize([this]() noexcept {
             m_fileSelectWindow->hide();
             m_fileVisible = false;
@@ -186,9 +215,32 @@ namespace platform::window
     void Win32SelectWindowManager::updateParameterWindowForJob(
         core::constant::JobType jobType) noexcept
     {
+        m_currentJobType = jobType;
         if (!m_parameterWindow) return;
-        core::data::JobInfo jobInfo{ m_resourceManager.getJobInfo(jobType) };
-        m_parameterWindow->refresh(jobInfo);
+
+        const core::data::JobInfo jobInfo{ m_resourceManager.getJobInfo(jobType) };
+
+        float bonusHp{}, bonusAtk{}, bonusDef{}, bonusSpd{};
+        int equippedCount{};
+        for (int i = 0; i < 3; ++i)
+        {
+            if (!m_slotPaths[i].empty())
+            {
+                const auto bonus = game::utility::ExtensionBonusCalculator::calculate(m_slotExtTypes[i]);
+                bonusHp  += bonus.hp;
+                bonusAtk += bonus.atk;
+                bonusDef += bonus.def;
+                bonusSpd += bonus.spd;
+                ++equippedCount;
+            }
+        }
+
+        m_parameterWindow->refresh(
+            jobInfo.m_hp,  jobInfo.m_atk,  jobInfo.m_def,  jobInfo.m_spd,
+            bonusHp, bonusAtk, bonusDef, bonusSpd,
+            jobInfo.m_name, jobInfo.m_skillName,
+            equippedCount
+        );
     }
 
     void Win32SelectWindowManager::handleDesktopMessage(const std::string& json) noexcept

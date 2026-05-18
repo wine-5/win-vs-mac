@@ -5,11 +5,6 @@
 #include "WindowBase.h"
 #include "platform/webview/WebView2Host.h"
 
-namespace core::data
-{
-    struct JobInfo;
-}
-
 namespace platform::window
 {
     /**
@@ -33,9 +28,24 @@ namespace platform::window
 
         /**
          * @brief ステータス情報を更新
-         * @param jobInfo 職業情報
+         * @param baseHp 基礎 HP
+         * @param baseAtk 基礎 ATK
+         * @param baseDef 基礎 DEF
+         * @param baseSpd 基礎 SPD
+         * @param bonusHp ファイル装備ボーナス HP
+         * @param bonusAtk ファイル装備ボーナス ATK
+         * @param bonusDef ファイル装備ボーナス DEF
+         * @param bonusSpd ファイル装備ボーナス SPD
+         * @param jobNameSjis 職業名（Shift-JIS）
+         * @param skillNameSjis スキル名（Shift-JIS）
+         * @param equippedSlots 装備中スロット数
          */
-        void refresh(const core::data::JobInfo& jobInfo) noexcept;
+        void refresh(
+            float baseHp, float baseAtk, float baseDef, float baseSpd,
+            float bonusHp, float bonusAtk, float bonusDef, float bonusSpd,
+            const std::string& jobNameSjis,
+            const std::string& skillNameSjis,
+            int equippedSlots) noexcept;
 
     protected:
         void onCreateControls(HWND hwnd) override;

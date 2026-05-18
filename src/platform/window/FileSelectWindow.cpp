@@ -58,7 +58,7 @@ namespace platform::window
 		try
 		{
 			auto j = nlohmann::json::parse(json);
-			if (j.value("type", "") == "openFileDialog")
+			if (j.value("type", "") == "slotSelected")
 			{
 				int slot = j.value("slot", 0);
 				if (slot >= 0 && slot < SLOT_COUNT)
@@ -84,15 +84,69 @@ namespace platform::window
 		if (GetOpenFileNameA(&ofn))
 		{
 			m_filePaths[slotIndex] = szFile;
+
+			// Determine extension type
+			std::string path{ szFile };
+			auto dotPos = path.rfind('.');
+			if (dotPos != std::string::npos)
+			{
+				std::string ext{ path.substr(dotPos) };
+				std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+				m_extensionTypes[slotIndex] = game::utility::FileExtensionTypeResolver::toFileExtensionType(ext);
+			}
+			else
+			{
+				m_extensionTypes[slotIndex] = game::data::FileExtensionType::Unknown;
+			}
+
 			if (m_onFileSlotChanged)
 				m_onFileSlotChanged(slotIndex, m_filePaths[slotIndex]);
 
-			// JS 側にファイルパスを通知
+			sendSlotsRefresh();
+		}
+	}
+
+	void FileSelectWindow::sendSlotsRefresh() noexcept
+	{
+		auto toName = [](game::data::FileExtensionType t) -> const char* {
+			switch (t)
+			{
+			case game::data::FileExtensionType::Executable: return "Executable";
+			case game::data::FileExtensionType::Document:   return "Document";
+			case game::data::FileExtensionType::Image:      return "Image";
+			case game::data::FileExtensionType::Audio:      return "Audio";
+			case game::data::FileExtensionType::Archive:    return "Archive";
+			default:                                        return "Unknown";
+			}
+		};
+
+		try
+		{
 			nlohmann::json resp;
-			resp["type"] = "fileSelected";
-			resp["slot"] = slotIndex;
-			resp["path"] = m_filePaths[slotIndex];
+			resp["type"]  = "refresh";
+			resp["slots"] = nlohmann::json::array();
+			for (int i = 0; i < SLOT_COUNT; ++i)
+			{
+				nlohmann::json s;
+				s["slot"] = i;
+				if (m_filePaths[i].empty())
+				{
+					s["isEmpty"] = true;
+				}
+				else
+				{
+					s["isEmpty"] = false;
+					std::string fileName{ m_filePaths[i] };
+					auto slash = fileName.find_last_of("/\\");
+					if (slash != std::string::npos)
+						fileName = fileName.substr(slash + 1);
+					s["fileName"] = fileName;
+					s["extType"]  = toName(m_extensionTypes[i]);
+				}
+				resp["slots"].push_back(s);
+			}
 			m_webView.postMessage(resp.dump());
 		}
+		catch (...) {}
 	}
 }

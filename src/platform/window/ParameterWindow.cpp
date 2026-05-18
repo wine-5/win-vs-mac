@@ -1,6 +1,5 @@
 ﻿#include <windows.h>
 #include "ParameterWindow.h"
-#include "core/data/JobInfo.h"
 #include "thirdparty/nlohmann/json.hpp"
 
 namespace platform::window
@@ -10,11 +9,15 @@ namespace platform::window
     {
     }
 
-    void ParameterWindow::refresh(const core::data::JobInfo& jobInfo) noexcept
+    void ParameterWindow::refresh(
+        float baseHp, float baseAtk, float baseDef, float baseSpd,
+        float bonusHp, float bonusAtk, float bonusDef, float bonusSpd,
+        const std::string& jobNameSjis,
+        const std::string& skillNameSjis,
+        int equippedSlots) noexcept
     {
         if (!m_webView.isReady()) return;
 
-        // Shift-JIS to UTF-8 conversion (nlohmann requires UTF-8)
         auto sjisToUtf8 = [](const std::string& sjis) -> std::string
         {
             if (sjis.empty()) return {};
@@ -32,13 +35,18 @@ namespace platform::window
         try
         {
             nlohmann::json j;
-            j["type"]  = "refresh";
-            j["name"]  = sjisToUtf8(jobInfo.m_name);
-            j["skill"] = sjisToUtf8(jobInfo.m_skillName);
-            j["hp"]    = static_cast<int>(jobInfo.m_hp);
-            j["atk"]   = static_cast<int>(jobInfo.m_atk);
-            j["def"]   = static_cast<int>(jobInfo.m_def);
-            j["spd"]   = static_cast<int>(jobInfo.m_spd);
+            j["type"]         = "refresh";
+            j["job"]          = sjisToUtf8(jobNameSjis);
+            j["skill"]        = sjisToUtf8(skillNameSjis);
+            j["baseHp"]       = baseHp;
+            j["baseAtk"]      = baseAtk;
+            j["baseDef"]      = baseDef;
+            j["baseSpd"]      = baseSpd;
+            j["bonusHp"]      = bonusHp;
+            j["bonusAtk"]     = bonusAtk;
+            j["bonusDef"]     = bonusDef;
+            j["bonusSpd"]     = bonusSpd;
+            j["slot"]         = equippedSlots;
             m_webView.postMessage(j.dump());
         }
         catch (...) {}

@@ -3,6 +3,9 @@
 #include "core/interface/ISelectWindowManager.h"
 #include "core/constant/JobType.h"
 #include "core/data/JobInfo.h"
+#include "game/data/FileExtensionType.h"
+#include "game/utility/FileExtensionTypeResolver.h"
+#include "game/utility/ExtensionBonusCalculator.h"
 #include "DesktopWindow.h"
 #include "JobWindow.h"
 #include "FileSelectWindow.h"
@@ -11,6 +14,8 @@
 #include <memory>
 #include <functional>
 #include <string>
+#include <array>
+#include <algorithm>
 
 namespace core::iface
 {
@@ -54,6 +59,14 @@ namespace platform::window
         bool m_fileVisible{true};
         bool m_paramVisible{true};
         bool m_diffVisible{true};
+
+        core::constant::JobType m_currentJobType{core::constant::JobType::Warrior};
+        std::array<std::string, 3> m_slotPaths{};
+        std::array<game::data::FileExtensionType, 3> m_slotExtTypes{
+            game::data::FileExtensionType::Unknown,
+            game::data::FileExtensionType::Unknown,
+            game::data::FileExtensionType::Unknown
+        };
 
         std::function<void()> m_onGameStart{};
         std::function<void(core::constant::JobType)> m_onJobSelect{};

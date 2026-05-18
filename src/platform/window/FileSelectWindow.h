@@ -3,8 +3,11 @@
 #include <windows.h>
 #include <string>
 #include <array>
+#include <algorithm>
 #include "WindowBase.h"
 #include "platform/webview/WebView2Host.h"
+#include "game/data/FileExtensionType.h"
+#include "game/utility/FileExtensionTypeResolver.h"
 #include <functional>
 
 namespace platform::window
@@ -51,9 +54,15 @@ namespace platform::window
 
         platform::webview::WebView2Host m_webView{};
         std::array<std::string, SLOT_COUNT> m_filePaths{};
+        std::array<game::data::FileExtensionType, SLOT_COUNT> m_extensionTypes{
+            game::data::FileExtensionType::Unknown,
+            game::data::FileExtensionType::Unknown,
+            game::data::FileExtensionType::Unknown
+        };
         std::function<void(int, const std::string&)> m_onFileSlotChanged{};
 
         void handleMessage(const std::string& json) noexcept;
         void openFileDialog(int slotIndex);
+        void sendSlotsRefresh() noexcept;
     };
 }
