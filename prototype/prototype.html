@@ -527,46 +527,413 @@
 
     <!-- ===== RESULT WIN ===== -->
     <div id="scene-result-win" class="scene">
-        <div class="shutdown-screen">
-            <div class="shutdown-win-logo">
-                <div class="shutdown-tile"></div>
-                <div class="shutdown-tile"></div>
-                <div class="shutdown-tile"></div>
-                <div class="shutdown-tile"></div>
+        <style>
+            /* ============ リザルト画面共通 ============ */
+            .result-window-container {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 520px;
+                background-color: #2d2d2d;
+                border: 1px solid #444;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+                display: flex;
+                flex-direction: column;
+                z-index: 100;
+            }
+
+            .result-window-container.good-end {
+                animation: resultWindowFadeIn 0.4s ease-out;
+            }
+
+            .result-window-container.bad-end {
+                animation: resultWindowFadeInWithShake 0.7s ease-out;
+            }
+
+            @keyframes resultWindowFadeIn {
+                from {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(0.98);
+                }
+                to {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                }
+            }
+
+            @keyframes resultWindowFadeInWithShake {
+                0% {
+                    opacity: 0;
+                    transform: translate(-50%, -50%) scale(0.98) translateX(0);
+                }
+                20% {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1) translateX(-8px);
+                }
+                40% {
+                    transform: translate(-50%, -50%) scale(1) translateX(8px);
+                }
+                60% {
+                    transform: translate(-50%, -50%) scale(1) translateX(-8px);
+                }
+                80% {
+                    transform: translate(-50%, -50%) scale(1) translateX(4px);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1) translateX(0);
+                }
+            }
+
+            .result-titlebar {
+                display: flex;
+                align-items: center;
+                height: 32px;
+                background-color: #1a1a1a;
+                border-bottom: 1px solid #444;
+                padding: 0 8px;
+                flex-shrink: 0;
+            }
+
+            .result-titlebar-icon {
+                width: 16px;
+                height: 16px;
+                margin-right: 8px;
+                font-size: 14px;
+                line-height: 16px;
+            }
+
+            .result-titlebar-text {
+                flex: 1;
+                font-size: 13px;
+                font-weight: 500;
+                color: #ffffff;
+                user-select: none;
+            }
+
+            .result-titlebar-controls {
+                display: flex;
+                gap: 2px;
+            }
+
+            .result-titlebar-button {
+                width: 46px;
+                height: 32px;
+                padding: 0;
+                border: none;
+                background: transparent;
+                color: #ffffff;
+                font-size: 16px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background 0.2s;
+            }
+
+            .result-titlebar-button:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .result-titlebar-button.close:hover {
+                background-color: #c42b1c;
+            }
+
+            .result-window-content {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                padding: 24px;
+                overflow-y: auto;
+                gap: 16px;
+            }
+
+            .result-screen {
+                display: none;
+            }
+
+            .result-screen.active {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .result-message-section {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .result-message-icon {
+                font-size: 24px;
+                line-height: 1;
+            }
+
+            .result-message-icon.checkmark {
+                animation: checkmarkScale 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            }
+
+            .result-message-icon.error {
+                animation: errorBlink 0.6s ease-out;
+            }
+
+            @keyframes checkmarkScale {
+                0% {
+                    transform: scale(0);
+                    opacity: 0;
+                }
+                50% {
+                    transform: scale(1.3);
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes errorBlink {
+                0%, 20%, 40% {
+                    opacity: 0;
+                }
+                10%, 30% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 1;
+                }
+                100% {
+                    opacity: 1;
+                }
+            }
+
+            .result-message-text {
+                font-size: 14px;
+                color: #ffffff;
+                line-height: 1.4;
+            }
+
+            .result-sub-message {
+                display: none;
+                font-size: 13px;
+                color: #aaaaaa;
+                margin-top: -8px;
+            }
+
+            .bad-end-result .result-sub-message {
+                display: block;
+            }
+
+            .result-divider {
+                height: 1px;
+                background-color: #444;
+                margin: 8px 0;
+            }
+
+            .result-stats-section {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .result-stat-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 13px;
+                padding: 4px 0;
+                color: #cccccc;
+            }
+
+            .good-end-result .result-stat-row {
+                animation: resultStatSlideIn 0.4s ease-out backwards;
+            }
+
+            @keyframes resultStatSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-8px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .good-end-result .result-stat-row:nth-child(1) { animation-delay: 0.2s; }
+            .good-end-result .result-stat-row:nth-child(2) { animation-delay: 0.35s; }
+            .good-end-result .result-stat-row:nth-child(3) { animation-delay: 0.5s; }
+            .good-end-result .result-stat-row:nth-child(4) { animation-delay: 0.65s; }
+            .good-end-result .result-stat-row:nth-child(5) { animation-delay: 0.8s; }
+
+            .result-stat-label {
+                color: #aaaaaa;
+                font-size: 12px;
+            }
+
+            .result-stat-value {
+                font-weight: 500;
+                color: #ffffff;
+            }
+
+            .result-used-files {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .result-file-badge {
+                display: inline-block;
+                background-color: #3a3a3a;
+                border: 1px solid #555;
+                padding: 4px 10px;
+                border-radius: 3px;
+                font-size: 12px;
+                color: #aaaaaa;
+                text-align: center;
+            }
+
+            .result-button-section {
+                display: flex;
+                gap: 12px;
+                justify-content: center;
+                margin-top: 8px;
+            }
+
+            .result-button {
+                padding: 8px 24px;
+                background-color: #3a3a3a;
+                border: 1px solid #555;
+                border-radius: 2px;
+                color: #cccccc;
+                font-size: 13px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .result-button:hover {
+                background-color: #4a4a4a;
+                border-color: #0078d4;
+                color: #0078d4;
+            }
+
+            .result-button:active {
+                background-color: #0078d4;
+                border-color: #0078d4;
+                color: #ffffff;
+            }
+
+            /* Bad End 画面のみ暗い背景 */
+            #scene-result-lose.active {
+                background-color: #0a0a0a;
+            }
+        </style>
+
+        <div class="result-window-container good-end">
+            <div class="result-titlebar">
+                <div class="result-titlebar-icon">🪟</div>
+                <div class="result-titlebar-text">✅ Mission Complete</div>
+                <div class="result-titlebar-controls">
+                    <button class="result-titlebar-button">−</button>
+                    <button class="result-titlebar-button">□</button>
+                    <button class="result-titlebar-button close">×</button>
+                </div>
             </div>
-            <div class="shutdown-title">シャットダウンしています...</div>
-            <div class="shutdown-message">MacBookをシャットダウンしました</div>
-            <div class="shutdown-code">mac_os.exe — プロセスを正常に終了しました (0x00000000)</div>
-            <div class="shutdown-spinner">
-                <div class="shutdown-dot"></div>
-                <div class="shutdown-dot"></div>
-                <div class="shutdown-dot"></div>
-                <div class="shutdown-dot"></div>
-                <div class="shutdown-dot"></div>
+
+            <div class="result-window-content">
+                <div class="result-screen good-end-result active">
+                    <div class="result-message-section">
+                        <div class="result-message-icon checkmark">✅</div>
+                        <div class="result-message-text">MacBook.exe を正常に終了しました。</div>
+                    </div>
+
+                    <div class="result-divider"></div>
+
+                    <div class="result-stats-section">
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">撃破数</span>
+                            <span class="result-stat-value">3 / 3</span>
+                        </div>
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">クリア時間</span>
+                            <span class="result-stat-value">12:34</span>
+                        </div>
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">被ダメージ</span>
+                            <span class="result-stat-value">240</span>
+                        </div>
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">使用ファイル</span>
+                            <div class="result-used-files">
+                                <span class="result-file-badge">attack.exe</span>
+                                <span class="result-file-badge">shield.png</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-divider"></div>
+
+                    <div class="result-button-section">
+                        <button class="result-button" onclick="showScene('stage')">もう一度</button>
+                        <button class="result-button" onclick="showScene('title')">タイトルへ</button>
+                    </div>
+                </div>
             </div>
-            <button class="shutdown-restart-btn" onclick="showScene('title')">タイトルに戻る</button>
         </div>
     </div>
 
     <!-- ===== RESULT LOSE ===== -->
     <div id="scene-result-lose" class="scene">
-        <div class="bsod-screen">
-            <span class="bsod-emoji">:(</span>
-            <div class="bsod-title">GAME OVER</div>
-            <div class="bsod-text">
-                問題が発生したため、PCを再起動する必要があります。<br>
-                エラー情報を収集しています。自動的に再起動します。
+        <div class="result-window-container bad-end">
+            <div class="result-titlebar">
+                <div class="result-titlebar-icon">🪟</div>
+                <div class="result-titlebar-text">⛔ Win vs Mac.exe — エラー</div>
+                <div class="result-titlebar-controls">
+                    <button class="result-titlebar-button">−</button>
+                    <button class="result-titlebar-button">□</button>
+                    <button class="result-titlebar-button close">×</button>
+                </div>
             </div>
-            <div class="bsod-progress-label">0% 完了</div>
-            <div class="bsod-progress-bar">
-                <div class="bsod-progress-fill"></div>
+
+            <div class="result-window-content">
+                <div class="result-screen bad-end-result active">
+                    <div class="result-message-section">
+                        <div class="result-message-icon error">⛔</div>
+                        <div>
+                            <div class="result-message-text">Win vs Mac.exe は動作を停止しました。</div>
+                            <div class="result-sub-message">問題が発生したため、プロセスを終了します。</div>
+                        </div>
+                    </div>
+
+                    <div class="result-divider"></div>
+
+                    <div class="result-stats-section">
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">終了コード</span>
+                            <span class="result-stat-value">0x000000_DEFEATED</span>
+                        </div>
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">発生場所</span>
+                            <span class="result-stat-value">Safari.exe</span>
+                        </div>
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">生存時間</span>
+                            <span class="result-stat-value">08:21</span>
+                        </div>
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">与ダメージ</span>
+                            <span class="result-stat-value">180</span>
+                        </div>
+                    </div>
+
+                    <div class="result-divider"></div>
+
+                    <div class="result-button-section">
+                        <button class="result-button" onclick="showScene('stage')">再試行</button>
+                        <button class="result-button" onclick="showScene('title')">タイトルへ</button>
+                    </div>
+                </div>
             </div>
-            <div class="bsod-qr">詳細については、次のエラーを検索してください：</div>
-            <div class="bsod-stopcode">
-                STOP CODE: PLAYER_HP_DEPLETED (0x0000DEAD)<br>
-                失敗した内容: mac_os.exe による致命的攻撃
-            </div>
-            <button class="bsod-restart-btn" onclick="showScene('title')">[ 再起動 ]</button>
         </div>
     </div>
 
