@@ -4,49 +4,70 @@
     <meta charset="UTF-8">
     <base href="https://game.web/">
     <link rel="stylesheet" href="common/common.css">
-    <style>
-        body { display: flex; flex-direction: column; height: 100%; padding: 12px; gap: 0; }
-
-        .section-label { flex-shrink: 0; margin-bottom: 8px; }
-
-        .stat-row {
-            flex: 1;
-            min-height: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 2px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .stat-row:last-child { border-bottom: none; }
-
-        .stat-key { color: var(--text-muted); font-size: 12px; }
-
-        .stat-val { font-weight: 600; font-size: 13px; }
-    </style>
+    <link rel="stylesheet" href="param/param.css">
 </head>
 <body>
-    <div class="section-label">ステータス</div>
-    <div class="stat-row"><span class="stat-key">Name</span> <span class="stat-val" id="v-name">—</span></div>
-    <div class="stat-row"><span class="stat-key">Skill</span><span class="stat-val" id="v-skill">—</span></div>
-    <div class="stat-row"><span class="stat-key">HP</span>   <span class="stat-val" id="v-hp">—</span></div>
-    <div class="stat-row"><span class="stat-key">ATK</span>  <span class="stat-val" id="v-atk">—</span></div>
-    <div class="stat-row"><span class="stat-key">DEF</span>  <span class="stat-val" id="v-def">—</span></div>
-    <div class="stat-row"><span class="stat-key">SPD</span>  <span class="stat-val" id="v-spd">—</span></div>
-
+    <div class="tab-bar">
+        <div class="tab active" data-tab="perf">パフォーマンス</div>
+        <div class="tab" data-tab="detail">詳細</div>
+    </div>
+    <div class="param-content" id="perf-view">
+        <div class="metric-row">
+            <div class="metric-header">
+                <span class="metric-key">HP</span>
+                <span><span class="metric-val" id="v-hp">&#8212;</span><span class="metric-bonus" id="b-hp"></span></span>
+            </div>
+            <div class="bar-bg">
+                <div class="bar-fill bar-hp"    id="bar-base-hp"  style="width:0%"></div>
+                <div class="bar-fill bar-bonus" id="bar-bonus-hp" style="width:0%"></div>
+            </div>
+        </div>
+        <div class="metric-row">
+            <div class="metric-header">
+                <span class="metric-key">ATK</span>
+                <span><span class="metric-val" id="v-atk">&#8212;</span><span class="metric-bonus" id="b-atk"></span></span>
+            </div>
+            <div class="bar-bg">
+                <div class="bar-fill bar-atk"   id="bar-base-atk"  style="width:0%"></div>
+                <div class="bar-fill bar-bonus" id="bar-bonus-atk" style="width:0%"></div>
+            </div>
+        </div>
+        <div class="metric-row">
+            <div class="metric-header">
+                <span class="metric-key">DEF</span>
+                <span><span class="metric-val" id="v-def">&#8212;</span><span class="metric-bonus" id="b-def"></span></span>
+            </div>
+            <div class="bar-bg">
+                <div class="bar-fill bar-def"   id="bar-base-def"  style="width:0%"></div>
+                <div class="bar-fill bar-bonus" id="bar-bonus-def" style="width:0%"></div>
+            </div>
+        </div>
+        <div class="metric-row">
+            <div class="metric-header">
+                <span class="metric-key">SPD</span>
+                <span><span class="metric-val" id="v-spd">&#8212;</span><span class="metric-bonus" id="b-spd"></span></span>
+            </div>
+            <div class="bar-bg">
+                <div class="bar-fill bar-spd"   id="bar-base-spd"  style="width:0%"></div>
+                <div class="bar-fill bar-bonus" id="bar-bonus-spd" style="width:0%"></div>
+            </div>
+        </div>
+    </div>
+    <div class="detail-content" id="detail-view">
+        <div class="meta-row">
+            <span class="meta-key">ジョブ</span>
+            <span class="meta-val" id="m-job">&#8212;</span>
+        </div>
+        <div class="meta-row">
+            <span class="meta-key">スキル</span>
+            <span class="meta-val" id="m-skill">&#8212;</span>
+        </div>
+        <div class="meta-row">
+            <span class="meta-key">装備スロット</span>
+            <span class="meta-val" id="m-slot">&#8212;</span>
+        </div>
+    </div>
     <script src="common/messaging.js"></script>
-    <script>
-        function onMessageFromGame(data) {
-            if (data.type === 'refresh') {
-                document.getElementById('v-name').textContent  = data.name  ?? '—';
-                document.getElementById('v-skill').textContent = data.skill ?? '—';
-                document.getElementById('v-hp').textContent    = data.hp    ?? '—';
-                document.getElementById('v-atk').textContent   = data.atk   ?? '—';
-                document.getElementById('v-def').textContent   = data.def   ?? '—';
-                document.getElementById('v-spd').textContent   = data.spd   ?? '—';
-            }
-        }
-    </script>
+    <script src="param/param.js"></script>
 </body>
 </html>

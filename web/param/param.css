@@ -1,0 +1,107 @@
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.tab-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    padding: 0 8px;
+    flex-shrink: 0;
+}
+
+.tab {
+    padding: 6px 14px;
+    font-size: 11px;
+    cursor: pointer;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.1s;
+    user-select: none;
+}
+
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.param-content {
+    flex: 1;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+.param-content.hidden { display: none; }
+
+.metric-row { display: flex; flex-direction: column; gap: 4px; }
+
+.metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.metric-key {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.metric-val { font-size: 12px; font-weight: 700; color: var(--text); }
+
+.metric-bonus {
+    font-size: 11px;
+    font-weight: 600;
+    color: #f0c040;
+    margin-left: 4px;
+}
+
+.bar-bg {
+    height: 6px;
+    background: #2a2a2a;
+    border-radius: 3px;
+    display: flex;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    transition: width 0.4s ease;
+}
+
+.bar-hp    { background: #4ec94e; }
+.bar-atk   { background: #e8a030; }
+.bar-def   { background: #5090d0; }
+.bar-spd   { background: #c050e0; }
+.bar-bonus { background: #f0c040; }
+
+.detail-content {
+    flex: 1;
+    padding: 12px;
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+}
+
+.detail-content.visible { display: flex; }
+
+.meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.meta-row:last-child { border-bottom: none; }
+.meta-key { color: var(--text-muted); }
+.meta-val { font-weight: 600; }
