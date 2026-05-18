@@ -9,18 +9,6 @@ const state = {
     bonusHp: 0, bonusAtk: 0, bonusDef: 0, bonusSpd: 0,
 };
 
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.tab').forEach(function (tab) {
-        tab.addEventListener('click', function () {
-            document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
-            tab.classList.add('active');
-            const isPerf = tab.dataset.tab === 'perf';
-            document.getElementById('perf-view').classList.toggle('hidden', !isPerf);
-            document.getElementById('detail-view').classList.toggle('visible', !isPerf);
-        });
-    });
-});
-
 function fmt(val) {
     return Number.isInteger(val) ? String(val) : val.toFixed(1);
 }
