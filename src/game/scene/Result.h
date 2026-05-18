@@ -3,7 +3,9 @@
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "core/interface/IResultWindowManager.h"
 #include "game/ui/UIManager.h"
+#include <memory>
 
 namespace game::scene
 {
@@ -24,6 +26,12 @@ namespace game::scene
             core::iface::IScreen& screen);
 
         /**
+         * @brief リザルトウィンドウマネージャーを設定する
+         * @param manager ウィンドウマネージャー（所有権を移譲）
+         */
+        void setWindowManager(std::unique_ptr<core::iface::IResultWindowManager> manager) noexcept;
+
+        /**
          * @brief シーンの更新処理
          * @param deltaTime フレーム間の時間差
          */
@@ -36,7 +44,7 @@ namespace game::scene
 
     private:
         /**
-         * @brief UIを構築する
+         * @brief UIを構築する（フォールバック用）
          */
         void setupUI();
 
@@ -44,5 +52,7 @@ namespace game::scene
         core::iface::IUIRenderer&    m_uiRenderer;
         core::iface::IScreen&        m_screen;
         ui::UIManager                m_uiManager;
+
+        std::unique_ptr<core::iface::IResultWindowManager> m_windowManager{};
     };
 }

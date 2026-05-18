@@ -2,6 +2,7 @@
 #include "SceneManager.h"
 #include "SceneType.h"
 #include "game/ui/Button.h"
+#include "game/GameManager.h"
 #include "core/constant/UI.h"
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
@@ -28,13 +29,27 @@ namespace game::scene
         setupUI();
     }
 
+    void Result::setWindowManager(std::unique_ptr<core::iface::IResultWindowManager> manager) noexcept
+    {
+        m_windowManager = std::move(manager);
+        const auto& resultData{ game::GameManager::getInstance().getResultData() };
+        m_windowManager->show(resultData);
+    }
+
     void Result::update(float deltaTime)
     {
+        if (m_windowManager)
+        {
+            m_windowManager->pumpMessages();
+            return;
+        }
         m_uiManager.update();
     }
 
     void Result::draw()
     {
+        if (m_windowManager)  return;
+
         auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
 
         const int titleFontSize{static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO)};
