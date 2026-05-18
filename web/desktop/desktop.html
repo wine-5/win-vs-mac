@@ -4,135 +4,24 @@
     <meta charset="UTF-8">
     <base href="https://game.web/">
     <link rel="stylesheet" href="common/common.css">
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-            background: linear-gradient(160deg, #1a2a4a 0%, #0d1520 100%);
-        }
-
-        .desktop-area {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            background-image: url('https://assets.game.web/images/background/DesktopBG.jpg');
-            background-size: cover;
-            background-position: center;
-        }
-
-        /* -- Taskbar -- */
-        .taskbar {
-            height: 48px;
-            background: rgba(12, 12, 12, 0.92);
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            align-items: center;
-            padding: 0 14px;
-            gap: 8px;
-            flex-shrink: 0;
-            position: relative;
-        }
-
-        .taskbar-apps {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 2px;
-            max-width: calc(100% - 260px);
-            overflow: hidden;
-        }
-
-        .taskbar-app {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.15s;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.9);
-            position: relative;
-            user-select: none;
-        }
-
-        .taskbar-app:hover { background: rgba(255, 255, 255, 0.1); }
-
-        .taskbar-app.active::after {
-            content: '';
-            position: absolute;
-            bottom: 3px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 16px;
-            height: 2px;
-            background: #0078d4;
-            border-radius: 2px;
-        }
-
-        .taskbar-app.hidden-win {
-            color: rgba(255, 255, 255, 0.38);
-        }
-
-        .app-icon {
-            width: 24px;
-            height: 24px;
-            object-fit: contain;
-        }
-
-        .taskbar-app.hidden-win .app-icon { opacity: 0.38; }
-
-        .taskbar-right {
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .clock {
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.75);
-            text-align: center;
-            line-height: 1.4;
-            min-width: 40px;
-        }
-
-        .start-btn {
-            padding: 7px 16px;
-            background: var(--accent);
-            border-color: var(--accent);
-            color: #fff;
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-        }
-
-        .start-btn:hover {
-            background: var(--accent-hover);
-            border-color: var(--accent-hover);
-            color: #fff;
-        }
-    </style>
+    <link rel="stylesheet" href="desktop/desktop.css">
 </head>
 <body>
     <div class="desktop-area"></div>
 
     <div class="taskbar">
         <div class="taskbar-apps">
-            <div class="taskbar-app active" id="app-job"   onclick="toggleWindow('job')">
-                <img class="app-icon" src="https://assets.game.web/images/ui/icons/job.png"> 職業選択
+            <div class="taskbar-app active" id="app-job" data-tooltip="職業選択" onclick="toggleWindow('job')">
+                <img class="app-icon" src="https://assets.game.web/images/ui/icons/job.png">
             </div>
-            <div class="taskbar-app active" id="app-file"  onclick="toggleWindow('file')">
-                <img class="app-icon" src="https://assets.game.web/images/ui/icons/file.png"> ファイル
+            <div class="taskbar-app active" id="app-file" data-tooltip="ファイル" onclick="toggleWindow('file')">
+                <img class="app-icon" src="https://assets.game.web/images/ui/icons/file.png">
             </div>
-            <div class="taskbar-app active" id="app-param" onclick="toggleWindow('param')">
-                <img class="app-icon" src="https://assets.game.web/images/ui/icons/param.png"> パラメータ
+            <div class="taskbar-app active" id="app-param" data-tooltip="パラメータ" onclick="toggleWindow('param')">
+                <img class="app-icon" src="https://assets.game.web/images/ui/icons/param.png">
             </div>
-            <div class="taskbar-app active" id="app-diff" onclick="toggleWindow('diff')">
-                <img class="app-icon" src="https://assets.game.web/images/ui/icons/diff.png"> 難易度
+            <div class="taskbar-app active" id="app-diff" data-tooltip="難易度" onclick="toggleWindow('diff')">
+                <img class="app-icon" src="https://assets.game.web/images/ui/icons/diff.png">
             </div>
         </div>
 
@@ -143,46 +32,6 @@
     </div>
 
     <script src="common/messaging.js"></script>
-    <script>
-        const winStates = { job: true, file: true, param: true, diff: true };
-        function toggleWindow(name) {
-            sendToGame({ type: 'toggleWindow', window: name });
-        }
-
-        function startGame() {
-            sendToGame({ type: 'startGame' });
-        }
-
-        function setWindowVisible(name, visible) {
-            winStates[name] = visible;
-            var el = document.getElementById('app-' + name);
-            if (!el) return;
-            if (visible) {
-                el.classList.add('active');
-                el.classList.remove('hidden-win');
-            } else {
-                el.classList.remove('active');
-                el.classList.add('hidden-win');
-            }
-        }
-
-        function onMessageFromGame(data) {
-            if (data.type === 'windowStateChanged') {
-                setWindowVisible(data.window, data.visible);
-            }
-        }
-
-        function updateClock() {
-            var now = new Date();
-            var h  = String(now.getHours()).padStart(2, '0');
-            var m  = String(now.getMinutes()).padStart(2, '0');
-            var mo = now.getMonth() + 1;
-            var d  = now.getDate();
-            document.getElementById('clock').innerHTML = h + ':' + m + '<br>' + mo + '/' + d;
-        }
-
-        updateClock();
-        setInterval(updateClock, 10000);
-    </script>
+    <script src="desktop/desktop.js"></script>
 </body>
 </html>

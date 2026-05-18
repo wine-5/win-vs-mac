@@ -1,0 +1,168 @@
+:root {
+    /* Responsive Layout Variables */
+    --taskbar-height: 48px;
+    --icon-size: 32px;
+    --app-icon-padding: 6px;
+    --taskbar-padding: 0 14px;
+    --taskbar-gap: 8px;
+    --taskbar-app-gap: 2px;
+    --taskbar-app-radius: 6px;
+    --app-padding: 6px;
+    --tooltip-padding: 6px 10px;
+    --tooltip-font-size: 11px;
+    --tooltip-margin-bottom: 8px;
+    --tooltip-border-radius: 4px;
+    --active-indicator-size: 4px;
+    --active-indicator-bottom: 2px;
+    --taskbar-right-gap: 10px;
+    --clock-font-size: 11px;
+    --clock-min-width: 40px;
+    --start-btn-padding: 7px 16px;
+    --start-btn-font-size: 13px;
+    --border-top-color: rgba(255, 255, 255, 0.08);
+    --app-hover-background: rgba(255, 255, 255, 0.1);
+    --tooltip-background: rgba(0, 0, 0, 0.9);
+    --tooltip-color: rgba(255, 255, 255, 0.95);
+    --app-color: rgba(255, 255, 255, 0.9);
+    --app-hidden-color: rgba(255, 255, 255, 0.38);
+    --app-hidden-icon-opacity: 0.38;
+    --taskbar-background: rgba(12, 12, 12, 0.92);
+    --active-indicator-color: #0078d4;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    background: linear-gradient(160deg, #1a2a4a 0%, #0d1520 100%);
+}
+
+.desktop-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background-image: url('https://assets.game.web/images/background/DesktopBG.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+/* -- Taskbar -- */
+.taskbar {
+    height: var(--taskbar-height);
+    background: var(--taskbar-background);
+    border-top: 1px solid var(--border-top-color);
+    display: flex;
+    align-items: center;
+    padding: var(--taskbar-padding);
+    gap: var(--taskbar-gap);
+    flex-shrink: 0;
+    position: relative;
+}
+
+.taskbar-apps {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: var(--taskbar-app-gap);
+    max-width: calc(100% - 260px);
+    overflow: hidden;
+}
+
+.taskbar-app {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--app-padding);
+    border-radius: var(--taskbar-app-radius);
+    cursor: pointer;
+    transition: background 0.15s;
+    font-size: 12px;
+    color: var(--app-color);
+    position: relative;
+    user-select: none;
+}
+
+.taskbar-app:hover {
+    background: var(--app-hover-background);
+}
+
+/* Tooltip on hover */
+.taskbar-app::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--tooltip-padding);
+    background: var(--tooltip-background);
+    color: var(--tooltip-color);
+    border-radius: var(--tooltip-border-radius);
+    font-size: var(--tooltip-font-size);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    margin-bottom: var(--tooltip-margin-bottom);
+    z-index: 1000;
+}
+
+.taskbar-app:hover::before {
+    opacity: 1;
+}
+
+.taskbar-app.active::after {
+    content: '';
+    position: absolute;
+    bottom: var(--active-indicator-bottom);
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--active-indicator-size);
+    height: var(--active-indicator-size);
+    background: var(--active-indicator-color);
+    border-radius: 50%;
+}
+
+.taskbar-app.hidden-win {
+    color: var(--app-hidden-color);
+}
+
+.app-icon {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    object-fit: contain;
+}
+
+.taskbar-app.hidden-win .app-icon { opacity: var(--app-hidden-icon-opacity); }
+
+.taskbar-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--taskbar-right-gap);
+}
+
+.clock {
+    font-size: var(--clock-font-size);
+    color: rgba(255, 255, 255, 0.75);
+    text-align: center;
+    line-height: 1.4;
+    min-width: var(--clock-min-width);
+}
+
+.start-btn {
+    padding: var(--start-btn-padding);
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-size: var(--start-btn-font-size);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.start-btn:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: #fff;
+}
