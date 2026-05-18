@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WindowBase.h"
+#include "platform/window/WindowBase.h"
 #include "platform/webview/WebView2Host.h"
 #include <string>
 #include <functional>

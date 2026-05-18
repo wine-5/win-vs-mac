@@ -4,7 +4,7 @@
 #include <string>
 #include <array>
 #include <algorithm>
-#include "WindowBase.h"
+#include "platform/window/WindowBase.h"
 #include "platform/webview/WebView2Host.h"
 #include "game/data/FileExtensionType.h"
 #include "game/utility/FileExtensionTypeResolver.h"
