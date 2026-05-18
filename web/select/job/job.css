@@ -43,7 +43,7 @@ body {
     gap: 10px;
 }
 
-.job-icon { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+.job-icon { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; }
 
 .job-info { flex: 1; }
 

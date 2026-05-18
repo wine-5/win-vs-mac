@@ -106,21 +106,11 @@ body {
 .file-name.empty { color: var(--text-muted); font-style: italic; }
 
 .ext-badge {
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 4px;
-    border-radius: 2px;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-    display: inline-block;
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    flex-shrink: 0;
 }
-
-.ext-badge.exe { background: rgba(232,160, 48,0.2); color: #e8a030; border: 1px solid #e8a030; }
-.ext-badge.doc { background: rgba( 80,144,208,0.2); color: #5090d0; border: 1px solid #5090d0; }
-.ext-badge.img { background: rgba( 78,201, 78,0.2); color: #4ec94e; border: 1px solid #4ec94e; }
-.ext-badge.aud { background: rgba(192, 80,224,0.2); color: #c050e0; border: 1px solid #c050e0; }
-.ext-badge.arc { background: rgba(180,180, 60,0.2); color: #c0c040; border: 1px solid #c0c040; }
-.ext-badge.unk { background: rgba(136,136,136,0.1); color: var(--text-muted); border: 1px solid var(--border); }
 
 .bonus-text { font-size: 11px; color: var(--text-muted); }
 .bonus-text.has-bonus { color: #f0c040; font-weight: 600; }
