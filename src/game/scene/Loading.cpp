@@ -17,10 +17,14 @@ namespace game::scene
     }
 
     Loading::Loading(core::iface::IUIRenderer& uiRenderer,
-        core::iface::IScreen& screen)
+        core::iface::IScreen& screen,
+        SceneType nextScene)
         : m_uiRenderer{ uiRenderer }
         , m_screen{ screen }
-        , m_elapsedTime{ 0.0f }
+        , m_nextScene{ nextScene }
+        , m_label{ nextScene == SceneType::InGame
+            ? "ダンジョンを生成しています..."
+            : "Win VS Mac.exe を起動しています..." }
     {
     }
 
@@ -28,11 +32,26 @@ namespace game::scene
     {
         m_elapsedTime += deltaTime;
 
-        // 2秒経過したらInGameシーンへ遷移
-        if (m_elapsedTime >= TEST_LOADING_DURATION)
+        switch (m_state)
         {
-            auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
-            sceneManager->changeScene(SceneType::InGame);
+        case State::Playing:
+            // 指定時間が経過したらフェードアウト開始
+            if (m_elapsedTime >= TEST_LOADING_DURATION)
+            {
+                m_fade = std::make_unique<ui::FadeTransition>(
+                    m_uiRenderer, m_screen, FADE_DURATION, false);
+                m_state = State::FadingOut;
+            }
+            break;
+
+        case State::FadingOut:
+            m_fade->update(deltaTime);
+            if (m_fade->isFinished())
+            {
+                auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
+                sceneManager->changeScene(m_nextScene);
+            }
+            break;
         }
     }
 
@@ -42,12 +61,14 @@ namespace game::scene
 
         const int fontSize{static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO)};
 
-        // ローディングタイトル表示
-        const char* title{"Loading..."};
-        int titleWidth{m_uiRenderer.getTextWidth(title, fontSize)};
+        // タイトル表示（文字コード変換して描画）
+        std::string title{ m_label };
+        if (converter)
+            title = converter->utf8ToShiftJis(title);
+        int titleWidth{m_uiRenderer.getTextWidth(title.c_str(), fontSize)};
         int titleX{(m_screen.getWidth() - titleWidth) / 2};
         int titleY{static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO)};
-        m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE, fontSize);
+        m_uiRenderer.drawText(titleX, titleY, title.c_str(), core::utility::Color::WHITE, fontSize);
 
         // 経過時間表示（切り上げ）
         float remainingTime{TEST_LOADING_DURATION - m_elapsedTime};
@@ -60,5 +81,7 @@ namespace game::scene
         int timerX{(m_screen.getWidth() - timerWidth) / 2};
         int timerY{static_cast<int>(m_screen.getHeight() * TIMER_Y_RATIO)};
         m_uiRenderer.drawText(timerX, timerY, timerText.c_str(), core::utility::Color::YELLOW, fontSize);
+
+        if (m_fade) m_fade->draw(m_uiRenderer, m_screen);
     }
 }

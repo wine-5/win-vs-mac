@@ -8,6 +8,7 @@
 #include "infrastructure/UIRenderer.h"
 #include "InGame.h"
 #include "Title.h"
+#include "Lockscreen.h"
 #include "Select.h"
 #include "Loading.h"
 #include "Result.h"
@@ -51,6 +52,11 @@ namespace game::scene
         infrastructure::UIRenderer   m_titleUIRenderer;
         std::unique_ptr<Title>       m_titleScene;
 
+        // Lockscreen用の依存関係と実体
+        infrastructure::InputManager m_lockscreenInputManager;
+        infrastructure::UIRenderer   m_lockscreenUIRenderer;
+        std::unique_ptr<Lockscreen>  m_lockscreenScene;
+
         // Select用の依存関係と実体
         infrastructure::InputManager m_selectInputManager;
         infrastructure::UIRenderer   m_selectUIRenderer;
@@ -59,6 +65,7 @@ namespace game::scene
         // Loading用の依存関係と実体
         infrastructure::UIRenderer   m_loadingUIRenderer;
         std::unique_ptr<Loading>     m_loadingScene;
+        bool                         m_startupLoadingDone{};
 
         // Result用の依存関係と実体
         infrastructure::InputManager m_resultInputManager;

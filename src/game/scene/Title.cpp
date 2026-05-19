@@ -5,7 +5,6 @@
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IResourceManager.h"
 #include <cstdlib>
-#include "LockscreenView.h"
 
 namespace game::scene
 {
@@ -18,40 +17,23 @@ namespace game::scene
 	{
 		auto* res{ core::base::ServiceLocator::get<core::iface::IResourceManager>() };
 		std::string mainFontName{ res->getFontName("main").value_or("") };
-		std::string lockFontName{ res->getFontName("normal").value_or("") };
-		m_lockscreenView = std::make_unique<LockscreenView>(uiRenderer, screen, *res, std::move(lockFontName));
 
 		m_view = std::make_unique<TitleView>(
 			inputProvider, uiRenderer, screen,
 			std::move(mainFontName),
 			[this]() { goToSelect(); },
 			[this]() { exitApp(); });
+
+		// Loading 画面で起動演出済みのため、Splash をスキップしてタイトルをフェードインで表示
+		m_view->setButtonsVisible(true);
+		m_fade = std::make_unique<ui::FadeTransition>(
+			m_uiRenderer, m_screen, FADE_DURATION, true);
 	}
 
 	void Title::update(float deltaTime)
 	{
 		switch (m_state)
 		{
-		case State::Lockscreen:
-			m_lockscreenView->update(deltaTime);
-			if (m_inputProvider.isKeyPressed(core::input::KeyCode::Space)
-				|| m_inputProvider.isMouseLeftPressed()
-				|| m_inputProvider.isMouseRightPressed())
-			{
-				m_state = State::LockscreenSliding;
-			}
-			break;
-
-		case State::LockscreenSliding:
-		{
-			m_lockscreenView->update(deltaTime);
-			const float slideSpeed{ static_cast<float>(m_screen.getHeight()) / LOCKSCREEN_SLIDE_DURATION };
-			m_lockscreenOffsetY -= slideSpeed * deltaTime;
-			if (m_lockscreenOffsetY <= -static_cast<float>(m_screen.getHeight()))
-				m_state = State::Splash;
-			break;
-		}
-
 		case State::Splash:
 			m_splashTimer += deltaTime;
 			m_dotTimer += deltaTime;
@@ -108,11 +90,6 @@ namespace game::scene
 	{
 		switch (m_state)
 		{	
-		case State::Lockscreen:
-		case State::LockscreenSliding:
-			m_lockscreenView->draw(static_cast<int>(m_lockscreenOffsetY));
-			break;
-
 		case State::Splash:
 		case State::SplashFadeOut:
 			m_view->drawSplash(m_dotCount);

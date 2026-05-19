@@ -7,6 +7,7 @@ namespace game::scene
      */
     enum class SceneType
     {
+        Lockscreen,
         Title,
         Select,
         Loading,

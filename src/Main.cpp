@@ -44,11 +44,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// ServiceLocatorからSceneManagerを取得
 	auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
 	
-	// 初期シーンをTitleに設定
-	//sceneManager->changeScene(game::scene::SceneType::Title);
-
-	// デバック用：初期シーンをgameに設定
-	sceneManager->changeScene(game::scene::SceneType::Select);
+	// 初期シーンをLoadingに設定
+	sceneManager->changeScene(game::scene::SceneType::Loading);
 	
 	while (ProcessMessage() == 0)
 	{

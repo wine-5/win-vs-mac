@@ -8,7 +8,6 @@
 
 namespace game::scene
 {
-	class LockscreenView;
 	class TitleView;
 
 	/**
@@ -41,8 +40,6 @@ namespace game::scene
 	private:
 		enum class State
 		{
-			Lockscreen,
-			LockscreenSliding,
 			Splash,
 			SplashFadeOut,
 			TitleFadeIn,
@@ -58,17 +55,14 @@ namespace game::scene
 		core::iface::IScreen& m_screen;
 
 		std::unique_ptr<TitleView>          m_view;
-		std::unique_ptr<LockscreenView> m_lockscreenView;
 		std::unique_ptr<ui::FadeTransition> m_fade;
 
-		State m_state{ State::Lockscreen };
+		State m_state{ State::TitleFadeIn };
 
-		float m_lockscreenOffsetY{};
 		float m_splashTimer{};
 		float m_dotTimer{};
 		int   m_dotCount{};
 
-		static constexpr float LOCKSCREEN_SLIDE_DURATION = 0.7f;
 		static constexpr float SPLASH_DURATION = 3.0f;
 		static constexpr float FADE_DURATION = 0.5f;
 		static constexpr float DOT_INTERVAL = 0.4f;
