@@ -1,11 +1,9 @@
 ﻿#pragma once
 #include "IScene.h"
-#include "SceneType.h"
 #include "game/ui/FadeTransition.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include <memory>
-#include <string>
 
 namespace game::scene
 {
@@ -22,8 +20,7 @@ namespace game::scene
          * @param nextScene ローディング完了後に遷移するシーン
          */
         Loading(core::iface::IUIRenderer& uiRenderer,
-            core::iface::IScreen& screen,
-            SceneType nextScene);
+            core::iface::IScreen& screen);
 
         /**
          * @brief シーンの更新処理
@@ -46,8 +43,6 @@ namespace game::scene
         core::iface::IUIRenderer& m_uiRenderer;
         core::iface::IScreen& m_screen;
         float m_elapsedTime{};
-        SceneType m_nextScene;
-        std::string m_label;
         State m_state{ State::Playing };
         std::unique_ptr<ui::FadeTransition> m_fade;
 

@@ -17,14 +17,9 @@ namespace game::scene
     }
 
     Loading::Loading(core::iface::IUIRenderer& uiRenderer,
-        core::iface::IScreen& screen,
-        SceneType nextScene)
+        core::iface::IScreen& screen)
         : m_uiRenderer{ uiRenderer }
         , m_screen{ screen }
-        , m_nextScene{ nextScene }
-        , m_label{ nextScene == SceneType::InGame
-            ? "ダンジョンを生成しています..."
-            : "Win VS Mac.exe を起動しています..." }
     {
     }
 
@@ -49,7 +44,7 @@ namespace game::scene
             if (m_fade->isFinished())
             {
                 auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
-                sceneManager->changeScene(m_nextScene);
+                sceneManager->changeScene(SceneType::InGame);
             }
             break;
         }
@@ -62,7 +57,7 @@ namespace game::scene
         const int fontSize{static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO)};
 
         // タイトル表示（文字コード変換して描画）
-        std::string title{ m_label };
+        std::string title{ "ローディング中..." };
         if (converter)
             title = converter->utf8ToShiftJis(title);
         int titleWidth{m_uiRenderer.getTextWidth(title.c_str(), fontSize)};
