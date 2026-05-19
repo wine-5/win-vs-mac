@@ -144,6 +144,7 @@
     <ClCompile Include="src\game\attack\DefenseHandler.cpp" />
     <ClCompile Include="src\game\factory\EnemyFactory.cpp" />
     <ClCompile Include="src\game\scene\Loading.cpp" />
+    <ClCompile Include="src\game\scene\Lockscreen.cpp" />
     <ClCompile Include="src\game\scene\LockscreenView.cpp" />
     <ClCompile Include="src\game\scene\Result.cpp" />
     <ClCompile Include="src\game\scene\SceneFactory.cpp" />
@@ -274,6 +275,7 @@
     <ClInclude Include="src\game\factory\EnemyFactory.h" />
     <ClInclude Include="src\game\GameManager.h" />
     <ClInclude Include="src\game\scene\Loading.h" />
+    <ClInclude Include="src\game\scene\Lockscreen.h" />
     <ClInclude Include="src\game\scene\LockscreenView.h" />
     <ClInclude Include="src\game\scene\Result.h" />
     <ClInclude Include="src\game\scene\SceneFactory.h" />
