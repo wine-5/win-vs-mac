@@ -289,52 +289,6 @@
             </div>
         </div>
     </div>
-                    <!-- ===== Window: Job Select ===== -->
-                    <div class="win10-window" id="win-job" onmousedown="bringToFront('win-job')">
-            <div class="win10-titlebar" onmousedown="startDrag(event, 'win-job')">
-                <span class="win10-titlebar-icon">⚔</span>
-                <span class="win10-titlebar-title">職業選択</span>
-                <div class="win10-window-controls">
-                    <button class="win10-wctrl" onclick="minimizeWindow('win-job')" title="最小化">─</button>
-                    <button class="win10-wctrl" onclick="maximizeWindow('win-job')" title="最大化">□</button>
-                    <button class="win10-wctrl close" onclick="closeWindow('win-job')" title="閉じる">✕</button>
-                </div>
-            </div>
-            <div class="win10-window-body">
-                <div class="job-list" id="job-list">
-                    <div class="job-item selected" onclick="selectJob(this,'剣士')">
-                        <div class="job-item-icon">⚔</div>
-                        <div class="job-item-info">
-                            <div class="job-item-name">剣士 <span class="job-item-en">Warrior</span></div>
-                            <div class="job-item-sub">近接・前方扇形攻撃</div>
-                        </div>
-                    </div>
-                    <div class="job-item" onclick="selectJob(this,'魔法使い')">
-                        <div class="job-item-icon">🔮</div>
-                        <div class="job-item-info">
-                            <div class="job-item-name">魔法使い <span class="job-item-en">Mage</span></div>
-                            <div class="job-item-sub">遠距離・魔法弾</div>
-                        </div>
-                    </div>
-                    <div class="job-item" onclick="selectJob(this,'忍者')">
-                        <div class="job-item-icon">🗡</div>
-                        <div class="job-item-info">
-                            <div class="job-item-name">忍者 <span class="job-item-en">Ninja</span></div>
-                            <div class="job-item-sub">近接・高速移動</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="job-desc-box">
-                    <div class="job-desc-name" id="job-desc-name">剣士 / Warrior</div>
-                    <div class="job-desc-text" id="job-desc-text">近接戦闘を得意とする前衛職。前方扇形への斬撃で複数の敵をまとめて攻撃できる。防御力が高く初心者にもおすすめ。</div>
-                    <div class="job-desc-skill">
-                        <span class="job-desc-skill-label">必殺技</span>
-                        <span id="job-desc-skill">全方位斬り</span>
-                    </div>
-                    <div class="job-desc-type">攻撃タイプ: <span id="job-desc-type">slash</span></div>
-                </div>
-            </div>
-        </div>
 
     <!-- ===== LOADING ===== -->
     <div id="scene-loading" class="scene">
@@ -366,33 +320,33 @@
                         <div class="dungeon-corner dungeon-corner-tr" style="left:480px;top:150px;"></div>
                         <div class="dungeon-corner dungeon-corner-bl" style="left:100px;top:330px;"></div>
                         <div class="dungeon-corner dungeon-corner-br" style="left:480px;top:330px;"></div>
-                        <div class="player-sprite" style="left:270px;top:210px">
+                        <div class="player-sprite">
                             <div class="player-head"></div>
                             <div class="player-body"></div>
                         </div>
-                        <div class="enemy-sprite" style="left:160px;top:180px">
-                            <div style="position:relative">
-                                <div class="enemy-hpbar">
-                                    <div class="enemy-hpbar-fill" style="width:70%"></div>
-                                </div>
-                                <div class="enemy-body">👾</div>
-                            </div>
+                    </div>
+                    <!-- Player Stats Panel (Left Top) -->
+                    <div class="player-stats-panel">
+                        <div class="stats-title">STATS</div>
+                        <div class="stat-item">
+                            <span class="stat-name">HP</span>
+                            <span class="stat-value" id="stat-hp-display">100/100</span>
                         </div>
-                        <div class="enemy-sprite" style="left:380px;top:260px;animation-delay:0.5s">
-                            <div style="position:relative">
-                                <div class="enemy-hpbar">
-                                    <div class="enemy-hpbar-fill" style="width:45%"></div>
-                                </div>
-                                <div class="enemy-body">🦊</div>
-                            </div>
+                        <div class="stat-item">
+                            <span class="stat-name">ATK</span>
+                            <span class="stat-value">45</span>
                         </div>
-                        <div class="enemy-sprite" style="left:280px;top:300px;animation-delay:1s">
-                            <div style="position:relative">
-                                <div class="enemy-hpbar">
-                                    <div class="enemy-hpbar-fill" style="width:90%"></div>
-                                </div>
-                                <div class="enemy-body">🤖</div>
-                            </div>
+                        <div class="stat-item">
+                            <span class="stat-name">DEF</span>
+                            <span class="stat-value">10</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-name">SPD</span>
+                            <span class="stat-value">12</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-name">TYPE</span>
+                            <span class="stat-value" id="stat-type-display">SLASH</span>
                         </div>
                     </div>
                 </div>
@@ -632,6 +586,7 @@
     <script src="js/window-manager.js"></script>
     <script src="js/scene-stage.js"></script>
     <script src="js/scene-loading.js"></script>
+    <script src="js/game-logic.js"></script>
     <script src="js/scene-ingame.js"></script>
     <script src="js/scene-result.js"></script>
     <script src="js/utils.js"></script>
