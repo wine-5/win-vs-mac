@@ -247,25 +247,27 @@ if (difficulty === 'HARD') { }
 
 ### 画像パス
 
-画像パスは絶対URLまたは相対パスで指定：
+画像パスは絶対URLを優先。WebView環境では `https://assets.game.web/` ドメインを使用：
 
 ```javascript
-// 推奨：絶対URL（CDN/外部サーバー）
+// ✅ 推奨：絶対URL（WebView環境）
 'https://assets.game.web/images/ui/select/job-warrior.png'
 
-// 代替：相対パス
+// OK：相対パス（フォールバック）
 '../../../assets/images/ui/select/job-warrior.png'
 ```
+
+**参考：** WebViewの基URL (`https://game.web/`) とアセットドメイン (`https://assets.game.web/`) の区別を意識
 
 ---
 
 ## コメント・ドキュメント
 
-JavaScriptのコメントは C++ の Doxygen ルールと異なります。
+JavaScriptのコメント規則は C++ の Doxygen ルールと異なります。
 
 ### 関数のドキュメントコメント
 
-複雑な関数には JSDoc 形式のコメントを推奨（ただし必須ではない）：
+複雑な関数にはJSDoc形式のコメントを推奨（ただし必須ではない）：
 
 ```javascript
 /**
@@ -276,6 +278,8 @@ function selectDifficulty(difficulty) {
     // ...
 }
 ```
+
+**Google Style Guide:** JSDoc は public API に推奨（内部関数は不要）
 
 ### インライン説明
 
@@ -301,18 +305,20 @@ let globalJobData = null;
 // ✅ 推奨
 const JobLogic = (function () {
     let jobData = null;  // IIFE内に閉じ込める
-    return { /* ... */ };
+    return { /* 公開メソッド */ };
 }());
 ```
+
+**Google Style Guide:** グローバルスコープの污染を避ける
 
 ### null / undefined の初期値
 
 変数初期化は明示的に `null` で統一：
 
 ```javascript
-let buttonEl = null;      // ✅ 明示的
-let jobListEl = null;     // ✅ 明示的
-let firstRender = true;   // ✅ 初期値が決まっている場合は値で
+let buttonElement = null;   // ✅ 明示的
+let jobListElement = null;  // ✅ 明示的
+let firstRender = true;     // ✅ 初期値が決まっている場合は値で
 ```
 
 ### 文字列リテラル
@@ -331,12 +337,21 @@ statusEl.textContent = 'ファイルをクリックして選択';  // ✅ 直接
 |---|---|---|
 | ファイル名 | ケバブケース | `job-logic.js` |
 | フォルダ名 | 小文字 | `select/` |
-| IIFEモジュール | PascalCase | `JobView` |
-| 関数名 | camelCase | `initialize()` |
-| ローカル変数 | camelCase | `jobListEl` |
-| 定数（トップレベル） | UPPER_SNAKE_CASE | `MAX_SLOTS` |
-| HTML id | ケバブケース | `job-list` |
-| data-属性 | ケバブケース | `data-action` |
-| CSSクラス | ケバブケース | `.job-card` |
-| イベントハンドラ | camelCase（on無し） | `onJobSelected` |
-| 状態プロパティ | camelCase | `baseHp` |
+| IIFE モジュール名 | PascalCase | `JobLogic`, `JobView` |
+| 関数名 | camelCase | `initialize()`, `renderSlots()` |
+| ローカル変数 | camelCase | `jobCount`, `userName` |
+| DOM要素変数 | camelCase + Element/El | `jobListElement`, `btnEl` |
+| グローバル定数 | CONSTANT_CASE | `MAX_SLOTS`, `DEFAULT_DIFFICULTY` |
+| HTML id | ケバブケース | `job-list`, `btn-easy` |
+| data-属性 | ケバブケース | `data-action`, `data-slot` |
+| CSSクラス | ケバブケース | `.job-card`, `.active-easy` |
+| コールバック関数 | on + camelCase | `onJobSelected()`, `onStatsUpdate()` |
+| オブジェクトプロパティ | camelCase | `baseHp`, `currentJob` |
+
+---
+
+## 参考資料
+
+- **[Google JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html)** - 公式スタイルガイド
+- **[MDN JavaScript Guide](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide)** - Mozilla公式ドキュメント
+- **[ES6 標準](https://www.ecma-international.org/ecma-262/)** - ECMAScript仕様
