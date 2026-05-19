@@ -415,3 +415,108 @@
     justify-content: flex-end;
     gap: 8px;
 }
+
+/* Dungeon Visualization */
+.dungeon-bg-box {
+    position: absolute;
+    background: linear-gradient(135deg, #080818, #0c0c20);
+    border: 1px solid rgba(0, 245, 255, 0.1);
+}
+
+.dungeon-top-line {
+    position: absolute;
+    background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.4), transparent);
+    height: 3px;
+}
+
+.dungeon-bottom-line {
+    position: absolute;
+    background: linear-gradient(90deg, transparent, rgba(0, 128, 255, 0.3), transparent);
+    height: 3px;
+}
+
+.dungeon-grid {
+    position: absolute;
+    background-image: linear-gradient(rgba(0, 245, 255, 0.05) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0, 245, 255, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+}
+
+.dungeon-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+}
+
+.dungeon-corner-tl {
+    border-left: 2px solid var(--neon-cyan);
+    border-top: 2px solid var(--neon-cyan);
+}
+
+.dungeon-corner-tr {
+    border-right: 2px solid var(--neon-cyan);
+    border-top: 2px solid var(--neon-cyan);
+}
+
+.dungeon-corner-bl {
+    border-left: 2px solid var(--neon-cyan);
+    border-bottom: 2px solid var(--neon-cyan);
+}
+
+.dungeon-corner-br {
+    border-right: 2px solid var(--neon-cyan);
+    border-bottom: 2px solid var(--neon-cyan);
+}
+
+/* Action Buttons */
+.action-buttons {
+    position: absolute;
+    bottom: 60px;
+    right: 20px;
+    display: flex;
+    gap: 8px;
+    z-index: 30;
+}
+
+.action-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-btn-attack {
+    background: rgba(0, 245, 255, 0.1);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+
+.action-btn-attack:hover {
+    background: rgba(0, 245, 255, 0.2);
+    box-shadow: 0 0 12px var(--neon-cyan);
+}
+
+.action-btn-special {
+    background: rgba(255, 0, 60, 0.1);
+    border: 1px solid var(--neon-red);
+    color: var(--neon-red);
+}
+
+.action-btn-special:hover {
+    background: rgba(255, 0, 60, 0.2);
+    box-shadow: 0 0 12px var(--neon-red);
+}
+
+.action-btn-damage {
+    background: rgba(255, 165, 0, 0.1);
+    border: 1px solid #ff8c00;
+    color: #ff8c00;
+}
+
+.action-btn-damage:hover {
+    background: rgba(255, 165, 0, 0.2);
+    box-shadow: 0 0 12px #ff8c00;
+}
