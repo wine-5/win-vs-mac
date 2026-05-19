@@ -1,4 +1,5 @@
 ﻿#include "SceneFactory.h"
+#include "Bios.h"
 #include "Title.h"
 #include "Lockscreen.h"
 #include "Select.h"
@@ -26,8 +27,8 @@ namespace game::scene
 		, m_lockscreenScene{}
 		, m_selectScene{}
 		, m_loadingScene{}
-		, m_resultScene{}
-		, m_titleUIRenderer{ MAIN_FONT_NAME }
+		, m_resultScene{}		, m_biosScene{}
+		, m_biosUIRenderer{ MAIN_FONT_NAME }		, m_titleUIRenderer{ MAIN_FONT_NAME }
 		, m_lockscreenUIRenderer{ MAIN_FONT_NAME }
 		, m_selectUIRenderer{ MAIN_FONT_NAME }
 		, m_loadingUIRenderer{ MAIN_FONT_NAME }
@@ -45,6 +46,13 @@ namespace game::scene
 
 		switch (sceneType)
 		{
+		case SceneType::Bios:
+			m_biosScene = std::make_unique<Bios>(
+				m_biosInputManager,
+				m_biosUIRenderer,
+				*screen);
+			return m_biosScene.get();
+
 		case SceneType::Title:
 			m_titleScene = std::make_unique<Title>(
 				m_titleInputManager,
@@ -92,12 +100,9 @@ namespace game::scene
 
 		case SceneType::Loading:
 		{
-			const SceneType nextScene{ m_startupLoadingDone ? SceneType::InGame : SceneType::Lockscreen };
-			m_startupLoadingDone = true;
 			m_loadingScene = std::make_unique<Loading>(
 				m_loadingUIRenderer,
-				*screen,
-				nextScene);
+				*screen);
 			return m_loadingScene.get();
 		}
 
@@ -148,7 +153,8 @@ namespace game::scene
 		// 指定シーンを破棄してウィンドウなどのリソースを解放する
 		switch (sceneType)
 		{
-		case SceneType::Title:   m_titleScene.reset();      break;
+		case SceneType::Bios:       m_biosScene.reset();       break;
+		case SceneType::Title:      m_titleScene.reset();      break;
 		case SceneType::Lockscreen: m_lockscreenScene.reset(); break;
 		case SceneType::Select:  m_selectScene.reset();  break;
 		case SceneType::Loading: m_loadingScene.reset(); break;

@@ -44,8 +44,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// ServiceLocatorからSceneManagerを取得
 	auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
 	
-	// 初期シーンをLoadingに設定
-	sceneManager->changeScene(game::scene::SceneType::Loading);
+	// 初期シーンをBiosに設定
+	sceneManager->changeScene(game::scene::SceneType::Bios);
 	
 	while (ProcessMessage() == 0)
 	{

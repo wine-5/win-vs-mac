@@ -12,6 +12,7 @@
 #include "Select.h"
 #include "Loading.h"
 #include "Result.h"
+#include "Bios.h"
 #include <memory>
 
 namespace game::scene
@@ -62,10 +63,14 @@ namespace game::scene
         infrastructure::UIRenderer   m_selectUIRenderer;
         std::unique_ptr<Select>      m_selectScene;
 
+        // Bios用の依存関係と実体
+        infrastructure::InputManager m_biosInputManager;
+        infrastructure::UIRenderer   m_biosUIRenderer;
+        std::unique_ptr<Bios>        m_biosScene;
+
         // Loading用の依存関係と実体
         infrastructure::UIRenderer   m_loadingUIRenderer;
         std::unique_ptr<Loading>     m_loadingScene;
-        bool                         m_startupLoadingDone{};
 
         // Result用の依存関係と実体
         infrastructure::InputManager m_resultInputManager;
