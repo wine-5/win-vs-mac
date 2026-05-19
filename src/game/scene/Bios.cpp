@@ -7,45 +7,46 @@
 
 namespace
 {
-    enum class LineType { Normal, Ok, Warn, Bold, Dim, Head };
+    enum class LineType { Content, Category, Header, Footer, Guide };
 
     struct BiosLine
     {
         const char* text;
-        LineType    type { LineType::Normal };
+        LineType    type { LineType::Content };
         float       delay{};    // 直前の行からの遅延（秒）
     };
 
+    // BIOS 起動シーケンスの表示行。各行は順序通りに画面に表示される
+    // 形式: { テキスト, 行タイプ, 前の行からの遅延時間（秒） }
+    // 遅延時間をマジックナンバーである理由として定数化にしても再利用する予定がなく、冗長になってしまうだけだと思ったため
     constexpr BiosLine BIOS_LINES[] =
     {
-        { "  AMI UEFI BIOS  -  WIN vs MAC Dungeon System v1.0.0  ",     LineType::Head,   0.00f },
-        { "  Copyright (C) 2026  WIN vs MAC Development Team      ",    LineType::Head,   0.08f },
-        { "",                                                            LineType::Normal, 0.14f },
-        { "CPU  : WIN-CORE i9-X9900K @ 5.80GHz .......................... [OK]", LineType::Ok,   0.52f },
-        { "Mem  : 32768 MB DDR5-6400 ..................................... [OK]", LineType::Ok,   0.24f },
-        { "",                                                            LineType::Normal, 0.08f },
-        { "Detecting storage devices...",                                LineType::Normal, 0.32f },
-        { "  C:\\ NTFS  512 GB  (Windows OS + Dungeon Core) .......... [OK]", LineType::Ok,   0.21f },
-        { "  D:\\ NTFS    2 TB  (User Data + Enemy Database) ......... [OK]", LineType::Ok,   0.21f },
-        { "  Z:\\ ???   ??? GB  (UNKNOWN - Suspicious Files) ... [WARN]", LineType::Warn, 0.48f },
-        { "",                                                            LineType::Normal, 0.08f },
-        { "PCI-E Devices:",                                             LineType::Normal, 0.18f },
-        { "  GPU : NVIDIA GeForce RTX 4090 ............................... [OK]", LineType::Ok, 0.17f },
-        { "  NET : Intel AX210 WiFi 6E ................................... [OK]", LineType::Ok, 0.17f },
-        { "",                                                            LineType::Normal, 0.08f },
-        { "DUNGEON SUBSYSTEM INITIALIZING...",                           LineType::Bold,   0.36f },
-        { "  Kernel Modules      [############] 100% ................. [OK]", LineType::Ok, 0.31f },
-        { "  Enemy Database      [############] 100% ................. [OK]", LineType::Ok, 0.27f },
-        { "  Physics Engine      [############] 100% ................. [OK]", LineType::Ok, 0.29f },
-        { "  Dungeon Generator   [############] 100% ................. [OK]", LineType::Ok, 0.37f },
-        { "",                                                            LineType::Normal, 0.10f },
-        { "[!] WARNING: Unauthorized process detected  (mac_invasion.exe)", LineType::Warn, 0.68f },
-        { "    Countermeasures loading...",                              LineType::Warn,   0.40f },
-        { "",                                                            LineType::Normal, 0.20f },
-        { "System Ready.  Starting WIN vs MAC...",                       LineType::Bold,   0.56f },
-        { "",                                                            LineType::Normal, 0.08f },
-        { "----------------------------------------------------------------------", LineType::Dim, 0.08f },
-        { " [F2] Enter Setup   |   [F12] Boot Menu   |   [ESC] Skip ", LineType::Dim,  0.05f },
+        { "  [ESC]: Skip  ",                                                        LineType::Guide,    0.00f },
+        { "  AMI UEFI BIOS  -  WIN vs MAC.exe v1.0.0  ",                            LineType::Header,   0.00f },
+        { "  Copyright (C) 2026  WIN vs MAC wine-5      ",                          LineType::Header,   0.08f },
+        { "----------------------------------------------------------------------", LineType::Category, 0.08f },
+        { "Loading Core Systems",                                                   LineType::Category, 0.32f },
+        { "  Service Locator ........................................ [OK]",        LineType::Content,  0.21f },
+        { "  ECS Entity Manager ..................................... [OK]",        LineType::Content,  0.21f },
+        { "  Layered Architecture ................................... [OK]",        LineType::Content,  0.18f },
+        { "  Singleton Pattern ....................................... [OK]",       LineType::Content,  0.17f },
+        { "  EventBus ............................................... [OK]",        LineType::Content,  0.17f },
+        { "  Chain of Responsibility ................................. [OK]",       LineType::Content,  0.18f },
+        { "----------------------------------------------------------------------", LineType::Category, 0.08f },
+        { "External Libraries",                                                     LineType::Category, 0.24f },
+        { "  DxLib 3D Graphics ....................................... [OK]",       LineType::Content,  0.27f },
+        { "  Raylib Graphics Engine ................................... [OK]",      LineType::Content,  0.21f },
+        { "  RapidJSON Parser ......................................... [OK]",      LineType::Content,  0.29f },
+        { "  Effekseer Particle Engine ................................ [OK]",      LineType::Content,  0.31f },
+        { "  WebView2 Integration ..................................... [OK]",      LineType::Content,  0.21f },
+        { "----------------------------------------------------------------------", LineType::Category, 0.08f },
+        { "Programming Language",                                                   LineType::Category, 0.24f },
+        { "  C++17 Standard .......................................... [OK]",       LineType::Content,  0.21f },
+        { "  GLSL/HLSL Shaders ....................................... [OK]",       LineType::Content,  0.17f },
+        { "  HTML/CSS/JavaScript ..................................... [OK]",       LineType::Content,  0.18f },
+        { "  JSON Data Format ......................................... [OK]",      LineType::Content,  0.17f },
+        { "System Ready.  Starting WIN vs MAC.exe...",                              LineType::Content,  0.56f },
+        { "[ESC] Skip ",                                                            LineType::Footer,   0.5f },
     };
 
     constexpr int LINE_COUNT{ static_cast<int>(sizeof(BIOS_LINES) / sizeof(BIOS_LINES[0])) };
@@ -60,12 +61,11 @@ namespace
         using core::utility::Color;
         switch (type)
         {
-        case LineType::Ok:   return Color::rgb(  0, 200,   0);
-        case LineType::Warn: return Color::rgb(200, 200,   0);
-        case LineType::Bold: return Color::WHITE;
-        case LineType::Dim:  return Color::rgb( 96,  96,  96);
-        case LineType::Head: return Color::YELLOW;
-        default:             return Color::LIGHT_GRAY;
+        case LineType::Content:  return Color::DARK_BLUE;
+        case LineType::Category:  return Color::BLACK;
+        case LineType::Header:   return Color::WHITE;
+        case LineType::Footer:   return Color::WHITE;
+        case LineType::Guide:    return Color::BLACK;
         }
     }
 }
@@ -127,9 +127,9 @@ namespace game::scene
         const int padX      { static_cast<int>(screenW * BIOS_PADDING_X_RATIO) };
         const int padY      { static_cast<int>(screenH * BIOS_PADDING_Y_RATIO) };
 
-        // 黒背景を明示的に塗りつぶす
+        // 白背景を明示的に塗りつぶす
         m_uiRenderer.drawBox(0, 0, screenW, screenH,
-            core::utility::Color::rgb(0, 0, 0), true);
+            core::utility::Color::WHITE, true);
 
         for (int i{}; i < m_visibleCount; ++i)
         {
@@ -137,10 +137,12 @@ namespace game::scene
             const int   y    { padY + i * lineHeight };
             const auto  color{ lineTypeToColor(line.type) };
 
-            // Head タイプは青背景を先に描画
-            if (line.type == LineType::Head)
-                m_uiRenderer.drawBox(padX, y, screenW - 2 * padX, lineHeight,
-                    core::utility::Color::rgb(0, 0, 170), true);
+            if (line.type == LineType::Guide)
+                m_uiRenderer.drawBox(0, y, screenW, lineHeight,
+                    core::utility::Color::MEDIUM_GREEN, true);
+            else if (line.type == LineType::Header || line.type == LineType::Footer)
+                m_uiRenderer.drawBox(0, y, screenW, lineHeight,
+                    core::utility::Color::BLUE, true);
 
             if (line.text[0] != '\0')
                 m_uiRenderer.drawText(padX, y, line.text, color, fontSize);
