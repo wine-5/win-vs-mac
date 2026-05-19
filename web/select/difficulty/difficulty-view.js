@@ -46,6 +46,10 @@ const DifficultyView = (function () {
     };
 }());
 
+window.onMessageFromGame = function (data) {
+    DifficultyLogic.onMessageFromGame(data);
+};
+
 (function () {
     if (DifficultyView.initialize()) {
         DifficultyView.updateDisplay(DifficultyLogic.getCurrentDifficulty());

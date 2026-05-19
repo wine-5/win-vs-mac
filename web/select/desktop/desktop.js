@@ -7,7 +7,7 @@
 function updateResponsiveVariables() {
     const width = window.innerWidth;
     const height = window.innerHeight;
-    const root = document.documentElement;
+    const rootElement = document.documentElement;
 
     // 基準値（Debug 1280x720 時）
     const baseWidth = 1280;
@@ -28,17 +28,17 @@ function updateResponsiveVariables() {
     const clockFontSize = Math.max(10, Math.round(11 * scale));
     const startBtnFontSize = Math.max(12, Math.round(13 * scale));
 
-    root.style.setProperty('--taskbar-height', taskbarHeight + 'px');
-    root.style.setProperty('--icon-size', iconSize + 'px');
-    root.style.setProperty('--app-padding', appPadding + 'px');
-    root.style.setProperty('--tooltip-font-size', tooltipFontSize + 'px');
-    root.style.setProperty('--clock-font-size', clockFontSize + 'px');
-    root.style.setProperty('--start-btn-font-size', startBtnFontSize + 'px');
+    rootElement.style.setProperty('--taskbar-height', taskbarHeight + 'px');
+    rootElement.style.setProperty('--icon-size', iconSize + 'px');
+    rootElement.style.setProperty('--app-padding', appPadding + 'px');
+    rootElement.style.setProperty('--tooltip-font-size', tooltipFontSize + 'px');
+    rootElement.style.setProperty('--clock-font-size', clockFontSize + 'px');
+    rootElement.style.setProperty('--start-btn-font-size', startBtnFontSize + 'px');
 
     // スケール値が小さい場合はスペーシングも調整
     if (scale < 0.9) {
-        root.style.setProperty('--taskbar-gap', Math.round(6 * scale) + 'px');
-        root.style.setProperty('--taskbar-right-gap', Math.round(8 * scale) + 'px');
+        rootElement.style.setProperty('--taskbar-gap', Math.round(6 * scale) + 'px');
+        rootElement.style.setProperty('--taskbar-right-gap', Math.round(8 * scale) + 'px');
     }
 }
 
@@ -58,14 +58,14 @@ function startGame() {
 
 function setWindowVisible(name, visible) {
     winStates[name] = visible;
-    const el = document.getElementById('app-' + name);
-    if (!el) return;
+    const appElement = document.getElementById('app-' + name);
+    if (!appElement) return;
     if (visible) {
-        el.classList.add('active');
-        el.classList.remove('hidden-win');
+        appElement.classList.add('active');
+        appElement.classList.remove('hidden-win');
     } else {
-        el.classList.remove('active');
-        el.classList.add('hidden-win');
+        appElement.classList.remove('active');
+        appElement.classList.add('hidden-win');
     }
 }
 

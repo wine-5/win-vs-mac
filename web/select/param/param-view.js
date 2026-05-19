@@ -23,13 +23,13 @@ const ParamView = (function () {
     }
 
     function flashBar(id, isDecrease) {
-        const bar = document.getElementById('bar-base-' + id);
-        if (!bar) return;
-        bar.classList.remove('bar-flash', 'bar-dim');
-        void bar.offsetWidth;
-        bar.classList.add(isDecrease ? 'bar-dim' : 'bar-flash');
-        bar.addEventListener('animationend', function () {
-            bar.classList.remove('bar-flash', 'bar-dim');
+        const barElement = document.getElementById('bar-base-' + id);
+        if (!barElement) return;
+        barElement.classList.remove('bar-flash', 'bar-dim');
+        void barElement.offsetWidth;
+        barElement.classList.add(isDecrease ? 'bar-dim' : 'bar-flash');
+        barElement.addEventListener('animationend', function () {
+            barElement.classList.remove('bar-flash', 'bar-dim');
         }, { once: true });
     }
 

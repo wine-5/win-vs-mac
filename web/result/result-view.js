@@ -68,15 +68,15 @@ const ResultView = (function () {
     }
 
     function startBsodAnimation() {
-        const fill = document.getElementById('bsod-fill');
-        const pct = document.getElementById('bsod-pct');
-        if (!fill || !pct) return;
+        const fillElement = document.getElementById('bsod-fill');
+        const pctElement = document.getElementById('bsod-pct');
+        if (!fillElement || !pctElement) return;
 
         let progress = 0;
         const timer = setInterval(function () {
             progress += 1;
-            fill.style.width = progress + '%';
-            pct.textContent = String(progress);
+            fillElement.style.width = progress + '%';
+            pctElement.textContent = String(progress);
             if (progress >= 100) {
                 clearInterval(timer);
                 setTimeout(revealLoseDialog, 400);
@@ -85,28 +85,28 @@ const ResultView = (function () {
     }
 
     function revealLoseDialog() {
-        const overlay = document.getElementById('bsod-overlay');
-        const dialog = document.getElementById('lose-dialog');
-        if (!overlay) return;
+        const overlayElement = document.getElementById('bsod-overlay');
+        const dialogElement = document.getElementById('lose-dialog');
+        if (!overlayElement) return;
 
-        overlay.classList.add('fade-out');
+        overlayElement.classList.add('fade-out');
         setTimeout(function () {
-            overlay.style.display = 'none';
-            if (dialog) {
-                dialog.style.display = 'flex';
-                dialog.style.flexDirection = 'column';
+            overlayElement.style.display = 'none';
+            if (dialogElement) {
+                dialogElement.style.display = 'flex';
+                dialogElement.style.flexDirection = 'column';
             }
             setupButtons();
         }, 600);
     }
 
     function render(data) {
-        const root = document.getElementById('result-root');
+        const rootElement = document.getElementById('result-root');
         if (data.isVictory) {
-            root.innerHTML = renderWin(data);
+            rootElement.innerHTML = renderWin(data);
             setupButtons();
         } else {
-            root.innerHTML = renderLose(data);
+            rootElement.innerHTML = renderLose(data);
             startBsodAnimation();
         }
     }
