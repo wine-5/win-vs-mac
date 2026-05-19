@@ -46,6 +46,8 @@ namespace core::utility
         static constexpr unsigned int GRAY = 0xFF808080;
         static constexpr unsigned int DARK_GRAY = 0xFF404040;
         static constexpr unsigned int LIGHT_GRAY = 0xFFC0C0C0;
+        static constexpr unsigned int DARK_BLUE = 0xFF0000C8;
+        static constexpr unsigned int MEDIUM_GREEN = 0xFF00B400;
 
         // ========== UI用の色 ==========
 
