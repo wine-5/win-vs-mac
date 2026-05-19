@@ -15,59 +15,48 @@
     <link rel="stylesheet" href="css/loading.css">
     <link rel="stylesheet" href="css/ingame.css">
     <link rel="stylesheet" href="css/result.css">
+    <link rel="stylesheet" href="css/bios.css">
+    <link rel="stylesheet" href="css/lockscreen.css">
 </head>
 
 <body>
 
     <div class="dev-nav">
-        <button class="dev-nav-btn active" onclick="showScene('title')">TITLE</button>
-        <button class="dev-nav-btn" onclick="showScene('stage')">STAGE</button>
+        <button class="dev-nav-btn active" onclick="showScene('bios')">BIOS</button>
+        <button class="dev-nav-btn" onclick="showScene('lockscreen')">LOCK</button>
+        <button class="dev-nav-btn" onclick="showScene('select')">SELECT</button>
         <button class="dev-nav-btn" onclick="showScene('loading')">LOAD</button>
         <button class="dev-nav-btn" onclick="showScene('ingame')">INGAME</button>
         <button class="dev-nav-btn" onclick="showScene('result-win')">WIN</button>
         <button class="dev-nav-btn" onclick="showScene('result-lose')">LOSE</button>
     </div>
 
-    <!-- ===== TITLE ===== -->
-    <div id="scene-title" class="scene active">
-        <!-- Splash Screen -->
-        <div class="splash-screen">
-            <div class="splash-logo">
-                <div class="splash-tile"></div>
-                <div class="splash-tile"></div>
-                <div class="splash-tile"></div>
-                <div class="splash-tile"></div>
-            </div>
-            <div class="splash-text">Windows を起動しています...</div>
-            <div class="splash-spinner">
-                <div class="splash-dot"></div>
-                <div class="splash-dot"></div>
-                <div class="splash-dot"></div>
-            </div>
+    <!-- ===== BIOS ===== -->
+    <div id="scene-bios" class="scene active">
+        <div class="bios-container">
+            <div class="bios-output" id="bios-output"></div>
         </div>
+        <div class="bios-skip-hint">[ESC] スキップ</div>
+    </div>
 
-        <!-- Background -->
-        <div class="lockscreen-bg">
-            <div class="lockscreen-blob blob1"></div>
-            <div class="lockscreen-blob blob2"></div>
-            <div class="lockscreen-blob blob3"></div>
-        </div>
-
-        <!-- Particles container -->
+    <!-- ===== LOCK SCREEN ===== -->
+    <div id="scene-lockscreen" class="scene" onclick="unlockScreen()">
+        <div class="lockscreen-bg-overlay"></div>
         <div id="particles-container" style="position:absolute;inset:0;pointer-events:none;z-index:1;"></div>
-
-        <!-- Title screen (shown after splash) -->
-        <div class="title-screen" id="title-screen">
-            <div class="title-content">
-                <div class="title-main">WIN vs MAC</div>
-                <div class="title-subtitle">Windows 内部ダンジョンRPG</div>
-                <button class="title-start-btn" onclick="showScene('stage')">ゲームを開始</button>
+        <div class="lockscreen-content" id="lockscreen-content">
+            <div class="lockscreen-time" id="lockscreen-time">--:--</div>
+            <div class="lockscreen-date" id="lockscreen-date">読み込み中...</div>
+        </div>
+        <div class="lockscreen-bottom" id="lockscreen-bottom">
+            <div class="lockscreen-win-logo">
+                <div></div><div></div><div></div><div></div>
             </div>
+            <div class="lockscreen-unlock-hint">&#8593; クリックしてロック解除</div>
         </div>
     </div>
 
-    <!-- ===== STAGE SELECT ===== -->
-    <div id="scene-stage" class="scene">
+    <!-- ===== SELECT (stage select on Windows desktop) ===== -->
+    <div id="scene-select" class="scene">
 
         <!-- Desktop icons on the left side -->
         <div class="stage-desktop-icons">
@@ -349,24 +338,17 @@
 
     <!-- ===== LOADING ===== -->
     <div id="scene-loading" class="scene">
-        <div class="win10-boot">
-            <div class="win10-logo">
-                <div class="win10-logo-grid">
-                    <div class="win10-logo-tile"></div>
-                    <div class="win10-logo-tile"></div>
-                    <div class="win10-logo-tile"></div>
-                    <div class="win10-logo-tile"></div>
+        <div class="cmd-window">
+            <div class="cmd-titlebar">
+                <div class="cmd-titlebar-icon">▣</div>
+                <div class="cmd-titlebar-text">コマンド プロンプト - dungeon_load.exe</div>
+                <div class="cmd-titlebar-controls">
+                    <button class="cmd-wctrl">─</button>
+                    <button class="cmd-wctrl">□</button>
+                    <button class="cmd-wctrl cmd-close">×</button>
                 </div>
-                <div class="win10-logo-text">Windows</div>
             </div>
-            <div class="win10-spinner">
-                <div class="win10-spinner-dot"></div>
-                <div class="win10-spinner-dot"></div>
-                <div class="win10-spinner-dot"></div>
-                <div class="win10-spinner-dot"></div>
-                <div class="win10-spinner-dot"></div>
-            </div>
-            <div class="win10-boot-status" id="boot-status">ダンジョンを生成しています...</div>
+            <div class="cmd-body" id="cmd-output"></div>
         </div>
     </div>
 
@@ -481,7 +463,7 @@
                             </div>
                             <div style="clear:both"></div>
                             <div class="pause-btn-row">
-                                <button class="win10-btn primary" onclick="showScene('title')">タイトルへ戻る</button>
+                                <button class="win10-btn primary" onclick="showScene('bios')">タイトルへ戻る</button>
                                 <button class="win10-btn" onclick="togglePause()">ゲームを続ける</button>
                             </div>
                         </div>
@@ -976,8 +958,8 @@
                     <div class="result-divider"></div>
 
                     <div class="result-button-section">
-                        <button class="result-button" onclick="showScene('stage')">もう一度</button>
-                        <button class="result-button" onclick="showScene('title')">タイトルへ</button>
+                        <button class="result-button" onclick="showScene('select')">もう一度</button>
+                        <button class="result-button" onclick="showScene('bios')">タイトルへ</button>
                     </div>
                 </div>
             </div>
@@ -1052,8 +1034,8 @@
                     <div class="result-divider"></div>
 
                     <div class="result-button-section">
-                        <button class="result-button" onclick="showScene('stage')">再試行</button>
-                        <button class="result-button" onclick="showScene('title')">タイトルへ</button>
+                        <button class="result-button" onclick="showScene('select')">再試行</button>
+                        <button class="result-button" onclick="showScene('bios')">タイトルへ</button>
                     </div>
                 </div>
             </div>
@@ -1063,6 +1045,8 @@
     <script src="js/globals.js"></script>
     <script src="js/scene-manager.js"></script>
     <script src="js/scene-title.js"></script>
+    <script src="js/scene-bios.js"></script>
+    <script src="js/scene-lockscreen.js"></script>
     <script src="js/window-manager.js"></script>
     <script src="js/scene-stage.js"></script>
     <script src="js/scene-loading.js"></script>
