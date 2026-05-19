@@ -50,6 +50,10 @@ window.onMessageFromGame = function (data) {
     DifficultyLogic.onMessageFromGame(data);
 };
 
+function selectDiff(difficulty) {
+    DifficultyLogic.selectDifficulty(difficulty);
+}
+
 (function () {
     if (DifficultyView.initialize()) {
         DifficultyView.updateDisplay(DifficultyLogic.getCurrentDifficulty());
