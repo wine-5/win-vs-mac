@@ -1,7 +1,22 @@
 # やることリスト
 
-## 早めに対処する必要があるもの
-- 現在Loadingがcppが2つの用途で使用されているため、それぞれクラスを分離して片方はApplicationLoading、もう一方はLoadingInGameのようにする
+## タイトル画面背景（タスクマネージャー風）
+
+### 実装順序
+- [ ] 1. `core/interface/IPerformanceDataProvider.h` 作成
+  - `PerformanceSnapshot { float cpuUsage; float memoryUsage; float diskActivity; }` を定義
+  - `update()` / `getSnapshot()` の純粋仮想関数を定義
+- [ ] 2. `platform/WindowsPerformanceProvider.h/.cpp` 作成
+  - CPU: `GetSystemTimes()` で前フレームとの差分から使用率を計算
+  - メモリ: `GlobalMemoryStatusEx()` で使用率を取得
+  - ディスク: `DeviceIoControl()` + `IOCTL_DISK_PERFORMANCE` でI/O速度を取得
+- [ ] 3. `ServiceLocatorInitializer::init()` に `WindowsPerformanceProvider` を登録
+- [ ] 4. `Title::update()` 内で `IPerformanceDataProvider::update()` を呼ぶ
+- [ ] 5. `TitleView::drawTitle()` で `getSnapshot()` を参照して波形背景を描画
+
+### 備考
+- `update()` は現状 `Title::update()` のみで呼ぶ。他シーンで必要になったら移行する
+- ディスクは空き容量（静的）ではなくリアルタイムI/O速度を使う
 
 ## ポインタ不要箇所 再評価
 
