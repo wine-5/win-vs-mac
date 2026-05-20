@@ -5,7 +5,7 @@
 namespace platform::window::select
 {
     ParameterWindow::ParameterWindow(int x, int y, int width, int height) noexcept
-        : WindowBase(L"ParameterWindowClass", L"Status Display", x, y, width, height)
+        : WindowBase(L"ParameterWindowClass", L"パラメータ", x, y, width, height)
     {
     }
 

@@ -8,7 +8,7 @@
 namespace platform::window::select
 {
 	FileSelectWindow::FileSelectWindow(int x, int y, int width, int height) noexcept
-		: WindowBase(L"FileSelectWindowClass", L"File Selection", x, y, width, height)
+		: WindowBase(L"FileSelectWindowClass", L"ファイル選択", x, y, width, height)
 	{
 	}
 

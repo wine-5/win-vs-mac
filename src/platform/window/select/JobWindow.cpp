@@ -7,7 +7,7 @@
 namespace platform::window::select
 {
 	JobWindow::JobWindow(int x, int y, int width, int height) noexcept
-		: WindowBase(L"JobWindowClass", L"Job Selection", x, y, width, height),
+		: WindowBase(L"JobWindowClass", L"職業選択", x, y, width, height),
 		m_selectedJob{core::constant::JobType::Warrior}
 	{
 	}

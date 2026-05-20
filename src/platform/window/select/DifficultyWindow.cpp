@@ -5,7 +5,7 @@
 namespace platform::window::select
 {
     DifficultyWindow::DifficultyWindow(int x, int y, int width, int height) noexcept
-        : WindowBase(L"DifficultyWindowClass", L"Difficulty Selection", x, y, width, height)
+        : WindowBase(L"DifficultyWindowClass", L"難易度設定", x, y, width, height)
     {
     }
 
