@@ -140,8 +140,9 @@ namespace platform::window::result
             j["totalDamageTaken"] = data.m_totalDamageTaken;
             j["usedFiles"]        = data.m_usedFiles;
 
-            m_webView.postMessage(j.dump());
+            std::string jsonStr = j.dump();
+            m_webView.postMessage(jsonStr);
         }
-        catch (...) {}
+        catch (...) { }
     }
 }

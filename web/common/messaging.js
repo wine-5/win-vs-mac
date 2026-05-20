@@ -3,7 +3,11 @@
  * @param {object} obj 送信するオブジェクト
  */
 function sendToGame(obj) {
-    window.chrome.webview.postMessage(JSON.stringify(obj));
+    try {
+        window.chrome.webview.postMessage(JSON.stringify(obj));
+    } catch (err) {
+        console.error('sendToGame error:', err);
+    }
 }
 
 // C++ → JS メッセージ受信。各ページで onMessageFromGame を定義して使う
@@ -13,5 +17,7 @@ window.chrome.webview.addEventListener('message', function (e) {
         if (typeof onMessageFromGame === 'function') {
             onMessageFromGame(data);
         }
-    } catch (_) {}
+    } catch (err) {
+        console.error('Message listener error:', err);
+    }
 });

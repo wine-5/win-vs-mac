@@ -1,92 +1,41 @@
 ﻿#include "Result.h"
 #include "SceneManager.h"
 #include "SceneType.h"
-#include "game/ui/Button.h"
 #include "game/GameManager.h"
-#include "core/constant/UI.h"
-#include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
-#include "core/interface/IStringConverter.h"
+#include "platform/window/result/ResultWindow.h"
 
 namespace game::scene
 {
-    namespace
-    {
-        // リザルトのUIの配置比率（画面サイズ比）
-        constexpr float TITLE_Y_RATIO = 0.20f;          // 画面高さの20%
-        constexpr float RETURN_BUTTON_Y_RATIO = 0.60f; // 画面高さの60%
-        constexpr float BUTTON_WIDTH_RATIO = 0.15f;    // 画面幅の15%
-        constexpr float BUTTON_HEIGHT_RATIO = 0.06f;   // 画面高さの6%
-    }
-
-    Result::Result(core::iface::IInputProvider& inputProvider,
-        core::iface::IUIRenderer& uiRenderer,
+    Result::Result(core::iface::IUIRenderer& uiRenderer,
         core::iface::IScreen& screen)
-        : m_inputProvider{ inputProvider }
-        , m_uiRenderer{ uiRenderer }
+        : m_uiRenderer{ uiRenderer }
         , m_screen{ screen }
     {
-        setupUI();
-    }
+        m_resultWindow = std::make_unique<platform::window::result::ResultWindow>(
+            screen,
+            []() {
+                auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
+                if (sceneManager)
+                    sceneManager->changeScene(SceneType::Select);
+            },
+            []() {
+                auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
+                if (sceneManager)
+                    sceneManager->changeScene(SceneType::Title);
+            }
+        );
 
-    void Result::setWindowManager(std::unique_ptr<core::iface::IResultWindowManager> manager) noexcept
-    {
-        m_windowManager = std::move(manager);
         const auto& resultData{ game::GameManager::getInstance().getResultData() };
-        m_windowManager->show(resultData);
+        m_resultWindow->show(resultData);
     }
 
     void Result::update(float deltaTime)
     {
-        if (m_windowManager)
-        {
-            m_windowManager->pumpMessages();
-            return;
-        }
-        m_uiManager.update();
+        m_resultWindow->pumpMessages();
     }
 
     void Result::draw()
     {
-        if (m_windowManager)  return;
-
-        auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
-
-        const int titleFontSize{static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO)};
-        std::string title{"リザルト画面"};
-        if (converter)
-            title = converter->utf8ToShiftJis(title);
-        int titleWidth{m_uiRenderer.getTextWidth(title.c_str(), titleFontSize)};
-        int titleX{(m_screen.getWidth() - titleWidth) / 2};
-        int titleY{static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO)};
-        m_uiRenderer.drawText(titleX, titleY, title.c_str(), core::utility::Color::WHITE, titleFontSize);
-
-        // UI要素を描画
-        m_uiManager.draw(m_uiRenderer);
-    }
-
-    void Result::setupUI()
-    {
-        // 画面サイズを取得
-        const int screenWidth = m_screen.getWidth();
-        const int screenHeight = m_screen.getHeight();
-
-        // 比率に基づいて実際のピクセル値を計算
-        const int buttonWidth = static_cast<int>(screenWidth * BUTTON_WIDTH_RATIO);
-        const int buttonHeight = static_cast<int>(screenHeight * BUTTON_HEIGHT_RATIO);
-        const int buttonX = (screenWidth - buttonWidth) / 2;
-        const int returnButtonY = static_cast<int>(screenHeight * RETURN_BUTTON_Y_RATIO);
-        const int buttonFontSize = static_cast<int>(screenHeight * core::constant::ui::DEFAULT_FONT_SIZE_RATIO);
-
-        auto returnButton{std::make_unique<ui::Button>(
-            "タイトルへ戻る", buttonX, returnButtonY, buttonWidth, buttonHeight, m_inputProvider, buttonFontSize)};
-
-        // ボタンが押されたときの処理（Titleシーンへ遷移）
-        returnButton->setOnClick([]() {
-            auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
-            sceneManager->changeScene(SceneType::Title);
-            });
-
-        m_uiManager.addElement(std::move(returnButton));
     }
 }

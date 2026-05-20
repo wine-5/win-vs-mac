@@ -129,6 +129,11 @@ const ResultView = (function () {
     };
 }());
 
+// グローバルスコープに onMessageFromGame を定義（messaging.js から呼ばれる）
+function onMessageFromGame(data) {
+    ResultLogic.onMessageFromGame(data);
+}
+
 (function () {
     ResultLogic.onResultData(function (data) {
         ResultView.render(data);
