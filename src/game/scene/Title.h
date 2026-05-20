@@ -6,6 +6,11 @@
 #include "core/interface/IScreen.h"
 #include <memory>
 
+namespace core::iface
+{
+	class IPerformanceDataProvider;
+}
+
 namespace game::scene
 {
 	class TitleView;
@@ -50,12 +55,13 @@ namespace game::scene
 		void goToSelect();
 		void exitApp();
 
-		core::iface::IInputProvider& m_inputProvider;
-		core::iface::IUIRenderer& m_uiRenderer;
-		core::iface::IScreen& m_screen;
+		core::iface::IInputProvider&           m_inputProvider;
+		core::iface::IUIRenderer&              m_uiRenderer;
+		core::iface::IScreen&                  m_screen;
+		core::iface::IPerformanceDataProvider* m_perfProvider{};
 
-		std::unique_ptr<TitleView>          m_view;
-		std::unique_ptr<ui::FadeTransition> m_fade;
+		std::unique_ptr<TitleView>          m_view{};
+		std::unique_ptr<ui::FadeTransition> m_fade{};
 
 		State m_state{ State::TitleFadeIn };
 

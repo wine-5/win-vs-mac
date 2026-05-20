@@ -11,7 +11,8 @@
 #include "infrastructure/utility/LogUtil.h"
 #include "infrastructure/ResourceManager.h"
 #include "game/scene/SceneManager.h"
-#include "game/GameManager.h"
+#include "core/interface/IPerformanceDataProvider.h"
+#include "platform/system/WindowsPerformanceProvider.h"
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 {
@@ -54,5 +55,10 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 	// SceneManager登録（内部でSceneFactoryを所有）
 	core::base::ServiceLocator::provide(
 		std::make_unique<game::scene::SceneManager>()
+	);
+
+	// パフォーマンスデータプロバイダを登録
+	core::base::ServiceLocator::provide<core::iface::IPerformanceDataProvider>(
+		std::make_unique<platform::system::WindowsPerformanceProvider>()
 	);
 }

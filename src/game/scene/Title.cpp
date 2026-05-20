@@ -5,6 +5,7 @@
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IResourceManager.h"
 #include <cstdlib>
+#include "core/interface/IPerformanceDataProvider.h"
 
 namespace game::scene
 {
@@ -28,10 +29,15 @@ namespace game::scene
 		m_view->setButtonsVisible(true);
 		m_fade = std::make_unique<ui::FadeTransition>(
 			m_uiRenderer, m_screen, FADE_DURATION, true);
+
+		m_perfProvider = core::base::ServiceLocator::get<core::iface::IPerformanceDataProvider>();
 	}
 
 	void Title::update(float deltaTime)
 	{
+		m_perfProvider->update();
+
+
 		switch (m_state)
 		{
 		case State::Splash:
@@ -62,18 +68,24 @@ namespace game::scene
 			break;
 
 		case State::TitleFadeIn:
+		{
+			const auto snap{ m_perfProvider->getSnapshot() };
 			m_fade->update(deltaTime);
-			m_view->update();
+			m_view->update(snap);
 			if (m_fade->isFinished())
 			{
 				m_fade = nullptr;
 				m_state = State::Idle;
 			}
 			break;
+		}
 
 		case State::Idle:
-			m_view->update();
+		{
+			const auto snap{ m_perfProvider->getSnapshot() };
+			m_view->update(snap);
 			break;
+		}
 
 		case State::FadingOut:
 			m_fade->update(deltaTime);

@@ -3,8 +3,9 @@
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "core/interface/IPerformanceDataProvider.h"
 #include <functional>
-#include <memory>
+#include <array>
 #include <string>
 
 namespace game::ui
@@ -37,9 +38,10 @@ namespace game::scene
 			std::function<void()> onExit);
 
 		/**
-		 * @brief ボタン入力を更新する
+		 * @brief ボタン入力とパフォーマンス履歴を更新する
+		 * @param snap 最新のパフォーマンススナップショット
 		 */
-		void update();
+		void update(const core::iface::PerformanceSnapshot& snap);
 
 		/**
 		 * @brief スプラッシュ画面を描画する
@@ -59,6 +61,11 @@ namespace game::scene
 		void setButtonsVisible(bool visible);
 
 	private:
+		static constexpr int HISTORY_SIZE{ 120 };
+
+		void drawBackground() const;
+		void pushHistory(std::array<float, HISTORY_SIZE>& buf, float value);
+
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen&     m_screen;
 		std::string               m_mainFontName;
@@ -66,6 +73,11 @@ namespace game::scene
 		ui::UIManager m_uiManager;
 		ui::Button*   m_startButton{};
 		ui::Button*   m_exitButton{};
+
+
+		std::array<float, HISTORY_SIZE> m_cpuHistory{};
+		std::array<float, HISTORY_SIZE> m_memHistory{};
+		std::array<float, HISTORY_SIZE> m_diskHistory{};
 
 		static constexpr float TITLE_Y_RATIO         = 0.35f;
 		static constexpr float START_BUTTON_Y_RATIO  = 0.50f;
