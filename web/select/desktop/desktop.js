@@ -87,3 +87,114 @@ function updateClock() {
 
 updateClock();
 setInterval(updateClock, 10000);
+
+// ── Matrix Rain ──────────────────────────────────────────────────
+(function () {
+    const canvas = document.getElementById('matrix-bg');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const PROG_LINES = [
+        // C++
+        'for(int i = 0; i < n; i++)',
+        'if(ptr == nullptr) return;',
+        'std::vector<int> vec;',
+        '#include <iostream>',
+        'template<typename T>',
+        'virtual void update() = 0;',
+        'auto& [key, val] : map',
+        'std::make_unique<T>()',
+        'reinterpret_cast<void*>(p)',
+        'constexpr int MAX = 256;',
+        'delete[] ptr; ptr = nullptr;',
+        '[[nodiscard]] bool isValid()',
+        '#pragma once',
+        'assert(value != nullptr);',
+        'throw std::runtime_error(msg)',
+        '// TODO: fix this',
+        '/* FIXME: memory leak */',
+        'struct Node { int val; Node* next; };',
+        'std::unordered_map<K, V>',
+        'std::priority_queue<int>',
+        // Python
+        'def __init__(self):',
+        'if __name__ == "__main__":',
+        'import numpy as np',
+        'for i, v in enumerate(lst):',
+        'lambda x: x * x',
+        // Algorithms
+        'O(n log n)', 'O(1) space',
+        'binary search', 'merge sort',
+        'BFS', 'DFS', 'Dijkstra',
+        'dp[i] = dp[i-1] + dp[i-2]',
+        'heap.push(node)',
+        // Git
+        'git commit -m "feat: add"',
+        'git push origin main',
+        'git rebase -i HEAD~3',
+        'fatal: not a git repository',
+        'HEAD is now at a3f9b12',
+        // Errors / Build
+        'error: use of undeclared identifier',
+        'warning: unused variable [-Wunused]',
+        'Segmentation fault (core dumped)',
+        'undefined reference to `main`',
+        'gcc -O2 -Wall -o out main.c',
+        'make clean && make all',
+        'cmake .. -DCMAKE_BUILD_TYPE=Release',
+    ];
+
+    const CHAR_H = 15;
+    let cols, drops;
+
+    function initDrops() {
+        cols = Math.floor(canvas.width / 14);
+        drops = Array.from({ length: cols }, () => ({
+            y:     -Math.random() * canvas.height,
+            spd:   0.35 + Math.random() * 0.65,
+            txt:   PROG_LINES[Math.floor(Math.random() * PROG_LINES.length)],
+            alpha: 0.15 + Math.random() * 0.22,
+        }));
+    }
+
+    function resize() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initDrops();
+    }
+    window.addEventListener('resize', resize);
+    // DOM レイアウト確定後にサイズを取得するため 1 フレーム待つ
+    requestAnimationFrame(function () { resize(); draw(); });
+
+    function draw() {
+        requestAnimationFrame(draw);
+        // 完全にクリアして文字だけを描画（背景画像を透過させる）
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.font = '11px Consolas, monospace';
+        const colW = canvas.width / cols;
+
+        for (let i = 0; i < drops.length; i++) {
+            const d = drops[i];
+            const visLen = Math.floor(d.y / CHAR_H);
+            const trailLen = 20;
+
+            for (let ci = Math.max(0, visLen - trailLen); ci <= visLen && ci < d.txt.length; ci++) {
+                const fade = ci === visLen ? 1 : (1 - (visLen - ci) / trailLen) * 0.55;
+                ctx.fillStyle = ci === visLen
+                    ? `rgba(150, 210, 255, ${d.alpha * fade})`
+                    : `rgba(30, 80, 180, ${d.alpha * fade * 0.6})`;
+                ctx.fillText(d.txt[ci], i * colW, ci * CHAR_H + 14);
+            }
+
+            d.y += d.spd;
+            if (d.y > (d.txt.length + 22) * CHAR_H) {
+                d.y     = -Math.random() * canvas.height;
+                d.txt   = PROG_LINES[Math.floor(Math.random() * PROG_LINES.length)];
+                d.spd   = 0.35 + Math.random() * 0.65;
+                d.alpha = 0.12 + Math.random() * 0.20;
+            }
+        }
+    }
+    // draw() は resize() の requestAnimationFrame コールバック内で開始する
+}());

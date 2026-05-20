@@ -47,6 +47,13 @@ body {
     background-position: center;
 }
 
+#matrix-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
 /* -- Taskbar -- */
 .taskbar {
     height: var(--taskbar-height);
