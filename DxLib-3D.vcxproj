@@ -195,6 +195,7 @@
     <ClCompile Include="src\platform\window\select\FileSelectWindow.cpp" />
     <ClCompile Include="src\platform\window\select\DesktopWindow.cpp" />
     <ClCompile Include="src\platform\window\select\DifficultyWindow.cpp" />
+    <ClCompile Include="src\platform\window\select\RulesWindow.cpp" />
     <ClCompile Include="src\platform\window\select\ParameterWindow.cpp" />
     <ClCompile Include="src\platform\window\WindowBase.cpp" />
     <ClCompile Include="src\platform\window\select\Win32SelectWindowManager.cpp" />

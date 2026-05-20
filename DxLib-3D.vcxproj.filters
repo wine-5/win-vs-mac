@@ -186,6 +186,9 @@
     <ClCompile Include="src\platform\window\select\DifficultyWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\platform\window\select\RulesWindow.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="src\platform\window\select\ParameterWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
