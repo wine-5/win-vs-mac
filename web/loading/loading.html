@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading - WIN vs MAC</title>
+    <link rel="stylesheet" href="loading.css">
+</head>
+
+<body>
+    <div class="loading-container">
+        <div class="cmd-window">
+            <div class="cmd-titlebar">
+                <div class="cmd-titlebar-icon">▣</div>
+                <div class="cmd-titlebar-text">コマンド プロンプト - dungeon_load.exe</div>
+                <div class="cmd-titlebar-controls">
+                    <button class="cmd-wctrl">−</button>
+                    <button class="cmd-wctrl">□</button>
+                    <button class="cmd-wctrl cmd-close">×</button>
+                </div>
+            </div>
+            <div class="cmd-body" id="cmd-output"></div>
+        </div>
+    </div>
+
+    <script src="../common/messaging.js"></script>
+    <script src="loading-logic.js"></script>
+    <script src="loading-view.js"></script>
+    <script>
+        window.onMessageFromGame = function (data) {
+            LoadingLogic.onMessageFromGame(data);
+        };
+
+        LoadingView.initialize();
+    </script>
+</body>
+
+</html>
