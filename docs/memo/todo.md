@@ -1,33 +1,11 @@
 # やることリスト
 
-## タイトル画面背景（タスクマネージャー風）
-
-### 実装順序
-- [ ] 1. `core/interface/IPerformanceDataProvider.h` 作成
-  - `PerformanceSnapshot { float cpuUsage; float memoryUsage; float diskActivity; }` を定義
-  - `update()` / `getSnapshot()` の純粋仮想関数を定義
-- [ ] 2. `platform/WindowsPerformanceProvider.h/.cpp` 作成
-  - CPU: `GetSystemTimes()` で前フレームとの差分から使用率を計算
-  - メモリ: `GlobalMemoryStatusEx()` で使用率を取得
-  - ディスク: `DeviceIoControl()` + `IOCTL_DISK_PERFORMANCE` でI/O速度を取得
-- [ ] 3. `ServiceLocatorInitializer::init()` に `WindowsPerformanceProvider` を登録
-- [ ] 4. `Title::update()` 内で `IPerformanceDataProvider::update()` を呼ぶ
-- [ ] 5. `TitleView::drawTitle()` で `getSnapshot()` を参照して波形背景を描画
-
-### 備考
-- `update()` は現状 `Title::update()` のみで呼ぶ。他シーンで必要になったら移行する
-- ディスクは空き容量（静的）ではなくリアルタイムI/O速度を使う
-
 ## ポインタ不要箇所 再評価
 
 ### 実装予定
 - [ ] `Title::m_fade` を `std::optional` に変更
 - [ ] `Select::m_fade` を `std::optional` に変更
 - [ ] `PlayerFactory::getPlayer()` に assert を追加（early detection）
-
-## CI
-- JSの命名規則もチェックができるように更新する
----
 
 ## モデルの描画について
 - 3Dモデルを描画やアニメーションはDxLibではなく、よりいろんな拡張子に対応しているRaylibを採用するように
@@ -45,19 +23,10 @@
 - Syetem関連のクラスでUpdate内で毎回GetComponentしているため、ISystemクラスに最初にコンポーネントを取得するような純粋仮想関数を追加する -> それを具象クラスですべてのSystemでキャッシュする
 
 - 初期化の際は｛｝で初期化リストで初期化を行うべきだが、代入も{}にしてしまうと可読性が下がることが分かったため、
-初期化は｛｝で、代入は = で明示的に書く様にする
+初期化は｛｝で、代入は = で書く様にする
 
 - 現在DxLib.hを直接インクルードしているが、ラッパーのヘッダーファイルがあったほうが安全かつ差し替えるときに容易になるため作るようにする
 
 - InGame.cpp内のhファイルが多いためhファイルをインクルードする専用クラスを作成するか検討中
 
-- サービスロケータのみではなくシングルトンのテンプレートクラスの作成して、将来的に差し替えが必要なクラスはサービスロケータにして、インスタンスを1つに制限してテスト等も行う予定がないクラスはシングルトンとして定義してしまったほうがいいと思った
-
 - 一度選択した職業やファイルは記憶しておいて再度挑戦するときにそのまま選択状態にされておくようにする
-
-### デスクトップ画面を作成するときに追加するもの
-- ゴミ箱
-- セーブする機構を作成して、エクスプローラーに表示してその地点から遊べるように
-- 各アプリケーションのアイコンを設置してそこでもWindowをオンオフできるように
-
-- 余裕があったらタスクバーに検索窓をつけて実際に使えるようにしてみたい

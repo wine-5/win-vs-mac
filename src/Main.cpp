@@ -42,10 +42,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	ServiceLocatorInitializer::init(screenWidth, screenHeight);
 
 	// ServiceLocatorからSceneManagerを取得
-	auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
+	auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();	
 	
 	// 初期シーンをBiosに設定
-	sceneManager->changeScene(game::scene::SceneType::Title);
+	sceneManager->changeScene(game::scene::SceneType::Select);
 	
 	while (ProcessMessage() == 0)
 	{
