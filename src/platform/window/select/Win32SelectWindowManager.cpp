@@ -4,6 +4,7 @@
 #include "core/constant/SelectWindowId.h"
 #include "core/constant/JobType.h"
 #include "thirdparty/nlohmann/json.hpp"
+#include <shellapi.h>
 
 namespace platform::window::select
 {
@@ -160,6 +161,33 @@ namespace platform::window::select
             notifyWindowState("diff", false);
         });
 
+        // RulesWindow（センタリング、初期非表示）
+        constexpr int rulesW{ 720 };
+        constexpr int rulesH{ 460 };
+        m_rulesWindow = std::make_unique<RulesWindow>(
+            originX + (screenWidth  - rulesW) / 2,
+            originY + (screenHeight - rulesH) / 2,
+            rulesW,
+            rulesH
+        );
+        if (!m_rulesWindow->create(m_desktopWindow->getHwnd())) return;
+        m_rulesWindow->setOnMinimize([this]() noexcept {
+            m_rulesWindow->hide();
+            m_rulesVisible = false;
+            notifyWindowState("rules", false);
+        });
+        m_rulesWindow->setOnClose([this]() noexcept {
+            m_rulesVisible = false;
+            notifyWindowState("rules", false);
+        });
+
+        constexpr BYTE windowAlpha{ 250 };
+        m_jobWindow->setAlpha(windowAlpha);
+        m_fileSelectWindow->setAlpha(windowAlpha);
+        m_parameterWindow->setAlpha(windowAlpha);
+        m_difficultyWindow->setAlpha(windowAlpha);
+        m_rulesWindow->setAlpha(windowAlpha);
+
         m_jobWindow->show();
         m_fileSelectWindow->show();
         m_parameterWindow->show();
@@ -172,12 +200,14 @@ namespace platform::window::select
         if (m_fileSelectWindow)   m_fileSelectWindow->destroy();
         if (m_parameterWindow)    m_parameterWindow->destroy();
         if (m_difficultyWindow)   m_difficultyWindow->destroy();
+        if (m_rulesWindow)        m_rulesWindow->destroy();
         if (m_desktopWindow)      m_desktopWindow->destroy();
 
         m_jobWindow.reset();
         m_fileSelectWindow.reset();
         m_parameterWindow.reset();
         m_difficultyWindow.reset();
+        m_rulesWindow.reset();
         m_desktopWindow.reset();
     }
 
@@ -288,6 +318,24 @@ namespace platform::window::select
                     m_diffVisible ? m_difficultyWindow->show() : m_difficultyWindow->hide();
                     notifyWindowState("diff", m_diffVisible);
                 }
+                else if (name == "rules" && m_rulesWindow)
+                {
+                    m_rulesVisible = !m_rulesVisible;
+                    m_rulesVisible ? m_rulesWindow->show() : m_rulesWindow->hide();
+                    notifyWindowState("rules", m_rulesVisible);
+                }
+            }
+            else if (type == "launchApp")
+            {
+                const std::string app{ j.value("app", "") };
+                if (app == "cmd")
+                    ShellExecuteW(nullptr, L"open", L"cmd.exe", nullptr, nullptr, SW_SHOW);
+                else if (app == "taskmgr")
+                    ShellExecuteW(nullptr, L"open", L"taskmgr.exe", nullptr, nullptr, SW_SHOW);
+                else if (app == "recyclebin")
+                    ShellExecuteW(nullptr, L"open", L"shell:RecycleBinFolder", nullptr, nullptr, SW_SHOW);
+                else if (app == "notepad")
+                    ShellExecuteW(nullptr, L"open", L"notepad.exe", nullptr, nullptr, SW_SHOW);
             }
         }
         catch (...) {}

@@ -58,9 +58,9 @@ body {
 .desktop-icons {
     position: absolute;
     top: 16px;
-    left: 16px;
-    display: flex;
-    flex-direction: column;
+    left: 4px;
+    display: grid;
+    grid-template-columns: repeat(2, 80px);
     gap: 4px;
     z-index: 10;
 }
@@ -69,9 +69,9 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 72px;
+    width: 80px;
     gap: 4px;
-    padding: 6px 4px;
+    padding: 8px 4px;
     border-radius: 4px;
     cursor: pointer;
     user-select: none;
@@ -89,15 +89,15 @@ body {
 
 .desk-icon img,
 .desk-icon-emoji {
-    width: 40px;
-    height: 40px;
+    width: 52px;
+    height: 52px;
     object-fit: contain;
     image-rendering: pixelated;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
-    line-height: 40px;
+    font-size: 36px;
+    line-height: 52px;
 }
 
 .desk-icon span:not(.desk-icon-emoji) {

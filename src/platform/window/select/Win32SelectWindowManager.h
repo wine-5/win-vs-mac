@@ -11,6 +11,7 @@
 #include "FileSelectWindow.h"
 #include "ParameterWindow.h"
 #include "DifficultyWindow.h"
+#include "RulesWindow.h"
 #include <memory>
 #include <functional>
 #include <string>
@@ -54,11 +55,13 @@ namespace platform::window::select
         std::unique_ptr<FileSelectWindow>   m_fileSelectWindow{};
         std::unique_ptr<ParameterWindow>    m_parameterWindow{};
         std::unique_ptr<DifficultyWindow>   m_difficultyWindow{};
+        std::unique_ptr<RulesWindow>         m_rulesWindow{};
 
         bool m_jobVisible{true};
         bool m_fileVisible{true};
         bool m_paramVisible{true};
         bool m_diffVisible{true};
+        bool m_rulesVisible{false};
 
         core::constant::JobType m_currentJobType{core::constant::JobType::Warrior};
         std::array<std::string, 3> m_slotPaths{};
