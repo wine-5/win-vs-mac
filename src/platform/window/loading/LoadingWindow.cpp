@@ -4,7 +4,7 @@
 namespace platform::window::loading
 {
 	LoadingWindow::LoadingWindow(int x, int y, int width, int height) noexcept
-		: WindowBase(L"LoadingWindowClass", L"コマンド プロンプト - dungeon_load.exe", x, y, width, height)
+		: WindowBase(L"LoadingWindow", L"コマンドプロンプト - ローディング中", x, y, width, height)
 	{
 	}
 
