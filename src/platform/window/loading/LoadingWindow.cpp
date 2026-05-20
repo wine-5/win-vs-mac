@@ -15,6 +15,8 @@ namespace platform::window::loading
 
 	void LoadingWindow::onCreateControls(HWND hwnd)
 	{
+		setIcon(hwnd, ICON_PATH);
+
 		// WebView2 からのメッセージハンドラを設定（initialize の前に設定）
 		m_webView.setOnMessage([this](const std::string& json) {
 			handleMessage(json);

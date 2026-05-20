@@ -37,7 +37,7 @@ namespace platform::window::loading
 		LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
 
 	private:
-		static constexpr const wchar_t* ICON_PATH = L"assets/images/ui/icons/loading.ico";
+		static constexpr const wchar_t* ICON_PATH = L"assets/images/ui/icons/cmdicon.ico";
 
 		platform::webview::WebView2Host m_webView{};
 		std::function<void()> m_onLoadingComplete{};
