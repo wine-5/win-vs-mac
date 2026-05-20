@@ -2,12 +2,15 @@
 
 const LoadingView = (function () {
     let cmdBodyEl = null;
+    let spinnerEl = null;
+    let spinnerTimer = null;
+    const SPINNER_FRAMES = ['|', '/', '-', '\\'];
+    let spinnerIndex = 0;
 
     function initialize() {
         cmdBodyEl = document.getElementById('cmd-output');
         if (!cmdBodyEl) return false;
 
-        // ロジックのコールバックを設定
         LoadingLogic.onLineReady(function (text, type) {
             addLine(text, type);
         });
@@ -22,18 +25,47 @@ const LoadingView = (function () {
     function addLine(text, type) {
         if (!cmdBodyEl) return;
 
+        if (type === 'spinner') {
+            startSpinner();
+            return;
+        }
+
         const lineEl = document.createElement('div');
         lineEl.className = 'cmd-line ' + (type || 'info');
         lineEl.textContent = text;
 
         cmdBodyEl.appendChild(lineEl);
-
-        // 自動スクロール：最後の行が見えるようにスクロール
         cmdBodyEl.scrollTop = cmdBodyEl.scrollHeight;
     }
 
+    function startSpinner() {
+        if (spinnerEl) return;
+
+        spinnerEl = document.createElement('div');
+        spinnerEl.className = 'cmd-line spinner';
+        spinnerEl.textContent = SPINNER_FRAMES[0];
+        cmdBodyEl.appendChild(spinnerEl);
+        cmdBodyEl.scrollTop = cmdBodyEl.scrollHeight;
+
+        spinnerTimer = setInterval(function () {
+            spinnerIndex = (spinnerIndex + 1) % SPINNER_FRAMES.length;
+            if (spinnerEl) spinnerEl.textContent = SPINNER_FRAMES[spinnerIndex];
+        }, 80);
+    }
+
+    function stopSpinner() {
+        if (spinnerTimer) {
+            clearInterval(spinnerTimer);
+            spinnerTimer = null;
+        }
+        if (spinnerEl) {
+            spinnerEl.remove();
+            spinnerEl = null;
+        }
+    }
+
     function onLoadingComplete() {
-        // ローディング完了をC++に通知
+        stopSpinner();
         sendToGame({ type: 'loadingComplete' });
     }
 
