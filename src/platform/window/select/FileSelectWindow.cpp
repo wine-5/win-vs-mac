@@ -147,6 +147,7 @@ namespace platform::window::select
 					if (slash != std::string::npos)
 						fileName = fileName.substr(slash + 1);
 					s["fileName"] = fileName;
+					s["filePath"] = m_filePaths[i];
 					s["extType"]  = toName(m_extensionTypes[i]);
 				}
 				resp["slots"].push_back(s);

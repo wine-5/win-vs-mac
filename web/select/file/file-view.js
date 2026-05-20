@@ -3,6 +3,36 @@
 const FileView = (function () {
     let fileListEl = null;
     let statusEl = null;
+    let activeTypewriteTimer = null;
+
+    // ── タイプライター演出 ────────────────────────────────────────
+    function typewritePath(pathRow, text) {
+        if (activeTypewriteTimer !== null) {
+            clearInterval(activeTypewriteTimer);
+            activeTypewriteTimer = null;
+        }
+        pathRow.textContent = '';
+        pathRow.classList.add('visible');
+        let idx = 0;
+        activeTypewriteTimer = setInterval(function () {
+            if (idx >= text.length) {
+                clearInterval(activeTypewriteTimer);
+                activeTypewriteTimer = null;
+                return;
+            }
+            pathRow.textContent += text[idx];
+            idx++;
+        }, 18);
+    }
+
+    function clearPath(pathRow) {
+        if (activeTypewriteTimer !== null) {
+            clearInterval(activeTypewriteTimer);
+            activeTypewriteTimer = null;
+        }
+        pathRow.classList.remove('visible');
+        pathRow.textContent = '';
+    }
 
     function initialize() {
         fileListEl = document.getElementById('file-list');
@@ -46,9 +76,22 @@ const FileView = (function () {
     function updateSelection() {
         if (!fileListEl) return;
         const selectedSlot = FileLogic.getSelectedSlot();
+        const slots = FileLogic.getSlots();
         fileListEl.querySelectorAll('.file-row').forEach(function (row) {
-            const isSelected = parseInt(row.dataset.slot, 10) === selectedSlot;
+            const slotIdx = parseInt(row.dataset.slot, 10);
+            const isSelected = slotIdx === selectedSlot;
             row.classList.toggle('selected', isSelected);
+
+            const pathRow = document.getElementById('path-row-' + slotIdx);
+            if (pathRow) {
+                const hasPath = !slots[slotIdx].isEmpty && slots[slotIdx].filePath;
+                if (isSelected && hasPath) {
+                    typewritePath(pathRow, slots[slotIdx].filePath);
+                } else {
+                    clearPath(pathRow);
+                }
+            }
+
             if (isSelected) {
                 row.classList.remove('pulse');
                 void row.offsetWidth;
@@ -87,8 +130,13 @@ const FileView = (function () {
             const et = s.extType || 'Unknown';
             const isEmpty = s.isEmpty;
             const justLoaded = prevEmpty[i] && !isEmpty;
+            const isSelected = i === FileLogic.getSelectedSlot();
+
+            const wrap = document.createElement('div');
+            wrap.className = 'file-slot';
+
             const row = document.createElement('div');
-            row.className = 'file-row' + (i === FileLogic.getSelectedSlot() ? ' selected' : '') + (justLoaded ? ' anim-in' : '');
+            row.className = 'file-row' + (isSelected ? ' selected' : '') + (justLoaded ? ' anim-in' : '');
             row.dataset.slot = i;
             row.onclick = function () { FileLogic.selectSlot(i); };
 
@@ -107,12 +155,40 @@ const FileView = (function () {
             row.innerHTML =
                 '<div class="file-name-cell">' +
                     iconHtml +
-                    '<span class="file-name' + (isEmpty ? ' empty' : '') + '">' +
-                        (isEmpty ? '─ 未選択 ─' : (s.fileName || '—')) +
+                    '<span class="file-name' + (isEmpty ? ' empty' : '') + '" id="fname-' + i + '">' +
+                        (isEmpty ? '─ 未選択 ─' : '') +
                     '</span>' +
                 '</div>' +
                 badge + bonus;
-            fileListEl.appendChild(row);
+
+            // 新規ロード時: anim-in(280ms)完了後にタイプライター演出
+            if (!isEmpty) {
+                const fileName = s.fileName || '—';
+                if (justLoaded) {
+                    setTimeout(function () {
+                        const nameEl = document.getElementById('fname-' + i);
+                        if (!nameEl) return;
+                        let idx = 0;
+                        const timer = setInterval(function () {
+                            if (idx >= fileName.length) { clearInterval(timer); return; }
+                            nameEl.textContent += fileName[idx];
+                            idx++;
+                        }, 18);
+                    }, 290);
+                } else {
+                    const nameEl = row.querySelector('#fname-' + i);
+                    if (nameEl) nameEl.textContent = fileName;
+                }
+            }
+
+            const pathRow = document.createElement('div');
+            pathRow.className = 'file-path-row' + (isSelected && s.filePath ? ' visible' : '');
+            pathRow.id = 'path-row-' + i;
+            pathRow.textContent = s.filePath || '';
+
+            wrap.appendChild(row);
+            wrap.appendChild(pathRow);
+            fileListEl.appendChild(wrap);
 
             prevEmpty[i] = isEmpty;
         });

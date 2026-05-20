@@ -13,9 +13,9 @@ const FILE_EXT_CLASS = { Executable: 'exe', Document: 'doc', Image: 'img', Audio
 
 const FileLogic = (function () {
     const slots = [
-        { isEmpty: true, fileName: null, extType: null },
-        { isEmpty: true, fileName: null, extType: null },
-        { isEmpty: true, fileName: null, extType: null },
+        { isEmpty: true, fileName: null, filePath: null, extType: null },
+        { isEmpty: true, fileName: null, filePath: null, extType: null },
+        { isEmpty: true, fileName: null, filePath: null, extType: null },
     ];
 
     const prevEmpty = [true, true, true];

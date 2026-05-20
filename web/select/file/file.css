@@ -70,21 +70,50 @@ body {
     flex-direction: column;
 }
 
+.file-slot {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.file-slot:last-child { border-bottom: none; }
+
 .file-row {
     display: grid;
     grid-template-columns: 1fr 52px 100px;
     padding: 0 12px;
     cursor: pointer;
     align-items: center;
-    border-bottom: 1px solid var(--border);
     transition: background 0.1s;
     flex: 1;
     min-height: 0;
 }
 
-.file-row:last-child { border-bottom: none; }
 .file-row:hover { background: var(--surface-hover); }
 .file-row.selected { background: rgba(0, 120, 212, 0.18); }
+
+.file-path-row {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 12px 0 52px;
+    font-size: 10px;
+    font-family: Consolas, monospace;
+    color: var(--text-muted);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    background: rgba(0, 120, 212, 0.10);
+    opacity: 0;
+    transition: max-height 0.2s ease, opacity 0.2s ease, padding 0.2s ease;
+}
+
+.file-path-row.visible {
+    max-height: 20px;
+    opacity: 1;
+    padding: 3px 12px 3px 52px;
+}
 
 .file-name-cell {
     display: flex;
