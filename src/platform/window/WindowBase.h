@@ -92,7 +92,12 @@ namespace platform::window
          */
         [[nodiscard]] int getHeight() const noexcept;
 
-    protected:
+        /**
+         * @brief ウィンドウの透明度を設定する
+         * @param alpha 不透明度（0=完全透明, 255=完全不透明）
+         */
+        void setAlpha(BYTE alpha) noexcept;
+
         /**
          * @brief ウィンドウアイコンを設定する
          * @param iconPath .ico ファイルのパス（実行ディレクトリからの相対パス）

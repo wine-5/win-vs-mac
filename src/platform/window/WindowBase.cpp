@@ -114,6 +114,14 @@ namespace platform::window
         return m_height;
     }
 
+    void WindowBase::setAlpha(BYTE alpha) noexcept
+    {
+        if (m_hwnd == nullptr) return;
+        LONG_PTR exStyle{ GetWindowLongPtrW(m_hwnd, GWL_EXSTYLE) };
+        SetWindowLongPtrW(m_hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+        SetLayeredWindowAttributes(m_hwnd, 0, alpha, LWA_ALPHA);
+    }
+
     LRESULT CALLBACK WindowBase::staticWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
     {
         if (msg == WM_CREATE)
