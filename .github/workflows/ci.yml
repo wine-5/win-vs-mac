@@ -44,6 +44,14 @@ jobs:
           .github/scripts/check-initialization.sh 2>&1 | tee init_check_output.txt
           exit ${PIPESTATUS[0]}
 
+      - name: Check architecture compliance
+        id: check_arch
+        continue-on-error: true
+        run: |
+          chmod +x .github/scripts/check-architecture.sh
+          .github/scripts/check-architecture.sh 2>&1 | tee arch_check_output.txt
+          exit ${PIPESTATUS[0]}
+
       - name: Run clang-tidy
         id: run_lint
         continue-on-error: true
@@ -96,6 +104,13 @@ jobs:
             echo "No initialization check output" >> combined_lint.txt
           fi
           echo "" >> combined_lint.txt
+          echo "=== Architecture Compliance ===" >> combined_lint.txt
+          if [ -f "arch_check_output.txt" ]; then
+            cat arch_check_output.txt >> combined_lint.txt
+          else
+            echo "No architecture check output" >> combined_lint.txt
+          fi
+          echo "" >> combined_lint.txt
           echo "=== clang-tidy Check ===" >> combined_lint.txt
           if [ -f "lint_output.txt" ]; then
             cat lint_output.txt >> combined_lint.txt
@@ -104,7 +119,7 @@ jobs:
           fi
 
       - name: Fail if any check failed
-        if: steps.check_init.outcome == 'failure' || steps.run_lint.outcome == 'failure'
+        if: steps.check_init.outcome == 'failure' || steps.check_arch.outcome == 'failure' || steps.run_lint.outcome == 'failure'
         run: exit 1
 
       - name: Upload lint result
@@ -135,7 +150,7 @@ jobs:
           LINT_STATUS="${{ needs.lint.result }}"
 
           if [ "$BUILD_STATUS" = "success" ] && [ "$LINT_STATUS" = "success" ]; then
-            MESSAGE="✅ ビルド・コードチェック成功 (命名規則・初期化スタイル)"
+            MESSAGE="✅ ビルド・コードチェック成功 (命名規則・初期化・アーキテクチャ)"
             COLOR=3066993
           else
             LINT_DETAILS=""
