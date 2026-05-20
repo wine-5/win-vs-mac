@@ -45,9 +45,14 @@ namespace game::scene
 
 	void TitleView::update(const core::iface::PerformanceSnapshot& snap)
 	{
-		pushHistory(m_cpuHistory,  snap.cpuUsage);
-		pushHistory(m_memHistory,  snap.memoryUsage);
-		pushHistory(m_diskHistory, snap.diskActivity);
+		// EMA スムージングを通して履歴に積み上げる
+		m_cpuSmoothed  += CPU_SMOOTH_FACTOR  * (snap.cpuUsage    - m_cpuSmoothed);
+		m_memSmoothed  += MEM_SMOOTH_FACTOR  * (snap.memoryUsage - m_memSmoothed);
+		m_diskSmoothed += DISK_SMOOTH_FACTOR * (snap.diskActivity - m_diskSmoothed);
+
+		pushHistory(m_cpuHistory,  m_cpuSmoothed);
+		pushHistory(m_memHistory,  m_memSmoothed);
+		pushHistory(m_diskHistory, m_diskSmoothed);
 
 		m_uiManager.update();
 	}

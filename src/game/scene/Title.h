@@ -67,11 +67,13 @@ namespace game::scene
 
 		float m_splashTimer{};
 		float m_dotTimer{};
+		float m_perfTimer{};
 		int   m_dotCount{};
 
-		static constexpr float SPLASH_DURATION = 3.0f;
-		static constexpr float FADE_DURATION = 0.5f;
-		static constexpr float DOT_INTERVAL = 0.4f;
+		static constexpr float SPLASH_DURATION       = 3.0f;
+		static constexpr float FADE_DURATION         = 0.5f;
+		static constexpr float DOT_INTERVAL          = 0.4f;
+		static constexpr float PERF_UPDATE_INTERVAL  = 1.0f; // パフォーマンス取得の更新間隔（秒）
 		static constexpr int   MAX_DOTS = 3;
 	};
 }

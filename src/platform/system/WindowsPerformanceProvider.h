@@ -34,9 +34,10 @@ namespace platform::system
 		int64_t m_prevKernelTime{}; // CPUがOSの処理に使った時間 
 		int64_t m_prevUserTime{};   // CPUがアプリケーションの処理に使った時間
 
-		// ディスクI/O計算用（前フレームの累積値）
-		int64_t m_prevBytesRead{};
-		int64_t m_prevBytesWritten{};
+		// ディスクI/O計算用（前回の累積時間）
+		int64_t m_prevReadTime{};
+		int64_t m_prevWriteTime{};
+		int64_t m_prevQueryTime{};
 
 		void* m_hDisk{}; // HANDLE(Window.hをヘッダーに漏らさないために void* で保持する）
 

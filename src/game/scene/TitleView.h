@@ -79,6 +79,16 @@ namespace game::scene
 		std::array<float, HISTORY_SIZE> m_memHistory{};
 		std::array<float, HISTORY_SIZE> m_diskHistory{};
 
+		// 指数移動平均（EMA）スムージング後の中間値
+		float m_cpuSmoothed{};
+		float m_memSmoothed{};
+		float m_diskSmoothed{};
+
+		// EMA 平滑化係数（0=完全スムース　1=生値）
+		static constexpr float CPU_SMOOTH_FACTOR { 0.15f };
+		static constexpr float MEM_SMOOTH_FACTOR { 0.40f };
+		static constexpr float DISK_SMOOTH_FACTOR{ 0.15f };
+
 		static constexpr float TITLE_Y_RATIO         = 0.35f;
 		static constexpr float START_BUTTON_Y_RATIO  = 0.50f;
 		static constexpr float EXIT_BUTTON_Y_RATIO   = 0.62f;

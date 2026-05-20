@@ -4,9 +4,7 @@
 
 namespace platform::system
 {
-	// ディスクI/O正規化の上限（500MB/s を 60fps で1フレーム分に換算）
-	// 500 MB/s ÷ 60 fps = 約 8.33 MB/フレーム = 約 8,333,333 バイト/フレーム -> 少し余裕を持たせて定義
-	static constexpr int64_t MAX_DISK_BYTES_PER_FRAME{ 8'700'000 };
+
 
 	WindowsPerformanceProvider::WindowsPerformanceProvider()
 		{
@@ -96,21 +94,26 @@ namespace platform::system
 			static_cast<HANDLE>(m_hDisk),
 			IOCTL_DISK_PERFORMANCE,
 			nullptr, 0,
-			&dp,sizeof(dp),
+			&dp, sizeof(dp),
 			&bytesReturned, nullptr)) return;
 
-		// 今回の読み書きバイト数を取得
-		const int64_t curRead{dp.BytesRead.QuadPart};
-		const int64_t curWritten{dp.BytesWritten.QuadPart};
+		// タスクマネージャーの「アクティブな時間」と同じ計算方式：
+		// activeTime = (ビジー時間) / (経過時間) = (ReadTime + WriteTime) / QueryTime
+		const int64_t curReadTime  { dp.ReadTime.QuadPart  };
+		const int64_t curWriteTime { dp.WriteTime.QuadPart };
+		const int64_t curQueryTime { dp.QueryTime.QuadPart };
 
-		// 前回からの差分を計算
-		const int64_t delta{ (curRead - m_prevBytesRead) + (curWritten - m_prevBytesWritten) };
+		const int64_t deltaQuery{ curQueryTime - m_prevQueryTime };
+		if (deltaQuery > 0)
+		{
+			const int64_t deltaBusy{ (curReadTime - m_prevReadTime) + (curWriteTime - m_prevWriteTime) };
+			m_diskActivity = static_cast<float>(deltaBusy) / static_cast<float>(deltaQuery);
+			if (m_diskActivity > 1.0f) m_diskActivity = 1.0f;
+			if (m_diskActivity < 0.0f) m_diskActivity = 0.0f;
+		}
 
-		m_diskActivity = static_cast<float>(delta) / static_cast<float>(MAX_DISK_BYTES_PER_FRAME);
-		if (m_diskActivity > 1.0f) m_diskActivity = 1.0f;
-		if (m_diskActivity < 0.0f) m_diskActivity = 0.0f;
-
-		m_prevBytesRead    = curRead;
-		m_prevBytesWritten = curWritten;
+		m_prevReadTime  = curReadTime;
+		m_prevWriteTime = curWriteTime;
+		m_prevQueryTime = curQueryTime;
 	}
 }

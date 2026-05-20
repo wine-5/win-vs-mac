@@ -35,8 +35,12 @@ namespace game::scene
 
 	void Title::update(float deltaTime)
 	{
-		m_perfProvider->update();
-
+		m_perfTimer += deltaTime;
+		if (m_perfTimer >= PERF_UPDATE_INTERVAL)
+		{
+			m_perfTimer -= PERF_UPDATE_INTERVAL;
+			m_perfProvider->update();
+		}
 
 		switch (m_state)
 		{
