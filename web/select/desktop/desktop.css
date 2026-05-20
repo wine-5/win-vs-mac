@@ -59,10 +59,16 @@ body {
     position: absolute;
     top: 16px;
     left: 4px;
-    display: grid;
-    grid-template-columns: repeat(2, 80px);
+    display: flex;
+    flex-direction: row;
     gap: 4px;
     z-index: 10;
+}
+
+.icon-column {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .desk-icon {

@@ -12,44 +12,49 @@
 
         <!-- デスクトップアイコン -->
         <div class="desktop-icons">
-            <!-- ゲーム内ウィンドウを開くアイコン -->
-            <div class="desk-icon" ondblclick="toggleWindow('job')">
-                <img src="https://assets.game.web/images/ui/app/job.png" alt="">
-                <span>ジョブ選択</span>
+            <!-- 左列: 標準 Windows アプリ -->
+            <div class="icon-column">
+                <div class="desk-icon" ondblclick="launchApp('cmd')">
+                    <img src="https://assets.game.web/images/ui/app/cmdIcon.png" alt="">
+                    <span>コマンド<br>プロンプト</span>
+                </div>
+                <div class="desk-icon" ondblclick="launchApp('taskmgr')">
+                    <img src="https://assets.game.web/images/ui/app/taskManager.png" alt="">
+                    <span>タスク<br>マネージャー</span>
+                </div>
+                <div class="desk-icon" ondblclick="launchApp('notepad')">
+                    <img src="https://assets.game.web/images/ui/app/notepad.png" alt="">
+                    <span>メモ帳</span>
+                </div>
+                <div class="desk-icon" ondblclick="launchApp('recyclebin')">
+                    <img src="https://assets.game.web/images/ui/app/gomibako.png" alt="">
+                    <span>ごみ箱</span>
+                </div>
             </div>
-            <div class="desk-icon" ondblclick="toggleWindow('diff')">
-                <img src="https://assets.game.web/images/ui/app/diff.png" alt="">
-                <span>難易度設定</span>
+            <!-- 右列: ゲーム設定 -->
+            <div class="icon-column">
+                <div class="desk-icon" ondblclick="toggleWindow('job')">
+                    <img src="https://assets.game.web/images/ui/app/job.png" alt="">
+                    <span>ジョブ選択</span>
+                </div>
+                <div class="desk-icon" ondblclick="toggleWindow('diff')">
+                    <img src="https://assets.game.web/images/ui/app/diff.png" alt="">
+                    <span>難易度設定</span>
+                </div>
+                <div class="desk-icon" ondblclick="toggleWindow('file')">
+                    <img src="https://assets.game.web/images/ui/app/file.png" alt="">
+                    <span>ファイル選択</span>
+                </div>
+                <div class="desk-icon" ondblclick="toggleWindow('param')">
+                    <img src="https://assets.game.web/images/ui/app/param.png" alt="">
+                    <span>パラメータ</span>
+                </div>
+                <div class="desk-icon" ondblclick="toggleWindow('rules')">
+                    <img src="https://assets.game.web/images/ui/app/Rules.png" alt="">
+                    <span>readme.txt</span>
+                </div>
             </div>
-            <div class="desk-icon" ondblclick="toggleWindow('file')">
-                <img src="https://assets.game.web/images/ui/app/file.png" alt="">
-                <span>ファイル選択</span>
-            </div>
-            <div class="desk-icon" ondblclick="toggleWindow('param')">
-                <img src="https://assets.game.web/images/ui/app/param.png" alt="">
-                <span>パラメータ</span>
-            </div>
-            <!-- ルール説明 -->
-            <div class="desk-icon" ondblclick="toggleWindow('rules')">
-                <img src="https://assets.game.web/images/ui/app/Rules.png" alt="">
-                <span>readme.txt</span>
-            </div>
-            <!-- Windows アプリ起動 -->
-            <div class="desk-icon" ondblclick="launchApp('cmd')">
-                <img src="https://assets.game.web/images/ui/app/cmdIcon.png" alt="">
-                <span>コマンド<br>プロンプト</span>
-            </div>
-            <div class="desk-icon" ondblclick="launchApp('taskmgr')">
-                <img src="https://assets.game.web/images/ui/app/taskManager.png" alt="">
-                <span>タスク<br>マネージャー</span>
-            </div>
-            <div class="desk-icon" ondblclick="launchApp('recyclebin')">
-                <img src="https://assets.game.web/images/ui/app/gomibako.png" alt="">
-                <span>ごみ箱</span>
-            </div>            <div class="desk-icon" ondblclick="launchApp('notepad')">
-                <img src="https://assets.game.web/images/ui/app/notepad.png" alt="">
-                <span>メモ帳</span>
-            </div>        </div>
+        </div>
     </div>
 
     <div class="taskbar">
