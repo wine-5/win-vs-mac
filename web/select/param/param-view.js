@@ -114,7 +114,6 @@ const ParamView = (function () {
             const el = document.getElementById(id);
             if (el) el.textContent = val != null ? val : '—';
         };
-        set('m-job', state.job);
         set('top-job', state.job);
         set('m-skill', state.skill);
         set('m-slot', state.slot != null && state.slot > 0 ? state.slot + '/3' : null);
