@@ -52,6 +52,14 @@ jobs:
           .github/scripts/check-architecture.sh 2>&1 | tee arch_check_output.txt
           exit ${PIPESTATUS[0]}
 
+      - name: Check JavaScript naming convention
+        id: check_js
+        continue-on-error: true
+        run: |
+          chmod +x .github/scripts/check-javascript.sh
+          .github/scripts/check-javascript.sh 2>&1 | tee js_check_output.txt
+          exit ${PIPESTATUS[0]}
+
       - name: Run clang-tidy
         id: run_lint
         continue-on-error: true
@@ -111,6 +119,13 @@ jobs:
             echo "No architecture check output" >> combined_lint.txt
           fi
           echo "" >> combined_lint.txt
+          echo "=== JavaScript Naming Convention ===" >> combined_lint.txt
+          if [ -f "js_check_output.txt" ]; then
+            cat js_check_output.txt >> combined_lint.txt
+          else
+            echo "No JavaScript naming check output" >> combined_lint.txt
+          fi
+          echo "" >> combined_lint.txt
           echo "=== clang-tidy Check ===" >> combined_lint.txt
           if [ -f "lint_output.txt" ]; then
             cat lint_output.txt >> combined_lint.txt
@@ -119,7 +134,7 @@ jobs:
           fi
 
       - name: Fail if any check failed
-        if: steps.check_init.outcome == 'failure' || steps.check_arch.outcome == 'failure' || steps.run_lint.outcome == 'failure'
+        if: steps.check_init.outcome == 'failure' || steps.check_arch.outcome == 'failure' || steps.check_js.outcome == 'failure' || steps.run_lint.outcome == 'failure'
         run: exit 1
 
       - name: Upload lint result
@@ -150,7 +165,7 @@ jobs:
           LINT_STATUS="${{ needs.lint.result }}"
 
           if [ "$BUILD_STATUS" = "success" ] && [ "$LINT_STATUS" = "success" ]; then
-            MESSAGE="✅ ビルド・コードチェック成功 (命名規則・初期化・アーキテクチャ)"
+            MESSAGE="✅ ビルド・コードチェック成功 (C++命名規則・初期化・アーキテクチャ・JS命名規則)"
             COLOR=3066993
           else
             LINT_DETAILS=""
