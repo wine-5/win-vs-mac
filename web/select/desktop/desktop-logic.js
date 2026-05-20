@@ -5,7 +5,7 @@
  * ウィンドウ状態の管理と C++ ↔ JS メッセージングを担う
  */
 const DesktopLogic = (function () {
-    const winStates = { job: true, file: true, param: true, diff: true };
+    const winStates = { job: true, file: true, param: true, diff: true, rules: false };
 
     let onWindowChangeCallback = null;
 
@@ -33,6 +33,14 @@ const DesktopLogic = (function () {
     }
 
     /**
+     * @brief Windows アプリ起動をゲームへ通知する
+     * @param {'cmd'|'taskmgr'|'recyclebin'} app 起動するアプリ識別子
+     */
+    function launchApp(app) {
+        sendToGame({ type: 'launchApp', app });
+    }
+
+    /**
      * @brief C++ からのメッセージを処理する
      * @param {object} data 受信したメッセージオブジェクト
      */
@@ -45,12 +53,13 @@ const DesktopLogic = (function () {
         }
     }
 
-    return { onWindowChange, toggleWindow, startGame, handleMessage };
+    return { onWindowChange, toggleWindow, startGame, launchApp, handleMessage };
 }());
 
 // HTML の onclick から呼ばれるグローバル関数
 function toggleWindow(name) { DesktopLogic.toggleWindow(name); }
 function startGame()        { DesktopLogic.startGame(); }
+function launchApp(app)     { DesktopLogic.launchApp(app); }
 
 // messaging.js が呼び出すグローバル関数
 function onMessageFromGame(data) { DesktopLogic.handleMessage(data); }

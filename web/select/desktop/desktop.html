@@ -9,6 +9,45 @@
 <body>
     <div class="desktop-area">
         <canvas id="matrix-bg"></canvas>
+
+        <!-- デスクトップアイコン -->
+        <div class="desktop-icons">
+            <!-- ゲーム内ウィンドウを開くアイコン -->
+            <div class="desk-icon" ondblclick="toggleWindow('job')">
+                <img src="https://assets.game.web/images/ui/icons/job.png" alt="">
+                <span>ジョブ選択</span>
+            </div>
+            <div class="desk-icon" ondblclick="toggleWindow('diff')">
+                <img src="https://assets.game.web/images/ui/icons/diff.png" alt="">
+                <span>難易度設定</span>
+            </div>
+            <div class="desk-icon" ondblclick="toggleWindow('file')">
+                <img src="https://assets.game.web/images/ui/icons/file.png" alt="">
+                <span>ファイル選択</span>
+            </div>
+            <div class="desk-icon" ondblclick="toggleWindow('param')">
+                <img src="https://assets.game.web/images/ui/icons/param.png" alt="">
+                <span>パラメータ</span>
+            </div>
+            <!-- ルール説明 -->
+            <div class="desk-icon" ondblclick="toggleWindow('rules')">
+                <span class="desk-icon-emoji">📄</span>
+                <span>readme.txt</span>
+            </div>
+            <!-- Windows アプリ起動 -->
+            <div class="desk-icon" ondblclick="launchApp('cmd')">
+                <img src="https://assets.game.web/images/ui/icons/cmdicon.png" alt="">
+                <span>コマンド<br>プロンプト</span>
+            </div>
+            <div class="desk-icon" ondblclick="launchApp('taskmgr')">
+                <img src="https://assets.game.web/images/ui/app/taskManager.png" alt="">
+                <span>タスク<br>マネージャー</span>
+            </div>
+            <div class="desk-icon" ondblclick="launchApp('recyclebin')">
+                <img src="https://assets.game.web/images/ui/app/gomibako.png" alt="">
+                <span>ごみ箱</span>
+            </div>
+        </div>
     </div>
 
     <div class="taskbar">
