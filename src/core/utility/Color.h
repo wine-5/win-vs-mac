@@ -52,9 +52,16 @@ namespace core::utility
         // ========== UI用の色 ==========
 
         // ボタンの色
-        static constexpr unsigned int BUTTON_NORMAL = 0xFF4848A0;
-        static constexpr unsigned int BUTTON_FOCUSED = 0xFF6868D0;
-        static constexpr unsigned int BUTTON_PRESSED = 0xFF383880;
-        static constexpr unsigned int BUTTON_DISABLED = GRAY;
+        static constexpr unsigned int BUTTON_NORMAL    = 0xFF4848A0;
+        static constexpr unsigned int BUTTON_FOCUSED   = 0xFF6868D0;
+        static constexpr unsigned int BUTTON_PRESSED   = 0xFF383880;
+        static constexpr unsigned int BUTTON_DISABLED  = GRAY;
+
+        // ========== パフォーマンスグラフ用の色 ==========
+
+        static constexpr unsigned int GRAPH_CPU    = 0xFF4080FF; // 青：CPU使用率
+        static constexpr unsigned int GRAPH_MEMORY = 0xFF40FF80; // 緑：メモリ使用率
+        static constexpr unsigned int GRAPH_DISK   = 0xFF80FFFF; // シアン：ディスク活動率
+        static constexpr unsigned int CARD_BG      = 0xFF081024; // タスクマネージャー風カード背景（濃い紺）
     };
 }

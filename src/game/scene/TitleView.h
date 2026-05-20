@@ -84,5 +84,10 @@ namespace game::scene
 		static constexpr float EXIT_BUTTON_Y_RATIO   = 0.62f;
 		static constexpr float BUTTON_WIDTH_RATIO    = 0.15f;
 		static constexpr float BUTTON_HEIGHT_RATIO   = 0.06f;
+
+		// パフォーマンスグラフ カード上端 Y 位置（0〜1）
+		static constexpr float GRAPH_CPU_TOP_RATIO    = 0.04f;
+		static constexpr float GRAPH_MEMORY_TOP_RATIO = 0.37f;
+		static constexpr float GRAPH_DISK_TOP_RATIO   = 0.73f;
 	};
 }
