@@ -11,9 +11,9 @@ namespace
 
     struct BiosLine
     {
-        const char* text;
-        LineType    type { LineType::Content };
-        float       delay{};    // 直前の行からの遅延（秒）
+        const char* m_text;
+        LineType    m_type { LineType::Content };
+        float       m_delay{};    // 直前の行からの遅延（秒）
     };
 
     // BIOS 起動シーケンスの表示行。各行は順序通りに画面に表示される
@@ -135,17 +135,17 @@ namespace game::scene
         {
             const auto& line { BIOS_LINES[i] };
             const int   y    { padY + i * lineHeight };
-            const auto  color{ lineTypeToColor(line.type) };
+            const auto  color{ lineTypeToColor(line.m_type) };
 
-            if (line.type == LineType::Guide)
+            if (line.m_type == LineType::Guide)
                 m_uiRenderer.drawBox(0, y, screenW, lineHeight,
                     core::utility::Color::MEDIUM_GREEN, true);
-            else if (line.type == LineType::Header || line.type == LineType::Footer)
+            else if (line.m_type == LineType::Header || line.m_type == LineType::Footer)
                 m_uiRenderer.drawBox(0, y, screenW, lineHeight,
                     core::utility::Color::BLUE, true);
 
-            if (line.text[0] != '\0')
-                m_uiRenderer.drawText(padX, y, line.text, color, fontSize);
+            if (line.m_text[0] != '\0')
+                m_uiRenderer.drawText(padX, y, line.m_text, color, fontSize);
         }
     }
 

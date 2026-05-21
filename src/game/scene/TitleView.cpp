@@ -106,15 +106,15 @@ namespace game::scene
 
 	void TitleView::drawBackground() const
 	{
-		const int W{ m_screen.getWidth()  };
-		const int H{ m_screen.getHeight() };
+		const int screenW{ m_screen.getWidth()  };
+		const int screenH{ m_screen.getHeight() };
 
 		struct Channel
 		{
-			const std::array<float, HISTORY_SIZE>& history;
-			const char*  label;
-			unsigned int color;
-			float        topRatio; // カード上端の Y 位置（0〜1）
+			const std::array<float, HISTORY_SIZE>& m_history;
+			const char*  m_label;
+			unsigned int m_color;
+			float        m_topRatio; // カード上端の Y 位置（0〜1）
 		};
 
 		const Channel channels[]
@@ -135,23 +135,23 @@ namespace game::scene
 		constexpr int   infoPanelPadding  { 14 };     // 情報パネルの左マージン（px）
 		constexpr int   textVerticalOffset{ 2 };      // ラベル・数値の縦位置微調整（px）
 
-		const int cardW { static_cast<int>(W * cardWidthRatio) };
-		const int cardX { (W - cardW) / 2 };
-		const int cardH { static_cast<int>(H * cardHeightRatio) };
+		const int cardW { static_cast<int>(screenW * cardWidthRatio) };
+		const int cardX { (screenW - cardW) / 2 };
+		const int cardH { static_cast<int>(screenH * cardHeightRatio) };
 		const int graphW{ static_cast<int>(cardW * graphWidthFrac) };
 		const int infoX { cardX + graphW + infoPanelPadding };
 		const int barW  { std::max(1, graphW / HISTORY_SIZE) };
 
-		const int labelSize{ static_cast<int>(H * labelFontSizeRatio) };
-		const int valueSize{ static_cast<int>(H * valueFontSizeRatio) };
+		const int labelSize{ static_cast<int>(screenH * labelFontSizeRatio) };
+		const int valueSize{ static_cast<int>(screenH * valueFontSizeRatio) };
 
 		for (const auto& ch : channels)
 		{
-			const int cardTop { static_cast<int>(H * ch.topRatio) };
+			const int cardTop { static_cast<int>(screenH * ch.m_topRatio) };
 			const int graphTop{ cardTop + graphPadding };
 			const int graphBot{ cardTop + cardH - graphPadding };
 			const int graphH  { graphBot - graphTop };
-			const float latestVal{ ch.history.back() };
+			const float latestVal{ ch.m_history.back() };
 
 			// カード背景（濃い紺）
 			m_uiRenderer.setBlendMode(2, 40);
@@ -160,46 +160,46 @@ namespace game::scene
 
 			// グラフ背景（チャンネルカラーで極薄）
 			m_uiRenderer.setBlendMode(2, 18);
-			m_uiRenderer.drawBox(cardX, graphTop, graphW, graphH, ch.color, true);
+			m_uiRenderer.drawBox(cardX, graphTop, graphW, graphH, ch.m_color, true);
 
 			// 横グリッドライン（25 / 50 / 75 %）
 			m_uiRenderer.setBlendMode(2, 40);
 			for (int g{ 1 }; g <= gridLineCount; ++g)
 			{
 				const int gy{ graphBot - static_cast<int>(graphH * g * gridLineInterval) };
-				m_uiRenderer.drawBox(cardX, gy, graphW, 1, ch.color, true);
+				m_uiRenderer.drawBox(cardX, gy, graphW, 1, ch.m_color, true);
 			}
 
 			// 波形（塗り ＋ 上端ライン）
 			for (int i{ 0 }; i < HISTORY_SIZE; ++i)
 			{
-				const int barH{ static_cast<int>(ch.history[i] * graphH) };
+				const int barH{ static_cast<int>(ch.m_history[i] * graphH) };
 				if (barH <= 0) continue;
 				const int x{ cardX + i * barW };
 				const int y{ graphBot - barH };
 
 				// 塗り（半透明）
 				m_uiRenderer.setBlendMode(2, 90);
-				m_uiRenderer.drawBox(x, y, barW - 1, barH, ch.color, true);
+				m_uiRenderer.drawBox(x, y, barW - 1, barH, ch.m_color, true);
 
 				// 上端ライン（輝線）
 				m_uiRenderer.setBlendMode(2, 230);
-				m_uiRenderer.drawBox(x, y, barW - 1, 1, ch.color, true);
+				m_uiRenderer.drawBox(x, y, barW - 1, 1, ch.m_color, true);
 			}
 
 			// カード枠線
 			m_uiRenderer.setBlendMode(2, 130);
-			m_uiRenderer.drawBox(cardX, cardTop, cardW, cardH, ch.color, false);
+			m_uiRenderer.drawBox(cardX, cardTop, cardW, cardH, ch.m_color, false);
 
 			// グラフ ／ 情報パネル 区切り線
 			m_uiRenderer.setBlendMode(2, 100);
-			m_uiRenderer.drawBox(cardX + graphW, cardTop, 1, cardH, ch.color, true);
+			m_uiRenderer.drawBox(cardX + graphW, cardTop, 1, cardH, ch.m_color, true);
 
 			// ラベル（情報パネル上段）
 			const int infoCenterY{ cardTop + cardH / 2 };
 			m_uiRenderer.setBlendMode(2, 210);
 			m_uiRenderer.drawText(infoX, infoCenterY - labelSize - valueSize / 2 - textVerticalOffset,
-				ch.label, ch.color, labelSize);
+				ch.m_label, ch.m_color, labelSize);
 
 			// 数値（情報パネル下段、白 ＋ 大きめ）
 			const std::string valText{ std::to_string(static_cast<int>(latestVal * 100.f)) + "%" };

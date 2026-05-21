@@ -11,7 +11,6 @@ namespace game::ui
 		: m_uiRenderer{ uiRenderer }
 		, m_screen{ screen }
 		, m_duration{ duration }
-		, m_elapsed{ 0.0f }
 		, m_isFadeIn{ isFadeIn }
 	{
 	}
