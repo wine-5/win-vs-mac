@@ -1,6 +1,8 @@
 #include "WindowFactory.h"
 #include "loading/LoadingWindow.h"
 #include "result/ResultWindow.h"
+#include "select/Win32SelectWindowManager.h"
+#include "core/interface/IResourceManager.h"
 
 namespace platform::window
 {
@@ -51,5 +53,19 @@ namespace platform::window
             m_screen,
             std::move(onRetry),
             std::move(onTitle));
+    }
+
+    std::unique_ptr<core::iface::ISelectWindowManager> WindowFactory::createSelectWindowManager(
+        std::function<void()> onGameStart,
+        std::function<void(core::constant::JobType)> onJobSelect,
+        std::function<void(int, const std::string&)> onFileSlotChanged,
+        core::iface::IResourceManager& resourceManager)
+    {
+        return std::make_unique<select::Win32SelectWindowManager>(
+            std::move(onGameStart),
+            std::move(onJobSelect),
+            std::move(onFileSlotChanged),
+            resourceManager,
+            m_screen);
     }
 }

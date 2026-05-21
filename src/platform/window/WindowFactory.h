@@ -36,6 +36,20 @@ namespace platform::window
             std::function<void()> onRetry,
             std::function<void()> onTitle) override;
 
+        /**
+         * @brief セレクト画面のウィンドウマネージャを生成・初期化
+         * @param onGameStart ゲーム開始時のコールバック
+         * @param onJobSelect 職業選択時のコールバック
+         * @param onFileSlotChanged ファイルスロット変更時のコールバック
+         * @param resourceManager リソースマネージャ
+         * @return 生成されたセレクトウィンドウマネージャ
+         */
+        std::unique_ptr<core::iface::ISelectWindowManager> createSelectWindowManager(
+            std::function<void()> onGameStart,
+            std::function<void(core::constant::JobType)> onJobSelect,
+            std::function<void(int, const std::string&)> onFileSlotChanged,
+            core::iface::IResourceManager& resourceManager) override;
+
     private:
         core::iface::IScreen& m_screen;
     };
