@@ -172,10 +172,18 @@ jobs:
             COLOR=3066993
           else
             LINT_DETAILS=""
+            ARCH_VIOLATIONS=""
             if [ -f "combined_lint.txt" ] && [ -s "combined_lint.txt" ]; then
               echo "=== Lint Output File Contents ===" >&2
               cat combined_lint.txt >&2
-              
+
+              # アーキテクチャ違反を抽出
+              ARCH_VIOLATIONS=$(sed -n '/=== Architecture Compliance ===/,/=== JavaScript/p' combined_lint.txt \
+                | grep -E "src/" \
+                | grep -v "No architecture" \
+                | head -15 \
+                | sed 's|/home/runner/work/[^/]*/[^/]*/||g')
+
               # エラーを抽出して整形
               LINT_DETAILS=$(cat combined_lint.txt \
                 | grep -v "thirdparty" \
