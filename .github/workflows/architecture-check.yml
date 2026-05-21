@@ -24,8 +24,8 @@ jobs:
 
       - name: Run Architecture Check
         run: |
-          chmod +x scripts/check_architecture.sh
-          bash scripts/check_architecture.sh src
+          chmod +x .github/scripts/check-architecture.sh
+          bash .github/scripts/check-architecture.sh src
         continue-on-error: true
         id: arch-check
 
@@ -97,14 +97,13 @@ jobs:
           EOF
         id: prepare-failure
 
-      - name: Send to Discord Bot
+      - name: Send to Discord Webhook
         if: always()
         run: |
-          if [ -z "${{ secrets.DISCORD_BOT_TOKEN }}" ] || [ -z "${{ secrets.DISCORD_CHANNEL_ID }}" ]; then
-            echo "⚠️  Discord Bot Token or Channel ID not set. Skipping notification."
+          if [ -z "${{ secrets.DISCORD_WEBHOOK_URL }}" ]; then
+            echo "⚠️  Discord Webhook URL not set. Skipping notification."
             exit 0
           fi
-          curl -X POST "https://discordapp.com/api/channels/${{ secrets.DISCORD_CHANNEL_ID }}/messages" \
-            -H "Authorization: Bot ${{ secrets.DISCORD_BOT_TOKEN }}" \
+          curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
             -d @discord_payload.json
