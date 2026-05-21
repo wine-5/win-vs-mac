@@ -4,6 +4,7 @@
 #include "platform/webview/WebView2Host.h"
 #include "core/interface/IResultWindowManager.h"
 #include "core/interface/IScreen.h"
+#include "core/interface/IWindow.h"
 
 #include <functional>
 #include <optional>
@@ -14,7 +15,7 @@ namespace platform::window::result
      * @class ResultWindow
      * @brief リザルト画面を表示する WebView2 ウィンドウ
      */
-    class ResultWindow : public WindowBase, public core::iface::IResultWindowManager
+    class ResultWindow : public WindowBase, public core::iface::IResultWindowManager, public core::iface::IWindow
     {
     public:
         /**
@@ -28,7 +29,7 @@ namespace platform::window::result
             std::function<void()> onRetry,
             std::function<void()> onTitle) noexcept;
 
-        virtual ~ResultWindow() noexcept = default;
+        virtual ~ResultWindow() noexcept;
 
         /**
          * @brief ウィンドウを表示し、結果データを WebView に送信する
@@ -40,6 +41,11 @@ namespace platform::window::result
          * @brief メッセージポンプ（毎フレーム呼び出し）
          */
         void pumpMessages() noexcept override;
+
+        /**
+         * @brief ウィンドウを破棄する
+         */
+        void destroy() noexcept override;
 
     protected:
         void onCreateControls(HWND hwnd) override;

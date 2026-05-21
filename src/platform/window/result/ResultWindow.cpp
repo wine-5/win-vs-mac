@@ -19,6 +19,11 @@ namespace platform::window::result
     {
     }
 
+    ResultWindow::~ResultWindow() noexcept
+    {
+        destroy();
+    }
+
     void ResultWindow::show(const core::data::ResultData& data) noexcept
     {
         m_pendingData = data;
@@ -63,6 +68,11 @@ namespace platform::window::result
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+    }
+
+    void ResultWindow::destroy() noexcept
+    {
+        WindowBase::destroy();
     }
 
     void ResultWindow::onCreateControls(HWND hwnd)

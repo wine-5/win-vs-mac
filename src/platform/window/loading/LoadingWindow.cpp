@@ -8,9 +8,24 @@ namespace platform::window::loading
 	{
 	}
 
+	LoadingWindow::~LoadingWindow() noexcept
+	{
+		destroy();
+	}
+
 	void LoadingWindow::setOnLoadingComplete(std::function<void()> callback) noexcept
 	{
 		m_onLoadingComplete = callback;
+	}
+
+	void LoadingWindow::pumpMessages() noexcept
+	{
+		// メッセージポンプ処理（現在は WebView2 が自動的に処理を行うため不要）
+	}
+
+	void LoadingWindow::destroy() noexcept
+	{
+		WindowBase::destroy();
 	}
 
 	void LoadingWindow::onCreateControls(HWND hwnd)

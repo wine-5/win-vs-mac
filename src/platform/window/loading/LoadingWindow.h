@@ -4,6 +4,7 @@
 #include <functional>
 #include "platform/window/WindowBase.h"
 #include "platform/webview/WebView2Host.h"
+#include "core/interface/IWindow.h"
 
 namespace platform::window::loading
 {
@@ -11,7 +12,7 @@ namespace platform::window::loading
 	 * @class LoadingWindow
 	 * @brief ローディングウィンドウ
 	 */
-	class LoadingWindow : public WindowBase
+	class LoadingWindow : public WindowBase, public core::iface::IWindow
 	{
 	public:
 		/**
@@ -24,13 +25,23 @@ namespace platform::window::loading
 		LoadingWindow(int x, int y, int width, int height) noexcept;
 
 		/// @brief デストラクタ
-		virtual ~LoadingWindow() noexcept = default;
+		virtual ~LoadingWindow() noexcept;
 
 		/**
 		 * @brief ローディング完了時のコールバック設定
 		 * @param callback ローディング完了時に呼ぶコールバック関数
 		 */
 		void setOnLoadingComplete(std::function<void()> callback) noexcept;
+
+		/**
+		 * @brief メッセージポンプ（毎フレーム呼び出し）
+		 */
+		void pumpMessages() noexcept override;
+
+		/**
+		 * @brief ウィンドウを破棄する
+		 */
+		void destroy() noexcept override;
 
 	protected:
 		void onCreateControls(HWND hwnd) override;
