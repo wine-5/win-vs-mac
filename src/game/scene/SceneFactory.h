@@ -1,11 +1,6 @@
 ﻿#pragma once
 #include "IScene.h"
 #include "SceneType.h"
-#include "infrastructure/Camera.h"
-#include "infrastructure/Renderer.h"
-#include "infrastructure/Animator.h"
-#include "infrastructure/InputManager.h"
-#include "infrastructure/UIRenderer.h"
 #include "InGame.h"
 #include "Title.h"
 #include "Lockscreen.h"
@@ -13,6 +8,14 @@
 #include "Loading.h"
 #include "Result.h"
 #include "Bios.h"
+#include "core/interface/ICamera.h"
+#include "core/interface/IRenderer.h"
+#include "core/interface/IAnimator.h"
+#include "core/interface/IInputProvider.h"
+#include "core/interface/IUIRenderer.h"
+#include "core/interface/IResourceManager.h"
+#include "core/interface/IScreen.h"
+#include "core/interface/IWindowFactory.h"
 #include <memory>
 
 namespace game::scene
@@ -25,6 +28,11 @@ namespace game::scene
     {
     public:
         SceneFactory();
+
+        /**
+         * @brief デストラクタ
+         */
+        ~SceneFactory();
 
         /**
          * @brief 指定されたタイプのシーンを生成
@@ -41,40 +49,13 @@ namespace game::scene
         void resetScene(SceneType sceneType) noexcept;
 
     private:
-        // InGame用の依存関係と実体
-        infrastructure::Camera       m_inGameCamera;
-        infrastructure::Renderer     m_inGameRenderer;
-        infrastructure::Animator     m_inGameAnimator;
-        infrastructure::InputManager m_inGameInputManager;
+        // シーンインスタンスの管理
         std::unique_ptr<InGame>      m_inGameScene;
-
-        // Title用の依存関係と実体
-        infrastructure::InputManager m_titleInputManager;
-        infrastructure::UIRenderer   m_titleUIRenderer;
         std::unique_ptr<Title>       m_titleScene;
-
-        // Lockscreen用の依存関係と実体
-        infrastructure::InputManager m_lockscreenInputManager;
-        infrastructure::UIRenderer   m_lockscreenUIRenderer;
         std::unique_ptr<Lockscreen>  m_lockscreenScene;
-
-        // Select用の依存関係と実体
-        infrastructure::InputManager m_selectInputManager;
-        infrastructure::UIRenderer   m_selectUIRenderer;
         std::unique_ptr<Select>      m_selectScene;
-
-        // Bios用の依存関係と実体
-        infrastructure::InputManager m_biosInputManager;
-        infrastructure::UIRenderer   m_biosUIRenderer;
-        std::unique_ptr<Bios>        m_biosScene;
-
-        // Loading用の依存関係と実体
-        infrastructure::UIRenderer   m_loadingUIRenderer;
         std::unique_ptr<Loading>     m_loadingScene;
-
-        // Result用の依存関係と実体
-        infrastructure::InputManager m_resultInputManager;
-        infrastructure::UIRenderer   m_resultUIRenderer;
         std::unique_ptr<Result>      m_resultScene;
+        std::unique_ptr<Bios>        m_biosScene;
     };
 }

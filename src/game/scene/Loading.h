@@ -3,12 +3,8 @@
 #include "game/ui/FadeTransition.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "core/interface/IWindow.h"
 #include <memory>
-
-namespace platform::window::loading
-{
-	class LoadingWindow;
-}
 
 namespace game::scene
 {
@@ -22,9 +18,11 @@ namespace game::scene
          * @brief Loadingのコンストラクタ
          * @param uiRenderer UI描画インターフェース
          * @param screen 画面情報インターフェース
+         * @param loadingWindow ローディングウィンドウ
          */
         Loading(core::iface::IUIRenderer& uiRenderer,
-            core::iface::IScreen& screen);
+            core::iface::IScreen& screen,
+            std::unique_ptr<core::iface::IWindow> loadingWindow);
 
         /**
          * @brief Loadingのデストラクタ
@@ -59,7 +57,7 @@ namespace game::scene
 
         core::iface::IUIRenderer& m_uiRenderer;
         core::iface::IScreen& m_screen;
-        std::unique_ptr<platform::window::loading::LoadingWindow> m_loadingWindow;
+        std::unique_ptr<core::iface::IWindow> m_loadingWindow{};
         std::unique_ptr<ui::FadeTransition> m_fade;
 
         State m_state{ State::FadeIn };

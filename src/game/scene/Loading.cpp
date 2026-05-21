@@ -3,53 +3,19 @@
 #include "SceneType.h"
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
-#include "platform/window/loading/LoadingWindow.h"
 
 namespace game::scene
 {
     Loading::Loading(core::iface::IUIRenderer& uiRenderer,
-        core::iface::IScreen& screen)
+        core::iface::IScreen& screen,
+        std::unique_ptr<core::iface::IWindow> loadingWindow)
         : m_uiRenderer{ uiRenderer }
         , m_screen{ screen }
+        , m_loadingWindow{ std::move(loadingWindow) }
     {
-        // DxLib のクライアント領域を取得
-        HWND dxlibHwnd = static_cast<HWND>(m_screen.getNativeWindowHandle());
-
-        RECT clientRect{};
-        GetClientRect(dxlibHwnd, &clientRect);
-        int screenWidth{ clientRect.right };
-        int screenHeight{ clientRect.bottom };
-
-        POINT origin{ 0, 0 };
-        ClientToScreen(dxlibHwnd, &origin);
-        int originX{ origin.x };
-        int originY{ origin.y };
-
-        // ローディングウィンドウを作成
-        // スクリーン中央に配置（スクリーンサイズの80%）
-        int windowWidth = screenWidth * 80 / 100;
-        int windowHeight = screenHeight * 80 / 100;
-        int windowX = originX + (screenWidth - windowWidth) / 2;
-        int windowY = originY + (screenHeight - windowHeight) / 2;
-
-        m_loadingWindow = std::make_unique<platform::window::loading::LoadingWindow>(
-            windowX, windowY, windowWidth, windowHeight);
-
-        // ローディング完了時のコールバックを設定
-        m_loadingWindow->setOnLoadingComplete([this]() {
-            this->notifyLoadingComplete();
-        });
-
-        // ウィンドウを作成・表示
-        if (m_loadingWindow->create())
-            m_loadingWindow->show();
     }
 
-    Loading::~Loading() noexcept
-    {
-        if (m_loadingWindow)
-            m_loadingWindow->destroy();
-    }
+    Loading::~Loading() noexcept = default;
 
     void Loading::update(float deltaTime)
     {

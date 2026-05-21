@@ -3,38 +3,30 @@
 #include "SceneType.h"
 #include "game/GameManager.h"
 #include "core/base/ServiceLocator.h"
-#include "platform/window/result/ResultWindow.h"
 
 namespace game::scene
 {
     Result::Result(core::iface::IUIRenderer& uiRenderer,
-        core::iface::IScreen& screen)
+        core::iface::IScreen& screen,
+        std::unique_ptr<core::iface::IWindow> resultWindow)
         : m_uiRenderer{ uiRenderer }
         , m_screen{ screen }
+        , m_resultWindow{ std::move(resultWindow) }
     {
-        m_resultWindow = std::make_unique<platform::window::result::ResultWindow>(
-            screen,
-            []() {
-                auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
-                if (sceneManager)
-                    sceneManager->changeScene(SceneType::Select);
-            },
-            []() {
-                auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
-                if (sceneManager)
-                    sceneManager->changeScene(SceneType::Title);
-            }
-        );
-
-        const auto& resultData{ game::GameManager::getInstance().getResultData() };
-        m_resultWindow->show(resultData);
+        // リザルトウィンドウを表示
+        if (auto* resultWindowMgr = dynamic_cast<core::iface::IResultWindowManager*>(m_resultWindow.get()))
+        {
+            const auto& resultData = GameManager::getInstance().getResultData();
+            resultWindowMgr->show(resultData);
+        }
     }
 
     Result::~Result() noexcept = default;
 
     void Result::update(float deltaTime)
     {
-        m_resultWindow->pumpMessages();
+        if (m_resultWindow)
+            m_resultWindow->pumpMessages();
     }
 
     void Result::draw()
