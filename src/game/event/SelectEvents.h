@@ -30,8 +30,8 @@ namespace core::event
 
 		FileSlotChangedEvent() = default;
 		FileSlotChangedEvent(int slotIndex, const std::string& filePath)
-			: m_slotIndex(slotIndex)
-			, m_filePath(filePath)
+			: m_slotIndex{slotIndex}
+			, m_filePath{filePath}
 		{
 		}
 	};

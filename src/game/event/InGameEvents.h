@@ -20,9 +20,9 @@ namespace game::event
 
 		AttackHitEvent() = default;
 		AttackHitEvent(core::ecs::EntityId atkId, core::ecs::EntityId tgtId, float dmg)
-			: m_attackerId(atkId)
-			, m_targetId(tgtId)
-			, m_damage(dmg) 
+			: m_attackerId{atkId}
+			, m_targetId{tgtId}
+			, m_damage{dmg} 
 		{
 		}
 	};

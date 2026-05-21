@@ -12,8 +12,8 @@ namespace platform::window
 {
     WindowBase::WindowBase(const wchar_t* className, const wchar_t* title,
         int x, int y, int width, int height) noexcept
-        : m_className(className), m_title(title), m_x(x), m_y(y),
-        m_width(width), m_height(height), m_hwnd(nullptr)
+        : m_className{className}, m_title{title}, m_x{x}, m_y{y},
+        m_width{width}, m_height{height}, m_hwnd{nullptr}
     {
     }
 

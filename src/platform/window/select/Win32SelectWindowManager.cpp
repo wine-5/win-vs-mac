@@ -15,11 +15,11 @@ namespace platform::window::select
         core::iface::IResourceManager& resourceManager,
         core::iface::IScreen& screen
     ) noexcept
-        : m_onGameStart(onGameStart),
-        m_onJobSelect(onJobSelect),
-        m_onFileSlotChanged(onFileSlotChanged),
-        m_resourceManager(resourceManager),
-        m_screen(screen)
+        : m_onGameStart{onGameStart},
+        m_onJobSelect{onJobSelect},
+        m_onFileSlotChanged{onFileSlotChanged},
+        m_resourceManager{resourceManager},
+        m_screen{screen}
     {
     }
 
