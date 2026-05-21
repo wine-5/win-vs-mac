@@ -13,6 +13,7 @@ namespace platform::webview
      * @brief Win32 ウィンドウのクライアント領域に WebView2 を埋め込むホストクラス
      * @details initialize() を呼ぶと非同期で WebView2 が初期化される。
      *          完了後は postMessage / setOnMessage で C++ ↔ JS 通信できる。
+     *          WebView2を初めて使用するというのもありコメントの量が過剰かもしれませんがご了承ください。
      */
     class WebView2Host
     {
@@ -72,19 +73,19 @@ namespace platform::webview
         [[nodiscard]] bool isReady() const noexcept;
 
     private:
-        Microsoft::WRL::ComPtr<ICoreWebView2Controller> m_controller{};
-        Microsoft::WRL::ComPtr<ICoreWebView2> m_webview{};
-        MessageCallback m_onMessage{};
+        Microsoft::WRL::ComPtr<ICoreWebView2Controller> m_controller{}; // WebView2の表示領域・サイズ・可視状態を制御するコントローラー 
+        Microsoft::WRL::ComPtr<ICoreWebView2> m_webview{}; // メッセージ送受信を行うWebViewの本体
+        MessageCallback m_onMessage{}; // JS -> C++でメッセージを受信したときに呼ぶコールバック
         bool m_ready{false};
-        std::vector<std::wstring> m_pendingMessages{};
-        EventRegistrationToken m_webMessageToken{};
-        EventRegistrationToken m_navToken{};
+        std::vector<std::wstring> m_pendingMessages{}; // m_readyがfalseの時の間に送信を試みたメッセージを一時的にためておくキュー
+        EventRegistrationToken    m_webMessageToken{}; // JSメッセージ受信ハンドラの登録トークンで、デストラクタで解除するために
+        EventRegistrationToken    m_navToken{};        // ナビゲーション完了ハンドラの登録トークン
 
         HRESULT onControllerCreated(HRESULT result, ICoreWebView2Controller* controller,
-            HWND parentHwnd, const std::wstring& htmlPath) noexcept;
-        void setupVirtualHostMappings(ICoreWebView2_3* webview3) noexcept;
-        void registerMessageHandler(ICoreWebView2* webview) noexcept;
-        void registerNavigationHandler(ICoreWebView2* webview) noexcept;
-        void flushPendingMessages() noexcept;
+            HWND parentHwnd, const std::wstring& htmlPath) noexcept;       // コントローラーとWebViewを保存して、サイズ設定・ハンドラ登録・ナビゲーション開始を行う
+        void setupVirtualHostMappings(ICoreWebView2_3* webview3) noexcept; // ローカルフォルダを仮想ホスト名に紐づける。HTTPS経由でローカルファイルにアクセスできるようにする
+        void registerMessageHandler(ICoreWebView2* webview) noexcept;      // JS -> C++のメッセージ受信イベントハンドラを受信する
+        void registerNavigationHandler(ICoreWebView2* webview) noexcept;   // ページ読み込み完了イベントハンドラを登録する。完了時に m_ready = true にし、溜まったメッセージを一括送信する
+        void flushPendingMessages() noexcept;                              // m_pendingMessages に溜まっていたメッセージを順番に送信し、キューを空にする
     };
 }

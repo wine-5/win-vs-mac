@@ -124,6 +124,7 @@ namespace platform::window
         std::function<void()> m_onClose{};
         std::wstring m_className{};
         std::wstring m_title{};
+        
         int m_x{};
         int m_y{};
         int m_width{};
