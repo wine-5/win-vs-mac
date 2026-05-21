@@ -84,7 +84,7 @@ namespace game::scene
         float acc{};
         for (int i{}; i < LINE_COUNT; ++i)
         {
-            acc += BIOS_LINES[i].delay;
+            acc += BIOS_LINES[i].m_delay;
             m_lineTimestamps.push_back(acc);
         }
     }

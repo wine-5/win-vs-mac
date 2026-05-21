@@ -173,14 +173,14 @@ namespace platform::window::select
 		auto fmt = [](float v) -> std::string {
 			if (v == static_cast<int>(v))
 				return std::to_string(static_cast<int>(v));
-			std::ostringstream oss;
+			std::ostringstream oss{};
 			oss << v;
 			return oss.str();
 		};
 
 		auto describe = [&](game::data::FileExtensionType t) -> std::string {
 			auto b = game::utility::ExtensionBonusCalculator::calculate(t);
-			std::string result;
+			std::string result{};
 			auto append = [&](const char* label, float val) {
 				if (val == 0.0f) return;
 				if (!result.empty()) result += ' ';

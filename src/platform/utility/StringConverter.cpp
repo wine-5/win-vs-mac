@@ -15,7 +15,7 @@ namespace platform::utility
 
 		// UTF-8 → UTF-16（ワイド文字）
 		// WindowsのAPIはUTF-16をネイティブに扱うため、まず中間形式に変換
-		int wideSize = MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, nullptr, 0);
+		int wideSize{ MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, nullptr, 0) };
 		if (wideSize == 0)
 			return utf8Str;
 
@@ -24,7 +24,7 @@ namespace platform::utility
 
 		// UTF-16 → Shift_JIS
 		// DxLibの描画関数がShift_JISを期待しているため、最終的にこのエンコーディングに変換
-		int sjisSize = WideCharToMultiByte(CP_ACP, 0, wide.data(), -1, nullptr, 0, nullptr, nullptr);
+		int sjisSize{ WideCharToMultiByte(CP_ACP, 0, wide.data(), -1, nullptr, 0, nullptr, nullptr) };
 		if (sjisSize == 0)
 			return utf8Str;
 

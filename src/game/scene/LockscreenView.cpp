@@ -37,7 +37,11 @@ namespace game::scene
 		// 現在時刻の取得
 		const std::time_t currentTime{ std::time(nullptr) };
 		std::tm t{};
+#ifdef _WIN32
 		localtime_s(&t, &currentTime);
+#else
+		localtime_r(&currentTime, &t);
+#endif
 
 		m_uiRenderer.setFont(m_mainFontName.c_str());
 

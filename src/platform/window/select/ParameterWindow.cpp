@@ -25,7 +25,7 @@ namespace platform::window::select
             if (wlen <= 0) return {};
             std::wstring wide(wlen - 1, L'\0');
             MultiByteToWideChar(932, 0, sjis.c_str(), -1, wide.data(), wlen);
-            int ulen = WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, nullptr, 0, nullptr, nullptr);
+            int ulen{ WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, nullptr, 0, nullptr, nullptr) };
             if (ulen <= 0) return {};
             std::string utf8(ulen - 1, '\0');
             WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, utf8.data(), ulen, nullptr, nullptr);

@@ -61,7 +61,7 @@ namespace platform::window::select
             }
             else if (type == "confirmHard")
             {
-                const int result = MessageBoxW(
+                const int result{ MessageBoxW(
                     m_hwnd,
                     L"HARD モードを選択しようとしています。\n"
                     L"敵の攻撃力・防御力が大幅に上昇し、\n"
@@ -69,7 +69,7 @@ namespace platform::window::select
                     L"本当に続行しますか？",
                     L"警告 - Win vs Mac.exe",
                     MB_OKCANCEL | MB_ICONWARNING
-                );
+                ) };
                 if (result == IDOK)
                 {
                     m_selectedDifficulty = "HARD";

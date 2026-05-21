@@ -120,7 +120,7 @@ namespace platform::webview
     void WebView2Host::postMessage(const std::string& utf8Json) noexcept
     {
         if (!m_webview) return;
-        int len = MultiByteToWideChar(CP_UTF8, 0, utf8Json.c_str(), -1, nullptr, 0);
+        int len{ MultiByteToWideChar(CP_UTF8, 0, utf8Json.c_str(), -1, nullptr, 0) };
         if (len <= 0) return;
         std::wstring wide(len - 1, L'\0');
         MultiByteToWideChar(CP_UTF8, 0, utf8Json.c_str(), -1, wide.data(), len);
