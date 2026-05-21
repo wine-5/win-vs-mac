@@ -70,7 +70,7 @@ else
   echo ""
 
   # ファイル名:行番号 の形式で出力
-  grep -E "^\s+src/" "$TEMP_VIOLATIONS" | cut -d':' -f1-2 | sed 's|^\s*||' | head -5
+  grep -E "^\s+src/" "$TEMP_VIOLATIONS" | cut -d':' -f1-2 | sed 's|^\s*||' | head -10
 
   TOTAL_FILES=$(grep -c '^\s*src/' "$TEMP_VIOLATIONS" || true)
   if [ "$TOTAL_FILES" -gt 5 ]; then
