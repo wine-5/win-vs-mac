@@ -19,6 +19,9 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
 
+      - name: Restore NuGet packages
+        run: nuget restore DxLib-3D.sln
+
       - name: Build (Debug x64)
         run: |
           msbuild DxLib-3D.sln `
