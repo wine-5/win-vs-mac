@@ -11,12 +11,9 @@ TEMP_VIOLATIONS="/tmp/js_violations.txt"
 
 > "$TEMP_VIOLATIONS"
 
-echo "🔍 JavaScript命名規則をチェック中..."
-
 # ========================================
 # 1. ファイル名がケバブケースか（JS・HTML・CSS）
 # ========================================
-echo "  ファイル名をチェック..." >&2
 
 # JSファイル: ケバブケース [a-z0-9-]+.js
 js_file_violations=$(find "$WEB_PATH" -name "*.js" -type f | grep -E '[A-Z_]' || true)

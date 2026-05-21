@@ -209,9 +209,15 @@ jobs:
                   {print}
                 ')
               
+              # アーキテクチャ違反詳細をメッセージに追加
+              if [ -n "$ARCH_VIOLATIONS" ]; then
+                ARCH_VIOLATIONS=$(echo "$ARCH_VIOLATIONS" | head -c 1000)
+                LINT_DETAILS="${LINT_DETAILS}\n\n**アーキテクチャ違反:**\n\`\`\`\n${ARCH_VIOLATIONS}\n\`\`\`"
+              fi
+
               if [ -n "$LINT_DETAILS" ]; then
                 # Discordの文字数制限を考慮
-                LINT_DETAILS=$(echo "$LINT_DETAILS" | head -c 1500)
+                LINT_DETAILS=$(echo "$LINT_DETAILS" | head -c 2000)
                 LINT_DETAILS="\n\n**エラー詳細:**\n\`\`\`\n${LINT_DETAILS}\n\`\`\`"
               else
                 LINT_DETAILS="\n\n⚠️ エラー詳細の抽出に失敗しました。GitHub Actionsのログを確認してください。"
