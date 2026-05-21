@@ -73,7 +73,22 @@ jobs:
       - name: Prepare Discord Message (Failure)
         if: failure()
         run: |
-          cat > discord_payload.json << 'EOF'
+          ARCH_VIOLATIONS=""
+          if [ -f "arch_violations_detail.txt" ]; then
+            ARCH_VIOLATIONS=$(cat arch_violations_detail.txt \
+              | grep -E "^❌|^⚠️|src/" \
+              | head -20 \
+              | sed 's|/home/runner/work/[^/]*/[^/]*/||g' \
+              | awk '{print "  " $0}' \
+              | tr '\n' '\\' | sed 's/\\$//')
+            if [ -z "$ARCH_VIOLATIONS" ]; then
+              ARCH_VIOLATIONS="詳細は GitHub Actions のログを確認してください"
+            fi
+          else
+            ARCH_VIOLATIONS="詳細は GitHub Actions のログを確認してください"
+          fi
+
+          cat > discord_payload.json << EOF
           {
             "embeds": [{
               "title": "❌ Architecture Compliance Check",
@@ -83,6 +98,7 @@ jobs:
                 {"name": "Status", "value": "❌ 違反検出", "inline": true},
                 {"name": "Branch", "value": "${{ github.ref_name }}", "inline": true},
                 {"name": "Repository", "value": "${{ github.repository }}", "inline": false},
+                {"name": "違反詳細", "value": "\`\`\`$ARCH_VIOLATIONS\`\`\`", "inline": false},
                 {"name": "Triggered by", "value": "<@${{ github.actor_id }}>", "inline": true},
                 {"name": "詳細ドキュメント", "value": "[ARCHITECTURE_VIOLATIONS.md](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/docs/architecture/ARCHITECTURE_VIOLATIONS.md)", "inline": true},
                 {"name": "Action Link", "value": "[View Workflow Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})", "inline": false}

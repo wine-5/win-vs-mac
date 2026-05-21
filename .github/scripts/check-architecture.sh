@@ -77,5 +77,10 @@ else
     echo "   ... さらに $(($(grep -c '^\s*src/' "$TEMP_VIOLATIONS" || true) - 5)) 件の違反があります" >&2
   fi
 
+  # CI用に詳細ファイルを生成
+  if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ]; then
+    cat "$TEMP_VIOLATIONS" > arch_violations_detail.txt 2>/dev/null || true
+  fi
+
   exit 1
 fi
