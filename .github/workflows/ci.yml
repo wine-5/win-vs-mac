@@ -188,10 +188,10 @@ jobs:
               LINT_DETAILS=$(cat combined_lint.txt \
                 | grep -v "thirdparty" \
                 | grep -v "DxLib.h" \
-                | grep -v "file not found" \
+                | grep -v "No.*check output" \
                 | grep -v "^$" \
-                | grep -E "warning:|error:|src/" \
-                | head -25 \
+                | grep -v "^===" \
+                | head -30 \
                 | sed 's|/home/runner/work/[^/]*/[^/]*/||g' \
                 | awk '
                   /invalid case style for member/ {print "❌ メンバ変数にm_プレフィックスが必要"; next}
@@ -202,6 +202,10 @@ jobs:
                   /invalid case style for enum/ {print "❌ 列挙型はPascalCaseにしてください"; next}
                   /variable .* is not initialized/ {print "❌ 変数が初期化されていません"; next}
                   /Found \(\) initialization/ {print "❌ 初期化は {} を使ってください（() は非推奨）"; next}
+                  /Error while processing/ {print "❌ " $0; next}
+                  /^❌/ {print; next}
+                  /^⚠️/ {print; next}
+                  /src\/.*:/ {print "  " $0; next}
                   {print}
                 ')
               
