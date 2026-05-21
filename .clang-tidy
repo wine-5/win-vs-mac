@@ -7,7 +7,6 @@ Checks: >
   -modernize-concat-nested-namespaces,
   -modernize-use-nodiscard,
   -modernize-use-equals-default,
-  cppcoreguidelines-init-variables,
   modernize-use-default-member-init
 
 CheckOptions:
