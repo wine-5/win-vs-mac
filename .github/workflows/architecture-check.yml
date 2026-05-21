@@ -26,7 +26,6 @@ jobs:
         run: |
           chmod +x .github/scripts/check-architecture.sh
           bash .github/scripts/check-architecture.sh src
-        continue-on-error: true
         id: arch-check
 
       - name: Report Results
