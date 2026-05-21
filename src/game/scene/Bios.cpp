@@ -66,6 +66,7 @@ namespace
         case LineType::Header:   return Color::WHITE;
         case LineType::Footer:   return Color::WHITE;
         case LineType::Guide:    return Color::BLACK;
+        default:                 return Color::BLACK;
         }
     }
 }

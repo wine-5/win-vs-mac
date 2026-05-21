@@ -54,9 +54,9 @@ namespace platform::system
 			return (static_cast<int64_t>(ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
 			};
 
-		const int64_t idle   { toInt64(idleTime)  };
-		const int64_t kernel { toInt64(kernelTime)};
-		const int64_t user   { toInt64(userTime)  };
+		const int64_t idle{ toInt64(idleTime) };
+		const int64_t kernel{ toInt64(kernelTime) };
+		const int64_t user{ toInt64(userTime) };
 
 		// 前回取得時からの差分を計算
 		const int64_t deltaIdle{ idle - m_prevIdleTime };

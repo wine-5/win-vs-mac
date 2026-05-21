@@ -1,5 +1,5 @@
 #include "LoadingWindow.h"
-#include <nlohmann/json.hpp>
+#include "thirdparty/nlohmann/json.hpp"
 
 namespace platform::window::loading
 {

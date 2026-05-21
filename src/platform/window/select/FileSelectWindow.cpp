@@ -160,7 +160,7 @@ namespace platform::window::select
 	void FileSelectWindow::sendBonusInfo() noexcept
 	{
 		// ExtensionBonusCalculator の定数から説明文を生成（C++ が正とする）
-		struct Entry { const char* key; game::data::FileExtensionType type; };
+		struct Entry { const char* m_key; game::data::FileExtensionType m_type; };
 		constexpr Entry entries[] = {
 			{ "Executable", game::data::FileExtensionType::Executable },
 			{ "Document",   game::data::FileExtensionType::Document   },
@@ -202,7 +202,7 @@ namespace platform::window::select
 			resp["type"]  = "bonusInfo";
 			resp["descs"] = nlohmann::json::object();
 			for (const auto& e : entries)
-				resp["descs"][e.key] = describe(e.type);
+				resp["descs"][e.m_key] = describe(e.m_type);
 			m_webView.postMessage(resp.dump());
 		}
 		catch (...) {}

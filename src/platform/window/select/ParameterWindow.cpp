@@ -35,18 +35,18 @@ namespace platform::window::select
         try
         {
             nlohmann::json j;
-            j["type"]         = "refresh";
-            j["job"]          = sjisToUtf8(jobNameSjis);
-            j["skill"]        = sjisToUtf8(skillNameSjis);
-            j["baseHp"]       = baseHp;
-            j["baseAtk"]      = baseAtk;
-            j["baseDef"]      = baseDef;
-            j["baseSpd"]      = baseSpd;
-            j["bonusHp"]      = bonusHp;
-            j["bonusAtk"]     = bonusAtk;
-            j["bonusDef"]     = bonusDef;
-            j["bonusSpd"]     = bonusSpd;
-            j["slot"]         = equippedSlots;
+            j["type"]     = "refresh";
+            j["job"]      = sjisToUtf8(jobNameSjis);
+            j["skill"]    = sjisToUtf8(skillNameSjis);
+            j["baseHp"]   = baseHp;
+            j["baseAtk"]  = baseAtk;
+            j["baseDef"]  = baseDef;
+            j["baseSpd"]  = baseSpd;
+            j["bonusHp"]  = bonusHp;
+            j["bonusAtk"] = bonusAtk;
+            j["bonusDef"] = bonusDef;
+            j["bonusSpd"] = bonusSpd;
+            j["slot"]     = equippedSlots;
             m_webView.postMessage(j.dump());
         }
         catch (...) {}
