@@ -7,6 +7,7 @@ Checks: >
   -modernize-concat-nested-namespaces,
   -modernize-use-nodiscard,
   -modernize-use-equals-default,
+  cppcoreguidelines-init-variables,
   modernize-use-default-member-init
 
 CheckOptions:
@@ -23,8 +24,8 @@ CheckOptions:
     value: camelBack
 
   # ローカル変数 camelCase
-  - key: readability-identifier-naming.LocalVariableCase
-    value: camelBack
+  # - key: readability-identifier-naming.LocalVariableCase
+  #   value: camelBack
 
   # ローカルconst変数 camelCase（関数内のconst変数）
   - key: readability-identifier-naming.LocalConstantCase
