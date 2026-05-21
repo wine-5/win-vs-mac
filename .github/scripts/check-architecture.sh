@@ -66,13 +66,13 @@ if [ "$VIOLATIONS" -eq 0 ]; then
 else
   echo "❌ アーキテクチャコンプライアンス: 失敗（$VIOLATIONS 件の違反検出）"
   echo ""
-  echo "=== 違反一覧（ファイル:行番号） ===" >&2
+  echo "=== 違反一覧（ファイル:行番号） ==="
 
   # ファイル名:行番号 の形式で出力
-  grep -E "^\s+src/" "$TEMP_VIOLATIONS" | cut -d' ' -f1 | head -5 >&2
+  grep -E "^\s+src/" "$TEMP_VIOLATIONS" | cut -d' ' -f1 | head -5
 
   if [ "$(grep -c '^\s*src/' "$TEMP_VIOLATIONS" || true)" -gt 5 ]; then
-    echo "   ... さらに $(($(grep -c '^\s*src/' "$TEMP_VIOLATIONS" || true) - 5)) 件の違反があります" >&2
+    echo "   ... さらに $(($(grep -c '^\s*src/' "$TEMP_VIOLATIONS" || true) - 5)) 件の違反があります"
   fi
 
   # CI用に詳細ファイルを生成

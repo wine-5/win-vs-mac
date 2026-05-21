@@ -179,30 +179,36 @@ jobs:
 
               # アーキテクチャ違反を抽出
               ARCH_VIOLATIONS=$(sed -n '/=== Architecture Compliance ===/,/=== JavaScript/p' combined_lint.txt \
-                | grep -E "src/" \
+                | grep -v "^===" \
                 | grep -v "No architecture" \
-                | head -15 \
+                | grep -v "^$" \
+                | sed 's|/home/runner/work/[^/]*/[^/]*/||g' \
+                | head -15)
+
+              # その他のエラーを抽出
+              OTHER_ERRORS=$(cat combined_lint.txt \
+                | sed -n '/=== clang-tidy/,/^$/p' \
+                | grep -E "warning:|error:" \
+                | head -10 \
                 | sed 's|/home/runner/work/[^/]*/[^/]*/||g')
 
-              # エラーを抽出して整形
-              LINT_DETAILS=$(cat combined_lint.txt \
-                | grep -E "^❌|^⚠️|Error while processing|src/.*:" \
-                | grep -v "No.*check output" \
-                | head -20 \
-                | sed 's|/home/runner/work/[^/]*/[^/]*/||g')
-              
-              # アーキテクチャ違反詳細をメッセージに追加
+              # メッセージを構築
+              LINT_DETAILS=""
+
               if [ -n "$ARCH_VIOLATIONS" ]; then
-                ARCH_VIOLATIONS=$(echo "$ARCH_VIOLATIONS" | head -c 1000)
-                LINT_DETAILS="${LINT_DETAILS}\n\n**アーキテクチャ違反:**\n\`\`\`\n${ARCH_VIOLATIONS}\n\`\`\`"
+                ARCH_VIOLATIONS=$(echo "$ARCH_VIOLATIONS" | head -c 800)
+                LINT_DETAILS="${LINT_DETAILS}**🔴 アーキテクチャ違反:**\n${ARCH_VIOLATIONS}\n\n"
+              fi
+
+              if [ -n "$OTHER_ERRORS" ]; then
+                OTHER_ERRORS=$(echo "$OTHER_ERRORS" | head -c 800)
+                LINT_DETAILS="${LINT_DETAILS}**🟡 その他のエラー:**\n${OTHER_ERRORS}\n"
               fi
 
               if [ -n "$LINT_DETAILS" ]; then
-                # Discordの文字数制限を考慮
-                LINT_DETAILS=$(echo "$LINT_DETAILS" | head -c 2000)
-                LINT_DETAILS="\n\n**エラー詳細:**\n\`\`\`\n${LINT_DETAILS}\n\`\`\`"
+                LINT_DETAILS="\n\n${LINT_DETAILS}"
               else
-                LINT_DETAILS="\n\n⚠️ エラー詳細の抽出に失敗しました。GitHub Actionsのログを確認してください。"
+                LINT_DETAILS="\n\n✅ すべてのチェックに合格しました"
               fi
             else
               echo "⚠️ combined_lint.txt not found or empty" >&2
