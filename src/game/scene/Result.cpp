@@ -30,6 +30,8 @@ namespace game::scene
         m_resultWindow->show(resultData);
     }
 
+    Result::~Result() noexcept = default;
+
     void Result::update(float deltaTime)
     {
         m_resultWindow->pumpMessages();

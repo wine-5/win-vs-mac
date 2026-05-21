@@ -33,6 +33,8 @@ namespace game::scene
 		m_perfProvider = core::base::ServiceLocator::get<core::iface::IPerformanceDataProvider>();
 	}
 
+	Title::~Title() noexcept = default;
+
 	void Title::update(float deltaTime)
 	{
 		m_perfTimer += deltaTime;

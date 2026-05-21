@@ -32,6 +32,11 @@ namespace game::scene
 			core::iface::IScreen& screen);
 
 		/**
+		 * @brief Titleのデストラクタ
+		 */
+		~Title() noexcept;
+
+		/**
 		 * @brief シーンの更新処理
 		 * @param deltaTime フレーム間の時間差
 		 */

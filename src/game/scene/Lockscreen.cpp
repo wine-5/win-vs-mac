@@ -22,6 +22,8 @@ namespace game::scene
 		m_fade = std::make_unique<ui::FadeTransition>(uiRenderer, screen, FADE_DURATION, true);
 	}
 
+	Lockscreen::~Lockscreen() noexcept = default;
+
 	void Lockscreen::update(float deltaTime)
 	{
 		switch (m_state)
