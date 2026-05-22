@@ -161,6 +161,7 @@
     <ClCompile Include="src\infrastructure\repository\FontRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\JobRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\ModelRepository.cpp" />
+    <ClCompile Include="src\infrastructure\repository\AnimationRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\ImageRepository.cpp" />
     <ClCompile Include="src\infrastructure\Screen.cpp" />
     <ClCompile Include="src\core\base\ServiceLocator.cpp" />
@@ -301,6 +302,7 @@
     <ClInclude Include="src\infrastructure\repository\FontRepository.h" />
     <ClInclude Include="src\infrastructure\repository\JobRepository.h" />
     <ClInclude Include="src\infrastructure\repository\ModelRepository.h" />
+    <ClInclude Include="src\infrastructure\repository\AnimationRepository.h" />
     <ClInclude Include="src\infrastructure\Screen.h" />
     <ClInclude Include="src\core\base\ServiceLocator.h" />
     <ClInclude Include="src\core\utility\Color.h" />
@@ -309,6 +311,7 @@
     <ClInclude Include="src\game\component\ColliderComponent.h" />
     <ClInclude Include="src\game\constant\Tag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
+    <ClInclude Include="src\game\constant\AnimationId.h" />
     <ClInclude Include="src\core\constant\UI.h" />
     <ClInclude Include="src\game\data\GroundData.h" />
     <ClInclude Include="src\game\factory\FactoryInitializer.h" />
