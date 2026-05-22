@@ -10,7 +10,7 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IAnimator.h"
-#include "core/EventBus.h"
+#include "core/base/EventBus.h"
 
 /* game層のインクルード */
 #include "game/factory/FactoryManager.h"
@@ -62,16 +62,22 @@ namespace game::scene
 		void setupSystems();
 		void setupEvents();
 
-		core::ecs::EntityManager m_entityManager;
-		core::ecs::ComponentManager m_componentManager;
-		core::ecs::SystemManager m_systemManager;
+		/**
+		 * @brief GameManager にリザルトデータを保存する
+		 * @param isVictory 勝利かどうか
+		 */
+		void saveResultData(bool isVictory) noexcept;
 
-		core::iface::ICamera &m_camera;
-		core::iface::IRenderer &m_renderer;
-		core::iface::IAnimator &m_animator;
+		core::ecs::EntityManager 	m_entityManager;
+		core::ecs::ComponentManager m_componentManager;
+		core::ecs::SystemManager 	m_systemManager;
+
+		core::iface::ICamera          &m_camera;
+		core::iface::IRenderer        &m_renderer;
+		core::iface::IAnimator        &m_animator;
 		core::iface::IResourceManager &m_resourceManager;
-		core::iface::IInputProvider &m_inputProvider;
-		data::FileEquipmentData &m_fileEquipmentData;
+		core::iface::IInputProvider   &m_inputProvider;
+		data::FileEquipmentData       &m_fileEquipmentData;
 
 		game::factory::FactoryManager m_factoryManager;
 		game::data::PlayerData m_playerData;
@@ -80,7 +86,12 @@ namespace game::scene
 		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_enemyId{core::ecs::INVALID_ENTITY_ID};
 
-		EventBus m_eventBus;
+		core::base::EventBus m_eventBus;
+
+		// 進行トラッキング
+		float m_elapsedTime{0.0f};
+		int   m_killCount{0};
+		float m_totalDamageTaken{0.0f};
 
 		// カメラ設定
 		static constexpr float CAMERA_OFFSET_X = 0.0f;

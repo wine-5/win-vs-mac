@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "core/Vector3.h"
+#include "core/utility/Vector3.h"
 #include <string>
 #include <unordered_map>
 

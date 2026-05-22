@@ -1,0 +1,253 @@
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.exp-toolbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+}
+
+.nav-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    color: var(--text-muted);
+    font-size: 11px;
+    padding: 2px 6px;
+    cursor: pointer;
+    height: 22px;
+    font-family: inherit;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: var(--surface-hover);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+.address-bar {
+    flex: 1;
+    background: #1a1a1a;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    height: 22px;
+    padding: 0 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.file-list-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 52px 100px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+}
+
+.file-list {
+    flex: 2;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.file-slot {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.file-slot:last-child { border-bottom: none; }
+
+.file-row {
+    display: grid;
+    grid-template-columns: 1fr 52px 100px;
+    padding: 0 12px;
+    cursor: pointer;
+    align-items: center;
+    transition: background 0.1s;
+    flex: 1;
+    min-height: 0;
+}
+
+.file-row:hover { background: var(--surface-hover); }
+.file-row.selected { background: rgba(0, 120, 212, 0.18); }
+
+.file-path-row {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 12px 0 52px;
+    font-size: 10px;
+    font-family: Consolas, monospace;
+    color: var(--text-muted);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    background: rgba(0, 120, 212, 0.10);
+    opacity: 0;
+    transition: max-height 0.2s ease, opacity 0.2s ease, padding 0.2s ease;
+}
+
+.file-path-row.visible {
+    max-height: 20px;
+    opacity: 1;
+    padding: 3px 12px 3px 52px;
+}
+
+.file-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.file-icon { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+
+.file-name {
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-name.empty { color: var(--text-muted); font-style: italic; }
+
+.ext-badge {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.bonus-text { font-size: 11px; color: var(--text-muted); }
+.bonus-text.has-bonus { color: #f0c040; font-weight: 600; }
+
+.exp-statusbar {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 4px 10px;
+    flex-shrink: 0;
+}
+
+.status-text { font-size: 11px; color: var(--text-muted); }
+
+/* ── 拡張子ボーナス一覧パネル ── */
+.bonus-panel {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    border-top: 2px solid var(--border);
+    background: var(--bg);
+}
+
+.bonus-panel-header {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 7px 12px 4px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.bonus-panel-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bonus-entry {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+}
+
+.bonus-entry-name {
+    flex: 1;
+    color: var(--text-muted);
+}
+
+.bonus-entry-val {
+    font-weight: 700;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.bonus-entry-val.atk   { color: #e8a030; }
+.bonus-entry-val.def   { color: #5090d0; }
+.bonus-entry-val.hp    { color: #4ec94e; }
+.bonus-entry-val.spd   { color: #c050e0; }
+.bonus-entry-val.multi { color: #c0c040; }
+.bonus-entry-val.range { color: var(--text-muted); }
+
+/* ── アニメーション ── */
+
+/* スロット行クリック時のパルス */
+@keyframes rowPulse {
+    0%   { background: rgba(0, 120, 212, 0.55); }
+    100% { background: rgba(0, 120, 212, 0.18); }
+}
+
+.file-row.selected.pulse {
+    animation: rowPulse 0.4s ease-out forwards;
+}
+
+/* 新規ファイル装備時のスライドイン */
+@keyframes rowSlideIn {
+    from { opacity: 0; transform: translateX(-12px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.file-row.anim-in {
+    animation: rowSlideIn 0.28s ease-out;
+}
+
+/* ボーナス一覧：装備中の拡張子行をハイライト */
+@keyframes bonusActivate {
+    0%   { background: rgba(255, 255, 255, 0.14); }
+    100% { background: rgba(255, 255, 255, 0.06); }
+}
+
+.bonus-entry {
+    border-radius: 4px;
+    padding: 1px 4px;
+    margin: 0 -4px;
+    transition: background 0.3s;
+}
+
+.bonus-entry.active {
+    background: rgba(255, 255, 255, 0.06);
+    animation: bonusActivate 0.45s ease-out;
+}
+
+.bonus-entry.active .bonus-entry-val {
+    text-shadow: 0 0 8px currentColor;
+}

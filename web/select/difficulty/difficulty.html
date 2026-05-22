@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <base href="https://game.web/">
+    <link rel="stylesheet" href="common/common.css">
+    <link rel="stylesheet" href="select/difficulty/difficulty.css">
+</head>
+<body>
+    <div class="uac-header">
+        <img class="uac-shield" src="https://assets.game.web/images/ui/select/shield.png" alt="UAC Shield">
+        <div>
+            <div class="uac-title-main">ユーザーアカウント制御</div>
+            <div class="uac-title-sub">ダンジョンの難易度変更を許可しますか？</div>
+        </div>
+    </div>
+
+    <div class="uac-body">
+        <div class="prog-info">
+            <div class="prog-row">
+                <span class="prog-label">プログラム名:</span>
+                <span class="prog-value">Win vs Mac.exe</span>
+            </div>
+            <div class="prog-row">
+                <span class="prog-label">発行元:</span>
+                <span class="prog-value verified">wine-5</span>
+                <span class="verified-icon">&#x2714;</span>
+            </div>
+        </div>
+
+        <div class="uac-desc">
+            難易度を変更すると、ダンジョン内の敵の強さが変化します。<br>
+            続行するには難易度を選択してください。
+        </div>
+
+        <div class="diff-buttons">
+            <button id="btn-easy"   class="diff-btn"              onclick="selectDiff('EASY')">
+                <img class="diff-shield" src="https://assets.game.web/images/ui/select/easy.png" alt="EASY">EASY
+            </button>
+            <button id="btn-normal" class="diff-btn active-normal" onclick="selectDiff('NORMAL')">
+                <img class="diff-shield" src="https://assets.game.web/images/ui/select/normal.png" alt="NORMAL">NORMAL
+            </button>
+            <button id="btn-hard"   class="diff-btn danger"        onclick="selectDiff('HARD')">
+                <img class="diff-shield" src="https://assets.game.web/images/ui/select/hard.png" alt="HARD">HARD
+            </button>
+        </div>
+
+        <div class="diff-desc" id="diff-desc">標準的な難易度。バランスの取れた戦闘が楽しめます。</div>
+    </div>
+
+    <script src="common/messaging.js"></script>
+    <script src="select/difficulty/difficulty-logic.js"></script>
+    <script src="select/difficulty/difficulty-view.js"></script>
+</body>
+</html>

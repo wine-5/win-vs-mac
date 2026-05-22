@@ -1,0 +1,33 @@
+/* ===== SCENES ===== */
+.scene {
+    position: fixed;
+    inset: 0;
+    display: none;
+}
+
+.scene.active {
+    display: flex;
+    flex-direction: column;
+}
+
+#scene-stage.active {
+    display: block;
+}
+
+#scene-ingame.active {
+    display: flex;
+    flex-direction: row;
+}
+
+#scene-result-win.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#scene-result-lose.active {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 100px 80px;
+}

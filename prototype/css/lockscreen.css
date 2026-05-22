@@ -1,0 +1,111 @@
+/* ===================================================
+   LOCK SCREEN
+   =================================================== */
+#scene-lockscreen {
+    background: linear-gradient(135deg, #0d1b3e 0%, #1a2744 40%, #0a1628 100%);
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* subtle radial light blobs */
+.lockscreen-bg-overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 28% 38%, rgba(0, 120, 212, 0.38) 0%, transparent 58%),
+        radial-gradient(ellipse at 76% 68%, rgba(80, 50, 200, 0.28) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── main content: clock + date ── */
+.lockscreen-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    z-index: 2;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.55s ease;
+}
+
+.lockscreen-content.slide-up {
+    transform: translateY(-110%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.lockscreen-time {
+    font-family: 'Segoe UI', 'Share Tech Mono', sans-serif;
+    font-size: 104px;
+    font-weight: 200;
+    color: #ffffff;
+    letter-spacing: -4px;
+    text-shadow: 0 2px 48px rgba(255, 255, 255, 0.12);
+    line-height: 1;
+}
+
+.lockscreen-date {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 21px;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.82);
+    letter-spacing: 1px;
+    margin-top: 6px;
+}
+
+/* ── bottom area: logo + hint ── */
+.lockscreen-bottom {
+    position: absolute;
+    bottom: 52px;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    z-index: 2;
+    pointer-events: none;
+    transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.55s ease;
+}
+
+.lockscreen-bottom.slide-up {
+    transform: translateY(-110%);
+    opacity: 0;
+}
+
+/* Windows logo (2×2 grid) */
+.lockscreen-win-logo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    width: 26px;
+    height: 26px;
+    opacity: 0.5;
+}
+
+.lockscreen-win-logo div {
+    background: #ffffff;
+    border-radius: 1px;
+}
+
+/* animated unlock hint */
+.lockscreen-unlock-hint {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.45);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    animation: ls-hint-pulse 3s ease-in-out infinite;
+}
+
+@keyframes ls-hint-pulse {
+    0%, 100% { opacity: 0.3; transform: translateY(0); }
+    50%       { opacity: 0.75; transform: translateY(-4px); }
+}

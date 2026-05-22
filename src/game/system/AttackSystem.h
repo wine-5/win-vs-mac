@@ -1,7 +1,7 @@
 #pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
-#include "core/EventBus.h"
+#include "core/base/EventBus.h"
 #include "game/attack/IDamageHandler.h"
 
 namespace game::system
@@ -17,7 +17,7 @@ namespace game::system
 		 * @param componentManager ComponentManagerの参照
 		 * @param eventBus EventBusの参照
 		 */
-		AttackSystem(core::ecs::ComponentManager& componentManager, EventBus& eventBus);
+		AttackSystem(core::ecs::ComponentManager& componentManager, core::base::EventBus& eventBus);
 
 		
 		/**
@@ -28,7 +28,7 @@ namespace game::system
 
 	private:
 		core::ecs::ComponentManager& m_componentManager;
-		EventBus& m_eventBus;
+		core::base::EventBus& m_eventBus;
 		std::unique_ptr<attack::IDamageHandler> m_damageChain;
 	};
 }

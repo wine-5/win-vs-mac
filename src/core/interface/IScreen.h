@@ -21,5 +21,12 @@ namespace core::iface
          * @return 画面の高さ（ピクセル）
          */
         virtual int getHeight() const noexcept = 0;
+
+        /**
+         * @brief DxLib メインウィンドウのネイティブハンドルを取得する
+         * @details Platform 層が HWND として利用するための void* ラッパー
+         * @return ネイティブウィンドウハンドル（HWND を void* にキャストしたもの）
+         */
+        virtual void* getNativeWindowHandle() const noexcept = 0;
     };
 }

@@ -1,0 +1,244 @@
+/* ===================================================
+   LOADING — コマンドプロンプト Style
+   =================================================== */
+#scene-loading {
+    background: #1a1a2e;
+}
+
+#scene-loading.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ── CMD Window ── */
+.cmd-window {
+    width: 740px;
+    background: #0c0c0c;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.75);
+    border: 1px solid #3a3a3a;
+}
+
+/* Title bar */
+.cmd-titlebar {
+    height: 30px;
+    background: #1c1c1c;
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    gap: 8px;
+    flex-shrink: 0;
+    user-select: none;
+    border-bottom: 1px solid #2e2e2e;
+}
+
+.cmd-titlebar-icon {
+    font-size: 13px;
+    color: #808080;
+    line-height: 1;
+}
+
+.cmd-titlebar-text {
+    flex: 1;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    color: #c8c8c8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cmd-titlebar-controls {
+    display: flex;
+}
+
+.cmd-wctrl {
+    width: 44px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    color: #c0c0c0;
+    font-size: 11px;
+    cursor: default;
+    transition: background 0.12s;
+}
+
+.cmd-wctrl:hover            { background: rgba(255, 255, 255, 0.1); }
+.cmd-wctrl.cmd-close:hover  { background: #c42b1c; color: #fff; }
+
+/* Terminal body */
+.cmd-body {
+    padding: 10px 16px 18px;
+    font-family: 'Lucida Console', 'Courier New', 'Share Tech Mono', monospace;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #c0c0c0;
+    overflow: hidden;
+    min-height: 370px;
+}
+
+/* Line type classes */
+.cmd-line          { white-space: pre; display: block; }
+.cmd-line.cmd-cmd  { color: #ffffff; }
+.cmd-line.cmd-ok   { color: #00c800; }
+.cmd-line.cmd-warn { color: #c8c800; }
+.cmd-line.cmd-fail { color: #c80000; }
+.cmd-line.cmd-dim  { color: #686868; }
+
+/* Progress bar */
+.cmd-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.cmd-progress-track {
+    display: inline-block;
+    width: 200px;
+    height: 10px;
+    background: #2a2a2a;
+    border: 1px solid #484848;
+    overflow: hidden;
+    vertical-align: middle;
+}
+
+.cmd-progress-fill {
+    height: 100%;
+    background: #00c800;
+    width: 0%;
+}
+
+.cmd-progress-pct {
+    color: #c0c0c0;
+    font-family: 'Lucida Console', 'Courier New', monospace;
+    font-size: 13px;
+    min-width: 40px;
+}
+
+
+.win10-boot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    width: 100%;
+}
+
+.win10-logo {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.win10-logo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    width: 56px;
+    height: 56px;
+}
+
+.win10-logo-tile {
+    background: white;
+    border-radius: 1px;
+    opacity: 0;
+    animation: logo-appear 0.6s ease forwards;
+}
+
+.win10-logo-tile:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.win10-logo-tile:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.win10-logo-tile:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.win10-logo-tile:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+@keyframes logo-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.win10-logo-text {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 28px;
+    font-weight: 200;
+    color: white;
+    letter-spacing: 2px;
+    margin-left: 12px;
+}
+
+/* Windows 10 spinner */
+.win10-spinner {
+    display: flex;
+    gap: 6px;
+}
+
+.win10-spinner-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: white;
+    animation: win10-spin 1.4s ease-in-out infinite;
+    opacity: 0;
+}
+
+.win10-spinner-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.win10-spinner-dot:nth-child(2) {
+    animation-delay: 0.16s;
+}
+
+.win10-spinner-dot:nth-child(3) {
+    animation-delay: 0.32s;
+}
+
+.win10-spinner-dot:nth-child(4) {
+    animation-delay: 0.48s;
+}
+
+.win10-spinner-dot:nth-child(5) {
+    animation-delay: 0.64s;
+}
+
+@keyframes win10-spin {
+    0%,
+    100% {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.win10-boot-status {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 1px;
+    min-height: 20px;
+}

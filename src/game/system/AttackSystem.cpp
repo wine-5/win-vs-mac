@@ -12,7 +12,7 @@
 
 namespace game::system
 {
-	AttackSystem::AttackSystem(core::ecs::ComponentManager &componentManager, EventBus &eventBus)
+	AttackSystem::AttackSystem(core::ecs::ComponentManager &componentManager, core::base::EventBus &eventBus)
 		: m_componentManager{componentManager}, m_eventBus{eventBus}
 	{
 		auto base{std::make_unique<attack::BaseAttackHandler>(m_componentManager)};

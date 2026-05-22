@@ -1,197 +1,57 @@
 ﻿#include "ResourceManager.h"
-#include <DxLib.h>
-#include "core/interface/ILogger.h"
-#include "thirdparty/nlohmann/json.hpp"
-#include <fstream>
-#include <cassert>
 #include <stdexcept>
-#include "constant/JsonKeys.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/ILogger.h"
 
 namespace infrastructure
 {
-    ResourceManager::ResourceManager()
-    {
-        // resources.jsonから全リソースを読み込む
-        auto resourceList{loadResourceList("assets/config/resources.json")};
-        for (const auto& res : resourceList)
-        {
-            auto metadata{parseJsonFile(res.m_path)};
-            m_metadata[res.m_id] = metadata;
-        }
-    }
+	ResourceManager::ResourceManager()
+	{
+		try
+		{
+			m_modelRepo = std::make_unique<ModelRepository>();
+			m_fontRepo = std::make_unique<FontRepository>();
+			m_jobRepo = std::make_unique<JobRepository>();
+			m_imageRepo = std::make_unique<ImageRepository>();
+		}
+		catch (const std::exception& e)
+		{
+			LOG_E("リポジトリ初期化に失敗しました: %s", e.what());
+		}
+	}
 
-    int ResourceManager::loadModelById(const std::string_view modelId)
-    {
-        std::string modelIdStr(modelId);
-        // メタデータを取得
-        auto it{m_metadata.find(modelIdStr)};
-        if (it == m_metadata.end())
-        {
-            LOG_E("モデルID '%s' が見つかりません", modelIdStr.c_str());
-            return -1;
-        }
+	int ResourceManager::loadModelById(const std::string_view modelId)
+	{
+		if (!m_modelRepo)
+			return -1;
+		return m_modelRepo->loadModelById(modelId);
+	}
 
-        const auto& metadata = it->second;
+	std::optional<core::data::ModelMetadata> ResourceManager::getMetadata(const std::string_view modelId) const
+	{
+		if (!m_modelRepo)
+			return std::nullopt;
+		return m_modelRepo->getMetadata(modelId);
+	}
 
-        // 既にロード済みか確認
-        auto handleIt{m_modelHandles.find(modelIdStr)};
-        if (handleIt != m_modelHandles.end())
-        {
-            return handleIt->second;
-        }
+	std::optional<std::string> ResourceManager::getFontName(const std::string_view fontId) const
+	{
+		if (!m_fontRepo)
+			return std::nullopt;
+		return m_fontRepo->getFontName(fontId);
+	}
 
-        // モデルをロード
-        int handle{MV1LoadModel(metadata.modelPath.c_str())};
-        if (handle == -1)
-        {
-            LOG_E("モデルの読み込みに失敗しました: %s", metadata.modelPath.c_str());
-            return -1;
-        }
+	core::data::JobInfo ResourceManager::getJobInfo(core::constant::JobType jobType) const
+	{
+		if (!m_jobRepo)
+			throw std::runtime_error("JobRepository が初期化されていません");
+		return m_jobRepo->getJobInfo(jobType);
+	}
 
-        // スケールを適用
-        VECTOR scale = VGet(metadata.scale.x, metadata.scale.y, metadata.scale.z);
-        MV1SetScale(handle, scale);
-
-        // colliderSizeが0の場合、モデルのAABBから自動計算
-        if (metadata.colliderSize.x == 0.0f &&
-            metadata.colliderSize.y == 0.0f &&
-            metadata.colliderSize.z == 0.0f)
-        {
-            // 非constなメタデータを取得して更新
-            auto& mutableMetadata = m_metadata[modelIdStr];
-
-            VECTOR vMin = MV1GetFrameMinVertexLocalPosition(handle, -1);
-            VECTOR vMax = MV1GetFrameMaxVertexLocalPosition(handle, -1);
-
-            mutableMetadata.colliderSize.x = vMax.x - vMin.x;
-            mutableMetadata.colliderSize.y = vMax.y - vMin.y;
-            mutableMetadata.colliderSize.z = vMax.z - vMin.z;
-
-            LOG("'%s' のコライダーサイズを自動計算: (%.2f, %.2f, %.2f)",
-                modelIdStr.c_str(),
-                mutableMetadata.colliderSize.x,
-                mutableMetadata.colliderSize.y,
-                mutableMetadata.colliderSize.z);
-        }
-
-        m_modelHandles[modelIdStr] = handle;
-        return handle;
-    }
-
-    std::optional<core::data::ModelMetadata> ResourceManager::getMetadata(const std::string_view modelId) const
-    {
-        std::string modelIdStr(modelId);
-        auto it{m_metadata.find(modelIdStr)};
-        if (it == m_metadata.end())
-            return std::nullopt;
-
-        return it->second;
-    }
-
-    std::vector<ResourceManager::ResourceDefinition> ResourceManager::loadResourceList(const std::string& filePath)
-    {
-        std::ifstream file(filePath);
-        if (!file.is_open())
-        {
-            LOG_E("FATAL: resources.jsonを開けませんでした: %s", filePath.c_str());
-            assert(false && "致命的エラー: resources.jsonが見つかりません。ファイルパスを確認してください。");
-            throw std::runtime_error("resources.jsonを開けませんでした: " + filePath);
-        }
-
-        nlohmann::json j = nlohmann::json::parse(file);
-        std::vector<ResourceDefinition> resources;
-
-        for (const auto& item : j["resources"])
-        {
-            ResourceDefinition def;
-            def.m_id = item["id"];
-            def.m_path = item["path"];
-            resources.push_back(def);
-        }
-
-        return resources;
-    }
-
-    core::data::ModelMetadata ResourceManager::parseJsonFile(const std::string& filePath)
-    {
-        using namespace infrastructure::constant;  // json_keysを使いやすく
-
-        std::ifstream file(filePath);
-        if (!file.is_open())
-        {
-            LOG_E("FATAL: JSONファイルを開けませんでした: %s", filePath.c_str());
-            assert(false && "致命的エラー: JSONファイルが見つかりません。ファイルパスを確認してください。");
-            throw std::runtime_error("JSONファイルを開けませんでした: " + filePath);
-        }
-
-        nlohmann::json j = nlohmann::json::parse(file);
-
-        core::data::ModelMetadata metadata;
-        metadata.id = j[json_keys::ID];
-        metadata.category = j[json_keys::CATEGORY];
-        metadata.modelPath = j[json_keys::MODEL][json_keys::PATH];
-
-        // スケール
-        metadata.scale.x = j[json_keys::MODEL][json_keys::SCALE][0];
-        metadata.scale.y = j[json_keys::MODEL][json_keys::SCALE][1];
-        metadata.scale.z = j[json_keys::MODEL][json_keys::SCALE][2];
-
-        // コライダーサイズ
-        metadata.colliderSize.x = j[json_keys::COLLIDER][json_keys::SIZE][0];
-        metadata.colliderSize.y = j[json_keys::COLLIDER][json_keys::SIZE][1];
-        metadata.colliderSize.z = j[json_keys::COLLIDER][json_keys::SIZE][2];
-
-        // コライダーオフセット
-        metadata.colliderOffset.x = j[json_keys::COLLIDER][json_keys::OFFSET][0];
-        metadata.colliderOffset.y = j[json_keys::COLLIDER][json_keys::OFFSET][1];
-        metadata.colliderOffset.z = j[json_keys::COLLIDER][json_keys::OFFSET][2];
-
-        // Transform情報（直接メンバに代入、findコスト削減）
-        if (j.contains(json_keys::TRANSFORM))
-        {
-            if (j[json_keys::TRANSFORM].contains("posX"))
-                metadata.position.x = j[json_keys::TRANSFORM]["posX"];
-            if (j[json_keys::TRANSFORM].contains("posY"))
-                metadata.position.y = j[json_keys::TRANSFORM]["posY"];
-            if (j[json_keys::TRANSFORM].contains("posZ"))
-                metadata.position.z = j[json_keys::TRANSFORM]["posZ"];
-            if (j[json_keys::TRANSFORM].contains("rotX"))
-                metadata.rotation.x = j[json_keys::TRANSFORM]["rotX"];
-            if (j[json_keys::TRANSFORM].contains("rotY"))
-                metadata.rotation.y = j[json_keys::TRANSFORM]["rotY"];
-            if (j[json_keys::TRANSFORM].contains("rotZ"))
-                metadata.rotation.z = j[json_keys::TRANSFORM]["rotZ"];
-        }
-
-        // アニメーション（stringProperties）
-        if (j.contains(json_keys::ANIMATIONS))
-        {
-            if (j[json_keys::ANIMATIONS].contains(json_keys::IDLE))
-                metadata.stringProperties["idleAnim"] = j[json_keys::ANIMATIONS][json_keys::IDLE];
-            if (j[json_keys::ANIMATIONS].contains(json_keys::WALK))
-                metadata.stringProperties["walkAnim"] = j[json_keys::ANIMATIONS][json_keys::WALK];
-        }
-
-        // ゲームプレイパラメータ（floatProperties - Entity固有のレアなパラメータのみ）
-        if (j.contains(json_keys::GAMEPLAY))
-        {
-            if (j[json_keys::GAMEPLAY].contains(json_keys::MOVE_SPEED))
-                metadata.floatProperties["moveSpeed"] = j[json_keys::GAMEPLAY][json_keys::MOVE_SPEED];
-
-            if (j[json_keys::GAMEPLAY].contains(json_keys::DETECTION_RANGE))
-                metadata.floatProperties["detectionRange"] = j[json_keys::GAMEPLAY][json_keys::DETECTION_RANGE];
-            if (j[json_keys::GAMEPLAY].contains(json_keys::ATTACK_RANGE))
-                metadata.floatProperties["attackRange"] = j[json_keys::GAMEPLAY][json_keys::ATTACK_RANGE];
-            if (j[json_keys::GAMEPLAY].contains(json_keys::MAX_HP))
-                metadata.floatProperties["maxHp"] = j[json_keys::GAMEPLAY][json_keys::MAX_HP];
-            if (j[json_keys::GAMEPLAY].contains(json_keys::DEFENCE))
-                metadata.floatProperties["defence"] = j[json_keys::GAMEPLAY][json_keys::DEFENCE];
-            if (j[json_keys::GAMEPLAY].contains(json_keys::ATTACK_POWER))
-                metadata.floatProperties["attackPower"] = j[json_keys::GAMEPLAY][json_keys::ATTACK_POWER];
-            if (j[json_keys::GAMEPLAY].contains(json_keys::ATTACK_COOLDOWN))
-                metadata.floatProperties["attackCooldown"] = j[json_keys::GAMEPLAY][json_keys::ATTACK_COOLDOWN];
-        }
-
-        return metadata;
-    }
+	int ResourceManager::loadImageById(std::string_view imageId)
+	{
+		if (!m_imageRepo)
+			return -1;
+		return m_imageRepo->loadImageById(imageId);
+	}
 }

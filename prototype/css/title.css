@@ -1,0 +1,446 @@
+/* ===================================================
+   TITLE SCENE — Windows 10 Lock Screen
+   =================================================== */
+#scene-title {
+    background: linear-gradient(135deg, #0d1b3e 0%, #1a2744 40%, #0a1628 100%);
+    cursor: default;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+/* Splash screen */
+.splash-screen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #0d1b3e 0%, #1a2744 50%, #0a1628 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 40px;
+    z-index: 100;
+    animation: splash-fade-out 0.4s ease-in-out 3.2s forwards;
+    pointer-events: none;
+}
+
+@keyframes splash-fade-out {
+    from {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    to {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+.splash-logo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    width: 100px;
+    height: 100px;
+}
+
+.splash-tile {
+    background: white;
+    border-radius: 2px;
+    animation: splash-tile-rotate 3s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.splash-tile:nth-child(1) {
+    background: #0078d4;
+    animation-delay: 0s;
+}
+
+.splash-tile:nth-child(2) {
+    background: #50e6ff;
+    animation-delay: 0.1s;
+}
+
+.splash-tile:nth-child(3) {
+    background: #ffb900;
+    animation-delay: 0.2s;
+}
+
+.splash-tile:nth-child(4) {
+    background: #107c10;
+    animation-delay: 0.3s;
+}
+
+@keyframes splash-tile-rotate {
+    0% {
+        transform: scale(0) rotateZ(-180deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) rotateZ(0deg);
+        opacity: 1;
+    }
+}
+
+.splash-text {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 28px;
+    font-weight: 200;
+    color: white;
+    letter-spacing: 2px;
+    animation: splash-text-appear 0.6s ease-in-out 0.8s forwards;
+    opacity: 0;
+}
+
+@keyframes splash-text-appear {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.splash-spinner {
+    display: flex;
+    gap: 6px;
+}
+
+.splash-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    animation: splash-spin 1.4s ease-in-out infinite;
+}
+
+.splash-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.splash-dot:nth-child(2) {
+    animation-delay: 0.16s;
+}
+
+.splash-dot:nth-child(3) {
+    animation-delay: 0.32s;
+}
+
+@keyframes splash-spin {
+    0%,
+    100% {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Particles */
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(0, 100, 200, 0.3));
+    pointer-events: none;
+}
+
+.particle.small {
+    width: 2px;
+    height: 2px;
+}
+
+.particle.medium {
+    width: 4px;
+    height: 4px;
+}
+
+.particle.large {
+    width: 6px;
+    height: 6px;
+}
+
+.lockscreen-bg {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 30% 60%, #1a3a6a 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, #0d2a4a 0%, transparent 50%),
+        linear-gradient(160deg, #0d1b3e 0%, #1a2744 40%, #0a1628 100%);
+}
+
+/* Subtle Windows 10 wallpaper-like blob shapes */
+.lockscreen-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.3;
+}
+
+.blob1 {
+    width: 600px;
+    height: 400px;
+    background: #1e5799;
+    top: -100px;
+    left: -100px;
+}
+
+.blob2 {
+    width: 500px;
+    height: 500px;
+    background: #2980b9;
+    bottom: -150px;
+    right: -100px;
+}
+
+.blob3 {
+    width: 300px;
+    height: 300px;
+    background: #3498db;
+    top: 40%;
+    left: 40%;
+}
+
+/* Top status bar */
+.lockscreen-topbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    justify-content: flex-end;
+    z-index: 10;
+}
+
+.lockscreen-topbar-icon {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Center content */
+.lockscreen-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    z-index: 5;
+}
+
+.lockscreen-time {
+    font-family: 'Segoe UI', 'Share Tech Mono', sans-serif;
+    font-size: 96px;
+    font-weight: 200;
+    color: white;
+    letter-spacing: -2px;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.lockscreen-date {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.9);
+    letter-spacing: 1px;
+    margin-bottom: 60px;
+}
+
+.lockscreen-hint {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 2px;
+    animation: hint-pulse 3s ease-in-out infinite;
+}
+
+@keyframes hint-pulse {
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: translateY(0);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translateY(-4px);
+    }
+}
+
+.lockscreen-arrow {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 8px;
+    animation: arrow-bounce 2s ease-in-out infinite;
+}
+
+@keyframes arrow-bounce {
+    0%,
+    100% {
+        transform: translateY(0);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: translateY(-6px);
+        opacity: 1;
+    }
+}
+
+/* Slide up animation */
+.lockscreen-slide {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 20;
+}
+
+.lockscreen-slide.sliding-up {
+    transform: translateY(-100%);
+}
+
+/* Login screen behind */
+.loginscreen {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #1a3a5c, #0d2035);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.login-user-icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2980b9, #1a5276);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.login-username {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 22px;
+    font-weight: 300;
+    color: white;
+    letter-spacing: 1px;
+}
+
+.login-start-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+    letter-spacing: 3px;
+    padding: 12px 48px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.2s;
+    margin-top: 8px;
+}
+
+.login-start-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Title screen */
+.title-screen {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(13, 27, 62, 0.9) 0%, rgba(26, 39, 68, 0.95) 50%, rgba(10, 22, 40, 0.9) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+}
+
+.title-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.title-main {
+    font-family: 'VT323', monospace;
+    font-size: 72px;
+    color: #00ffcc;
+    letter-spacing: 12px;
+    text-shadow:
+        0 0 20px rgba(0, 255, 200, 0.8),
+        0 0 40px rgba(0, 255, 200, 0.4),
+        0 0 60px rgba(255, 100, 200, 0.2);
+    animation: title-glow 2s ease-in-out 0.8s infinite;
+}
+
+@keyframes title-glow {
+    0%,
+    100% {
+        text-shadow:
+            0 0 20px rgba(0, 255, 200, 0.8),
+            0 0 40px rgba(0, 255, 200, 0.4),
+            0 0 60px rgba(255, 100, 200, 0.2);
+    }
+    50% {
+        text-shadow:
+            0 0 40px rgba(0, 255, 200, 1),
+            0 0 80px rgba(0, 255, 200, 0.6),
+            0 0 120px rgba(255, 100, 200, 0.4);
+    }
+}
+
+.title-subtitle {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 2px;
+    margin-top: -40px;
+}
+
+.title-start-btn {
+    background: linear-gradient(135deg, rgba(0, 255, 200, 0.3), rgba(100, 150, 255, 0.3));
+    border: 2px solid #00ffcc;
+    color: #00ffcc;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 18px;
+    padding: 18px 60px;
+    cursor: pointer;
+    letter-spacing: 3px;
+    transition: all 0.3s;
+    font-weight: 600;
+    box-shadow: 0 0 20px rgba(0, 255, 200, 0.4);
+    text-shadow: 0 0 10px rgba(0, 255, 200, 0.5);
+}
+
+.title-start-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 200, 0.5), rgba(100, 150, 255, 0.5));
+    border-color: #00ffff;
+    color: #00ffff;
+    box-shadow: 0 0 30px rgba(0, 255, 200, 0.8), inset 0 0 20px rgba(0, 255, 200, 0.2);
+    transform: translateY(-2px);
+}

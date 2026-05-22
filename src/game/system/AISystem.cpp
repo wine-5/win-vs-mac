@@ -3,7 +3,7 @@
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
 #include "game/component/AttackComponent.h"
-#include "core/Vector3.h"
+#include "core/utility/Vector3.h"
 #include <cmath>
 
 namespace game::system

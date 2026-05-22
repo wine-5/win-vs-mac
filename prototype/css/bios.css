@@ -1,0 +1,83 @@
+/* ===================================================
+   BIOS — POST Screen
+   =================================================== */
+#scene-bios {
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 0;
+    overflow: hidden;
+}
+
+.bios-container {
+    width: 100%;
+    height: 100%;
+    padding: 22px 36px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    font-family: 'VT323', 'Share Tech Mono', monospace;
+    font-size: 19px;
+    line-height: 1.55;
+    color: #c0c0c0;
+}
+
+.bios-output {
+    flex: 1;
+    overflow: hidden;
+}
+
+.bios-line {
+    white-space: pre;
+    opacity: 0;
+    animation: bios-line-appear 0.01s ease forwards;
+}
+
+@keyframes bios-line-appear {
+    to { opacity: 1; }
+}
+
+/* type variants */
+.bios-line.ok    { color: #00c800; }
+.bios-line.warn  { color: #ffcc00; }
+.bios-line.error { color: #ff4040; }
+.bios-line.dim   { color: #606060; }
+.bios-line.bold  { color: #ffffff; }
+.bios-line.head  {
+    color: #ffff00;
+    background: #0000aa;
+    display: block;
+    text-align: center;
+    padding: 1px 0;
+    margin-bottom: 3px;
+}
+
+/* blinking cursor shown at the end */
+.bios-cursor {
+    display: inline-block;
+    width: 10px;
+    height: 1em;
+    background: #c0c0c0;
+    animation: bios-blink 0.7s step-end infinite;
+    vertical-align: text-bottom;
+    margin-left: 2px;
+}
+
+@keyframes bios-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* skip hint at bottom-right */
+.bios-skip-hint {
+    position: absolute;
+    bottom: 14px;
+    right: 20px;
+    font-family: 'VT323', 'Share Tech Mono', monospace;
+    font-size: 15px;
+    color: #484848;
+    pointer-events: none;
+    letter-spacing: 1px;
+}

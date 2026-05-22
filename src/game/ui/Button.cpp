@@ -1,21 +1,27 @@
 ﻿#include "Button.h"
 #include "core/utility/Color.h"
-#include "game/constant/UI.h"
+#include "core/constant/UI.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IStringConverter.h"
 #include <utility>
 
 namespace game::ui
 {
     Button::Button(std::string text, int x, int y, int width, int height,
-        core::iface::IInputProvider& inputProvider)
+        core::iface::IInputProvider& inputProvider, int fontSize)
         : m_text{std::move(text)}
         , m_x{x}
         , m_y{y}
         , m_width{width}
         , m_height{height}
+        , m_fontSize{fontSize}
         , m_visible{true}
         , m_onClick{}
         , m_inputProvider{inputProvider}
     {
+        auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+        if (converter)
+            m_text = converter->utf8ToShiftJis(m_text);
     }
 
     void Button::update()
@@ -59,10 +65,10 @@ namespace game::ui
         // ボタンの枠線
         uiRenderer.drawBox(m_x, m_y, m_width, m_height, core::utility::Color::WHITE, false);
 
-        int textWidth{uiRenderer.getTextWidth(m_text.c_str())};
+        int textWidth{uiRenderer.getTextWidth(m_text.c_str(), m_fontSize)};
         int textX{m_x + (m_width - textWidth) / 2};
-        int textY{m_y + (m_height - game::constant::ui::FONT_SIZE_NORMAL) / 2};
-        uiRenderer.drawText(textX, textY, m_text.c_str(), core::utility::Color::BLUE);
+        int textY{m_y + (m_height - m_fontSize) / 2};
+        uiRenderer.drawText(textX, textY, m_text.c_str(), core::utility::Color::WHITE, m_fontSize);
     }
 
     void Button::setVisible(bool visible)

@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include <cstdarg>
-#include "core/ServiceLocator.h"
+#include "core/base/ServiceLocator.h"
 
 namespace core::iface
 {
@@ -44,19 +44,19 @@ namespace core::iface
     do { \
         char _buf[1024]; \
         snprintf(_buf, sizeof(_buf), __VA_ARGS__); \
-        core::ServiceLocator::get<core::iface::ILogger>()->log(_buf); \
+        core::base::ServiceLocator::get<core::iface::ILogger>()->log(_buf); \
     } while(0)
 
 #define LOG_W(...) \
     do { \
         char _buf[1024]; \
         snprintf(_buf, sizeof(_buf), __VA_ARGS__); \
-        core::ServiceLocator::get<core::iface::ILogger>()->warning(_buf); \
+        core::base::ServiceLocator::get<core::iface::ILogger>()->warning(_buf); \
     } while(0)
 
 #define LOG_E(...) \
     do { \
         char _buf[1024]; \
         snprintf(_buf, sizeof(_buf), __VA_ARGS__); \
-        core::ServiceLocator::get<core::iface::ILogger>()->error(_buf); \
+        core::base::ServiceLocator::get<core::iface::ILogger>()->error(_buf); \
     } while(0)

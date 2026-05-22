@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading - WIN vs MAC</title>
+    <link rel="stylesheet" href="loading.css">
+</head>
+
+<body>
+    <div id="cmd-output"></div>
+
+    <script src="../common/messaging.js"></script>
+    <script src="loading-logic.js"></script>
+    <script src="loading-view.js"></script>
+    <script>
+        window.onMessageFromGame = function (data) {
+            LoadingLogic.onMessageFromGame(data);
+        };
+
+        LoadingView.initialize();
+    </script>
+</body>
+
+</html>

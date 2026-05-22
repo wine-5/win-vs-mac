@@ -30,6 +30,12 @@ namespace infrastructure
          */
         int getHeight() const noexcept override;
 
+        /**
+         * @brief DxLib メインウィンドウのネイティブハンドルを取得する
+         * @return ネイティブウィンドウハンドル（HWND を void* にキャストしたもの）
+         */
+        void* getNativeWindowHandle() const noexcept override;
+
     private:
         int m_width;
         int m_height;

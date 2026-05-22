@@ -19,6 +19,9 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
 
+      - name: Restore NuGet packages
+        run: nuget restore DxLib-3D.sln
+
       - name: Build (Debug x64)
         run: |
           msbuild DxLib-3D.sln `
@@ -42,6 +45,22 @@ jobs:
         run: |
           chmod +x .github/scripts/check-initialization.sh
           .github/scripts/check-initialization.sh 2>&1 | tee init_check_output.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Check architecture compliance
+        id: check_arch
+        continue-on-error: true
+        run: |
+          chmod +x .github/scripts/check-architecture.sh
+          .github/scripts/check-architecture.sh 2>&1 | tee arch_check_output.txt
+          exit ${PIPESTATUS[0]}
+
+      - name: Check JavaScript naming convention
+        id: check_js
+        continue-on-error: true
+        run: |
+          chmod +x .github/scripts/check-javascript.sh
+          .github/scripts/check-javascript.sh 2>&1 | tee js_check_output.txt
           exit ${PIPESTATUS[0]}
 
       - name: Run clang-tidy
@@ -96,6 +115,20 @@ jobs:
             echo "No initialization check output" >> combined_lint.txt
           fi
           echo "" >> combined_lint.txt
+          echo "=== Architecture Compliance ===" >> combined_lint.txt
+          if [ -f "arch_check_output.txt" ]; then
+            cat arch_check_output.txt >> combined_lint.txt
+          else
+            echo "No architecture check output" >> combined_lint.txt
+          fi
+          echo "" >> combined_lint.txt
+          echo "=== JavaScript Naming Convention ===" >> combined_lint.txt
+          if [ -f "js_check_output.txt" ]; then
+            cat js_check_output.txt >> combined_lint.txt
+          else
+            echo "No JavaScript naming check output" >> combined_lint.txt
+          fi
+          echo "" >> combined_lint.txt
           echo "=== clang-tidy Check ===" >> combined_lint.txt
           if [ -f "lint_output.txt" ]; then
             cat lint_output.txt >> combined_lint.txt
@@ -104,7 +137,7 @@ jobs:
           fi
 
       - name: Fail if any check failed
-        if: steps.check_init.outcome == 'failure' || steps.run_lint.outcome == 'failure'
+        if: steps.check_init.outcome == 'failure' || steps.check_arch.outcome == 'failure' || steps.check_js.outcome == 'failure' || steps.run_lint.outcome == 'failure'
         run: exit 1
 
       - name: Upload lint result
@@ -135,41 +168,47 @@ jobs:
           LINT_STATUS="${{ needs.lint.result }}"
 
           if [ "$BUILD_STATUS" = "success" ] && [ "$LINT_STATUS" = "success" ]; then
-            MESSAGE="✅ ビルド・コードチェック成功 (命名規則・初期化スタイル)"
+            MESSAGE="✅ ビルド・コードチェック成功 (C++命名規則・初期化・アーキテクチャ・JS命名規則)"
             COLOR=3066993
           else
             LINT_DETAILS=""
+            ARCH_VIOLATIONS=""
             if [ -f "combined_lint.txt" ] && [ -s "combined_lint.txt" ]; then
               echo "=== Lint Output File Contents ===" >&2
               cat combined_lint.txt >&2
-              
-              # エラーを抽出して整形
-              LINT_DETAILS=$(cat combined_lint.txt \
-                | grep -v "thirdparty" \
-                | grep -v "DxLib.h" \
-                | grep -v "file not found" \
+
+              # アーキテクチャ違反を抽出
+              ARCH_VIOLATIONS=$(sed -n '/=== Architecture Compliance ===/,/=== JavaScript/p' combined_lint.txt \
+                | grep -v "^===" \
+                | grep -v "No architecture" \
                 | grep -v "^$" \
-                | grep -E "warning:|error:|src/" \
-                | head -25 \
                 | sed 's|/home/runner/work/[^/]*/[^/]*/||g' \
-                | awk '
-                  /invalid case style for member/ {print "❌ メンバ変数にm_プレフィックスが必要"; next}
-                  /invalid case style for namespace/ {print "❌ 名前空間は小文字にしてください"; next}
-                  /invalid case style for function/ {print "❌ 関数名はcamelCaseにしてください"; next}
-                  /invalid case style for variable/ {print "❌ ローカル変数はcamelCaseにしてください"; next}
-                  /invalid case style for constant/ {print "❌ 定数はUPPER_SNAKE_CASEにしてください"; next}
-                  /invalid case style for enum/ {print "❌ 列挙型はPascalCaseにしてください"; next}
-                  /variable .* is not initialized/ {print "❌ 変数が初期化されていません"; next}
-                  /Found \(\) initialization/ {print "❌ 初期化は {} を使ってください（() は非推奨）"; next}
-                  {print}
-                ')
-              
+                | head -15)
+
+              # その他のエラーを抽出
+              OTHER_ERRORS=$(cat combined_lint.txt \
+                | sed -n '/=== clang-tidy/,/^$/p' \
+                | grep -E "warning:|error:" \
+                | head -10 \
+                | sed 's|/home/runner/work/[^/]*/[^/]*/||g')
+
+              # メッセージを構築
+              LINT_DETAILS=""
+
+              if [ -n "$ARCH_VIOLATIONS" ]; then
+                ARCH_VIOLATIONS=$(echo "$ARCH_VIOLATIONS" | head -c 800)
+                LINT_DETAILS="${LINT_DETAILS}**🔴 アーキテクチャ違反:**\n${ARCH_VIOLATIONS}\n\n"
+              fi
+
+              if [ -n "$OTHER_ERRORS" ]; then
+                OTHER_ERRORS=$(echo "$OTHER_ERRORS" | head -c 800)
+                LINT_DETAILS="${LINT_DETAILS}**🟡 その他のエラー:**\n${OTHER_ERRORS}\n"
+              fi
+
               if [ -n "$LINT_DETAILS" ]; then
-                # Discordの文字数制限を考慮
-                LINT_DETAILS=$(echo "$LINT_DETAILS" | head -c 1500)
-                LINT_DETAILS="\n\n**エラー詳細:**\n\`\`\`\n${LINT_DETAILS}\n\`\`\`"
+                LINT_DETAILS="\n\n${LINT_DETAILS}"
               else
-                LINT_DETAILS="\n\n⚠️ エラー詳細の抽出に失敗しました。GitHub Actionsのログを確認してください。"
+                LINT_DETAILS="\n\n✅ すべてのチェックに合格しました"
               fi
             else
               echo "⚠️ combined_lint.txt not found or empty" >&2

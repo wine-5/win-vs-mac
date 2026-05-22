@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <base href="https://game.web/">
+    <link rel="stylesheet" href="common/common.css">
+    <link rel="stylesheet" href="select/desktop/desktop.css">
+</head>
+<body>
+    <div class="desktop-area">
+        <canvas id="matrix-bg"></canvas>
+
+        <!-- デスクトップアイコン -->
+        <div class="desktop-icons">
+            <!-- 左列: 標準 Windows アプリ -->
+            <div class="icon-column">
+                <div class="desk-icon" ondblclick="launchApp('cmd')">
+                    <img src="https://assets.game.web/images/ui/app/cmdIcon.png" alt="">
+                    <span>コマンド<br>プロンプト</span>
+                </div>
+                <div class="desk-icon" ondblclick="launchApp('taskmgr')">
+                    <img src="https://assets.game.web/images/ui/app/taskManager.png" alt="">
+                    <span>タスク<br>マネージャー</span>
+                </div>
+                <div class="desk-icon" ondblclick="launchApp('notepad')">
+                    <img src="https://assets.game.web/images/ui/app/notepad.png" alt="">
+                    <span>メモ帳</span>
+                </div>
+                <div class="desk-icon" ondblclick="launchApp('recyclebin')">
+                    <img src="https://assets.game.web/images/ui/app/gomibako.png" alt="">
+                    <span>ごみ箱</span>
+                </div>
+            </div>
+            <!-- 右列: ゲーム設定 -->
+            <div class="icon-column">
+                <div class="desk-icon" ondblclick="toggleWindow('job')">
+                    <img src="https://assets.game.web/images/ui/app/job.png" alt="">
+                    <span>ジョブ選択</span>
+                </div>
+                <div class="desk-icon" ondblclick="toggleWindow('diff')">
+                    <img src="https://assets.game.web/images/ui/app/diff.png" alt="">
+                    <span>難易度設定</span>
+                </div>
+                <div class="desk-icon" ondblclick="toggleWindow('file')">
+                    <img src="https://assets.game.web/images/ui/app/file.png" alt="">
+                    <span>ファイル選択</span>
+                </div>
+                <div class="desk-icon" ondblclick="toggleWindow('param')">
+                    <img src="https://assets.game.web/images/ui/app/param.png" alt="">
+                    <span>パラメータ</span>
+                </div>
+                <div class="desk-icon" ondblclick="toggleWindow('rules')">
+                    <img src="https://assets.game.web/images/ui/app/Rules.png" alt="">
+                    <span>ルール説明.txt</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="taskbar">
+        <div class="taskbar-apps">
+            <div class="taskbar-app active" id="app-job" data-tooltip="職業選択" onclick="toggleWindow('job')">
+                <img class="app-icon" src="https://assets.game.web/images/ui/app/job.png">
+            </div>
+            <div class="taskbar-app active" id="app-diff" data-tooltip="難易度" onclick="toggleWindow('diff')">
+                <img class="app-icon" src="https://assets.game.web/images/ui/app/diff.png">
+            </div>
+            <div class="taskbar-app active" id="app-file" data-tooltip="ファイル" onclick="toggleWindow('file')">
+                <img class="app-icon" src="https://assets.game.web/images/ui/app/file.png">
+            </div>
+            <div class="taskbar-app active" id="app-param" data-tooltip="パラメータ" onclick="toggleWindow('param')">
+                <img class="app-icon" src="https://assets.game.web/images/ui/app/param.png">
+            </div>
+        </div>
+
+        <div class="taskbar-right">
+            <div class="clock" id="clock">00:00<br>--/--</div>
+            <button class="start-btn" onclick="startGame()">ゲームを開始 →</button>
+        </div>
+    </div>
+
+    <script src="common/messaging.js"></script>
+    <script src="select/desktop/desktop-logic.js"></script>
+    <script src="select/desktop/desktop-view.js"></script>
+</body>
+</html>

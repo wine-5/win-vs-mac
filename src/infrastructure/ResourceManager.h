@@ -1,21 +1,22 @@
 ﻿#pragma once
-#include <unordered_map>
-#include <vector>
-#include <string>
+#include <memory>
 #include "core/interface/IResourceManager.h"
+#include "infrastructure/repository/ModelRepository.h"
+#include "infrastructure/repository/FontRepository.h"
+#include "infrastructure/repository/JobRepository.h"
+#include "infrastructure/repository/ImageRepository.h"
 
 namespace infrastructure
 {
 	/**
-	 * @brief リソースの読み込み・管理を担当するクラス
+	 * @brief リソース管理の Facade クラス
+	 * 各リポジトリ（Model・Font・Job）への一元アクセスを提供する
 	 */
 	class ResourceManager : public core::iface::IResourceManager
 	{
 	public:
-		/**
-		 * @brief ResourceManagerのコンストラクタ
-		 */
 		ResourceManager();
+		~ResourceManager() = default;
 
 		/**
 		 * @brief modelIDからモデルを読み込み、ハンドルを返す
@@ -23,7 +24,7 @@ namespace infrastructure
 		 * @return モデルハンドル
 		 */
 		int loadModelById(const std::string_view modelId) override;
-		
+
 		/**
 		 * @brief modelIDからメタデータを取得する
 		 * @param modelId モデルID
@@ -31,23 +32,31 @@ namespace infrastructure
 		 */
 		std::optional<core::data::ModelMetadata> getMetadata(const std::string_view modelId) const override;
 
+		/**
+		 * @brief フォントIDからフォント名を取得する
+		 * @param fontId フォントID
+		 * @return フォントファミリー名（存在しない場合nullopt）
+		 */
+		std::optional<std::string> getFontName(const std::string_view fontId) const override;
+
+		/**
+		 * @brief ジョブタイプからジョブ情報を取得する
+		 * @param jobType ジョブタイプ
+		 * @return ジョブ情報
+		 */
+		[[nodiscard]] core::data::JobInfo getJobInfo(core::constant::JobType jobType) const override;
+
+		/**
+		 * @brief 画像IDから画像を読み込みハンドルを返す（キャッシュ付き）
+		 * @param imageId 画像ID
+		 * @return DxLib 画像ハンドル、失敗時は -1
+		 */
+		int loadImageById(std::string_view imageId) override;
+
 	private:
-		/// @brief リソース定義（resources.jsonの1エントリ）
-		struct ResourceDefinition {
-			std::string m_id;
-			std::string m_path;
-		};
-
-		/// @brief resources.jsonからリソースリストを読み込む
-		std::vector<ResourceDefinition> loadResourceList(const std::string& filePath);
-		core::data::ModelMetadata parseJsonFile(const std::string& filePath);
-
-		// ファイルパスをキーにしてモデルを管理
-		std::unordered_map<std::string, int> m_modelCache;
-		std::unordered_map<std::string, int> m_modelHandles;
-		std::unordered_map<std::string, core::data::ModelMetadata> m_metadata;
-
-	public:
-		virtual ~ResourceManager() = default;
+		std::unique_ptr<ModelRepository> m_modelRepo;
+		std::unique_ptr<FontRepository>  m_fontRepo;
+		std::unique_ptr<JobRepository>   m_jobRepo;
+		std::unique_ptr<ImageRepository> m_imageRepo;
 	};
 }

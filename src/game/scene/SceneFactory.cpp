@@ -1,80 +1,198 @@
 ﻿#include "SceneFactory.h"
+#include "Bios.h"
 #include "Title.h"
-#include "StageSelect.h"
+#include "Lockscreen.h"
+#include "Select.h"
 #include "Loading.h"
 #include "InGame.h"
 #include "Result.h"
-#include "core/ServiceLocator.h"
+#include "SceneManager.h"
+#include "core/base/ServiceLocator.h"
 #include "core/interface/IFileProvider.h"
+#include "core/interface/IResourceManager.h"
+#include "core/interface/IWindowFactory.h"
+#include "core/interface/ISelectWindowManager.h"
 #include "game/GameManager.h"
+
+namespace
+{
+	constexpr const char* MAIN_FONT_NAME = "x12y16pxMaruMonica";
+}
 
 namespace game::scene
 {
-    SceneFactory::SceneFactory()
-        : m_inGameScene{}, m_titleScene{}, m_stageSelectScene{}, m_loadingScene{}, m_resultScene{}
-    {
-    }
+	SceneFactory::SceneFactory()
+		: m_inGameScene{}
+		, m_titleScene{}
+		, m_lockscreenScene{}
+		, m_selectScene{}
+		, m_loadingScene{}
+		, m_resultScene{}
+		, m_biosScene{}
+	{
+	}
 
-    IScene *SceneFactory::createScene(SceneType sceneType)
-    {
-        // TODO: 現在は全て軽量なシーンであるためシーンが作られるたびに生成をしているが、
-        // 本来であればreset()関数をInGameなどの状態をゲームループするたびにリセットする必要がある
-        // オブジェクトに持たせる必要があり、逆にリセットが不要なシーンに関しては
-        // if文で重複して何度も生成されないようにするべき
-        auto *screen = core::ServiceLocator::get<core::iface::IScreen>();
+	SceneFactory::~SceneFactory() = default;
 
-        switch (sceneType)
-        {
-        case SceneType::Title:
-            m_titleScene = std::make_unique<Title>(
-                m_titleInputManager,
-                m_titleUIRenderer,
-                *screen);
-            return m_titleScene.get();
+	IScene* SceneFactory::createScene(SceneType sceneType)
+	{
+		// TODO: 現在は全て軽量なシーンであるためシーンが作られるたびに生成をしているが、
+		// 本来であればreset()関数をInGameなどの状態をゲームループするたびにリセットする必要がある
+		// オブジェクトに持たせる必要があり、逆にリセットが不要なシーンに関しては
+		// if文で重複して何度も生成されないようにするべき
+		auto* screen = core::base::ServiceLocator::get<core::iface::IScreen>();
 
-        case SceneType::StageSelect:
-        {
-            auto *fileProvider = core::ServiceLocator::get<core::iface::IFileProvider>();
-            auto *gameManager = core::ServiceLocator::get<game::GameManager>();
+		switch (sceneType)
+		{
+		case SceneType::Bios:
+		{
+			auto* inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
+			auto* uiRenderer = core::base::ServiceLocator::get<core::iface::IUIRenderer>();
+			m_biosScene = std::make_unique<Bios>(
+				*inputProvider,
+				*uiRenderer,
+				*screen);
+			return m_biosScene.get();
+		}
 
-            m_stageSelectScene = std::make_unique<StageSelect>(
-                m_stageSelectInputManager,
-                m_stageSelectUIRenderer,
-                *screen,
-                *fileProvider,
-                gameManager->getFileEquipmentData());
-            return m_stageSelectScene.get();
-        }
+		case SceneType::Title:
+		{
+			auto* inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
+			auto* uiRenderer = core::base::ServiceLocator::get<core::iface::IUIRenderer>();
+			m_titleScene = std::make_unique<Title>(
+				*inputProvider,
+				*uiRenderer,
+				*screen);
+			return m_titleScene.get();
+		}
 
-        case SceneType::Loading:
-            m_loadingScene = std::make_unique<Loading>(
-                m_loadingUIRenderer,
-                *screen);
-            return m_loadingScene.get();
+		case SceneType::Lockscreen:
+		{
+			auto* inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
+			auto* uiRenderer = core::base::ServiceLocator::get<core::iface::IUIRenderer>();
+			m_lockscreenScene = std::make_unique<Lockscreen>(
+				*inputProvider,
+				*uiRenderer,
+				*screen);
+			return m_lockscreenScene.get();
+		}
 
-        case SceneType::InGame:
-        {
-            auto *gameManager = core::ServiceLocator::get<game::GameManager>();
+		case SceneType::Select:
+		{
+			auto* inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
+			auto* uiRenderer = core::base::ServiceLocator::get<core::iface::IUIRenderer>();
+			auto* fileProvider = core::base::ServiceLocator::get<core::iface::IFileProvider>();
+			auto* resourceManager = core::base::ServiceLocator::get<core::iface::IResourceManager>();
 
-            m_inGameScene = std::make_unique<InGame>(
-                m_inGameCamera,
-                m_inGameRenderer,
-                m_inGameAnimator,
-                m_inGameResourceManager,
-                m_inGameInputManager,
-                gameManager->getFileEquipmentData());
-            return m_inGameScene.get();
-        }
+			m_selectScene = std::make_unique<Select>(
+				*inputProvider,
+				*uiRenderer,
+				*screen,
+				*fileProvider,
+				*resourceManager,
+				game::GameManager::getInstance().getFileEquipmentData(),
+				nullptr);
 
-        case SceneType::Result:
-            m_resultScene = std::make_unique<Result>(
-                m_resultInputManager,
-                m_resultUIRenderer,
-                *screen);
-            return m_resultScene.get();
+			auto* windowFactory = core::base::ServiceLocator::get<core::iface::IWindowFactory>();
+			auto windowManager = windowFactory->createSelectWindowManager(
+				[selectPtr = m_selectScene.get()]() { selectPtr->notifyGameStart(); },
+				[selectPtr = m_selectScene.get()](core::constant::JobType jt) {
+					game::GameManager::getInstance().getJobSelectionData().setSelectedJobType(jt);
+					selectPtr->notifyJobSelected(jt);
+				},
+				[fileProvider](int slot, const std::string& path) {
+					game::GameManager::getInstance().getFileEquipmentData().setFilePath(slot, path);
+				},
+				*resourceManager
+			);
 
-        default:
-            return nullptr;
-        }
-    }
+			m_selectScene->setWindowManager(std::move(windowManager));
+			return m_selectScene.get();
+		}
+
+		case SceneType::Loading:
+		{
+			auto* uiRenderer = core::base::ServiceLocator::get<core::iface::IUIRenderer>();
+			auto* windowFactory = core::base::ServiceLocator::get<core::iface::IWindowFactory>();
+
+			auto loadingWindow = windowFactory->createLoadingWindow(
+				[this]() {
+					if (m_loadingScene)
+						m_loadingScene->notifyLoadingComplete();
+				});
+
+			m_loadingScene = std::make_unique<Loading>(
+				*uiRenderer,
+				*screen,
+				std::move(loadingWindow));
+			return m_loadingScene.get();
+		}
+
+		case SceneType::InGame:
+		{
+			auto* camera = core::base::ServiceLocator::get<core::iface::ICamera>();
+			auto* renderer = core::base::ServiceLocator::get<core::iface::IRenderer>();
+			auto* animator = core::base::ServiceLocator::get<core::iface::IAnimator>();
+			auto* resourceManager = core::base::ServiceLocator::get<core::iface::IResourceManager>();
+			auto* inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
+
+			m_inGameScene = std::make_unique<InGame>(
+				*camera,
+				*renderer,
+				*animator,
+				*resourceManager,
+				*inputProvider,
+				game::GameManager::getInstance().getFileEquipmentData());
+			return m_inGameScene.get();
+		}
+
+		case SceneType::Result:
+		{
+			auto* uiRenderer = core::base::ServiceLocator::get<core::iface::IUIRenderer>();
+			auto* windowFactory = core::base::ServiceLocator::get<core::iface::IWindowFactory>();
+
+			auto resultWindow = windowFactory->createResultWindow(
+				[this]() {
+					auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
+					if (sceneManager)
+						sceneManager->changeScene(SceneType::Select);
+				},
+				[this]() {
+					auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
+					if (sceneManager)
+						sceneManager->changeScene(SceneType::Title);
+				});
+
+			m_resultScene = std::make_unique<Result>(
+				*uiRenderer,
+				*screen,
+				std::move(resultWindow));
+
+			return m_resultScene.get();
+		}
+
+		default:
+			return nullptr;
+		}
+	}
+
+	void SceneFactory::resetScene(SceneType sceneType) noexcept
+	{
+		// 指定シーンを破棄してウィンドウなどのリソースを解放する
+		switch (sceneType)
+		{
+		case SceneType::Bios:       m_biosScene.reset();       break;
+		case SceneType::Title:      m_titleScene.reset();      break;
+		case SceneType::Lockscreen: m_lockscreenScene.reset(); break;
+		case SceneType::Select:     m_selectScene.reset();     break;
+		case SceneType::Loading:
+			m_loadingScene.reset();
+			break;
+		case SceneType::InGame:     m_inGameScene.reset();     break;
+		case SceneType::Result:
+			m_resultScene.reset();
+			break;
+		default: break;
+		}
+	}
 }

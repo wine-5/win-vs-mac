@@ -13,6 +13,14 @@ namespace game::scene
 
 	void SceneManager::update(float deltaTime)
 	{
+		// 前フレームで予約された古いシーンを破棄する
+		// （シーンのコールスタック上での破棄を避けるため1フレーム遅延）
+		if (m_pendingReset.has_value() && m_pendingReset.value() != m_currentSceneType)
+		{
+			m_sceneFactory->resetScene(m_pendingReset.value());
+			m_pendingReset.reset();
+		}
+
 		if (m_currentScene)
 			m_currentScene->update(deltaTime);
 	}
@@ -25,7 +33,11 @@ namespace game::scene
 
 	void SceneManager::changeScene(SceneType sceneType)
 	{
-		// SceneFactoryでシーンを生成（所有権はFactoryが保持）
+		// 現在シーンが存在する場合のみ、翌フレームでの遅延リセットを予約する
+		if (m_currentScene != nullptr)
+			m_pendingReset = m_currentSceneType;
+
+		// SceneFactory でシーンを生成（所有権は Factory が保持）
 		m_currentScene = m_sceneFactory->createScene(sceneType);
 		m_currentSceneType = sceneType;
 	}

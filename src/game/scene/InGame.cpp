@@ -3,7 +3,9 @@
 /* core層 */
 #include "core/interface/ILogger.h"
 #include "core/utility/Color.h"
-#include "core/ServiceLocator.h"
+#include "core/base/ServiceLocator.h"
+#include "core/constant/JobType.h"
+#include "core/data/ResultData.h"
 
 /* game層 */
 #include "game/factory/FactoryInitializer.h"
@@ -12,6 +14,7 @@
 #include "game/system/PhysicsSystem.h"
 #include "game/component/TransformComponent.h"
 #include "game/actor/Player.h"
+#include "game/GameManager.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/HealthComponent.h"
 #include "game/component/HitEffectComponent.h"
@@ -40,8 +43,14 @@ namespace game::scene
 		core::iface::IResourceManager& resourceManager,
 		core::iface::IInputProvider& inputProvider,
 		data::FileEquipmentData& fileEquipmentData)
-		: m_camera{ camera }, m_renderer{ renderer }, m_animator{ animator }, m_resourceManager{ resourceManager }, m_inputProvider{ inputProvider }, m_fileEquipmentData{ fileEquipmentData }, m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }, m_playerData{ game::data::PlayerData::fromMetadata(
-																																																																  m_resourceManager.getMetadata(constant::model_id::PLAYER).value()) }
+		: m_camera{ camera }
+		, m_renderer{ renderer }
+		, m_animator{ animator }
+		, m_resourceManager{ resourceManager }
+		, m_inputProvider{ inputProvider }
+		, m_fileEquipmentData{ fileEquipmentData }
+		, m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }
+		, m_playerData{ game::data::PlayerData::fromMetadata(m_resourceManager.getMetadata(constant::model_id::PLAYER).value()) }
 	{
 		loadResources();
 		spawnEntities();
@@ -67,15 +76,29 @@ namespace game::scene
 
 	void InGame::spawnEntities()
 	{
-
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
 
-		// テストとして表示するようにベースパラメータを保存
-		const float baseHp{ m_playerData.getMaxHp() };
-		const float baseAtk{ m_playerData.getAttackPower() };
-		const float baseDef{ m_playerData.getDefence() };
-		const float baseSpd{ m_playerData.getMoveSpeed() };
-		const float baseRange{ m_playerData.getAttackRange() };
+		// 初期値を保存
+		const float initialHp{ m_playerData.getMaxHp() };
+		const float initialAtk{ m_playerData.getAttackPower() };
+		const float initialDef{ m_playerData.getDefence() };
+		const float initialSpd{ m_playerData.getMoveSpeed() };
+		const float initialRange{ m_playerData.getAttackRange() };
+
+		// 職業パラメータをPlayerDataに反映
+		const auto& jobSelectionData{ GameManager::getInstance().getJobSelectionData() };
+		if (jobSelectionData.hasJobSelected())
+		{
+			const auto jobType{ jobSelectionData.getSelectedJobType() };
+			const auto jobInfo{ m_resourceManager.getJobInfo(jobType) };
+			m_playerData.applyJobParameters(jobInfo.m_hp, jobInfo.m_atk, jobInfo.m_def, jobInfo.m_spd);
+		}
+
+		// 職業適用後の値を保存
+		const float afterJobHp{ m_playerData.getMaxHp() };
+		const float afterJobAtk{ m_playerData.getAttackPower() };
+		const float afterJobDef{ m_playerData.getDefence() };
+		const float afterJobSpd{ m_playerData.getMoveSpeed() };
 
 		// 拡張子ボーナスをPlayerDataに反映
 		for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
@@ -87,13 +110,21 @@ namespace game::scene
 				m_playerData.applyExtensionBonus(bonus);
 			}
 		}
-		// テスト用に表示
+
+		// 最終値を保存
+		const float finalHp{ m_playerData.getMaxHp() };
+		const float finalAtk{ m_playerData.getAttackPower() };
+		const float finalDef{ m_playerData.getDefence() };
+		const float finalSpd{ m_playerData.getMoveSpeed() };
+		const float finalRange{ m_playerData.getAttackRange() };
+
+		// テスト用に詳細ログを表示
 		LOG("=== Player パラメータ ===");
-		LOG("  HP        : %.1f -> %.1f", baseHp, m_playerData.getMaxHp());
-		LOG("  ATK       : %.1f -> %.1f", baseAtk, m_playerData.getAttackPower());
-		LOG("  DEF       : %.1f -> %.1f", baseDef, m_playerData.getDefence());
-		LOG("  SPD       : %.1f -> %.1f", baseSpd, m_playerData.getMoveSpeed());
-		LOG("  ATK Range : %.1f -> %.1f", baseRange, m_playerData.getAttackRange());
+		LOG("  HP        : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialHp, afterJobHp, finalHp);
+		LOG("  ATK       : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialAtk, afterJobAtk, finalAtk);
+		LOG("  DEF       : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialDef, afterJobDef, finalDef);
+		LOG("  SPD       : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialSpd, afterJobSpd, finalSpd);
+		LOG("  ATK Range : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialRange, initialRange, finalRange);
 		LOG("========================");
 
 		initializer.initializePlayer(m_playerData);
@@ -142,6 +173,10 @@ namespace game::scene
 				LOG("AttackHit: 攻撃者のId=%u 被攻撃者のId=%u ダメージ=%.1f",
 					e.m_attackerId, e.m_targetId, e.m_damage);
 
+				// 被ダメージ追跡（プレイヤーが攻撃を受けた場合）
+				if (e.m_targetId == m_playerId)
+					m_totalDamageTaken += e.m_damage;
+
 				// ヒットエフェクト開始
 				if (m_componentManager.has<component::HitEffectComponent>(e.m_targetId))
 				{
@@ -161,7 +196,8 @@ namespace game::scene
 							render.m_isVisible = false;
 						}
 
-						auto* sceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
+						saveResultData(false);
+						auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 						sceneManager->changeScene(game::scene::SceneType::Result); });
 
 				// 敵の死亡イベントの購読
@@ -173,6 +209,8 @@ namespace game::scene
 							auto& render{ m_componentManager.get<component::RenderComponent>(e.m_entityId) };
 							render.m_isVisible = false;
 						}
+
+						m_killCount++;
 
 						// 敵が全滅しているかチェック
 						auto enemies{ m_componentManager.getAllEntities<component::AIComponent>() };
@@ -188,18 +226,22 @@ namespace game::scene
 						}
 						if (allDead)
 						{
-							auto* sceneManager{ core::ServiceLocator::get<game::scene::SceneManager>() };
+							saveResultData(true);
+							auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 							sceneManager->changeScene(game::scene::SceneType::Result);
 						} });
 	}
 
 	void InGame::update(float deltaTime)
 	{
+		m_elapsedTime += deltaTime;
+
 		// デバッグ用：Rキーでリザルト画面へ
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::R))
 		{
 			LOG("INFO: Rキーでリザルト画面へ遷移");
-			auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
+			saveResultData(false);
+			auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
 			sceneManager->changeScene(game::scene::SceneType::Result);
 			return;
 		}
@@ -240,5 +282,22 @@ namespace game::scene
 
 		m_renderer.drawCollider(playerColliderCenter, playerCollider.m_size, core::utility::Color::GREEN);
 		m_renderer.drawCollider(groundColliderCenter, groundCollider.m_size, core::utility::Color::BLUE);
+	}
+
+	void InGame::saveResultData(bool isVictory) noexcept
+	{
+		core::data::ResultData result{};
+		result.m_isVictory        = isVictory;
+		result.m_elapsedTime      = m_elapsedTime;
+		result.m_killCount        = m_killCount;
+		result.m_totalDamageTaken = m_totalDamageTaken;
+
+		for (int i{0}; i < data::FileEquipmentData::MAX_SLOTS; ++i)
+		{
+			if (m_fileEquipmentData.hasSelection(i))
+				result.m_usedFiles.push_back(m_fileEquipmentData.getFilePath(i));
+		}
+
+		game::GameManager::getInstance().setResultData(result);
 	}
 }

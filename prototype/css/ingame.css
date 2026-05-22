@@ -1,0 +1,603 @@
+/* ===================================================
+   INGAME
+   =================================================== */
+#scene-ingame {
+    background: var(--bg-dark);
+}
+
+.ingame-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    position: relative;
+}
+
+.dungeon-view {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: #050510;
+}
+
+/* Player Stats Panel */
+.player-stats-panel {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 20, 40, 0.9);
+    border: 1px solid var(--neon-cyan);
+    border-radius: 4px;
+    padding: 12px;
+    min-width: 120px;
+    z-index: 50;
+    font-family: 'Share Tech Mono', monospace;
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.2);
+}
+
+.stats-title {
+    font-size: 24px;
+    color: var(--neon-cyan);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 22px;
+    margin-bottom: 6px;
+    color: #aaa;
+}
+
+.stat-item:last-child {
+    margin-bottom: 0;
+}
+
+.stat-name {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    width: 40px;
+}
+
+.stat-value {
+    color: var(--neon-cyan);
+    font-weight: bold;
+    text-align: right;
+}
+
+.dungeon-scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.iso-container {
+    position: relative;
+    width: 900px;
+    height: 600px;
+    transform: perspective(500px) rotateX(35deg) rotateZ(-15deg) scale(2.4);
+    transform-origin: center center;
+}
+
+.player-sprite {
+    position: absolute;
+    width: 60px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: player-float 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 15px var(--neon-cyan));
+    z-index: 10;
+    font-size: 56px;
+}
+
+@keyframes player-float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.player-head {
+    width: 18px;
+    height: 18px;
+    background: #e0c090;
+    border-radius: 50%;
+    border: 2px solid var(--neon-cyan);
+    margin-bottom: 4px;
+}
+
+.player-body {
+    width: 28px;
+    height: 40px;
+    background: linear-gradient(180deg, #00c8ff, #0060aa);
+    border: 2px solid var(--neon-cyan);
+    border-radius: 4px;
+}
+
+.enemy-sprite {
+    position: absolute;
+    width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: enemy-idle 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px var(--neon-red));
+    font-size: 48px;
+}
+
+@keyframes enemy-idle {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.enemy-body {
+    width: 20px;
+    height: 24px;
+    background: linear-gradient(180deg, #cc0020, #880010);
+    border: 1px solid var(--neon-red);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: white;
+}
+
+.enemy-hpbar {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 54px;
+    height: 6px;
+    background: rgba(255, 0, 0, 0.3);
+    border: 1px solid rgba(255, 0, 0, 0.6);
+}
+
+.enemy-hpbar-fill {
+    height: 100%;
+    background: var(--neon-red);
+    box-shadow: 0 0 4px var(--neon-red);
+}
+
+/* HUD */
+.ingame-hud {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.hud-top {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.hud-panel {
+    background: rgba(0, 5, 15, 0.85);
+    border: 1px solid rgba(0, 245, 255, 0.3);
+    padding: 8px 12px;
+    backdrop-filter: blur(4px);
+}
+
+.hud-label {
+    font-size: 18px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+
+.hud-bar-container {
+    width: 140px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.hud-bar {
+    height: 100%;
+    transition: width 0.3s;
+}
+
+.hud-bar.hp {
+    background: linear-gradient(90deg, #00ff88, #00cc66);
+    width: 75%;
+}
+
+.hud-bar.sp {
+    background: linear-gradient(90deg, #0080ff, #0040cc);
+    width: 60%;
+}
+
+.hud-value {
+    font-size: 20px;
+    color: #e0e0ff;
+    margin-top: 2px;
+}
+
+.hud-job-panel {
+    background: rgba(0, 5, 15, 0.85);
+    border: 1px solid rgba(0, 245, 255, 0.3);
+    padding: 8px 12px;
+    margin-left: auto;
+    text-align: right;
+}
+
+.hud-job-name {
+    font-size: 22px;
+    color: var(--neon-cyan);
+    letter-spacing: 2px;
+}
+
+.hud-skill-indicator {
+    font-size: 18px;
+    color: var(--text-dim);
+    margin-top: 4px;
+}
+
+.hud-bottom {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.hud-room-info {
+    background: rgba(0, 5, 15, 0.85);
+    border: 1px solid rgba(0, 245, 255, 0.2);
+    padding: 6px 16px;
+    font-size: 20px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.hud-room-info span {
+    color: var(--neon-cyan);
+    font-size: 26px;
+}
+
+@keyframes attack-flash {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.5);
+    }
+}
+
+.attack-effect {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--neon-cyan);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: attack-flash 0.3s ease-out forwards;
+    z-index: 15;
+}
+
+/* Damage flash */
+@keyframes damage-flash {
+    0%,
+    100% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+.damage-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 0, 0, 0.3);
+    pointer-events: none;
+    z-index: 25;
+    opacity: 0;
+}
+
+.damage-overlay.flashing {
+    animation: damage-flash 0.3s ease;
+}
+
+/* Sidebar */
+.ingame-sidebar {
+    width: 200px;
+    background: rgba(0, 5, 15, 0.95);
+    border-left: 1px solid rgba(0, 245, 255, 0.2);
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sidebar-section-title {
+    font-size: 18px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    border-bottom: 1px solid rgba(0, 245, 255, 0.1);
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+}
+
+.attr-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 22px;
+    margin-bottom: 4px;
+}
+
+.attr-label {
+    color: var(--text-dim);
+}
+
+.attr-value {
+    color: var(--neon-cyan);
+}
+
+.minimap {
+    width: 100%;
+    aspect-ratio: 1;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 245, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.minimap-room {
+    position: absolute;
+    background: rgba(0, 245, 255, 0.15);
+    border: 1px solid rgba(0, 245, 255, 0.4);
+}
+
+.minimap-player {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: var(--neon-cyan);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--neon-cyan);
+    transform: translate(-50%, -50%);
+}
+
+.ingame-btn {
+    background: transparent;
+    border: 1px solid rgba(0, 245, 255, 0.3);
+    color: var(--text-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 20px;
+    letter-spacing: 2px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.ingame-btn:hover {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+    box-shadow: 0 0 8px rgba(0, 245, 255, 0.2);
+}
+
+/* Pause overlay */
+.pause-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.pause-overlay.active {
+    display: flex;
+}
+
+.pause-dialog {
+    background: #f0f0f0;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+    width: 340px;
+}
+
+.pause-dialog-title {
+    background: linear-gradient(180deg, #1659c7, #0a246a);
+    height: 32px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 24px;
+    color: white;
+    cursor: default;
+}
+
+.pause-dialog-body {
+    padding: 20px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.pause-icon {
+    font-size: 32px;
+    float: left;
+    margin-right: 16px;
+}
+
+.pause-text {
+    font-size: 26px;
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.pause-btn-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* Dungeon Visualization */
+.dungeon-bg-box {
+    position: absolute;
+    background: linear-gradient(135deg, #080818, #0c0c20);
+    border: 1px solid rgba(0, 245, 255, 0.1);
+}
+
+.dungeon-top-line {
+    position: absolute;
+    background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.4), transparent);
+    height: 3px;
+}
+
+.dungeon-bottom-line {
+    position: absolute;
+    background: linear-gradient(90deg, transparent, rgba(0, 128, 255, 0.3), transparent);
+    height: 3px;
+}
+
+.dungeon-grid {
+    position: absolute;
+    background-image: linear-gradient(rgba(0, 245, 255, 0.05) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0, 245, 255, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+}
+
+.dungeon-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+}
+
+.dungeon-corner-tl {
+    border-left: 2px solid var(--neon-cyan);
+    border-top: 2px solid var(--neon-cyan);
+}
+
+.dungeon-corner-tr {
+    border-right: 2px solid var(--neon-cyan);
+    border-top: 2px solid var(--neon-cyan);
+}
+
+.dungeon-corner-bl {
+    border-left: 2px solid var(--neon-cyan);
+    border-bottom: 2px solid var(--neon-cyan);
+}
+
+.dungeon-corner-br {
+    border-right: 2px solid var(--neon-cyan);
+    border-bottom: 2px solid var(--neon-cyan);
+}
+
+/* Action Buttons */
+.action-buttons {
+    position: absolute;
+    bottom: 60px;
+    right: 20px;
+    display: flex;
+    gap: 8px;
+    z-index: 30;
+}
+
+.action-btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 20px;
+    letter-spacing: 2px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-btn-attack {
+    background: rgba(0, 245, 255, 0.1);
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+
+.action-btn-attack:hover {
+    background: rgba(0, 245, 255, 0.2);
+    box-shadow: 0 0 12px var(--neon-cyan);
+}
+
+.action-btn-special {
+    background: rgba(255, 0, 60, 0.1);
+    border: 1px solid var(--neon-red);
+    color: var(--neon-red);
+}
+
+.action-btn-special:hover {
+    background: rgba(255, 0, 60, 0.2);
+    box-shadow: 0 0 12px var(--neon-red);
+}
+
+.action-btn-damage {
+    background: rgba(255, 165, 0, 0.1);
+    border: 1px solid #ff8c00;
+    color: #ff8c00;
+}
+
+.action-btn-damage:hover {
+    background: rgba(255, 165, 0, 0.2);
+    box-shadow: 0 0 12px #ff8c00;
+}
+
+/* Damage Numbers */
+.damage-number {
+    position: absolute;
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: bold;
+    font-size: 24px;
+    pointer-events: none;
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+    animation: damageFloat 1.5s ease-out forwards;
+    z-index: 20;
+}
+
+@keyframes damageFloat {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(0.5);
+    }
+}

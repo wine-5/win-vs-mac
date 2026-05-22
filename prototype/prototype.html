@@ -1,1575 +1,420 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WIN vs MAC - Prototype</title>
+    <title>WIN vs MAC - Prototype v2</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Rajdhani:wght@300;400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&family=Share+Tech+Mono&family=VT323&display=swap"
         rel="stylesheet">
-    <style>
-        :root {
-            --bg: #0a0a0f;
-            --surface: #0f0f1a;
-            --surface2: #151525;
-            --border: #1e1e3a;
-            --neon-cyan: #00f5ff;
-            --neon-blue: #0080ff;
-            --neon-purple: #8000ff;
-            --neon-red: #ff003c;
-            --neon-green: #00ff88;
-            --neon-yellow: #ffcc00;
-            --win-gray: #c0c0c0;
-            --win-dark: #808080;
-            --win-blue: #000080;
-            --win-bg: #008080;
-            --text: #e0e0ff;
-            --text-dim: #606080;
-            --glow-cyan: 0 0 10px #00f5ff, 0 0 20px #00f5ff40;
-            --glow-red: 0 0 10px #ff003c, 0 0 20px #ff003c40;
-            --glow-green: 0 0 10px #00ff88, 0 0 20px #00ff8840;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Share Tech Mono', monospace;
-            background: var(--bg);
-            color: var(--text);
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* Scanline overlay */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: repeating-linear-gradient(0deg,
-                    transparent,
-                    transparent 2px,
-                    rgba(0, 0, 0, 0.08) 2px,
-                    rgba(0, 0, 0, 0.08) 4px);
-            pointer-events: none;
-            z-index: 9999;
-        }
-
-        /* CRT flicker */
-        @keyframes flicker {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            92% {
-                opacity: 1;
-            }
-
-            93% {
-                opacity: 0.85;
-            }
-
-            94% {
-                opacity: 1;
-            }
-
-            96% {
-                opacity: 0.9;
-            }
-
-            97% {
-                opacity: 1;
-            }
-        }
-
-        body {
-            animation: flicker 8s infinite;
-        }
-
-        .scene {
-            position: absolute;
-            inset: 0;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .scene.active {
-            display: flex;
-        }
-
-        /* ========== TITLE SCENE ========== */
-        #scene-title {
-            background: #001020;
-            background-image:
-                radial-gradient(ellipse at 50% 100%, #00204060 0%, transparent 60%),
-                linear-gradient(180deg, #0a0a0f 0%, #001020 100%);
-        }
-
-        .title-bg-grid {
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(0, 245, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 245, 255, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
-            transform: perspective(500px) rotateX(60deg) translateY(30%);
-            transform-origin: bottom;
-        }
-
-        .title-login-box {
-            background: rgba(0, 15, 30, 0.95);
-            border: 1px solid var(--neon-cyan);
-            box-shadow: var(--glow-cyan), inset 0 0 30px rgba(0, 245, 255, 0.03);
-            padding: 48px 64px;
-            text-align: center;
-            position: relative;
-            min-width: 480px;
-        }
-
-        .title-login-box::before {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: 20px;
-            right: 20px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
-        }
-
-        .title-os-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 28px;
-            background: linear-gradient(180deg, #1a3a5a, #0a1a2a);
-            border-bottom: 1px solid var(--neon-cyan);
-            display: flex;
-            align-items: center;
-            padding: 0 12px;
-            font-size: 11px;
-            color: var(--neon-cyan);
-            letter-spacing: 2px;
-        }
-
-        .title-os-bar .dots {
-            display: flex;
-            gap: 6px;
-            margin-left: auto;
-        }
-
-        .title-os-bar .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            border: 1px solid currentColor;
-        }
-
-        .title-os-bar .dot.red {
-            color: var(--neon-red);
-        }
-
-        .title-os-bar .dot.yellow {
-            color: var(--neon-yellow);
-        }
-
-        .title-os-bar .dot.green {
-            color: var(--neon-green);
-        }
-
-        .title-user-icon {
-            width: 80px;
-            height: 80px;
-            border: 2px solid var(--neon-cyan);
-            border-radius: 50%;
-            margin: 36px auto 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            box-shadow: var(--glow-cyan);
-            position: relative;
-        }
-
-        .title-user-icon::after {
-            content: '';
-            position: absolute;
-            inset: -6px;
-            border-radius: 50%;
-            border: 1px solid rgba(0, 245, 255, 0.2);
-            animation: pulse-ring 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse-ring {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 0.5;
-            }
-
-            50% {
-                transform: scale(1.1);
-                opacity: 0.1;
-            }
-        }
-
-        .title-game-name {
-            font-family: 'VT323', monospace;
-            font-size: 52px;
-            color: var(--neon-cyan);
-            text-shadow: var(--glow-cyan);
-            letter-spacing: 8px;
-            margin-bottom: 4px;
-            animation: text-glow 3s ease-in-out infinite;
-        }
-
-        @keyframes text-glow {
-
-            0%,
-            100% {
-                text-shadow: 0 0 10px #00f5ff, 0 0 20px #00f5ff40;
-            }
-
-            50% {
-                text-shadow: 0 0 20px #00f5ff, 0 0 40px #00f5ff60, 0 0 60px #00f5ff20;
-            }
-        }
-
-        .title-subtitle {
-            font-size: 10px;
-            color: var(--text-dim);
-            letter-spacing: 4px;
-            margin-bottom: 32px;
-        }
-
-        .title-username {
-            font-size: 13px;
-            color: var(--win-gray);
-            margin-bottom: 20px;
-            letter-spacing: 2px;
-        }
-
-        .btn-primary {
-            background: transparent;
-            border: 1px solid var(--neon-cyan);
-            color: var(--neon-cyan);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 13px;
-            letter-spacing: 4px;
-            padding: 12px 40px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
-        }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: var(--neon-cyan);
-            transform: translateX(-100%);
-            transition: transform 0.3s;
-            z-index: -1;
-        }
-
-        .btn-primary:hover {
-            color: var(--bg);
-            box-shadow: var(--glow-cyan);
-        }
-
-        .btn-primary:hover::before {
-            transform: translateX(0);
-        }
-
-        .title-version {
-            position: absolute;
-            bottom: 20px;
-            right: 24px;
-            font-size: 10px;
-            color: var(--text-dim);
-        }
-
-        /* ========== STAGE SELECT SCENE ========== */
-        #scene-stage {
-            background: var(--win-bg);
-            align-items: stretch;
-            justify-content: stretch;
-            font-family: 'Share Tech Mono', monospace;
-        }
-
-        .win-desktop {
-            width: 100%;
-            height: 100%;
-            background: var(--win-bg);
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            padding: 40px;
-        }
-
-        .win-taskbar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 32px;
-            background: var(--win-gray);
-            border-top: 2px solid white;
-            display: flex;
-            align-items: center;
-            padding: 0 4px;
-            gap: 4px;
-        }
-
-        .win-start-btn {
-            background: var(--win-gray);
-            border: 2px outset var(--win-gray);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 2px 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .win-taskbar-time {
-            margin-left: auto;
-            border: 2px inset var(--win-gray);
-            padding: 2px 8px;
-            font-size: 11px;
-            color: #000;
-        }
-
-        .win-dialog {
-            background: var(--win-gray);
-            border: 2px outset var(--win-gray);
-            min-width: 360px;
-            font-size: 12px;
-            color: #000;
-            box-shadow: 4px 4px 0 #000;
-        }
-
-        .win-dialog-title {
-            background: var(--win-blue);
-            color: white;
-            padding: 4px 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .win-dialog-controls {
-            display: flex;
-            gap: 2px;
-        }
-
-        .win-ctrl-btn {
-            background: var(--win-gray);
-            border: 2px outset var(--win-gray);
-            width: 16px;
-            height: 14px;
-            font-size: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #000;
-            font-family: monospace;
-        }
-
-        .win-dialog-body {
-            padding: 16px;
-        }
-
-        .win-section-label {
-            font-size: 11px;
-            color: #444;
-            margin-bottom: 8px;
-        }
-
-        .job-options {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            margin-bottom: 16px;
-        }
-
-        .job-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 8px;
-            border: 2px inset var(--win-gray);
-            background: white;
-            cursor: pointer;
-            transition: background 0.1s;
-        }
-
-        .job-option:hover {
-            background: var(--win-blue);
-            color: white;
-        }
-
-        .job-option.selected {
-            background: var(--win-blue);
-            color: white;
-        }
-
-        .job-icon {
-            font-size: 18px;
-        }
-
-        .job-name {
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .job-desc {
-            font-size: 10px;
-            opacity: 0.8;
-            margin-left: auto;
-        }
-
-        .win-divider {
-            border: none;
-            border-top: 1px solid var(--win-dark);
-            border-bottom: 1px solid white;
-            margin: 12px 0;
-        }
-
-        .win-btn-row {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .win-btn {
-            background: var(--win-gray);
-            border: 2px outset var(--win-gray);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 11px;
-            padding: 4px 16px;
-            cursor: pointer;
-            color: #000;
-            min-width: 75px;
-        }
-
-        .win-btn:hover {
-            background: #d0d0d0;
-        }
-
-        .win-btn:active {
-            border-style: inset;
-        }
-
-        .win-btn.primary {
-            font-weight: bold;
-        }
-
-        /* Explorer window */
-        .win-explorer {
-            min-width: 420px;
-            font-size: 12px;
-        }
-
-        .explorer-toolbar {
-            background: var(--win-gray);
-            border-bottom: 1px solid var(--win-dark);
-            padding: 4px 8px;
-            display: flex;
-            gap: 8px;
-            font-size: 11px;
-        }
-
-        .explorer-path {
-            border: 2px inset var(--win-gray);
-            background: white;
-            padding: 2px 8px;
-            font-size: 11px;
-            flex: 1;
-            color: #000;
-        }
-
-        .explorer-body {
-            background: white;
-            border: 2px inset var(--win-gray);
-            margin: 8px;
-            height: 160px;
-            overflow-y: auto;
-            padding: 4px;
-        }
-
-        .file-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 3px 4px;
-            cursor: pointer;
-            font-size: 11px;
-            color: #000;
-            border: 1px solid transparent;
-        }
-
-        .file-item:hover {
-            background: #0000aa;
-            color: white;
-            border-color: #0000aa;
-        }
-
-        .file-item.selected {
-            background: #0000aa;
-            color: white;
-            border-color: #0000aa;
-        }
-
-        .file-icon {
-            font-size: 14px;
-        }
-
-        .explorer-status {
-            border-top: 1px solid var(--win-dark);
-            padding: 3px 8px;
-            font-size: 10px;
-            color: #444;
-            background: var(--win-gray);
-        }
-
-        .selected-count {
-            font-size: 10px;
-            color: #444;
-            margin-top: 4px;
-        }
-
-        .selected-count.max {
-            color: var(--neon-red);
-        }
-
-        /* ========== LOADING SCENE ========== */
-        #scene-loading {
-            background: #000020;
-            background-image: radial-gradient(ellipse at 50% 50%, #00103040 0%, transparent 70%);
-        }
-
-        .loading-win-box {
-            background: var(--win-gray);
-            border: 2px outset var(--win-gray);
-            min-width: 440px;
-            box-shadow: 4px 4px 0 #000;
-            font-size: 12px;
-            color: #000;
-        }
-
-        .loading-content {
-            padding: 24px;
-            text-align: center;
-        }
-
-        .loading-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            animation: spin-slow 3s linear infinite;
-        }
-
-        @keyframes spin-slow {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .loading-title-text {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 16px;
-            color: #000;
-        }
-
-        .loading-progress-container {
-            border: 2px inset var(--win-gray);
-            background: white;
-            height: 20px;
-            margin-bottom: 8px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .loading-progress-bar {
-            height: 100%;
-            background: var(--win-blue);
-            width: 0%;
-            transition: width 0.1s;
-            position: relative;
-        }
-
-        .loading-progress-bar::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(90deg,
-                    transparent 0px,
-                    transparent 10px,
-                    rgba(255, 255, 255, 0.15) 10px,
-                    rgba(255, 255, 255, 0.15) 20px);
-        }
-
-        .loading-status {
-            font-size: 11px;
-            color: #444;
-            height: 16px;
-            margin-bottom: 4px;
-        }
-
-        .loading-percent {
-            font-size: 11px;
-            color: #000;
-            font-weight: bold;
-        }
-
-        /* ========== INGAME SCENE ========== */
-        #scene-ingame {
-            background: var(--bg);
-            overflow: hidden;
-        }
-
-        .ingame-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            display: flex;
-        }
-
-        /* dungeon view */
-        .dungeon-view {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            background: #050510;
-        }
-
-        /* isometric grid */
-        .dungeon-grid {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .iso-room {
-            position: absolute;
-            width: 120px;
-            height: 60px;
-            background: rgba(0, 245, 255, 0.05);
-            border: 1px solid rgba(0, 245, 255, 0.2);
-            transform: rotateX(60deg) rotateZ(-45deg);
-            box-shadow: inset 0 0 20px rgba(0, 245, 255, 0.05);
-        }
-
-        /* fake isometric dungeon using CSS */
-        .dungeon-scene {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .iso-container {
-            position: relative;
-            width: 600px;
-            height: 400px;
-            transform: perspective(800px) rotateX(35deg) rotateZ(-15deg);
-        }
-
-        .floor-tile {
-            position: absolute;
-            background: linear-gradient(135deg, #0a0a1a, #0f0f22);
-            border: 1px solid rgba(0, 245, 255, 0.15);
-        }
-
-        .wall-tile {
-            position: absolute;
-            background: linear-gradient(180deg, #0f1525, #08101e);
-            border: 1px solid rgba(0, 128, 255, 0.2);
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Player */
-        .player-sprite {
-            position: absolute;
-            width: 24px;
-            height: 32px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            animation: player-float 2s ease-in-out infinite;
-            filter: drop-shadow(0 0 8px var(--neon-cyan));
-            z-index: 10;
-        }
-
-        @keyframes player-float {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-4px);
-            }
-        }
-
-        .player-body {
-            width: 16px;
-            height: 20px;
-            background: linear-gradient(180deg, #00c8ff, #0060aa);
-            border: 1px solid var(--neon-cyan);
-            border-radius: 2px;
-            position: relative;
-        }
-
-        .player-head {
-            width: 12px;
-            height: 12px;
-            background: #e0c090;
-            border-radius: 50%;
-            border: 1px solid var(--neon-cyan);
-            margin-bottom: 2px;
-        }
-
-        /* Enemy sprites */
-        .enemy-sprite {
-            position: absolute;
-            animation: enemy-idle 1.5s ease-in-out infinite;
-            filter: drop-shadow(0 0 6px var(--neon-red));
-        }
-
-        @keyframes enemy-idle {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.05);
-            }
-        }
-
-        .enemy-body {
-            width: 20px;
-            height: 24px;
-            background: linear-gradient(180deg, #cc0020, #880010);
-            border: 1px solid var(--neon-red);
-            border-radius: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: white;
-        }
-
-        /* HUD */
-        .ingame-hud {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 20;
-        }
-
-        .hud-top {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            right: 12px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .hud-panel {
-            background: rgba(0, 5, 15, 0.85);
-            border: 1px solid rgba(0, 245, 255, 0.3);
-            padding: 8px 12px;
-            backdrop-filter: blur(4px);
-        }
-
-        .hud-label {
-            font-size: 9px;
-            color: var(--text-dim);
-            letter-spacing: 2px;
-            margin-bottom: 4px;
-        }
-
-        .hud-bar-container {
-            width: 140px;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            overflow: hidden;
-        }
-
-        .hud-bar {
-            height: 100%;
-            transition: width 0.3s;
-        }
-
-        .hud-bar.hp {
-            background: linear-gradient(90deg, #00ff88, #00cc66);
-            width: 75%;
-        }
-
-        .hud-bar.sp {
-            background: linear-gradient(90deg, #0080ff, #0040cc);
-            width: 60%;
-        }
-
-        .hud-value {
-            font-size: 10px;
-            color: var(--text);
-            margin-top: 2px;
-        }
-
-        .hud-job-panel {
-            background: rgba(0, 5, 15, 0.85);
-            border: 1px solid rgba(0, 245, 255, 0.3);
-            padding: 8px 12px;
-            margin-left: auto;
-            text-align: right;
-        }
-
-        .hud-job-name {
-            font-size: 11px;
-            color: var(--neon-cyan);
-            letter-spacing: 2px;
-        }
-
-        .hud-skill-indicator {
-            font-size: 9px;
-            color: var(--text-dim);
-            margin-top: 4px;
-        }
-
-        .hud-bottom {
-            position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .hud-room-info {
-            background: rgba(0, 5, 15, 0.85);
-            border: 1px solid rgba(0, 245, 255, 0.2);
-            padding: 6px 16px;
-            font-size: 10px;
-            color: var(--text-dim);
-            letter-spacing: 2px;
-            text-align: center;
-        }
-
-        .hud-room-info span {
-            color: var(--neon-cyan);
-            font-size: 13px;
-        }
-
-        /* enemy health bars */
-        .enemy-hpbar {
-            position: absolute;
-            top: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 30px;
-            height: 4px;
-            background: rgba(255, 0, 0, 0.3);
-            border: 1px solid rgba(255, 0, 0, 0.5);
-        }
-
-        .enemy-hpbar-fill {
-            height: 100%;
-            background: var(--neon-red);
-            box-shadow: 0 0 4px var(--neon-red);
-        }
-
-        /* attack animation */
-        @keyframes attack-flash {
-            0% {
-                opacity: 0;
-                transform: scale(0.5);
-            }
-
-            50% {
-                opacity: 1;
-                transform: scale(1.2);
-            }
-
-            100% {
-                opacity: 0;
-                transform: scale(1.5);
-            }
-        }
-
-        .attack-effect {
-            position: absolute;
-            width: 40px;
-            height: 40px;
-            border: 2px solid var(--neon-cyan);
-            border-radius: 50%;
-            pointer-events: none;
-            animation: attack-flash 0.3s ease-out forwards;
-            z-index: 15;
-        }
-
-        /* sidebar */
-        .ingame-sidebar {
-            width: 200px;
-            background: rgba(0, 5, 15, 0.95);
-            border-left: 1px solid rgba(0, 245, 255, 0.2);
-            padding: 16px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            pointer-events: all;
-        }
-
-        .sidebar-section-title {
-            font-size: 9px;
-            color: var(--text-dim);
-            letter-spacing: 3px;
-            border-bottom: 1px solid rgba(0, 245, 255, 0.1);
-            padding-bottom: 4px;
-            margin-bottom: 8px;
-        }
-
-        .attr-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            margin-bottom: 4px;
-        }
-
-        .attr-label {
-            color: var(--text-dim);
-        }
-
-        .attr-value {
-            color: var(--neon-cyan);
-        }
-
-        .minimap {
-            width: 100%;
-            aspect-ratio: 1;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(0, 245, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .minimap-room {
-            position: absolute;
-            background: rgba(0, 245, 255, 0.15);
-            border: 1px solid rgba(0, 245, 255, 0.4);
-        }
-
-        .minimap-player {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: var(--neon-cyan);
-            border-radius: 50%;
-            box-shadow: 0 0 6px var(--neon-cyan);
-            transform: translate(-50%, -50%);
-        }
-
-        .ingame-btn {
-            background: transparent;
-            border: 1px solid rgba(0, 245, 255, 0.3);
-            color: var(--text-dim);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 10px;
-            letter-spacing: 2px;
-            padding: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            pointer-events: all;
-            width: 100%;
-        }
-
-        .ingame-btn:hover {
-            border-color: var(--neon-cyan);
-            color: var(--neon-cyan);
-            box-shadow: 0 0 8px rgba(0, 245, 255, 0.2);
-        }
-
-        /* ========== RESULT SCENE ========== */
-        #scene-result-win {
-            background: #000010;
-        }
-
-        #scene-result-lose {
-            background: #100000;
-        }
-
-        .result-win-container {
-            text-align: center;
-            position: relative;
-        }
-
-        /* Shutdown screen */
-        .shutdown-screen {
-            background: #000;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 24px;
-        }
-
-        .shutdown-logo {
-            font-size: 64px;
-            opacity: 0.8;
-            animation: logo-pulse 3s ease-in-out infinite;
-        }
-
-        @keyframes logo-pulse {
-
-            0%,
-            100% {
-                filter: drop-shadow(0 0 10px var(--neon-cyan));
-            }
-
-            50% {
-                filter: drop-shadow(0 0 30px var(--neon-cyan));
-            }
-        }
-
-        .shutdown-title {
-            font-family: 'VT323', monospace;
-            font-size: 48px;
-            color: var(--neon-cyan);
-            text-shadow: var(--glow-cyan);
-            letter-spacing: 4px;
-        }
-
-        .shutdown-message {
-            font-size: 13px;
-            color: var(--text-dim);
-            letter-spacing: 3px;
-        }
-
-        .shutdown-detail {
-            font-size: 11px;
-            color: #304050;
-            letter-spacing: 1px;
-            margin-top: -16px;
-        }
-
-        .shutdown-spinner {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .shutdown-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--neon-cyan);
-            animation: dot-bounce 1.2s ease-in-out infinite;
-            box-shadow: 0 0 6px var(--neon-cyan);
-        }
-
-        .shutdown-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .shutdown-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        .shutdown-dot:nth-child(4) {
-            animation-delay: 0.6s;
-        }
-
-        .shutdown-dot:nth-child(5) {
-            animation-delay: 0.8s;
-        }
-
-        @keyframes dot-bounce {
-
-            0%,
-            100% {
-                transform: scale(0.5);
-                opacity: 0.3;
-            }
-
-            50% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* Error dialog - Game Over */
-        .error-screen {
-            background: rgba(10, 0, 0, 0.98);
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .bsod-container {
-            background: var(--neon-red);
-            color: white;
-            padding: 48px 64px;
-            max-width: 640px;
-            width: 90%;
-            position: relative;
-        }
-
-        .bsod-header {
-            font-size: 14px;
-            letter-spacing: 2px;
-            margin-bottom: 24px;
-            opacity: 0.9;
-        }
-
-        .bsod-icon {
-            font-size: 64px;
-            display: block;
-            margin-bottom: 16px;
-        }
-
-        .bsod-title {
-            font-family: 'VT323', monospace;
-            font-size: 42px;
-            letter-spacing: 4px;
-            margin-bottom: 16px;
-            text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
-        }
-
-        .bsod-code {
-            font-size: 11px;
-            opacity: 0.8;
-            letter-spacing: 1px;
-            margin-bottom: 24px;
-            line-height: 1.8;
-        }
-
-        .bsod-progress {
-            font-size: 11px;
-            opacity: 0.9;
-            margin-bottom: 24px;
-        }
-
-        .bsod-progress-bar {
-            height: 4px;
-            background: rgba(255, 255, 255, 0.3);
-            margin-top: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .bsod-progress-fill {
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            background: white;
-            animation: bsod-fill 3s ease-in-out infinite;
-        }
-
-        @keyframes bsod-fill {
-            0% {
-                width: 0%;
-            }
-
-            100% {
-                width: 100%;
-            }
-        }
-
-        /* scene transition */
-        @keyframes fade-in {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        .scene.active {
-            animation: fade-in 0.5s ease;
-        }
-
-        /* ======= SCENE NAV (dev helper) ======= */
-        .dev-nav {
-            position: fixed;
-            top: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 4px;
-            z-index: 99999;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .dev-nav-btn {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: rgba(255, 255, 255, 0.4);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 9px;
-            padding: 3px 8px;
-            cursor: pointer;
-            letter-spacing: 1px;
-            transition: all 0.2s;
-        }
-
-        .dev-nav-btn:hover,
-        .dev-nav-btn.active {
-            border-color: var(--neon-cyan);
-            color: var(--neon-cyan);
-        }
-
-        .time-display {
-            color: #000;
-        }
-    </style>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/scene.css">
+    <link rel="stylesheet" href="css/title.css">
+    <link rel="stylesheet" href="css/stage.css">
+    <link rel="stylesheet" href="css/loading.css">
+    <link rel="stylesheet" href="css/ingame.css">
+    <link rel="stylesheet" href="css/result.css">
+    <link rel="stylesheet" href="css/bios.css">
+    <link rel="stylesheet" href="css/lockscreen.css">
 </head>
 
 <body>
 
-    <!-- Dev nav -->
     <div class="dev-nav">
-        <button class="dev-nav-btn active" onclick="showScene('title')">TITLE</button>
-        <button class="dev-nav-btn" onclick="showScene('stage')">STAGE</button>
+        <button class="dev-nav-btn active" onclick="showScene('bios')">BIOS</button>
+        <button class="dev-nav-btn" onclick="showScene('lockscreen')">LOCK</button>
+        <button class="dev-nav-btn" onclick="showScene('select')">SELECT</button>
         <button class="dev-nav-btn" onclick="showScene('loading')">LOAD</button>
         <button class="dev-nav-btn" onclick="showScene('ingame')">INGAME</button>
         <button class="dev-nav-btn" onclick="showScene('result-win')">WIN</button>
         <button class="dev-nav-btn" onclick="showScene('result-lose')">LOSE</button>
     </div>
 
-    <!-- ========== TITLE ========== -->
-    <div id="scene-title" class="scene active">
-        <div class="title-bg-grid"></div>
-        <div class="title-login-box">
-            <div class="title-os-bar">
-                DUNGEON_DRIVE.EXE
-                <div class="dots">
-                    <div class="dot red"></div>
-                    <div class="dot yellow"></div>
-                    <div class="dot green"></div>
-                </div>
-            </div>
-            <div class="title-user-icon">⚔</div>
-            <div class="title-game-name">WIN vs MAC</div>
-            <div class="title-subtitle">WINDOWS INTERNAL SYSTEM v1.0.0</div>
-            <div class="title-username">USER: PLAYER_001</div>
-            <button class="btn-primary" onclick="showScene('stage')">[ BOOT SYSTEM ]</button>
+    <!-- ===== BIOS ===== -->
+    <div id="scene-bios" class="scene active">
+        <div class="bios-container">
+            <div class="bios-output" id="bios-output"></div>
         </div>
-        <div class="title-version">BUILD 2026.05 // DxLib + ECS // WIN vs MAC</div>
+        <div class="bios-skip-hint">[ESC] スキップ</div>
     </div>
 
-    <!-- ========== STAGE SELECT ========== -->
-    <div id="scene-stage" class="scene">
-        <div class="win-desktop">
-
-            <!-- Job Select Dialog -->
-            <div class="win-dialog" id="dialog-job">
-                <div class="win-dialog-title">
-                    ⚔ 職業の選択
-                    <div class="win-dialog-controls">
-                        <div class="win-ctrl-btn">_</div>
-                        <div class="win-ctrl-btn">□</div>
-                        <div class="win-ctrl-btn">✕</div>
-                    </div>
-                </div>
-                <div class="win-dialog-body">
-                    <div class="win-section-label">職業を選択してください：</div>
-                    <div class="job-options">
-                        <div class="job-option selected" onclick="selectJob(this, '剣士')">
-                            <span class="job-icon">⚔</span>
-                            <div>
-                                <div class="job-name">剣士 [Warrior]</div>
-                                <div style="font-size:10px;color:#666">近接・前方扇形攻撃</div>
-                            </div>
-                            <span class="job-desc">必殺: 全方位斬り</span>
-                        </div>
-                        <div class="job-option" onclick="selectJob(this, '魔法使い')">
-                            <span class="job-icon">🔮</span>
-                            <div>
-                                <div class="job-name">魔法使い [Mage]</div>
-                                <div style="font-size:10px;color:#666">遠距離・魔法弾</div>
-                            </div>
-                            <span class="job-desc">必殺: 巨大魔法弾</span>
-                        </div>
-                        <div class="job-option" onclick="selectJob(this, '忍者')">
-                            <span class="job-icon">🗡</span>
-                            <div>
-                                <div class="job-name">忍者 [Ninja]</div>
-                                <div style="font-size:10px;color:#666">近接・高速</div>
-                            </div>
-                            <span class="job-desc">必殺: 分身一斉攻撃</span>
-                        </div>
-                    </div>
-                    <hr class="win-divider">
-                    <div class="win-btn-row">
-                        <button class="win-btn primary" onclick="confirmJob()">OK</button>
-                        <button class="win-btn" onclick="showScene('title')">キャンセル</button>
-                    </div>
-                </div>
+    <!-- ===== LOCK SCREEN ===== -->
+    <div id="scene-lockscreen" class="scene" onclick="unlockScreen()">
+        <div class="lockscreen-bg-overlay"></div>
+        <div id="particles-container" style="position:absolute;inset:0;pointer-events:none;z-index:1;"></div>
+        <div class="lockscreen-content" id="lockscreen-content">
+            <div class="lockscreen-time" id="lockscreen-time">--:--</div>
+            <div class="lockscreen-date" id="lockscreen-date">読み込み中...</div>
+        </div>
+        <div class="lockscreen-bottom" id="lockscreen-bottom">
+            <div class="lockscreen-win-logo">
+                <div></div><div></div><div></div><div></div>
             </div>
-
-            <!-- File Explorer Dialog -->
-            <div class="win-dialog win-explorer" id="dialog-explorer">
-                <div class="win-dialog-title">
-                    📁 ファイルの選択 — ダンジョンフォルダを指定
-                    <div class="win-dialog-controls">
-                        <div class="win-ctrl-btn">_</div>
-                        <div class="win-ctrl-btn">□</div>
-                        <div class="win-ctrl-btn">✕</div>
-                    </div>
-                </div>
-                <div class="win-dialog-body" style="padding:8px">
-                    <div class="explorer-toolbar">
-                        <span>📁</span>
-                        <div class="explorer-path">C:\Users\Player\Documents\Projects</div>
-                    </div>
-                    <div class="explorer-body" id="file-list">
-                        <div class="file-item" onclick="toggleFile(this, 'project_final.exe', '.exe')">
-                            <span class="file-icon">⚙</span> project_final.exe <span
-                                style="margin-left:auto;font-size:10px;color:#888">2.4 MB</span>
-                        </div>
-                        <div class="file-item" onclick="toggleFile(this, 'readme.txt', '.txt')">
-                            <span class="file-icon">📄</span> readme.txt <span
-                                style="margin-left:auto;font-size:10px;color:#888">12 KB</span>
-                        </div>
-                        <div class="file-item" onclick="toggleFile(this, 'screenshot.png', '.png')">
-                            <span class="file-icon">🖼</span> screenshot.png <span
-                                style="margin-left:auto;font-size:10px;color:#888">3.1 MB</span>
-                        </div>
-                        <div class="file-item" onclick="toggleFile(this, 'bgm.mp3', '.mp3')">
-                            <span class="file-icon">🎵</span> bgm.mp3 <span
-                                style="margin-left:auto;font-size:10px;color:#888">8.7 MB</span>
-                        </div>
-                        <div class="file-item" onclick="toggleFile(this, 'backup.zip', '.zip')">
-                            <span class="file-icon">📦</span> backup.zip <span
-                                style="margin-left:auto;font-size:10px;color:#888">45 MB</span>
-                        </div>
-                        <div class="file-item" onclick="toggleFile(this, 'data.dll', '.dll')">
-                            <span class="file-icon">⚙</span> data.dll <span
-                                style="margin-left:auto;font-size:10px;color:#888">512 KB</span>
-                        </div>
-                        <div class="file-item" onclick="toggleFile(this, 'notes.docx', '.docx')">
-                            <span class="file-icon">📝</span> notes.docx <span
-                                style="margin-left:auto;font-size:10px;color:#888">280 KB</span>
-                        </div>
-                    </div>
-                    <div class="explorer-status">
-                        <span id="file-status">ファイルを最大3つ選択してください</span>
-                    </div>
-                    <div class="win-btn-row" style="margin-top:8px">
-                        <button class="win-btn primary" onclick="confirmFiles()">選択完了</button>
-                        <button class="win-btn">キャンセル</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="win-taskbar">
-                <button class="win-start-btn">🪟 スタート</button>
-                <button class="win-start-btn">⚔ 職業選択</button>
-                <button class="win-start-btn">📁 ファイル選択</button>
-                <div class="win-taskbar-time">
-                    <span class="time-display" id="taskbar-time">00:00</span>
-                </div>
-            </div>
+            <div class="lockscreen-unlock-hint">&#8593; クリックしてロック解除</div>
         </div>
     </div>
 
-    <!-- ========== LOADING ========== -->
+    <!-- ===== SELECT (stage select on Windows desktop) ===== -->
+    <div id="scene-select" class="scene">
+
+        <!-- Desktop icons on the left side -->
+        <div class="stage-desktop-icons">
+            <div class="desktop-icon" ondblclick="restoreStageAll()">
+                <div class="desktop-icon-img">🎮</div>
+                <div class="desktop-icon-label">STAGE<br>SELECT</div>
+            </div>
+            <div class="desktop-icon" id="icon-job" ondblclick="restoreWindow('win-job')" style="display: none;">
+                <div class="desktop-icon-img">⚔</div>
+                <div class="desktop-icon-label">職業<br>選択</div>
+            </div>
+            <div class="desktop-icon" id="icon-explorer" ondblclick="restoreWindow('win-explorer')" style="display: none;">
+                <div class="desktop-icon-img">📁</div>
+                <div class="desktop-icon-label">ファイル<br>選択</div>
+            </div>
+            <div class="desktop-icon" id="icon-params" ondblclick="restoreWindow('win-params')" style="display: none;">
+                <div class="desktop-icon-img">📊</div>
+                <div class="desktop-icon-label">パラ<br>メータ</div>
+            </div>
+        </div>
+
+        <!-- ===== Outer Window: STAGE SELECT ===== -->
+        <div class="win10-window win-stage-outer" id="win-stage" data-max-zindex="5" onmousedown="bringToFront('win-stage')">
+            <div class="win10-titlebar" onmousedown="startDrag(event,'win-stage')">
+                <span class="win10-titlebar-icon">🎮</span>
+                <span class="win10-titlebar-title">STAGE SELECT — WIN vs MAC</span>
+                <div class="win10-window-controls">
+                    <button class="win10-wctrl" onclick="minimizeStageAll()" title="最小化">─</button>
+                    <button class="win10-wctrl" onclick="maximizeWindow('win-stage')" title="最大化">□</button>
+                    <button class="win10-wctrl close" onclick="closeStageAll()" title="閉じる">✕</button>
+                </div>
+            </div>
+            <div class="win10-window-body win-stage-desktop">
+                <!-- Inner desktop icons for sub-windows -->
+                <div class="stage-inner-icons">
+                    <div class="desktop-icon" ondblclick="showWindow('win-job')">
+                        <div class="desktop-icon-img">⚔</div>
+                        <div class="desktop-icon-label">職業<br>選択</div>
+                    </div>
+                    <div class="desktop-icon" ondblclick="showWindow('win-explorer')">
+                        <div class="desktop-icon-img">📁</div>
+                        <div class="desktop-icon-label">ファイル<br>選択</div>
+                    </div>
+                    <div class="desktop-icon" ondblclick="showWindow('win-params')">
+                        <div class="desktop-icon-img">📊</div>
+                        <div class="desktop-icon-label">パラ<br>メータ</div>
+                    </div>
+                </div>
+            </div>
+            <div class="stage-bottom-bar">
+                <div class="difficulty-group">
+                    <span class="difficulty-label">難易度</span>
+                    <button class="diff-btn" id="diff-easy" onclick="setDifficulty('EASY')">EASY</button>
+                    <button class="diff-btn active" id="diff-normal" onclick="setDifficulty('NORMAL')">NORMAL</button>
+                    <button class="diff-btn danger" id="diff-hard" onclick="setDifficulty('HARD')">HARD</button>
+                </div>
+                <div class="difficulty-desc" id="difficulty-desc">標準的な難易度。バランスよく楽しめます。</div>
+                <button class="start-btn" id="start-btn" onclick="goToGame()">ゲームを開始 →</button>
+            </div>
+        </div>
+
+        <!-- ===== Sub Window: Job Select ===== -->
+        <div class="win10-window win-sub" id="win-job" onmousedown="bringToFront('win-job')">
+            <div class="win10-titlebar" onmousedown="startDrag(event,'win-job')">
+                <span class="win10-titlebar-icon">⚔</span>
+                <span class="win10-titlebar-title">職業選択 — WIN vs MAC</span>
+                <div class="win10-window-controls">
+                    <button class="win10-wctrl" onclick="minimizeWindow('win-job')" title="最小化">─</button>
+                    <button class="win10-wctrl" onclick="maximizeWindow('win-job')" title="最大化">□</button>
+                    <button class="win10-wctrl close" onclick="closeWindow('win-job')" title="閉じる">✕</button>
+                </div>
+            </div>
+            <div class="win10-window-body job-window-body">
+                <div class="job-window-label">職業を選択してください：</div>
+                <div class="job-list" id="job-list">
+                    <div class="job-item selected" onclick="selectJob(this,'剣士')">
+                        <div class="job-item-icon">⚔</div>
+                        <div class="job-item-info">
+                            <div class="job-item-name">剣士 <span class="job-item-en">Warrior</span></div>
+                            <div class="job-item-sub">近接・前方扇形攻撃</div>
+                        </div>
+                    </div>
+                    <div class="job-item" onclick="selectJob(this,'魔法使い')">
+                        <div class="job-item-icon">🔮</div>
+                        <div class="job-item-info">
+                            <div class="job-item-name">魔法使い <span class="job-item-en">Mage</span></div>
+                            <div class="job-item-sub">遠距離・魔法弾</div>
+                        </div>
+                    </div>
+                    <div class="job-item" onclick="selectJob(this,'忍者')">
+                        <div class="job-item-icon">🗡</div>
+                        <div class="job-item-info">
+                            <div class="job-item-name">忍者 <span class="job-item-en">Ninja</span></div>
+                            <div class="job-item-sub">近接・高速移動</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="job-desc-box">
+                    <div class="job-desc-name" id="job-desc-name">剣士 / Warrior</div>
+                    <div class="job-desc-text" id="job-desc-text">近接戦闘を得意とする前衛職。前方扇形への斬撃で複数の敵をまとめて攻撃できる。防御力が高く初心者にもおすすめ。</div>
+                    <div class="job-desc-skill">
+                        <span class="job-desc-skill-label">必殺技</span>
+                        <span id="job-desc-skill">全方位斬り</span>
+                    </div>
+                    <div class="job-desc-type">攻撃タイプ: <span id="job-desc-type">slash</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Sub Window: File Select ===== -->
+        <div class="win10-window win-sub" id="win-explorer" onmousedown="bringToFront('win-explorer')">
+            <div class="win10-titlebar" onmousedown="startDrag(event,'win-explorer')">
+                <span class="win10-titlebar-icon">📁</span>
+                <span class="win10-titlebar-title">ファイル選択</span>
+                <div class="win10-window-controls">
+                    <button class="win10-wctrl" onclick="minimizeWindow('win-explorer')" title="最小化">─</button>
+                    <button class="win10-wctrl" onclick="maximizeWindow('win-explorer')" title="最大化">□</button>
+                    <button class="win10-wctrl close" onclick="closeWindow('win-explorer')" title="閉じる">✕</button>
+                </div>
+            </div>
+            <div class="win10-window-body explorer-window-body">
+                <div class="explorer-window-label">ファイルスロットを選択してください</div>
+
+                <div class="explorer-slot-list">
+                    <button class="explorer-slot-btn" onclick="selectFileSlot(0)">
+                        <div class="explorer-slot-title">📎 スロット 1</div>
+                        <div id="slot-selected-1" class="explorer-slot-desc">ファイルを選択してください</div>
+                    </button>
+
+                    <button class="explorer-slot-btn" onclick="selectFileSlot(1)">
+                        <div class="explorer-slot-title">📎 スロット 2</div>
+                        <div id="slot-selected-2" class="explorer-slot-desc">ファイルを選択してください</div>
+                    </button>
+
+                    <button class="explorer-slot-btn" onclick="selectFileSlot(2)">
+                        <div class="explorer-slot-title">📎 スロット 3</div>
+                        <div id="slot-selected-3" class="explorer-slot-desc">ファイルを選択してください</div>
+                    </button>
+                </div>
+
+                <div class="explorer-extension-note">
+                    <strong>拡張子による補正:</strong>
+                    • .exe/.dll: ATK +10<br>
+                    • .txt/.pdf: SPD +5<br>
+                    • .png/.jpg: DEF +8<br>
+                    • .mp3/.wav: HP +20<br>
+                    • .zip: ALL +5
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Sub Window: Parameters ===== -->
+        <div class="win10-window win-sub" id="win-params" onmousedown="bringToFront('win-params')">
+            <div class="win10-titlebar" onmousedown="startDrag(event,'win-params')">
+                <span class="win10-titlebar-icon">📊</span>
+                <span class="win10-titlebar-title">パラメータ — WIN vs MAC</span>
+                <div class="win10-window-controls">
+                    <button class="win10-wctrl" onclick="minimizeWindow('win-params')" title="最小化">─</button>
+                    <button class="win10-wctrl" onclick="maximizeWindow('win-params')" title="最大化">□</button>
+                    <button class="win10-wctrl close" onclick="closeWindow('win-params')" title="閉じる">✕</button>
+                </div>
+            </div>
+            <div class="win10-window-body params-window-body">
+                <div class="param-job-badge">
+                    <span class="param-job-icon" id="param-job-icon">⚔</span>
+                    <span class="param-job-name" id="param-job-name">剣士 / Warrior</span>
+                </div>
+                <div class="param-stats">
+                    <div class="param-stat-row">
+                        <div class="param-stat-label">HP</div>
+                        <div class="param-stat-bar-wrap">
+                            <div class="param-stat-bar hp" id="bar-hp" style="width:60%"></div>
+                        </div>
+                        <div class="param-stat-val" id="val-hp">120</div>
+                    </div>
+                    <div class="param-stat-row">
+                        <div class="param-stat-label">ATK</div>
+                        <div class="param-stat-bar-wrap">
+                            <div class="param-stat-bar atk" id="bar-atk" style="width:45%"></div>
+                        </div>
+                        <div class="param-stat-val" id="val-atk">45</div>
+                    </div>
+                    <div class="param-stat-row">
+                        <div class="param-stat-label">DEF</div>
+                        <div class="param-stat-bar-wrap">
+                            <div class="param-stat-bar def" id="bar-def" style="width:44%"></div>
+                        </div>
+                        <div class="param-stat-val" id="val-def">35</div>
+                    </div>
+                    <div class="param-stat-row">
+                        <div class="param-stat-label">SPD</div>
+                        <div class="param-stat-bar-wrap">
+                            <div class="param-stat-bar spd" id="bar-spd" style="width:30%"></div>
+                        </div>
+                        <div class="param-stat-val" id="val-spd">30</div>
+                    </div>
+                </div>
+                <div class="param-divider"></div>
+                <div class="param-section-header">装備ファイル</div>
+                <div class="param-equip-list" id="param-equip-list">
+                    <div class="param-equip-empty">— なし —</div>
+                </div>
+                <div class="param-divider"></div>
+                <div class="param-section-header">必殺技</div>
+                <div class="param-skill-name" id="param-skill-name">全方位斬り</div>
+            </div>
+        </div>
+
+        <!-- Windows 10 Taskbar -->
+        <div class="win10-taskbar">
+            <div class="win10-start" title="スタート">⊞</div>
+            <div class="win10-search">🔍 <span>検索</span></div>
+            <div class="win10-taskbar-apps" id="taskbar-apps">
+                <div class="win10-taskbar-app active" id="tb-win-stage" onclick="toggleStageAll()">
+                    <span>🎮</span><span>STAGE SELECT</span>
+                </div>
+                <div class="win10-taskbar-app active" id="tb-win-job" onclick="toggleWindow('win-job')">
+                    <span>⚔</span><span>職業選択</span>
+                </div>
+                <div class="win10-taskbar-app active" id="tb-win-explorer" onclick="toggleWindow('win-explorer')">
+                    <span>📁</span><span>ファイル選択</span>
+                </div>
+                <div class="win10-taskbar-app active" id="tb-win-params" onclick="toggleWindow('win-params')">
+                    <span>📊</span><span>パラメータ</span>
+                </div>
+            </div>
+            <div class="win10-tray">
+                <span>📶</span><span>🔋</span>
+                <span id="taskbar-time" style="font-family:'Segoe UI',sans-serif;font-size:11px;">00:00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== LOADING ===== -->
     <div id="scene-loading" class="scene">
-        <div class="loading-win-box">
-            <div class="win-dialog-title">
-                🖥 WIN vs MAC — システム起動中
-                <div class="win-dialog-controls">
-                    <div class="win-ctrl-btn" style="opacity:0.3">_</div>
-                    <div class="win-ctrl-btn" style="opacity:0.3">□</div>
-                    <div class="win-ctrl-btn" style="opacity:0.3">✕</div>
+        <div class="cmd-window">
+            <div class="cmd-titlebar">
+                <div class="cmd-titlebar-icon">▣</div>
+                <div class="cmd-titlebar-text">コマンド プロンプト - dungeon_load.exe</div>
+                <div class="cmd-titlebar-controls">
+                    <button class="cmd-wctrl">─</button>
+                    <button class="cmd-wctrl">□</button>
+                    <button class="cmd-wctrl cmd-close">×</button>
                 </div>
             </div>
-            <div class="loading-content">
-                <div class="loading-icon">⚙</div>
-                <div class="loading-title-text">ダンジョンを解析中...</div>
-                <div class="loading-progress-container">
-                    <div class="loading-progress-bar" id="loading-bar"></div>
-                </div>
-                <div class="loading-status" id="loading-status">フォルダ構造を読み込んでいます...</div>
-                <div class="loading-percent" id="loading-percent">0%</div>
-            </div>
+            <div class="cmd-body" id="cmd-output"></div>
         </div>
     </div>
 
-    <!-- ========== INGAME ========== -->
+    <!-- ===== INGAME ===== -->
     <div id="scene-ingame" class="scene">
         <div class="ingame-container">
             <div class="dungeon-view">
-                <!-- Dungeon visual -->
                 <div class="dungeon-scene">
                     <div class="iso-container" id="dungeon-iso">
-                        <!-- Floor tiles -->
-                        <div class="floor-tile"
-                            style="left:100px;top:150px;width:400px;height:200px;background:linear-gradient(135deg,#080818,#0c0c20);border:1px solid rgba(0,245,255,0.1)">
-                        </div>
-
-                        <!-- Wall highlights -->
-                        <div
-                            style="position:absolute;left:100px;top:150px;width:400px;height:3px;background:linear-gradient(90deg,transparent,rgba(0,245,255,0.4),transparent)">
-                        </div>
-                        <div
-                            style="position:absolute;left:100px;top:348px;width:400px;height:3px;background:linear-gradient(90deg,transparent,rgba(0,128,255,0.3),transparent)">
-                        </div>
-
-                        <!-- Grid lines on floor -->
-                        <div style="position:absolute;left:100px;top:150px;width:400px;height:200px;
-            background-image:linear-gradient(rgba(0,245,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.05) 1px,transparent 1px);
-            background-size:40px 40px;pointer-events:none"></div>
-
-                        <!-- Neon accent corners -->
-                        <div
-                            style="position:absolute;left:100px;top:150px;width:20px;height:20px;border-left:2px solid var(--neon-cyan);border-top:2px solid var(--neon-cyan);box-shadow:var(--glow-cyan)">
-                        </div>
-                        <div
-                            style="position:absolute;left:480px;top:150px;width:20px;height:20px;border-right:2px solid var(--neon-cyan);border-top:2px solid var(--neon-cyan);box-shadow:var(--glow-cyan)">
-                        </div>
-                        <div
-                            style="position:absolute;left:100px;top:330px;width:20px;height:20px;border-left:2px solid var(--neon-cyan);border-bottom:2px solid var(--neon-cyan);box-shadow:var(--glow-cyan)">
-                        </div>
-                        <div
-                            style="position:absolute;left:480px;top:330px;width:20px;height:20px;border-right:2px solid var(--neon-cyan);border-bottom:2px solid var(--neon-cyan);box-shadow:var(--glow-cyan)">
-                        </div>
-
-                        <!-- Player -->
-                        <div class="player-sprite" style="left:270px;top:210px" id="player">
+                        <div class="dungeon-bg-box" style="left:100px;top:150px;width:400px;height:200px;"></div>
+                        <div class="dungeon-top-line" style="left:100px;top:150px;width:400px;"></div>
+                        <div class="dungeon-bottom-line" style="left:100px;top:348px;width:400px;"></div>
+                        <div class="dungeon-grid" style="left:100px;top:150px;width:400px;height:200px;"></div>
+                        <div class="dungeon-corner dungeon-corner-tl" style="left:100px;top:150px;"></div>
+                        <div class="dungeon-corner dungeon-corner-tr" style="left:480px;top:150px;"></div>
+                        <div class="dungeon-corner dungeon-corner-bl" style="left:100px;top:330px;"></div>
+                        <div class="dungeon-corner dungeon-corner-br" style="left:480px;top:330px;"></div>
+                        <div class="player-sprite">
                             <div class="player-head"></div>
                             <div class="player-body"></div>
                         </div>
-
-                        <!-- Enemies -->
-                        <div class="enemy-sprite" style="left:160px;top:180px" id="enemy1">
-                            <div style="position:relative">
-                                <div class="enemy-hpbar">
-                                    <div class="enemy-hpbar-fill" style="width:70%"></div>
-                                </div>
-                                <div class="enemy-body">👾</div>
-                            </div>
+                    </div>
+                    <!-- Player Stats Panel (Left Top) -->
+                    <div class="player-stats-panel">
+                        <div class="stats-title">STATS</div>
+                        <div class="stat-item">
+                            <span class="stat-name">HP</span>
+                            <span class="stat-value" id="stat-hp-display">100/100</span>
                         </div>
-
-                        <div class="enemy-sprite" style="left:380px;top:260px;animation-delay:0.5s" id="enemy2">
-                            <div style="position:relative">
-                                <div class="enemy-hpbar">
-                                    <div class="enemy-hpbar-fill" style="width:45%"></div>
-                                </div>
-                                <div class="enemy-body">🦊</div>
-                            </div>
+                        <div class="stat-item">
+                            <span class="stat-name">ATK</span>
+                            <span class="stat-value">45</span>
                         </div>
-
-                        <div class="enemy-sprite" style="left:280px;top:300px;animation-delay:1s" id="enemy3">
-                            <div style="position:relative">
-                                <div class="enemy-hpbar">
-                                    <div class="enemy-hpbar-fill" style="width:90%"></div>
-                                </div>
-                                <div class="enemy-body">🤖</div>
-                            </div>
+                        <div class="stat-item">
+                            <span class="stat-name">DEF</span>
+                            <span class="stat-value">10</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-name">SPD</span>
+                            <span class="stat-value">12</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-name">TYPE</span>
+                            <span class="stat-value" id="stat-type-display">SLASH</span>
                         </div>
                     </div>
                 </div>
-
-                <!-- HUD overlay -->
+                <div class="damage-overlay" id="damage-overlay"></div>
                 <div class="ingame-hud">
                     <div class="hud-top">
                         <div class="hud-panel">
                             <div class="hud-label">HP</div>
                             <div class="hud-bar-container">
-                                <div class="hud-bar hp" id="hud-hp"></div>
+                                <div class="hud-bar hp"></div>
                             </div>
                             <div class="hud-value">75 / 100</div>
                         </div>
                         <div class="hud-panel">
                             <div class="hud-label">SP</div>
                             <div class="hud-bar-container">
-                                <div class="hud-bar sp" id="hud-sp"></div>
+                                <div class="hud-bar sp"></div>
                             </div>
                             <div class="hud-value">60 / 100</div>
                         </div>
                         <div class="hud-job-panel">
                             <div class="hud-job-name" id="hud-job">⚔ 剣士</div>
-                            <div class="hud-skill-indicator">必殺: 全方位斬り</div>
+                            <div class="hud-skill-indicator" id="hud-skill">必殺: 全方位斬り</div>
                         </div>
                     </div>
-
                     <div class="hud-bottom">
                         <div class="hud-room-info">
-                            ROOM <span id="hud-room">1</span>/4 &nbsp;|&nbsp; FLOOR <span>1</span>/1 &nbsp;|&nbsp;
-                            DIFFICULTY: <span style="color:var(--neon-green)">EASY</span>
+                            ROOM <span>1</span>/4 &nbsp;|&nbsp; FLOOR <span>1</span>/1 &nbsp;|&nbsp; DIFFICULTY: <span
+                                style="color:var(--neon-green)">EASY</span>
                         </div>
                     </div>
                 </div>
-
-                <!-- Attack btn overlay -->
-                <div style="position:absolute;bottom:60px;right:20px;display:flex;gap:8px;z-index:30">
-                    <button onclick="doAttack()"
-                        style="background:rgba(0,245,255,0.1);border:1px solid var(--neon-cyan);color:var(--neon-cyan);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;">ATTACK</button>
-                    <button onclick="doSpecial()"
-                        style="background:rgba(255,0,60,0.1);border:1px solid var(--neon-red);color:var(--neon-red);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;">SPECIAL</button>
+                <div class="action-buttons">
+                    <button class="action-btn action-btn-attack" onclick="doAttack()">ATTACK</button>
+                    <button class="action-btn action-btn-special" onclick="doSpecial()">SPECIAL</button>
+                    <button class="action-btn action-btn-damage" onclick="takeDamage()">DAMAGE</button>
+                </div>
+                <!-- Pause overlay -->
+                <div class="pause-overlay" id="pause-overlay">
+                    <div class="pause-dialog">
+                        <div class="pause-dialog-title">
+                            ⚠ WIN vs MAC
+                        </div>
+                        <div class="pause-dialog-body">
+                            <div class="pause-icon">⚠</div>
+                            <div class="pause-text">
+                                ゲームを終了しますか？<br>
+                                進行中のデータは保存されません。
+                            </div>
+                            <div style="clear:both"></div>
+                            <div class="pause-btn-row">
+                                <button class="win10-btn primary" onclick="showScene('bios')">タイトルへ戻る</button>
+                                <button class="win10-btn" onclick="togglePause()">ゲームを続ける</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- Sidebar -->
             <div class="ingame-sidebar">
                 <div>
                     <div class="sidebar-section-title">PARAMETERS</div>
                     <div class="attr-row"><span class="attr-label">ATK</span><span class="attr-value"
                             id="stat-atk">45</span></div>
-                    <div class="attr-row"><span class="attr-label">DEF</span><span class="attr-value"
-                            id="stat-def">28</span></div>
-                    <div class="attr-row"><span class="attr-label">SPD</span><span class="attr-value"
-                            id="stat-spd">31</span></div>
+                    <div class="attr-row"><span class="attr-label">DEF</span><span class="attr-value">28</span></div>
+                    <div class="attr-row"><span class="attr-label">SPD</span><span class="attr-value">31</span></div>
                     <div class="attr-row"><span class="attr-label">HP</span><span class="attr-value">75/100</span></div>
-                    <div class="attr-row"><span class="attr-label">TYPE</span><span class="attr-value">SLASH</span>
-                    </div>
+                    <div class="attr-row"><span class="attr-label">TYPE</span><span class="attr-value"
+                            id="stat-type">SLASH</span></div>
                 </div>
                 <div>
                     <div class="sidebar-section-title">MINIMAP</div>
@@ -1583,182 +428,168 @@
                 </div>
                 <div>
                     <div class="sidebar-section-title">EQUIPPED FILES</div>
-                    <div style="font-size:10px;color:var(--text-dim);line-height:2">
+                    <div style="font-size:10px;color:var(--text-dim);line-height:2" id="equipped-files">
                         <div>⚙ project.exe <span style="color:var(--neon-cyan)">ATK+10</span></div>
                         <div>📄 readme.txt <span style="color:var(--neon-cyan)">SPD+1.5</span></div>
                         <div>📦 backup.zip <span style="color:var(--neon-cyan)">ALL+</span></div>
                     </div>
                 </div>
-                <button class="ingame-btn" onclick="showScene('result-win')" style="margin-top:auto">BOSS CLEAR
-                    →</button>
+                <button class="ingame-btn" onclick="togglePause()" style="margin-top:auto">PAUSE [ESC]</button>
+                <button class="ingame-btn" onclick="showScene('result-win')">BOSS CLEAR →</button>
                 <button class="ingame-btn" onclick="showScene('result-lose')"
                     style="border-color:rgba(255,0,60,0.3);color:rgba(255,0,60,0.5)">GAME OVER →</button>
             </div>
         </div>
     </div>
 
-    <!-- ========== RESULT WIN ========== -->
+    <!-- ===== RESULT WIN ===== -->
     <div id="scene-result-win" class="scene">
-        <div class="shutdown-screen">
-            <div class="shutdown-logo">🖥</div>
-            <div class="shutdown-title">SYSTEM SHUTDOWN</div>
-            <div class="shutdown-message">MacBookをシャットダウンしました</div>
-            <div class="shutdown-detail">mac_os.exe — プロセスを正常に終了しました (0x00000000)</div>
-            <div class="shutdown-spinner">
-                <div class="shutdown-dot"></div>
-                <div class="shutdown-dot"></div>
-                <div class="shutdown-dot"></div>
-                <div class="shutdown-dot"></div>
-                <div class="shutdown-dot"></div>
-            </div>
-            <div style="margin-top:32px;display:flex;gap:16px">
-                <button class="btn-primary" onclick="showScene('title')" style="font-size:11px">[ RETURN TO TITLE
-                    ]</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ========== RESULT LOSE ========== -->
-    <div id="scene-result-lose" class="scene">
-        <div class="error-screen">
-            <div class="bsod-container">
-                <div class="bsod-header">⚠ WIN_vs_MAC — 致命的なエラー</div>
-                <span class="bsod-icon">💀</span>
-                <div class="bsod-title">GAME OVER</div>
-                <div class="bsod-code">
-                    問題が発生したため、プロセスを停止しました。<br>
-                    STOP CODE: PLAYER_HP_DEPLETED<br>
-                    エラーコード: 0x0000DEAD
+        <div class="result-window-container good-end">
+            <div class="result-titlebar">
+                <div class="result-titlebar-icon">🪟</div>
+                <div class="result-titlebar-text">✅ Mission Complete</div>
+                <div class="result-titlebar-controls">
+                    <button class="result-titlebar-button">−</button>
+                    <button class="result-titlebar-button">□</button>
+                    <button class="result-titlebar-button close">×</button>
                 </div>
-                <div class="bsod-progress">
-                    問題を収集しています... 0%完了<br>
-                    再起動するとタイトルに戻ります。
-                    <div class="bsod-progress-bar">
-                        <div class="bsod-progress-fill"></div>
+            </div>
+
+            <div class="result-window-content">
+                <div class="result-screen good-end-result active">
+                    <div class="result-message-section">
+                        <div class="result-message-icon checkmark">✅</div>
+                        <div class="result-message-text">MacBook を無事に停止させました。</div>
+                    </div>
+
+                    <div class="result-rank-section">
+                        <div class="result-rank-label">評価</div>
+                        <div class="result-rank-value rank-a">A</div>
+                    </div>
+
+                    <div class="result-divider"></div>
+
+                    <div class="result-stats-section">
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">撃破数</span>
+                            <span class="result-stat-value">3 / 3</span>
+                        </div>
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">クリア時間</span>
+                            <span class="result-stat-value">12:34</span>
+                        </div>
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">被ダメージ</span>
+                            <span class="result-stat-value">240</span>
+                        </div>
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">使用ファイル</span>
+                            <div class="result-used-files">
+                                <span class="result-file-badge">attack.exe</span>
+                                <span class="result-file-badge">shield.png</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-divider"></div>
+
+                    <div class="result-button-section">
+                        <button class="result-button" onclick="showScene('select')">もう一度</button>
+                        <button class="result-button" onclick="showScene('bios')">タイトルへ</button>
                     </div>
                 </div>
-                <button onclick="showScene('title')"
-                    style="background:white;border:none;color:var(--neon-red);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;padding:10px 24px;cursor:pointer;font-weight:bold">[
-                    RESTART ]</button>
             </div>
         </div>
     </div>
 
-    <script>
-        let selectedJob = '剣士';
-        let selectedFiles = [];
-        let loadingInterval = null;
+    <!-- ===== RESULT LOSE ===== -->
+    <div id="scene-result-lose" class="scene">
 
-        function showScene(name) {
-            document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.dev-nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('scene-' + name).classList.add('active');
-            document.querySelector(`.dev-nav-btn[onclick="showScene('${name}')"]`).classList.add('active');
+        <div class="bsod-overlay" id="bsod-overlay">
+            <div class="bsod-content">
+                <div class="bsod-face">:(</div>
+                <div class="bsod-title">
+                    ご使用の PC で問題が発生したため、再起動する必要があります。<br>
+                    エラーの収集が完了したら、再起動します。
+                </div>
+                <div class="bsod-progress-area">
+                    <div class="bsod-bar-track">
+                        <div class="bsod-bar-fill" id="bsod-bar"></div>
+                    </div>
+                    <div class="bsod-progress-text"><span id="bsod-pct">0</span>% 完了</div>
+                </div>
+                <div class="bsod-stop-code">
+                    詳細については、以下のエラーを検索してください:<br>
+                    停止コード: <span>PLAYER_DEFEATED</span>
+                </div>
+            </div>
+        </div>
 
-            if (name === 'loading') startLoading();
-        }
+        <div class="result-window-container bad-end">
+            <div class="result-titlebar">
+                <div class="result-titlebar-icon">🪟</div>
+                <div class="result-titlebar-text">⛔ Win vs Mac.exe — エラー</div>
+                <div class="result-titlebar-controls">
+                    <button class="result-titlebar-button">−</button>
+                    <button class="result-titlebar-button">□</button>
+                    <button class="result-titlebar-button close">×</button>
+                </div>
+            </div>
 
-        function selectJob(el, job) {
-            document.querySelectorAll('.job-option').forEach(o => o.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedJob = job;
-        }
+            <div class="result-window-content">
+                <div class="result-screen bad-end-result active">
+                    <div class="result-message-section">
+                        <div class="result-message-icon error">⛔</div>
+                        <div>
+                            <div class="result-message-text">Windows が致命的なエラーで停止しました。</div>
+                            <div class="result-sub-message">敵の攻撃により、プロセスを強制終了します。</div>
+                        </div>
+                    </div>
 
-        function confirmJob() {
-            alert(`職業「${selectedJob}」を選択しました`);
-        }
+                    <div class="result-divider"></div>
 
-        function toggleFile(el, name, ext) {
-            if (el.classList.contains('selected')) {
-                el.classList.remove('selected');
-                selectedFiles = selectedFiles.filter(f => f.name !== name);
-            } else {
-                if (selectedFiles.length >= 3) {
-                    document.getElementById('file-status').textContent = '⚠ 最大3つまで選択できます';
-                    document.getElementById('file-status').style.color = 'red';
-                    return;
-                }
-                el.classList.add('selected');
-                selectedFiles.push({ name, ext });
-            }
-            const count = selectedFiles.length;
-            const status = document.getElementById('file-status');
-            status.style.color = '';
-            status.textContent = count === 0
-                ? 'ファイルを最大3つ選択してください'
-                : `${count}個のファイルを選択中`;
-        }
+                    <div class="result-stats-section">
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">終了コード</span>
+                            <span class="result-stat-value">0x000000_DEFEATED</span>
+                        </div>
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">発生場所</span>
+                            <span class="result-stat-value">MacBook.exe</span>
+                        </div>
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">生存時間</span>
+                            <span class="result-stat-value">08:21</span>
+                        </div>
+                        <div class="result-stat-row">
+                            <span class="result-stat-label">与ダメージ</span>
+                            <span class="result-stat-value">180</span>
+                        </div>
+                    </div>
 
-        function confirmFiles() {
-            if (selectedFiles.length === 0) {
-                alert('ファイルを1つ以上選択してください');
-                return;
-            }
-            showScene('loading');
-        }
+                    <div class="result-divider"></div>
 
-        const loadingMessages = [
-            'フォルダ構造を読み込んでいます...',
-            'ファイルサイズを解析しています...',
-            '難易度を計算しています...',
-            'ダンジョンを生成しています...',
-            'プレイヤーパラメータを適用しています...',
-            '敵の配置を決定しています...',
-            '起動完了...',
-        ];
+                    <div class="result-button-section">
+                        <button class="result-button" onclick="showScene('select')">再試行</button>
+                        <button class="result-button" onclick="showScene('bios')">タイトルへ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        function startLoading() {
-            let progress = 0;
-            const bar = document.getElementById('loading-bar');
-            const status = document.getElementById('loading-status');
-            const percent = document.getElementById('loading-percent');
-
-            if (loadingInterval) clearInterval(loadingInterval);
-
-            bar.style.width = '0%';
-            progress = 0;
-
-            loadingInterval = setInterval(() => {
-                progress += Math.random() * 8 + 2;
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(loadingInterval);
-                    setTimeout(() => showScene('ingame'), 600);
-                }
-                bar.style.width = progress + '%';
-                percent.textContent = Math.floor(progress) + '%';
-                const msgIdx = Math.min(Math.floor(progress / 15), loadingMessages.length - 1);
-                status.textContent = loadingMessages[msgIdx];
-            }, 200);
-        }
-
-        function doAttack() {
-            const iso = document.getElementById('dungeon-iso');
-            const effect = document.createElement('div');
-            effect.className = 'attack-effect';
-            effect.style.left = (250 + Math.random() * 100) + 'px';
-            effect.style.top = (200 + Math.random() * 100) + 'px';
-            iso.appendChild(effect);
-            setTimeout(() => effect.remove(), 400);
-        }
-
-        function doSpecial() {
-            for (let i = 0; i < 5; i++) {
-                setTimeout(() => doAttack(), i * 80);
-            }
-        }
-
-        // Taskbar clock
-        function updateClock() {
-            const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            const el = document.getElementById('taskbar-time');
-            if (el) el.textContent = `${h}:${m}`;
-        }
-        updateClock();
-        setInterval(updateClock, 10000);
-    </script>
+    <script src="js/globals.js"></script>
+    <script src="js/scene-manager.js"></script>
+    <script src="js/scene-title.js"></script>
+    <script src="js/scene-bios.js"></script>
+    <script src="js/scene-lockscreen.js"></script>
+    <script src="js/window-manager.js"></script>
+    <script src="js/scene-stage.js"></script>
+    <script src="js/scene-loading.js"></script>
+    <script src="js/game-logic.js"></script>
+    <script src="js/scene-ingame.js"></script>
+    <script src="js/scene-result.js"></script>
+    <script src="js/utils.js"></script>
 </body>
 
 </html>

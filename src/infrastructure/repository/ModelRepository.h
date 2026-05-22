@@ -1,0 +1,58 @@
+﻿#pragma once
+#include <string>
+#include <string_view>
+#include <optional>
+#include <unordered_map>
+#include <vector>
+#include "core/data/ModelMetadata.h"
+#include "thirdparty/nlohmann/json.hpp"
+
+namespace infrastructure
+{
+	/**
+	 * @brief 3Dモデルリソースを管理するリポジトリクラス
+	 *
+	 * resources.jsonからモデルメタデータを読み込み、
+	 * モデル識別子でモデルハンドルおよびメタデータを取得する
+	 */
+	class ModelRepository
+	{
+	public:
+		/**
+		 * @brief コンストラクタ
+		 *
+		 * コンストラクト時にresources.jsonからすべてのモデルメタデータを読み込む
+		 * @throw std::runtime_error ファイルが見つからないか、JSONパースに失敗した場合
+		 */
+		ModelRepository();
+
+		/**
+		 * @brief IDでモデルを読み込みハンドルをキャッシュする
+		 *
+		 * @param modelId モデル識別子
+		 * @return DxLibモデルハンドル、失敗時は-1
+		 */
+		int loadModelById(std::string_view modelId);
+
+		/**
+		 * @brief IDでモデルのメタデータを取得する
+		 *
+		 * @param modelId モデル識別子
+		 * @return 見つかった場合はモデルメタデータ、見つからない場合はstd::nullopt
+		 */
+		std::optional<core::data::ModelMetadata> getMetadata(std::string_view modelId) const;
+
+	private:
+		struct ResourceDefinition
+		{
+			std::string m_id;
+			std::string m_path;
+		};
+
+		std::vector<ResourceDefinition> loadResourceList(const nlohmann::json& json);
+		core::data::ModelMetadata parseJsonFile(const std::string& filePath);
+
+		std::unordered_map<std::string, int> m_modelHandles;
+		std::unordered_map<std::string, core::data::ModelMetadata> m_metadata;
+	};
+}

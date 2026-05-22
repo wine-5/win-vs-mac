@@ -2,7 +2,7 @@
 #include "core/ecs/EntityManager.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
-#include "core/Vector3.h"
+#include "core/utility/Vector3.h"
 #include "game/data/PlayerData.h"
 
 namespace game::actor

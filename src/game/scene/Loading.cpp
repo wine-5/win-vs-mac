@@ -2,55 +2,65 @@
 #include "SceneManager.h"
 #include "SceneType.h"
 #include "core/utility/Color.h"
-#include "core/ServiceLocator.h"
-#include <string>
-#include <cmath>
+#include "core/base/ServiceLocator.h"
 
 namespace game::scene
 {
-    namespace
-    {
-        constexpr float TITLE_Y_RATIO = 0.40f;        // 画面高さの40%
-        constexpr float TIMER_Y_RATIO = 0.55f;        // 画面高さの55%
-    }
-
     Loading::Loading(core::iface::IUIRenderer& uiRenderer,
-        core::iface::IScreen& screen)
+        core::iface::IScreen& screen,
+        std::unique_ptr<core::iface::IWindow> loadingWindow)
         : m_uiRenderer{ uiRenderer }
         , m_screen{ screen }
-        , m_elapsedTime{ 0.0f }
+        , m_loadingWindow{ std::move(loadingWindow) }
     {
     }
+
+    Loading::~Loading() noexcept = default;
 
     void Loading::update(float deltaTime)
     {
-        m_elapsedTime += deltaTime;
-
-        // 2秒経過したらInGameシーンへ遷移
-        if (m_elapsedTime >= TEST_LOADING_DURATION)
+        switch (m_state)
         {
-            auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
-            sceneManager->changeScene(SceneType::InGame);
+        case State::FadeIn:
+            m_state = State::Loading;
+            break;
+
+        case State::Loading:
+            // ローディング画面の完了を待つ
+            break;
+
+        case State::FadeOut:
+            m_fade->update(deltaTime);
+            if (m_fade->isFinished())
+            {
+                auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
+                if (sceneManager)
+                    sceneManager->changeScene(SceneType::InGame);
+            }
+            break;
         }
     }
 
     void Loading::draw()
     {
-        // ローディングタイトル表示
-        const char* title{"Loading..."};
-        int titleWidth{m_uiRenderer.getTextWidth(title)};
-        int titleX{(m_screen.getWidth() - titleWidth) / 2};
-        int titleY{static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO)};
-        m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE);
+        // 暗いオーバーレイを描画
+        m_uiRenderer.drawBox(0, 0, m_screen.getWidth(), m_screen.getHeight(),
+            core::utility::Color::argb(0x80, 0x00, 0x00, 0x00), true);
 
-        // 経過時間表示（切り上げ）
-        float remainingTime{TEST_LOADING_DURATION - m_elapsedTime};
-        if (remainingTime < 0.0f) remainingTime = 0.0f;
+        if (m_fade)
+            m_fade->draw(m_uiRenderer, m_screen);
+    }
 
-        std::string timerText = std::to_string(static_cast<int>(std::ceil(remainingTime))) + "秒";
-        int timerWidth{m_uiRenderer.getTextWidth(timerText.c_str())};
-        int timerX{(m_screen.getWidth() - timerWidth) / 2};
-        int timerY{static_cast<int>(m_screen.getHeight() * TIMER_Y_RATIO)};
-        m_uiRenderer.drawText(timerX, timerY, timerText.c_str(), core::utility::Color::YELLOW);
+    void Loading::notifyLoadingComplete() noexcept
+    {
+        if (m_state == State::Loading)
+            startFadeOut();
+    }
+
+    void Loading::startFadeOut() noexcept
+    {
+        m_fade = std::make_unique<ui::FadeTransition>(
+            m_uiRenderer, m_screen, FADE_DURATION, false);
+        m_state = State::FadeOut;
     }
 }

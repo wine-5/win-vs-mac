@@ -39,6 +39,75 @@ platform → infrastructure → game → core
 
 ---
 
+## Web UI 層
+
+### 概要
+
+WebView2 上で動作する HTML / CSS / JS による UI 層。
+C++ の層とは**別の実行環境（ブラウザランタイム）**であり、Platform 層が生成・制御する。
+C++ の層を直接参照・インクルードすることはできない。
+
+### 全体における位置づけ
+
+```
+┌─────────────────────────────────────────────────┐
+│  Web UI 層（HTML / CSS / JS）                     │
+│  ※ C++ の層に直接アクセスできない                 │
+│  ※ Platform 層との JSON メッセージのみが唯一の接点 │
+└─────────────────────────────────────────────────┘
+               ↕  WebView2 postMessage（JSON）
+┌─────────────────────────────────────────────────┐
+│  Platform 層                                     │
+│  ↓                                              │
+│  Infrastructure 層 → Game 層 → Core 層           │
+└─────────────────────────────────────────────────┘
+```
+
+Platform 層が WebView2 ウィンドウを生成・管理し、メッセージ送受信を担う。
+
+### メッセージプロトコル
+
+C++ ↔ Web UI の唯一の通信経路。JSON スキーマがこの境界における事実上のインターフェース定義になる。
+
+```
+C++ → JS : webView->PostMessage(json)        受信側: onMessageFromGame(data)
+JS → C++ : sendToGame({ type, ... })         受信側: handleMessage(json)   ← messaging.js 経由
+```
+
+### フォルダ構成
+
+```
+web/
+├── common/              ← 全ウィンドウから参照可能な共通基盤
+│   ├── messaging.js     ← sendToGame() / onMessageFromGame() ブリッジ
+│   └── common.css       ← 共通 CSS 変数・スタイル
+├── desktop/             ← タスクバー・デスクトップ UI
+├── job/                 ← 職業選択ウィンドウ
+├── file/                ← ファイル選択ウィンドウ
+├── param/               ← パラメータ表示ウィンドウ
+└── difficulty/          ← 難易度選択ウィンドウ
+```
+
+各ウィンドウフォルダは `[name].html` / `[name].css` / `[name].js` の3ファイル構成。
+
+### Web UI 層の規則
+
+1. **C++ との通信は `messaging.js` 経由の JSON メッセージのみ**  
+   `assets/` フォルダや外部ファイルへの直接アクセス禁止。データは C++ が送信した JSON から受け取る
+
+2. **ウィンドウ間の直接参照禁止**  
+   `job/` と `param/` はお互いを知らない。ウィンドウ間の連携は必ず C++ 経由
+
+3. **`common/` は全ウィンドウから参照可**（逆方向は禁止）
+
+4. **ゲームデータの数値を JS にハードコードしない**  
+   `jobData.json` などの値は C++ から `init` / `refresh` メッセージで受け取る
+
+5. **表示専用の静的データは例外的に許容**  
+   アイコン文字列・ラベル文字列など、表示にのみ使用するものはこの限りではない
+
+---
+
 ## 各レイヤーの責務
 
 ### Core層
@@ -128,92 +197,19 @@ game/Player                     → uses       → core/IResourceManager
 
 ## Game層内部：ECS設計
 
-### ECSとは
-- **Entity**：ただのID番号
-- **Component**：データだけを持つ
-- **System**：処理だけを行う
-
-PlayerやEnemyという独立したクラスは存在しない。
-EntityにComponentを組み合わせることで実体を表現する。
-
-```cpp
-// Playerの生成
-EntityId player = entityManager.create();
-componentManager.add<TransformComponent>(player, {});
-componentManager.add<HealthComponent>(player, {});
-componentManager.add<RenderComponent>(player, { handle });
-
-// Enemyの生成（Componentの組み合わせが違うだけ）
-EntityId enemy = entityManager.create();
-componentManager.add<TransformComponent>(enemy, {});
-componentManager.add<HealthComponent>(enemy, {});
-componentManager.add<AIComponent>(enemy, {});
-```
+詳細は [patterns.md](patterns.md) を参照。
 
 ---
 
 ## イベント駆動：EventBus
 
-SystemがSystemを直接呼ばないようにEventBusを使う。
-EventBusはCore層に置くことでGame層・Infrastructure層の両方から使える。
-
-```cpp
-// BattleSystemがイベントを発行する（Game層）
-eventBus.emit<EnemyDefeatedEvent>({ enemyId, "chrome.exe" });
-
-// SoundManagerがイベントを受信する（Infrastructure層）
-eventBus.subscribe<EnemyDefeatedEvent>([](const EnemyDefeatedEvent& e) {
-    // 効果音を鳴らす
-});
-```
-
-### イベントの定義
-`IGameEvent`をマーカーとして継承し1ファイルにまとめて定義する。
-
-```cpp
-// game/event/InGameEvents.h
-class IGameEvent {};
-
-struct EnemyDefeatedEvent : public IGameEvent
-{
-    EntityId m_enemyId;
-    std::string m_processName;
-};
-
-struct PlayerDamagedEvent : public IGameEvent
-{
-    int m_damage;
-};
-
-struct RoomClearedEvent : public IGameEvent
-{
-    int m_roomId;
-};
-
-struct DungeonClearedEvent : public IGameEvent {};
-```
+詳細は [patterns.md](patterns.md) を参照。
 
 ---
 
-## グローバルアクセス：ServiceLocator
+## グローバルアクセス
 
-ServiceLocatorはシングルトンの倉庫。
-ゲーム全体で1つだけ存在するManagerクラスを預けてどこからでも取り出せる仕組み。
-Core層に置くことでGame層・Infrastructure層の両方から使える。
-
-複数の場所から使われるサービス（AudioManagerなど）のみを登録する。
-特定の1箇所からしか使われないクラスはコンストラクタインジェクションで渡す。
-
-```cpp
-// ServiceLocatorInitializerで登録する
-ServiceLocator::provide(std::make_unique<AudioManager>());
-
-// インターフェースを指定して登録する場合
-ServiceLocator::provide<IResourceManager>(std::make_unique<ResourceManager>());
-
-// どこからでも取り出せる
-ServiceLocator::get<AudioManager>()->play("attack");
-```
+Singleton基底クラスと ServiceLocator の設計・使い分けについては [patterns.md](patterns.md) を参照。
 
 ---
 

@@ -1,0 +1,77 @@
+:root {
+    --win-gray: #d4d0c8;
+    --win-gray-dark: #808080;
+    --win-gray-light: #f0ece0;
+    --win-blue-title: #0a246a;
+    --win-blue-grad-start: #1659c7;
+    --win-blue-grad-end: #0a246a;
+    --win-taskbar: #245edc;
+    --win-start: #1f7c1f;
+    --win-border-light: #ffffff;
+    --win-border-dark: #404040;
+    --win-border-mid: #808080;
+    --win-desktop: #5b8dd9;
+    --neon-cyan: #00f5ff;
+    --neon-red: #ff003c;
+    --neon-green: #00ff88;
+    --neon-yellow: #ffcc00;
+    --bg-dark: #050510;
+    --text-dim: #606080;
+    --glow-cyan: 0 0 10px #00f5ff, 0 0 20px #00f5ff40;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Share Tech Mono', monospace;
+    background: #000;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* DEV NAV */
+.dev-nav {
+    position: fixed;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+    z-index: 99999;
+    background: rgba(0, 0, 0, 0.85);
+    padding: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.dev-nav-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.4);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    padding: 3px 8px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+}
+
+.dev-nav-btn:hover,
+.dev-nav-btn.active {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+
+/* Scanlines */
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px);
+    pointer-events: none;
+    z-index: 99998;
+}

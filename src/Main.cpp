@@ -1,6 +1,8 @@
 ﻿#include "DxLib.h"
+#include "resource.h"
+#include "SingletonInitializer.h"
 #include "ServiceLocatorInitializer.h"
-#include "core/ServiceLocator.h"
+#include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
@@ -26,19 +28,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	ChangeWindowMode(FALSE);
 #endif
 
+	SetAlwaysRunFlag(TRUE); // ファイルダイアログ等でウィンドウが非アクティブになっても描画を継続する
+	SetWindowIconID(IDI_GAMEICON); // アプリケーションアイコンを設定
+	SetMainWindowText("Win VS Mac"); // ウィンドウタイトルを設定
 	if (DxLib_Init() == -1) return -1;
+	SetMouseDispFlag(TRUE); // リリース・デバッグ問わずマウスカーソルを常時表示
 	SetUseLighting(FALSE);
 
+	// Singletonインスタンスを初期化（ServiceLocatorInitializer より先に呼ぶ）
+	SingletonInitializer::init();
+
+	// サービスを登録
 	ServiceLocatorInitializer::init(screenWidth, screenHeight);
 
 	// ServiceLocatorからSceneManagerを取得
-	auto* sceneManager = core::ServiceLocator::get<game::scene::SceneManager>();
+	auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();	
 	
-	// 初期シーンをTitleに設定
-	//sceneManager->changeScene(game::scene::SceneType::Title);
-
-	// デバック用：初期シーンをgameに設定
-	sceneManager->changeScene(game::scene::SceneType::StageSelect);
+	// 初期シーンをBiosに設定
+	sceneManager->changeScene(game::scene::SceneType::Bios);
 	
 	while (ProcessMessage() == 0)
 	{

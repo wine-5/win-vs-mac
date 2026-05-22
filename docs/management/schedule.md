@@ -58,7 +58,7 @@
 
 ### 7月
 - [ ] LoadingScene の完成（フォルダ解析・ダンジョン生成演出）
-- [ ] StageSelect から InGame への遷移実装
+- [x] StageSelect から InGame への遷移実装
 - [ ] InGame UI整備（HP・パラメータ表示）
 - [ ] ダッシュの実装（Shiftキー）
 - [ ] ダッシュのエフェクト・クールダウン
