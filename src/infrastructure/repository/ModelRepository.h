@@ -50,9 +50,11 @@ namespace infrastructure
 		};
 
 		std::vector<ResourceDefinition> loadResourceList(const nlohmann::json& json);
+		std::vector<ResourceDefinition> loadRawModelList(const nlohmann::json& json);
 		core::data::ModelMetadata parseJsonFile(const std::string& filePath);
 
 		std::unordered_map<std::string, int> m_modelHandles;
 		std::unordered_map<std::string, core::data::ModelMetadata> m_metadata;
+		std::unordered_map<std::string, std::string> m_rawModelPaths;
 	};
 }

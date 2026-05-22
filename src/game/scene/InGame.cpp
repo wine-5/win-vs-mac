@@ -24,6 +24,7 @@
 #include "game/system/AttackSystem.h"
 #include "game/component/ColliderComponent.h"
 #include "game/constant/ModelId.h"
+#include "game/constant/AnimationId.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
 #include "game/system/AISystem.h"
@@ -145,19 +146,19 @@ namespace game::scene
 	void InGame::setupSystems()
 	{
 		// アニメーションハンドルをロード
-		// int idleAnimHandle = m_resourceManager.loadModelById(m_playerData.getIdleAnimPath());
-		// int walkAnimHandle = m_resourceManager.loadModelById(m_playerData.getWalkAnimPath());
+		int idleAnimHandle{ m_resourceManager.loadAnimationById(constant::animation_id::PLAYER_IDLE) };
+		int walkAnimHandle{ m_resourceManager.loadAnimationById(constant::animation_id::PLAYER_WALK) };
 
 		// システム登録
 		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_playerId, m_inputProvider);
 		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed());
 		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager);
-		// m_systemManager.registerSystem<game::system::AnimationSystem>(
-		//	m_componentManager,
-		//	m_factoryManager.getPlayerFactory().getPlayer().getId(),
-		//	m_animator,
-		//	idleAnimHandle,
-		//	walkAnimHandle);
+		 m_systemManager.registerSystem<game::system::AnimationSystem>(
+			m_componentManager,
+			m_factoryManager.getPlayerFactory().getPlayer().getId(),
+			m_animator,
+			idleAnimHandle,
+			walkAnimHandle);
 
 		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
 		m_systemManager.registerSystem<game::system::AISystem>(m_componentManager);

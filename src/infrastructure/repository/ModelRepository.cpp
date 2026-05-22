@@ -16,11 +16,31 @@ namespace infrastructure
 		const nlohmann::json j = nlohmann::json::parse(file);
 		for (const auto& res : loadResourceList(j))
 			m_metadata[res.m_id] = parseJsonFile(res.m_path);
+		for (const auto& res : loadRawModelList(j))
+			m_rawModelPaths[res.m_id] = res.m_path;
 	}
 
 	int ModelRepository::loadModelById(std::string_view modelId)
 	{
 		std::string id(modelId);
+
+		// raw modelの場合は直接MV1LoadModel
+		{
+			auto rawIt{ m_rawModelPaths.find(id) };
+			if (rawIt != m_rawModelPaths.end())
+			{
+				auto handleIt{ m_modelHandles.find(id) };
+				if (handleIt != m_modelHandles.end())
+					return handleIt->second;
+
+				int handle{ MV1LoadModel(rawIt->second.c_str()) };
+				if (handle == -1)
+					LOG_E("モデルの読み込みに失敗しました: %s", rawIt->second.c_str());
+				else
+					m_modelHandles[id] = handle;
+				return handle;
+			}
+		}
 
 		auto metaIt{ m_metadata.find(id) };
 		if (metaIt == m_metadata.end())
@@ -81,6 +101,17 @@ namespace infrastructure
 			return resources;
 
 		for (const auto& item : json["resources"])
+			resources.push_back({ item["id"], item["path"] });
+		return resources;
+	}
+
+	std::vector<ModelRepository::ResourceDefinition> ModelRepository::loadRawModelList(const nlohmann::json& json)
+	{
+		std::vector<ResourceDefinition> resources;
+		if (!json.contains("rawModels"))
+			return resources;
+
+		for (const auto& item : json["rawModels"])
 			resources.push_back({ item["id"], item["path"] });
 		return resources;
 	}

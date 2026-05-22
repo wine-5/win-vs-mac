@@ -13,6 +13,7 @@ namespace infrastructure
 			m_fontRepo = std::make_unique<FontRepository>();
 			m_jobRepo = std::make_unique<JobRepository>();
 			m_imageRepo = std::make_unique<ImageRepository>();
+			m_animRepo = std::make_unique<AnimationRepository>();
 		}
 		catch (const std::exception& e)
 		{
@@ -53,5 +54,12 @@ namespace infrastructure
 		if (!m_imageRepo)
 			return -1;
 		return m_imageRepo->loadImageById(imageId);
+	}
+
+	int ResourceManager::loadAnimationById(std::string_view animationId)
+	{
+		if (!m_animRepo)
+			return -1;
+		return m_animRepo->loadAnimationById(animationId);
 	}
 }

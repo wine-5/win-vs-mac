@@ -51,5 +51,12 @@ namespace core::iface
 		 * @return DxLib 画像ハンドル、失敗時は -1
 		 */
 		virtual int loadImageById(std::string_view imageId) = 0;
+
+		/**
+		 * @brief アニメーションIDからアニメーションモデルを読み込みハンドルを返す（キャッシュ付き）
+		 * @param animationId アニメーションID（resources.json の animations セクションで定義）
+		 * @return DxLib モデルハンドル、失敗時は -1
+		 */
+		virtual int loadAnimationById(std::string_view animationId) = 0;
 	};
 }
