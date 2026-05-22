@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "JobWindow.h"
+#include "platform/window/WindowConstants.h"
 #include "core/constant/JobType.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include <sstream>
@@ -7,7 +8,7 @@
 namespace platform::window::select
 {
 	JobWindow::JobWindow(int x, int y, int width, int height) noexcept
-		: WindowBase(L"JobWindowClass", L"職業選択", x, y, width, height),
+		: WindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height),
 		m_selectedJob{core::constant::JobType::Warrior}
 	{
 	}
@@ -29,7 +30,7 @@ namespace platform::window::select
 		m_webView.setOnMessage([this](const std::string& json) noexcept {
 			handleMessage(json);
 		});
-		m_webView.initialize(hwnd, L"https://game.web/select/job/job.html");
+		m_webView.initialize(hwnd, JOB_HTML_URL);
 	}
 
 	LRESULT JobWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
@@ -59,19 +60,19 @@ namespace platform::window::select
 		try
 		{
 			auto j = nlohmann::json::parse(json);
-			const std::string type = j.value("type", "");
+			const std::string type = j.value(platform::window::WindowConstants::JSON_KEY_TYPE, "");
 
-			if (type == "jobSelected")
+			if (type == platform::window::WindowConstants::MESSAGE_TYPE_JOB_SELECTED)
 			{
-				const std::string job = j.value("job", "Warrior");
-				if (job == "Warrior")    m_selectedJob = core::constant::JobType::Warrior;
-				else if (job == "Mage")  m_selectedJob = core::constant::JobType::Mage;
-				else if (job == "Ninja") m_selectedJob = core::constant::JobType::Ninja;
+				const std::string job = j.value(platform::window::WindowConstants::JSON_KEY_JOB, JOB_NAME_WARRIOR);
+				if (job == JOB_NAME_WARRIOR)    m_selectedJob = core::constant::JobType::Warrior;
+				else if (job == JOB_NAME_MAGE)  m_selectedJob = core::constant::JobType::Mage;
+				else if (job == JOB_NAME_NINJA) m_selectedJob = core::constant::JobType::Ninja;
 
 				if (m_onJobSelect)
 					m_onJobSelect(m_selectedJob);
 			}
-			else if (type == "requestJobStats")
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_JOB_STATS)
 			{
 				sendJobStats();
 			}
@@ -85,18 +86,18 @@ namespace platform::window::select
 		try
 		{
 			nlohmann::json resp;
-			resp["type"]  = "jobStats";
-			resp["stats"] = nlohmann::json::array();
+			resp[platform::window::WindowConstants::JSON_KEY_TYPE]  = platform::window::WindowConstants::MESSAGE_TYPE_JOB_STATS;
+			resp[platform::window::WindowConstants::JSON_KEY_STATS] = nlohmann::json::array();
 			for (int i{0}; i < core::constant::JOB_COUNT; ++i)
 			{
 				auto info = m_jobRepository->getJobInfo(static_cast<core::constant::JobType>(i));
 				nlohmann::json s;
-				s["id"]  = i;
-				s["hp"]  = info.m_hp;
-				s["atk"] = info.m_atk;
-				s["def"] = info.m_def;
-				s["spd"] = info.m_spd;
-				resp["stats"].push_back(s);
+				s[platform::window::WindowConstants::JSON_KEY_ID]  = i;
+				s[platform::window::WindowConstants::JSON_KEY_HP]  = info.m_hp;
+				s[platform::window::WindowConstants::JSON_KEY_ATK] = info.m_atk;
+				s[platform::window::WindowConstants::JSON_KEY_DEF] = info.m_def;
+				s[platform::window::WindowConstants::JSON_KEY_SPD] = info.m_spd;
+				resp[platform::window::WindowConstants::JSON_KEY_STATS].push_back(s);
 			}
 			m_webView.postMessage(resp.dump());
 		}

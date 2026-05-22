@@ -1,11 +1,12 @@
 ﻿#include <windows.h>
 #include "DifficultyWindow.h"
+#include "platform/window/WindowConstants.h"
 #include "thirdparty/nlohmann/json.hpp"
 
 namespace platform::window::select
 {
     DifficultyWindow::DifficultyWindow(int x, int y, int width, int height) noexcept
-        : WindowBase(L"DifficultyWindowClass", L"難易度設定", x, y, width, height)
+        : WindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height)
     {
     }
 
@@ -20,7 +21,7 @@ namespace platform::window::select
         m_webView.setOnMessage([this](const std::string& json) noexcept {
             handleMessage(json);
         });
-        m_webView.initialize(hwnd, L"https://game.web/select/difficulty/difficulty.html");
+        m_webView.initialize(hwnd, DIFFICULTY_HTML_URL);
     }
 
     LRESULT DifficultyWindow::onMessage(
@@ -51,29 +52,28 @@ namespace platform::window::select
         try
         {
             auto j = nlohmann::json::parse(json);
-            const std::string type{ j.value("type", "") };
+            const std::string type{ j.value(platform::window::WindowConstants::JSON_KEY_TYPE, "") };
 
-            if (type == "difficultyChanged")
+            if (type == MESSAGE_TYPE_DIFFICULTY_CHANGED)
             {
-                const std::string diff{ j.value("difficulty", "NORMAL") };
-                if (diff == "EASY" || diff == "NORMAL" || diff == "HARD")
+                const std::string diff{ j.value("difficulty", DIFFICULTY_NORMAL) };
+                if (diff == DIFFICULTY_EASY || diff == DIFFICULTY_NORMAL || diff == DIFFICULTY_HARD)
                     m_selectedDifficulty = diff;
             }
-            else if (type == "confirmHard")
+            else if (type == MESSAGE_TYPE_CONFIRM_HARD)
             {
                 const int result{ MessageBoxW(
                     m_hwnd,
-                    L"HARD モードを選択しようとしています。\n"
-                    L"敵の攻撃力・防御力が大幅に上昇し、\n"
-                    L"攻略が非常に困難になります。\n\n"
-                    L"本当に続行しますか？",
-                    L"警告 - Win vs Mac.exe",
+                    HARD_WARNING_MESSAGE,
+                    HARD_WARNING_TITLE,
                     MB_OKCANCEL | MB_ICONWARNING
                 ) };
                 if (result == IDOK)
                 {
-                    m_selectedDifficulty = "HARD";
-                    m_webView.postMessage(std::string{R"({"type":"hardConfirmed"})"});
+                    m_selectedDifficulty = DIFFICULTY_HARD;
+                    nlohmann::json resp;
+                    resp[platform::window::WindowConstants::JSON_KEY_TYPE] = MESSAGE_TYPE_HARD_CONFIRMED;
+                    m_webView.postMessage(resp.dump());
                 }
             }
         }

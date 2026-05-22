@@ -29,8 +29,8 @@ namespace platform::window
 
         // ローディングウィンドウを作成
         // スクリーン中央に配置（スクリーンサイズの80%）
-        int windowWidth = screenWidth * 80 / 100;
-        int windowHeight = screenHeight * 80 / 100;
+        int windowWidth = screenWidth * LOADING_WINDOW_SIZE_RATIO / 100;
+        int windowHeight = screenHeight * LOADING_WINDOW_SIZE_RATIO / 100;
         int windowX = originX + (screenWidth - windowWidth) / 2;
         int windowY = originY + (screenHeight - windowHeight) / 2;
 

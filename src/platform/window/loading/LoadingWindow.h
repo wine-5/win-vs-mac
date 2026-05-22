@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <functional>
 #include "platform/window/WindowBase.h"
+#include "platform/window/WindowConstants.h"
 #include "platform/webview/WebView2Host.h"
 #include "core/interface/IWindow.h"
 
@@ -48,7 +49,11 @@ namespace platform::window::loading
 		LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
 
 	private:
-		static constexpr const wchar_t* ICON_PATH = L"assets/images/ui/icons/cmdicon.ico";
+		// ウィンドウ定数
+		static constexpr const wchar_t* WINDOW_CLASS_NAME{ L"LoadingWindow" };
+		static constexpr const wchar_t* WINDOW_TITLE{ L"コマンドプロンプト - ローディング中" };
+		static constexpr const wchar_t* ICON_PATH{ L"assets/images/ui/icons/cmdicon.ico" };
+		static constexpr const wchar_t* LOADING_HTML_URL{ L"https://game.web/loading/loading.html" };
 
 		platform::webview::WebView2Host m_webView{};
 		std::function<void()> m_onLoadingComplete{};

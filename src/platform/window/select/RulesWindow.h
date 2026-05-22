@@ -29,7 +29,11 @@ namespace platform::window::select
         LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
 
     private:
-        static constexpr const wchar_t* ICON_PATH = L"assets/images/ui/icons/Rules.ico";
+        // ウィンドウ定数
+        static constexpr const wchar_t* ICON_PATH{ L"assets/images/ui/icons/Rules.ico" };
+        static constexpr const wchar_t* WINDOW_CLASS_NAME{ L"RulesWindowClass" };
+        static constexpr const wchar_t* WINDOW_TITLE{ L"ルール説明.txt - メモ帳" };
+        static constexpr const wchar_t* RULES_HTML_URL{ L"https://game.web/select/rules/rules.html" };
 
         platform::webview::WebView2Host m_webView{};
     };

@@ -73,6 +73,9 @@ namespace platform::window::select
         HWND m_hwnd{};
         platform::webview::WebView2Host m_webView{};
 
+        // ウィンドウ定数
         static constexpr wchar_t CLASS_NAME[] = L"DesktopWindowClass";
+        static constexpr const wchar_t* WINDOW_TITLE{ L"" };
+        static constexpr const wchar_t* DESKTOP_HTML_URL{ L"https://game.web/select/desktop/desktop.html" };
     };
 }

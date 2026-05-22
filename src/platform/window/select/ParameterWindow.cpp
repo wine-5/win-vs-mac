@@ -1,11 +1,12 @@
 ﻿#include <windows.h>
 #include "ParameterWindow.h"
+#include "platform/window/WindowConstants.h"
 #include "thirdparty/nlohmann/json.hpp"
 
 namespace platform::window::select
 {
     ParameterWindow::ParameterWindow(int x, int y, int width, int height) noexcept
-        : WindowBase(L"ParameterWindowClass", L"パラメータ", x, y, width, height)
+        : WindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height)
     {
     }
 
@@ -18,35 +19,35 @@ namespace platform::window::select
     {
         if (!m_webView.isReady()) return;
 
-        auto sjisToUtf8 = [](const std::string& sjis) -> std::string
+        auto sjisToUtf8 = [this](const std::string& sjis) -> std::string
         {
             if (sjis.empty()) return {};
-            int wlen = MultiByteToWideChar(932, 0, sjis.c_str(), -1, nullptr, 0);
+            int wlen = MultiByteToWideChar(SJIS_CODE_PAGE, 0, sjis.c_str(), -1, nullptr, 0);
             if (wlen <= 0) return {};
             std::wstring wide(wlen - 1, L'\0');
-            MultiByteToWideChar(932, 0, sjis.c_str(), -1, wide.data(), wlen);
-            int ulen{ WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, nullptr, 0, nullptr, nullptr) };
+            MultiByteToWideChar(SJIS_CODE_PAGE, 0, sjis.c_str(), -1, wide.data(), wlen);
+            int ulen{ WideCharToMultiByte(UTF8_CODE_PAGE, 0, wide.c_str(), -1, nullptr, 0, nullptr, nullptr) };
             if (ulen <= 0) return {};
             std::string utf8(ulen - 1, '\0');
-            WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, utf8.data(), ulen, nullptr, nullptr);
+            WideCharToMultiByte(UTF8_CODE_PAGE, 0, wide.c_str(), -1, utf8.data(), ulen, nullptr, nullptr);
             return utf8;
         };
 
         try
         {
             nlohmann::json j;
-            j["type"]     = "refresh";
-            j["job"]      = sjisToUtf8(jobNameSjis);
-            j["skill"]    = sjisToUtf8(skillNameSjis);
-            j["baseHp"]   = baseHp;
-            j["baseAtk"]  = baseAtk;
-            j["baseDef"]  = baseDef;
-            j["baseSpd"]  = baseSpd;
-            j["bonusHp"]  = bonusHp;
-            j["bonusAtk"] = bonusAtk;
-            j["bonusDef"] = bonusDef;
-            j["bonusSpd"] = bonusSpd;
-            j["slot"]     = equippedSlots;
+            j[platform::window::WindowConstants::JSON_KEY_TYPE]     = platform::window::WindowConstants::MESSAGE_TYPE_REFRESH;
+            j[platform::window::WindowConstants::JSON_KEY_JOB]      = sjisToUtf8(jobNameSjis);
+            j[platform::window::WindowConstants::JSON_KEY_SKILL]    = sjisToUtf8(skillNameSjis);
+            j[platform::window::WindowConstants::JSON_KEY_BASE_HP]   = baseHp;
+            j[platform::window::WindowConstants::JSON_KEY_BASE_ATK]  = baseAtk;
+            j[platform::window::WindowConstants::JSON_KEY_BASE_DEF]  = baseDef;
+            j[platform::window::WindowConstants::JSON_KEY_BASE_SPD]  = baseSpd;
+            j[platform::window::WindowConstants::JSON_KEY_BONUS_HP]  = bonusHp;
+            j[platform::window::WindowConstants::JSON_KEY_BONUS_ATK] = bonusAtk;
+            j[platform::window::WindowConstants::JSON_KEY_BONUS_DEF] = bonusDef;
+            j[platform::window::WindowConstants::JSON_KEY_BONUS_SPD] = bonusSpd;
+            j[platform::window::WindowConstants::JSON_KEY_SLOT]     = equippedSlots;
             m_webView.postMessage(j.dump());
         }
         catch (...) {}
@@ -55,7 +56,7 @@ namespace platform::window::select
     void ParameterWindow::onCreateControls(HWND hwnd)
     {
         setIcon(hwnd, ICON_PATH);
-        m_webView.initialize(hwnd, L"https://game.web/select/param/param.html");
+        m_webView.initialize(hwnd, PARAMETER_HTML_URL);
     }
 
     LRESULT ParameterWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept

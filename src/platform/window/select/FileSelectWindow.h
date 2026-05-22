@@ -4,6 +4,7 @@
 #include <string>
 #include <array>
 #include <algorithm>
+#include "platform/window/WindowConstants.h"
 #include "platform/window/WindowBase.h"
 #include "platform/webview/WebView2Host.h"
 #include "game/data/FileExtensionType.h"
@@ -50,8 +51,23 @@ namespace platform::window::select
         LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
 
     private:
-        static constexpr const wchar_t* ICON_PATH = L"assets/images/ui/icons/file.ico";
-        static constexpr int SLOT_COUNT = 3;
+        // ウィンドウ定数
+        static constexpr const wchar_t* ICON_PATH{ L"assets/images/ui/icons/file.ico" };
+        static constexpr const wchar_t* WINDOW_CLASS_NAME{ L"FileSelectWindowClass" };
+        static constexpr const wchar_t* WINDOW_TITLE{ L"ファイル選択" };
+        static constexpr const wchar_t* FILE_SELECT_HTML_URL{ L"https://game.web/select/file/file.html" };
+        static constexpr int SLOT_COUNT{ 3 };
+
+        // ファイルダイアログフィルター
+        static constexpr const char* FILE_DIALOG_FILTER{ "All Files\0*.*\0" };
+
+        // ファイル拡張子タイプ名
+        static constexpr const char* EXT_TYPE_NAME_EXECUTABLE{ "Executable" };
+        static constexpr const char* EXT_TYPE_NAME_DOCUMENT{ "Document" };
+        static constexpr const char* EXT_TYPE_NAME_IMAGE{ "Image" };
+        static constexpr const char* EXT_TYPE_NAME_AUDIO{ "Audio" };
+        static constexpr const char* EXT_TYPE_NAME_ARCHIVE{ "Archive" };
+        static constexpr const char* EXT_TYPE_NAME_UNKNOWN{ "Unknown" };
 
         platform::webview::WebView2Host m_webView{};
         std::array<std::string, SLOT_COUNT> m_filePaths{};

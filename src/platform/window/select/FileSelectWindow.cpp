@@ -2,13 +2,14 @@
 #include <commdlg.h>
 #include <sstream>
 #include "FileSelectWindow.h"
+#include "platform/window/WindowConstants.h"
 #include "core/interface/ILogger.h"
 #include "thirdparty/nlohmann/json.hpp"
 
 namespace platform::window::select
 {
 	FileSelectWindow::FileSelectWindow(int x, int y, int width, int height) noexcept
-		: WindowBase(L"FileSelectWindowClass", L"ファイル選択", x, y, width, height)
+		: WindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height)
 	{
 	}
 
@@ -29,7 +30,7 @@ namespace platform::window::select
 		m_webView.setOnMessage([this](const std::string& json) noexcept {
 			handleMessage(json);
 		});
-		m_webView.initialize(hwnd, L"https://game.web/select/file/file.html");
+		m_webView.initialize(hwnd, FILE_SELECT_HTML_URL);
 	}
 
 	LRESULT FileSelectWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
@@ -59,14 +60,14 @@ namespace platform::window::select
 		try
 		{
 			auto j = nlohmann::json::parse(json);
-			const std::string type = j.value("type", "");
-			if (type == "slotSelected")
+			const std::string type = j.value(platform::window::WindowConstants::JSON_KEY_TYPE, "");
+			if (type == platform::window::WindowConstants::MESSAGE_TYPE_SLOT_SELECTED)
 			{
 				int slot = j.value("slot", 0);
 				if (slot >= 0 && slot < SLOT_COUNT)
 					openFileDialog(slot);
 			}
-			else if (type == "requestBonusInfo")
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_BONUS_INFO)
 			{
 				sendBonusInfo();
 			}
@@ -83,7 +84,7 @@ namespace platform::window::select
 		ofn.hwndOwner = getHwnd();
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = MAX_PATH;
-		ofn.lpstrFilter = "All Files\0*.*\0";
+		ofn.lpstrFilter = FILE_DIALOG_FILTER;
 		ofn.nFilterIndex = 1;
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
@@ -114,43 +115,43 @@ namespace platform::window::select
 
 	void FileSelectWindow::sendSlotsRefresh() noexcept
 	{
-		auto toName = [](game::data::FileExtensionType t) -> const char* {
+		auto toName = [this](game::data::FileExtensionType t) -> const char* {
 			switch (t)
 			{
-			case game::data::FileExtensionType::Executable: return "Executable";
-			case game::data::FileExtensionType::Document:   return "Document";
-			case game::data::FileExtensionType::Image:      return "Image";
-			case game::data::FileExtensionType::Audio:      return "Audio";
-			case game::data::FileExtensionType::Archive:    return "Archive";
-			default:                                        return "Unknown";
+			case game::data::FileExtensionType::Executable: return EXT_TYPE_NAME_EXECUTABLE;
+			case game::data::FileExtensionType::Document:   return EXT_TYPE_NAME_DOCUMENT;
+			case game::data::FileExtensionType::Image:      return EXT_TYPE_NAME_IMAGE;
+			case game::data::FileExtensionType::Audio:      return EXT_TYPE_NAME_AUDIO;
+			case game::data::FileExtensionType::Archive:    return EXT_TYPE_NAME_ARCHIVE;
+			default:                                        return EXT_TYPE_NAME_UNKNOWN;
 			}
 		};
 
 		try
 		{
 			nlohmann::json resp;
-			resp["type"]  = "refresh";
-			resp["slots"] = nlohmann::json::array();
+			resp[platform::window::WindowConstants::JSON_KEY_TYPE]  = platform::window::WindowConstants::MESSAGE_TYPE_REFRESH;
+			resp[platform::window::WindowConstants::JSON_KEY_FILE_SLOT] = nlohmann::json::array();
 			for (int i = 0; i < SLOT_COUNT; ++i)
 			{
 				nlohmann::json s;
-				s["slot"] = i;
+				s[platform::window::WindowConstants::JSON_KEY_FILE_SLOT] = i;
 				if (m_filePaths[i].empty())
 				{
-					s["isEmpty"] = true;
+					s[platform::window::WindowConstants::JSON_KEY_IS_EMPTY] = true;
 				}
 				else
 				{
-					s["isEmpty"] = false;
+					s[platform::window::WindowConstants::JSON_KEY_IS_EMPTY] = false;
 					std::string fileName{ m_filePaths[i] };
 					auto slash = fileName.find_last_of("/\\");
 					if (slash != std::string::npos)
 						fileName = fileName.substr(slash + 1);
-					s["fileName"] = fileName;
-					s["filePath"] = m_filePaths[i];
-					s["extType"]  = toName(m_extensionTypes[i]);
+					s[platform::window::WindowConstants::JSON_KEY_FILE_NAME] = fileName;
+					s[platform::window::WindowConstants::JSON_KEY_FILE_PATH] = m_filePaths[i];
+					s[platform::window::WindowConstants::JSON_KEY_EXT_TYPE]  = toName(m_extensionTypes[i]);
 				}
-				resp["slots"].push_back(s);
+				resp[platform::window::WindowConstants::JSON_KEY_FILE_SLOT].push_back(s);
 			}
 			m_webView.postMessage(resp.dump());
 		}
@@ -162,12 +163,12 @@ namespace platform::window::select
 		// ExtensionBonusCalculator の定数から説明文を生成（C++ が正とする）
 		struct Entry { const char* m_key; game::data::FileExtensionType m_type; };
 		constexpr Entry entries[] = {
-			{ "Executable", game::data::FileExtensionType::Executable },
-			{ "Document",   game::data::FileExtensionType::Document   },
-			{ "Image",      game::data::FileExtensionType::Image      },
-			{ "Audio",      game::data::FileExtensionType::Audio      },
-			{ "Archive",    game::data::FileExtensionType::Archive    },
-			{ "Unknown",    game::data::FileExtensionType::Unknown    },
+			{ EXT_TYPE_NAME_EXECUTABLE, game::data::FileExtensionType::Executable },
+			{ EXT_TYPE_NAME_DOCUMENT,   game::data::FileExtensionType::Document   },
+			{ EXT_TYPE_NAME_IMAGE,      game::data::FileExtensionType::Image      },
+			{ EXT_TYPE_NAME_AUDIO,      game::data::FileExtensionType::Audio      },
+			{ EXT_TYPE_NAME_ARCHIVE,    game::data::FileExtensionType::Archive    },
+			{ EXT_TYPE_NAME_UNKNOWN,    game::data::FileExtensionType::Unknown    },
 		};
 
 		auto fmt = [](float v) -> std::string {
@@ -199,10 +200,10 @@ namespace platform::window::select
 		try
 		{
 			nlohmann::json resp;
-			resp["type"]  = "bonusInfo";
-			resp["descs"] = nlohmann::json::object();
+			resp[platform::window::WindowConstants::JSON_KEY_TYPE]  = platform::window::WindowConstants::MESSAGE_TYPE_BONUS_INFO;
+			resp[platform::window::WindowConstants::JSON_KEY_DESCRIPTIONS] = nlohmann::json::object();
 			for (const auto& e : entries)
-				resp["descs"][e.m_key] = describe(e.m_type);
+				resp[platform::window::WindowConstants::JSON_KEY_DESCRIPTIONS][e.m_key] = describe(e.m_type);
 			m_webView.postMessage(resp.dump());
 		}
 		catch (...) {}

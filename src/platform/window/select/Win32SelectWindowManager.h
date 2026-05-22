@@ -6,6 +6,7 @@
 #include "game/data/FileExtensionType.h"
 #include "game/utility/FileExtensionTypeResolver.h"
 #include "game/utility/ExtensionBonusCalculator.h"
+#include "platform/window/WindowConstants.h"
 #include "DesktopWindow.h"
 #include "JobWindow.h"
 #include "FileSelectWindow.h"
@@ -47,15 +48,47 @@ namespace platform::window::select
         void updateParameterWindowForJob(core::constant::JobType jobType) noexcept;
 
     private:
+        // レイアウト定数
+        static constexpr int TASKBAR_HEIGHT{ 48 };
+        static constexpr int GAP_Y{ 8 };
+        static constexpr int MARGIN_PERCENT{ 2 };
+        static constexpr int COLUMN_COUNT{ 3 };
+        static constexpr int JOB_HEIGHT_RATIO{ 11 };
+        static constexpr int JOB_HEIGHT_RATIO_BASE{ 20 };
+
+        // RulesWindowのサイズ
+        static constexpr int RULES_WINDOW_WIDTH{ 920 };
+        static constexpr int RULES_WINDOW_HEIGHT{ 660 };
+
+        // ウィンドウのアルファ値
+        static constexpr BYTE WINDOW_ALPHA{ 250 };
+
+        // ファイルスロット数
+        static constexpr int FILE_SLOT_COUNT{ 3 };
+
+        // ウィンドウ名
+        static constexpr const char* WINDOW_NAME_JOB{ "job" };
+        static constexpr const char* WINDOW_NAME_FILE{ "file" };
+        static constexpr const char* WINDOW_NAME_PARAM{ "param" };
+        static constexpr const char* WINDOW_NAME_DIFF{ "diff" };
+        static constexpr const char* WINDOW_NAME_RULES{ "rules" };
+
+        // アプリケーション名とパス
+        // アプリパス（複雑で再利用可能）
+        static constexpr const wchar_t* APP_CMD_PATH{ L"cmd.exe" };
+        static constexpr const wchar_t* APP_TASKMGR_PATH{ L"taskmgr.exe" };
+        static constexpr const wchar_t* APP_RECYCLEBIN_PATH{ L"shell:RecycleBinFolder" };
+        static constexpr const wchar_t* APP_NOTEPAD_PATH{ L"notepad.exe" };
+
         void handleDesktopMessage(const std::string& json) noexcept;
         void notifyWindowState(const std::string& name, bool visible) noexcept;
 
-        std::unique_ptr<DesktopWindow>      m_desktopWindow{};
-        std::unique_ptr<JobWindow>          m_jobWindow{};
-        std::unique_ptr<FileSelectWindow>   m_fileSelectWindow{};
-        std::unique_ptr<ParameterWindow>    m_parameterWindow{};
-        std::unique_ptr<DifficultyWindow>   m_difficultyWindow{};
-        std::unique_ptr<RulesWindow>         m_rulesWindow{};
+        std::unique_ptr<DesktopWindow>    m_desktopWindow{};
+        std::unique_ptr<JobWindow>        m_jobWindow{};
+        std::unique_ptr<FileSelectWindow> m_fileSelectWindow{};
+        std::unique_ptr<ParameterWindow>  m_parameterWindow{};
+        std::unique_ptr<DifficultyWindow> m_difficultyWindow{};
+        std::unique_ptr<RulesWindow>      m_rulesWindow{};
 
         bool m_jobVisible{true};
         bool m_fileVisible{true};

@@ -1,4 +1,5 @@
 ﻿#include "Win32SelectWindowManager.h"
+#include "platform/window/WindowConstants.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
 #include "core/constant/SelectWindowId.h"
@@ -37,7 +38,7 @@ namespace platform::window::select
         int originX{ origin.x };
         int originY{ origin.y };
 
-        // --- DesktopWindow: DxLib クライアント領域全体を覆う ---
+        // DxLibクライアント領域全体を覆うDesktopWindow
         m_desktopWindow = std::make_unique<DesktopWindow>();
         m_desktopWindow->setOnMessage([this](const std::string& json) noexcept {
             handleDesktopMessage(json);
@@ -47,14 +48,12 @@ namespace platform::window::select
 
         // --- レイアウト定数 ---
         // 左列: Job(上) + File(下)  /  中央列: HTML難易度パネル  /  右列: Parameter
-        constexpr int taskbarH{ 48 };
-        constexpr int gapY{ 8 };
-        int marginX{ screenWidth  * 2 / 100 };
-        int marginY{ screenHeight * 2 / 100 };
-        int colWidth{ (screenWidth  - marginX * 4) / 3 };
-        int availH{    screenHeight - taskbarH - marginY * 2 };
-        int jobH{   availH * 11 / 20 };
-        int fileH{  availH - jobH - gapY };
+        int marginX{ screenWidth  * MARGIN_PERCENT / 100 };
+        int marginY{ screenHeight * MARGIN_PERCENT / 100 };
+        int colWidth{ (screenWidth  - marginX * COLUMN_COUNT) / COLUMN_COUNT };
+        int availH{    screenHeight - TASKBAR_HEIGHT - marginY * 2 };
+        int jobH{   availH * JOB_HEIGHT_RATIO / JOB_HEIGHT_RATIO_BASE };
+        int fileH{  availH - jobH - GAP_Y };
 
         int winY{ originY + marginY };
 
@@ -73,14 +72,14 @@ namespace platform::window::select
         m_jobWindow->setOnMinimize([this]() noexcept {
             m_jobWindow->hide();
             m_jobVisible = false;
-            notifyWindowState("job", false);
+            notifyWindowState(WINDOW_NAME_JOB, false);
         });
         m_jobWindow->setOnClose([this]() noexcept {
             m_jobVisible = false;
-            notifyWindowState("job", false);
+            notifyWindowState(WINDOW_NAME_JOB, false);
         });
 
-        // FileSelect ウィンドウ（中央列 全高）
+        // FileSelectウィンドウ（中央列 全高）
         m_fileSelectWindow = std::make_unique<FileSelectWindow>(
             originX + marginX * 2 + colWidth,
             winY,
@@ -90,7 +89,7 @@ namespace platform::window::select
         if (!m_fileSelectWindow->create(m_desktopWindow->getHwnd())) return;
         m_fileSelectWindow->setOnFileSlotChanged([this](int slot, const std::string& path) noexcept {
             if (m_onFileSlotChanged) m_onFileSlotChanged(slot, path);
-            if (slot >= 0 && slot < 3)
+            if (slot >= 0 && slot < FILE_SLOT_COUNT)
             {
                 m_slotPaths[slot] = path;
                 if (!path.empty())
@@ -104,28 +103,24 @@ namespace platform::window::select
                         m_slotExtTypes[slot] = game::utility::FileExtensionTypeResolver::toFileExtensionType(ext);
                     }
                     else
-                    {
                         m_slotExtTypes[slot] = game::data::FileExtensionType::Unknown;
-                    }
                 }
                 else
-                {
                     m_slotExtTypes[slot] = game::data::FileExtensionType::Unknown;
-                }
             }
             updateParameterWindowForJob(m_currentJobType);
         });
         m_fileSelectWindow->setOnMinimize([this]() noexcept {
             m_fileSelectWindow->hide();
             m_fileVisible = false;
-            notifyWindowState("file", false);
+            notifyWindowState(WINDOW_NAME_FILE, false);
         });
         m_fileSelectWindow->setOnClose([this]() noexcept {
             m_fileVisible = false;
-            notifyWindowState("file", false);
+            notifyWindowState(WINDOW_NAME_FILE, false);
         });
 
-        // Parameter ウィンドウ（右列 全高）
+        // Parameterウィンドウ（右列 全高）
         m_parameterWindow = std::make_unique<ParameterWindow>(
             originX + marginX * 3 + colWidth * 2,
             winY,
@@ -136,17 +131,17 @@ namespace platform::window::select
         m_parameterWindow->setOnMinimize([this]() noexcept {
             m_parameterWindow->hide();
             m_paramVisible = false;
-            notifyWindowState("param", false);
+            notifyWindowState(WINDOW_NAME_PARAM, false);
         });
         m_parameterWindow->setOnClose([this]() noexcept {
             m_paramVisible = false;
-            notifyWindowState("param", false);
+            notifyWindowState(WINDOW_NAME_PARAM, false);
         });
 
-        // DifficultyWindow (左列 下 / Job の下)
+        // DifficultyWindow（左列下 / Jobの下）
         m_difficultyWindow = std::make_unique<DifficultyWindow>(
             originX + marginX,
-            winY + jobH + gapY,
+            winY + jobH + GAP_Y,
             colWidth,
             fileH
         );
@@ -154,39 +149,36 @@ namespace platform::window::select
         m_difficultyWindow->setOnMinimize([this]() noexcept {
             m_difficultyWindow->hide();
             m_diffVisible = false;
-            notifyWindowState("diff", false);
+            notifyWindowState(WINDOW_NAME_DIFF, false);
         });
         m_difficultyWindow->setOnClose([this]() noexcept {
             m_diffVisible = false;
-            notifyWindowState("diff", false);
+            notifyWindowState(WINDOW_NAME_DIFF, false);
         });
 
-        // RulesWindow（センタリング、初期非表示）
-        constexpr int rulesW{ 720 };
-        constexpr int rulesH{ 460 };
+        // RulesWindow（センタリング・初期非表示）
         m_rulesWindow = std::make_unique<RulesWindow>(
-            originX + (screenWidth  - rulesW) / 2,
-            originY + (screenHeight - rulesH) / 2,
-            rulesW,
-            rulesH
+            originX + (screenWidth  - RULES_WINDOW_WIDTH) / 2,
+            originY + (screenHeight - RULES_WINDOW_HEIGHT) / 2,
+            RULES_WINDOW_WIDTH,
+            RULES_WINDOW_HEIGHT
         );
         if (!m_rulesWindow->create(m_desktopWindow->getHwnd())) return;
         m_rulesWindow->setOnMinimize([this]() noexcept {
             m_rulesWindow->hide();
             m_rulesVisible = false;
-            notifyWindowState("rules", false);
+            notifyWindowState(WINDOW_NAME_RULES, false);
         });
         m_rulesWindow->setOnClose([this]() noexcept {
             m_rulesVisible = false;
-            notifyWindowState("rules", false);
+            notifyWindowState(WINDOW_NAME_RULES, false);
         });
 
-        constexpr BYTE windowAlpha{ 250 };
-        m_jobWindow->setAlpha(windowAlpha);
-        m_fileSelectWindow->setAlpha(windowAlpha);
-        m_parameterWindow->setAlpha(windowAlpha);
-        m_difficultyWindow->setAlpha(windowAlpha);
-        m_rulesWindow->setAlpha(windowAlpha);
+        m_jobWindow->setAlpha(WINDOW_ALPHA);
+        m_fileSelectWindow->setAlpha(WINDOW_ALPHA);
+        m_parameterWindow->setAlpha(WINDOW_ALPHA);
+        m_difficultyWindow->setAlpha(WINDOW_ALPHA);
+        m_rulesWindow->setAlpha(WINDOW_ALPHA);
 
         m_jobWindow->show();
         m_fileSelectWindow->show();
@@ -196,12 +188,12 @@ namespace platform::window::select
 
     void Win32SelectWindowManager::destroyAllWindows()
     {
-        if (m_jobWindow)          m_jobWindow->destroy();
-        if (m_fileSelectWindow)   m_fileSelectWindow->destroy();
-        if (m_parameterWindow)    m_parameterWindow->destroy();
-        if (m_difficultyWindow)   m_difficultyWindow->destroy();
-        if (m_rulesWindow)        m_rulesWindow->destroy();
-        if (m_desktopWindow)      m_desktopWindow->destroy();
+        if (m_jobWindow)        m_jobWindow->destroy();
+        if (m_fileSelectWindow) m_fileSelectWindow->destroy();
+        if (m_parameterWindow)  m_parameterWindow->destroy();
+        if (m_difficultyWindow) m_difficultyWindow->destroy();
+        if (m_rulesWindow)      m_rulesWindow->destroy();
+        if (m_desktopWindow)    m_desktopWindow->destroy();
 
         m_jobWindow.reset();
         m_fileSelectWindow.reset();
@@ -252,7 +244,7 @@ namespace platform::window::select
 
         float bonusHp{}, bonusAtk{}, bonusDef{}, bonusSpd{};
         int equippedCount{};
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < FILE_SLOT_COUNT; ++i)
         {
             if (!m_slotPaths[i].empty())
             {
@@ -278,11 +270,11 @@ namespace platform::window::select
         try
         {
             auto j = nlohmann::json::parse(json);
-            const std::string type{ j.value("type", "") };
+            const std::string type{ j.value(platform::window::WindowConstants::JSON_KEY_TYPE, "") };
 
-            if (type == "startGame")
+            if (type == platform::window::WindowConstants::MESSAGE_TYPE_START_GAME)
             {
-                // ゲーム開始前に全サブウィンドウを非表示にしてからコールバックを呼ぶ
+                // ゲーム開始前に全サブウィンドウを非表示にしてからコールバックを実行
                 if (m_desktopWindow && m_desktopWindow->getHwnd())
                     ShowWindow(m_desktopWindow->getHwnd(), SW_HIDE);
                 if (m_jobWindow)        m_jobWindow->hide();
@@ -291,51 +283,51 @@ namespace platform::window::select
                 if (m_difficultyWindow) m_difficultyWindow->hide();
                 if (m_onGameStart) m_onGameStart();
             }
-            else if (type == "toggleWindow")
+            else if (type == platform::window::WindowConstants::MESSAGE_TYPE_TOGGLE_WINDOW)
             {
-                const std::string name{ j.value("window", "") };
-                if (name == "job" && m_jobWindow)
+                const std::string name{ j.value(platform::window::WindowConstants::JSON_KEY_WINDOW, "") };
+                if (name == WINDOW_NAME_JOB && m_jobWindow)
                 {
                     m_jobVisible = !m_jobVisible;
                     m_jobVisible ? m_jobWindow->show() : m_jobWindow->hide();
-                    notifyWindowState("job", m_jobVisible);
+                    notifyWindowState(WINDOW_NAME_JOB, m_jobVisible);
                 }
-                else if (name == "file" && m_fileSelectWindow)
+                else if (name == WINDOW_NAME_FILE && m_fileSelectWindow)
                 {
                     m_fileVisible = !m_fileVisible;
                     m_fileVisible ? m_fileSelectWindow->show() : m_fileSelectWindow->hide();
-                    notifyWindowState("file", m_fileVisible);
+                    notifyWindowState(WINDOW_NAME_FILE, m_fileVisible);
                 }
-                else if (name == "param" && m_parameterWindow)
+                else if (name == WINDOW_NAME_PARAM && m_parameterWindow)
                 {
                     m_paramVisible = !m_paramVisible;
                     m_paramVisible ? m_parameterWindow->show() : m_parameterWindow->hide();
-                    notifyWindowState("param", m_paramVisible);
+                    notifyWindowState(WINDOW_NAME_PARAM, m_paramVisible);
                 }
-                else if (name == "diff" && m_difficultyWindow)
+                else if (name == WINDOW_NAME_DIFF && m_difficultyWindow)
                 {
                     m_diffVisible = !m_diffVisible;
                     m_diffVisible ? m_difficultyWindow->show() : m_difficultyWindow->hide();
-                    notifyWindowState("diff", m_diffVisible);
+                    notifyWindowState(WINDOW_NAME_DIFF, m_diffVisible);
                 }
-                else if (name == "rules" && m_rulesWindow)
+                else if (name == WINDOW_NAME_RULES && m_rulesWindow)
                 {
                     m_rulesVisible = !m_rulesVisible;
                     m_rulesVisible ? m_rulesWindow->show() : m_rulesWindow->hide();
-                    notifyWindowState("rules", m_rulesVisible);
+                    notifyWindowState(WINDOW_NAME_RULES, m_rulesVisible);
                 }
             }
-            else if (type == "launchApp")
+            else if (type == platform::window::WindowConstants::MESSAGE_TYPE_LAUNCH_APP)
             {
-                const std::string app{ j.value("app", "") };
+                const std::string app{ j.value(platform::window::WindowConstants::JSON_KEY_APP, "") };
                 if (app == "cmd")
-                    ShellExecuteW(nullptr, L"open", L"cmd.exe", nullptr, nullptr, SW_SHOW);
+                    ShellExecuteW(nullptr, L"open", APP_CMD_PATH, nullptr, nullptr, SW_SHOW);
                 else if (app == "taskmgr")
-                    ShellExecuteW(nullptr, L"open", L"taskmgr.exe", nullptr, nullptr, SW_SHOW);
+                    ShellExecuteW(nullptr, L"open", APP_TASKMGR_PATH, nullptr, nullptr, SW_SHOW);
                 else if (app == "recyclebin")
-                    ShellExecuteW(nullptr, L"open", L"shell:RecycleBinFolder", nullptr, nullptr, SW_SHOW);
+                    ShellExecuteW(nullptr, L"open", APP_RECYCLEBIN_PATH, nullptr, nullptr, SW_SHOW);
                 else if (app == "notepad")
-                    ShellExecuteW(nullptr, L"open", L"notepad.exe", nullptr, nullptr, SW_SHOW);
+                    ShellExecuteW(nullptr, L"open", APP_NOTEPAD_PATH, nullptr, nullptr, SW_SHOW);
             }
         }
         catch (...) {}
@@ -348,9 +340,9 @@ namespace platform::window::select
         try
         {
             nlohmann::json j;
-            j["type"]    = "windowStateChanged";
-            j["window"]  = name;
-            j["visible"] = visible;
+            j[platform::window::WindowConstants::JSON_KEY_TYPE]    = platform::window::WindowConstants::MESSAGE_TYPE_WINDOW_STATE_CHANGED;
+            j[platform::window::WindowConstants::JSON_KEY_WINDOW]  = name;
+            j[platform::window::WindowConstants::JSON_KEY_VISIBLE] = visible;
             m_desktopWindow->postMessage(j.dump());
         }
         catch (...) {}

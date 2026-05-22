@@ -124,7 +124,7 @@ namespace platform::window
         std::function<void()> m_onClose{};
         std::wstring m_className{};
         std::wstring m_title{};
-        
+
         int m_x{};
         int m_y{};
         int m_width{};
@@ -135,6 +135,11 @@ namespace platform::window
         HICON m_hIcon{};
 
     private:
+        // ウィンドウクラス登録用の背景色（システムボタン背景 + 1）
+        static constexpr int BACKGROUND_BRUSH_COLOR{ COLOR_BTNFACE + 1 };
+        // WM_SYSCOMMAND の wParam マスク値（下位 4 ビットは座標情報）
+        static constexpr WPARAM SYSCOMMAND_MASK{ 0xFFF0 };
+
         static LRESULT CALLBACK staticWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
     }; 
 

@@ -37,7 +37,7 @@ namespace platform::window
         wndClass.hInstance = GetModuleHandleW(nullptr);
         wndClass.lpszClassName = m_className.c_str();
         wndClass.hCursor = LoadCursorW(nullptr, (LPCWSTR)IDC_ARROW);
-        wndClass.hbrBackground = (HBRUSH)(COLOR_BTNFACE + 1);
+        wndClass.hbrBackground = (HBRUSH)BACKGROUND_BRUSH_COLOR;
 
         ATOM atom = RegisterClassW(&wndClass);
         if (atom == 0) return false;
@@ -182,7 +182,7 @@ namespace platform::window
 
         case WM_SYSCOMMAND:
             // 下位 4 ビットはマウス座標などの付加情報なのでマスクして SC_MINIMIZE と比較する
-            if ((wParam & 0xFFF0) == SC_MINIMIZE && m_onMinimize)
+            if ((wParam & SYSCOMMAND_MASK) == SC_MINIMIZE && m_onMinimize)
             {
                 m_onMinimize();
                 return 0; // デフォルトの最小化を抑制する

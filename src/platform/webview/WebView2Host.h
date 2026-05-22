@@ -73,7 +73,13 @@ namespace platform::webview
         [[nodiscard]] bool isReady() const noexcept;
 
     private:
-        Microsoft::WRL::ComPtr<ICoreWebView2Controller> m_controller{}; // WebView2の表示領域・サイズ・可視状態を制御するコントローラー 
+        // 仮想ホストマッピング用定数
+        static constexpr const wchar_t* VIRTUAL_HOST_GAME{ L"game.web" };
+        static constexpr const wchar_t* VIRTUAL_HOST_ASSETS{ L"assets.game.web" };
+        static constexpr const wchar_t* FOLDER_PATH_WEB{ L"\\web" };
+        static constexpr const wchar_t* FOLDER_PATH_ASSETS{ L"\\assets" };
+
+        Microsoft::WRL::ComPtr<ICoreWebView2Controller> m_controller{}; // WebView2の表示領域・サイズ・可視状態を制御するコントローラー
         Microsoft::WRL::ComPtr<ICoreWebView2> m_webview{}; // メッセージ送受信を行うWebViewの本体
         MessageCallback m_onMessage{}; // JS -> C++でメッセージを受信したときに呼ぶコールバック
         bool m_ready{false};

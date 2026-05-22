@@ -4,7 +4,7 @@
 namespace platform::window::loading
 {
 	LoadingWindow::LoadingWindow(int x, int y, int width, int height) noexcept
-		: WindowBase(L"LoadingWindow", L"コマンドプロンプト - ローディング中", x, y, width, height)
+		: WindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height)
 	{
 	}
 
@@ -38,7 +38,7 @@ namespace platform::window::loading
 		});
 
 		// WebView2 を初期化
-		m_webView.initialize(hwnd, L"https://game.web/loading/loading.html");
+		m_webView.initialize(hwnd, LOADING_HTML_URL);
 	}
 
 	LRESULT LoadingWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
@@ -52,7 +52,8 @@ namespace platform::window::loading
 		{
 			auto data = nlohmann::json::parse(json);
 
-			if (data.contains("type") && data["type"] == "loadingComplete")
+			if (data.contains(WindowConstants::JSON_KEY_TYPE) &&
+				data[WindowConstants::JSON_KEY_TYPE] == WindowConstants::MESSAGE_TYPE_LOADING_COMPLETE)
 			{
 				if (m_onLoadingComplete)
 					m_onLoadingComplete();

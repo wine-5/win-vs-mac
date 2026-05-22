@@ -108,8 +108,8 @@ namespace platform::system
 		{
 			const int64_t deltaBusy{ (curReadTime - m_prevReadTime) + (curWriteTime - m_prevWriteTime) };
 			m_diskActivity = static_cast<float>(deltaBusy) / static_cast<float>(deltaQuery);
-			if (m_diskActivity > 1.0f) m_diskActivity = 1.0f;
-			if (m_diskActivity < 0.0f) m_diskActivity = 0.0f;
+			if (m_diskActivity > USAGE_MAX_BOUND) m_diskActivity = USAGE_MAX_BOUND;
+			if (m_diskActivity < USAGE_MIN_BOUND) m_diskActivity = USAGE_MIN_BOUND;
 		}
 
 		m_prevReadTime  = curReadTime;

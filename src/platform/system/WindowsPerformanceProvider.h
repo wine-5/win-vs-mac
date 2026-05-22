@@ -25,13 +25,17 @@ namespace platform::system
 		[[nodiscard]] core::iface::PerformanceSnapshot getSnapshot() const noexcept override;
 
 	private:
+		// パフォーマンスメトリクスの正規化用定数
+		static constexpr float USAGE_MAX_BOUND{ 1.0f };
+		static constexpr float USAGE_MIN_BOUND{ 0.0f };
+
 		float m_cpuUsage{};
 		float m_memoryUsage{};
 		float m_diskActivity{};
 
 		// CPU計算用（前フレームの値）
 		int64_t m_prevIdleTime{};   // CPUが何もしていなかった時間
-		int64_t m_prevKernelTime{}; // CPUがOSの処理に使った時間 
+		int64_t m_prevKernelTime{}; // CPUがOSの処理に使った時間
 		int64_t m_prevUserTime{};   // CPUがアプリケーションの処理に使った時間
 
 		// ディスクI/O計算用（前回の累積時間）

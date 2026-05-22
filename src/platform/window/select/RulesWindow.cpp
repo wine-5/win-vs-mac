@@ -1,17 +1,18 @@
 #include <windows.h>
 #include "RulesWindow.h"
+#include "platform/window/WindowConstants.h"
 
 namespace platform::window::select
 {
     RulesWindow::RulesWindow(int x, int y, int width, int height) noexcept
-        : WindowBase(L"RulesWindowClass", L"readme.txt - \u30e1\u30e2\u5e33", x, y, width, height)
+        : WindowBase(L"RulesWindowClass", L"ルール説明.txt - \u30e1\u30e2\u5e33", x, y, width, height)
     {
     }
 
     void RulesWindow::onCreateControls(HWND hwnd)
     {
         setIcon(hwnd, ICON_PATH);
-        m_webView.initialize(hwnd, L"https://game.web/select/rules/rules.html");
+        m_webView.initialize(hwnd, RULES_HTML_URL);
     }
 
     LRESULT RulesWindow::onMessage(

@@ -11,7 +11,7 @@ namespace platform::window::result
         core::iface::IScreen& screen,
         std::function<void()> onRetry,
         std::function<void()> onTitle) noexcept
-        : WindowBase(L"ResultWindowClass", L"Result - Win vs Mac.exe",
+        : WindowBase(WINDOW_CLASS_NAME, L"Result - Win vs Mac.exe",
             0, 0, 0, 0)
         , m_screen{ screen }
         , m_onRetry{ std::move(onRetry) }
@@ -80,7 +80,7 @@ namespace platform::window::result
         m_webView.setOnMessage([this](const std::string& json) noexcept {
             handleMessage(json);
         });
-        m_webView.initialize(hwnd, L"https://game.web/result/result.html");
+        m_webView.initialize(hwnd, RESULT_HTML_URL);
     }
 
     LRESULT ResultWindow::onMessage(
@@ -111,14 +111,14 @@ namespace platform::window::result
         try
         {
             auto j{ nlohmann::json::parse(json) };
-            const std::string type{ j.value("type", "") };
+            const std::string type{ j.value(WindowConstants::JSON_KEY_TYPE, "") };
 
-            if (type == "requestResult")
+            if (type == WindowConstants::MESSAGE_TYPE_REQUEST_RESULT)
             {
                 if (m_pendingData.has_value())
                     sendResultData(m_pendingData.value());
             }
-            else if (type == "retry")
+            else if (type == WindowConstants::MESSAGE_TYPE_RETRY)
             {
                 // シーン遷移前にウィンドウを非表示にし、DxLib ウィンドウにフォーカスを戻す
                 hide();
@@ -126,7 +126,7 @@ namespace platform::window::result
                 if (m_onRetry)
                     m_onRetry();
             }
-            else if (type == "title")
+            else if (type == WindowConstants::MESSAGE_TYPE_TITLE)
             {
                 // シーン遷移前にウィンドウを非表示にし、DxLib ウィンドウにフォーカスを戻す
                 hide();
@@ -143,7 +143,7 @@ namespace platform::window::result
         try
         {
             nlohmann::json j{};
-            j["type"]             = "resultData";
+            j[WindowConstants::JSON_KEY_TYPE]             = WindowConstants::MESSAGE_TYPE_RESULT_DATA;
             j["isVictory"]        = data.m_isVictory;
             j["elapsedTime"]      = data.m_elapsedTime;
             j["killCount"]        = data.m_killCount;

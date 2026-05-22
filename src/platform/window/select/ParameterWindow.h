@@ -2,6 +2,7 @@
 
 #include <windows.h>
 #include <string>
+#include "platform/window/WindowConstants.h"
 #include "platform/window/WindowBase.h"
 #include "platform/webview/WebView2Host.h"
 
@@ -52,7 +53,15 @@ namespace platform::window::select
         LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
 
     private:
-        static constexpr const wchar_t* ICON_PATH = L"assets/images/ui/icons/param.ico";
+        // ウィンドウ定数
+        static constexpr const wchar_t* ICON_PATH{ L"assets/images/ui/icons/param.ico" };
+        static constexpr const wchar_t* WINDOW_CLASS_NAME{ L"ParameterWindowClass" };
+        static constexpr const wchar_t* WINDOW_TITLE{ L"パラメータ" };
+        static constexpr const wchar_t* PARAMETER_HTML_URL{ L"https://game.web/select/param/param.html" };
+
+        // 文字コード定数
+        static constexpr int SJIS_CODE_PAGE{ 932 };
+        static constexpr int UTF8_CODE_PAGE{ CP_UTF8 };
 
         platform::webview::WebView2Host m_webView{};
     };

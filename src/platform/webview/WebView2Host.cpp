@@ -79,11 +79,11 @@ namespace platform::webview
         std::wstring base{cwd};
         // https://game.web/... → <cwd>/web/ 以下のファイルを返す
         webview3->SetVirtualHostNameToFolderMapping(
-            L"game.web", (base + L"\\web").c_str(),
+            VIRTUAL_HOST_GAME, (base + FOLDER_PATH_WEB).c_str(),
             COREWEBVIEW2_HOST_RESOURCE_ACCESS_KIND_ALLOW);
         // https://assets.game.web/... → <cwd>/assets/ 以下のファイルを返す
         webview3->SetVirtualHostNameToFolderMapping(
-            L"assets.game.web", (base + L"\\assets").c_str(),
+            VIRTUAL_HOST_ASSETS, (base + FOLDER_PATH_ASSETS).c_str(),
             COREWEBVIEW2_HOST_RESOURCE_ACCESS_KIND_ALLOW);
     }
 

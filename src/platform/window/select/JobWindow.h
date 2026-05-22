@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <optional>
 #include <string>
+#include "platform/window/WindowConstants.h"
 #include "platform/window/WindowBase.h"
 #include "platform/webview/WebView2Host.h"
 #include "infrastructure/repository/JobRepository.h"
@@ -51,7 +52,17 @@ namespace platform::window::select
         LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
 
     private:
-        static constexpr const wchar_t* ICON_PATH = L"assets/images/ui/icons/job.ico";
+        // ウィンドウ定数
+        static constexpr const wchar_t* ICON_PATH{ L"assets/images/ui/icons/job.ico" };
+        static constexpr const wchar_t* WINDOW_CLASS_NAME{ L"JobWindowClass" };
+        static constexpr const wchar_t* WINDOW_TITLE{ L"職業選択" };
+        static constexpr const wchar_t* JOB_HTML_URL{ L"https://game.web/select/job/job.html" };
+
+        // ジョブ名
+        static constexpr const char* JOB_NAME_WARRIOR{ "Warrior" };
+        static constexpr const char* JOB_NAME_MAGE{ "Mage" };
+        static constexpr const char* JOB_NAME_NINJA{ "Ninja" };
+
         platform::webview::WebView2Host m_webView{};
         core::constant::JobType m_selectedJob{};
         std::function<void(core::constant::JobType)> m_onJobSelect{};

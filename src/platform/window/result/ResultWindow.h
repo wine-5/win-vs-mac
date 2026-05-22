@@ -1,6 +1,7 @@
 #pragma once
 
 #include "platform/window/WindowBase.h"
+#include "platform/window/WindowConstants.h"
 #include "platform/webview/WebView2Host.h"
 #include "core/interface/IResultWindowManager.h"
 #include "core/interface/IScreen.h"
@@ -52,6 +53,9 @@ namespace platform::window::result
         LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
 
     private:
+        // ウィンドウ定数
+        static constexpr const wchar_t* WINDOW_CLASS_NAME{ L"ResultWindowClass" };
+        static constexpr const wchar_t* RESULT_HTML_URL{ L"https://game.web/result/result.html" };
 
         core::iface::IScreen& m_screen;
         platform::webview::WebView2Host m_webView{};

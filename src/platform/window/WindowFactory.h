@@ -51,6 +51,9 @@ namespace platform::window
             core::iface::IResourceManager& resourceManager) override;
 
     private:
+        // ローディングウィンドウのサイズ比率（スクリーンサイズに対する割合）
+        static constexpr int LOADING_WINDOW_SIZE_RATIO{ 80 };
+
         core::iface::IScreen& m_screen;
     };
 }

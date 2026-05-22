@@ -22,7 +22,7 @@ namespace platform::window::select
         m_hwnd = CreateWindowExW(
             WS_EX_NOACTIVATE | WS_EX_TOPMOST,
             CLASS_NAME,
-            L"",
+            WINDOW_TITLE,
             WS_POPUP,
             x, y, width, height,
             nullptr, nullptr,
@@ -32,7 +32,7 @@ namespace platform::window::select
 
         if (!m_hwnd) return false;
 
-        m_webView.initialize(m_hwnd, L"https://game.web/select/desktop/desktop.html");
+        m_webView.initialize(m_hwnd, DESKTOP_HTML_URL);
         return true;
     }
 

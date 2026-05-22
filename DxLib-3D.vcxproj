@@ -356,7 +356,11 @@
     <ClInclude Include="src\platform\WindowsDataProvider.h" />
     <ClInclude Include="src\platform\utility\StringConverter.h" />
     <ClInclude Include="src\platform\window\select\JobWindow.h" />
+    <ClInclude Include="src\platform\window\select\FileSelectWindow.h" />
+    <ClInclude Include="src\platform\window\select\RulesWindow.h" />
+    <ClInclude Include="src\platform\window\select\Win32SelectWindowManager.h" />
     <ClInclude Include="src\platform\window\WindowBase.h" />
+    <ClInclude Include="src\platform\window\WindowConstants.h" />
     <ClInclude Include="src\platform\window\WindowFactory.h" />
     <ClInclude Include="src\platform\window\result\ResultWindow.h" />
     <ClInclude Include="src\platform\window\loading\LoadingWindow.h" />
