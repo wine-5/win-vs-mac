@@ -11,5 +11,6 @@ namespace core::constant
 		Hit,  // ヒット
 		
 		// 今後攻撃のエフェクトなど追加予定
+		// EffectRepositoryのtypeMapにも追加を忘れないように
 	};
 }
