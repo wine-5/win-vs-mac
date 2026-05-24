@@ -164,6 +164,7 @@
     <ClCompile Include="src\game\system\HitEffectSystem.cpp" />
     <ClCompile Include="src\game\ui\FadeTransition.cpp" />
     <ClCompile Include="src\game\ui\Label.cpp" />
+    <ClCompile Include="src\infrastructure\EffectPool.cpp" />
     <ClCompile Include="src\infrastructure\repository\EffectRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\FontRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\JobRepository.cpp" />
