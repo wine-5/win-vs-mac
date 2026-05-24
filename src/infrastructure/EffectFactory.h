@@ -38,6 +38,8 @@ namespace infrastructure
 		void update() override;
 
 	private:
+		static constexpr int HIT_POOL_SIZE{ 10 }; // ヒットエフェクトの最大同時再生数
+
 		EffectRepository m_repository{};
 		std::unordered_map<core::constant::EffectType, EffectPool> m_pools{};
 
