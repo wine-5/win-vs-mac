@@ -1,4 +1,4 @@
-#include "EffectPool.h"
+#include "infrastructure/EffectPool.h"
 #include "thirdparty/effekseer/EffekseerForDXLib.h"
 
 namespace infrastructure
@@ -9,12 +9,12 @@ namespace infrastructure
 
 		core::base::ObjectPool<EffectSlot>::Config config{};
 		config.m_initialSize = poolSize;
-		config.m_expandSize = poolSize;
-		config.m_autoExpand = true;
+		config.m_expandSize  = poolSize;
+		config.m_autoExpand  = true;
 
 		core::base::ObjectPool<EffectSlot>::Callbacks callbacks{};
 		callbacks.onCreate = []() {return std::make_unique<EffectSlot>(); };
-		callbacks.onGet = [](EffectSlot& slot) {slot.m_playHandle = -1; };
+		callbacks.onGet    = [](EffectSlot& slot) {slot.m_playHandle = -1; };
 		callbacks.onReturn = [](EffectSlot& slot)
 			{
 				if (slot.m_playHandle != -1)
