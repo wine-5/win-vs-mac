@@ -1,10 +1,14 @@
 #include "infrastructure/EffectFactory.h"
 #include <vector>
+#include "thirdparty/effekseer/EffekseerForDXLib.h"
 
 namespace infrastructure
 {
 	void EffectFactory::initialize()
 	{
+		Effekseer_Init(8000);
+		m_repository.initialize();
+
 		const std::vector<std::pair<core::constant::EffectType, int>> typePoolSizes
 		{
 			{core::constant::EffectType::Hit,HIT_POOL_SIZE}
@@ -49,6 +53,8 @@ namespace infrastructure
 
 	void EffectFactory::update()
 	{
+		UpdateEffekseer3D();
+
 		// 全プールの自然終了チェックを行う
 		for (auto& [type, pool] : m_pools)
 			pool.update();
@@ -66,6 +72,11 @@ namespace infrastructure
 	{
 		// m_handleToType にハンドルが存在すれば再生中
 		return m_handleToType.contains(handle);
+	}
+
+	void EffectFactory::draw()
+	{
+		DrawEffekseer3D();
 	}
 
 }

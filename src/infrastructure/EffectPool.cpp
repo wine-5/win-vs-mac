@@ -1,5 +1,6 @@
 #include "infrastructure/EffectPool.h"
 #include "thirdparty/effekseer/EffekseerForDXLib.h"
+#include "core/interface/ILogger.h"
 
 namespace infrastructure
 {
@@ -45,6 +46,7 @@ namespace infrastructure
 		SetPosPlayingEffekseer3DEffect(handle, position.x, position.y, position.z);
 		slot->m_playHandle = handle;
 		m_activeSlots.push_back(slot);
+		LOG("[EffectPool] エフェクト生成 handle=%d pos=(%.1f, %.1f, %.1f)", handle, position.x, position.y, position.z);
 		return handle;
 	}
 
@@ -56,6 +58,7 @@ namespace infrastructure
 			if ((*it)->m_playHandle == playHandle)
 			{
 				// returnObject内のonReturnコールバックでStopが呼ばれる
+				LOG("[EffectPool] エフェクト返却 handle=%d", playHandle);
 				m_pool.returnObject(*it);
 				it = m_activeSlots.erase(it);
 				return;
@@ -73,6 +76,7 @@ namespace infrastructure
 			if (!IsEffekseer3DEffectPlaying((*it)->m_playHandle))
 			{
 				// すでに終了しているためStopは不要でハンドルだけリセットして返却する
+				LOG("[EffectPool] エフェクト自動返却 handle=%d", (*it)->m_playHandle);
 				(*it)->m_playHandle = -1;
 				m_pool.returnObject(*it);
 				it = m_activeSlots.erase(it);

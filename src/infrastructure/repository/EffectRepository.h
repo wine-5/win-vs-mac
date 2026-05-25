@@ -15,13 +15,13 @@ namespace infrastructure
     class EffectRepository
     {
     public:
+        EffectRepository() = default;
+
         /**
-         * @brief コンストラクタ
-         *
-         * コンストラクト時に resources.json からエフェクト情報を読み込む
+         * @brief Effekseer 初期化後に呼び出す。resources.json からエフェクトを読み込む
          * @throw std::runtime_error ファイルが見つからないか、JSONパースに失敗した場合
          */
-        EffectRepository();
+        void initialize();
 
         /**
          * @brief EffectType に対応するリソースハンドルを返す

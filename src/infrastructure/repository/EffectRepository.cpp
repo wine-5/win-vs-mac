@@ -6,7 +6,7 @@
 
 namespace infrastructure
 {
-	EffectRepository::EffectRepository()
+	void EffectRepository::initialize()
 	{
 		std::ifstream file{ "assets/config/resources.json" };
 		if (!file.is_open())
