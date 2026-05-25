@@ -2,6 +2,7 @@
 #include "core/base/ServiceLocator.h"
 #include "game/component/EffectComponent.h"
 #include "game/component/TransformComponent.h"
+#include "core/interface/ILogger.h"
 
 namespace game::system
 {
@@ -39,7 +40,27 @@ namespace game::system
 
 	void EffectSystem::onAttackHit(const game::event::AttackHitEvent& event)
 	{
+		// ターゲットがTransformComponentを持っていなければそもそも再生ができない
+		if (!m_componentManager.has<component::TransformComponent>(event.m_targetId)) return;
 
+		const auto& transform{ m_componentManager.get<component::TransformComponent>(event.m_targetId) };
+
+		// エフェクトを再生してハンドルを取得する
+		int handle{ m_effectFactory.play(event.m_effectType, transform.m_position) };
+		if (handle == -1) return;
+
+		if (!m_componentManager.has<component::EffectComponent>(event.m_targetId))
+		{
+			LOG("ターゲットにエフェクトのコンポーネントをつけてください");
+			return;
+		}
+
+		// スロットに記録する
+		auto& effect{ m_componentManager.get<component::EffectComponent>(event.m_targetId) };
+		component::EffectComponent::Slot slot{};
+		slot.m_type     = event.m_effectType;
+		slot.m_handle   = handle;
+		slot.m_isActive = true;
+		effect.m_slots.push_back(slot);
 	}
-
 }
