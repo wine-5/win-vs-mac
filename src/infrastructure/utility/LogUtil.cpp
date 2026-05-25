@@ -16,6 +16,9 @@ namespace infrastructure::utility
         FILE* fp;
         freopen_s(&fp, "CONOUT$", "w", stdout);
         freopen_s(&fp, "CONOUT$", "w", stderr);
+
+        // コンソールの出力コードページを UTF-8 に設定
+        SetConsoleOutputCP(CP_UTF8);
         
         // コンソールハンドルを取得
         m_consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
