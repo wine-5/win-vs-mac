@@ -36,6 +36,7 @@ namespace infrastructure
 
 		// エフェクトを再生してプレイハンドルを受け取る
 		int handle{ PlayEffekseer3DEffect(m_resourceHandle) };
+
 		if (handle == -1)
 		{
 			m_pool.returnObject(slot);
@@ -43,10 +44,17 @@ namespace infrastructure
 		}
 
 		// 再生位置を設定する
-		SetPosPlayingEffekseer3DEffect(handle, position.x, position.y, position.z);
+		// Y軸反転 + Y軸オフセット調整（Z軸は反転なし）
+		SetPosPlayingEffekseer3DEffect(handle, position.x, -position.y - 75.0f, position.z);
+		LOG("EffectPool::getEffect - Position (converted): (%.2f, %.2f, %.2f), Original: (%.2f, %.2f, %.2f), Handle: %d",
+			position.x, -position.y, position.z, position.x, position.y, position.z, handle);
+
+		// エフェクトスケールを設定
+		SetScalePlayingEffekseer3DEffect(handle, 100.0f, 100.0f, 100.0f);
+
 		slot->m_playHandle = handle;
 		m_activeSlots.push_back(slot);
-		LOG("[EffectPool] エフェクト生成 handle=%d pos=(%.1f, %.1f, %.1f)", handle, position.x, position.y, position.z);
+
 		return handle;
 	}
 
@@ -58,7 +66,6 @@ namespace infrastructure
 			if ((*it)->m_playHandle == playHandle)
 			{
 				// returnObject内のonReturnコールバックでStopが呼ばれる
-				LOG("[EffectPool] エフェクト返却 handle=%d", playHandle);
 				m_pool.returnObject(*it);
 				it = m_activeSlots.erase(it);
 				return;
@@ -73,10 +80,11 @@ namespace infrastructure
 		auto it{ m_activeSlots.begin() };
 		while (it != m_activeSlots.end())
 		{
-			if (!IsEffekseer3DEffectPlaying((*it)->m_playHandle))
+			int playingState{ IsEffekseer3DEffectPlaying((*it)->m_playHandle) };
+
+			// -1 = 無効または終了状態
+			if (playingState == -1)
 			{
-				// すでに終了しているためStopは不要でハンドルだけリセットして返却する
-				LOG("[EffectPool] エフェクト自動返却 handle=%d", (*it)->m_playHandle);
 				(*it)->m_playHandle = -1;
 				m_pool.returnObject(*it);
 				it = m_activeSlots.erase(it);

@@ -2,10 +2,12 @@
 
 /* core層 */
 #include "core/interface/ILogger.h"
+#include "core/interface/IEffectFactory.h"
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
 #include "core/constant/JobType.h"
 #include "core/data/ResultData.h"
+#include "thirdparty/effekseer/EffekseerForDXLib.h" // TODO: アーキテクチャ違反のため修正必須
 
 /* game層 */
 #include "game/factory/FactoryInitializer.h"
@@ -134,6 +136,8 @@ namespace game::scene
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
 
 		m_groundId = initializer.initializeGround();
+		auto& groundTransformInit = m_componentManager.get<component::TransformComponent>(m_groundId);
+		LOG("Ground Position (init): (%.2f, %.2f, %.2f)", groundTransformInit.m_position.x, groundTransformInit.m_position.y, groundTransformInit.m_position.z);
 
 		m_enemyId = initializer.initializeEnemy();
 		// Enemyの初期位置をずらす
@@ -253,6 +257,9 @@ namespace game::scene
 		}
 		m_systemManager.update(deltaTime);
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
+		auto& enemyTransform = m_componentManager.get<game::component::TransformComponent>(m_enemyId);
+		LOG("Player Position: (%.2f, %.2f, %.2f)", transform.m_position.x, transform.m_position.y, transform.m_position.z);
+		LOG("Enemy Position: (%.2f, %.2f, %.2f)", enemyTransform.m_position.x, enemyTransform.m_position.y, enemyTransform.m_position.z);
 		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
 
 		// フレーム最後に入力状態を更新
@@ -261,9 +268,18 @@ namespace game::scene
 
 	void InGame::draw()
 	{
+		// Effekseer 3D表示設定をDxLibのカメラ設定に同期させる
+		Effekseer_Sync3DSetting();
+
+		// エフェクト描画（モデル描画の前）
+		auto* effectFactory{ core::base::ServiceLocator::get<core::iface::IEffectFactory>() };
+		if (effectFactory)
+		{
+			effectFactory->draw();
+		}
+
 		// コンポーネントの取得
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
-		// auto& anim = m_componentManager.get<game::component::AnimationComponent<game::constant::PlayerAnimationState>>(m_playerId);
 		auto& groundRender = m_componentManager.get<game::component::RenderComponent>(m_groundId);
 		auto& render = m_componentManager.get<game::component::RenderComponent>(m_playerId);
 		auto& groundTransform = m_componentManager.get<game::component::TransformComponent>(m_groundId);

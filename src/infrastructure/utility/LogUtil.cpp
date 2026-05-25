@@ -1,7 +1,6 @@
 ﻿#include "LogUtil.h"
 #include <cstdio>
 #include <ctime>
-#include <Windows.h>
 
 namespace infrastructure::utility
 {

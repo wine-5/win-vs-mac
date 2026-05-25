@@ -6,6 +6,15 @@
 
 namespace infrastructure
 {
+	EffectRepository::~EffectRepository()
+	{
+		for (const auto& [type, handle] : m_handles)
+		{
+			if (handle != -1)
+				DeleteEffekseerEffect(handle);
+		}
+	}
+
 	void EffectRepository::initialize()
 	{
 		std::ifstream file{ "assets/config/resources.json" };
@@ -45,7 +54,6 @@ namespace infrastructure
 			int handle{ LoadEffekseerEffect(path.c_str()) };
 			if (handle == - 1)
 			{
-				LOG("エフェクトの読み込みに失敗しました");
 				continue;
 			}
 

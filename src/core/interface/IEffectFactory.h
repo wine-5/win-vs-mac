@@ -43,5 +43,10 @@ namespace core::iface
          * @return 再生中なら true
          */
         virtual bool isPlaying(int handle) const = 0;
+
+        /**
+         * @brief 再生中のエフェクトをすべて描画する
+         */
+        virtual void draw() = 0;
     };
 }

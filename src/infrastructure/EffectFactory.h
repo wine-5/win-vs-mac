@@ -13,6 +13,8 @@ namespace infrastructure
 	class EffectFactory : public core::iface::IEffectFactory
 	{
 	public:
+		~EffectFactory();
+
 		/**
 		* @brief エフェクトリソースを読み込み、各 EffectPool を初期化する
 		*/
@@ -43,6 +45,11 @@ namespace infrastructure
 		 * @return 再生中なら true
 		 */
 		bool isPlaying(int handle) const override;
+
+		/**
+		 * @brief 再生中のエフェクトをすべて描画する
+		 */
+		void draw() override;
 
 	private:
 		static constexpr int HIT_POOL_SIZE{ 10 };

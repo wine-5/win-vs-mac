@@ -16,6 +16,7 @@ namespace infrastructure
     {
     public:
         EffectRepository() = default;
+        ~EffectRepository();
 
         /**
          * @brief Effekseer 初期化後に呼び出す。resources.json からエフェクトを読み込む

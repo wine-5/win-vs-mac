@@ -15,7 +15,9 @@ namespace game::system
 	{
 		// AttackHitEventを購読する
 		m_eventBus.subscribe<game::event::AttackHitEvent>(
-			[this](const game::event::AttackHitEvent& e) {onAttackHit(e); }
+			[this](const game::event::AttackHitEvent& e) {
+				onAttackHit(e);
+			}
 		);
 	}
 
@@ -41,17 +43,24 @@ namespace game::system
 	void EffectSystem::onAttackHit(const game::event::AttackHitEvent& event)
 	{
 		// ターゲットがTransformComponentを持っていなければそもそも再生ができない
-		if (!m_componentManager.has<component::TransformComponent>(event.m_targetId)) return;
+		if (!m_componentManager.has<component::TransformComponent>(event.m_targetId))
+		{
+			return;
+		}
 
 		const auto& transform{ m_componentManager.get<component::TransformComponent>(event.m_targetId) };
+		LOG("EffectSystem::onAttackHit - Target Position: (%.2f, %.2f, %.2f), EffectType: %d",
+			transform.m_position.x, transform.m_position.y, transform.m_position.z, static_cast<int>(event.m_effectType));
 
 		// エフェクトを再生してハンドルを取得する
 		int handle{ m_effectFactory.play(event.m_effectType, transform.m_position) };
-		if (handle == -1) return;
+		if (handle == -1)
+		{
+			return;
+		}
 
 		if (!m_componentManager.has<component::EffectComponent>(event.m_targetId))
 		{
-			LOG_E("ターゲットにエフェクトのコンポーネントをつけてください");
 			return;
 		}
 
