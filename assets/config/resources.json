@@ -15,5 +15,8 @@
   "images": [
     {"id": "lock-bg",    "path": "assets/images/background/LockBG.jpg"},
     {"id": "desktop-bg", "path": "assets/images/background/DesktopBG.jpg"}
+  ],
+  "effects": [
+    {"type": "Hit", "path": "assets/effects/SlashEffect.efk"}
   ]
 }

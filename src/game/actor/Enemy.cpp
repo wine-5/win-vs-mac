@@ -9,6 +9,7 @@
 #include "game/component/AttackComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/HitEffectComponent.h"
+#include "game/component/EffectComponent.h"
 #include "game/constant/EnemyAnimationState.h"
 #include "game/constant/Tag.h"
 
@@ -25,6 +26,7 @@ namespace game::actor
 		componentManager.add<component::AnimationComponent<constant::EnemyAnimationState>>(m_entity.getId(), {});
 		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
 		componentManager.add<component::HitEffectComponent>(m_entity.getId(), {});
+		componentManager.add<component::EffectComponent>(m_entity.getId(), {});
 
 		component::HealthComponent health{};
 		health.m_maxHp = enemyData.getMaxHp();

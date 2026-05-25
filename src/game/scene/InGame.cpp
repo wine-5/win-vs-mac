@@ -19,8 +19,10 @@
 #include "game/component/HealthComponent.h"
 #include "game/component/HitEffectComponent.h"
 #include "game/system/AnimationSystem.h"
-#include "game/system/HitEffectSystem.h"
 #include "game/system/CollisionSystem.h"
+#include "game/system/HitEffectSystem.h"
+#include "game/system/EffectSystem.h"
+#include "core/interface/IEffectFactory.h"
 #include "game/system/AttackSystem.h"
 #include "game/component/ColliderComponent.h"
 #include "game/constant/ModelId.h"
@@ -164,6 +166,9 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::AISystem>(m_componentManager);
 		m_systemManager.registerSystem<game::system::AttackSystem>(m_componentManager, m_eventBus);
 		m_systemManager.registerSystem<game::system::HitEffectSystem>(m_componentManager);
+		
+		auto& effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() };
+		m_systemManager.registerSystem<game::system::EffectSystem>(m_componentManager, m_eventBus, effectFactory);
 	}
 
 	void InGame::setupEvents()

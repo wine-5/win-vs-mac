@@ -51,7 +51,7 @@ namespace game::system
 
 		if (!m_componentManager.has<component::EffectComponent>(event.m_targetId))
 		{
-			LOG("ターゲットにエフェクトのコンポーネントをつけてください");
+			LOG_E("ターゲットにエフェクトのコンポーネントをつけてください");
 			return;
 		}
 
