@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "core/ecs/Entity.h"
 #include "core/event/IGameEvent.h"
+#include "core/constant/EffectType.h"
 
 namespace game::event
 {
@@ -18,11 +19,16 @@ namespace game::event
 		/** @brief 最終的に与えたダメージ値 */
 		float m_damage{ 0.0f };
 
+		/** @brief 再生するエフェクトの種類 */
+		core::constant::EffectType m_effectType{ core::constant::EffectType::Hit };
+
 		AttackHitEvent() = default;
-		AttackHitEvent(core::ecs::EntityId atkId, core::ecs::EntityId tgtId, float dmg)
-			: m_attackerId{atkId}
-			, m_targetId{tgtId}
-			, m_damage{dmg} 
+		AttackHitEvent(core::ecs::EntityId atkId, core::ecs::EntityId tgtId, float dmg,
+			core::constant::EffectType effectType = core::constant::EffectType::Hit)
+			: m_attackerId{ atkId }
+			, m_targetId{ tgtId }
+			, m_damage{ dmg }
+			, m_effectType{effectType}
 		{
 		}
 	};
