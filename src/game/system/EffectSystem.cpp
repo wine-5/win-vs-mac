@@ -31,9 +31,9 @@ namespace game::system
 		{
 			auto& effect{ m_componentManager.get<component::EffectComponent>(entityId) };
 
-			std::erase_if(effect.m_slots, [](const component::EffectComponent::Slot& slot)
+			std::erase_if(effect.m_slots, [this](const component::EffectComponent::Slot& slot)
 				{
-					return !slot.m_isActive;
+					return !m_effectFactory.isPlaying(slot.m_handle);
 				});
 		}
 	}
@@ -58,9 +58,8 @@ namespace game::system
 		// スロットに記録する
 		auto& effect{ m_componentManager.get<component::EffectComponent>(event.m_targetId) };
 		component::EffectComponent::Slot slot{};
-		slot.m_type     = event.m_effectType;
-		slot.m_handle   = handle;
-		slot.m_isActive = true;
+		slot.m_type   = event.m_effectType;
+		slot.m_handle = handle;
 		effect.m_slots.push_back(slot);
 	}
 }

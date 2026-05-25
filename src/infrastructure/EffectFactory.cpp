@@ -1,4 +1,5 @@
 #include "infrastructure/EffectFactory.h"
+#include <vector>
 
 namespace infrastructure
 {
@@ -59,6 +60,12 @@ namespace infrastructure
 
 				return !poolIt->second.isActive(pair.first); // 再生が終わっていれば除去する
 			});
+	}
+
+	bool EffectFactory::isPlaying(int handle) const
+	{
+		// m_handleToType にハンドルが存在すれば再生中
+		return m_handleToType.contains(handle);
 	}
 
 }

@@ -14,7 +14,6 @@ namespace game::component
 		{
 			core::constant::EffectType m_type{ core::constant::EffectType::None };
 			int  m_handle{ -1 };      // IEffectFactory::play()が返すハンドル
-			bool m_isActive{ false }; // 現在再生中かどうか
 		};
 
 		std::vector<Slot> m_slots{};

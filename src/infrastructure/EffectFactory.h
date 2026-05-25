@@ -37,8 +37,15 @@ namespace infrastructure
 		 */
 		void update() override;
 
+		/**
+		 * @brief エフェクトが再生中かどうかを返す
+		 * @param handle play() が返したハンドル
+		 * @return 再生中なら true
+		 */
+		bool isPlaying(int handle) const override;
+
 	private:
-		static constexpr int HIT_POOL_SIZE{ 10 }; // ヒットエフェクトの最大同時再生数
+		static constexpr int HIT_POOL_SIZE{ 10 };
 
 		EffectRepository m_repository{};
 		std::unordered_map<core::constant::EffectType, EffectPool> m_pools{};
