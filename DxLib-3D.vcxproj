@@ -161,6 +161,7 @@
     <ClCompile Include="src\game\scene\TitleView.cpp" />
     <ClCompile Include="src\game\system\AISystem.cpp" />
     <ClCompile Include="src\game\system\AttackSystem.cpp" />
+    <ClCompile Include="src\game\system\EffectSystem.cpp" />
     <ClCompile Include="src\game\system\HitEffectSystem.cpp" />
     <ClCompile Include="src\game\ui\FadeTransition.cpp" />
     <ClCompile Include="src\game\ui\Label.cpp" />
