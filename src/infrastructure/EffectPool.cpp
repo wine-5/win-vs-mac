@@ -81,4 +81,13 @@ namespace infrastructure
 				++it;
 		}
 	}
+
+	bool EffectPool::isActive(int playHandle) const
+	{
+		for (const auto& slot : m_activeSlots)
+		{
+			if (slot->m_playHandle == playHandle) return true;
+		}
+		return false;
+	}
 }

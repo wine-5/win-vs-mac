@@ -41,6 +41,11 @@ namespace infrastructure
 		 */
 		void update();
 
+		/**
+		 * @brief エフェクトがアクティブかどうか
+		 */
+		bool isActive(int playHandle) const;
+
 	private:
 		int m_resourceHandle{ -1 };
 		core::base::ObjectPool<EffectSlot> m_pool{};
