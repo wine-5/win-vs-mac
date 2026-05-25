@@ -25,6 +25,8 @@
 #include "game/scene/SceneManager.h"
 #include "core/interface/IPerformanceDataProvider.h"
 #include "platform/system/WindowsPerformanceProvider.h"
+#include "core/interface/IEffectFactory.h"
+#include "infrastructure/EffectFactory.h"
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 {
@@ -104,5 +106,12 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 	// パフォーマンスデータプロバイダを登録
 	core::base::ServiceLocator::provide<core::iface::IPerformanceDataProvider>(
 		std::make_unique<platform::system::WindowsPerformanceProvider>()
+	);
+
+	// EffectFactory登録
+	auto effectFactory{ std::make_unique<infrastructure::EffectFactory>() };
+	effectFactory->initialize();
+	core::base::ServiceLocator::provide<core::iface::IEffectFactory>(
+		std::move(effectFactory)
 	);
 }
