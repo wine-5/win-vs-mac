@@ -44,13 +44,13 @@ namespace infrastructure
 		}
 
 		// 再生位置を設定する
-		// Y軸反転 + Y軸オフセット調整（Z軸は反転なし）
-		SetPosPlayingEffekseer3DEffect(handle, position.x, -position.y - 75.0f, position.z);
+		// 敵の中心（足元 + 75）にエフェクトを配置(TODO: マジックナンバーの削除もしくはjsonから読み取って半分の値を書く様にする）
+		SetPosPlayingEffekseer3DEffect(handle, position.x, position.y + 75.0f, position.z);
 		LOG("EffectPool::getEffect - Position (converted): (%.2f, %.2f, %.2f), Original: (%.2f, %.2f, %.2f), Handle: %d",
 			position.x, -position.y, position.z, position.x, position.y, position.z, handle);
 
 		// エフェクトスケールを設定
-		SetScalePlayingEffekseer3DEffect(handle, 100.0f, 100.0f, 100.0f);
+		SetScalePlayingEffekseer3DEffect(handle, 10.0f, 10.0f, 10.0f);
 
 		slot->m_playHandle = handle;
 		m_activeSlots.push_back(slot);

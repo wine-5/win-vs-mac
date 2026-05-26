@@ -258,8 +258,6 @@ namespace game::scene
 		m_systemManager.update(deltaTime);
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
 		auto& enemyTransform = m_componentManager.get<game::component::TransformComponent>(m_enemyId);
-		LOG("Player Position: (%.2f, %.2f, %.2f)", transform.m_position.x, transform.m_position.y, transform.m_position.z);
-		LOG("Enemy Position: (%.2f, %.2f, %.2f)", enemyTransform.m_position.x, enemyTransform.m_position.y, enemyTransform.m_position.z);
 		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
 
 		// フレーム最後に入力状態を更新
@@ -271,13 +269,6 @@ namespace game::scene
 		// Effekseer 3D表示設定をDxLibのカメラ設定に同期させる
 		Effekseer_Sync3DSetting();
 
-		// エフェクト描画（モデル描画の前）
-		auto* effectFactory{ core::base::ServiceLocator::get<core::iface::IEffectFactory>() };
-		if (effectFactory)
-		{
-			effectFactory->draw();
-		}
-
 		// コンポーネントの取得
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
 		auto& groundRender = m_componentManager.get<game::component::RenderComponent>(m_groundId);
@@ -287,7 +278,6 @@ namespace game::scene
 		// モデルの描画
 		if (render.m_isVisible)
 			m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
-		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
 
 		// 敵の描画
 		auto& enemyRenderer = m_componentManager.get<component::RenderComponent>(m_enemyId);
@@ -304,9 +294,20 @@ namespace game::scene
 
 		m_renderer.drawCollider(playerColliderCenter, playerCollider.m_size, core::utility::Color::GREEN);
 		m_renderer.drawCollider(groundColliderCenter, groundCollider.m_size, core::utility::Color::BLUE);
+
+		// エフェクト描画
+		auto* effectFactory{ core::base::ServiceLocator::get<core::iface::IEffectFactory>() };
+		if (effectFactory)
+		{
+			effectFactory->draw();
+		}
+
+		// グラウンド描画（最後に描画してエフェクトを前面に）
+		MV1SetOpacityRate(groundRender.m_modelHandle, 0.5f); // 地面αを下げてみる
+		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
 	}
 
-	void InGame::saveResultData(bool isVictory) noexcept
+	void InGame::saveResultData	(bool isVictory) noexcept
 	{
 		core::data::ResultData result{};
 		result.m_isVictory        = isVictory;
