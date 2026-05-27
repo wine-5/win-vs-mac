@@ -261,6 +261,7 @@
     <ClInclude Include="src\core\ecs\ObjectPool.h" />
     <ClInclude Include="src\core\input\GamePadCode.h" />
     <ClInclude Include="src\core\interface\IAnimator.h" />
+    <ClInclude Include="src\core\interface\IAudioManager.h" />
     <ClInclude Include="src\core\interface\IEffectFactory.h" />
     <ClInclude Include="src\core\interface\IFileProvider.h" />
     <ClInclude Include="src\core\interface\IInputProvider.h" />
