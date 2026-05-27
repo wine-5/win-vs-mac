@@ -255,6 +255,7 @@
     <ClInclude Include="src\core\constant\EffectType.h" />
     <ClInclude Include="src\core\constant\JobType.h" />
     <ClInclude Include="src\core\constant\SelectWindowId.h" />
+    <ClInclude Include="src\core\constant\SeType.h" />
     <ClInclude Include="src\core\data\ModelMetadata.h" />
     <ClInclude Include="src\core\base\EventBus.h" />
     <ClInclude Include="src\core\ecs\ObjectPool.h" />
