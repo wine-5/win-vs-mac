@@ -4,9 +4,11 @@
 
 namespace infrastructure
 {
-	void EffectPool::initialize(int resourceHandle, int poolSize)
+	void EffectPool::initialize(int resourceHandle, int poolSize, float yOffset, float scale)
 	{
 		m_resourceHandle = resourceHandle;
+		m_yOffset        = yOffset;
+		m_scale          = scale;
 
 		core::base::ObjectPool<EffectSlot>::Config config{};
 		config.m_initialSize = poolSize;
@@ -43,14 +45,13 @@ namespace infrastructure
 			return -1;
 		}
 
-		// 再生位置を設定する
-		// 敵の中心（足元 + 75）にエフェクトを配置(TODO: マジックナンバーの削除もしくはjsonから読み取って半分の値を書く様にする）
-		SetPosPlayingEffekseer3DEffect(handle, position.x, position.y + 75.0f, position.z);
+		// 再生位置を設定する（足元座標に Y オフセットを加算してモデル中心に合わせる）
+		SetPosPlayingEffekseer3DEffect(handle, position.x, position.y + m_yOffset, position.z);
 		LOG("EffectPool::getEffect - Position (converted): (%.2f, %.2f, %.2f), Original: (%.2f, %.2f, %.2f), Handle: %d",
 			position.x, -position.y, position.z, position.x, position.y, position.z, handle);
 
 		// エフェクトスケールを設定
-		SetScalePlayingEffekseer3DEffect(handle, 10.0f, 10.0f, 10.0f); // TOFOエフェクトごとに設定できるようにする
+		SetScalePlayingEffekseer3DEffect(handle, m_scale, m_scale, m_scale);
 
 		slot->m_playHandle = handle;
 		m_activeSlots.push_back(slot);

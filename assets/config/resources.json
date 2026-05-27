@@ -17,6 +17,12 @@
     {"id": "desktop-bg", "path": "assets/images/background/DesktopBG.jpg"}
   ],
   "effects": [
-    {"type": "Hit", "path": "assets/effects/slash.efk"}
+    {
+      "type": "Hit",
+      "path": "assets/effects/slash.efk",
+      "poolSize": 10,
+      "yOffset": 75.0,
+      "scale": 10.0
+    }
   ]
 }

@@ -4,7 +4,8 @@ namespace game::component
 {
     /**
      * @brief ダメージヒット時の点滅演出を制御するコンポーネント
-     * TODO: 将来的にアニメーションやエフェクトに差し替える予定
+     *        ヒットエフェクト（パーティクル）は EffectSystem / EffectFactory で管理する
+     *        本コンポーネントはモデルの点滅表示のみを担う
      */
     struct HitEffectComponent
     {

@@ -52,8 +52,6 @@ namespace infrastructure
 		void draw() override;
 
 	private:
-		static constexpr int HIT_POOL_SIZE{ 10 };
-
 		EffectRepository m_repository{};
 		std::unordered_map<core::constant::EffectType, EffectPool> m_pools{};
 

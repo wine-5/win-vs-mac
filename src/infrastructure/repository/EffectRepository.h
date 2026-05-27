@@ -7,9 +7,20 @@
 namespace infrastructure
 {
     /**
+     * @brief Effekseer エフェクトリソースの設定情報
+     */
+    struct EffectConfig
+    {
+        int   m_handle  { -1 };   // LoadEffekseerEffect() で取得したハンドル
+        int   m_poolSize{ 0 };  // プールの初期サイズ（必ず resources.json から設定する）
+        float m_yOffset { 0.0f }; // 再生位置の Y 軸オフセット（必ず resources.json から設定する）
+        float m_scale   { 0.0f }; // エフェクトの再生スケール（必ず resources.json から設定する）
+    };
+
+    /**
      * @brief Effekseer エフェクトリソースを管理するリポジトリクラス
      *
-     * @details resources.json からエフェクトファイルパスを読み込み、
+     * @details resources.json からエフェクトファイルパスと設定を読み込み、
      * LoadEffekseerEffect() でハンドルを取得・キャッシュする
      */
     class EffectRepository
@@ -25,15 +36,14 @@ namespace infrastructure
         void initialize();
 
         /**
-         * @brief EffectType に対応するリソースハンドルを返す
-         * @param type エフェクト種類
-         * @return LoadEffekseerEffect() のハンドル（未登録の場合は -1）
+         * @brief 全エフェクト設定を返す
+         * @return EffectType → EffectConfig のマップ
          */
-        [[nodiscard]] int getHandle(core::constant::EffectType type) const;
+        [[nodiscard]] const std::unordered_map<core::constant::EffectType, EffectConfig>& getAllConfigs() const;
 
     private:
         void load(const nlohmann::json& json);
 
-        std::unordered_map<core::constant::EffectType, int> m_handles;
+        std::unordered_map<core::constant::EffectType, EffectConfig> m_configs;
     };
 }

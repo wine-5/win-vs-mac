@@ -20,8 +20,10 @@ namespace infrastructure
 		 * @brief プールを初期化する
 		 * @param resourceHandle LoadEffekseerEffect で取得したリソースハンドル
 		 * @param poolSize 初期プールサイズ
+		 * @param yOffset 再生位置の Y 軸オフセット（モデル足元からの高さ）
+		 * @param scale エフェクトの再生スケール
 		 */
-		void initialize(int resourceHandle, int poolSize);
+		void initialize(int resourceHandle, int poolSize, float yOffset, float scale);
 
 		/**
 		 * @brief エフェクトを指定位置で再生し、プレイハンドルを返す
@@ -47,7 +49,9 @@ namespace infrastructure
 		bool isActive(int playHandle) const;
 
 	private:
-		int m_resourceHandle{ -1 };
+		int   m_resourceHandle{ -1 };
+		float m_yOffset{ 0.0f };
+		float m_scale  { 1.0f };
 		core::base::ObjectPool<EffectSlot> m_pool{};
 		std::vector<EffectSlot*> m_activeSlots{};
 	};

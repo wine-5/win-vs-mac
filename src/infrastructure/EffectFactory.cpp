@@ -1,5 +1,4 @@
 #include "infrastructure/EffectFactory.h"
-#include <vector>
 #include "thirdparty/effekseer/EffekseerForDXLib.h"
 #include <core\interface\ILogger.h>
 
@@ -19,26 +18,16 @@ namespace infrastructure
 		// 注: DxLib のドキュメントに従い、カメラ設定後に初期化する必要がある
 		int initResult{ Effekseer_Init(8000) };
 
-		if (initResult == -1)
-		{
-			return;
-		}
+		if (initResult == -1) return;
 
 		// Effekseer を 3D モードに設定
 		Effekseer_Sync3DSetting();
 
 		m_repository.initialize();
 
-		const std::vector<std::pair<core::constant::EffectType, int>> typePoolSizes
+		for (const auto& [type, config] : m_repository.getAllConfigs())
 		{
-			{core::constant::EffectType::Hit, HIT_POOL_SIZE}
-		};
-
-		for (const auto& [type, poolSize] : typePoolSizes)
-		{
-			int resourceHandle{ m_repository.getHandle(type) };
-			if (resourceHandle == -1) continue;
-			m_pools[type].initialize(resourceHandle, poolSize);
+			m_pools[type].initialize(config.m_handle, config.m_poolSize, config.m_yOffset, config.m_scale);
 		}
 	}
 
