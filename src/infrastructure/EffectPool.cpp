@@ -50,7 +50,7 @@ namespace infrastructure
 			position.x, -position.y, position.z, position.x, position.y, position.z, handle);
 
 		// エフェクトスケールを設定
-		SetScalePlayingEffekseer3DEffect(handle, 10.0f, 10.0f, 10.0f);
+		SetScalePlayingEffekseer3DEffect(handle, 10.0f, 10.0f, 10.0f); // TOFOエフェクトごとに設定できるようにする
 
 		slot->m_playHandle = handle;
 		m_activeSlots.push_back(slot);

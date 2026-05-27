@@ -98,6 +98,8 @@ namespace infrastructure
 
 	void EffectFactory::draw()
 	{
+		// DxLib のカメラ設定を Effekseer に同期してからエフェクトを描画する
+		Effekseer_Sync3DSetting();
 		DrawEffekseer3D();
 	}
 

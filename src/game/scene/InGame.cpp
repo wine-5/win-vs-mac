@@ -7,8 +7,6 @@
 #include "core/base/ServiceLocator.h"
 #include "core/constant/JobType.h"
 #include "core/data/ResultData.h"
-#include "thirdparty/effekseer/EffekseerForDXLib.h" // TODO: アーキテクチャ違反のため修正必須
-
 /* game層 */
 #include "game/factory/FactoryInitializer.h"
 #include "game/system/InputSystem.h"
@@ -266,9 +264,6 @@ namespace game::scene
 
 	void InGame::draw()
 	{
-		// Effekseer 3D表示設定をDxLibのカメラ設定に同期させる
-		Effekseer_Sync3DSetting();
-
 		// コンポーネントの取得
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
 		auto& groundRender = m_componentManager.get<game::component::RenderComponent>(m_groundId);
@@ -278,6 +273,8 @@ namespace game::scene
 		// モデルの描画
 		if (render.m_isVisible)
 			m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
+
+		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
 
 		// 敵の描画
 		auto& enemyRenderer = m_componentManager.get<component::RenderComponent>(m_enemyId);
@@ -298,13 +295,8 @@ namespace game::scene
 		// エフェクト描画
 		auto* effectFactory{ core::base::ServiceLocator::get<core::iface::IEffectFactory>() };
 		if (effectFactory)
-		{
 			effectFactory->draw();
-		}
 
-		// グラウンド描画（最後に描画してエフェクトを前面に）
-		MV1SetOpacityRate(groundRender.m_modelHandle, 0.5f); // 地面αを下げてみる
-		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
 	}
 
 	void InGame::saveResultData	(bool isVictory) noexcept
