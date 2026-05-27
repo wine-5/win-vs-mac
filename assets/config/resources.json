@@ -17,6 +17,6 @@
     {"id": "desktop-bg", "path": "assets/images/background/DesktopBG.jpg"}
   ],
   "effects": [
-    {"type": "Hit", "path": "assets/effects/SlashEffect.efk"}
+    {"type": "Hit", "path": "assets/effects/normal_slash.efk"}
   ]
 }
