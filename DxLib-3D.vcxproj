@@ -319,6 +319,7 @@
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
     <ClInclude Include="src\infrastructure\EffectFactory.h" />
     <ClInclude Include="src\infrastructure\EffectPool.h" />
+    <ClInclude Include="src\infrastructure\repository\AudioRepository.h" />
     <ClInclude Include="src\infrastructure\repository\EffectRepository.h" />
     <ClInclude Include="src\infrastructure\repository\FontRepository.h" />
     <ClInclude Include="src\infrastructure\repository\JobRepository.h" />

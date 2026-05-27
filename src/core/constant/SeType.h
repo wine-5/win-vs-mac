@@ -11,8 +11,8 @@ namespace core::constant
 
         // ゲーム関連
         AttackWarrior,   // 戦士の攻撃
-        AttackMage,      // 魔法使いの攻撃
-        AttackNinja,     // 忍者の攻撃
+        AttackFire,      // 魔法使いの攻撃(いったん炎)
+        AttackNinja,     // 忍者の攻撃（いったん手裏剣）
         HitEnemy,        // 敵がダメージを受けた（TODO: もしかしたらPlayerの職業ごとに音を変更する可能性あり）
         HitPlayer,       // プレイヤーがダメージを受けた
         DeadEnemy,       // 敵が倒れた
