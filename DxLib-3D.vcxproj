@@ -167,6 +167,7 @@
     <ClCompile Include="src\game\ui\Label.cpp" />
     <ClCompile Include="src\infrastructure\EffectFactory.cpp" />
     <ClCompile Include="src\infrastructure\EffectPool.cpp" />
+    <ClCompile Include="src\infrastructure\repository\AudioRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\EffectRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\FontRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\JobRepository.cpp" />

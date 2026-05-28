@@ -213,6 +213,9 @@
     <ClCompile Include="src\platform\window\loading\LoadingWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\infrastructure\repository\AudioRepository.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="src\infrastructure\repository\EffectRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
