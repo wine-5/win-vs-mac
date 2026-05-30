@@ -4,6 +4,8 @@
 #include "core/base/ServiceLocator.h"
 #include "game/GameManager.h"
 #include "core/interface/ILogger.h"
+#include "core/interface/IAudioManager.h"
+#include "core/constant/BgmType.h"
 
 namespace game::scene
 {
@@ -22,6 +24,9 @@ namespace game::scene
 	{
 		if (m_windowManager)
 			m_windowManager->createAllWindows();
+
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio) audio->playBgm(core::constant::BgmType::Select);
 	}
 
 	Select::~Select() noexcept

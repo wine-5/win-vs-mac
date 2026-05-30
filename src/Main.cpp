@@ -4,6 +4,7 @@
 #include "ServiceLocatorInitializer.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
+#include "core/interface/IAudioManager.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
 
@@ -60,7 +61,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	while (ProcessMessage() == 0)
 	{
 		ClearDrawScreen();// 画面クリア
-		
+
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio) audio->update();
+
 		sceneManager->update(DELTA_TIME);
 		sceneManager->draw();
 

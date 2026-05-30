@@ -3,6 +3,8 @@
 #include "SceneType.h"
 #include "game/GameManager.h"
 #include "core/base/ServiceLocator.h"
+#include "core/interface/IAudioManager.h"
+#include "core/constant/BgmType.h"
 
 namespace game::scene
 {
@@ -18,6 +20,15 @@ namespace game::scene
         {
             const auto& resultData = GameManager::getInstance().getResultData();
             resultWindowMgr->show(resultData);
+        }
+
+        // リザルトBGM再生
+        auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+        if (audio)
+        {
+            const auto& resultData{ GameManager::getInstance().getResultData() };
+            const auto bgmType{ resultData.m_isVictory ? core::constant::BgmType::ResultWin : core::constant::BgmType::ResultLose };
+            audio->playBgm(bgmType, false);
         }
     }
 

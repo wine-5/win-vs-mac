@@ -3,6 +3,7 @@
 /* core層 */
 #include "core/interface/ILogger.h"
 #include "core/interface/IEffectFactory.h"
+#include "core/interface/IAudioManager.h"
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
 #include "core/constant/JobType.h"
@@ -59,6 +60,9 @@ namespace game::scene
 		spawnEntities();
 		setupSystems();
 		setupEvents();
+
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio) audio->playBgm(core::constant::BgmType::InGame);
 	}
 
 	void InGame::loadResources()
@@ -192,8 +196,29 @@ namespace game::scene
 					effect.m_isActive = true;
 					effect.m_durationTimer = effect.m_duration;
 					effect.m_blinkTimer = effect.m_blinkInterval;
-				} });
+			}
 
+			// SE 再生
+			auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+			if (audio)
+			{
+				if (e.m_attackerId == m_playerId)
+				{
+					const auto& jobData{ GameManager::getInstance().getJobSelectionData() };
+					if (jobData.hasJobSelected())
+					{
+						switch (jobData.getSelectedJobType())
+						{
+						case core::constant::JobType::Warrior: audio->playSe(core::constant::SeType::AttackWarrior); break;
+						case core::constant::JobType::Mage:    audio->playSe(core::constant::SeType::AttackFire);    break;
+						case core::constant::JobType::Ninja:   audio->playSe(core::constant::SeType::AttackNinja);   break;
+						}
+					}
+				}
+				else if (e.m_targetId == m_playerId)
+					audio->playSe(core::constant::SeType::HitPlayer);
+			}
+			});
 				// プレイヤー死亡イベントの購読
 				m_eventBus.subscribe<event::PlayerDeadEvent>([this](const event::PlayerDeadEvent&)
 					{
@@ -219,7 +244,9 @@ namespace game::scene
 						}
 
 						m_killCount++;
-
+					// 死亡SE再生
+					auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+					if (audio) audio->playSe(core::constant::SeType::DeadEnemy);
 						// 敵が全滅しているかチェック
 						auto enemies{ m_componentManager.getAllEntities<component::AIComponent>() };
 						bool allDead{ true };
@@ -244,15 +271,6 @@ namespace game::scene
 	{
 		m_elapsedTime += deltaTime;
 
-		// デバッグ用：Rキーでリザルト画面へ
-		if (m_inputProvider.isKeyPressed(core::input::KeyCode::R))
-		{
-			LOG("INFO: Rキーでリザルト画面へ遷移");
-			saveResultData(false);
-			auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
-			sceneManager->changeScene(game::scene::SceneType::Result);
-			return;
-		}
 		m_systemManager.update(deltaTime);
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
 		auto& enemyTransform = m_componentManager.get<game::component::TransformComponent>(m_enemyId);
