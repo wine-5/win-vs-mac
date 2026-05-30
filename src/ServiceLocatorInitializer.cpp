@@ -25,7 +25,9 @@
 #include "game/scene/SceneManager.h"
 #include "core/interface/IPerformanceDataProvider.h"
 #include "platform/system/WindowsPerformanceProvider.h"
+#include "core/interface/IAudioManager.h"
 #include "core/interface/IEffectFactory.h"
+#include "infrastructure/AudioManager.h"
 #include "infrastructure/EffectFactory.h"
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
@@ -113,5 +115,12 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 	effectFactory->initialize();
 	core::base::ServiceLocator::provide<core::iface::IEffectFactory>(
 		std::move(effectFactory)
+	);
+
+	// AudioManager登録
+	auto audioManager{ std::make_unique<infrastructure::AudioManager>() };
+	audioManager->initialize();
+	core::base::ServiceLocator::provide<core::iface::IAudioManager>(
+		std::move(audioManager)
 	);
 }

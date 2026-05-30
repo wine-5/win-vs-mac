@@ -222,6 +222,9 @@
     <ClCompile Include="src\infrastructure\EffectPool.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\infrastructure\AudioManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="src\infrastructure\EffectFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -651,6 +654,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\infrastructure\EffectPool.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\infrastructure\AudioManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\infrastructure\EffectFactory.h">

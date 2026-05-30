@@ -165,6 +165,7 @@
     <ClCompile Include="src\game\system\HitEffectSystem.cpp" />
     <ClCompile Include="src\game\ui\FadeTransition.cpp" />
     <ClCompile Include="src\game\ui\Label.cpp" />
+    <ClCompile Include="src\infrastructure\AudioManager.cpp" />
     <ClCompile Include="src\infrastructure\EffectFactory.cpp" />
     <ClCompile Include="src\infrastructure\EffectPool.cpp" />
     <ClCompile Include="src\infrastructure\repository\AudioRepository.cpp" />
@@ -318,6 +319,7 @@
     <ClInclude Include="src\game\ui\Label.h" />
     <ClInclude Include="src\game\utility\ExtensionBonusCalculator.h" />
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
+    <ClInclude Include="src\infrastructure\AudioManager.h" />
     <ClInclude Include="src\infrastructure\EffectFactory.h" />
     <ClInclude Include="src\infrastructure\EffectPool.h" />
     <ClInclude Include="src\infrastructure\repository\AudioRepository.h" />
