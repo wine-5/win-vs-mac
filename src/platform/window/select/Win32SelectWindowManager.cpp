@@ -4,6 +4,7 @@
 #include "core/interface/IScreen.h"
 #include "core/constant/SelectWindowId.h"
 #include "core/constant/JobType.h"
+#include "platform/utility/StringConverter.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include <shellapi.h>
 #include <windows.h>
@@ -279,8 +280,7 @@ namespace platform::window::select
                 // 職業が選択されているか確認
                 if (!m_jobSelected)
                 {
-                    HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
-                    MessageBoxW(parentHwnd, L"職業を選択してからスタートしてください。", L"警告", MB_OK | MB_ICONWARNING);
+                    showWarningMessage("職業を選択してからスタートしてください。");
                     return;
                 }
                 // ゲーム開始前に全サブウィンドウを非表示にしてからコールバックを実行
@@ -355,5 +355,14 @@ namespace platform::window::select
             m_desktopWindow->postMessage(j.dump());
         }
         catch (...) {}
+    }
+
+    void Win32SelectWindowManager::showWarningMessage(const std::string& message) noexcept
+    {
+        HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
+
+        platform::utility::StringConverter converter;
+        std::wstring wMessage = converter.utf8ToWide(message);
+        MessageBoxW(parentHwnd, wMessage.c_str(), L"警告", MB_OK | MB_ICONWARNING);
     }
 }

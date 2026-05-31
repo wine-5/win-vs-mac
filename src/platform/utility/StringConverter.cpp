@@ -33,4 +33,20 @@ namespace platform::utility
 
 		return result;
 	}
+
+	std::wstring StringConverter::utf8ToWide(const std::string& utf8Str) const
+	{
+		if (utf8Str.empty())
+			return L"";
+
+		// UTF-8 → UTF-16（ワイド文字）
+		int wideSize{ MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, nullptr, 0) };
+		if (wideSize == 0)
+			return L"";
+
+		std::wstring result(wideSize - 1, L'\0');
+		MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, &result[0], wideSize);
+
+		return result;
+	}
 }

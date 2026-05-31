@@ -16,5 +16,12 @@ namespace platform::utility
 		 * @return Shift_JIS の文字列
 		 */
 		std::string utf8ToShiftJis(const std::string& utf8Str) const override;
+
+		/**
+		 * @brief UTF-8 を Unicode (ワイド文字) に変換する
+		 * @param utf8Str UTF-8 の文字列
+		 * @return Unicode の文字列
+		 */
+		std::wstring utf8ToWide(const std::string& utf8Str) const override;
 	};
 }

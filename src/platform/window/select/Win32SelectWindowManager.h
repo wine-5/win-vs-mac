@@ -47,6 +47,7 @@ namespace platform::window::select
 
         void updateParameterWindowForJob(core::constant::JobType jobType) noexcept;
         bool isJobSelected() const noexcept override { return m_jobSelected; }
+        void showWarningMessage(const std::string& message) noexcept override;
 
     private:
         // レイアウト定数

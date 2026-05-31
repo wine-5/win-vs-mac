@@ -18,5 +18,12 @@ namespace core::iface
 		 * @return Shift_JIS の文字列
 		 */
 		virtual std::string utf8ToShiftJis(const std::string& utf8Str) const = 0;
+
+		/**
+		 * @brief UTF-8 を Unicode (ワイド文字) に変換する
+		 * @param utf8Str UTF-8 の文字列
+		 * @return Unicode の文字列
+		 */
+		virtual std::wstring utf8ToWide(const std::string& utf8Str) const = 0;
 	};
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "core/constant/SelectWindowId.h"
 #include "core/constant/JobType.h"
+#include <string>
 
 namespace core::iface
 {
