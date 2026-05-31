@@ -6,6 +6,7 @@
 #include "core/constant/JobType.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include <shellapi.h>
+#include <windows.h>
 
 namespace platform::window::select
 {
@@ -66,6 +67,7 @@ namespace platform::window::select
         );
         if (!m_jobWindow->create(m_desktopWindow->getHwnd())) return;
         m_jobWindow->setOnJobSelect([this](core::constant::JobType jobType) noexcept {
+            m_jobSelected = true;
             if (m_onJobSelect) m_onJobSelect(jobType);
             updateParameterWindowForJob(jobType);
         });
@@ -274,6 +276,13 @@ namespace platform::window::select
 
             if (type == platform::window::WindowConstants::MESSAGE_TYPE_START_GAME)
             {
+                // 職業が選択されているか確認
+                if (!m_jobSelected)
+                {
+                    HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
+                    MessageBoxW(parentHwnd, L"職業を選択してからスタートしてください。", L"警告", MB_OK | MB_ICONWARNING);
+                    return;
+                }
                 // ゲーム開始前に全サブウィンドウを非表示にしてからコールバックを実行
                 if (m_desktopWindow && m_desktopWindow->getHwnd())
                     ShowWindow(m_desktopWindow->getHwnd(), SW_HIDE);
