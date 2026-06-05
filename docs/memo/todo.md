@@ -7,6 +7,12 @@
 1. モデルのアニメーション
 2. マップの作製（オブジェクトの配置）
 
+### モデルのアニメーション方針
+- **Player / Enemy（アニメーションあり）**: pmx + vmd を使用
+  - Mixamo FBX → Blender（mmd_tools アドオン）→ MMD標準ボーン名に対応付け → pmx / vmd エクスポート
+  - DxLibはpmxもMV1系APIで透過的に扱えるため、既存の `Animator` / `ModelRepository` のコード変更は不要
+- **地形・建物・Stage（静的オブジェクト）**: mv1 のまま継続
+
 ## ポインタ不要箇所 再評価
 
 ### 実装予定
