@@ -7,6 +7,7 @@ namespace game::event
 {
 	/**
 	 * @brief AttackHitEvent / EnemyDeadEvent を購読してSEを再生するリスナー
+     * AudioManagerでイベントの購読を検討したがアーキテクチャ違反のためListenerクラス作成した
 	 */
 	class AudioEventListener
 	{

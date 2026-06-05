@@ -2,6 +2,7 @@
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/base/EventBus.h"
+#include "core/constant/SeType.h"
 #include "game/attack/IDamageHandler.h"
 
 namespace game::system
@@ -16,8 +17,10 @@ namespace game::system
 		 * @brief AttackSystemのコンストラクタ
 		 * @param componentManager ComponentManagerの参照
 		 * @param eventBus EventBusの参照
+		 * @param playerAttackSeType プレイヤーが攻撃するときに再生するSEの種類
 		 */
-		AttackSystem(core::ecs::ComponentManager& componentManager, core::base::EventBus& eventBus);
+		AttackSystem(core::ecs::ComponentManager& componentManager, core::base::EventBus& eventBus,
+			core::constant::SeType playerAttackSeType = core::constant::SeType::None);
 
 		
 		/**
@@ -29,6 +32,7 @@ namespace game::system
 	private:
 		core::ecs::ComponentManager& m_componentManager;
 		core::base::EventBus& m_eventBus;
+		core::constant::SeType m_playerAttackSeType{ core::constant::SeType::None };
 		std::unique_ptr<attack::IDamageHandler> m_damageChain;
 	};
 }

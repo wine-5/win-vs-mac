@@ -7,6 +7,7 @@
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
 #include "core/constant/JobType.h"
+#include "core/constant/SeType.h"
 #include "core/data/ResultData.h"
 /* game層 */
 #include "game/factory/FactoryInitializer.h"
@@ -58,6 +59,7 @@ namespace game::scene
 	{
 		loadResources();
 		spawnEntities();
+		m_audioEventListener = std::make_unique<game::event::AudioEventListener>(m_eventBus, m_playerId);
 		setupSystems();
 		setupEvents();
 
@@ -170,9 +172,22 @@ namespace game::scene
 
 		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
 		m_systemManager.registerSystem<game::system::AISystem>(m_componentManager);
-		m_systemManager.registerSystem<game::system::AttackSystem>(m_componentManager, m_eventBus);
-		m_systemManager.registerSystem<game::system::HitEffectSystem>(m_componentManager);
-		
+
+		// ジョブに応じた攻撃SEタイプを決定してAttackSystemに渡す
+		core::constant::SeType playerAttackSeType{ core::constant::SeType::None };
+		const auto& jobData{ GameManager::getInstance().getJobSelectionData() };
+		if (jobData.hasJobSelected())
+		{
+			switch (jobData.getSelectedJobType())
+			{
+			case core::constant::JobType::Warrior: playerAttackSeType = core::constant::SeType::AttackWarrior; break;
+			case core::constant::JobType::Mage:    playerAttackSeType = core::constant::SeType::AttackFire;    break;
+			case core::constant::JobType::Ninja:   playerAttackSeType = core::constant::SeType::AttackNinja;   break;
+			}
+		}
+		m_systemManager.registerSystem<game::system::AttackSystem>(m_componentManager, m_eventBus, playerAttackSeType);
+		m_systemManager.registerSystem<game::system::HitEffectSystem>(m_componentManager, m_eventBus);
+
 		auto& effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() };
 		m_systemManager.registerSystem<game::system::EffectSystem>(m_componentManager, m_eventBus, effectFactory);
 	}
@@ -188,38 +203,8 @@ namespace game::scene
 				// 被ダメージ追跡（プレイヤーが攻撃を受けた場合）
 				if (e.m_targetId == m_playerId)
 					m_totalDamageTaken += e.m_damage;
-
-				// ヒットエフェクト開始
-				if (m_componentManager.has<component::HitEffectComponent>(e.m_targetId))
-				{
-					auto& effect{ m_componentManager.get<component::HitEffectComponent>(e.m_targetId) };
-					effect.m_isActive = true;
-					effect.m_durationTimer = effect.m_duration;
-					effect.m_blinkTimer = effect.m_blinkInterval;
-			}
-
-			// SE 再生
-			auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
-			if (audio)
-			{
-				if (e.m_attackerId == m_playerId)
-				{
-					const auto& jobData{ GameManager::getInstance().getJobSelectionData() };
-					if (jobData.hasJobSelected())
-					{
-						switch (jobData.getSelectedJobType())
-						{
-						case core::constant::JobType::Warrior: audio->playSe(core::constant::SeType::AttackWarrior); break;
-						case core::constant::JobType::Mage:    audio->playSe(core::constant::SeType::AttackFire);    break;
-						case core::constant::JobType::Ninja:   audio->playSe(core::constant::SeType::AttackNinja);   break;
-						}
-					}
-				}
-				else if (e.m_targetId == m_playerId)
-					audio->playSe(core::constant::SeType::HitPlayer);
-			}
 			});
-				// プレイヤー死亡イベントの購読
+			// プレイヤー死亡イベントの購読
 				m_eventBus.subscribe<event::PlayerDeadEvent>([this](const event::PlayerDeadEvent&)
 					{
 						LOG("PlayerDead: プレイヤーが死亡しました");
@@ -244,10 +229,8 @@ namespace game::scene
 						}
 
 						m_killCount++;
-					// 死亡SE再生
-					auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
-					if (audio) audio->playSe(core::constant::SeType::DeadEnemy);
-						// 敵が全滅しているかチェック
+
+				// 敵が全滅しているかチェック
 						auto enemies{ m_componentManager.getAllEntities<component::AIComponent>() };
 						bool allDead{ true };
 						for (auto enemyId : enemies)

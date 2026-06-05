@@ -23,7 +23,10 @@ namespace game::event
 
 		// 攻撃SEの再生（プレイヤーがジョブに応じた攻撃音）
 		if (e.m_seType != core::constant::SeType::None)
+		{
 			audio->playSe(e.m_seType);
+			audio->playSe(core::constant::SeType::HitEnemy);
+		}
 
 		// プレイヤーが被弾したときのSE
 		if (e.m_targetId == m_playerId)

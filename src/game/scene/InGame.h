@@ -17,7 +17,7 @@
 #include "game/component/RenderComponent.h"
 #include "game/data/PlayerData.h"
 #include "game/data/FileEquipmentData.h"
-
+#include "game/event/AudioEventListener.h"
 #include <memory>
 
 namespace game::scene
@@ -87,6 +87,8 @@ namespace game::scene
 		core::ecs::EntityId m_enemyId{core::ecs::INVALID_ENTITY_ID};
 
 		core::base::EventBus m_eventBus;
+
+		std::unique_ptr<game::event::AudioEventListener> m_audioEventListener;
 
 		// 進行トラッキング
 		float m_elapsedTime{0.0f};
