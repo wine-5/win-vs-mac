@@ -39,6 +39,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	if (DxLib_Init() == -1) return -1;
 
+	SetDrawScreen(DX_SCREEN_BACK);  // 描画先を裏画面に設定
+
 	// 3D Z-buffer 設定
 	SetUseZBuffer3D(TRUE);
 	SetWriteZBuffer3D(TRUE);
