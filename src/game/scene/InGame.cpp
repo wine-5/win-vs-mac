@@ -87,13 +87,6 @@ namespace game::scene
 	{
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
 
-		// 初期値を保存
-		const float initialHp{ m_playerData.getMaxHp() };
-		const float initialAtk{ m_playerData.getAttackPower() };
-		const float initialDef{ m_playerData.getDefence() };
-		const float initialSpd{ m_playerData.getMoveSpeed() };
-		const float initialRange{ m_playerData.getAttackRange() };
-
 		// 職業パラメータをPlayerDataに反映
 		const auto& jobSelectionData{ GameManager::getInstance().getJobSelectionData() };
 		if (jobSelectionData.hasJobSelected())
@@ -102,12 +95,6 @@ namespace game::scene
 			const auto jobInfo{ m_resourceManager.getJobInfo(jobType) };
 			m_playerData.applyJobParameters(jobInfo.m_hp, jobInfo.m_atk, jobInfo.m_def, jobInfo.m_spd);
 		}
-
-		// 職業適用後の値を保存
-		const float afterJobHp{ m_playerData.getMaxHp() };
-		const float afterJobAtk{ m_playerData.getAttackPower() };
-		const float afterJobDef{ m_playerData.getDefence() };
-		const float afterJobSpd{ m_playerData.getMoveSpeed() };
 
 		// 拡張子ボーナスをPlayerDataに反映
 		for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
@@ -120,28 +107,10 @@ namespace game::scene
 			}
 		}
 
-		// 最終値を保存
-		const float finalHp{ m_playerData.getMaxHp() };
-		const float finalAtk{ m_playerData.getAttackPower() };
-		const float finalDef{ m_playerData.getDefence() };
-		const float finalSpd{ m_playerData.getMoveSpeed() };
-		const float finalRange{ m_playerData.getAttackRange() };
-
-		// テスト用に詳細ログを表示
-		LOG("=== Player パラメータ ===");
-		LOG("  HP        : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialHp, afterJobHp, finalHp);
-		LOG("  ATK       : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialAtk, afterJobAtk, finalAtk);
-		LOG("  DEF       : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialDef, afterJobDef, finalDef);
-		LOG("  SPD       : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialSpd, afterJobSpd, finalSpd);
-		LOG("  ATK Range : %.1f -> (職業)%.1f -> (ファイル)%.1f", initialRange, initialRange, finalRange);
-		LOG("========================");
-
 		initializer.initializePlayer(m_playerData);
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
 
 		m_groundId = initializer.initializeGround();
-		auto& groundTransformInit = m_componentManager.get<component::TransformComponent>(m_groundId);
-		LOG("Ground Position (init): (%.2f, %.2f, %.2f)", groundTransformInit.m_position.x, groundTransformInit.m_position.y, groundTransformInit.m_position.z);
 
 		m_enemyId = initializer.initializeEnemy();
 		// Enemyの初期位置をずらす
@@ -197,9 +166,6 @@ namespace game::scene
 		// Hitイベントの購読
 		m_eventBus.subscribe<event::AttackHitEvent>([this](const event::AttackHitEvent& e)
 			{
-				LOG("AttackHit: 攻撃者のId=%u 被攻撃者のId=%u ダメージ=%.1f",
-					e.m_attackerId, e.m_targetId, e.m_damage);
-
 				// 被ダメージ追跡（プレイヤーが攻撃を受けた場合）
 				if (e.m_targetId == m_playerId)
 					m_totalDamageTaken += e.m_damage;

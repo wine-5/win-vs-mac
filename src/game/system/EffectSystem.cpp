@@ -2,7 +2,6 @@
 #include "core/base/ServiceLocator.h"
 #include "game/component/EffectComponent.h"
 #include "game/component/TransformComponent.h"
-#include "core/interface/ILogger.h"
 
 namespace game::system
 {
@@ -49,8 +48,6 @@ namespace game::system
 		}
 
 		const auto& transform{ m_componentManager.get<component::TransformComponent>(event.m_targetId) };
-		LOG("EffectSystem::onAttackHit - Target Position: (%.2f, %.2f, %.2f), EffectType: %d",
-			transform.m_position.x, transform.m_position.y, transform.m_position.z, static_cast<int>(event.m_effectType));
 
 		// エフェクトを再生してハンドルを取得する
 		int handle{ m_effectFactory.play(event.m_effectType, transform.m_position) };

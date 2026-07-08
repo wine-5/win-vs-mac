@@ -1,6 +1,5 @@
 #include "infrastructure/EffectPool.h"
 #include "thirdparty/effekseer/EffekseerForDXLib.h"
-#include "core/interface/ILogger.h"
 
 namespace infrastructure
 {
@@ -47,8 +46,6 @@ namespace infrastructure
 
 		// 再生位置を設定する（足元座標に Y オフセットを加算してモデル中心に合わせる）
 		SetPosPlayingEffekseer3DEffect(handle, position.x, position.y + m_yOffset, position.z);
-		LOG("EffectPool::getEffect - Position (converted): (%.2f, %.2f, %.2f), Original: (%.2f, %.2f, %.2f), Handle: %d",
-			position.x, -position.y, position.z, position.x, position.y, position.z, handle);
 
 		// エフェクトスケールを設定
 		SetScalePlayingEffekseer3DEffect(handle, m_scale, m_scale, m_scale);
