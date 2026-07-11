@@ -33,8 +33,8 @@ namespace game::system
 			? constant::PlayerAnimationState::Walk
 			: constant::PlayerAnimationState::Idle};
 
-		// 状態が変わったときだけアニメーションを切り替える
-		if (anim.m_state != nextState)
+		// 状態が変わったとき、または未アタッチのときにアニメーションを切り替える
+		if (anim.m_state != nextState || anim.m_animIndex == -1)
 		{
 			int nextHandle{(nextState == constant::PlayerAnimationState::Walk)
 				? m_walkAnimHandle
@@ -43,9 +43,13 @@ namespace game::system
 			changeAnimation(anim, render.m_modelHandle, nextState, nextHandle);
 		}
 
+		// アニメーション時間を進め、終端に達したら先頭に巻き戻してループ再生する
 		anim.m_animTime += deltaTime * ANIMATION_FPS;
-		if (anim.m_animTime >= anim.m_animTotalTime)
-			anim.m_animTime = 0.0f;
+		if (anim.m_animTotalTime > 0.0f)
+		{
+			while (anim.m_animTime >= anim.m_animTotalTime)
+				anim.m_animTime -= anim.m_animTotalTime;
+		}
 
 		m_animator.updateAnimTime(render.m_modelHandle, anim.m_animIndex, anim.m_animTime);
 	}
