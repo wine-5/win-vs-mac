@@ -39,7 +39,6 @@ namespace core::iface
 }
 
 // ログ出力用マクロ（使用を簡潔にする）
-// ログ出力用マクロ（使用を簡潔にする）
 #define LOG(...) \
     do { \
         char _buf[1024]; \
