@@ -21,7 +21,9 @@ namespace game::actor
 		const data::EnemyData& enemyData)
 		: m_entity{ entityManager.create() }
 	{
-		componentManager.add<component::TransformComponent>(m_entity.getId(), {});
+		component::TransformComponent transform{};
+		transform.m_scale = enemyData.getScale();
+		componentManager.add<component::TransformComponent>(m_entity.getId(), transform);
 		componentManager.add<component::VelocityComponent>(m_entity.getId(), {});
 		componentManager.add<component::AnimationComponent<constant::EnemyAnimationState>>(m_entity.getId(), {});
 		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });

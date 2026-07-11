@@ -21,7 +21,9 @@ namespace game::actor
 		const data::PlayerData& playerData)
 		: m_entity{entityManager.create()}
 	{
-		componentManager.add<component::TransformComponent>(m_entity.getId(), {});
+		component::TransformComponent transform{};
+		transform.m_scale = playerData.getScale();
+		componentManager.add<component::TransformComponent>(m_entity.getId(), transform);
 		componentManager.add<component::VelocityComponent>(m_entity.getId(), {});
 		componentManager.add<component::InputComponent>(m_entity.getId(), {});
 		componentManager.add<component::AnimationComponent<constant::PlayerAnimationState>>(m_entity.getId(), {});

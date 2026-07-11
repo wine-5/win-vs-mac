@@ -22,6 +22,7 @@ namespace game::data
 		{
 			PlayerData data;
 			data.m_modelPath = metadata.modelPath;
+			data.m_scale = metadata.scale;
 			data.m_colliderSize = metadata.colliderSize;
 			data.m_colliderOffset = metadata.colliderOffset;
 
@@ -98,6 +99,8 @@ namespace game::data
 		[[nodiscard]] core::Vector3      getColliderSize()   const noexcept { return m_colliderSize; }
 		/** @brief コライダーオフセットを取得 */
 		[[nodiscard]] core::Vector3      getColliderOffset() const noexcept { return m_colliderOffset; }
+		/** @brief モデルスケールを取得 */
+		[[nodiscard]] core::Vector3      getScale()          const noexcept { return m_scale; }
 
 		/**
 		 * @brief FileExtensionBonus をパラメータに加算する
@@ -147,6 +150,7 @@ namespace game::data
 		float         m_attackCooldown{ 0.0f };
 		core::Vector3 m_colliderSize;
 		core::Vector3 m_colliderOffset;
+		core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
 
 		// 基本値（メタデータから取得）
 		float m_baseHp{ 0.0f };
