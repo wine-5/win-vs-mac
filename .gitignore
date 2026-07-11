@@ -135,4 +135,4 @@ packages/
 *.tlog
 Backup/
 tmp/
-temp/
+temp/__pycache__/

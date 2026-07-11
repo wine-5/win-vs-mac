@@ -10,12 +10,13 @@ Mixamo FBX → DxLib mv1 用 FBX 変換スクリプト
   python tools/convert_fbx.py --input input.fbx --output output.fbx [--anim-only]
 """
 
+import os
 import sys
 import argparse
 import bpy
 
 # tools フォルダをパスに追加（モジュールインポート用）
-sys.path.insert(0, __file__.rsplit('/', 1)[0])
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import blender_fbx_cleanup as cleanup
 import extract_anim_only as extract
