@@ -3,7 +3,7 @@
   "category": "player",
   "model": {
     "path": "assets/model/Player.mv1",
-    "scale": [ 1, 1, 1 ]
+    "scale": [ 165, 165, 165 ]
   },
   "collider": {
     "size": [ 50.5, 150.7, 50.5 ],
