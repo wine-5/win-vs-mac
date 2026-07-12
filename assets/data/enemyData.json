@@ -10,9 +10,9 @@
     "offset": [ 0, 75, 0 ]
   },
   "transform": {
-    "posX": 300.0,
+    "posX": 100.0,
     "posY": 0.0,
-    "posZ": 300.0
+    "posZ": 100.0
   },
   "animations": {
     "idle": "assets/animations/enemies/xcode/Xcode_Idle.mv1",
