@@ -22,6 +22,7 @@ namespace game::actor
 		: m_entity{ entityManager.create() }
 	{
 		component::TransformComponent transform{};
+		transform.m_position = enemyData.getPosition();
 		transform.m_scale = enemyData.getScale();
 		componentManager.add<component::TransformComponent>(m_entity.getId(), transform);
 		componentManager.add<component::VelocityComponent>(m_entity.getId(), {});

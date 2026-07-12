@@ -22,6 +22,7 @@ namespace game::data
             EnemyData data;
             data.m_modelPath = metadata.modelPath;
             data.m_scale = metadata.scale;
+            data.m_position = metadata.position;
             data.m_colliderSize = metadata.colliderSize;
             data.m_colliderOffset = metadata.colliderOffset;
 
@@ -99,6 +100,8 @@ namespace game::data
         [[nodiscard]] core::Vector3      getColliderOffset() const noexcept { return m_colliderOffset; }
         /** @brief モデルスケールを取得 */
         [[nodiscard]] core::Vector3      getScale()          const noexcept { return m_scale; }
+        /** @brief 初期位置を取得 */
+        [[nodiscard]] core::Vector3      getPosition()       const noexcept { return m_position; }
 
     private:
         std::string   m_modelPath;
@@ -114,5 +117,6 @@ namespace game::data
         core::Vector3 m_colliderSize;
         core::Vector3 m_colliderOffset;
         core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
+        core::Vector3 m_position;
     };
 }
