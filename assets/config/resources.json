@@ -5,8 +5,24 @@
     {"id": "enemy" , "path": "assets/data/enemyData.json"}
   ],
   "animations": [
-    {"id": "anim_player_idle", "path": "assets/animations/Player_Idle.mv1"},
-    {"id": "anim_player_walk", "path": "assets/animations/Player_Walking.mv1"}
+    {"id": "anim_player_idle",       "path": "assets/animations/player/Player_Idle.mv1"},
+    {"id": "anim_player_walk",       "path": "assets/animations/player/Player_Walking.mv1"},
+    {"id": "anim_player_run",        "path": "assets/animations/player/Player_Run.mv1"},
+    {"id": "anim_player_slash",      "path": "assets/animations/player/Player_SwordSlash.mv1"},
+    {"id": "anim_player_spin",       "path": "assets/animations/player/Player_SwordSpin.mv1"},
+    {"id": "anim_player_hit",        "path": "assets/animations/player/Player_HitReaction.mv1"},
+    {"id": "anim_player_dying",      "path": "assets/animations/player/Player_Dying.mv1"},
+    {"id": "anim_player_jump",       "path": "assets/animations/player/Player_Jump.mv1"},
+    {"id": "anim_mac_idle",          "path": "assets/animations/enemies/mac/Mac_Idle.mv1"},
+    {"id": "anim_mac_walk",          "path": "assets/animations/enemies/mac/Mac_Walk.mv1"},
+    {"id": "anim_mac_run",           "path": "assets/animations/enemies/mac/Mac_Run.mv1"},
+    {"id": "anim_mac_swing_attack",  "path": "assets/animations/enemies/mac/Mac_SwingAttack.mv1"},
+    {"id": "anim_mac_magic_attack",  "path": "assets/animations/enemies/mac/Mac_MagicAttack.mv1"},
+    {"id": "anim_mac_dying",         "path": "assets/animations/enemies/mac/Mac_Dying.mv1"},
+    {"id": "anim_xcode_idle",        "path": "assets/animations/enemies/xcode/Xcode_Idle.mv1"},
+    {"id": "anim_xcode_walk",        "path": "assets/animations/enemies/xcode/Xcode_Walk.mv1"},
+    {"id": "anim_xcode_ground_slam", "path": "assets/animations/enemies/xcode/Xcode_GroundSlam.mv1"},
+    {"id": "anim_xcode_dying",       "path": "assets/animations/enemies/xcode/Xcode_Dying.mv1"}
   ],
   "fonts": [
     {"id": "main",   "path": "assets/fonts/MaruMonica.ttf",  "name": "x12y16pxMaruMonica"},
