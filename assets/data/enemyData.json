@@ -2,8 +2,8 @@
   "id": "enemy",
   "category": "enemy",
   "model": {
-    "path": "assets/model/Player.mv1",
-    "scale": [ 1, 1, 1 ]
+    "path": "assets/model/enemies/xcode/Xcode.mv1",
+    "scale": [ 165, 165, 165 ]
   },
   "collider": {
     "size": [ 50.5, 150.7, 50.5 ],
@@ -15,8 +15,8 @@
     "posZ": 300.0
   },
   "animations": {
-    "idle": "assets/animations/Player_Idle.mv1",
-    "walk": "assets/animations/Player_Walking.mv1"
+    "idle": "assets/animations/enemies/xcode/Xcode_Idle.mv1",
+    "walk": "assets/animations/enemies/xcode/Xcode_Walk.mv1"
   },
   "gameplay": {
     "moveSpeed": 5.0,
