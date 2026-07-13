@@ -1,16 +1,21 @@
-﻿#pragma once
+#pragma once
+#include <unordered_map>
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
+#include "core/base/EventBus.h"
 #include "core/interface/IAnimator.h"
 #include "game/component/AnimationComponent.h"
-#include "game/component/VelocityComponent.h"
-#include "game/constant/PlayerAnimationState.h"
+#include "game/constant/AnimationState.h"
 
 namespace game::system
 {
 	/**
-	 * @brief アニメーション状態を管理・更新するSystem
+	 * @brief 全エンティティのアニメーション切り替え・再生を一元管理するSystem
+	 *
+	 * 他のSystemは AnimationComponent::m_requested に状態を書くだけでよい。
+	 * 本Systemが優先度判定・attach/detach・ループ/完了処理・遷移ログを行う。
+	 * 非ループクリップの再生完了時は AnimationFinishedEvent を発行する。
 	 */
 	class AnimationSystem : public core::ecs::ISystem
 	{
@@ -18,34 +23,47 @@ namespace game::system
 		/**
 		 * @brief AnimationSystemのコンストラクタ
 		 * @param componentManager ComponentManagerの参照
-		 * @param entityId 対象EntityのID
 		 * @param animator IAnimatorの参照
-		 * @param idleAnimHandle Idleアニメーションハンドル
-		 * @param walkAnimHandle Walkアニメーションハンドル
+		 * @param eventBus 完了イベント発行用のEventBus
 		 */
 		AnimationSystem(core::ecs::ComponentManager& componentManager,
-			core::ecs::EntityId entityId,
 			core::iface::IAnimator& animator,
-			int idleAnimHandle,
-			int walkAnimHandle);
+			core::base::EventBus& eventBus);
 
 		/**
-		 * @brief アニメーション状態を管理・更新する
+		 * @brief 全エンティティのアニメーション状態を更新する
 		 * @param deltaTime フレーム間の時間差
 		 */
 		void update(float deltaTime) override;
 
 	private:
-		void changeAnimation(
-			component::AnimationComponent<constant::PlayerAnimationState>& anim,
+		/**
+		 * @brief 要求された状態への遷移を優先度に基づいて試みる
+		 * @param entityId 対象EntityのID
+		 * @param anim 対象のAnimationComponent
+		 * @param modelHandle 描画モデルハンドル
+		 */
+		void tryChangeState(core::ecs::EntityId entityId,
+			component::AnimationComponent& anim,
+			int modelHandle);
+
+		/**
+		 * @brief アニメーションを切り替える（優先度判定なしの強制遷移）
+		 * @param entityId 対象EntityのID（ログ用）
+		 * @param anim 対象のAnimationComponent
+		 * @param modelHandle 描画モデルハンドル
+		 * @param newState 遷移先の状態
+		 */
+		void changeAnimation(core::ecs::EntityId entityId,
+			component::AnimationComponent& anim,
 			int modelHandle,
-			constant::PlayerAnimationState newState,
-			int newAnimHandle);
-		
+			constant::AnimationState newState);
+
 		core::ecs::ComponentManager& m_componentManager;
-		core::ecs::EntityId m_entityId{};
 		core::iface::IAnimator& m_animator;
-		int m_idleAnimHandle{-1};
-		int m_walkAnimHandle{-1};
+		core::base::EventBus& m_eventBus;
+
+		// 遷移拒否ログのスパム防止用（entityごとに最後に拒否した要求を記録）
+		std::unordered_map<core::ecs::EntityId, constant::AnimationState> m_lastDeniedRequests{};
 	};
 }
