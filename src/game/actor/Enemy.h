@@ -3,6 +3,7 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 #include "core/utility/Vector3.h"
+#include "core/interface/IResourceManager.h"
 #include "game/data/EnemyData.h"
 
 namespace game::actor
@@ -17,11 +18,13 @@ namespace game::actor
          * @brief Enemyのコンストラクタ
          * @param entityManager EntityManagerの参照
          * @param componentManager ComponentManagerの参照
+         * @param resourceManager アニメーションハンドル取得用のIResourceManager
          * @param modelHandle モデルハンドル
-         * @param Enemyのデータ
+         * @param enemyData Enemyのデータ
          */
         Enemy(core::ecs::EntityManager& entityManager,
             core::ecs::ComponentManager& componentManager,
+            core::iface::IResourceManager& resourceManager,
             int modelHandle,
             const data::EnemyData& enemyData
             );

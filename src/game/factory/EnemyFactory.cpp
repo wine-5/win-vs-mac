@@ -17,6 +17,7 @@ namespace game::factory
 		auto enemy{std::make_unique<actor::Enemy>(
 			m_entityManager,
 			m_componentManager,
+			m_resourceManager,
 			modelHandle,
 			enemyData)};
 
