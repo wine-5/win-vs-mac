@@ -2,6 +2,7 @@
 #include "game/component/InputComponent.h"
 #include "game/component/VelocityComponent.h"
 #include "game/component/TransformComponent.h"
+#include "game/component/AnimationComponent.h"
 #include <cmath>
 
 namespace game::system
@@ -23,7 +24,17 @@ namespace game::system
 		velocity.m_velocity.z = input.m_moveZ * m_moveSpeed;
 
 		// 移動入力があるときだけ向きを更新する
-		if (input.m_moveX != 0.0f || input.m_moveZ != 0.0f)
+		const bool isMoving{ input.m_moveX != 0.0f || input.m_moveZ != 0.0f };
+		if (isMoving)
 			transform.m_rotation.y = atan2f(-input.m_moveX, -input.m_moveZ);
+
+		// 移動状態に応じたアニメーションを要求する
+		if (m_componentManager.has<component::AnimationComponent>(m_entityId))
+		{
+			auto& anim = m_componentManager.get<component::AnimationComponent>(m_entityId);
+			anim.m_requested = isMoving
+				? constant::AnimationState::Walk
+				: constant::AnimationState::Idle;
+		}
 	}
 }
