@@ -14,12 +14,12 @@ namespace game::actor
 		constexpr float dashAnimSpeed{ 0.8f }; // ダッシュのアニメの再生速度(見た目の調整)
 
 		component::AnimationComponent anim{};
-		anim.m_clips[AnimationState::Idle] = { m_resourceManager.loadAnimationById(anim_id::MAC_IDLE), true };
-		anim.m_clips[AnimationState::Walk] = { m_resourceManager.loadAnimationById(anim_id::MAC_WALK), true, AnimationState::Idle, priority::LOCOMOTION, walkAnimSpeed };
-		anim.m_clips[AnimationState::Walk] = { m_resourceManager.loadAnimationById(anim_id::MAC_RUN), true, AnimationState::Run, priority::LOCOMOTION, dashAnimSpeed };
-		anim.m_clips[AnimationState::Attack1] = { m_resourceManager.loadAnimationById(anim_id::MAC_SWING_ATTACK), false, AnimationState::Attack1,  priority::ATTACK };
-		anim.m_clips[AnimationState::Attack2] = { m_resourceManager.loadAnimationById(anim_id::MAC_MAGIC_ATTACK), false, AnimationState::Attack2,  priority::ATTACK };
-		anim.m_clips[AnimationState::Dying] = { m_resourceManager.loadAnimationById(anim_id::MAC_DYING),       false, AnimationState::Dying, priority::DYING };
+		anim.m_clips[AnimationState::Idle]    = { m_resourceManager.loadAnimationById(anim_id::MAC_IDLE), true };
+		anim.m_clips[AnimationState::Walk]    = { m_resourceManager.loadAnimationById(anim_id::MAC_WALK), true, AnimationState::Idle, priority::LOCOMOTION, walkAnimSpeed };
+		anim.m_clips[AnimationState::Run]    = { m_resourceManager.loadAnimationById(anim_id::MAC_RUN), true, AnimationState::Idle, priority::LOCOMOTION, dashAnimSpeed };
+		anim.m_clips[AnimationState::Attack1] = { m_resourceManager.loadAnimationById(anim_id::MAC_SWING_ATTACK), false, AnimationState::Idle,  priority::ATTACK };
+		anim.m_clips[AnimationState::Attack2] = { m_resourceManager.loadAnimationById(anim_id::MAC_MAGIC_ATTACK), false, AnimationState::Idle,  priority::ATTACK };
+		anim.m_clips[AnimationState::Dying]   = { m_resourceManager.loadAnimationById(anim_id::MAC_DYING),       false, AnimationState::Dying, priority::DYING };
 		m_componentManager.add<component::AnimationComponent>(m_entity.getId(), anim);
 	}
 
