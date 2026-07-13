@@ -5,8 +5,6 @@
 
 namespace game::actor
 {
-
-
 	void XcodeEnemy::setupAnimation()
 	{
 		using constant::AnimationState;
