@@ -11,12 +11,13 @@
 #include "game/component/HitEffectComponent.h"
 #include "game/component/EffectComponent.h"
 #include "game/constant/Tag.h"
-#include "game/constant/PlayerAnimationState.h"
+#include "game/constant/AnimationId.h"
 
 namespace game::actor
 {
 	Player::Player(core::ecs::EntityManager& entityManager,
 		core::ecs::ComponentManager& componentManager,
+		core::iface::IResourceManager& resourceManager,
 		int modelHandle,
 		const data::PlayerData& playerData)
 		: m_entity{entityManager.create()}
@@ -26,7 +27,20 @@ namespace game::actor
 		componentManager.add<component::TransformComponent>(m_entity.getId(), transform);
 		componentManager.add<component::VelocityComponent>(m_entity.getId(), {});
 		componentManager.add<component::InputComponent>(m_entity.getId(), {});
-		componentManager.add<component::AnimationComponent<constant::PlayerAnimationState>>(m_entity.getId(), {});
+
+		// アニメーションクリップの登録（状態→クリップの対応表）
+		using constant::AnimationState;
+		namespace anim_id = constant::animation_id;
+		component::AnimationComponent anim{};
+		anim.m_clips[AnimationState::Idle]    = { resourceManager.loadAnimationById(anim_id::PLAYER_IDLE),  true };
+		anim.m_clips[AnimationState::Walk]    = { resourceManager.loadAnimationById(anim_id::PLAYER_WALK),  true, AnimationState::Idle, 0, 0.6f };
+		anim.m_clips[AnimationState::Run]     = { resourceManager.loadAnimationById(anim_id::PLAYER_RUN),   true };
+		anim.m_clips[AnimationState::Attack1] = { resourceManager.loadAnimationById(anim_id::PLAYER_SLASH), false, AnimationState::Idle,  30 };
+		anim.m_clips[AnimationState::Attack2] = { resourceManager.loadAnimationById(anim_id::PLAYER_SPIN),  false, AnimationState::Idle,  30 };
+		anim.m_clips[AnimationState::Hit]     = { resourceManager.loadAnimationById(anim_id::PLAYER_HIT),   false, AnimationState::Idle,  50 };
+		anim.m_clips[AnimationState::Dying]   = { resourceManager.loadAnimationById(anim_id::PLAYER_DYING), false, AnimationState::Dying, 100 };
+		anim.m_clips[AnimationState::Jump]    = { resourceManager.loadAnimationById(anim_id::PLAYER_JUMP),  false, AnimationState::Idle,  20 };
+		componentManager.add<component::AnimationComponent>(m_entity.getId(), anim);
 		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
 		componentManager.add<component::HitEffectComponent>(m_entity.getId(), {});
 		componentManager.add<component::EffectComponent>(m_entity.getId(), {});
