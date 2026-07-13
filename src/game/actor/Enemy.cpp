@@ -31,11 +31,14 @@ namespace game::actor
 		// アニメーションクリップの登録（Xcode: Idle/Walk/GroundSlam/Dying）
 		using constant::AnimationState;
 		namespace anim_id = constant::animation_id;
+		namespace priority = constant::animation_priority;
+		constexpr float walkAnimSpeed{ 0.6f }; // 歩行アニメの再生速度（見た目の調整値）
+
 		component::AnimationComponent anim{};
 		anim.m_clips[AnimationState::Idle]    = { resourceManager.loadAnimationById(anim_id::XCODE_IDLE), true };
-		anim.m_clips[AnimationState::Walk]    = { resourceManager.loadAnimationById(anim_id::XCODE_WALK), true, AnimationState::Idle, 0, 0.6f };
-		anim.m_clips[AnimationState::Attack1] = { resourceManager.loadAnimationById(anim_id::XCODE_GROUND_SLAM), false, AnimationState::Idle,  30 };
-		anim.m_clips[AnimationState::Dying]   = { resourceManager.loadAnimationById(anim_id::XCODE_DYING),       false, AnimationState::Dying, 100 };
+		anim.m_clips[AnimationState::Walk]    = { resourceManager.loadAnimationById(anim_id::XCODE_WALK), true, AnimationState::Idle, priority::LOCOMOTION, walkAnimSpeed };
+		anim.m_clips[AnimationState::Attack1] = { resourceManager.loadAnimationById(anim_id::XCODE_GROUND_SLAM), false, AnimationState::Idle,  priority::ATTACK };
+		anim.m_clips[AnimationState::Dying]   = { resourceManager.loadAnimationById(anim_id::XCODE_DYING),       false, AnimationState::Dying, priority::DYING };
 		componentManager.add<component::AnimationComponent>(m_entity.getId(), anim);
 		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
 		componentManager.add<component::HitEffectComponent>(m_entity.getId(), {});

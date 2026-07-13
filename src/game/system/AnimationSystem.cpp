@@ -45,7 +45,7 @@ namespace game::system
 			const auto& clip{ clipIt->second };
 
 			// 時間更新（ループは巻き戻し、非ループは終端で停止して完了処理）
-			anim.m_animTime += deltaTime * ANIMATION_FPS;
+			anim.m_animTime += deltaTime * ANIMATION_FPS * clip.m_speed;
 			if (clip.m_isLoop)
 			{
 				if (anim.m_animTotalTime > 0.0f)

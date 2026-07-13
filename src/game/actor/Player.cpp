@@ -31,15 +31,18 @@ namespace game::actor
 		// アニメーションクリップの登録（状態→クリップの対応表）
 		using constant::AnimationState;
 		namespace anim_id = constant::animation_id;
+		namespace priority = constant::animation_priority;
+		constexpr float walkAnimSpeed{ 0.6f }; // 歩行アニメの再生速度（見た目の調整値）
+
 		component::AnimationComponent anim{};
 		anim.m_clips[AnimationState::Idle]    = { resourceManager.loadAnimationById(anim_id::PLAYER_IDLE),  true };
-		anim.m_clips[AnimationState::Walk]    = { resourceManager.loadAnimationById(anim_id::PLAYER_WALK),  true, AnimationState::Idle, 0, 0.6f };
+		anim.m_clips[AnimationState::Walk]    = { resourceManager.loadAnimationById(anim_id::PLAYER_WALK),  true, AnimationState::Idle, priority::LOCOMOTION, walkAnimSpeed };
 		anim.m_clips[AnimationState::Run]     = { resourceManager.loadAnimationById(anim_id::PLAYER_RUN),   true };
-		anim.m_clips[AnimationState::Attack1] = { resourceManager.loadAnimationById(anim_id::PLAYER_SLASH), false, AnimationState::Idle,  30 };
-		anim.m_clips[AnimationState::Attack2] = { resourceManager.loadAnimationById(anim_id::PLAYER_SPIN),  false, AnimationState::Idle,  30 };
-		anim.m_clips[AnimationState::Hit]     = { resourceManager.loadAnimationById(anim_id::PLAYER_HIT),   false, AnimationState::Idle,  50 };
-		anim.m_clips[AnimationState::Dying]   = { resourceManager.loadAnimationById(anim_id::PLAYER_DYING), false, AnimationState::Dying, 100 };
-		anim.m_clips[AnimationState::Jump]    = { resourceManager.loadAnimationById(anim_id::PLAYER_JUMP),  false, AnimationState::Idle,  20 };
+		anim.m_clips[AnimationState::Attack1] = { resourceManager.loadAnimationById(anim_id::PLAYER_SLASH), false, AnimationState::Idle,  priority::ATTACK };
+		anim.m_clips[AnimationState::Attack2] = { resourceManager.loadAnimationById(anim_id::PLAYER_SPIN),  false, AnimationState::Idle,  priority::ATTACK };
+		anim.m_clips[AnimationState::Hit]     = { resourceManager.loadAnimationById(anim_id::PLAYER_HIT),   false, AnimationState::Idle,  priority::HIT };
+		anim.m_clips[AnimationState::Dying]   = { resourceManager.loadAnimationById(anim_id::PLAYER_DYING), false, AnimationState::Dying, priority::DYING };
+		anim.m_clips[AnimationState::Jump]    = { resourceManager.loadAnimationById(anim_id::PLAYER_JUMP),  false, AnimationState::Idle,  priority::JUMP };
 		componentManager.add<component::AnimationComponent>(m_entity.getId(), anim);
 		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
 		componentManager.add<component::HitEffectComponent>(m_entity.getId(), {});

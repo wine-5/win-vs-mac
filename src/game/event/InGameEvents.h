@@ -3,6 +3,7 @@
 #include "core/event/IGameEvent.h"
 #include "core/constant/EffectType.h"
 #include "core/constant/SeType.h"
+#include "game/constant/AnimationState.h"
 
 namespace game::event
 {
@@ -35,6 +36,25 @@ namespace game::event
 			, m_damage{ dmg }
 			, m_effectType{effectType}
 			, m_seType{seType}
+		{
+		}
+	};
+
+	/**
+	 * @brief 非ループアニメーションが再生完了したときに発行されるイベント
+	 */
+	struct AnimationFinishedEvent : public core::event::IGameEvent
+	{
+		/** @brief 再生が完了したEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief 完了したアニメーション状態 */
+		constant::AnimationState m_state{ constant::AnimationState::Idle };
+
+		AnimationFinishedEvent() = default;
+		AnimationFinishedEvent(core::ecs::EntityId id, constant::AnimationState state)
+			: m_entityId{ id }
+			, m_state{ state }
 		{
 		}
 	};

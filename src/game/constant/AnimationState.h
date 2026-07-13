@@ -23,6 +23,21 @@ namespace game::constant
 	};
 
 	/**
+	 * @brief アニメーションの割り込み優先度の定数
+	 *
+	 * 再生中クリップより低い優先度の要求は再生完了まで無視される。
+	 * この大小関係はゲーム全体のルールなので、クリップ登録時は必ずここを使う
+	 */
+	namespace animation_priority
+	{
+		constexpr int DYING      = 100; // 死亡（何にも割り込まれない）
+		constexpr int HIT        = 50;  // 被弾（攻撃をキャンセルする）
+		constexpr int ATTACK     = 30;  // 攻撃
+		constexpr int JUMP       = 20;  // ジャンプ
+		constexpr int LOCOMOTION = 0;   // 移動系（Idle/Walk/Run、互いに自由に遷移）
+	}
+
+	/**
 	 * @brief アニメーション状態をログ出力用の文字列に変換
 	 * @param state 変換する状態
 	 * @return 状態名の文字列
