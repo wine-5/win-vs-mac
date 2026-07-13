@@ -1,4 +1,7 @@
 ﻿#include "EnemyFactory.h"
+#include "game/actor/XcodeEnemy.h"
+#include "game/actor/SafariEnemy.h"
+#include "game/actor/MacEnemy.h"
 
 namespace game::factory
 {
@@ -12,16 +15,30 @@ namespace game::factory
 	{
 	}
 
-	core::ecs::EntityId EnemyFactory::create(int modelHandle, const data::EnemyData& enemyData)
+	core::ecs::EntityId EnemyFactory::create(constant::EnemyType type, int modelHandle, const data::EnemyData& enemyData)
 	{
-		auto enemy{std::make_unique<actor::Enemy>(
-			m_entityManager,
-			m_componentManager,
-			m_resourceManager,
-			modelHandle,
-			enemyData)};
+		std::unique_ptr<actor::EnemyBase> enemy{};
 
-		core::ecs::EntityId id{enemy->getId()};
+		switch (type)
+		{
+		case game::constant::EnemyType::Xcode:
+			enemy = std::make_unique<actor::XcodeEnemy>(
+				m_entityManager, m_componentManager, m_resourceManager, modelHandle, enemyData);
+			break;
+		case game::constant::EnemyType::Safari:
+			enemy = std::make_unique<actor::SafariEnemy>(
+				m_entityManager, m_componentManager, m_resourceManager, modelHandle, enemyData);
+			break;
+		case game::constant::EnemyType::Mac:
+			enemy = std::make_unique<actor::MacEnemy>(
+				m_entityManager, m_componentManager, m_resourceManager, modelHandle, enemyData);
+			break;
+		}
+
+		// 2段階初期化：生成後に呼ぶことで仮想フックが派生クラスに正しく届く
+		enemy->initialize();
+
+		core::ecs::EntityId id{ enemy->getId() };
 		m_enemies.push_back(std::move(enemy));
 		m_enemyIds.push_back(id);
 		return id;

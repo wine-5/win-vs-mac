@@ -2,6 +2,8 @@
 #include "core/interface/ILogger.h"
 #include <cassert>
 #include <stdexcept>
+#include "game/constant/EnemyType.h"
+
 
 namespace game::factory
 {
@@ -12,7 +14,6 @@ namespace game::factory
 		, m_resourceManager{resourceManager}
 	{
 	}
-
 
 	void FactoryInitializer::initializePlayer(const data::PlayerData& playerData)
 	{
@@ -46,6 +47,6 @@ namespace game::factory
 		}
 
 		data::EnemyData enemyData = data::EnemyData::fromMetadata(enemyMeta.value());
-		return m_factoryManager.getEnemyFactory().create(enemyHandle, enemyData);
+		return m_factoryManager.getEnemyFactory().create(constant::EnemyType::Xcode,enemyHandle, enemyData);
 	}
 }

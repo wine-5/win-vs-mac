@@ -145,7 +145,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\game\actor\Enemy.cpp" />
     <ClCompile Include="src\game\actor\EnemyBase.cpp" />
     <ClCompile Include="src\game\actor\MacEnemy.cpp" />
     <ClCompile Include="src\game\actor\SafariEnemy.cpp" />
@@ -288,7 +287,6 @@
     <ClInclude Include="src\core\interface\IUIRenderer.h" />
     <ClInclude Include="src\core\interface\IWindow.h" />
     <ClInclude Include="src\core\interface\IWindowFactory.h" />
-    <ClInclude Include="src\game\actor\Enemy.h" />
     <ClInclude Include="src\game\actor\EnemyBase.h" />
     <ClInclude Include="src\game\attack\BaseAttackHandler.h" />
     <ClInclude Include="src\game\attack\DamageChain.h" />
@@ -301,6 +299,7 @@
     <ClInclude Include="src\game\component\HitEffectComponent.h" />
     <ClInclude Include="src\game\component\TagComponent.h" />
     <ClInclude Include="src\game\constant\EnemyAnimationState.h" />
+    <ClInclude Include="src\game\constant\EnemyType.h" />
     <ClInclude Include="src\game\constant\MetadataKeys.h" />
     <ClInclude Include="src\game\data\EnemyData.h" />
     <ClInclude Include="src\game\data\FileEquipmentData.h" />
