@@ -14,6 +14,7 @@ namespace infrastructure
 			m_jobRepo = std::make_unique<JobRepository>();
 			m_imageRepo = std::make_unique<ImageRepository>();
 			m_animRepo = std::make_unique<AnimationRepository>();
+			m_stageRepo = std::make_unique<StageRepository>();
 		}
 		catch (const std::exception& e)
 		{
@@ -61,5 +62,12 @@ namespace infrastructure
 		if (!m_animRepo)
 			return -1;
 		return m_animRepo->loadAnimationById(animationId);
+	}
+
+	const core::data::StageMetadata& ResourceManager::getStageMetadata() const
+	{
+		if (!m_stageRepo)
+			throw std::runtime_error("StageRepository が初期化されていません");
+		return m_stageRepo->getStageMetadata();
 	}
 }

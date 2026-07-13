@@ -6,6 +6,7 @@
 #include "infrastructure/repository/JobRepository.h"
 #include "infrastructure/repository/ImageRepository.h"
 #include "infrastructure/repository/AnimationRepository.h"
+#include "infrastructure/repository/StageRepository.h"
 
 namespace infrastructure
 {
@@ -61,11 +62,18 @@ namespace infrastructure
 		 */
 		int loadAnimationById(std::string_view animationId) override;
 
+		/**
+		 * @brief ステージの配置定義を取得する
+		 * @return ステージ配置定義
+		 */
+		[[nodiscard]] const core::data::StageMetadata& getStageMetadata() const override;
+
 	private:
 		std::unique_ptr<ModelRepository>     m_modelRepo;
 		std::unique_ptr<FontRepository>      m_fontRepo;
 		std::unique_ptr<JobRepository>       m_jobRepo;
 		std::unique_ptr<ImageRepository>     m_imageRepo;
 		std::unique_ptr<AnimationRepository> m_animRepo;
+		std::unique_ptr<StageRepository>     m_stageRepo;
 	};
 }

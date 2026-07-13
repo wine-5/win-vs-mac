@@ -20,9 +20,9 @@ namespace infrastructure
 		 * @brief ステージの配置定義を取得する
 		 * @return ステージ配置定義
 		 */
-		[[nodiscard]] const core::data::SpawnMetadata& getStageMetadata() const noexcept;
+		[[nodiscard]] const core::data::StageMetadata& getStageMetadata() const noexcept;
 
 	private:
-		core::data::SpawnMetadata m_stageMetadata{};
+		core::data::StageMetadata m_stageMetadata{};
 	};
 }

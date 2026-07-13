@@ -4,6 +4,7 @@
 #include <optional>
 #include "core/data/ModelMetadata.h"
 #include "core/data/JobInfo.h"
+#include "core/data/StageMetadata.h"
 #include "core/constant/JobType.h"
 
 namespace core::iface
@@ -58,5 +59,11 @@ namespace core::iface
 		 * @return DxLib モデルハンドル、失敗時は -1
 		 */
 		virtual int loadAnimationById(std::string_view animationId) = 0;
+
+		/**
+		 * @brief ステージの配置定義を取得する
+		 * @return ステージ配置定義
+		 */
+		[[nodiscard]] virtual const core::data::StageMetadata& getStageMetadata() const = 0;
 	};
 }

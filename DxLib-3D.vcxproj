@@ -201,6 +201,7 @@
     <ClCompile Include="src\game\system\InputSystem.cpp" />
     <ClCompile Include="src\game\system\MoveSystem.cpp" />
     <ClCompile Include="src\game\system\PhysicsSystem.cpp" />
+    <ClCompile Include="src\infrastructure\repository\StageRepository.cpp" />
     <ClCompile Include="src\infrastructure\UIRenderer.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\infrastructure\utility\LogUtil.cpp" />
