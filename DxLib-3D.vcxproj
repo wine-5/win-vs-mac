@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClCompile Include="src\game\actor\Enemy.cpp" />
     <ClCompile Include="src\game\actor\EnemyBase.cpp" />
+    <ClCompile Include="src\game\actor\MacEnemy.cpp" />
     <ClCompile Include="src\game\actor\SafariEnemy.cpp" />
     <ClCompile Include="src\game\actor\XcodeEnemy.cpp" />
     <ClCompile Include="src\game\attack\BaseAttackHandler.cpp" />
@@ -257,6 +258,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\base\Singleton.h" />
+    <ClInclude Include="src\game\actor\MacEnemy.h" />
     <ClInclude Include="src\game\actor\SafariEnemy.h" />
     <ClInclude Include="src\game\actor\XcodeEnemy.h" />
     <ClInclude Include="src\game\constant\AIBehavior.h" />
