@@ -37,8 +37,8 @@ namespace game::factory
 
 	core::ecs::EntityId FactoryInitializer::initializeEnemy()
 	{
-		int enemyHandle{m_resourceManager.loadModelById(constant::model_id::ENEMY)};
-		auto enemyMeta{m_resourceManager.getMetadata(constant::model_id::ENEMY)};
+		int enemyHandle{m_resourceManager.loadModelById(constant::model_id::ENEMY_XCODE) };
+		auto enemyMeta{ m_resourceManager.getMetadata(constant::model_id::ENEMY_XCODE)};
 
 		if (!enemyMeta.has_value())
 		{
