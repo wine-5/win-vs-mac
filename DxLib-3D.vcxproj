@@ -255,6 +255,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\base\Singleton.h" />
+    <ClInclude Include="src\core\constant\AIBehavior.h" />
     <ClInclude Include="src\core\constant\BgmType.h" />
     <ClInclude Include="src\core\constant\EffectType.h" />
     <ClInclude Include="src\core\constant\JobType.h" />
