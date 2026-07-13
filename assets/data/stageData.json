@@ -1,0 +1,14 @@
+{
+  "spawns": [
+    { "type": "xcode",  "position": [  300.0, 0.0,  300.0 ] },
+    { "type": "xcode",  "position": [ -300.0, 0.0,  300.0 ] },
+    { "type": "xcode",  "position": [  400.0, 0.0, -200.0 ] },
+    { "type": "xcode",  "position": [ -400.0, 0.0, -200.0 ] },
+    { "type": "safari", "position": [  200.0, 180.0, -400.0 ] },
+    { "type": "safari", "position": [ -200.0, 180.0, -400.0 ] }
+  ],
+  "boss": {
+    "type": "mac",
+    "position": [ 0.0, 0.0, -500.0 ]
+  }
+}

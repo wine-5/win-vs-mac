@@ -1,8 +1,10 @@
 ﻿{
   "resources": [
-    {"id": "player", "path": "assets/data/playerData.json"},
-    {"id": "ground", "path": "assets/data/groundData.json"},
-    {"id": "enemy" , "path": "assets/data/enemyData.json"}
+    {"id": "player",       "path": "assets/data/playerData.json"},
+    {"id": "ground",       "path": "assets/data/groundData.json"},
+    {"id": "enemy_xcode",  "path": "assets/data/enemies/xcodeData.json"},
+    {"id": "enemy_safari", "path": "assets/data/enemies/safariData.json"},
+    {"id": "enemy_mac",    "path": "assets/data/enemies/macData.json"}
   ],
   "animations": [
     {"id": "anim_player_idle",       "path": "assets/animations/player/Player_Idle.mv1"},

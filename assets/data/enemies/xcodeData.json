@@ -1,0 +1,21 @@
+{
+  "id": "enemy_xcode",
+  "category": "enemy",
+  "model": {
+    "path": "assets/model/enemies/xcode/Xcode.mv1",
+    "scale": [ 165, 165, 165 ]
+  },
+  "collider": {
+    "size": [ 50.5, 150.7, 50.5 ],
+    "offset": [ 0, 75, 0 ]
+  },
+  "gameplay": {
+    "moveSpeed": 12.0,
+    "detectionRange": 600.0,
+    "attackRange": 120.0,
+    "maxHp": 50.0,
+    "defence": 2.0,
+    "attackPower": 25.0,
+    "attackCooldown": 3.0
+  }
+}

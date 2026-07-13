@@ -1,0 +1,21 @@
+{
+  "id": "enemy_safari",
+  "category": "enemy",
+  "model": {
+    "path": "assets/model/enemies/safari/Safari.mv1",
+    "scale": [ 165, 165, 165 ]
+  },
+  "collider": {
+    "size": [ 80.0, 80.0, 80.0 ],
+    "offset": [ 0, 0, 0 ]
+  },
+  "gameplay": {
+    "moveSpeed": 10.0,
+    "detectionRange": 800.0,
+    "attackRange": 600.0,
+    "maxHp": 30.0,
+    "defence": 0.0,
+    "attackPower": 10.0,
+    "attackCooldown": 4.0
+  }
+}
