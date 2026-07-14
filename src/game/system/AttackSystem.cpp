@@ -59,13 +59,13 @@ namespace game::system
 			{
 				if (targetId == attackerId)
 					continue;
-				
-				// 同じ陣営動詞は攻撃しないように
-				const auto& attackerTagCheck{ m_componentManager.get<component::TagComponent>(attackerId)};
-				const auto& targetTagCheck{ m_componentManager.get<component::TagComponent>(targetId)};
-				if(attackerId == targetId)
+
+				// 同じ陣営同士は攻撃しないように（敵が敵を殴るフレンドリーファイア防止）
+				const auto& attackerTagCheck{ m_componentManager.get<component::TagComponent>(attackerId) };
+				const auto& targetTagCheck{ m_componentManager.get<component::TagComponent>(targetId) };
+				if (attackerTagCheck.m_tag == targetTagCheck.m_tag)
 					continue;
-				
+
 				if (!m_componentManager.has<component::TransformComponent>(targetId))
 					continue;
 
