@@ -1,4 +1,7 @@
 #pragma once
+#include <string_view>
+#include <stdexcept>
+#include <string>
 
 namespace game::constant
 {
@@ -13,4 +16,17 @@ namespace game::constant
 		Safari, // 遠距離雑魚（飛行）
 		Mac,    // ボス
 	};
+
+	/**
+	 * @brief JSONのタイプ文字列をEnemyTypeへ変換する
+	 * @param typeName タイプ名（"xcode" / "safari" / "mac"）
+	 * @return 対応するEnemyType
+	 */
+	inline EnemyType toEnemyType(std::string_view typeName)
+	{
+		if (typeName == "xcode")  return EnemyType::Xcode;
+		if (typeName == "safari") return EnemyType::Safari;
+		if (typeName == "mac")    return EnemyType::Mac;
+		throw std::runtime_error("未知の敵タイプです: " + std::string(typeName));
+	}
 }

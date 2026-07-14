@@ -112,10 +112,14 @@ namespace game::scene
 
 		m_groundId = initializer.initializeGround();
 
-		m_enemyId = initializer.initializeEnemy();
+		m_enemyIds = initializer.initializeEnemies();
 
-		auto& ai = m_componentManager.get<component::AIComponent>(m_enemyId);
-		ai.m_targetEntity = core::ecs::Entity(m_playerId);
+		// 全敵の追跡対象をプレイヤーに設定する
+		for (auto enemyId : m_enemyIds)
+		{
+			auto& ai = m_componentManager.get<component::AIComponent>(enemyId);
+			ai.m_targetEntity = core::ecs::Entity(m_playerId);
+		}
 	}
 
 	void InGame::setupSystems()
@@ -209,7 +213,6 @@ namespace game::scene
 
 		m_systemManager.update(deltaTime);
 		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
-		auto& enemyTransform = m_componentManager.get<game::component::TransformComponent>(m_enemyId);
 		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
 
 		// フレーム最後に入力状態を更新
@@ -231,10 +234,13 @@ namespace game::scene
 		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
 
 		// 敵の描画
-		auto& enemyRenderer = m_componentManager.get<component::RenderComponent>(m_enemyId);
-		auto& enemyTransform = m_componentManager.get<component::TransformComponent>(m_enemyId);
-		if (enemyRenderer.m_isVisible)
-			m_renderer.drawModel(enemyRenderer.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
+		for (auto enemyId : m_enemyIds)
+		{
+			auto& enemyRenderer = m_componentManager.get<component::RenderComponent>(enemyId);
+			auto& enemyTransform = m_componentManager.get<component::TransformComponent>(enemyId);
+			if (enemyRenderer.m_isVisible)
+				m_renderer.drawModel(enemyRenderer.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
+		}
 
 		// デバッグ: コライダーを可視化
 		auto& playerCollider = m_componentManager.get<game::component::ColliderComponent>(m_playerId);

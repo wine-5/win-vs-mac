@@ -102,6 +102,8 @@ namespace game::data
         [[nodiscard]] core::Vector3      getScale()          const noexcept { return m_scale; }
         /** @brief 初期位置を取得 */
         [[nodiscard]] core::Vector3      getPosition()       const noexcept { return m_position; }
+        /** @brief 初期位置を設定する（ステージ配置定義から上書きする用） */
+        void setPosition(const core::Vector3& position) noexcept { m_position = position; }
 
     private:
         std::string   m_modelPath;
