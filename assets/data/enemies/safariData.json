@@ -3,7 +3,7 @@
   "category": "enemy",
   "model": {
     "path": "assets/model/enemies/safari/Safari.mv1",
-    "scale": [ 165, 165, 165 ]
+    "scale": [ 1.65, 1.65, 1.65 ]
   },
   "collider": {
     "size": [ 80.0, 80.0, 80.0 ],
