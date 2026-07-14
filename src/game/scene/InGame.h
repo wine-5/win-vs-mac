@@ -69,6 +69,11 @@ namespace game::scene
 		 */
 		void saveResultData(bool isVictory) noexcept;
 
+		/**
+		 * @brief DEBUG: 当たり判定（青）・攻撃範囲（赤）・索敵範囲（黄）を可視化する（テスト後に削除）
+		 */
+		void drawDebugVisuals();
+
 		core::ecs::EntityManager 	m_entityManager;
 		core::ecs::ComponentManager m_componentManager;
 		core::ecs::SystemManager 	m_systemManager;

@@ -99,18 +99,10 @@ namespace game::system
 		if (requestedIt->second.m_priority >= currentPriority)
 		{
 			changeAnimation(entityId, anim, modelHandle, anim.m_requested);
-			m_lastDeniedRequests.erase(entityId);
 			return;
 		}
 
-		// 拒否（要求は保持し、再生完了後に再評価される）。同じ拒否のログは1回だけ出す
-		auto deniedIt{ m_lastDeniedRequests.find(entityId) };
-		if (deniedIt == m_lastDeniedRequests.end() || deniedIt->second != anim.m_requested)
-		{
-			LOG_W("[Anim] entity=%d %s への遷移を拒否（%s 再生中・優先度不足）",
-				entityId, constant::toString(anim.m_requested), constant::toString(anim.m_current));
-			m_lastDeniedRequests[entityId] = anim.m_requested;
-		}
+		// 拒否（要求は保持し、再生完了後に再評価される）
 	}
 
 	void AnimationSystem::changeAnimation(core::ecs::EntityId entityId,
@@ -125,9 +117,6 @@ namespace game::system
 				entityId, constant::toString(newState));
 			return;
 		}
-
-		LOG("[Anim] entity=%d %s -> %s",
-			entityId, constant::toString(anim.m_current), constant::toString(newState));
 
 		m_animator.changeAnimation(modelHandle, anim.m_animIndex, it->second.m_handle, anim.m_animTotalTime);
 		anim.m_animTime = 0.0f;

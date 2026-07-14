@@ -165,7 +165,6 @@ namespace game::scene
 			// プレイヤー死亡イベントの購読
 				m_eventBus.subscribe<event::PlayerDeadEvent>([this](const event::PlayerDeadEvent&)
 					{
-						LOG("PlayerDead: プレイヤーが死亡しました");
 						if (m_componentManager.has<component::RenderComponent>(m_playerId))
 						{
 							auto& render{ m_componentManager.get<component::RenderComponent>(m_playerId) };
@@ -179,7 +178,6 @@ namespace game::scene
 				// 敵の死亡イベントの購読
 				m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
 					{
-						LOG("敵が死んだ：Id=%u", e.m_entityId);
 						if (m_componentManager.has<component::RenderComponent>(e.m_entityId))
 						{
 							auto& render{ m_componentManager.get<component::RenderComponent>(e.m_entityId) };
@@ -243,45 +241,70 @@ namespace game::scene
 				m_renderer.drawModel(enemyRenderer.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
 		}
 
-		// デバッグ: コライダーを可視化
-		auto& playerCollider = m_componentManager.get<game::component::ColliderComponent>(m_playerId);
-		auto& groundCollider = m_componentManager.get<game::component::ColliderComponent>(m_groundId);
+		// DEBUG: デバッグ可視化（テスト後に呼び出しごと削除）
+		drawDebugVisuals();
 
-		core::Vector3 playerColliderCenter = transform.m_position + playerCollider.m_offset;
-		core::Vector3 groundColliderCenter = groundTransform.m_position + groundCollider.m_offset;
+		// エフェクト描画
+		// auto* effectFactory{ core::base::ServiceLocator::get<core::iface::IEffectFactory>() };
+		// if (effectFactory)
+		// 	effectFactory->draw();
 
-		m_renderer.drawCollider(playerColliderCenter, playerCollider.m_size, core::utility::Color::GREEN);
-		m_renderer.drawCollider(groundColliderCenter, groundCollider.m_size, core::utility::Color::BLUE);
+	}
 
-		// デバッグ: 敵のコライダーを可視化
-		for (auto enemyId : m_enemyIds)
+	void InGame::drawDebugVisuals()
+	{
+		// DEBUG: 当たり判定（ColliderComponent）を持つ全エンティティを青で可視化（テスト後に削除）
+		auto colliderEntities{ m_componentManager.getAllEntities<component::ColliderComponent>() };
+		for (auto id : colliderEntities)
 		{
-			auto& enemyTf{ m_componentManager.get<component::TransformComponent>(enemyId) };
-			auto& enemyCollider{ m_componentManager.get<component::ColliderComponent>(enemyId) };
-			core::Vector3 enemyColliderCenter{ enemyTf.m_position + enemyCollider.m_offset };
-			m_renderer.drawCollider(enemyColliderCenter, enemyCollider.m_size, core::utility::Color::GREEN);
+			auto& colliderTf{ m_componentManager.get<component::TransformComponent>(id) };
+			auto& collider{ m_componentManager.get<component::ColliderComponent>(id) };
+			core::Vector3 colliderCenter{ colliderTf.m_position + collider.m_offset };
+			m_renderer.drawCollider(colliderCenter, collider.m_size, core::utility::Color::BLUE);
 		}
 
-		// デバッグ: 攻撃範囲（赤）・索敵範囲（黄）を可視化
+		// DEBUG: 攻撃範囲（赤）・索敵範囲（黄）を可視化（テスト後に削除）
+		// 人型（プレイヤー・Xcode・Mac）はカプセル、浮遊型ドローン（Safari）は球で描く
 		auto attackers{ m_componentManager.getAllEntities<component::AttackComponent>() };
 		for (auto id : attackers)
 		{
 			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
 			auto& atk{ m_componentManager.get<component::AttackComponent>(id) };
-			m_renderer.drawDebugSphere(atkTransform.m_position, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
 
+			bool isFlying{ false };
 			if (m_componentManager.has<component::AIComponent>(id))
 			{
 				auto& ai{ m_componentManager.get<component::AIComponent>(id) };
-				m_renderer.drawDebugSphere(atkTransform.m_position, ai.m_detectionRange, core::utility::Color::rgb(255, 255, 0));
+				isFlying = (ai.m_behavior == constant::AIBehavior::RangeKeepDistance);
+			}
+
+			if (!isFlying && m_componentManager.has<component::ColliderComponent>(id))
+			{
+				// コライダーの縦軸に沿ったカプセルとして描画する
+				auto& collider{ m_componentManager.get<component::ColliderComponent>(id) };
+				core::Vector3 center{ atkTransform.m_position + collider.m_offset };
+				float halfHeight{ collider.m_size.y * 0.5f };
+				core::Vector3 bottom{ center.x, center.y - halfHeight, center.z };
+				core::Vector3 top{ center.x, center.y + halfHeight, center.z };
+				m_renderer.drawDebugCapsule(bottom, top, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
+
+				if (m_componentManager.has<component::AIComponent>(id))
+				{
+					auto& ai{ m_componentManager.get<component::AIComponent>(id) };
+					m_renderer.drawDebugCapsule(bottom, top, ai.m_detectionRange, core::utility::Color::rgb(255, 255, 0));
+				}
+			}
+			else
+			{
+				m_renderer.drawDebugSphere(atkTransform.m_position, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
+
+				if (m_componentManager.has<component::AIComponent>(id))
+				{
+					auto& ai{ m_componentManager.get<component::AIComponent>(id) };
+					m_renderer.drawDebugSphere(atkTransform.m_position, ai.m_detectionRange, core::utility::Color::rgb(255, 255, 0));
+				}
 			}
 		}
-
-		// エフェクト描画
-		auto* effectFactory{ core::base::ServiceLocator::get<core::iface::IEffectFactory>() };
-		if (effectFactory)
-			effectFactory->draw();
-
 	}
 
 	void InGame::saveResultData	(bool isVictory) noexcept

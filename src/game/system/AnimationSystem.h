@@ -14,7 +14,7 @@ namespace game::system
 	 * @brief 全エンティティのアニメーション切り替え・再生を一元管理するSystem
 	 *
 	 * 他のSystemは AnimationComponent::m_requested に状態を書くだけでよい。
-	 * 本Systemが優先度判定・attach/detach・ループ/完了処理・遷移ログを行う。
+	 * 本Systemが優先度判定・attach/detach・ループ/完了処理を行う。
 	 * 非ループクリップの再生完了時は AnimationFinishedEvent を発行する。
 	 */
 	class AnimationSystem : public core::ecs::ISystem
@@ -62,8 +62,5 @@ namespace game::system
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IAnimator& m_animator;
 		core::base::EventBus& m_eventBus;
-
-		// 遷移拒否ログのスパム防止用（entityごとに最後に拒否した要求を記録）
-		std::unordered_map<core::ecs::EntityId, constant::AnimationState> m_lastDeniedRequests{};
 	};
 }
