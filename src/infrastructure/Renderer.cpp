@@ -42,4 +42,13 @@ namespace infrastructure
 		// ワイヤーフレームで描画（塗りつぶしなし）
 		DrawCube3D(v1, v2, color, color, FALSE);
 	}
+
+	void Renderer::drawDebugSphere(const core::Vector3& center, float radius, unsigned int color)
+	{
+		constexpr int divNum{ 16 }; // 球の分割数（デバッグ用なので粗くてよい）
+		VECTOR pos = VGet(center.x, center.y, center.z);
+
+		// ワイヤーフレームで描画（塗りつぶしなし）
+		DrawSphere3D(pos, radius, divNum, color, color, FALSE);
+	}
 }

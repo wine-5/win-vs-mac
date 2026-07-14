@@ -71,15 +71,21 @@ namespace infrastructure
 			auto& mutableMeta = m_metadata[id];
 			VECTOR vMin = MV1GetFrameMinVertexLocalPosition(handle, -1);
 			VECTOR vMax = MV1GetFrameMaxVertexLocalPosition(handle, -1);
-			mutableMeta.colliderSize.x = vMax.x - vMin.x;
-			mutableMeta.colliderSize.y = vMax.y - vMin.y;
-			mutableMeta.colliderSize.z = vMax.z - vMin.z;
 
-			LOG("'%s' のコライダーサイズを自動計算: (%.2f, %.2f, %.2f)",
+			// モデルのローカル寸法に描画スケールを掛けてワールド寸法にする
+			mutableMeta.colliderSize.x = (vMax.x - vMin.x) * metadata.scale.x;
+			mutableMeta.colliderSize.y = (vMax.y - vMin.y) * metadata.scale.y;
+			mutableMeta.colliderSize.z = (vMax.z - vMin.z) * metadata.scale.z;
+
+			// コライダー中心も自動計算する（足元原点モデルなら高さの半分が中心になる）
+			mutableMeta.colliderOffset.x = (vMax.x + vMin.x) * 0.5f * metadata.scale.x;
+			mutableMeta.colliderOffset.y = (vMax.y + vMin.y) * 0.5f * metadata.scale.y;
+			mutableMeta.colliderOffset.z = (vMax.z + vMin.z) * 0.5f * metadata.scale.z;
+
+			LOG("'%s' のコライダーを自動計算: size(%.2f, %.2f, %.2f) offset(%.2f, %.2f, %.2f)",
 				id.c_str(),
-				mutableMeta.colliderSize.x,
-				mutableMeta.colliderSize.y,
-				mutableMeta.colliderSize.z);
+				mutableMeta.colliderSize.x, mutableMeta.colliderSize.y, mutableMeta.colliderSize.z,
+				mutableMeta.colliderOffset.x, mutableMeta.colliderOffset.y, mutableMeta.colliderOffset.z);
 		}
 
 		m_modelHandles[id] = handle;

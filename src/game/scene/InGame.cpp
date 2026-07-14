@@ -27,6 +27,7 @@
 #include "core/interface/IEffectFactory.h"
 #include "game/system/AttackSystem.h"
 #include "game/component/ColliderComponent.h"
+#include "game/component/AttackComponent.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/AnimationId.h"
 #include "game/scene/SceneManager.h"
@@ -251,6 +252,30 @@ namespace game::scene
 
 		m_renderer.drawCollider(playerColliderCenter, playerCollider.m_size, core::utility::Color::GREEN);
 		m_renderer.drawCollider(groundColliderCenter, groundCollider.m_size, core::utility::Color::BLUE);
+
+		// デバッグ: 敵のコライダーを可視化
+		for (auto enemyId : m_enemyIds)
+		{
+			auto& enemyTf{ m_componentManager.get<component::TransformComponent>(enemyId) };
+			auto& enemyCollider{ m_componentManager.get<component::ColliderComponent>(enemyId) };
+			core::Vector3 enemyColliderCenter{ enemyTf.m_position + enemyCollider.m_offset };
+			m_renderer.drawCollider(enemyColliderCenter, enemyCollider.m_size, core::utility::Color::GREEN);
+		}
+
+		// デバッグ: 攻撃範囲（赤）・索敵範囲（黄）を可視化
+		auto attackers{ m_componentManager.getAllEntities<component::AttackComponent>() };
+		for (auto id : attackers)
+		{
+			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
+			auto& atk{ m_componentManager.get<component::AttackComponent>(id) };
+			m_renderer.drawDebugSphere(atkTransform.m_position, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
+
+			if (m_componentManager.has<component::AIComponent>(id))
+			{
+				auto& ai{ m_componentManager.get<component::AIComponent>(id) };
+				m_renderer.drawDebugSphere(atkTransform.m_position, ai.m_detectionRange, core::utility::Color::rgb(255, 255, 0));
+			}
+		}
 
 		// エフェクト描画
 		auto* effectFactory{ core::base::ServiceLocator::get<core::iface::IEffectFactory>() };
