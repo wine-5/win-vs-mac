@@ -42,6 +42,16 @@ namespace infrastructure
 		 */
 		std::optional<core::data::ModelMetadata> getMetadata(std::string_view modelId) const;
 
+		/**
+		 * @brief モデルハンドルを複製する
+		 *
+		 * 同じモデルを複数体で使う場合、アニメーションやスケールの状態が
+		 * 競合しないようにインスタンスごとに複製ハンドルを使う
+		 * @param modelHandle 複製元のモデルハンドル
+		 * @return 複製したモデルハンドル、失敗時は-1
+		 */
+		int duplicateModel(int modelHandle);
+
 	private:
 		struct ResourceDefinition
 		{

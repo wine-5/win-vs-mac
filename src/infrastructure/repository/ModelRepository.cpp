@@ -86,6 +86,17 @@ namespace infrastructure
 		return handle;
 	}
 
+	int ModelRepository::duplicateModel(int modelHandle)
+	{
+		if (modelHandle == -1)
+			return -1;
+
+		int duplicated{ MV1DuplicateModel(modelHandle) };
+		if (duplicated == -1)
+			LOG_E("モデルハンドルの複製に失敗しました: %d", modelHandle);
+		return duplicated;
+	}
+
 	std::optional<core::data::ModelMetadata> ModelRepository::getMetadata(std::string_view modelId) const
 	{
 		auto it{ m_metadata.find(std::string(modelId)) };

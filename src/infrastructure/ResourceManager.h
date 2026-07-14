@@ -68,6 +68,13 @@ namespace infrastructure
 		 */
 		[[nodiscard]] const core::data::StageMetadata& getStageMetadata() const override;
 
+		/**
+		 * @brief モデルハンドルを複製する
+		 * @param modelHandle 複製元のモデルハンドル
+		 * @return 複製したモデルハンドル、失敗時は-1
+		 */
+		int duplicateModel(int modelHandle) override;
+
 	private:
 		std::unique_ptr<ModelRepository>     m_modelRepo;
 		std::unique_ptr<FontRepository>      m_fontRepo;

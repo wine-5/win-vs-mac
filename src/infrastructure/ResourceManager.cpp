@@ -70,4 +70,11 @@ namespace infrastructure
 			throw std::runtime_error("StageRepository が初期化されていません");
 		return m_stageRepo->getStageMetadata();
 	}
+
+	int ResourceManager::duplicateModel(int modelHandle)
+	{
+		if (!m_modelRepo)
+			return -1;
+		return m_modelRepo->duplicateModel(modelHandle);
+	}
 }
