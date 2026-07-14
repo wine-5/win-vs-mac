@@ -69,23 +69,46 @@ namespace infrastructure
 			metadata.colliderSize.z == 0.0f)
 		{
 			auto& mutableMeta = m_metadata[id];
-			VECTOR vMin = MV1GetFrameMinVertexLocalPosition(handle, -1);
-			VECTOR vMax = MV1GetFrameMaxVertexLocalPosition(handle, -1);
 
-			// モデルのローカル寸法に描画スケールを掛けてワールド寸法にする
-			mutableMeta.colliderSize.x = (vMax.x - vMin.x) * metadata.scale.x;
-			mutableMeta.colliderSize.y = (vMax.y - vMin.y) * metadata.scale.y;
-			mutableMeta.colliderSize.z = (vMax.z - vMin.z) * metadata.scale.z;
+			// モデル全体の頂点からAABBを求める（参照メッシュはスケール適用後のワールド座標で取得する）
+			MV1SetupReferenceMesh(handle, -1, TRUE);
+			const MV1_REF_POLYGONLIST refPoly{ MV1GetReferenceMesh(handle, -1, TRUE) };
 
-			// コライダー中心も自動計算する（足元原点モデルなら高さの半分が中心になる）
-			mutableMeta.colliderOffset.x = (vMax.x + vMin.x) * 0.5f * metadata.scale.x;
-			mutableMeta.colliderOffset.y = (vMax.y + vMin.y) * 0.5f * metadata.scale.y;
-			mutableMeta.colliderOffset.z = (vMax.z + vMin.z) * 0.5f * metadata.scale.z;
+			if (refPoly.VertexNum > 0)
+			{
+				VECTOR vMin{ refPoly.Vertexs[0].Position };
+				VECTOR vMax{ refPoly.Vertexs[0].Position };
+				for (int i{ 1 }; i < refPoly.VertexNum; ++i)
+				{
+					const VECTOR& p{ refPoly.Vertexs[i].Position };
+					vMin.x = (p.x < vMin.x) ? p.x : vMin.x;
+					vMin.y = (p.y < vMin.y) ? p.y : vMin.y;
+					vMin.z = (p.z < vMin.z) ? p.z : vMin.z;
+					vMax.x = (p.x > vMax.x) ? p.x : vMax.x;
+					vMax.y = (p.y > vMax.y) ? p.y : vMax.y;
+					vMax.z = (p.z > vMax.z) ? p.z : vMax.z;
+				}
 
-			LOG("'%s' のコライダーを自動計算: size(%.2f, %.2f, %.2f) offset(%.2f, %.2f, %.2f)",
-				id.c_str(),
-				mutableMeta.colliderSize.x, mutableMeta.colliderSize.y, mutableMeta.colliderSize.z,
-				mutableMeta.colliderOffset.x, mutableMeta.colliderOffset.y, mutableMeta.colliderOffset.z);
+				// 腕を広げたポーズだと横幅が実際の胴体より大きく出るため、水平方向を絞って胴体に沿わせる
+				constexpr float HORIZONTAL_SHRINK{ 0.5f };
+
+				// 参照メッシュはスケール適用済みなのでそのままワールド寸法になる
+				mutableMeta.colliderSize.x = (vMax.x - vMin.x) * HORIZONTAL_SHRINK;
+				mutableMeta.colliderSize.y = vMax.y - vMin.y;
+				mutableMeta.colliderSize.z = (vMax.z - vMin.z) * HORIZONTAL_SHRINK;
+
+				// コライダー中心も自動計算する（足元原点モデルなら高さの半分が中心になる）
+				mutableMeta.colliderOffset.x = (vMax.x + vMin.x) * 0.5f;
+				mutableMeta.colliderOffset.y = (vMax.y + vMin.y) * 0.5f;
+				mutableMeta.colliderOffset.z = (vMax.z + vMin.z) * 0.5f;
+
+			}
+			else
+			{
+				LOG_E("'%s' のコライダー自動計算に失敗しました（頂点が取得できません）", id.c_str());
+			}
+
+			MV1TerminateReferenceMesh(handle, -1, TRUE);
 		}
 
 		m_modelHandles[id] = handle;
