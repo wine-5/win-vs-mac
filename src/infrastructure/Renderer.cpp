@@ -51,4 +51,14 @@ namespace infrastructure
 		// ワイヤーフレームで描画（塗りつぶしなし）
 		DrawSphere3D(pos, radius, divNum, color, color, FALSE);
 	}
+
+	void Renderer::drawDebugCapsule(const core::Vector3& bottom, const core::Vector3& top, float radius, unsigned int color)
+	{
+		constexpr int divNum{ 16 }; // カプセルの分割数（デバッグ用なので粗くてよい）
+		VECTOR pos1 = VGet(bottom.x, bottom.y, bottom.z);
+		VECTOR pos2 = VGet(top.x, top.y, top.z);
+
+		// ワイヤーフレームで描画（塗りつぶしなし）
+		DrawCapsule3D(pos1, pos2, radius, divNum, color, color, FALSE);
+	}
 }
