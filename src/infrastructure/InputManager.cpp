@@ -106,11 +106,26 @@ namespace infrastructure
 
 	void InputManager::getMouseDelta(int& outDx, int& outDy)
 	{
-		// カーソル表示中はマウス視点を無効化し、カーソルを中央へ戻さない（自由に動かせるようにする）
+		int mouseX{}, mouseY{};
+		GetMousePoint(&mouseX, &mouseY);
+
+		// カーソル表示中は現在座標と前回座標の差分を使う（カーソルは自由移動）
 		if (m_cursorVisible)
 		{
-			outDx = 0;
-			outDy = 0;
+			if (!m_hasPreviousMousePosition)
+			{
+				m_previousMouseX = mouseX;
+				m_previousMouseY = mouseY;
+				m_hasPreviousMousePosition = true;
+				outDx = 0;
+				outDy = 0;
+				return;
+			}
+
+			outDx = mouseX - m_previousMouseX;
+			outDy = mouseY - m_previousMouseY;
+			m_previousMouseX = mouseX;
+			m_previousMouseY = mouseY;
 			return;
 		}
 
@@ -119,8 +134,6 @@ namespace infrastructure
 		const int centerX{ screenWidth / 2 };
 		const int centerY{ screenHeight / 2 };
 
-		int mouseX{}, mouseY{};
-		GetMousePoint(&mouseX, &mouseY);
 		outDx = mouseX - centerX;
 		outDy = mouseY - centerY;
 
@@ -130,6 +143,9 @@ namespace infrastructure
 
 	void InputManager::setMouseCursorVisible(bool visible)
 	{
+		if (m_cursorVisible == visible)
+			return;
+
 		m_cursorVisible = visible;
 		SetMouseDispFlag(visible ? TRUE : FALSE);
 
@@ -138,7 +154,18 @@ namespace infrastructure
 		{
 			int screenWidth{}, screenHeight{};
 			GetDrawScreenSize(&screenWidth, &screenHeight);
-			SetMousePoint(screenWidth / 2, screenHeight / 2);
+			const int centerX{ screenWidth / 2 };
+			const int centerY{ screenHeight / 2 };
+			SetMousePoint(centerX, centerY);
+			m_previousMouseX = centerX;
+			m_previousMouseY = centerY;
+			m_hasPreviousMousePosition = true;
+		}
+		else
+		{
+			// 表示に戻すときは現在位置を基準に次回差分を計算する
+			GetMousePoint(&m_previousMouseX, &m_previousMouseY);
+			m_hasPreviousMousePosition = true;
 		}
 	}
 } // namespace infrastructure
