@@ -365,4 +365,4 @@ namespace platform::window::select
         std::wstring wMessage = converter.utf8ToWide(message);
         MessageBoxW(parentHwnd, wMessage.c_str(), L"警告", MB_OK | MB_ICONWARNING);
     }
-}
+} // namespace platform::window::select

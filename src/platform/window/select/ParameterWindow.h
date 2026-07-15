@@ -65,4 +65,4 @@ namespace platform::window::select
 
         platform::webview::WebView2Host m_webView{};
     };
-}
+} // namespace platform::window::select

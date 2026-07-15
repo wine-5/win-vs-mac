@@ -68,4 +68,4 @@ namespace platform::window
             resourceManager,
             m_screen);
     }
-}
+} // namespace platform::window

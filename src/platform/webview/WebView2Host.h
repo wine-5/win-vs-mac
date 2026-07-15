@@ -94,4 +94,4 @@ namespace platform::webview
         void registerNavigationHandler(ICoreWebView2* webview) noexcept;   // ページ読み込み完了イベントハンドラを登録する。完了時に m_ready = true にし、溜まったメッセージを一括送信する
         void flushPendingMessages() noexcept;                              // m_pendingMessages に溜まっていたメッセージを順番に送信し、キューを空にする
     };
-}
+} // namespace platform::webview

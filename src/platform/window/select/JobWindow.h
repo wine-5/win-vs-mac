@@ -71,4 +71,4 @@ namespace platform::window::select
         void handleMessage(const std::string& json) noexcept;
         void sendJobStats() noexcept;
     };
-}
+} // namespace platform::window::select

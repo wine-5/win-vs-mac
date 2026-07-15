@@ -56,4 +56,4 @@ namespace platform::window
 
         core::iface::IScreen& m_screen;
     };
-}
+} // namespace platform::window

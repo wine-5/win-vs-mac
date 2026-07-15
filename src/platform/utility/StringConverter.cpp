@@ -49,4 +49,4 @@ namespace platform::utility
 
 		return result;
 	}
-}
+} // namespace platform::utility

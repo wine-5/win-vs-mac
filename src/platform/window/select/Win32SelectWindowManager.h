@@ -23,7 +23,7 @@ namespace core::iface
 {
     class IResourceManager;
     class IScreen;
-}
+} // namespace core::iface
 
 namespace platform::window::select
 {
@@ -114,4 +114,4 @@ namespace platform::window::select
         core::iface::IResourceManager& m_resourceManager;
         core::iface::IScreen& m_screen;
     };
-}
+} // namespace platform::window::select

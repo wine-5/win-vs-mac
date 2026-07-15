@@ -15,4 +15,4 @@ namespace platform
 		 */
 		[[nodiscard]] std::string selectFile() override;
 	};
-}
+} // namespace platform

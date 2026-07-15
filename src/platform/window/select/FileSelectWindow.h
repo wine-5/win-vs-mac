@@ -83,4 +83,4 @@ namespace platform::window::select
         void sendSlotsRefresh() noexcept;
         void sendBonusInfo() noexcept;
     };
-}
+} // namespace platform::window::select

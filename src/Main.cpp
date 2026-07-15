@@ -13,7 +13,7 @@ namespace
 	constexpr float TARGET_FPS = 60.0f;
 	constexpr float DELTA_TIME = 1.0f / TARGET_FPS;
 	constexpr int   COLOR_BIT = 32;
-}
+} // namespace
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {

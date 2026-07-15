@@ -64,4 +64,4 @@ namespace platform::window::loading
 			// JSON パースエラーは無視
 		}
 	}
-}
+} // namespace platform::window::loading

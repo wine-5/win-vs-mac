@@ -155,4 +155,4 @@ namespace platform::window::result
         }
         catch (...) { }
     }
-}
+} // namespace platform::window::result

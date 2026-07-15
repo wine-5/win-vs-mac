@@ -81,4 +81,4 @@ namespace platform::window::select
         return WindowBase::onMessage(hwnd, msg, wParam, lParam);
     }
 
-}
+} // namespace platform::window::select

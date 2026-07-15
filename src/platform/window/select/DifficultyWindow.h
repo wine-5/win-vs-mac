@@ -68,4 +68,4 @@ namespace platform::window::select
 
         void handleMessage(const std::string& json) noexcept;
     };
-}
+} // namespace platform::window::select

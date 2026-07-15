@@ -24,4 +24,4 @@ namespace platform::utility
 		 */
 		std::wstring utf8ToWide(const std::string& utf8Str) const override;
 	};
-}
+} // namespace platform::utility

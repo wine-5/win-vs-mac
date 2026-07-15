@@ -205,4 +205,4 @@ namespace platform::window
             return DefWindowProcW(hwnd, msg, wParam, lParam);
         }
     }
-}
+} // namespace platform::window

@@ -78,4 +78,4 @@ namespace platform::window::select
         static constexpr const wchar_t* WINDOW_TITLE{ L"" };
         static constexpr const wchar_t* DESKTOP_HTML_URL{ L"https://game.web/select/desktop/desktop.html" };
     };
-}
+} // namespace platform::window::select

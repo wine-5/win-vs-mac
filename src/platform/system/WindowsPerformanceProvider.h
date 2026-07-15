@@ -49,4 +49,4 @@ namespace platform::system
 		void updateMemory();
 		void updateDisk();
 	};
-}
+} // namespace platform::system
