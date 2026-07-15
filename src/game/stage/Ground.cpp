@@ -36,4 +36,4 @@ namespace game::stage
 	{
 		return m_entity.getId();
 	}
-}
+} // namespace game::stage

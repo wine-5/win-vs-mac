@@ -70,4 +70,4 @@ namespace core::ecs
 	private:
 		std::unordered_map<EntityId, T> m_component;
 	};
-}
+} // namespace core::ecs

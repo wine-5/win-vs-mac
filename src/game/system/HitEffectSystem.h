@@ -1,6 +1,8 @@
 #pragma once
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/ISystem.h"
+#include "core/base/EventBus.h"
+#include "game/event/InGameEvents.h"
 
 namespace game::system
 {
@@ -13,8 +15,10 @@ namespace game::system
         /**
          * @brief コンストラクタ
          * @param componentManager コンポーネントマネージャー
+         * @param eventBus EventBusの参照
          */
-        explicit HitEffectSystem(core::ecs::ComponentManager& componentManager);
+        HitEffectSystem(core::ecs::ComponentManager& componentManager,
+            core::base::EventBus& eventBus);
 
         /**
          * @brief システムの更新処理
@@ -23,6 +27,9 @@ namespace game::system
         void update(float deltaTime) override;
 
     private:
+        void onAttackHit(const game::event::AttackHitEvent& e);
+
         core::ecs::ComponentManager& m_componentManager;
+        core::base::EventBus&        m_eventBus;
     };
-}
+} // namespace game::system

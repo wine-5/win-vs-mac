@@ -51,4 +51,4 @@ namespace core::iface
             std::function<void(int, const std::string&)> onFileSlotChanged,
             IResourceManager& resourceManager) = 0;
     };
-}
+} // namespace core::iface

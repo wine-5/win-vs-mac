@@ -39,4 +39,4 @@ namespace game::ui
          */
         virtual void setVisible(bool visible) = 0;
     };
-}
+} // namespace game::ui

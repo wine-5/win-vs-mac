@@ -1,22 +1,29 @@
-﻿#pragma once
+#pragma once
 #include "core/utility/Vector3.h"
 
 namespace core::iface
 {
 	/**
-	 * @brief カメラの純粋仮想クラス
-	 * Game層がInfrastructre層に直接依存しないための抽象化
+	 * @brief カメラ装置の純粋仮想クラス
+	 * Game層がInfrastructure層に直接依存しないための抽象化。
+	 * yaw/pitch等の計算は行わず、渡された値をそのまま設定するだけの薄い層。
 	 */
 	class ICamera
 	{
 	public:
 		virtual ~ICamera() = default;
-		
+
 		/**
-		 * @brief カメラの位置をターゲットに追従させる
-		 * @param targetPosition 追従対象の座標
-		 * @param offset ターゲットからのオフセット
+		 * @brief カメラの位置と注視点を設定する
+		 * @param position カメラのワールド座標
+		 * @param target 注視点のワールド座標
 		 */
-		virtual void update(const core::Vector3& targetPosition, const core::Vector3& offset) = 0;
+		virtual void setLookAt(const core::Vector3& position, const core::Vector3& target) = 0;
+
+		/**
+		 * @brief 視野角（FOV）を設定する（将来のズーム演出用）
+		 * @param fovRad 視野角（ラジアン）
+		 */
+		virtual void setFieldOfView(float fovRad) = 0;
 	};
-}
+} // namespace core::iface

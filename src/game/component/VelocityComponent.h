@@ -10,4 +10,4 @@ namespace game::component
 	{
 		core::Vector3 m_velocity;
 	};
-}
+} // namespace game::component

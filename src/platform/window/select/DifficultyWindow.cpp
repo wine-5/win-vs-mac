@@ -79,4 +79,4 @@ namespace platform::window::select
         }
         catch (...) {}
     }
-}
+} // namespace platform::window::select

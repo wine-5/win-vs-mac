@@ -17,6 +17,7 @@ namespace game::factory
 		m_player = std::make_unique<actor::Player>(
 			m_entityManager,
 			m_componentManager,
+			m_resourceManager,
 			modelHandle,
 			playerData);
 	}
@@ -25,4 +26,4 @@ namespace game::factory
 	{
 		return *m_player;
 	}
-}
+} // namespace game::factory

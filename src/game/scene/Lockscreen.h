@@ -62,4 +62,4 @@ namespace game::scene
 		static constexpr float SLIDE_DURATION = 0.7f;
 		static constexpr float FADE_DURATION  = 0.5f;
 	};
-}
+} // namespace game::scene

@@ -31,4 +31,4 @@ namespace game::utility
         }
 	};
 
-}
+} // namespace game::utility

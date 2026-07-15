@@ -10,4 +10,4 @@ namespace game::component
     {
         constant::Tag m_tag{ constant::Tag::None };
     };
-}
+} // namespace game::component

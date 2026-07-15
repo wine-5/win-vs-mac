@@ -38,4 +38,4 @@ namespace game::system
 			transform.m_position.z += velocity.m_velocity.z * deltaTime;
 		}
 	}
-}
+} // namespace game::system

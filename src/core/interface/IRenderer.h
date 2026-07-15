@@ -28,5 +28,22 @@ namespace core::iface
 		 * @param color 色（ARGB）
 		 */
 		virtual void drawCollider(const core::Vector3& center, const core::Vector3& size, unsigned int color) = 0;
+
+		/**
+		 * @brief デバッグ用に球（範囲）を可視化する
+		 * @param center 中心座標
+		 * @param radius 半径
+		 * @param color 色（ARGB）
+		 */
+		virtual void drawDebugSphere(const core::Vector3& center, float radius, unsigned int color) = 0;
+
+		/**
+		 * @brief デバッグ用にカプセル（範囲）を可視化する
+		 * @param bottom カプセル軸の下端座標
+		 * @param top カプセル軸の上端座標
+		 * @param radius 半径
+		 * @param color 色（ARGB）
+		 */
+		virtual void drawDebugCapsule(const core::Vector3& bottom, const core::Vector3& top, float radius, unsigned int color) = 0;
 	};
-}
+} // namespace core::iface

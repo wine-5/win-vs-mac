@@ -51,4 +51,4 @@ namespace core::base
 	private:
 		std::unordered_map<std::type_index, std::vector<std::function<void(const std::any&)>>> m_listeners;
 	};
-}
+} // namespace core::base

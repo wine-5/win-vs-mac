@@ -1,11 +1,13 @@
 ﻿#pragma once
 #include "FactoryManager.h"
 #include "core/interface/IResourceManager.h"
+#include "core/data/StageMetadata.h"
 #include "game/data/PlayerData.h"
 #include "game/data/GroundData.h"
 #include "game/data/EnemyData.h"
 #include "game/constant/ModelId.h"
 #include <cassert>
+#include <vector>
 
 namespace game::factory
 {
@@ -39,13 +41,20 @@ namespace game::factory
 		core::ecs::EntityId initializeGround();
 
 		/**
-		 * @brief Enemyを初期化
-		 * @return 生成したEnemyのEntityId
+		 * @brief ステージ配置定義に基づき雑魚敵を全て生成する
+		 * @return 生成した全EnemyのEntityId
 		 */
-		core::ecs::EntityId initializeEnemy();
+		std::vector<core::ecs::EntityId> initializeEnemies();
 
 	private:
+		/**
+		 * @brief スポーン定義1件から敵を生成する
+		 * @param spawn スポーン定義
+		 * @return 生成したEnemyのEntityId
+		 */
+		core::ecs::EntityId spawnEnemy(const core::data::SpawnMetadata& spawn);
+
 		FactoryManager& m_factoryManager;
 		core::iface::IResourceManager& m_resourceManager;
 	};
-}
+} // namespace game::factory

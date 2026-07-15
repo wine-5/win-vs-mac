@@ -88,4 +88,4 @@ namespace infrastructure
         // キャッシュは内部実装の詳細であり論理的な const 性を損なわないため mutable としている
         mutable std::map<std::pair<std::string, int>, int> m_fontHandles{};
     };
-}
+} // namespace infrastructure

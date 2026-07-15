@@ -116,4 +116,4 @@ namespace platform::system
 		m_prevWriteTime = curWriteTime;
 		m_prevQueryTime = curQueryTime;
 	}
-}
+} // namespace platform::system

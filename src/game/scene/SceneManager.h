@@ -49,4 +49,4 @@ namespace game::scene
 		/// @brief 翌フレームに破棄するシーンの種類（use-after-free 防止のための遅延リセット）
 		std::optional<SceneType> m_pendingReset{};
 	};
-}
+} // namespace game::scene

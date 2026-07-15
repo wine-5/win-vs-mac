@@ -4,9 +4,24 @@
 
 namespace game::system
 {
-    HitEffectSystem::HitEffectSystem(core::ecs::ComponentManager& componentManager)
+    HitEffectSystem::HitEffectSystem(core::ecs::ComponentManager& componentManager,
+        core::base::EventBus& eventBus)
         : m_componentManager{ componentManager }
+        , m_eventBus{ eventBus }
     {
+        m_eventBus.subscribe<game::event::AttackHitEvent>(
+            [this](const game::event::AttackHitEvent& e) { onAttackHit(e); });
+    }
+
+    void HitEffectSystem::onAttackHit(const game::event::AttackHitEvent& e)
+    {
+        if (!m_componentManager.has<component::HitEffectComponent>(e.m_targetId))
+            return;
+
+        auto& effect{ m_componentManager.get<component::HitEffectComponent>(e.m_targetId) };
+        effect.m_isActive      = true;
+        effect.m_durationTimer = effect.m_duration;
+        effect.m_blinkTimer    = effect.m_blinkInterval;
     }
 
     void HitEffectSystem::update(float deltaTime)
@@ -47,4 +62,4 @@ namespace game::system
             }
         }
     }
-}
+} // namespace game::system

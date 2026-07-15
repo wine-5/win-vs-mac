@@ -54,4 +54,4 @@ namespace infrastructure
 		std::unordered_map<std::string, std::string> m_fontNames;
 		std::unordered_map<std::string, std::string> m_fontPaths;
 	};
-}
+} // namespace infrastructure

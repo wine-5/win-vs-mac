@@ -40,4 +40,4 @@ namespace infrastructure
         int m_width;
         int m_height;
     };
-}
+} // namespace infrastructure

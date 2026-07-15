@@ -72,4 +72,4 @@ namespace infrastructure
 		if (handle == -1) return;
 		DrawExtendGraph(x, y, x + width, y + height, handle, FALSE);
 	}
-}
+} // namespace infrastructure

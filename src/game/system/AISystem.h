@@ -26,4 +26,4 @@ namespace game::system
     private:
         core::ecs::ComponentManager& m_componentManager;
     };
-}
+} // namespace game::system

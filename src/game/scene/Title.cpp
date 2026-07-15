@@ -6,6 +6,8 @@
 #include "core/interface/IResourceManager.h"
 #include <cstdlib>
 #include "core/interface/IPerformanceDataProvider.h"
+#include "core/interface/IAudioManager.h"
+#include "core/constant/BgmType.h"
 
 namespace game::scene
 {
@@ -31,6 +33,9 @@ namespace game::scene
 			m_uiRenderer, m_screen, FADE_DURATION, true);
 
 		m_perfProvider = core::base::ServiceLocator::get<core::iface::IPerformanceDataProvider>();
+
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio) audio->playBgm(core::constant::BgmType::Title);
 	}
 
 	Title::~Title() noexcept = default;
@@ -136,4 +141,4 @@ namespace game::scene
 		if (m_state != State::Idle) return;
 		std::exit(0);
 	}
-}
+} // namespace game::scene

@@ -52,4 +52,4 @@ namespace infrastructure
         m_handles[id] = handle;
         return handle;
     }
-}
+} // namespace infrastructure

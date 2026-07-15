@@ -141,6 +141,6 @@ namespace platform::window
         static constexpr WPARAM SYSCOMMAND_MASK{ 0xFFF0 };
 
         static LRESULT CALLBACK staticWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
-    }; 
+    };
 
-}
+} // namespace platform::window

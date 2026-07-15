@@ -40,4 +40,4 @@ namespace game::ui
 	{
 		return m_elapsed >= m_duration;
 	}
-}
+} // namespace game::ui

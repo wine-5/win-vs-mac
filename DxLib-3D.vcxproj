@@ -78,10 +78,12 @@
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/FS /utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\effekseer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)thirdparty\effekseer;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -94,10 +96,12 @@
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/FS /utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\effekseer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)thirdparty\effekseer;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -106,15 +110,16 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);$(SolutionDir)thirdparty\effekseer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/FS /wd4819 /wd4828 /utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)thirdparty\dxlib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)thirdparty\effekseer</AdditionalLibraryDirectories>
       <AdditionalDependencies>DxLib_x64_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -126,20 +131,24 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);$(SolutionDir)thirdparty\effekseer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/FS /wd4819 /wd4828 /utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)thirdparty\dxlib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)thirdparty\effekseer</AdditionalLibraryDirectories>
       <AdditionalDependencies>DxLib_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\game\actor\Enemy.cpp" />
+    <ClCompile Include="src\game\actor\EnemyBase.cpp" />
+    <ClCompile Include="src\game\actor\MacEnemy.cpp" />
+    <ClCompile Include="src\game\actor\SafariEnemy.cpp" />
+    <ClCompile Include="src\game\actor\XcodeEnemy.cpp" />
     <ClCompile Include="src\game\attack\BaseAttackHandler.cpp" />
     <ClCompile Include="src\game\attack\DefenseHandler.cpp" />
     <ClCompile Include="src\game\factory\EnemyFactory.cpp" />
@@ -155,12 +164,21 @@
     <ClCompile Include="src\game\scene\TitleView.cpp" />
     <ClCompile Include="src\game\system\AISystem.cpp" />
     <ClCompile Include="src\game\system\AttackSystem.cpp" />
+    <ClCompile Include="src\game\system\CameraSystem.cpp" />
+    <ClCompile Include="src\game\event\AudioEventListener.cpp" />
+    <ClCompile Include="src\game\system\EffectSystem.cpp" />
     <ClCompile Include="src\game\system\HitEffectSystem.cpp" />
     <ClCompile Include="src\game\ui\FadeTransition.cpp" />
     <ClCompile Include="src\game\ui\Label.cpp" />
+    <ClCompile Include="src\infrastructure\AudioManager.cpp" />
+    <ClCompile Include="src\infrastructure\EffectFactory.cpp" />
+    <ClCompile Include="src\infrastructure\EffectPool.cpp" />
+    <ClCompile Include="src\infrastructure\repository\AudioRepository.cpp" />
+    <ClCompile Include="src\infrastructure\repository\EffectRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\FontRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\JobRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\ModelRepository.cpp" />
+    <ClCompile Include="src\infrastructure\repository\AnimationRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\ImageRepository.cpp" />
     <ClCompile Include="src\infrastructure\Screen.cpp" />
     <ClCompile Include="src\core\base\ServiceLocator.cpp" />
@@ -184,6 +202,7 @@
     <ClCompile Include="src\game\system\InputSystem.cpp" />
     <ClCompile Include="src\game\system\MoveSystem.cpp" />
     <ClCompile Include="src\game\system\PhysicsSystem.cpp" />
+    <ClCompile Include="src\infrastructure\repository\StageRepository.cpp" />
     <ClCompile Include="src\infrastructure\UIRenderer.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\infrastructure\utility\LogUtil.cpp" />
@@ -240,12 +259,23 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\base\Singleton.h" />
+    <ClInclude Include="src\core\data\StageMetadata.h" />
+    <ClInclude Include="src\game\actor\MacEnemy.h" />
+    <ClInclude Include="src\game\actor\SafariEnemy.h" />
+    <ClInclude Include="src\game\actor\XcodeEnemy.h" />
+    <ClInclude Include="src\game\constant\AIBehavior.h" />
+    <ClInclude Include="src\core\constant\BgmType.h" />
+    <ClInclude Include="src\core\constant\EffectType.h" />
     <ClInclude Include="src\core\constant\JobType.h" />
     <ClInclude Include="src\core\constant\SelectWindowId.h" />
+    <ClInclude Include="src\core\constant\SeType.h" />
     <ClInclude Include="src\core\data\ModelMetadata.h" />
     <ClInclude Include="src\core\base\EventBus.h" />
+    <ClInclude Include="src\core\ecs\ObjectPool.h" />
     <ClInclude Include="src\core\input\GamePadCode.h" />
     <ClInclude Include="src\core\interface\IAnimator.h" />
+    <ClInclude Include="src\core\interface\IAudioManager.h" />
+    <ClInclude Include="src\core\interface\IEffectFactory.h" />
     <ClInclude Include="src\core\interface\IFileProvider.h" />
     <ClInclude Include="src\core\interface\IInputProvider.h" />
     <ClInclude Include="src\core\interface\IPerformanceDataProvider.h" />
@@ -260,17 +290,19 @@
     <ClInclude Include="src\core\interface\IUIRenderer.h" />
     <ClInclude Include="src\core\interface\IWindow.h" />
     <ClInclude Include="src\core\interface\IWindowFactory.h" />
-    <ClInclude Include="src\game\actor\Enemy.h" />
+    <ClInclude Include="src\game\actor\EnemyBase.h" />
     <ClInclude Include="src\game\attack\BaseAttackHandler.h" />
     <ClInclude Include="src\game\attack\DamageChain.h" />
     <ClInclude Include="src\game\attack\DefenseHandler.h" />
     <ClInclude Include="src\game\attack\IDamageHandler.h" />
     <ClInclude Include="src\game\component\AIComponent.h" />
     <ClInclude Include="src\game\component\AttackComponent.h" />
+    <ClInclude Include="src\game\component\EffectComponent.h" />
     <ClInclude Include="src\game\component\HealthComponent.h" />
     <ClInclude Include="src\game\component\HitEffectComponent.h" />
     <ClInclude Include="src\game\component\TagComponent.h" />
     <ClInclude Include="src\game\constant\EnemyAnimationState.h" />
+    <ClInclude Include="src\game\constant\EnemyType.h" />
     <ClInclude Include="src\game\constant\MetadataKeys.h" />
     <ClInclude Include="src\game\data\EnemyData.h" />
     <ClInclude Include="src\game\data\FileEquipmentData.h" />
@@ -293,14 +325,24 @@
     <ClInclude Include="src\game\scene\TitleView.h" />
     <ClInclude Include="src\game\system\AISystem.h" />
     <ClInclude Include="src\game\system\AttackSystem.h" />
+    <ClInclude Include="src\game\system\CameraSystem.h" />
+    <ClInclude Include="src\game\event\AudioEventListener.h" />
+    <ClInclude Include="src\game\system\EffectSystem.h" />
     <ClInclude Include="src\game\system\HitEffectSystem.h" />
     <ClInclude Include="src\game\ui\FadeTransition.h" />
     <ClInclude Include="src\game\ui\Label.h" />
     <ClInclude Include="src\game\utility\ExtensionBonusCalculator.h" />
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
+    <ClInclude Include="src\infrastructure\AudioManager.h" />
+    <ClInclude Include="src\infrastructure\EffectFactory.h" />
+    <ClInclude Include="src\infrastructure\EffectPool.h" />
+    <ClInclude Include="src\infrastructure\repository\AudioRepository.h" />
+    <ClInclude Include="src\infrastructure\repository\EffectRepository.h" />
     <ClInclude Include="src\infrastructure\repository\FontRepository.h" />
     <ClInclude Include="src\infrastructure\repository\JobRepository.h" />
     <ClInclude Include="src\infrastructure\repository\ModelRepository.h" />
+    <ClInclude Include="src\infrastructure\repository\AnimationRepository.h" />
+    <ClInclude Include="src\infrastructure\repository\StageRepository.h" />
     <ClInclude Include="src\infrastructure\Screen.h" />
     <ClInclude Include="src\core\base\ServiceLocator.h" />
     <ClInclude Include="src\core\utility\Color.h" />
@@ -309,6 +351,7 @@
     <ClInclude Include="src\game\component\ColliderComponent.h" />
     <ClInclude Include="src\game\constant\Tag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
+    <ClInclude Include="src\game\constant\AnimationId.h" />
     <ClInclude Include="src\core\constant\UI.h" />
     <ClInclude Include="src\game\data\GroundData.h" />
     <ClInclude Include="src\game\factory\FactoryInitializer.h" />
@@ -338,6 +381,7 @@
     <ClInclude Include="src\core\ecs\ComponentArray.h" />
     <ClInclude Include="src\core\ecs\ComponentManager.h" />
     <ClInclude Include="src\game\component\InputComponent.h" />
+    <ClInclude Include="src\game\component\CameraComponent.h" />
     <ClInclude Include="src\game\component\RenderComponent.h" />
     <ClInclude Include="src\game\component\TransformComponent.h" />
     <ClInclude Include="src\game\component\VelocityComponent.h" />

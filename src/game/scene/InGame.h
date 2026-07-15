@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "IScene.h"
+#include <vector>
 
 /* core層のインクルード */
 #include "core/ecs/EntityManager.h"
@@ -17,7 +18,7 @@
 #include "game/component/RenderComponent.h"
 #include "game/data/PlayerData.h"
 #include "game/data/FileEquipmentData.h"
-
+#include "game/event/AudioEventListener.h"
 #include <memory>
 
 namespace game::scene
@@ -68,6 +69,11 @@ namespace game::scene
 		 */
 		void saveResultData(bool isVictory) noexcept;
 
+		/**
+		 * @brief DEBUG: 当たり判定（青）・攻撃範囲（赤）・索敵範囲（黄）を可視化する（テスト後に削除）
+		 */
+		void drawDebugVisuals();
+
 		core::ecs::EntityManager 	m_entityManager;
 		core::ecs::ComponentManager m_componentManager;
 		core::ecs::SystemManager 	m_systemManager;
@@ -84,18 +90,15 @@ namespace game::scene
 
 		core::ecs::EntityId m_groundId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
-		core::ecs::EntityId m_enemyId{core::ecs::INVALID_ENTITY_ID};
+		std::vector<core::ecs::EntityId> m_enemyIds{};
 
 		core::base::EventBus m_eventBus;
+
+		std::unique_ptr<game::event::AudioEventListener> m_audioEventListener;
 
 		// 進行トラッキング
 		float m_elapsedTime{0.0f};
 		int   m_killCount{0};
 		float m_totalDamageTaken{0.0f};
-
-		// カメラ設定
-		static constexpr float CAMERA_OFFSET_X = 0.0f;
-		static constexpr float CAMERA_OFFSET_Y = 200.0f;
-		static constexpr float CAMERA_OFFSET_Z = -300.0f;
 	};
-}
+} // namespace game::scene

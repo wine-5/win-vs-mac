@@ -15,4 +15,4 @@ namespace game::factory
     public:
         virtual ~IFactory() = default;
     };
-}
+} // namespace game::factory

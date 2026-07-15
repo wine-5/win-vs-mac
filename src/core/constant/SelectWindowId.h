@@ -12,4 +12,4 @@ namespace core::constant
 		FileSelect = 2,
 		Parameter = 3,
 	};
-}
+} // namespace core::constant

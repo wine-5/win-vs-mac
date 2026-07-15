@@ -37,4 +37,4 @@ namespace game::system
 		core::ecs::EntityId m_entityId{};
 		core::iface::IInputProvider& m_inputProvider;
 	};
-}
+} // namespace game::system

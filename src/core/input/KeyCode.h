@@ -5,7 +5,6 @@ namespace core::input
     /**
      * @brief DxLibに依存しない独自のキーコードを定義
      */
-
     enum class KeyCode
     {
         W,
@@ -20,5 +19,8 @@ namespace core::input
         Down,
         Left,
         Right,
-    };
-}
+
+		Shift, // ダッシュ用
+		Tab,   // ロックオン切り替え用
+	};
+} // namespace core::input

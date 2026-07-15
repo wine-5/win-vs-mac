@@ -122,4 +122,4 @@ namespace platform::window::select
         }
         return DefWindowProcW(hwnd, msg, wParam, lParam);
     }
-}
+} // namespace platform::window::select

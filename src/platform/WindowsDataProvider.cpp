@@ -27,4 +27,4 @@ namespace platform
 		// キャンセル時は空文字列を返す
 		return {};
 	}
-}
+} // namespace platform

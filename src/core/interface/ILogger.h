@@ -36,9 +36,8 @@ namespace core::iface
          */
         virtual void clear() = 0;
     };
-}
+} // namespace core::iface
 
-// ログ出力用マクロ（使用を簡潔にする）
 // ログ出力用マクロ（使用を簡潔にする）
 #define LOG(...) \
     do { \

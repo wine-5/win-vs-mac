@@ -23,7 +23,7 @@ namespace core::iface
 {
     class IResourceManager;
     class IScreen;
-}
+} // namespace core::iface
 
 namespace platform::window::select
 {
@@ -46,6 +46,8 @@ namespace platform::window::select
         void bringToFront(core::constant::SelectWindowId id) override;
 
         void updateParameterWindowForJob(core::constant::JobType jobType) noexcept;
+        bool isJobSelected() const noexcept override { return m_jobSelected; }
+        void showWarningMessage(const std::string& message) noexcept override;
 
     private:
         // レイアウト定数
@@ -96,6 +98,7 @@ namespace platform::window::select
         bool m_diffVisible{true};
         bool m_rulesVisible{false};
 
+        bool m_jobSelected{false};
         core::constant::JobType m_currentJobType{core::constant::JobType::Warrior};
         std::array<std::string, 3> m_slotPaths{};
         std::array<game::data::FileExtensionType, 3> m_slotExtTypes{
@@ -111,4 +114,4 @@ namespace platform::window::select
         core::iface::IResourceManager& m_resourceManager;
         core::iface::IScreen& m_screen;
     };
-}
+} // namespace platform::window::select

@@ -75,7 +75,24 @@ namespace infrastructure
 		 */
 		[[nodiscard]] bool isMouseRightPressed() const override;
 
-	private:
+		/**
+		 * @brief 前回取得時からのマウス移動量を取得する（取得後カーソルを画面中央へ戻す）
+		 * @param outDx X方向の移動量の出力先
+		 * @param outDy Y方向の移動量の出力先
+		 */
+		void getMouseDelta(int& outDx, int& outDy) override;
+
+		/**
+		 * @brief マウスカーソルの表示・非表示を切り替える
+		 * @param visible trueで表示、falseで非表示
+		 */
+		void setMouseCursorVisible(bool visible) override;
+
+	  private:
 		mutable std::unordered_map<core::input::KeyCode, bool> m_previousKeyState;
+		bool m_cursorVisible{ true }; // 表示中は前回座標との差分、非表示中は中央固定差分を使う
+		int m_previousMouseX{ 0 };
+		int m_previousMouseY{ 0 };
+		bool m_hasPreviousMousePosition{ false };
 	};
-}
+} // namespace infrastructure

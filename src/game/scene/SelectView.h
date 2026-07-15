@@ -72,4 +72,4 @@ namespace game::scene
 		static constexpr float FILE_NAME_Y_STEP          = 0.04f;
 		static constexpr int   FILE_NAME_X               = 10;
 	};
-}
+} // namespace game::scene

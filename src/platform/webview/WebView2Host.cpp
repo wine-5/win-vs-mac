@@ -179,4 +179,4 @@ namespace platform::webview
     {
         return m_ready;
     }
-}
+} // namespace platform::webview

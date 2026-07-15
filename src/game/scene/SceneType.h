@@ -15,4 +15,4 @@ namespace game::scene
         InGame,     // ゲーム画面
         Result      // リザルト画面
     };
-}
+} // namespace game::scene

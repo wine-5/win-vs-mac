@@ -34,5 +34,5 @@ namespace infrastructure::constant
         constexpr const char* DEFENCE          = "defence";
         constexpr const char* ATTACK_POWER     = "attackPower";
         constexpr const char* ATTACK_COOLDOWN  = "attackCooldown";
-    }
-}
+	} // namespace json_keys
+} // namespace infrastructure::constant

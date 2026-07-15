@@ -136,3 +136,4 @@ packages/
 Backup/
 tmp/
 temp/
+__pycache__/

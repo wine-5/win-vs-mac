@@ -64,4 +64,4 @@ namespace core::utility
         static constexpr unsigned int GRAPH_DISK   = 0xFF80FFFF; // シアン：ディスク活動率
         static constexpr unsigned int CARD_BG      = 0xFF081024; // タスクマネージャー風カード背景（濃い紺）
     };
-}
+} // namespace core::utility

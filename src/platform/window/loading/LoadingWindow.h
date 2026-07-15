@@ -60,4 +60,4 @@ namespace platform::window::loading
 
 		void handleMessage(const std::string& json) noexcept;
 	};
-}
+} // namespace platform::window::loading

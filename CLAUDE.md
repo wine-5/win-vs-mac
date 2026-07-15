@@ -44,10 +44,9 @@ platform → infrastructure → game → core
 | インターフェース名 | `I` + PascalCase | `ISystemDataProvider` |
 | 関数名 | camelCase | `getCpuUsage()`, `updatePlayer()` |
 | ローカル変数 | camelCase | `cpuUsage`, `playerPosition` |
-| ローカル定数（constexpr） | camelCase | `fileButtonYRatio`, `maxSlots` |
 | メンバ変数 | `m_` + camelCase | `m_cpuUsage`, `m_playerPosition` |
 | 静的メンバ変数 | `s_` + camelCase | `s_instance` |
-| グローバル定数 / 静的定数 | UPPER_SNAKE_CASE | `MAX_ENEMY_COUNT`, `SCREEN_WIDTH` |
+| 定数 / constexpr（ローカル・グローバル・静的すべて） | UPPER_SNAKE_CASE | `MAX_ENEMY_COUNT`, `SCREEN_WIDTH`, `HORIZONTAL_SHRINK` |
 | 列挙型（型名・値） | PascalCase | `EnemyState::Idle` |
 | 名前空間 | 小文字 | `namespace game`, `namespace game::player` |
 

@@ -22,6 +22,7 @@ namespace game::data
 		{
 			PlayerData data;
 			data.m_modelPath = metadata.modelPath;
+			data.m_scale = metadata.scale;
 			data.m_colliderSize = metadata.colliderSize;
 			data.m_colliderOffset = metadata.colliderOffset;
 
@@ -41,6 +42,11 @@ namespace game::data
 				std::string(constant::metadata_keys::MOVE_SPEED)) };
 			if (moveSpeedIt != metadata.floatProperties.end())
 				data.m_moveSpeed = moveSpeedIt->second;
+
+			auto dashMultiplierIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::DASH_MULTIPLIER)) };
+			if (dashMultiplierIt != metadata.floatProperties.end())
+				data.m_dashMultiplier = dashMultiplierIt->second;
 
 			auto maxHpIt{ metadata.floatProperties.find(
 				std::string(constant::metadata_keys::MAX_HP)) };
@@ -84,6 +90,11 @@ namespace game::data
 		[[nodiscard]] const std::string& getWalkAnimPath() const noexcept { return m_walkAnimPath; }
 		/** @brief 移動速度を取得 */
 		[[nodiscard]] float              getMoveSpeed()      const noexcept { return m_moveSpeed; }
+		/** @brief ダッシュ速度倍率を取得 */
+		[[nodiscard]] float getDashMultiplier() const noexcept
+		{
+			return m_dashMultiplier;
+		}
 		/** @brief 最大HPを取得 */
 		[[nodiscard]] float              getMaxHp()          const noexcept { return m_maxHp; }
 		/** @brief 防御力を取得 */
@@ -98,6 +109,8 @@ namespace game::data
 		[[nodiscard]] core::Vector3      getColliderSize()   const noexcept { return m_colliderSize; }
 		/** @brief コライダーオフセットを取得 */
 		[[nodiscard]] core::Vector3      getColliderOffset() const noexcept { return m_colliderOffset; }
+		/** @brief モデルスケールを取得 */
+		[[nodiscard]] core::Vector3      getScale()          const noexcept { return m_scale; }
 
 		/**
 		 * @brief FileExtensionBonus をパラメータに加算する
@@ -140,6 +153,7 @@ namespace game::data
 		std::string   m_idleAnimPath;
 		std::string   m_walkAnimPath;
 		float         m_moveSpeed{ 0.0f };
+		float m_dashMultiplier{ 1.0f }; // JSON未設定時はダッシュしても等速
 		float         m_maxHp{ 0.0f };
 		float         m_defence{ 0.0f };
 		float         m_attackPower{ 0.0f };
@@ -147,6 +161,7 @@ namespace game::data
 		float         m_attackCooldown{ 0.0f };
 		core::Vector3 m_colliderSize;
 		core::Vector3 m_colliderOffset;
+		core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
 
 		// 基本値（メタデータから取得）
 		float m_baseHp{ 0.0f };
@@ -160,4 +175,4 @@ namespace game::data
 		float m_jobDefAddition{ 0.0f };
 		float m_jobSpdAddition{ 0.0f };
 	};
-}
+} // namespace game::data

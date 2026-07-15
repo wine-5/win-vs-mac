@@ -124,32 +124,32 @@ namespace game::scene
 			{ m_diskHistory, "Disk",   core::utility::Color::GRAPH_DISK,   GRAPH_DISK_TOP_RATIO   },
 		};
 
-		constexpr float cardWidthRatio    { 0.88f };  // 画面幅に対するカード幅の割合
-		constexpr float cardHeightRatio   { 0.17f };  // 画面高さに対するカード高さの割合
-		constexpr float graphWidthFrac    { 0.68f };  // カード幅に対するグラフ領域の割合
-		constexpr float labelFontSizeRatio{ 0.028f }; // 画面高さに対するラベルフォントサイズの割合
-		constexpr float valueFontSizeRatio{ 0.038f }; // 画面高さに対する数値フォントサイズの割合
-		constexpr float gridLineInterval  { 0.25f };  // グリッドライン間隔（0=下端、1=上端）
-		constexpr int   gridLineCount     { 3 };      // グリッドライン本数（25 / 50 / 75 %）
-		constexpr int   graphPadding      { 2 };      // グラフ領域の上下パディング（px）
-		constexpr int   infoPanelPadding  { 14 };     // 情報パネルの左マージン（px）
-		constexpr int   textVerticalOffset{ 2 };      // ラベル・数値の縦位置微調整（px）
+		constexpr float CARD_WIDTH_RATIO{ 0.88f };       // 画面幅に対するカード幅の割合
+		constexpr float CARD_HEIGHT_RATIO{ 0.17f };      // 画面高さに対するカード高さの割合
+		constexpr float GRAPH_WIDTH_FRAC{ 0.68f };       // カード幅に対するグラフ領域の割合
+		constexpr float LABEL_FONT_SIZE_RATIO{ 0.028f }; // 画面高さに対するラベルフォントサイズの割合
+		constexpr float VALUE_FONT_SIZE_RATIO{ 0.038f }; // 画面高さに対する数値フォントサイズの割合
+		constexpr float GRID_LINE_INTERVAL{ 0.25f };     // グリッドライン間隔（0=下端、1=上端）
+		constexpr int GRID_LINE_COUNT{ 3 };              // グリッドライン本数（25 / 50 / 75 %）
+		constexpr int GRAPH_PADDING{ 2 };                // グラフ領域の上下パディング（px）
+		constexpr int INFO_PANEL_PADDING{ 14 };          // 情報パネルの左マージン（px）
+		constexpr int TEXT_VERTICAL_OFFSET{ 2 };         // ラベル・数値の縦位置微調整（px）
 
-		const int cardW { static_cast<int>(screenW * cardWidthRatio) };
+		const int cardW{ static_cast<int>(screenW * CARD_WIDTH_RATIO) };
 		const int cardX { (screenW - cardW) / 2 };
-		const int cardH { static_cast<int>(screenH * cardHeightRatio) };
-		const int graphW{ static_cast<int>(cardW * graphWidthFrac) };
-		const int infoX { cardX + graphW + infoPanelPadding };
+		const int cardH{ static_cast<int>(screenH * CARD_HEIGHT_RATIO) };
+		const int graphW{ static_cast<int>(cardW * GRAPH_WIDTH_FRAC) };
+		const int infoX{ cardX + graphW + INFO_PANEL_PADDING };
 		const int barW  { std::max(1, graphW / HISTORY_SIZE) };
 
-		const int labelSize{ static_cast<int>(screenH * labelFontSizeRatio) };
-		const int valueSize{ static_cast<int>(screenH * valueFontSizeRatio) };
+		const int labelSize{ static_cast<int>(screenH * LABEL_FONT_SIZE_RATIO) };
+		const int valueSize{ static_cast<int>(screenH * VALUE_FONT_SIZE_RATIO) };
 
 		for (const auto& ch : channels)
 		{
 			const int cardTop { static_cast<int>(screenH * ch.m_topRatio) };
-			const int graphTop{ cardTop + graphPadding };
-			const int graphBot{ cardTop + cardH - graphPadding };
+			const int graphTop{ cardTop + GRAPH_PADDING };
+			const int graphBot{ cardTop + cardH - GRAPH_PADDING };
 			const int graphH  { graphBot - graphTop };
 			const float latestVal{ ch.m_history.back() };
 
@@ -164,9 +164,9 @@ namespace game::scene
 
 			// 横グリッドライン（25 / 50 / 75 %）
 			m_uiRenderer.setBlendMode(2, 40);
-			for (int g{ 1 }; g <= gridLineCount; ++g)
+			for (int g{ 1 }; g <= GRID_LINE_COUNT; ++g)
 			{
-				const int gy{ graphBot - static_cast<int>(graphH * g * gridLineInterval) };
+				const int gy{ graphBot - static_cast<int>(graphH * g * GRID_LINE_INTERVAL) };
 				m_uiRenderer.drawBox(cardX, gy, graphW, 1, ch.m_color, true);
 			}
 
@@ -198,8 +198,8 @@ namespace game::scene
 			// ラベル（情報パネル上段）
 			const int infoCenterY{ cardTop + cardH / 2 };
 			m_uiRenderer.setBlendMode(2, 210);
-			m_uiRenderer.drawText(infoX, infoCenterY - labelSize - valueSize / 2 - textVerticalOffset,
-				ch.m_label, ch.m_color, labelSize);
+			m_uiRenderer.drawText(infoX, infoCenterY - labelSize - valueSize / 2 - TEXT_VERTICAL_OFFSET,
+			                      ch.m_label, ch.m_color, labelSize);
 
 			// 数値（情報パネル下段、白 ＋ 大きめ）
 			const std::string valText{ std::to_string(static_cast<int>(latestVal * 100.f)) + "%" };
@@ -210,4 +210,4 @@ namespace game::scene
 			m_uiRenderer.resetBlendMode();
 		}
 	}
-}
+} // namespace game::scene

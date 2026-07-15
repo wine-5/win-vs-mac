@@ -26,4 +26,4 @@ namespace game::factory
 	{
 		return *m_enemyFactory;
 	}
-}
+} // namespace game::factory

@@ -86,4 +86,4 @@ namespace game::data
 		std::array<FileExtensionType, MAX_SLOTS> m_extensionTypes{FileExtensionType::Unknown, FileExtensionType::Unknown, FileExtensionType::Unknown};
 		std::array<bool, MAX_SLOTS> m_hasSelection{false, false, false};
 	};
-}
+} // namespace game::data

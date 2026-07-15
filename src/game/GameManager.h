@@ -62,4 +62,4 @@ namespace game
         data::JobSelectionData m_jobSelectionData{};
         core::data::ResultData m_resultData{};
     };
-}
+} // namespace game

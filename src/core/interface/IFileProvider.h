@@ -18,4 +18,4 @@ namespace core::iface
          */
         [[nodiscard]] virtual std::string selectFile() = 0;
     };
-}
+} // namespace core::iface

@@ -3,6 +3,7 @@
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
 #include "game/component/AttackComponent.h"
+#include "game/component/AnimationComponent.h"
 #include "core/utility/Vector3.h"
 #include <cmath>
 
@@ -56,6 +57,15 @@ namespace game::system
 				velocity.m_velocity.z = direction.z * ai.m_moveSpeed;
 			}
 
+			// 移動状態に応じたアニメーションを要求する
+			if (m_componentManager.has<component::AnimationComponent>(entityId))
+			{
+				auto& anim = m_componentManager.get<component::AnimationComponent>(entityId);
+				anim.m_requested = (distance > 0.0f)
+					? constant::AnimationState::Walk
+					: constant::AnimationState::Idle;
+			}
+
 			if (distance > 0.0f)
 				transform.m_rotation.y = std::atan2f(-direction.x, -direction.z);
 
@@ -75,4 +85,4 @@ namespace game::system
 			}
 		}
 	}
-}
+} // namespace game::system

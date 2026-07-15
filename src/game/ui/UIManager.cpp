@@ -27,4 +27,4 @@ namespace game::ui
 	{
 		m_elements.clear();
 	}
-}
+} // namespace game::ui

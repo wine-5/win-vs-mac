@@ -12,4 +12,4 @@ namespace game::component
 		core::Vector3 m_rotation;
 		core::Vector3 m_scale{1.0f, 1.0f, 1.0f};
 	};
-}
+} // namespace game::component

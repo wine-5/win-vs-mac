@@ -42,4 +42,4 @@ namespace game::ui
     private:
         std::vector<std::unique_ptr<IUIElement>> m_elements;
     };
-}
+} // namespace game::ui

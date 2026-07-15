@@ -22,4 +22,4 @@ namespace core::iface
          */
         virtual void destroy() noexcept = 0;
     };
-}
+} // namespace core::iface

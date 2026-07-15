@@ -28,4 +28,4 @@ namespace platform::window::select
             m_webView.setVisible(wParam != 0);
         return WindowBase::onMessage(hwnd, msg, wParam, lParam);
     }
-}
+} // namespace platform::window::select

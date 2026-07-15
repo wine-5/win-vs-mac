@@ -69,7 +69,7 @@ namespace
         default:                 return Color::BLACK;
         }
     }
-}
+} // namespace
 
 namespace game::scene
 {
@@ -156,4 +156,4 @@ namespace game::scene
         auto* sm{ core::base::ServiceLocator::get<SceneManager>() };
         if (sm) sm->changeScene(SceneType::Lockscreen);
     }
-}
+} // namespace game::scene

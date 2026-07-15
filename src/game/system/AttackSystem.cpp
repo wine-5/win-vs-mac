@@ -12,8 +12,9 @@
 
 namespace game::system
 {
-	AttackSystem::AttackSystem(core::ecs::ComponentManager &componentManager, core::base::EventBus &eventBus)
-		: m_componentManager{componentManager}, m_eventBus{eventBus}
+	AttackSystem::AttackSystem(core::ecs::ComponentManager &componentManager, core::base::EventBus &eventBus,
+		core::constant::SeType playerAttackSeType)
+		: m_componentManager{componentManager}, m_eventBus{eventBus}, m_playerAttackSeType{playerAttackSeType}
 	{
 		auto base{std::make_unique<attack::BaseAttackHandler>(m_componentManager)};
 		auto defense{std::make_unique<attack::DefenseHandler>(m_componentManager)};
@@ -57,6 +58,12 @@ namespace game::system
 			for (auto targetId : targets)
 			{
 				if (targetId == attackerId)
+					continue;
+
+				// 同じ陣営同士は攻撃しないように（敵が敵を殴るフレンドリーファイア防止）
+				const auto& attackerTagCheck{ m_componentManager.get<component::TagComponent>(attackerId) };
+				const auto& targetTagCheck{ m_componentManager.get<component::TagComponent>(targetId) };
+				if (attackerTagCheck.m_tag == targetTagCheck.m_tag)
 					continue;
 
 				if (!m_componentManager.has<component::TransformComponent>(targetId))
@@ -103,6 +110,12 @@ namespace game::system
 				hitEvent.m_attackerId = attackerId;
 				hitEvent.m_targetId = targetId;
 				hitEvent.m_damage = chain.m_damage;
+
+				// 攻撃者がプレイヤーの場合、ジョブに応じた攻撃SEをセット
+				const auto& attackerTag{ m_componentManager.get<component::TagComponent>(attackerId) };
+				if (attackerTag.m_tag == constant::Tag::Player)
+					hitEvent.m_seType = m_playerAttackSeType;
+
 				m_eventBus.publish(hitEvent);
 			}
 
@@ -110,4 +123,4 @@ namespace game::system
 			attack.m_currentCooldown = attack.m_attackCooldown;
 		}
 	}
-}
+} // namespace game::system

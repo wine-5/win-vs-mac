@@ -10,4 +10,4 @@ namespace core::event
 	public:
 		virtual ~ISelectEvent() = default;
 	};
-}
+} // namespace core::event

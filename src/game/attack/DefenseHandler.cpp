@@ -26,4 +26,4 @@ namespace game::attack
 		if (m_next)
 			m_next->handle(chain);
 	}
-}
+} // namespace game::attack

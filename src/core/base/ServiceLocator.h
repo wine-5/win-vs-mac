@@ -82,4 +82,4 @@ namespace core::base
 	private:
 		static std::unordered_map<std::type_index, std::shared_ptr<void>> m_services;
 	};
-}
+} // namespace core::base

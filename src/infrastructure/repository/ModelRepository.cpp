@@ -5,6 +5,12 @@
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
 
+namespace
+{
+	// 腕を広げたポーズだと横幅が実際の胴体より大きく出るため、水平方向を絞って胴体に沿わせる係数
+	constexpr float HORIZONTAL_SHRINK{ 0.5f };
+} // namespace
+
 namespace infrastructure
 {
 	ModelRepository::ModelRepository()
@@ -16,11 +22,31 @@ namespace infrastructure
 		const nlohmann::json j = nlohmann::json::parse(file);
 		for (const auto& res : loadResourceList(j))
 			m_metadata[res.m_id] = parseJsonFile(res.m_path);
+		for (const auto& res : loadRawModelList(j))
+			m_rawModelPaths[res.m_id] = res.m_path;
 	}
 
 	int ModelRepository::loadModelById(std::string_view modelId)
 	{
 		std::string id(modelId);
+
+		// raw modelの場合は直接MV1LoadModel
+		{
+			auto rawIt{ m_rawModelPaths.find(id) };
+			if (rawIt != m_rawModelPaths.end())
+			{
+				auto handleIt{ m_modelHandles.find(id) };
+				if (handleIt != m_modelHandles.end())
+					return handleIt->second;
+
+				int handle{ MV1LoadModel(rawIt->second.c_str()) };
+				if (handle == -1)
+					LOG_E("モデルの読み込みに失敗しました: %s", rawIt->second.c_str());
+				else
+					m_modelHandles[id] = handle;
+				return handle;
+			}
+		}
 
 		auto metaIt{ m_metadata.find(id) };
 		if (metaIt == m_metadata.end())
@@ -49,21 +75,58 @@ namespace infrastructure
 			metadata.colliderSize.z == 0.0f)
 		{
 			auto& mutableMeta = m_metadata[id];
-			VECTOR vMin = MV1GetFrameMinVertexLocalPosition(handle, -1);
-			VECTOR vMax = MV1GetFrameMaxVertexLocalPosition(handle, -1);
-			mutableMeta.colliderSize.x = vMax.x - vMin.x;
-			mutableMeta.colliderSize.y = vMax.y - vMin.y;
-			mutableMeta.colliderSize.z = vMax.z - vMin.z;
 
-			LOG("'%s' のコライダーサイズを自動計算: (%.2f, %.2f, %.2f)",
-				id.c_str(),
-				mutableMeta.colliderSize.x,
-				mutableMeta.colliderSize.y,
-				mutableMeta.colliderSize.z);
+			// モデル全体の頂点からAABBを求める（参照メッシュはスケール適用後のワールド座標で取得する）
+			MV1SetupReferenceMesh(handle, -1, TRUE);
+			const MV1_REF_POLYGONLIST refPoly{ MV1GetReferenceMesh(handle, -1, TRUE) };
+
+			if (refPoly.VertexNum > 0)
+			{
+				VECTOR vMin{ refPoly.Vertexs[0].Position };
+				VECTOR vMax{ refPoly.Vertexs[0].Position };
+				for (int i{ 1 }; i < refPoly.VertexNum; ++i)
+				{
+					const VECTOR& p{ refPoly.Vertexs[i].Position };
+					vMin.x = (p.x < vMin.x) ? p.x : vMin.x;
+					vMin.y = (p.y < vMin.y) ? p.y : vMin.y;
+					vMin.z = (p.z < vMin.z) ? p.z : vMin.z;
+					vMax.x = (p.x > vMax.x) ? p.x : vMax.x;
+					vMax.y = (p.y > vMax.y) ? p.y : vMax.y;
+					vMax.z = (p.z > vMax.z) ? p.z : vMax.z;
+				}
+
+				// 参照メッシュはスケール適用済みなのでそのままワールド寸法になる
+				mutableMeta.colliderSize.x = (vMax.x - vMin.x) * HORIZONTAL_SHRINK;
+				mutableMeta.colliderSize.y = vMax.y - vMin.y;
+				mutableMeta.colliderSize.z = (vMax.z - vMin.z) * HORIZONTAL_SHRINK;
+
+				// コライダー中心も自動計算する（足元原点モデルなら高さの半分が中心になる）
+				mutableMeta.colliderOffset.x = (vMax.x + vMin.x) * 0.5f;
+				mutableMeta.colliderOffset.y = (vMax.y + vMin.y) * 0.5f;
+				mutableMeta.colliderOffset.z = (vMax.z + vMin.z) * 0.5f;
+
+			}
+			else
+			{
+				LOG_E("'%s' のコライダー自動計算に失敗しました（頂点が取得できません）", id.c_str());
+			}
+
+			MV1TerminateReferenceMesh(handle, -1, TRUE);
 		}
 
 		m_modelHandles[id] = handle;
 		return handle;
+	}
+
+	int ModelRepository::duplicateModel(int modelHandle)
+	{
+		if (modelHandle == -1)
+			return -1;
+
+		int duplicated{ MV1DuplicateModel(modelHandle) };
+		if (duplicated == -1)
+			LOG_E("モデルハンドルの複製に失敗しました: %d", modelHandle);
+		return duplicated;
 	}
 
 	std::optional<core::data::ModelMetadata> ModelRepository::getMetadata(std::string_view modelId) const
@@ -81,6 +144,17 @@ namespace infrastructure
 			return resources;
 
 		for (const auto& item : json["resources"])
+			resources.push_back({ item["id"], item["path"] });
+		return resources;
+	}
+
+	std::vector<ModelRepository::ResourceDefinition> ModelRepository::loadRawModelList(const nlohmann::json& json)
+	{
+		std::vector<ResourceDefinition> resources;
+		if (!json.contains("rawModels"))
+			return resources;
+
+		for (const auto& item : json["rawModels"])
 			resources.push_back({ item["id"], item["path"] });
 		return resources;
 	}
@@ -128,6 +202,8 @@ namespace infrastructure
 		{
 			auto& gp = j["gameplay"];
 			if (gp.contains("moveSpeed"))      metadata.floatProperties["moveSpeed"]      = gp["moveSpeed"];
+			if (gp.contains("dashMultiplier"))
+				metadata.floatProperties["dashMultiplier"] = gp["dashMultiplier"];
 			if (gp.contains("detectionRange")) metadata.floatProperties["detectionRange"] = gp["detectionRange"];
 			if (gp.contains("attackRange"))    metadata.floatProperties["attackRange"]    = gp["attackRange"];
 			if (gp.contains("maxHp"))          metadata.floatProperties["maxHp"]          = gp["maxHp"];
@@ -138,4 +214,4 @@ namespace infrastructure
 
 		return metadata;
 	}
-}
+} // namespace infrastructure

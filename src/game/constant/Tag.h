@@ -14,4 +14,4 @@ namespace game::constant
         Ground,
         Wall,
     };
-}
+} // namespace game::constant

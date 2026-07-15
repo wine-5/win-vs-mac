@@ -45,4 +45,4 @@ namespace game::scene
         core::iface::IScreen&                  m_screen;
         std::unique_ptr<core::iface::IWindow> m_resultWindow{};
     };
-}
+} // namespace game::scene

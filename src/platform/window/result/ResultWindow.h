@@ -68,4 +68,4 @@ namespace platform::window::result
         void handleMessage(const std::string& json) noexcept;
         void sendResultData(const core::data::ResultData& data) noexcept;
     };
-}
+} // namespace platform::window::result

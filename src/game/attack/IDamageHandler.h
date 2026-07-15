@@ -24,4 +24,4 @@ namespace game::attack
 		 */
 		virtual void handle(DamageChain& chain) = 0;
 	};
-}
+} // namespace game::attack

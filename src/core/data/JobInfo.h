@@ -17,4 +17,4 @@ namespace core::data
 		float m_def{};
 		float m_spd{};
 	};
-}
+} // namespace core::data

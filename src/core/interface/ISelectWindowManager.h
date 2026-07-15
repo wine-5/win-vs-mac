@@ -1,6 +1,7 @@
 #pragma once
 #include "core/constant/SelectWindowId.h"
 #include "core/constant/JobType.h"
+#include <string>
 
 namespace core::iface
 {
@@ -38,5 +39,17 @@ namespace core::iface
 		 * @param jobType 職業タイプ
 		 */
 		virtual void updateParameterWindowForJob(core::constant::JobType jobType) = 0;
+
+		/**
+		 * @brief 職業が選択されているかを確認する
+		 * @return 職業が選択されている場合true
+		 */
+		virtual bool isJobSelected() const = 0;
+
+		/**
+		 * @brief 警告メッセージボックスを表示する
+		 * @param message メッセージ内容
+		 */
+		virtual void showWarningMessage(const std::string& message) = 0;
 	};
-}
+} // namespace core::iface

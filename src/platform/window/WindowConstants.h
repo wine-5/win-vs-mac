@@ -71,4 +71,4 @@ namespace platform::window
     private:
         WindowConstants() = delete;
     };
-}
+} // namespace platform::window

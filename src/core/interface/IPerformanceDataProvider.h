@@ -32,4 +32,4 @@ namespace core::iface
 		 */
 		[[nodiscard]] virtual PerformanceSnapshot getSnapshot() const noexcept = 0;
 	};
-}
+} // namespace core::iface

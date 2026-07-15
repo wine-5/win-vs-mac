@@ -43,4 +43,4 @@ namespace core::ecs
 		// 登録順に更新されるSystemのリスト
 		std::vector<std::unique_ptr<ISystem>> m_systems;
 	};
-}
+} // namespace core::ecs

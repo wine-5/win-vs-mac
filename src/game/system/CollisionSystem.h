@@ -41,4 +41,4 @@ namespace game::system
 
 		core::ecs::ComponentManager& m_componentManager;
     };
-}
+} // namespace game::system

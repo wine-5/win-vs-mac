@@ -42,4 +42,4 @@ namespace game::ui
         if (converter)
             m_text = converter->utf8ToShiftJis(m_text);
     }
-}
+} // namespace game::ui

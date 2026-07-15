@@ -24,4 +24,4 @@ namespace core::data
         /** @brief 使用したファイルのパス一覧 */
         std::vector<std::string> m_usedFiles{};
     };
-}
+} // namespace core::data

@@ -46,4 +46,4 @@ namespace game::factory
 
 		std::unique_ptr<actor::Player> m_player{};
 	};
-}
+} // namespace game::factory

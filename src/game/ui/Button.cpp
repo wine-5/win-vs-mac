@@ -100,4 +100,4 @@ namespace game::ui
         default:                return core::utility::Color::BUTTON_NORMAL;
         }
     }
-}
+} // namespace game::ui

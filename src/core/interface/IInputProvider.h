@@ -75,5 +75,18 @@ namespace core::iface
 		 * @return 押されている場合true
 		 */
 		virtual bool isMouseRightPressed() const = 0;
+
+		/**
+		 * @brief 前回取得時からのマウス移動量を取得する（取得後カーソルを画面中央へ戻す）
+		 * @param outDx X方向の移動量の出力先
+		 * @param outDy Y方向の移動量の出力先
+		 */
+		virtual void getMouseDelta(int& outDx, int& outDy) = 0;
+
+		/**
+		 * @brief マウスカーソルの表示・非表示を切り替える
+		 * @param visible trueで表示、falseで非表示
+		 */
+		virtual void setMouseCursorVisible(bool visible) = 0;
 	};
-}
+} // namespace core::iface

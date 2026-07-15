@@ -4,6 +4,7 @@
 #include <optional>
 #include "core/data/ModelMetadata.h"
 #include "core/data/JobInfo.h"
+#include "core/data/StageMetadata.h"
 #include "core/constant/JobType.h"
 
 namespace core::iface
@@ -51,5 +52,28 @@ namespace core::iface
 		 * @return DxLib 画像ハンドル、失敗時は -1
 		 */
 		virtual int loadImageById(std::string_view imageId) = 0;
+
+		/**
+		 * @brief アニメーションIDからアニメーションモデルを読み込みハンドルを返す（キャッシュ付き）
+		 * @param animationId アニメーションID（resources.json の animations セクションで定義）
+		 * @return DxLib モデルハンドル、失敗時は -1
+		 */
+		virtual int loadAnimationById(std::string_view animationId) = 0;
+
+		/**
+		 * @brief ステージの配置定義を取得する
+		 * @return ステージ配置定義
+		 */
+		[[nodiscard]] virtual const core::data::StageMetadata& getStageMetadata() const = 0;
+
+		/**
+		 * @brief モデルハンドルを複製する
+		 *
+		 * 同じモデルを複数体で使う場合、アニメーションやスケールの状態が
+		 * 競合しないようにインスタンスごとに複製ハンドルを使う
+		 * @param modelHandle 複製元のモデルハンドル
+		 * @return 複製したモデルハンドル、失敗時は-1
+		 */
+		virtual int duplicateModel(int modelHandle) = 0;
 	};
-}
+} // namespace core::iface

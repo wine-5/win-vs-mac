@@ -1,7 +1,6 @@
 ﻿#include "LogUtil.h"
 #include <cstdio>
 #include <ctime>
-#include <Windows.h>
 
 namespace infrastructure::utility
 {
@@ -9,23 +8,26 @@ namespace infrastructure::utility
         : m_consoleHandle{}
     {
 #ifdef _DEBUG
-         //Windowsコンソールウィンドウを作成（不要な場合はコメントアウト）
-        //AllocConsole();
-        //
-        //// 標準出力をコンソールにリダイレクト
-        //FILE* fp;
-        //freopen_s(&fp, "CONOUT$", "w", stdout);
-        //freopen_s(&fp, "CONOUT$", "w", stderr);
-        //
-        //// コンソールハンドルを取得
-        //m_consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-        //
-        //// コンソールウィンドウのタイトルを設定
-        //SetConsoleTitleA("DxLib-3D Debug Console");
-        //
-        //printf("===========================================\n");
-        //printf("  DxLib-3D Debug Console\n");
-        //printf("===========================================\n\n");
+		//  //Windowsコンソールウィンドウを作成（不要な場合はコメントアウト）
+		// AllocConsole();
+
+		// // 標準出力をコンソールにリダイレクト
+		// FILE* fp;
+		// freopen_s(&fp, "CONOUT$", "w", stdout);
+		// freopen_s(&fp, "CONOUT$", "w", stderr);
+
+		// // コンソールの出力コードページを Shift-JIS に設定（DxLibのボーン名等がShift-JISのため）
+		// SetConsoleOutputCP(932);
+
+		// // コンソールハンドルを取得
+		// m_consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+		// // コンソールウィンドウのタイトルを設定
+		// SetConsoleTitleA("DxLib-3D Debug Console");
+
+		// printf("===========================================\n");
+		// printf("  DxLib-3D Debug Console\n");
+		// printf("===========================================\n\n");
 #endif
     }
     
@@ -79,4 +81,4 @@ namespace infrastructure::utility
         // 必要ならsystem("cls")を使用
 #endif
     }
-}
+} // namespace infrastructure::utility

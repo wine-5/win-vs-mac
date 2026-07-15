@@ -21,4 +21,4 @@ namespace game::scene
 		 */
 		virtual void draw() = 0;
 	};
-}
+} // namespace game::scene

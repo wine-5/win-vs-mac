@@ -42,6 +42,16 @@ namespace infrastructure
 		 */
 		std::optional<core::data::ModelMetadata> getMetadata(std::string_view modelId) const;
 
+		/**
+		 * @brief モデルハンドルを複製する
+		 *
+		 * 同じモデルを複数体で使う場合、アニメーションやスケールの状態が
+		 * 競合しないようにインスタンスごとに複製ハンドルを使う
+		 * @param modelHandle 複製元のモデルハンドル
+		 * @return 複製したモデルハンドル、失敗時は-1
+		 */
+		int duplicateModel(int modelHandle);
+
 	private:
 		struct ResourceDefinition
 		{
@@ -50,9 +60,11 @@ namespace infrastructure
 		};
 
 		std::vector<ResourceDefinition> loadResourceList(const nlohmann::json& json);
+		std::vector<ResourceDefinition> loadRawModelList(const nlohmann::json& json);
 		core::data::ModelMetadata parseJsonFile(const std::string& filePath);
 
 		std::unordered_map<std::string, int> m_modelHandles;
 		std::unordered_map<std::string, core::data::ModelMetadata> m_metadata;
+		std::unordered_map<std::string, std::string> m_rawModelPaths;
 	};
-}
+} // namespace infrastructure
