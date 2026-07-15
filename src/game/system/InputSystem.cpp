@@ -21,6 +21,7 @@ namespace game::system
 		input.m_moveZ = INPUT_NEUTRAL;
 		input.m_jumpPressed = false;
 		input.m_attackPressed = false;
+		input.m_dashPressed = false;
 
 		// -------------------------------------------------------
 		// PCでの操作の入力
@@ -37,6 +38,8 @@ namespace game::system
 			input.m_moveZ = INPUT_NEGATIVE;
 		if (m_inputProvider.isKeyDown(core::input::KeyCode::Space))
 			input.m_jumpPressed = true;
+		if (m_inputProvider.isKeyDown(core::input::KeyCode::Shift))
+			input.m_dashPressed = true;
 
 		// マウスの入力
 		if (m_inputProvider.isMouseLeftPressed())

@@ -11,5 +11,6 @@ namespace game::component
 		float m_moveZ{ 0.0f };
 		bool  m_jumpPressed{ false };
 		bool  m_attackPressed{ false };
+		bool m_dashPressed{ false }; // Shift押下でダッシュ
 	};
 } // namespace game::component
