@@ -165,6 +165,7 @@
     <ClCompile Include="src\game\system\AISystem.cpp" />
     <ClCompile Include="src\game\system\AttackSystem.cpp" />
     <ClCompile Include="src\game\system\CameraSystem.cpp" />
+    <ClCompile Include="src\game\system\TargetingSystem.cpp" />
     <ClCompile Include="src\game\event\AudioEventListener.cpp" />
     <ClCompile Include="src\game\system\EffectSystem.cpp" />
     <ClCompile Include="src\game\system\HitEffectSystem.cpp" />
@@ -198,6 +199,7 @@
     <ClCompile Include="src\infrastructure\Renderer.cpp" />
     <ClCompile Include="src\infrastructure\ResourceManager.cpp" />
     <ClCompile Include="src\game\scene\InGame.cpp" />
+    <ClCompile Include="src\game\scene\InGameView.cpp" />
     <ClCompile Include="src\game\actor\Player.cpp" />
     <ClCompile Include="src\game\system\InputSystem.cpp" />
     <ClCompile Include="src\game\system\MoveSystem.cpp" />
@@ -326,6 +328,7 @@
     <ClInclude Include="src\game\system\AISystem.h" />
     <ClInclude Include="src\game\system\AttackSystem.h" />
     <ClInclude Include="src\game\system\CameraSystem.h" />
+    <ClInclude Include="src\game\system\TargetingSystem.h" />
     <ClInclude Include="src\game\event\AudioEventListener.h" />
     <ClInclude Include="src\game\system\EffectSystem.h" />
     <ClInclude Include="src\game\system\HitEffectSystem.h" />
@@ -376,12 +379,14 @@
     <ClInclude Include="src\infrastructure\Renderer.h" />
     <ClInclude Include="src\infrastructure\ResourceManager.h" />
     <ClInclude Include="src\game\scene\InGame.h" />
+    <ClInclude Include="src\game\scene\InGameView.h" />
     <ClInclude Include="src\game\scene\IScene.h" />
     <ClInclude Include="src\game\actor\Player.h" />
     <ClInclude Include="src\core\ecs\ComponentArray.h" />
     <ClInclude Include="src\core\ecs\ComponentManager.h" />
     <ClInclude Include="src\game\component\InputComponent.h" />
     <ClInclude Include="src\game\component\CameraComponent.h" />
+    <ClInclude Include="src\game\component\AimComponent.h" />
     <ClInclude Include="src\game\component\RenderComponent.h" />
     <ClInclude Include="src\game\component\TransformComponent.h" />
     <ClInclude Include="src\game\component\VelocityComponent.h" />
