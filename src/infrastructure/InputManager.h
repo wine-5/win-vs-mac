@@ -90,5 +90,6 @@ namespace infrastructure
 
 	  private:
 		mutable std::unordered_map<core::input::KeyCode, bool> m_previousKeyState;
+		bool m_cursorVisible{ true }; // カーソル表示中はマウス視点（中央固定）を無効化する
 	};
 } // namespace infrastructure

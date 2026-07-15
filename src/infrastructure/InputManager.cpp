@@ -106,6 +106,14 @@ namespace infrastructure
 
 	void InputManager::getMouseDelta(int& outDx, int& outDy)
 	{
+		// カーソル表示中はマウス視点を無効化し、カーソルを中央へ戻さない（自由に動かせるようにする）
+		if (m_cursorVisible)
+		{
+			outDx = 0;
+			outDy = 0;
+			return;
+		}
+
 		int screenWidth{}, screenHeight{};
 		GetDrawScreenSize(&screenWidth, &screenHeight);
 		const int centerX{ screenWidth / 2 };
@@ -122,6 +130,7 @@ namespace infrastructure
 
 	void InputManager::setMouseCursorVisible(bool visible)
 	{
+		m_cursorVisible = visible;
 		SetMouseDispFlag(visible ? TRUE : FALSE);
 
 		// 非表示にする瞬間は同時にカーソルを中央へ置き、初回の移動量が大きく飛ぶのを防ぐ
