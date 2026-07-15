@@ -1,0 +1,36 @@
+---
+# プロジェクトのコードスタイル定義（clang-format 用）
+# 既存コードに極力合わせ、変更行だけを整えることを目的とする。
+Language: Cpp
+BasedOnStyle: Microsoft
+
+# インデント：タブ（幅4）
+UseTab: ForIndentation
+TabWidth: 4
+IndentWidth: 4
+
+# 名前空間の中もインデントする
+NamespaceIndentation: All
+
+# 波括弧は Allman（改行して次の行に {）
+BreakBeforeBraces: Allman
+
+# ポインタ・参照は型側に寄せる（int& x, int* p）
+PointerAlignment: Left
+ReferenceAlignment: Pointer
+
+# 波括弧初期化子の内側にスペースを入れる（{ screenWidth / 2 }）
+Cpp11BracedListStyle: false
+
+# case本体を1行に書いている箇所を維持する
+AllowShortCaseLabelsOnASingleLine: true
+IndentCaseLabels: false
+
+# 行の長さで勝手に折り返さない（既存コードの改行を保つ）
+ColumnLimit: 0
+
+# include の並べ替えはしない（意図しない差分を防ぐ）
+SortIncludes: Never
+
+Standard: Latest
+---
