@@ -78,12 +78,12 @@
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/FS /utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>;C:\DxLib\DxLib-3D\thirdparty\effekseer;C:\DxLib\DxLib-3D\thirdparty\effekseer;C:\DxLib\DxLib-3D\thirdparty\effekseer</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\effekseer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>;C:\DxLib\DxLib-3D\thirdparty\effekseer</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)thirdparty\effekseer;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -96,12 +96,12 @@
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/FS /utf-8 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>;C:\DxLib\DxLib-3D\thirdparty\effekseer;C:\DxLib\DxLib-3D\thirdparty\effekseer;C:\DxLib\DxLib-3D\thirdparty\effekseer</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\effekseer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>;C:\DxLib\DxLib-3D\thirdparty\effekseer</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)thirdparty\effekseer;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -110,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);%(AdditionalIncludeDirectories);C:\DxLib\DxLib-3D\thirdparty\effekseer;C:\DxLib\DxLib-3D\thirdparty\effekseer;C:\DxLib\DxLib-3D\thirdparty\effekseer</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);$(SolutionDir)thirdparty\effekseer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/FS /wd4819 /wd4828 /utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -119,7 +119,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)thirdparty\dxlib;C:\DxLib\DxLib-3D\thirdparty\effekseer</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)thirdparty\effekseer</AdditionalLibraryDirectories>
       <AdditionalDependencies>DxLib_x64_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -131,7 +131,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);%(AdditionalIncludeDirectories);C:\DxLib\DxLib-3D\thirdparty\effekseer;C:\DxLib\DxLib-3D\thirdparty\effekseer;C:\DxLib\DxLib-3D\thirdparty\effekseer</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)src;$(SolutionDir);$(SolutionDir)thirdparty\effekseer;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalOptions>/FS /wd4819 /wd4828 /utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -140,7 +140,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)thirdparty\dxlib;C:\DxLib\DxLib-3D\thirdparty\effekseer</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)thirdparty\dxlib;$(SolutionDir)thirdparty\effekseer</AdditionalLibraryDirectories>
       <AdditionalDependencies>DxLib_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
