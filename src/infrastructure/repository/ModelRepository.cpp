@@ -199,6 +199,8 @@ namespace infrastructure
 		{
 			auto& gp = j["gameplay"];
 			if (gp.contains("moveSpeed"))      metadata.floatProperties["moveSpeed"]      = gp["moveSpeed"];
+			if (gp.contains("dashMultiplier"))
+				metadata.floatProperties["dashMultiplier"] = gp["dashMultiplier"];
 			if (gp.contains("detectionRange")) metadata.floatProperties["detectionRange"] = gp["detectionRange"];
 			if (gp.contains("attackRange"))    metadata.floatProperties["attackRange"]    = gp["attackRange"];
 			if (gp.contains("maxHp"))          metadata.floatProperties["maxHp"]          = gp["maxHp"];

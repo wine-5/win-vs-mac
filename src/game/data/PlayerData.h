@@ -43,6 +43,11 @@ namespace game::data
 			if (moveSpeedIt != metadata.floatProperties.end())
 				data.m_moveSpeed = moveSpeedIt->second;
 
+			auto dashMultiplierIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::DASH_MULTIPLIER)) };
+			if (dashMultiplierIt != metadata.floatProperties.end())
+				data.m_dashMultiplier = dashMultiplierIt->second;
+
 			auto maxHpIt{ metadata.floatProperties.find(
 				std::string(constant::metadata_keys::MAX_HP)) };
 			if (maxHpIt != metadata.floatProperties.end())
@@ -85,6 +90,11 @@ namespace game::data
 		[[nodiscard]] const std::string& getWalkAnimPath() const noexcept { return m_walkAnimPath; }
 		/** @brief 移動速度を取得 */
 		[[nodiscard]] float              getMoveSpeed()      const noexcept { return m_moveSpeed; }
+		/** @brief ダッシュ速度倍率を取得 */
+		[[nodiscard]] float getDashMultiplier() const noexcept
+		{
+			return m_dashMultiplier;
+		}
 		/** @brief 最大HPを取得 */
 		[[nodiscard]] float              getMaxHp()          const noexcept { return m_maxHp; }
 		/** @brief 防御力を取得 */
@@ -143,6 +153,7 @@ namespace game::data
 		std::string   m_idleAnimPath;
 		std::string   m_walkAnimPath;
 		float         m_moveSpeed{ 0.0f };
+		float m_dashMultiplier{ 1.0f }; // JSON未設定時はダッシュしても等速
 		float         m_maxHp{ 0.0f };
 		float         m_defence{ 0.0f };
 		float         m_attackPower{ 0.0f };
