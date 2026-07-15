@@ -11,6 +11,9 @@ import shutil
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import ns_comments  # noqa: E402
+
 # 対象拡張子
 EXTENSIONS = {".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"}
 
@@ -75,17 +78,38 @@ def main():
     for path in staged_files():
         if not os.path.isfile(path):
             continue
+        changed = False
+
+        # ① 変更した行だけを整形する
         ranges = changed_line_ranges(path)
-        if not ranges:
-            continue
-        args = [clang_format, "-i", "--style=file"]
-        for start, end in ranges:
-            args.append(f"--lines={start}:{end}")
-        args.append(path)
-        subprocess.check_call(args)
-        subprocess.check_call(["git", "add", "--", path])
+        if ranges:
+            args = [clang_format, "-i", "--style=file"]
+            for start, end in ranges:
+                args.append(f"--lines={start}:{end}")
+            args.append(path)
+            subprocess.check_call(args)
+            changed = True
+
+        # ② 名前空間の閉じ } にコメントが無ければ追加する
+        if add_namespace_comments(path):
+            changed = True
+
+        if changed:
+            subprocess.check_call(["git", "add", "--", path])
 
     return 0
+
+
+def add_namespace_comments(path):
+    """名前空間コメントを追記した場合 True を返す。"""
+    with open(path, "rb") as f:
+        src = f.read().decode("utf-8", errors="replace")
+    out = ns_comments.add_namespace_comments(src)
+    if out == src:
+        return False
+    with open(path, "wb") as f:
+        f.write(out.encode("utf-8"))
+    return True
 
 
 if __name__ == "__main__":
