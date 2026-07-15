@@ -164,6 +164,7 @@
     <ClCompile Include="src\game\scene\TitleView.cpp" />
     <ClCompile Include="src\game\system\AISystem.cpp" />
     <ClCompile Include="src\game\system\AttackSystem.cpp" />
+    <ClCompile Include="src\game\system\CameraSystem.cpp" />
     <ClCompile Include="src\game\event\AudioEventListener.cpp" />
     <ClCompile Include="src\game\system\EffectSystem.cpp" />
     <ClCompile Include="src\game\system\HitEffectSystem.cpp" />
@@ -324,6 +325,7 @@
     <ClInclude Include="src\game\scene\TitleView.h" />
     <ClInclude Include="src\game\system\AISystem.h" />
     <ClInclude Include="src\game\system\AttackSystem.h" />
+    <ClInclude Include="src\game\system\CameraSystem.h" />
     <ClInclude Include="src\game\event\AudioEventListener.h" />
     <ClInclude Include="src\game\system\EffectSystem.h" />
     <ClInclude Include="src\game\system\HitEffectSystem.h" />
@@ -379,6 +381,7 @@
     <ClInclude Include="src\core\ecs\ComponentArray.h" />
     <ClInclude Include="src\core\ecs\ComponentManager.h" />
     <ClInclude Include="src\game\component\InputComponent.h" />
+    <ClInclude Include="src\game\component\CameraComponent.h" />
     <ClInclude Include="src\game\component\RenderComponent.h" />
     <ClInclude Include="src\game\component\TransformComponent.h" />
     <ClInclude Include="src\game\component\VelocityComponent.h" />
