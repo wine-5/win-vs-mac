@@ -33,4 +33,4 @@ namespace infrastructure
 	private:
 		std::array<core::data::JobInfo, core::constant::JOB_COUNT> m_jobTable;
 	};
-}
+} // namespace infrastructure

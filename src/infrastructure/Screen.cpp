@@ -24,4 +24,4 @@ namespace infrastructure
 		return GetMainWindowHandle();
 	}
 
-}
+} // namespace infrastructure

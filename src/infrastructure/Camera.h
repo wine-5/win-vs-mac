@@ -17,4 +17,4 @@ namespace infrastructure
 		 */
 		void update(const core::Vector3& targetPosition, const core::Vector3& offset) override;
 	};
-}
+} // namespace infrastructure

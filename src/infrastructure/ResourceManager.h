@@ -83,4 +83,4 @@ namespace infrastructure
 		std::unique_ptr<AnimationRepository> m_animRepo;
 		std::unique_ptr<StageRepository>     m_stageRepo;
 	};
-}
+} // namespace infrastructure

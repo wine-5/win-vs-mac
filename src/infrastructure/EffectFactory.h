@@ -58,4 +58,4 @@ namespace infrastructure
 		// stop() でどのプールに返却するかを逆引きするためのマップ
 		std::unordered_map<int, core::constant::EffectType> m_handleToType{};
 	};
-}
+} // namespace infrastructure

@@ -62,4 +62,4 @@ namespace infrastructure
 		std::unordered_map<core::constant::BgmType, BgmConfig> m_bgmConfigs{};
 		std::unordered_map<core::constant::SeType, SeConfig>  m_seConfigs{};
 	};
-}
+} // namespace infrastructure

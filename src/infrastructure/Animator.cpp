@@ -17,4 +17,4 @@ namespace infrastructure
 	{
 		MV1SetAttachAnimTime(modelHandle, animIndex, time);
 	}
-}
+} // namespace infrastructure

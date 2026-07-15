@@ -52,4 +52,4 @@ namespace infrastructure::utility
         static constexpr WORD COLOR_YELLOW = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
         static constexpr WORD COLOR_RED = FOREGROUND_RED | FOREGROUND_INTENSITY;
     };
-}
+} // namespace infrastructure::utility

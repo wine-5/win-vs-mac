@@ -44,4 +44,4 @@ namespace infrastructure
 		 */
 		void drawDebugCapsule(const core::Vector3& bottom, const core::Vector3& top, float radius, unsigned int color) override;
 	};
-}
+} // namespace infrastructure

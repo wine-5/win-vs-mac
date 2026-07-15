@@ -46,4 +46,4 @@ namespace infrastructure
 
         std::unordered_map<core::constant::EffectType, EffectConfig> m_configs;
     };
-}
+} // namespace infrastructure

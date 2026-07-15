@@ -120,4 +120,4 @@ namespace infrastructure
 			m_seConfigs[it->second] = config;
 		}
 	}
-}
+} // namespace infrastructure

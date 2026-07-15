@@ -68,4 +68,4 @@ namespace infrastructure
 		int   m_pendingBgmHandle{ -1 };
 		float m_pendingBgmVolume{ 0.0f };
 	};
-}
+} // namespace infrastructure

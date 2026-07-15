@@ -100,4 +100,4 @@ namespace infrastructure
 		}
 		return false;
 	}
-}
+} // namespace infrastructure

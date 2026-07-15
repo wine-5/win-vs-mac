@@ -37,4 +37,4 @@ namespace infrastructure
 	{
 		return m_jobTable[static_cast<int>(jobType)];
 	}
-}
+} // namespace infrastructure

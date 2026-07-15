@@ -81,4 +81,4 @@ namespace infrastructure::utility
         // 必要ならsystem("cls")を使用
 #endif
     }
-}
+} // namespace infrastructure::utility

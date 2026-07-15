@@ -44,4 +44,4 @@ namespace infrastructure
 			fonts.push_back({ item["id"], item["path"], item["name"] });
 		return fonts;
 	}
-}
+} // namespace infrastructure

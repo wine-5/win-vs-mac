@@ -25,4 +25,4 @@ namespace infrastructure
 	private:
 		core::data::StageMetadata m_stageMetadata{};
 	};
-}
+} // namespace infrastructure

@@ -91,4 +91,4 @@ namespace infrastructure
 	  private:
 		mutable std::unordered_map<core::input::KeyCode, bool> m_previousKeyState;
 	};
-}
+} // namespace infrastructure

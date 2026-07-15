@@ -67,4 +67,4 @@ namespace infrastructure
 		std::unordered_map<std::string, core::data::ModelMetadata> m_metadata;
 		std::unordered_map<std::string, std::string> m_rawModelPaths;
 	};
-}
+} // namespace infrastructure

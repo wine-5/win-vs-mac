@@ -26,4 +26,4 @@ namespace infrastructure
 		 */
 		void updateAnimTime(int modelHandle, int animIndex, float time)override;
 	};
-}
+} // namespace infrastructure

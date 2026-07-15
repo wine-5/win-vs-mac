@@ -77,4 +77,4 @@ namespace infrastructure
 			return -1;
 		return m_modelRepo->duplicateModel(modelHandle);
 	}
-}
+} // namespace infrastructure

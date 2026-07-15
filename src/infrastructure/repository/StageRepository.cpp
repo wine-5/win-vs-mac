@@ -19,7 +19,7 @@ namespace
 		spawn.m_position.z = j["position"][2];
 		return spawn;
 	}
-}
+} // namespace
 
 namespace infrastructure
 {
@@ -40,4 +40,4 @@ namespace infrastructure
 	{
 		return m_stageMetadata;
 	}
-}
+} // namespace infrastructure

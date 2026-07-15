@@ -37,4 +37,4 @@ namespace infrastructure
         std::unordered_map<std::string, std::string> m_paths{};
         std::unordered_map<std::string, int>         m_handles{};
     };
-}
+} // namespace infrastructure

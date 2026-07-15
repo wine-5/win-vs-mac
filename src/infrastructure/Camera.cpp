@@ -16,4 +16,4 @@ namespace infrastructure
 
 		SetCameraPositionAndTarget_UpVecY(position, target);
 	}
-}
+} // namespace infrastructure

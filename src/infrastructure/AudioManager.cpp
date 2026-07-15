@@ -138,4 +138,4 @@ namespace infrastructure
 		const int dxVolume{ static_cast<int>(normalizedVolume * 255) };
 		ChangeVolumeSoundMem(dxVolume, handle);
 	}
-}
+} // namespace infrastructure

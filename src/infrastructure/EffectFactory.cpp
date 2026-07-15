@@ -92,4 +92,4 @@ namespace infrastructure
 		DrawEffekseer3D();
 	}
 
-}
+} // namespace infrastructure

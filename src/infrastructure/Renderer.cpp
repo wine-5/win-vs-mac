@@ -61,4 +61,4 @@ namespace infrastructure
 		// ワイヤーフレームで描画（塗りつぶしなし）
 		DrawCapsule3D(pos1, pos2, radius, divNum, color, color, FALSE);
 	}
-}
+} // namespace infrastructure

@@ -55,4 +55,4 @@ namespace infrastructure
 		core::base::ObjectPool<EffectSlot> m_pool{};
 		std::vector<EffectSlot*> m_activeSlots{};
 	};
-}
+} // namespace infrastructure

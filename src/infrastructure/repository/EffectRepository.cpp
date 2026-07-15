@@ -64,4 +64,4 @@ namespace infrastructure
 			m_configs[it->second] = config;
 		}
 	}
-}
+} // namespace infrastructure
