@@ -48,7 +48,9 @@ def staged_files():
 def changed_line_ranges(path):
     """ステージ済み差分から、新しい側の変更行範囲 (start, end) を返す。"""
     out = subprocess.check_output(
-        ["git", "diff", "--cached", "-U0", "--", path], text=True
+        ["git", "diff", "--cached", "-U0", "--", path],
+        encoding="utf-8",
+        errors="replace",
     )
     ranges = []
     for line in out.splitlines():
