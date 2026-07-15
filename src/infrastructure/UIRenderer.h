@@ -31,7 +31,18 @@ namespace infrastructure
          */
         void drawBox(int x, int y, int width, int height, unsigned int color, bool isFilled) override;
 
-        /**
+		/**
+		 * @brief 円を描画する
+		 * @param centerX 中心X座標
+		 * @param centerY 中心Y座標
+		 * @param radius 半径
+		 * @param color 色（ARGB形式：0xAARRGGBB）
+		 * @param isFilled 塗りつぶすかどうか
+		 * @param thickness 線の太さ（塗りつぶしなしのときに有効）
+		 */
+		void drawCircle(int centerX, int centerY, int radius, unsigned int color, bool isFilled, int thickness) override;
+
+		/**
          * @brief テキストを描画する
          * @param x X座標
          * @param y Y座標

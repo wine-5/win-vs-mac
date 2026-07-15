@@ -23,6 +23,11 @@ namespace infrastructure
 			DrawBox(x, y, x + width, y + height, color, FALSE);
 	}
 
+	void UIRenderer::drawCircle(int centerX, int centerY, int radius, unsigned int color, bool isFilled, int thickness)
+	{
+		DrawCircle(centerX, centerY, radius, color, isFilled ? TRUE : FALSE, thickness);
+	}
+
 	void UIRenderer::drawText(int x, int y, const char *text, unsigned int color, int fontSize)
 	{
 		const auto key{std::make_pair(m_currentFontName, fontSize)};
@@ -70,6 +75,8 @@ namespace infrastructure
 	void UIRenderer::drawImage(int handle, int x, int y, int width, int height)
 	{
 		if (handle == -1) return;
-		DrawExtendGraph(x, y, x + width, y + height, handle, FALSE);
+		// 第6引数は透過フラグ。PNGのアルファチャンネルを反映するためTRUEにする
+		// （アルファを持たないJPG等は不透明のままなので影響なし）
+		DrawExtendGraph(x, y, x + width, y + height, handle, TRUE);
 	}
 } // namespace infrastructure
