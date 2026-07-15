@@ -11,14 +11,14 @@ namespace game::actor
 	void SafariEnemy::setupAI()
 	{
 		// TODO: 個別のjsonを作るタイミングでjsonへ移植する
-		constexpr float preferredDistanceMin{ 400.0f };
-		constexpr float preferredDistanceMax{ 600.0f };
-		constexpr float hoverHeight{ 180.0f };
+		constexpr float PREFERRED_DISTANCE_MIN{ 400.0f };
+		constexpr float PREFERRED_DISTANCE_MAX{ 600.0f };
+		constexpr float HOVER_HEIGHT{ 180.0f };
 
 		auto& ai = m_componentManager.get<component::AIComponent>(m_entity.getId());
 		ai.m_behavior = constant::AIBehavior::RangeKeepDistance;
-		ai.m_preferredDistanceMin = preferredDistanceMin;
-		ai.m_preferredDistanceMax = preferredDistanceMax;
-		ai.m_hoverHeight = hoverHeight;
+		ai.m_preferredDistanceMin = PREFERRED_DISTANCE_MIN;
+		ai.m_preferredDistanceMax = PREFERRED_DISTANCE_MAX;
+		ai.m_hoverHeight = HOVER_HEIGHT;
 	}
 } // namespace game::actor

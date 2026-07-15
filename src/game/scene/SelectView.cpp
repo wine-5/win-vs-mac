@@ -36,11 +36,11 @@ namespace game::scene
         startButton->setOnClick(std::move(onGameStart));
         m_uiManager.addElement(std::move(startButton));
 
-        constexpr float fileButtonYRatio{ FILE_BUTTON_BASE_Y_RATIO };
-        for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
+		constexpr float FILE_BUTTON_Y_RATIO{ FILE_BUTTON_BASE_Y_RATIO };
+		for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
         {
-            const int fileButtonY{ static_cast<int>(screenHeight * (fileButtonYRatio - i * FILE_BUTTON_Y_STEP)) };
-            const std::string label{ "ファイル" + std::to_string(i + 1) + "を選択" };
+			const int fileButtonY{ static_cast<int>(screenHeight * (FILE_BUTTON_Y_RATIO - i * FILE_BUTTON_Y_STEP)) };
+			const std::string label{ "ファイル" + std::to_string(i + 1) + "を選択" };
 
             auto fileSelectButton{ std::make_unique<ui::Button>(
                 label.c_str(), buttonX, fileButtonY, buttonWidth, buttonHeight, inputProvider, buttonFontSize) };

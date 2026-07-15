@@ -5,6 +5,12 @@
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
 
+namespace
+{
+	// 腕を広げたポーズだと横幅が実際の胴体より大きく出るため、水平方向を絞って胴体に沿わせる係数
+	constexpr float HORIZONTAL_SHRINK{ 0.5f };
+} // namespace
+
 namespace infrastructure
 {
 	ModelRepository::ModelRepository()
@@ -88,9 +94,6 @@ namespace infrastructure
 					vMax.y = (p.y > vMax.y) ? p.y : vMax.y;
 					vMax.z = (p.z > vMax.z) ? p.z : vMax.z;
 				}
-
-				// 腕を広げたポーズだと横幅が実際の胴体より大きく出るため、水平方向を絞って胴体に沿わせる
-				constexpr float HORIZONTAL_SHRINK{ 0.5f };
 
 				// 参照メッシュはスケール適用済みなのでそのままワールド寸法になる
 				mutableMeta.colliderSize.x = (vMax.x - vMin.x) * HORIZONTAL_SHRINK;

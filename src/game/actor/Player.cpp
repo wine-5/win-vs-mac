@@ -32,11 +32,11 @@ namespace game::actor
 		using constant::AnimationState;
 		namespace anim_id = constant::animation_id;
 		namespace priority = constant::animation_priority;
-		constexpr float walkAnimSpeed{ 0.6f }; // 歩行アニメの再生速度（見た目の調整値）
+		constexpr float WALK_ANIM_SPEED{ 0.6f }; // 歩行アニメの再生速度（見た目の調整値）
 
 		component::AnimationComponent anim{};
 		anim.m_clips[AnimationState::Idle]    = { resourceManager.loadAnimationById(anim_id::PLAYER_IDLE),  true };
-		anim.m_clips[AnimationState::Walk]    = { resourceManager.loadAnimationById(anim_id::PLAYER_WALK),  true, AnimationState::Idle, priority::LOCOMOTION, walkAnimSpeed };
+		anim.m_clips[AnimationState::Walk] = { resourceManager.loadAnimationById(anim_id::PLAYER_WALK), true, AnimationState::Idle, priority::LOCOMOTION, WALK_ANIM_SPEED };
 		anim.m_clips[AnimationState::Run]     = { resourceManager.loadAnimationById(anim_id::PLAYER_RUN),   true };
 		anim.m_clips[AnimationState::Attack1] = { resourceManager.loadAnimationById(anim_id::PLAYER_SLASH), false, AnimationState::Idle,  priority::ATTACK };
 		anim.m_clips[AnimationState::Attack2] = { resourceManager.loadAnimationById(anim_id::PLAYER_SPIN),  false, AnimationState::Idle,  priority::ATTACK };

@@ -45,20 +45,20 @@ namespace infrastructure
 
 	void Renderer::drawDebugSphere(const core::Vector3& center, float radius, unsigned int color)
 	{
-		constexpr int divNum{ 16 }; // 球の分割数（デバッグ用なので粗くてよい）
+		constexpr int DIV_NUM{ 16 }; // 球の分割数（デバッグ用なので粗くてよい）
 		VECTOR pos = VGet(center.x, center.y, center.z);
 
 		// ワイヤーフレームで描画（塗りつぶしなし）
-		DrawSphere3D(pos, radius, divNum, color, color, FALSE);
+		DrawSphere3D(pos, radius, DIV_NUM, color, color, FALSE);
 	}
 
 	void Renderer::drawDebugCapsule(const core::Vector3& bottom, const core::Vector3& top, float radius, unsigned int color)
 	{
-		constexpr int divNum{ 16 }; // カプセルの分割数（デバッグ用なので粗くてよい）
+		constexpr int DIV_NUM{ 16 }; // カプセルの分割数（デバッグ用なので粗くてよい）
 		VECTOR pos1 = VGet(bottom.x, bottom.y, bottom.z);
 		VECTOR pos2 = VGet(top.x, top.y, top.z);
 
 		// ワイヤーフレームで描画（塗りつぶしなし）
-		DrawCapsule3D(pos1, pos2, radius, divNum, color, color, FALSE);
+		DrawCapsule3D(pos1, pos2, radius, DIV_NUM, color, color, FALSE);
 	}
 } // namespace infrastructure
