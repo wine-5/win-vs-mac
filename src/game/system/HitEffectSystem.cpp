@@ -62,4 +62,4 @@ namespace game::system
             }
         }
     }
-}
+} // namespace game::system

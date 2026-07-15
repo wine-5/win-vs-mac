@@ -24,4 +24,4 @@ namespace game::actor
 		 */
 		void setupAI() override;
 	};
-}
+} // namespace game::actor

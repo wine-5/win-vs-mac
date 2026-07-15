@@ -29,4 +29,4 @@ namespace game::constant
 		if (typeName == "mac")    return EnemyType::Mac;
 		throw std::runtime_error("未知の敵タイプです: " + std::string(typeName));
 	}
-}
+} // namespace game::constant

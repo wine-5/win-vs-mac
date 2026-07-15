@@ -15,5 +15,5 @@ namespace game::constant
 		constexpr std::string_view DEFENCE = "defence";
 		constexpr std::string_view ATTACK_POWER = "attackPower";
 		constexpr std::string_view ATTACK_COOLDOWN = "attackCooldown";
-	}
-}
+	} // namespace metadata_keys
+} // namespace game::constant

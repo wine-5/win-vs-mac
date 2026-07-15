@@ -23,7 +23,7 @@ namespace
 		}
 		throw std::runtime_error("未対応のEnemyTypeです");
 	}
-}
+} // namespace
 
 namespace game::factory
 {
@@ -83,4 +83,4 @@ namespace game::factory
 		enemyData.setPosition(spawn.m_position); // 位置はステージ配置定義が正
 		return m_factoryManager.getEnemyFactory().create(type, modelHandle, enemyData);
 	}
-}
+} // namespace game::factory

@@ -25,4 +25,4 @@ namespace game::actor
 		auto& ai = m_componentManager.get<component::AIComponent>(m_entity.getId());
 		ai.m_behavior = constant::AIBehavior::MeleeChase;
 	}
-}
+} // namespace game::actor

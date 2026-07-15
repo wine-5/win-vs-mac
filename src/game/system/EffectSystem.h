@@ -30,4 +30,4 @@ namespace game::system
         core::base::EventBus&        m_eventBus;
         core::iface::IEffectFactory& m_effectFactory;
     };
-}
+} // namespace game::system

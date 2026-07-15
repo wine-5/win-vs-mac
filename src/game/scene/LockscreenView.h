@@ -53,4 +53,4 @@ namespace game::scene
 		static constexpr float HINT_ALPHA_MIN    = 0.7f;  // アルファ値の最小比率
 		static constexpr unsigned int BG_COLOR = core::utility::Color::rgb(10, 27, 62);
 	};
-}
+} // namespace game::scene

@@ -12,4 +12,4 @@ namespace game::component
 		bool  m_jumpPressed{ false };
 		bool  m_attackPressed{ false };
 	};
-}
+} // namespace game::component

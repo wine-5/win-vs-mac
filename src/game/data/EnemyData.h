@@ -121,4 +121,4 @@ namespace game::data
         core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
         core::Vector3 m_position;
     };
-}
+} // namespace game::data

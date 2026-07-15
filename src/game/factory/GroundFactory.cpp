@@ -50,4 +50,4 @@ namespace game::factory
 	{
 		return m_grounds.size();
 	}
-}
+} // namespace game::factory

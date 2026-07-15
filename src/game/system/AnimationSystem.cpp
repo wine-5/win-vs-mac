@@ -124,4 +124,4 @@ namespace game::system
 		anim.m_requested = newState;
 		anim.m_isCompleted = false;
 	}
-}
+} // namespace game::system

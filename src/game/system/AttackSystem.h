@@ -35,4 +35,4 @@ namespace game::system
 		core::constant::SeType m_playerAttackSeType{ core::constant::SeType::None };
 		std::unique_ptr<attack::IDamageHandler> m_damageChain;
 	};
-}
+} // namespace game::system

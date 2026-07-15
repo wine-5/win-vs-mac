@@ -18,4 +18,4 @@ namespace game::component
 
 		std::vector<Slot> m_slots{};
 	};
-}
+} // namespace game::component

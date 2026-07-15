@@ -141,4 +141,4 @@ namespace game::scene
 		if (m_state != State::Idle) return;
 		std::exit(0);
 	}
-}
+} // namespace game::scene

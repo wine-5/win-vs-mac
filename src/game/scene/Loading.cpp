@@ -63,4 +63,4 @@ namespace game::scene
             m_uiRenderer, m_screen, FADE_DURATION, false);
         m_state = State::FadeOut;
     }
-}
+} // namespace game::scene

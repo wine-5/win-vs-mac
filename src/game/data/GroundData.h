@@ -51,4 +51,4 @@ namespace game::data
         core::Vector3 m_colliderSize;
         core::Vector3 m_colliderOffset;
     };
-}
+} // namespace game::data

@@ -12,4 +12,4 @@ namespace game::data
 		float hp{0.0f};
 		float attackRange{0.0f};
 	};
-}
+} // namespace game::data

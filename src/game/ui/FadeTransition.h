@@ -48,4 +48,4 @@ namespace game::ui
         float m_elapsed{};
         bool m_isFadeIn{};
     };
-}
+} // namespace game::ui

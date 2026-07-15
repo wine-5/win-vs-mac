@@ -24,4 +24,4 @@ namespace game::component
 		float m_preferredDistanceMax{0.0f}; // これより遠ければ接近する
 		float m_hoverHeight{0.0f}; // 浮遊高度(0なら地上)
 	};
-}
+} // namespace game::component

@@ -16,7 +16,7 @@ namespace game::utility
 		constexpr float ARCHIVE_HP{ 5.0f };
 		constexpr float ARCHIVE_RANGE{ 0.5f };
 		constexpr float UNKNOWN_RANGE{ 20.0f };
-	}
+	} // namespace
 
 	/**
 	 * @brief FileExtensionType に応じたパラメータボーナスを算出するクラス
@@ -49,4 +49,4 @@ namespace game::utility
 			}
 		}
 	};
-}
+} // namespace game::utility

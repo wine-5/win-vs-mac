@@ -61,4 +61,4 @@ namespace game::factory
 
 		std::vector<std::unique_ptr<stage::Ground>> m_grounds;
 	};
-}
+} // namespace game::factory

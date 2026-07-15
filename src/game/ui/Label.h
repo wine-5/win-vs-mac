@@ -40,4 +40,4 @@ namespace game::ui
 		bool m_visible{};
 
 	};
-}
+} // namespace game::ui

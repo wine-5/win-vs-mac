@@ -195,4 +195,4 @@ namespace game::scene
 		default: break;
 		}
 	}
-}
+} // namespace game::scene

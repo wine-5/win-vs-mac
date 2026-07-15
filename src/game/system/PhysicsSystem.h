@@ -33,4 +33,4 @@ namespace game::system
 		float m_jumpForce{DEFAULT_JUMP_FORCE};
 		float m_maxFallSpeed{DEFAULT_MAX_FALL_SPEED};
 	};
-}
+} // namespace game::system

@@ -100,4 +100,4 @@ namespace game::scene
 		static constexpr float GRAPH_MEMORY_TOP_RATIO = 0.37f;
 		static constexpr float GRAPH_DISK_TOP_RATIO   = 0.73f;
 	};
-}
+} // namespace game::scene

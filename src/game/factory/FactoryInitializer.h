@@ -57,4 +57,4 @@ namespace game::factory
 		FactoryManager& m_factoryManager;
 		core::iface::IResourceManager& m_resourceManager;
 	};
-}
+} // namespace game::factory

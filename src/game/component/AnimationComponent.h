@@ -21,4 +21,4 @@ namespace game::component
         float m_animTotalTime{ 0.0f };
         bool  m_isCompleted{ false }; // 非ループ再生が終端に達したか
     };
-}
+} // namespace game::component

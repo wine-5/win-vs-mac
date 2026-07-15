@@ -28,4 +28,4 @@ namespace game::event
 		core::base::EventBus&  m_eventBus;
 		core::ecs::EntityId    m_playerId{};
 	};
-}
+} // namespace game::event

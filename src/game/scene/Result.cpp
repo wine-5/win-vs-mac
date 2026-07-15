@@ -43,4 +43,4 @@ namespace game::scene
     void Result::draw()
     {
     }
-}
+} // namespace game::scene

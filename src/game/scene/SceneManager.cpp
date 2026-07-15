@@ -41,4 +41,4 @@ namespace game::scene
 		m_currentScene = m_sceneFactory->createScene(sceneType);
 		m_currentSceneType = sceneType;
 	}
-}
+} // namespace game::scene

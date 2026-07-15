@@ -58,4 +58,4 @@ namespace game::scene
         std::unique_ptr<Result>      m_resultScene;
         std::unique_ptr<Bios>        m_biosScene;
     };
-}
+} // namespace game::scene

@@ -123,4 +123,4 @@ namespace game::system
 			attack.m_currentCooldown = attack.m_attackCooldown;
 		}
 	}
-}
+} // namespace game::system

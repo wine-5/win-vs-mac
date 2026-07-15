@@ -32,4 +32,4 @@ namespace game::system
         core::ecs::ComponentManager& m_componentManager;
         core::base::EventBus&        m_eventBus;
     };
-}
+} // namespace game::system

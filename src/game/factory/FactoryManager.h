@@ -45,4 +45,4 @@ namespace game::factory
         std::unique_ptr<GroundFactory> m_groundFactory;
         std::unique_ptr<EnemyFactory> m_enemyFactory;
     };
-}
+} // namespace game::factory

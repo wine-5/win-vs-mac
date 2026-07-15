@@ -16,4 +16,4 @@ namespace game::component
 		int m_priority{ 0 }; // 割り込み優先度（大きいほど優先。再生中クリップより低い要求は無視）
 		float m_speed{ 1.0f }; // 再生速度倍率（1.0が等倍、0.5で半分の速さ）
 	};
-}
+} // namespace game::component

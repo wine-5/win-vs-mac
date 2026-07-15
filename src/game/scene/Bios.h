@@ -51,4 +51,4 @@ namespace game::scene
         bool               m_transitioning{};
         std::vector<float> m_lineTimestamps;
     };
-}
+} // namespace game::scene

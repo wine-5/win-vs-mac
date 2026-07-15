@@ -29,5 +29,5 @@ namespace game::constant
         constexpr std::string_view XCODE_WALK        = "anim_xcode_walk";
         constexpr std::string_view XCODE_GROUND_SLAM = "anim_xcode_ground_slam";
         constexpr std::string_view XCODE_DYING       = "anim_xcode_dying";
-    }
-}
+	} // namespace animation_id
+} // namespace game::constant

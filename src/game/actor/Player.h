@@ -37,4 +37,4 @@ namespace game::actor
 	private:
 		core::ecs::Entity m_entity;
 	};
-}
+} // namespace game::actor

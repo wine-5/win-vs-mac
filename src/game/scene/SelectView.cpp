@@ -133,4 +133,4 @@ namespace game::scene
         }
     }
 
-}
+} // namespace game::scene

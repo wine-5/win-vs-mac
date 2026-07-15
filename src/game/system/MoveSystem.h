@@ -30,4 +30,4 @@ namespace game::system
 		core::ecs::EntityId m_entityId{};
 		float m_moveSpeed{0.0f};
 	};
-}
+} // namespace game::system

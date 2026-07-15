@@ -14,4 +14,4 @@ namespace game::data
         Archive,    // .zip .7z .rar   → 全パラメータ小+
         Unknown     // それ以外        → attackRange+
     };
-}
+} // namespace game::data

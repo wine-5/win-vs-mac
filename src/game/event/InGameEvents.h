@@ -78,4 +78,4 @@ namespace game::event
 		EnemyDeadEvent() = default;
 		EnemyDeadEvent(core::ecs::EntityId id) : m_entityId(id) {}
 	};
-}
+} // namespace game::event

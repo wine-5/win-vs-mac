@@ -73,4 +73,4 @@ namespace game::actor
 	{
 		return m_entity.getId();
 	}
-}
+} // namespace game::actor

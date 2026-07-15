@@ -107,5 +107,4 @@ namespace game::scene
 			m_windowManager->updateParameterWindowForJob(jobType);
 	}
 
-}
-
+} // namespace game::scene

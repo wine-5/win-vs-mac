@@ -323,4 +323,4 @@ namespace game::scene
 
 		game::GameManager::getInstance().setResultData(result);
 	}
-}
+} // namespace game::scene

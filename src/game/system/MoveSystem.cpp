@@ -37,4 +37,4 @@ namespace game::system
 				: constant::AnimationState::Idle;
 		}
 	}
-}
+} // namespace game::system

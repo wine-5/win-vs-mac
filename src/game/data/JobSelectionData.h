@@ -41,4 +41,4 @@ namespace game::data
 		core::constant::JobType m_selectedJobType{ static_cast<core::constant::JobType>(0) };
 		bool m_hasSelection{ false };
 	};
-}
+} // namespace game::data

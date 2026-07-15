@@ -10,4 +10,4 @@ namespace game::component
 		int  m_modelHandle{-1}; // -1は未ロード
 		bool m_isVisible{true};
 	};
-}
+} // namespace game::component

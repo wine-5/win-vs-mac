@@ -60,4 +60,4 @@ namespace game::ui
         std::function<void()> m_onClick{};
         core::iface::IInputProvider& m_inputProvider;
     };
-}
+} // namespace game::ui

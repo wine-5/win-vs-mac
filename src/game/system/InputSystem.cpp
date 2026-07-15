@@ -72,4 +72,4 @@ namespace game::system
 		if (m_inputProvider.isPadButtonDown(core::input::GamePadCode::ButtonB))
 			input.m_jumpPressed = true;
 	}
-}
+} // namespace game::system

@@ -38,4 +38,4 @@ namespace game::event
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio) audio->playSe(core::constant::SeType::DeadEnemy);
 	}
-}
+} // namespace game::event

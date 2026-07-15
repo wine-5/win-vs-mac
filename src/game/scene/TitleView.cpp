@@ -210,4 +210,4 @@ namespace game::scene
 			m_uiRenderer.resetBlendMode();
 		}
 	}
-}
+} // namespace game::scene

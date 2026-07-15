@@ -14,4 +14,4 @@ namespace game::component
 		float m_currentCooldown{ 0.0f };
 		bool  m_attackRequested{ false };
 	};
-}
+} // namespace game::component

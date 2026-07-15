@@ -81,4 +81,4 @@ namespace game::scene
 		static constexpr float PERF_UPDATE_INTERVAL  = 1.0f; // パフォーマンス取得の更新間隔（秒）
 		static constexpr int   MAX_DOTS = 3;
 	};
-}
+} // namespace game::scene

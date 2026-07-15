@@ -51,4 +51,4 @@ namespace game::factory
         std::vector<std::unique_ptr<actor::EnemyBase>> m_enemies;
         std::vector<core::ecs::EntityId> m_enemyIds{};
     };
-}
+} // namespace game::factory

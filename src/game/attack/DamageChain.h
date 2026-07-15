@@ -17,4 +17,4 @@ namespace game::attack
 		/** @brief 計算中のダメージ値(各ハンドラが段階的に加工する) */
 		float m_damage{};
 	};
-}
+} // namespace game::attack

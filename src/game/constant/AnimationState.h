@@ -35,7 +35,7 @@ namespace game::constant
 		constexpr int ATTACK     = 30;  // 攻撃
 		constexpr int JUMP       = 20;  // ジャンプ
 		constexpr int LOCOMOTION = 0;   // 移動系（Idle/Walk/Run、互いに自由に遷移）
-	}
+	} // namespace animation_priority
 
 	/**
 	 * @brief アニメーション状態をログ出力用の文字列に変換
@@ -57,4 +57,4 @@ namespace game::constant
 		default:                      return "Unknown";
 		}
 	}
-}
+} // namespace game::constant

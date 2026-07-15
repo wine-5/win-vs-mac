@@ -48,4 +48,4 @@ namespace game::factory
 	{
 		return m_enemyIds;
 	}
-}
+} // namespace game::factory

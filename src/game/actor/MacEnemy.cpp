@@ -29,4 +29,4 @@ namespace game::actor
 		ai.m_behavior = constant::AIBehavior::Boss;
 	}
 
-}
+} // namespace game::actor

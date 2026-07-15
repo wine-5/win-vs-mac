@@ -106,4 +106,4 @@ namespace game::scene
 		static constexpr float CAMERA_OFFSET_Y = 200.0f;
 		static constexpr float CAMERA_OFFSET_Z = -600.0f;
 	};
-}
+} // namespace game::scene

@@ -68,4 +68,4 @@ namespace game::system
 		slot.m_handle = handle;
 		effect.m_slots.push_back(slot);
 	}
-}
+} // namespace game::system

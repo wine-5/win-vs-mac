@@ -36,4 +36,4 @@ namespace game::stage
 	private:
 		core::ecs::Entity m_entity;
 	};
-}
+} // namespace game::stage

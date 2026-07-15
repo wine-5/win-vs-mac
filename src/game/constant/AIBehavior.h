@@ -14,4 +14,4 @@ namespace game::constant
 		RangeKeepDistance,// 遠距離維持型：一定距離を保ちながら遠距離攻撃
 		Boss              // ボス型：接近、遠距離などを使い分ける
 	};
-}
+} // namespace game::constant

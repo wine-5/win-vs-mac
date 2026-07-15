@@ -21,4 +21,4 @@ namespace game::actor
 		ai.m_preferredDistanceMax = preferredDistanceMax;
 		ai.m_hoverHeight = hoverHeight;
 	}
-}
+} // namespace game::actor

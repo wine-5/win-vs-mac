@@ -33,4 +33,4 @@ namespace game::attack
         core::ecs::ComponentManager& m_componentManager;
         std::unique_ptr<IDamageHandler> m_next{};
     };
-}
+} // namespace game::attack

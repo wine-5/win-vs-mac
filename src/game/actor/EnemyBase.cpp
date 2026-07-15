@@ -78,4 +78,4 @@ namespace game::actor
 		ai.m_detectionRange = m_enemyData.getDetectionRange();
 		m_componentManager.add<component::AIComponent>(m_entity.getId(), ai);
 	}
-}
+} // namespace game::actor

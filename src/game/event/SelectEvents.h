@@ -43,4 +43,4 @@ namespace core::event
 	{
 		GameStartRequestedEvent() = default;
 	};
-}
+} // namespace core::event

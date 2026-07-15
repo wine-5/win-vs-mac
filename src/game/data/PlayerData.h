@@ -164,4 +164,4 @@ namespace game::data
 		float m_jobDefAddition{ 0.0f };
 		float m_jobSpdAddition{ 0.0f };
 	};
-}
+} // namespace game::data

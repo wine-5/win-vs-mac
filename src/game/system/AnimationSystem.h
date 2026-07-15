@@ -63,4 +63,4 @@ namespace game::system
 		core::iface::IAnimator& m_animator;
 		core::base::EventBus& m_eventBus;
 	};
-}
+} // namespace game::system

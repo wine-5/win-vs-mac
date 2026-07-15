@@ -12,4 +12,4 @@ namespace game::component
 		float m_defence{ 0.0f };
 		bool  m_isDead{ false };
 	};
-}
+} // namespace game::component

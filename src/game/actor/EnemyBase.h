@@ -73,4 +73,4 @@ namespace game::actor
 		 */
 		void buildCommonComponents();
 	};
-}
+} // namespace game::actor
