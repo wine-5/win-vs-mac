@@ -69,8 +69,9 @@ namespace game::scene
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio) audio->playBgm(core::constant::BgmType::InGame);
 
+		// DEBUG: 何かと不便なためリリースするときにfalseに変更すること
 		// 3人称マウス視点のためカーソルを非表示にする
-		m_inputProvider.setMouseCursorVisible(false);
+		m_inputProvider.setMouseCursorVisible(true);
 	}
 
 	void InGame::loadResources()
