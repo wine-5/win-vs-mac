@@ -10,20 +10,17 @@
 #include "game/component/HitEffectComponent.h"
 #include "game/component/EffectComponent.h"
 #include "game/constant/Tag.h"
+#include <utility>
 
 namespace game::actor
 {
 
 	EnemyBase::EnemyBase(core::ecs::EntityManager& entityManager,
-		core::ecs::ComponentManager& componentManager,
-		core::iface::IResourceManager& resourceManager,
-		int modelHandle,
-		const data::EnemyData& enemyData)
-		: m_entity{ entityManager.create() }
-		, m_componentManager{ componentManager }
-		, m_resourceManager{ resourceManager }
-		, m_modelHandle{ modelHandle }
-		, m_enemyData{ enemyData }
+	                     core::ecs::ComponentManager& componentManager,
+	                     core::iface::IResourceManager& resourceManager,
+	                     int modelHandle,
+	                     data::EnemyData enemyData)
+	    : m_entity{ entityManager.create() }, m_componentManager{ componentManager }, m_resourceManager{ resourceManager }, m_modelHandle{ modelHandle }, m_enemyData{ std::move(enemyData) }
 	{
 	}
 
@@ -48,7 +45,7 @@ namespace game::actor
 		m_componentManager.add<component::TransformComponent>(m_entity.getId(), transform);
 
 		m_componentManager.add<component::VelocityComponent>(m_entity.getId(), {});
-		m_componentManager.add<component::RenderComponent>(m_entity.getId(), { m_modelHandle });
+		m_componentManager.add<component::RenderComponent>(m_entity.getId(), component::RenderComponent{ .m_modelHandle = m_modelHandle });
 		m_componentManager.add<component::HitEffectComponent>(m_entity.getId(), {});
 		m_componentManager.add<component::EffectComponent>(m_entity.getId(), {});
 

@@ -26,27 +26,27 @@ namespace game::actor
 		 * @param modelHandle モデルハンドル
 		 * @param enemyData 敵のデータ
 		 */
-		EnemyBase(core::ecs::EntityManager& entityManager,
-			core::ecs::ComponentManager& componentManager,
-			core::iface::IResourceManager& resourceManager,
-			int modelHandle,
-			const data::EnemyData& enemyData);
+	  EnemyBase(core::ecs::EntityManager& entityManager,
+		        core::ecs::ComponentManager& componentManager,
+		        core::iface::IResourceManager& resourceManager,
+		        int modelHandle,
+		        data::EnemyData enemyData);
 
-		virtual ~EnemyBase() = default;
+	  virtual ~EnemyBase() = default;
 
-		/**
-		 * @brief コンポーネントを構築する（生成直後に必ず呼ぶ）
-		 *
-		 * 共通コンポーネントの構築後、派生クラスのフック
-		 * （setupAnimation / setupAI）を呼び出す
-		 */
-		void initialize();
+	  /**
+	   * @brief コンポーネントを構築する（生成直後に必ず呼ぶ）
+	   *
+	   * 共通コンポーネントの構築後、派生クラスのフック
+	   * （setupAnimation / setupAI）を呼び出す
+	   */
+	  void initialize();
 
-		/**
-		 * @brief 敵のEntityIDを取得する
-		 * @return EntityID
-		 */
-		[[nodiscard]] core::ecs::EntityId getId() const noexcept;
+	  /**
+	   * @brief 敵のEntityIDを取得する
+	   * @return EntityID
+	   */
+	  [[nodiscard]] core::ecs::EntityId getId() const noexcept;
 
 	protected:
 		/**
