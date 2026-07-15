@@ -76,4 +76,4 @@ namespace core::iface
 		 */
 		virtual int duplicateModel(int modelHandle) = 0;
 	};
-}
+} // namespace core::iface

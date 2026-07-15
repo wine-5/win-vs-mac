@@ -22,4 +22,4 @@ namespace core::iface
          */
         virtual void pumpMessages() noexcept = 0;
     };
-}
+} // namespace core::iface

@@ -25,4 +25,4 @@ namespace core::data
 		std::vector<SpawnMetadata> m_spawns{};
 		SpawnMetadata m_boss{};
 	};
-}
+} // namespace core::data

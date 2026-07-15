@@ -15,4 +15,4 @@ namespace core::constant
         ResultWin,  // リザルト（勝利）
         ResultLose, // リザルト（敗北）
     };
-}
+} // namespace core::constant

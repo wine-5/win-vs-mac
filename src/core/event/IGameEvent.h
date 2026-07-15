@@ -11,4 +11,4 @@ namespace core::event
 	public:
 		virtual ~IGameEvent() = default;
 	};
-}
+} // namespace core::event

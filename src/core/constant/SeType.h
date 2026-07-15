@@ -27,4 +27,4 @@ namespace core::constant
 
         // 今後追加したら AudioRepository の typeMap にも追加を忘れないように
     };
-}
+} // namespace core::constant

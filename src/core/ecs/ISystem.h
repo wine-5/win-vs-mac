@@ -16,4 +16,4 @@ namespace core::ecs
 		 */
 		virtual void update(float deltaTime) = 0;
 	};
-}
+} // namespace core::ecs

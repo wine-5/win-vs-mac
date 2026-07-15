@@ -19,4 +19,4 @@ namespace core::iface
 		 */
 		virtual void update(const core::Vector3& targetPosition, const core::Vector3& offset) = 0;
 	};
-}
+} // namespace core::iface

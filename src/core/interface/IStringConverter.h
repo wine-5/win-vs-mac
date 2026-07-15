@@ -26,4 +26,4 @@ namespace core::iface
 		 */
 		virtual std::wstring utf8ToWide(const std::string& utf8Str) const = 0;
 	};
-}
+} // namespace core::iface

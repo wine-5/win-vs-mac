@@ -31,4 +31,4 @@ namespace core
 		/** @brief ベクトル加算代入 */
 		Vector3& operator+=(const Vector3& other) noexcept { x += other.x; y += other.y; z += other.z; return *this; }
 	};
-}
+} // namespace core

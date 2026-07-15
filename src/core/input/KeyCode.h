@@ -23,4 +23,4 @@ namespace core::input
 		Shift, // ダッシュ用
 		Tab,   // ロックオン切り替え用
 	};
-}
+} // namespace core::input

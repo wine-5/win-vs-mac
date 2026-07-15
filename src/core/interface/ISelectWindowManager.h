@@ -52,4 +52,4 @@ namespace core::iface
 		 */
 		virtual void showWarningMessage(const std::string& message) = 0;
 	};
-}
+} // namespace core::iface

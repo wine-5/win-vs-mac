@@ -33,4 +33,4 @@ namespace core::ecs
 	private:
 		EntityId m_id{INVALID_ENTITY_ID};
 	};
-}
+} // namespace core::ecs

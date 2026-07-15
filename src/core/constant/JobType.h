@@ -14,4 +14,4 @@ namespace core::constant
 
 	/// @brief 職業の総数
 	constexpr int JOB_COUNT = 3;
-}
+} // namespace core::constant

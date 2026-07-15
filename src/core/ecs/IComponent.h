@@ -16,4 +16,4 @@ namespace core::ecs
          */
         virtual void remove(EntityId id) = 0;
     };
-}
+} // namespace core::ecs

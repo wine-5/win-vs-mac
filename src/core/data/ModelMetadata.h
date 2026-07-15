@@ -22,4 +22,4 @@ namespace core::data
 		std::unordered_map<std::string, float> floatProperties;
 		std::unordered_map<std::string, std::string> stringProperties; // 例: {"idleAnim": "path/to/anim.mv1"}
 	};
-}
+} // namespace core::data

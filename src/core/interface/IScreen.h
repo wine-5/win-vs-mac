@@ -29,4 +29,4 @@ namespace core::iface
          */
         virtual void* getNativeWindowHandle() const noexcept = 0;
     };
-}
+} // namespace core::iface

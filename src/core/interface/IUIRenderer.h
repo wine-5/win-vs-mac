@@ -75,4 +75,4 @@ namespace core::iface
          */
         virtual void drawImage(int handle, int x, int y, int width, int height) = 0;
     };
-}
+} // namespace core::iface

@@ -21,4 +21,4 @@ namespace core::input
         DPadLeft,
         DPadRight,
     };
-}
+} // namespace core::input

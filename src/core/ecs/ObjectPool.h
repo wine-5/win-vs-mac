@@ -102,4 +102,4 @@ namespace core::base
 		std::queue<T*>                   m_available{};
 		std::vector<std::unique_ptr<T>>  m_all{};
 	};
-}
+} // namespace core::base

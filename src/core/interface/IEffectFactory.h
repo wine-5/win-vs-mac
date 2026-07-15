@@ -49,4 +49,4 @@ namespace core::iface
          */
         virtual void draw() = 0;
     };
-}
+} // namespace core::iface

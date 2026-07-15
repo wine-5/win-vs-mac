@@ -43,4 +43,4 @@ namespace core::iface
 		 */
 		virtual void update() = 0;
 	};
-}
+} // namespace core::iface

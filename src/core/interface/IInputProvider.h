@@ -89,4 +89,4 @@ namespace core::iface
 		 */
 		virtual void setMouseCursorVisible(bool visible) = 0;
 	};
-}
+} // namespace core::iface

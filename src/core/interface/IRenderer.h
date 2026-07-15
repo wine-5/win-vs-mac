@@ -46,4 +46,4 @@ namespace core::iface
 		 */
 		virtual void drawDebugCapsule(const core::Vector3& bottom, const core::Vector3& top, float radius, unsigned int color) = 0;
 	};
-}
+} // namespace core::iface

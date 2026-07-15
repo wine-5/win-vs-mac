@@ -27,4 +27,4 @@ namespace core::iface
          */
         virtual void updateAnimTime(int modelHandle, int animIndex, float time) = 0;
     };
-}
+} // namespace core::iface

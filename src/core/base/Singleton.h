@@ -64,4 +64,4 @@ namespace core::base
 	private:
 		static inline std::unique_ptr<T> m_instance;
 	};
-}
+} // namespace core::base

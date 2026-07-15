@@ -38,4 +38,4 @@ namespace core::ecs
 		// 再利用可能なEntityIdのキュー
 		std::queue<EntityId> m_recycledIds;
 	};
-}
+} // namespace core::ecs
