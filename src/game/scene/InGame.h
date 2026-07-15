@@ -100,10 +100,5 @@ namespace game::scene
 		float m_elapsedTime{0.0f};
 		int   m_killCount{0};
 		float m_totalDamageTaken{0.0f};
-
-		// カメラ設定
-		static constexpr float CAMERA_OFFSET_X = 0.0f;
-		static constexpr float CAMERA_OFFSET_Y = 200.0f;
-		static constexpr float CAMERA_OFFSET_Z = -600.0f;
 	};
 } // namespace game::scene

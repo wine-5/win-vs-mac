@@ -34,6 +34,8 @@
 #include "game/scene/SceneType.h"
 #include "game/system/AISystem.h"
 #include "game/component/AIComponent.h"
+#include "game/system/CameraSystem.h"
+#include "game/component/CameraComponent.h"
 #include "game/event/InGameEvents.h"
 #include "game/utility/ExtensionBonusCalculator.h"
 
@@ -66,6 +68,9 @@ namespace game::scene
 
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio) audio->playBgm(core::constant::BgmType::InGame);
+
+		// 3人称マウス視点のためカーソルを非表示にする
+		m_inputProvider.setMouseCursorVisible(false);
 	}
 
 	void InGame::loadResources()
@@ -111,6 +116,9 @@ namespace game::scene
 		initializer.initializePlayer(m_playerData);
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
 
+		// 3人称カメラの状態をプレイヤーに持たせる（CameraSystem/MoveSystemが参照する）
+		m_componentManager.add<component::CameraComponent>(m_playerId, component::CameraComponent{});
+
 		m_groundId = initializer.initializeGround();
 
 		// m_enemyIds = initializer.initializeEnemies();
@@ -127,7 +135,9 @@ namespace game::scene
 	{
 		// システム登録
 		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_playerId, m_inputProvider);
-		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed());
+		// カメラはMoveSystemより前に更新し、最新のyawで移動方向を計算させる
+		m_systemManager.registerSystem<game::system::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera);
+		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
 		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager);
 		m_systemManager.registerSystem<game::system::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
 
@@ -172,7 +182,9 @@ namespace game::scene
 						}
 
 						saveResultData(false);
-						auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
+			            // メニュー操作用にカーソルを戻してからシーンを切り替える
+			            m_inputProvider.setMouseCursorVisible(true);
+			            auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 						sceneManager->changeScene(game::scene::SceneType::Result); });
 
 				// 敵の死亡イベントの購読
@@ -201,7 +213,9 @@ namespace game::scene
 						if (allDead)
 						{
 							saveResultData(true);
-							auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
+				            // メニュー操作用にカーソルを戻してからシーンを切り替える
+				            m_inputProvider.setMouseCursorVisible(true);
+				            auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 							sceneManager->changeScene(game::scene::SceneType::Result);
 						} });
 	}
@@ -209,10 +223,7 @@ namespace game::scene
 	void InGame::update(float deltaTime)
 	{
 		m_elapsedTime += deltaTime;
-
 		m_systemManager.update(deltaTime);
-		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
-		m_camera.update(transform.m_position, core::Vector3(CAMERA_OFFSET_X, CAMERA_OFFSET_Y, CAMERA_OFFSET_Z));
 
 		// フレーム最後に入力状態を更新
 		m_inputProvider.updatePreviousState();
