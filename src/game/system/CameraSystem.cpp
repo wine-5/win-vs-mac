@@ -52,6 +52,9 @@ namespace game::system
 			lookTarget.z - cosYaw * cosPitch * camera.m_distance
 		};
 
+		// 視線方向（単位ベクトル）を保存する。レティクル判定・投射の発射方向に使う。
+		camera.m_forward = core::Vector3{ sinYaw * cosPitch, -sinPitch, cosYaw * cosPitch };
+
 		m_camera.setLookAt(cameraPos, lookTarget);
 	}
 } // namespace game::system

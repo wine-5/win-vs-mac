@@ -1,4 +1,5 @@
 #pragma once
+#include "core/utility/Vector3.h"
 
 namespace game::component
 {
@@ -21,5 +22,9 @@ namespace game::component
 		// ピッチの可動範囲（見上げすぎ・見下ろしすぎを防ぐ）
 		float m_pitchMin{ -0.3f };
 		float m_pitchMax{ 1.2f };
+
+		// カメラの視線方向（単位ベクトル）。CameraSystemが毎フレーム更新する。
+		// レティクルの敵捕捉判定・投射の発射方向に流用する。
+		core::Vector3 m_forward{ 0.0f, 0.0f, 1.0f };
 	};
 } // namespace game::component
