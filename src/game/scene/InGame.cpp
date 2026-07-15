@@ -113,7 +113,7 @@ namespace game::scene
 
 		m_groundId = initializer.initializeGround();
 
-		m_enemyIds = initializer.initializeEnemies();
+		// m_enemyIds = initializer.initializeEnemies();
 
 		// 全敵の追跡対象をプレイヤーに設定する
 		for (auto enemyId : m_enemyIds)

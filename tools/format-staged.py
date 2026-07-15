@@ -37,7 +37,8 @@ def find_clang_format():
 def staged_files():
     out = subprocess.check_output(
         ["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"],
-        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
     for name in out.splitlines():
         if os.path.splitext(name)[1].lower() in EXTENSIONS:
