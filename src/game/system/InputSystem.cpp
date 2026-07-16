@@ -22,6 +22,7 @@ namespace game::system
 		input.m_jumpPressed = false;
 		input.m_attackPressed = false;
 		input.m_dashPressed = false;
+		input.m_rangedAttackPressed = false;
 
 		// -------------------------------------------------------
 		// PCでの操作の入力
@@ -44,6 +45,8 @@ namespace game::system
 		// マウスの入力
 		if (m_inputProvider.isMouseLeftPressed())
 			input.m_attackPressed = true;
+		if (m_inputProvider.isMouseRightPressed())
+			input.m_rangedAttackPressed = true;
 
 		if (!m_inputProvider.isPadConnected()) return;
 
