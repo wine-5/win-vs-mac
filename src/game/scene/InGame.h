@@ -14,6 +14,7 @@
 #include "core/base/EventBus.h"
 
 /* game層のインクルード */
+#include "core/interface/IProjectileWindowManager.h"
 #include "game/factory/FactoryManager.h"
 #include "game/component/RenderComponent.h"
 #include "game/data/PlayerData.h"
@@ -94,6 +95,9 @@ namespace game::scene
 		core::base::EventBus m_eventBus;
 
 		std::unique_ptr<game::event::AudioEventListener> m_audioEventListener;
+
+		// 弾の見た目として実OSウィンドウを追従表示するマネージャ（Platform層実装）
+		std::unique_ptr<core::iface::IProjectileWindowManager> m_projectileWindowManager;
 
 		// 進行トラッキング
 		float m_elapsedTime{0.0f};

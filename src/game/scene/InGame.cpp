@@ -43,6 +43,8 @@
 #include "game/component/AimComponent.h"
 #include "game/system/ProjectileSystem.h"
 #include "game/system/RangedAttackSystem.h"
+#include "game/system/ProjectileWindowSystem.h"
+#include "core/interface/IWindowFactory.h"
 #include "game/event/InGameEvents.h"
 #include "game/utility/ExtensionBonusCalculator.h"
 
@@ -163,6 +165,13 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager);
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
 		m_systemManager.registerSystem<game::system::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);
+
+		// 弾の見た目として実OSウィンドウを追従させる（移動後の位置を射影するためPhysicsSystemより後）
+		auto* windowFactory{ core::base::ServiceLocator::get<core::iface::IWindowFactory>() };
+		if (windowFactory)
+			m_projectileWindowManager = windowFactory->createProjectileWindowManager();
+		if (m_projectileWindowManager)
+			m_systemManager.registerSystem<game::system::ProjectileWindowSystem>(m_componentManager, m_renderer, *m_projectileWindowManager);
 		m_systemManager.registerSystem<game::system::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
 
 		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
