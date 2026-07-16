@@ -33,7 +33,7 @@
   "images": [
     {"id": "lock-bg",           "path": "assets/images/background/LockBG.jpg"},
     {"id": "desktop-bg",        "path": "assets/images/background/DesktopBG.jpg"},
-    {"id": "projectile-window", "path": "assets/images/ui/ingame/projectile_window.png"}
+    {"id": "projectile-window", "path": "assets/images/ingame/projectile_window.png"}
   ],
   "effects": [
     {
