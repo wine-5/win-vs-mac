@@ -24,6 +24,14 @@ namespace
 		metadata.m_spawnForward = j["spawnForward"];
 		metadata.m_spawnHeight = j["spawnHeight"];
 		metadata.m_cooldown = j["cooldown"];
+
+		// 溜め攻撃（未定義なら溜め無効のデフォルト値のまま）
+		if (j.contains("chargeMaxTime"))
+			metadata.m_chargeMaxTime = j["chargeMaxTime"];
+		if (j.contains("chargeDamageMultiplier"))
+			metadata.m_chargeDamageMultiplier = j["chargeDamageMultiplier"];
+		if (j.contains("chargeSizeMultiplier"))
+			metadata.m_chargeSizeMultiplier = j["chargeSizeMultiplier"];
 		return metadata;
 	}
 } // namespace

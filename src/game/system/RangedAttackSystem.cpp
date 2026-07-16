@@ -29,11 +29,48 @@ namespace game::system
 			return;
 
 		const auto& input{ m_componentManager.get<component::InputComponent>(m_playerId) };
-		if (!input.m_rangedAttackPressed || m_cooldownTimer > 0.0f)
-			return;
 
+		// 押している間は溜める（クールダウン中は溜め開始しない）
+		if (input.m_rangedAttackPressed)
+		{
+			if (!m_isCharging && m_cooldownTimer <= 0.0f)
+			{
+				m_isCharging = true;
+				m_chargeTime = 0.0f;
+			}
+
+			if (m_isCharging)
+			{
+				m_chargeTime += deltaTime;
+				// 最大溜め時間で頭打ちにする
+				if (m_chargeTime > m_metadata.m_chargeMaxTime)
+					m_chargeTime = m_metadata.m_chargeMaxTime;
+			}
+			return;
+		}
+
+		// ボタンを離した瞬間に発射する
+		if (m_isCharging)
+		{
+			// 溜め率（0.0〜1.0）。溜め無効（chargeMaxTime==0）なら常に0
+			const float chargeRate{ m_metadata.m_chargeMaxTime > 0.0f
+				                        ? m_chargeTime / m_metadata.m_chargeMaxTime
+				                        : 0.0f };
+			fire(chargeRate);
+			m_isCharging = false;
+			m_chargeTime = 0.0f;
+			m_cooldownTimer = m_metadata.m_cooldown;
+		}
+	}
+
+	void RangedAttackSystem::fire(float chargeRate)
+	{
 		const auto& camera{ m_componentManager.get<component::CameraComponent>(m_playerId) };
 		const auto& transform{ m_componentManager.get<component::TransformComponent>(m_playerId) };
+
+		// 溜め率に応じて倍率を線形補間する（0で等倍、1で最大倍率）
+		const float damageMultiplier{ 1.0f + (m_metadata.m_chargeDamageMultiplier - 1.0f) * chargeRate };
+		const float sizeMultiplier{ 1.0f + (m_metadata.m_chargeSizeMultiplier - 1.0f) * chargeRate };
 
 		// カメラ前方へ、プレイヤーの少し前・目線の高さから発射する
 		const core::Vector3 direction{ camera.m_forward };
@@ -45,13 +82,12 @@ namespace game::system
 
 		factory::ProjectileConfig config{};
 		config.m_speed = m_metadata.m_speed;
-		config.m_damage = m_metadata.m_damage;
+		config.m_damage = m_metadata.m_damage * damageMultiplier;
 		config.m_lifetime = m_metadata.m_lifetime;
-		config.m_radius = m_metadata.m_radius;
+		config.m_radius = m_metadata.m_radius * sizeMultiplier;
 		config.m_scale = m_metadata.m_scale;
 		config.m_imageHandle = m_projectileImageHandle;
 
 		m_projectileFactory.spawn(origin, direction, config, constant::Tag::Player);
-		m_cooldownTimer = m_metadata.m_cooldown;
 	}
 } // namespace game::system

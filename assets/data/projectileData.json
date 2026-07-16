@@ -13,7 +13,7 @@
       "cooldown": 0.4,
       "chargeMaxTime": 1.5,
       "chargeDamageMultiplier": 3.0,
-      "chargeSizeMultiplier": 2.0
+      "chargeSizeMultiplier": 5.0
     }
   ]
 }
