@@ -40,6 +40,30 @@ namespace game::scene
 		          core::ecs::EntityId groundId,
 		          const std::vector<core::ecs::EntityId>& enemyIds);
 
+		/**
+		 * @brief デバッグ可視化の全体ON/OFFを切り替える
+		 * @param enabled trueで描画、falseで非描画
+		 */
+		void setDebugVisualsEnabled(bool enabled);
+
+		/**
+		 * @brief 当たり判定（Collider）のデバッグ描画ON/OFFを切り替える
+		 * @param enabled trueで描画、falseで非描画
+		 */
+		void setDebugColliderEnabled(bool enabled);
+
+		/**
+		 * @brief 攻撃範囲のデバッグ描画ON/OFFを切り替える
+		 * @param enabled trueで描画、falseで非描画
+		 */
+		void setDebugAttackRangeEnabled(bool enabled);
+
+		/**
+		 * @brief 索敵範囲のデバッグ描画ON/OFFを切り替える
+		 * @param enabled trueで描画、falseで非描画
+		 */
+		void setDebugDetectionRangeEnabled(bool enabled);
+
 	  private:
 		/**
 		 * @brief プレイヤー・地面・敵のモデルを描画する
@@ -64,9 +88,29 @@ namespace game::scene
 		 */
 		void drawDebugVisuals();
 
+		/**
+		 * @brief DEBUG: 当たり判定（青）を可視化する
+		 */
+		void drawDebugColliders();
+
+		/**
+		 * @brief DEBUG: 攻撃範囲（赤）を可視化する
+		 */
+		void drawDebugAttackRanges();
+
+		/**
+		 * @brief DEBUG: 索敵範囲（黄）を可視化する
+		 */
+		void drawDebugDetectionRanges();
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IRenderer& m_renderer;
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
+
+		bool m_isDebugVisualsEnabled{ true };
+		bool m_isDebugColliderEnabled{ true };
+		bool m_isDebugAttackRangeEnabled{ false };
+		bool m_isDebugDetectionRangeEnabled{ false };
 	};
 } // namespace game::scene
