@@ -51,5 +51,12 @@ namespace infrastructure
 		 * @param size 描画サイズ（ワールド単位・一辺の長さ）
 		 */
 		void drawBillboard(int imageHandle, const core::Vector3& position, float size) override;
+
+		/**
+		 * @brief ワールド座標をスクリーン座標へ変換する
+		 * @param worldPos ワールド座標
+		 * @return x/yはスクリーン座標、zは深度（0.0〜1.0の範囲内なら画面に映っている）
+		 */
+		core::Vector3 worldToScreen(const core::Vector3& worldPos) override;
 	};
 } // namespace infrastructure

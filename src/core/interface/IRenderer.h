@@ -53,5 +53,12 @@ namespace core::iface
 		 * @param size 描画サイズ（ワールド単位・一辺の長さ）
 		 */
 		virtual void drawBillboard(int imageHandle, const core::Vector3& position, float size) = 0;
+
+		/**
+		 * @brief ワールド座標をスクリーン座標へ変換する
+		 * @param worldPos ワールド座標
+		 * @return x/yはスクリーン座標、zは深度（0.0〜1.0の範囲内なら画面に映っている）
+		 */
+		virtual core::Vector3 worldToScreen(const core::Vector3& worldPos) = 0;
 	};
 } // namespace core::iface

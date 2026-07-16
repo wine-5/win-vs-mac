@@ -71,4 +71,10 @@ namespace infrastructure
 		// 中心(0.5, 0.5)基準・回転なし・透過有効で描画する
 		DrawBillboard3D(pos, 0.5f, 0.5f, size, 0.0f, imageHandle, TRUE);
 	}
+
+	core::Vector3 Renderer::worldToScreen(const core::Vector3& worldPos)
+	{
+		VECTOR screen = ConvWorldPosToScreenPos(VGet(worldPos.x, worldPos.y, worldPos.z));
+		return { screen.x, screen.y, screen.z };
+	}
 } // namespace infrastructure
