@@ -2,6 +2,7 @@
 #include "loading/LoadingWindow.h"
 #include "result/ResultWindow.h"
 #include "select/Win32SelectWindowManager.h"
+#include "projectile/ProjectileWindowManager.h"
 #include "core/interface/IResourceManager.h"
 
 namespace platform::window
@@ -68,4 +69,10 @@ namespace platform::window
             resourceManager,
             m_screen);
     }
+
+	std::unique_ptr<core::iface::IProjectileWindowManager> WindowFactory::createProjectileWindowManager()
+	{
+		HWND gameWindow{ static_cast<HWND>(m_screen.getNativeWindowHandle()) };
+		return std::make_unique<ProjectileWindowManager>(gameWindow);
+	}
 } // namespace platform::window
