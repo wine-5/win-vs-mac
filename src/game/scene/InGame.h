@@ -19,6 +19,7 @@
 #include "game/data/PlayerData.h"
 #include "game/data/FileEquipmentData.h"
 #include "game/event/AudioEventListener.h"
+#include "game/scene/InGameView.h"
 #include <memory>
 
 namespace game::scene
@@ -69,11 +70,6 @@ namespace game::scene
 		 */
 		void saveResultData(bool isVictory) noexcept;
 
-		/**
-		 * @brief DEBUG: 当たり判定（青）・攻撃範囲（赤）・索敵範囲（黄）を可視化する（テスト後に削除）
-		 */
-		void drawDebugVisuals();
-
 		core::ecs::EntityManager 	m_entityManager;
 		core::ecs::ComponentManager m_componentManager;
 		core::ecs::SystemManager 	m_systemManager;
@@ -87,6 +83,7 @@ namespace game::scene
 
 		game::factory::FactoryManager m_factoryManager;
 		game::data::PlayerData m_playerData;
+		InGameView m_view;
 
 		core::ecs::EntityId m_groundId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
