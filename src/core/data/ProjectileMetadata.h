@@ -12,6 +12,7 @@ namespace core::data
 	struct ProjectileMetadata
 	{
 		std::string m_id{};           // 弾の識別子（例: "player_window"）
+		std::string m_imageId{};      // ビルボード描画に使う画像ID（resources.jsonのimagesで定義）
 		float m_speed{ 0.0f };        // 弾速
 		float m_damage{ 0.0f };       // 与ダメージ
 		float m_lifetime{ 0.0f };     // 寿命（秒）

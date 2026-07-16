@@ -9,11 +9,13 @@ namespace game::system
 	RangedAttackSystem::RangedAttackSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId playerId,
 	    factory::ProjectileFactory& projectileFactory,
-	    const core::data::ProjectileMetadata& metadata)
+	    const core::data::ProjectileMetadata& metadata,
+	    int projectileImageHandle)
 	    : m_componentManager{ componentManager }
 	    , m_playerId{ playerId }
 	    , m_projectileFactory{ projectileFactory }
 	    , m_metadata{ metadata }
+	    , m_projectileImageHandle{ projectileImageHandle }
 	{
 	}
 
@@ -47,6 +49,7 @@ namespace game::system
 		config.m_lifetime = m_metadata.m_lifetime;
 		config.m_radius = m_metadata.m_radius;
 		config.m_scale = m_metadata.m_scale;
+		config.m_imageHandle = m_projectileImageHandle;
 
 		m_projectileFactory.spawn(origin, direction, config, constant::Tag::Player);
 		m_cooldownTimer = m_metadata.m_cooldown;

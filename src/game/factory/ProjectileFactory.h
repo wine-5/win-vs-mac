@@ -16,6 +16,7 @@ namespace game::factory
 		float m_lifetime{ 0.0f }; // 寿命
 		float m_radius{ 0.0f };   // 大きさの半径（AttackComponent.m_attackRange に入る＝当たり判定）
 		float m_scale{ 1.0f };    // 見た目スケール（0だと描画されないため1.0を既定にする）
+		int m_imageHandle{ -1 };  // ビルボード描画用の画像ハンドル（-1なら仮スフィア）
 	};
 
 	/**

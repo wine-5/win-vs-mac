@@ -23,11 +23,13 @@ namespace game::system
 		 * @param playerId プレイヤーのEntityID
 		 * @param projectileFactory 弾生成ファクトリの参照
 		 * @param metadata 弾定義（projectileData.jsonから取得したもの）
+		 * @param projectileImageHandle 弾のビルボード画像ハンドル（-1なら仮スフィア描画）
 		 */
 		RangedAttackSystem(core::ecs::ComponentManager& componentManager,
 		    core::ecs::EntityId playerId,
 		    factory::ProjectileFactory& projectileFactory,
-		    const core::data::ProjectileMetadata& metadata);
+		    const core::data::ProjectileMetadata& metadata,
+		    int projectileImageHandle);
 
 		/**
 		 * @brief 発射入力に応じて弾を発射する
@@ -40,6 +42,7 @@ namespace game::system
 		core::ecs::EntityId m_playerId{};
 		factory::ProjectileFactory& m_projectileFactory;
 		core::data::ProjectileMetadata m_metadata{}; // 弾定義（値コピーで保持）
+		int m_projectileImageHandle{ -1 };           // 弾のビルボード画像ハンドル
 		float m_cooldownTimer{ 0.0f };
 	};
 } // namespace game::system

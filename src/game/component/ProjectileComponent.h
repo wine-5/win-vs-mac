@@ -12,5 +12,6 @@ namespace game::component
 	struct ProjectileComponent
 	{
 		float m_remainingLifetime{}; // 残り寿命（毎フレーム減算し、0以下で自動消滅する）
+		int m_imageHandle{ -1 };     // ビルボード描画用の画像ハンドル（-1なら仮スフィアで描画）
 	};
 } // namespace game::component
