@@ -52,6 +52,12 @@ namespace game::system
 			lookTarget.z - cosYaw * cosPitch * camera.m_distance
 		};
 
+		// カメラが地面を突き抜けないよう、床より少し上に制限する
+		// （下から地面を見ると片面ポリゴンが裏面カリングで消えて真っ黒になるのを防ぐ）
+		constexpr float MIN_CAMERA_HEIGHT{ 30.0f };
+		if (cameraPos.y < MIN_CAMERA_HEIGHT)
+			cameraPos.y = MIN_CAMERA_HEIGHT;
+
 		// 視線方向（単位ベクトル）を保存する。レティクル判定・投射の発射方向に使う。
 		camera.m_forward = core::Vector3{ sinYaw * cosPitch, -sinPitch, cosYaw * cosPitch };
 
