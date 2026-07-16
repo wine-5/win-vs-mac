@@ -21,5 +21,10 @@ namespace core::data
 		float m_spawnForward{ 0.0f }; // 発射者より前方に出す距離
 		float m_spawnHeight{ 0.0f };  // 発射源の高さ（足元からのオフセット）
 		float m_cooldown{ 0.0f };     // 連射間隔（秒）
+
+		// 溜め攻撃（0なら溜め無効＝即発射のみ）
+		float m_chargeMaxTime{ 0.0f };          // 最大溜め時間（秒）。これ以上溜めても効果は頭打ち
+		float m_chargeDamageMultiplier{ 1.0f }; // 最大溜め時のダメージ倍率
+		float m_chargeSizeMultiplier{ 1.0f };   // 最大溜め時のサイズ（接触半径・見た目）倍率
 	};
 } // namespace core::data

@@ -10,7 +10,10 @@
       "scale": 1.0,
       "spawnForward": 80.0,
       "spawnHeight": 100.0,
-      "cooldown": 0.4
+      "cooldown": 0.4,
+      "chargeMaxTime": 1.5,
+      "chargeDamageMultiplier": 3.0,
+      "chargeSizeMultiplier": 2.0
     }
   ]
 }
