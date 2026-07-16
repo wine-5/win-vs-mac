@@ -49,9 +49,9 @@ namespace game::factory
 		tag.m_tag = ownerTag;
 		m_componentManager.add<component::TagComponent>(id, tag);
 
-		// 弾固有のデータ（寿命）。これがあることでProjectileSystem/PhysicsSystemが弾として扱う
+		// 弾固有のデータ（残り寿命）。これがあることでProjectileSystem/PhysicsSystemが弾として扱う
 		component::ProjectileComponent projectile{};
-		projectile.m_lifetime = config.m_lifetime;
+		projectile.m_remainingLifetime = config.m_lifetime;
 		m_componentManager.add<component::ProjectileComponent>(id, projectile);
 
 		return id;

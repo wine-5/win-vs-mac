@@ -32,6 +32,7 @@
 #include "game/component/AttackComponent.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/AnimationId.h"
+#include "game/constant/ProjectileId.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
 #include "game/system/AISystem.h"
@@ -155,8 +156,9 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
 		// 照準の敵捕捉判定（カメラ更新後・描画前に走らせる）
 		m_systemManager.registerSystem<game::system::TargetingSystem>(m_componentManager);
-		// 発射入力→弾生成（生成はPhysicsSystemより前でよい）
-		m_systemManager.registerSystem<game::system::RangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory);
+		// 発射入力→弾生成（生成はPhysicsSystemより前でよい）。弾定義はjsonから取得する
+		m_systemManager.registerSystem<game::system::RangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory,
+		    m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW));
 		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager);
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
 		m_systemManager.registerSystem<game::system::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);

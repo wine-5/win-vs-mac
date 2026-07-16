@@ -25,8 +25,8 @@ namespace game::system
 		for (auto id : projectiles)
 		{
 			auto& projectile{ m_componentManager.get<component::ProjectileComponent>(id) };
-			projectile.m_lifetime -= deltaTime;
-			if (projectile.m_lifetime <= 0.0f)
+			projectile.m_remainingLifetime -= deltaTime;
+			if (projectile.m_remainingLifetime <= 0.0f)
 			{
 				m_pendingDestroy.push_back(id);
 				continue;

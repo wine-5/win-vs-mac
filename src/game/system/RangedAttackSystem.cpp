@@ -4,25 +4,16 @@
 #include "game/component/TransformComponent.h"
 #include "game/constant/Tag.h"
 
-namespace
-{
-	// TODO: 個別のjsonを作るタイミングでjsonへ移植する
-	constexpr float PROJECTILE_SPEED{ 1500.0f }; // 弾速
-	constexpr float PROJECTILE_DAMAGE{ 20.0f };  // ダメージ
-	constexpr float PROJECTILE_LIFETIME{ 3.0f }; // 寿命（秒）
-	constexpr float PROJECTILE_RADIUS{ 40.0f };  // 接触半径（当たり判定）
-	constexpr float PROJECTILE_SCALE{ 1.0f };    // 見た目スケール
-	constexpr float SPAWN_FORWARD{ 80.0f };      // プレイヤーより前方に出す距離
-	constexpr float EYE_HEIGHT{ 100.0f };        // 発射源の高さ
-	constexpr float FIRE_COOLDOWN{ 0.4f };       // 連射間隔（秒）
-} // namespace
-
 namespace game::system
 {
 	RangedAttackSystem::RangedAttackSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId playerId,
-	    factory::ProjectileFactory& projectileFactory)
-	    : m_componentManager{ componentManager }, m_playerId{ playerId }, m_projectileFactory{ projectileFactory }
+	    factory::ProjectileFactory& projectileFactory,
+	    const core::data::ProjectileMetadata& metadata)
+	    : m_componentManager{ componentManager }
+	    , m_playerId{ playerId }
+	    , m_projectileFactory{ projectileFactory }
+	    , m_metadata{ metadata }
 	{
 	}
 
@@ -45,19 +36,19 @@ namespace game::system
 		// カメラ前方へ、プレイヤーの少し前・目線の高さから発射する
 		const core::Vector3 direction{ camera.m_forward };
 		const core::Vector3 origin{
-			transform.m_position.x + direction.x * SPAWN_FORWARD,
-			transform.m_position.y + EYE_HEIGHT + direction.y * SPAWN_FORWARD,
-			transform.m_position.z + direction.z * SPAWN_FORWARD
+			transform.m_position.x + direction.x * m_metadata.m_spawnForward,
+			transform.m_position.y + m_metadata.m_spawnHeight + direction.y * m_metadata.m_spawnForward,
+			transform.m_position.z + direction.z * m_metadata.m_spawnForward
 		};
 
 		factory::ProjectileConfig config{};
-		config.m_speed = PROJECTILE_SPEED;
-		config.m_damage = PROJECTILE_DAMAGE;
-		config.m_lifetime = PROJECTILE_LIFETIME;
-		config.m_radius = PROJECTILE_RADIUS;
-		config.m_scale = PROJECTILE_SCALE;
+		config.m_speed = m_metadata.m_speed;
+		config.m_damage = m_metadata.m_damage;
+		config.m_lifetime = m_metadata.m_lifetime;
+		config.m_radius = m_metadata.m_radius;
+		config.m_scale = m_metadata.m_scale;
 
 		m_projectileFactory.spawn(origin, direction, config, constant::Tag::Player);
-		m_cooldownTimer = FIRE_COOLDOWN;
+		m_cooldownTimer = m_metadata.m_cooldown;
 	}
 } // namespace game::system

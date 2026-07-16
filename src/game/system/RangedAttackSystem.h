@@ -2,6 +2,7 @@
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
+#include "core/data/ProjectileMetadata.h"
 #include "game/factory/ProjectileFactory.h"
 
 namespace game::system
@@ -10,6 +11,7 @@ namespace game::system
 	 * @brief プレイヤーの遠距離攻撃（Window投擲）の発射を担うSystem
 	 *
 	 * 発射入力とクールダウンを見て、カメラ前方へ弾を発射する。
+	 * 弾のパラメータは projectileData.json（ProjectileMetadata）から与えられ、
 	 * 弾の生成自体は ProjectileFactory に委譲する（敵の遠距離でも同じFactoryを使う）。
 	 */
 	class RangedAttackSystem : public core::ecs::ISystem
@@ -20,10 +22,12 @@ namespace game::system
 		 * @param componentManager ComponentManagerの参照
 		 * @param playerId プレイヤーのEntityID
 		 * @param projectileFactory 弾生成ファクトリの参照
+		 * @param metadata 弾定義（projectileData.jsonから取得したもの）
 		 */
 		RangedAttackSystem(core::ecs::ComponentManager& componentManager,
 		    core::ecs::EntityId playerId,
-		    factory::ProjectileFactory& projectileFactory);
+		    factory::ProjectileFactory& projectileFactory,
+		    const core::data::ProjectileMetadata& metadata);
 
 		/**
 		 * @brief 発射入力に応じて弾を発射する
@@ -35,6 +39,7 @@ namespace game::system
 		core::ecs::ComponentManager& m_componentManager;
 		core::ecs::EntityId m_playerId{};
 		factory::ProjectileFactory& m_projectileFactory;
+		core::data::ProjectileMetadata m_metadata{}; // 弾定義（値コピーで保持）
 		float m_cooldownTimer{ 0.0f };
 	};
 } // namespace game::system
