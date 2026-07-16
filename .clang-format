@@ -9,6 +9,14 @@ UseTab: ForIndentation
 TabWidth: 4
 IndentWidth: 4
 
+# 複数行の引数は開き括弧に揃えず、一定インデント（タブ1つ）で継続する
+# 例:
+#   Type func(A a,
+#       B b,
+#       C c)
+AlignAfterOpenBracket: DontAlign
+ContinuationIndentWidth: 4
+
 # 名前空間の中もインデントする
 NamespaceIndentation: All
 
