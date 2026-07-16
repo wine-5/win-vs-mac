@@ -43,5 +43,13 @@ namespace infrastructure
 		 * @param color 色（ARGB）
 		 */
 		void drawDebugCapsule(const core::Vector3& bottom, const core::Vector3& top, float radius, unsigned int color) override;
+
+		/**
+		 * @brief 常にカメラの方を向く板（ビルボード）として画像を描画する
+		 * @param imageHandle 画像ハンドル（loadImageByIdで取得）
+		 * @param position ワールド座標（板の中心）
+		 * @param size 描画サイズ（ワールド単位・一辺の長さ）
+		 */
+		void drawBillboard(int imageHandle, const core::Vector3& position, float size) override;
 	};
 } // namespace infrastructure

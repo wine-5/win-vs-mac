@@ -61,4 +61,14 @@ namespace infrastructure
 		// ワイヤーフレームで描画（塗りつぶしなし）
 		DrawCapsule3D(pos1, pos2, radius, DIV_NUM, color, color, FALSE);
 	}
+
+	void Renderer::drawBillboard(int imageHandle, const core::Vector3& position, float size)
+	{
+		if (imageHandle == -1)
+			return;
+
+		VECTOR pos = VGet(position.x, position.y, position.z);
+		// 中心(0.5, 0.5)基準・回転なし・透過有効で描画する
+		DrawBillboard3D(pos, 0.5f, 0.5f, size, 0.0f, imageHandle, TRUE);
+	}
 } // namespace infrastructure
