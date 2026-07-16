@@ -7,6 +7,7 @@
 #include "infrastructure/repository/ImageRepository.h"
 #include "infrastructure/repository/AnimationRepository.h"
 #include "infrastructure/repository/StageRepository.h"
+#include "infrastructure/repository/ProjectileRepository.h"
 
 namespace infrastructure
 {
@@ -69,6 +70,13 @@ namespace infrastructure
 		[[nodiscard]] const core::data::StageMetadata& getStageMetadata() const override;
 
 		/**
+		 * @brief 弾IDから弾定義を取得する
+		 * @param projectileId 弾ID（projectileData.json で定義）
+		 * @return 弾定義
+		 */
+		[[nodiscard]] const core::data::ProjectileMetadata& getProjectileMetadata(std::string_view projectileId) const override;
+
+		/**
 		 * @brief モデルハンドルを複製する
 		 * @param modelHandle 複製元のモデルハンドル
 		 * @return 複製したモデルハンドル、失敗時は-1
@@ -76,11 +84,12 @@ namespace infrastructure
 		int duplicateModel(int modelHandle) override;
 
 	private:
-		std::unique_ptr<ModelRepository>     m_modelRepo;
-		std::unique_ptr<FontRepository>      m_fontRepo;
-		std::unique_ptr<JobRepository>       m_jobRepo;
-		std::unique_ptr<ImageRepository>     m_imageRepo;
-		std::unique_ptr<AnimationRepository> m_animRepo;
-		std::unique_ptr<StageRepository>     m_stageRepo;
+	  std::unique_ptr<ModelRepository> m_modelRepo;
+	  std::unique_ptr<FontRepository> m_fontRepo;
+	  std::unique_ptr<JobRepository> m_jobRepo;
+	  std::unique_ptr<ImageRepository> m_imageRepo;
+	  std::unique_ptr<AnimationRepository> m_animRepo;
+	  std::unique_ptr<StageRepository> m_stageRepo;
+	  std::unique_ptr<ProjectileRepository> m_projectileRepo;
 	};
 } // namespace infrastructure

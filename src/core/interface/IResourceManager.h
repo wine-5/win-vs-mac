@@ -5,6 +5,7 @@
 #include "core/data/ModelMetadata.h"
 #include "core/data/JobInfo.h"
 #include "core/data/StageMetadata.h"
+#include "core/data/ProjectileMetadata.h"
 #include "core/constant/JobType.h"
 
 namespace core::iface
@@ -65,6 +66,13 @@ namespace core::iface
 		 * @return ステージ配置定義
 		 */
 		[[nodiscard]] virtual const core::data::StageMetadata& getStageMetadata() const = 0;
+
+		/**
+		 * @brief 弾IDから弾定義を取得する
+		 * @param projectileId 弾ID（projectileData.json で定義）
+		 * @return 弾定義
+		 */
+		[[nodiscard]] virtual const core::data::ProjectileMetadata& getProjectileMetadata(std::string_view projectileId) const = 0;
 
 		/**
 		 * @brief モデルハンドルを複製する
