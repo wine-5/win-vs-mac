@@ -208,6 +208,7 @@
     <ClCompile Include="src\game\system\MoveSystem.cpp" />
     <ClCompile Include="src\game\system\PhysicsSystem.cpp" />
     <ClCompile Include="src\infrastructure\repository\StageRepository.cpp" />
+    <ClCompile Include="src\infrastructure\repository\ProjectileRepository.cpp" />
     <ClCompile Include="src\infrastructure\UIRenderer.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\infrastructure\utility\LogUtil.cpp" />
@@ -265,6 +266,7 @@
   <ItemGroup>
     <ClInclude Include="src\core\base\Singleton.h" />
     <ClInclude Include="src\core\data\StageMetadata.h" />
+    <ClInclude Include="src\core\data\ProjectileMetadata.h" />
     <ClInclude Include="src\game\actor\MacEnemy.h" />
     <ClInclude Include="src\game\actor\SafariEnemy.h" />
     <ClInclude Include="src\game\actor\XcodeEnemy.h" />
@@ -353,6 +355,8 @@
     <ClInclude Include="src\infrastructure\repository\ModelRepository.h" />
     <ClInclude Include="src\infrastructure\repository\AnimationRepository.h" />
     <ClInclude Include="src\infrastructure\repository\StageRepository.h" />
+    <ClInclude Include="src\infrastructure\repository\ProjectileRepository.h" />
+    <ClInclude Include="src\game\constant\ProjectileId.h" />
     <ClInclude Include="src\infrastructure\Screen.h" />
     <ClInclude Include="src\core\base\ServiceLocator.h" />
     <ClInclude Include="src\core\utility\Color.h" />
