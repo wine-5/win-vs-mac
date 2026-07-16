@@ -15,7 +15,7 @@ namespace game::factory
 		float m_damage{ 0.0f };   // 与えるダメージ（AttackComponent.m_attackPower に入る）
 		float m_lifetime{ 0.0f }; // 寿命
 		float m_radius{ 0.0f };   // 大きさの半径（AttackComponent.m_attackRange に入る＝当たり判定）
-		float m_scale{ 0.0f };    //
+		float m_scale{ 1.0f };    // 見た目スケール（0だと描画されないため1.0を既定にする）
 	};
 
 	/**
