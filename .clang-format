@@ -17,6 +17,13 @@ IndentWidth: 4
 AlignAfterOpenBracket: DontAlign
 ContinuationIndentWidth: 4
 
+# コンストラクタ初期化リストは1メンバ1行・カンマ前置で縦に並べる
+# 例:
+#   : m_a{ a }
+#   , m_b{ b }
+BreakConstructorInitializers: BeforeComma
+PackConstructorInitializers: Never
+
 # 名前空間の中もインデントする
 NamespaceIndentation: All
 
