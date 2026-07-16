@@ -118,13 +118,23 @@ namespace game::scene
 		auto projectiles{ m_componentManager.getAllEntities<component::ProjectileComponent>() };
 		for (auto id : projectiles)
 		{
+			const auto& projectile{ m_componentManager.get<component::ProjectileComponent>(id) };
 			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
 			float radius{ 40.0f };
 			if (m_componentManager.has<component::AttackComponent>(id))
 				radius = m_componentManager.get<component::AttackComponent>(id).m_attackRange;
 
-			// 仮描画：ティールのスフィア（後でWindowビルボードに差し替え）
-			m_renderer.drawDebugSphere(transform.m_position, radius, core::utility::Color::rgb(0, 255, 180));
+			if (projectile.m_imageHandle != -1)
+			{
+				// 常にカメラを向くビルボードとして描画する（一辺＝直径×スケール）
+				const float size{ radius * 2.0f * transform.m_scale.x };
+				m_renderer.drawBillboard(projectile.m_imageHandle, transform.m_position, size);
+			}
+			else
+			{
+				// 画像未設定時の仮描画：ティールのスフィア
+				m_renderer.drawDebugSphere(transform.m_position, radius, core::utility::Color::rgb(0, 255, 180));
+			}
 		}
 	}
 
