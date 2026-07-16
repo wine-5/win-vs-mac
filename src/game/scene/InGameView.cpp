@@ -6,22 +6,28 @@
 #include "game/component/AttackComponent.h"
 #include "game/component/AIComponent.h"
 #include "game/component/AimComponent.h"
+#include "game/component/ProjectileComponent.h"
 
 namespace game::scene
 {
 	InGameView::InGameView(core::ecs::ComponentManager& componentManager,
-	                       core::iface::IRenderer& renderer,
-	                       core::iface::IUIRenderer& uiRenderer,
-	                       core::iface::IScreen& screen)
-	    : m_componentManager{ componentManager }, m_renderer{ renderer }, m_uiRenderer{ uiRenderer }, m_screen{ screen }
+	    core::iface::IRenderer& renderer,
+	    core::iface::IUIRenderer& uiRenderer,
+	    core::iface::IScreen& screen)
+	    : m_componentManager{ componentManager }
+	    , m_renderer{ renderer }
+	    , m_uiRenderer{ uiRenderer }
+	    , m_screen{ screen }
 	{
 	}
 
 	void InGameView::draw(core::ecs::EntityId playerId,
-	                      core::ecs::EntityId groundId,
-	                      const std::vector<core::ecs::EntityId>& enemyIds)
+	    core::ecs::EntityId groundId,
+	    const std::vector<core::ecs::EntityId>& enemyIds)
 	{
 		drawModels(playerId, groundId, enemyIds);
+
+		drawProjectiles();
 
 		// DEBUG: デバッグ可視化（テスト後に呼び出しごと削除）
 		// drawDebugVisuals();
@@ -31,8 +37,8 @@ namespace game::scene
 	}
 
 	void InGameView::drawModels(core::ecs::EntityId playerId,
-	                            core::ecs::EntityId groundId,
-	                            const std::vector<core::ecs::EntityId>& enemyIds)
+	    core::ecs::EntityId groundId,
+	    const std::vector<core::ecs::EntityId>& enemyIds)
 	{
 		const auto& transform{ m_componentManager.get<component::TransformComponent>(playerId) };
 		const auto& render{ m_componentManager.get<component::RenderComponent>(playerId) };
@@ -85,6 +91,21 @@ namespace game::scene
 		m_uiRenderer.drawBox(centerX - halfThickness, centerY + gap, THICKNESS, tickLength, color, true);
 		// 中心ドット
 		m_uiRenderer.drawCircle(centerX, centerY, DOT_RADIUS, color, true, 1);
+	}
+
+	void InGameView::drawProjectiles()
+	{
+		auto projectiles{ m_componentManager.getAllEntities<component::ProjectileComponent>() };
+		for (auto id : projectiles)
+		{
+			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
+			float radius{ 40.0f };
+			if (m_componentManager.has<component::AttackComponent>(id))
+				radius = m_componentManager.get<component::AttackComponent>(id).m_attackRange;
+
+			// 仮描画：ティールのスフィア（後でWindowビルボードに差し替え）
+			m_renderer.drawDebugSphere(transform.m_position, radius, core::utility::Color::rgb(0, 255, 180));
+		}
 	}
 
 	void InGameView::drawDebugVisuals()

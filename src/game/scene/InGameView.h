@@ -55,6 +55,11 @@ namespace game::scene
 		void drawReticle(core::ecs::EntityId playerId);
 
 		/**
+		 * @brief 弾（投射物）を描画する（仮：スフィア。後でビルボード/モデルに差し替え）
+		 */
+		void drawProjectiles();
+
+		/**
 		 * @brief DEBUG: 当たり判定（青）・攻撃範囲（赤）・索敵範囲（黄）を可視化する（テスト後に削除）
 		 */
 		void drawDebugVisuals();

@@ -153,6 +153,8 @@
     <ClCompile Include="src\game\attack\DefenseHandler.cpp" />
     <ClCompile Include="src\game\factory\EnemyFactory.cpp" />
     <ClCompile Include="src\game\factory\ProjectileFactory.cpp" />
+    <ClCompile Include="src\game\system\ProjectileSystem.cpp" />
+    <ClCompile Include="src\game\system\RangedAttackSystem.cpp" />
     <ClCompile Include="src\game\scene\Bios.cpp" />
     <ClCompile Include="src\game\scene\Loading.cpp" />
     <ClCompile Include="src\game\scene\Lockscreen.cpp" />
@@ -318,6 +320,8 @@
     <ClInclude Include="src\game\event\SelectEvents.h" />
     <ClInclude Include="src\game\factory\EnemyFactory.h" />
     <ClInclude Include="src\game\factory\ProjectileFactory.h" />
+    <ClInclude Include="src\game\system\ProjectileSystem.h" />
+    <ClInclude Include="src\game\system\RangedAttackSystem.h" />
     <ClInclude Include="src\game\GameManager.h" />
     <ClInclude Include="src\game\scene\Loading.h" />
     <ClInclude Include="src\game\scene\Lockscreen.h" />

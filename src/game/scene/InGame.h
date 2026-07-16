@@ -19,6 +19,7 @@
 #include "game/data/PlayerData.h"
 #include "game/data/FileEquipmentData.h"
 #include "game/event/AudioEventListener.h"
+#include "game/factory/ProjectileFactory.h"
 #include "game/scene/InGameView.h"
 #include <memory>
 
@@ -82,6 +83,7 @@ namespace game::scene
 		data::FileEquipmentData       &m_fileEquipmentData;
 
 		game::factory::FactoryManager m_factoryManager;
+		game::factory::ProjectileFactory m_projectileFactory;
 		game::data::PlayerData m_playerData;
 		InGameView m_view;
 
