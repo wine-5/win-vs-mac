@@ -2,6 +2,7 @@
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
 #include "game/component/InputComponent.h"
+#include "game/component/ProjectileComponent.h"
 
 namespace game::system
 {
@@ -19,19 +20,23 @@ namespace game::system
 			auto& transform = m_componentManager.get<component::TransformComponent>(entityId);
 			auto& velocity = m_componentManager.get<component::VelocityComponent>(entityId);
 
-			if (m_componentManager.has<component::InputComponent>(entityId))
+			// 弾は直進させたいので、ジャンプ・重力の対象外にする
+			if (!m_componentManager.has<component::ProjectileComponent>(entityId))
 			{
-				auto& input = m_componentManager.get<component::InputComponent>(entityId);
-				// ジャンプ処理
-				if (input.m_jumpPressed)
-					velocity.m_velocity.y = m_jumpForce;
-			}
+				if (m_componentManager.has<component::InputComponent>(entityId))
+				{
+					auto& input = m_componentManager.get<component::InputComponent>(entityId);
+					// ジャンプ処理
+					if (input.m_jumpPressed)
+						velocity.m_velocity.y = m_jumpForce;
+				}
 
-			// 重力
-			velocity.m_velocity.y += m_gravity * deltaTime;
-			// 速度を制限（トンネリング防止）
-			if (velocity.m_velocity.y < m_maxFallSpeed)
-				velocity.m_velocity.y = m_maxFallSpeed;
+				// 重力
+				velocity.m_velocity.y += m_gravity * deltaTime;
+				// 速度を制限（トンネリング防止）
+				if (velocity.m_velocity.y < m_maxFallSpeed)
+					velocity.m_velocity.y = m_maxFallSpeed;
+			}
 
 			transform.m_position.x += velocity.m_velocity.x * deltaTime;
 			transform.m_position.y += velocity.m_velocity.y * deltaTime;

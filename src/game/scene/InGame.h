@@ -14,11 +14,14 @@
 #include "core/base/EventBus.h"
 
 /* game層のインクルード */
+#include "core/interface/IProjectileWindowManager.h"
 #include "game/factory/FactoryManager.h"
 #include "game/component/RenderComponent.h"
 #include "game/data/PlayerData.h"
 #include "game/data/FileEquipmentData.h"
 #include "game/event/AudioEventListener.h"
+#include "game/factory/ProjectileFactory.h"
+#include "game/scene/InGameView.h"
 #include <memory>
 
 namespace game::scene
@@ -69,11 +72,6 @@ namespace game::scene
 		 */
 		void saveResultData(bool isVictory) noexcept;
 
-		/**
-		 * @brief DEBUG: 当たり判定（青）・攻撃範囲（赤）・索敵範囲（黄）を可視化する（テスト後に削除）
-		 */
-		void drawDebugVisuals();
-
 		core::ecs::EntityManager 	m_entityManager;
 		core::ecs::ComponentManager m_componentManager;
 		core::ecs::SystemManager 	m_systemManager;
@@ -86,7 +84,9 @@ namespace game::scene
 		data::FileEquipmentData       &m_fileEquipmentData;
 
 		game::factory::FactoryManager m_factoryManager;
+		game::factory::ProjectileFactory m_projectileFactory;
 		game::data::PlayerData m_playerData;
+		InGameView m_view;
 
 		core::ecs::EntityId m_groundId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
@@ -95,6 +95,9 @@ namespace game::scene
 		core::base::EventBus m_eventBus;
 
 		std::unique_ptr<game::event::AudioEventListener> m_audioEventListener;
+
+		// 弾の見た目として実OSウィンドウを追従表示するマネージャ（Platform層実装）
+		std::unique_ptr<core::iface::IProjectileWindowManager> m_projectileWindowManager;
 
 		// 進行トラッキング
 		float m_elapsedTime{0.0f};

@@ -28,5 +28,13 @@ namespace core::iface
          * @return ネイティブウィンドウハンドル（HWND を void* にキャストしたもの）
          */
         virtual void* getNativeWindowHandle() const noexcept = 0;
-    };
+
+		/**
+		 * @brief 画面クリア時の背景色を設定する
+		 * @param r 赤成分（0-255）
+		 * @param g 緑成分（0-255）
+		 * @param b 青成分（0-255）
+		 */
+		virtual void setBackgroundColor(int r, int g, int b) noexcept = 0;
+	};
 } // namespace core::iface

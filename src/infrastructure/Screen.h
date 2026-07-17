@@ -36,7 +36,15 @@ namespace infrastructure
          */
         void* getNativeWindowHandle() const noexcept override;
 
-    private:
+		/**
+		 * @brief 画面クリア時の背景色を設定する
+		 * @param r 赤成分（0-255）
+		 * @param g 緑成分（0-255）
+		 * @param b 青成分（0-255）
+		 */
+		void setBackgroundColor(int r, int g, int b) noexcept override;
+
+	  private:
         int m_width;
         int m_height;
     };

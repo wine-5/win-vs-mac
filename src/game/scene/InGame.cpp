@@ -4,6 +4,8 @@
 #include "core/interface/ILogger.h"
 #include "core/interface/IEffectFactory.h"
 #include "core/interface/IAudioManager.h"
+#include "core/interface/IUIRenderer.h"
+#include "core/interface/IScreen.h"
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
 #include "core/constant/JobType.h"
@@ -30,35 +32,50 @@
 #include "game/component/AttackComponent.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/AnimationId.h"
+#include "game/constant/ProjectileId.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
 #include "game/system/AISystem.h"
 #include "game/component/AIComponent.h"
 #include "game/system/CameraSystem.h"
 #include "game/component/CameraComponent.h"
+#include "game/system/TargetingSystem.h"
+#include "game/component/AimComponent.h"
+#include "game/system/ProjectileSystem.h"
+#include "game/system/RangedAttackSystem.h"
+#include "game/system/ProjectileWindowSystem.h"
+#include "game/system/PlayerChargeVisualsSystem.h"
+#include "game/system/ChargeZoomSystem.h"
+#include "game/system/DamageShakeSystem.h"
+#include "core/interface/IWindowFactory.h"
 #include "game/event/InGameEvents.h"
 #include "game/utility/ExtensionBonusCalculator.h"
 
 /* 標準のインクルード */
 #include <cassert>
 #include <stdexcept>
+#include <cmath>
 
 namespace game::scene
 {
 	InGame::InGame(core::iface::ICamera& camera,
-		core::iface::IRenderer& renderer,
-		core::iface::IAnimator& animator,
-		core::iface::IResourceManager& resourceManager,
-		core::iface::IInputProvider& inputProvider,
-		data::FileEquipmentData& fileEquipmentData)
-		: m_camera{ camera }
-		, m_renderer{ renderer }
-		, m_animator{ animator }
-		, m_resourceManager{ resourceManager }
-		, m_inputProvider{ inputProvider }
-		, m_fileEquipmentData{ fileEquipmentData }
-		, m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }
-		, m_playerData{ game::data::PlayerData::fromMetadata(m_resourceManager.getMetadata(constant::model_id::PLAYER).value()) }
+	    core::iface::IRenderer& renderer,
+	    core::iface::IAnimator& animator,
+	    core::iface::IResourceManager& resourceManager,
+	    core::iface::IInputProvider& inputProvider,
+	    data::FileEquipmentData& fileEquipmentData)
+	    : m_camera{ camera }
+	    , m_renderer{ renderer }
+	    , m_animator{ animator }
+	    , m_resourceManager{ resourceManager }
+	    , m_inputProvider{ inputProvider }
+	    , m_fileEquipmentData{ fileEquipmentData }
+	    , m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }
+	    , m_projectileFactory{ m_entityManager, m_componentManager }
+	    , m_playerData{ game::data::PlayerData::fromMetadata(m_resourceManager.getMetadata(constant::model_id::PLAYER).value()) }
+	    , m_view{ m_componentManager, m_renderer,
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>() }
 	{
 		loadResources();
 		spawnEntities();
@@ -68,6 +85,14 @@ namespace game::scene
 
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio) audio->playBgm(core::constant::BgmType::InGame);
+
+		// 背景（空）をUnityのデフォルトスカイブルー風にする
+		constexpr int SKY_BLUE_R{ 135 };
+		constexpr int SKY_BLUE_G{ 206 };
+		constexpr int SKY_BLUE_B{ 235 };
+		auto* screen{ core::base::ServiceLocator::get<core::iface::IScreen>() };
+		if (screen)
+			screen->setBackgroundColor(SKY_BLUE_R, SKY_BLUE_G, SKY_BLUE_B);
 
 		// DEBUG: 何かと不便なためリリースするときにfalseに変更すること
 		// 3人称マウス視点のためカーソルを非表示にする
@@ -117,12 +142,11 @@ namespace game::scene
 		initializer.initializePlayer(m_playerData);
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
 
-		// 3人称カメラの状態をプレイヤーに持たせる（CameraSystem/MoveSystemが参照する）
-		m_componentManager.add<component::CameraComponent>(m_playerId, component::CameraComponent{});
+		// プレイヤー専用コンポーネント（CameraComponent、AimComponent、PlayerChargeComponent）
+		// は Player.cpp のコンストラクタで初期化済
 
 		m_groundId = initializer.initializeGround();
-
-		// m_enemyIds = initializer.initializeEnemies();
+		m_enemyIds = initializer.initializeEnemies();
 
 		// 全敵の追跡対象をプレイヤーに設定する
 		for (auto enemyId : m_enemyIds)
@@ -136,10 +160,29 @@ namespace game::scene
 	{
 		// システム登録
 		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_playerId, m_inputProvider);
+		// カメラ演出（Zoom/Shake）はCameraSystemより前に走らせ、合成結果をCameraEffectComponentへ書いておく
+		m_systemManager.registerSystem<game::system::ChargeZoomSystem>(m_componentManager, m_playerId);
+		m_systemManager.registerSystem<game::system::DamageShakeSystem>(m_componentManager, m_eventBus, m_playerId);
 		// カメラはMoveSystemより前に更新し、最新のyawで移動方向を計算させる
 		m_systemManager.registerSystem<game::system::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera);
 		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
+		// 照準の敵捕捉判定（カメラ更新後・描画前に走らせる）
+		m_systemManager.registerSystem<game::system::TargetingSystem>(m_componentManager);
+		// 発射入力→弾生成（生成はPhysicsSystemより前でよい）。弾定義はjsonから取得する
+		const auto& projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
+		const int projectileImage{ m_resourceManager.loadImageById(projectileMeta.m_imageId) };
+		m_systemManager.registerSystem<game::system::RangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory,
+		    projectileMeta, projectileImage);
 		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager);
+		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
+		m_systemManager.registerSystem<game::system::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);
+
+		// 弾の見た目として実OSウィンドウを追従させる（移動後の位置を射影するためPhysicsSystemより後）
+		auto* windowFactory{ core::base::ServiceLocator::get<core::iface::IWindowFactory>() };
+		if (windowFactory)
+			m_projectileWindowManager = windowFactory->createProjectileWindowManager();
+		if (m_projectileWindowManager)
+			m_systemManager.registerSystem<game::system::ProjectileWindowSystem>(m_componentManager, m_renderer, *m_projectileWindowManager);
 		m_systemManager.registerSystem<game::system::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
 
 		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
@@ -162,6 +205,15 @@ namespace game::scene
 
 		auto& effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() };
 		m_systemManager.registerSystem<game::system::EffectSystem>(m_componentManager, m_eventBus, effectFactory);
+
+		// プレイヤーの溜め攻撃の画面演出（集中線）。描画内容はSystemが持ち、
+		// InGameViewには描画フェーズで呼び出させるためにポインタを渡す
+		auto* chargeVisuals{ m_systemManager.registerSystem<game::system::PlayerChargeVisualsSystem>(
+			m_componentManager,
+			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+			*core::base::ServiceLocator::get<core::iface::IScreen>(),
+			m_playerId) };
+		m_view.setPlayerChargeVisualsSystem(chargeVisuals);
 	}
 
 	void InGame::setupEvents()
@@ -232,91 +284,8 @@ namespace game::scene
 
 	void InGame::draw()
 	{
-		// コンポーネントの取得
-		auto& transform = m_componentManager.get<game::component::TransformComponent>(m_playerId);
-		auto& groundRender = m_componentManager.get<game::component::RenderComponent>(m_groundId);
-		auto& render = m_componentManager.get<game::component::RenderComponent>(m_playerId);
-		auto& groundTransform = m_componentManager.get<game::component::TransformComponent>(m_groundId);
-
-		// モデルの描画
-		if (render.m_isVisible)
-			m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
-
-		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
-
-		// 敵の描画
-		for (auto enemyId : m_enemyIds)
-		{
-			auto& enemyRenderer = m_componentManager.get<component::RenderComponent>(enemyId);
-			auto& enemyTransform = m_componentManager.get<component::TransformComponent>(enemyId);
-			if (enemyRenderer.m_isVisible)
-				m_renderer.drawModel(enemyRenderer.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
-		}
-
-		// DEBUG: デバッグ可視化（テスト後に呼び出しごと削除）
-		drawDebugVisuals();
-
-		// エフェクト描画
-		// auto* effectFactory{ core::base::ServiceLocator::get<core::iface::IEffectFactory>() };
-		// if (effectFactory)
-		// 	effectFactory->draw();
-
-	}
-
-	void InGame::drawDebugVisuals()
-	{
-		// DEBUG: 当たり判定（ColliderComponent）を持つ全エンティティを青で可視化（テスト後に削除）
-		auto colliderEntities{ m_componentManager.getAllEntities<component::ColliderComponent>() };
-		for (auto id : colliderEntities)
-		{
-			auto& colliderTf{ m_componentManager.get<component::TransformComponent>(id) };
-			auto& collider{ m_componentManager.get<component::ColliderComponent>(id) };
-			core::Vector3 colliderCenter{ colliderTf.m_position + collider.m_offset };
-			m_renderer.drawCollider(colliderCenter, collider.m_size, core::utility::Color::BLUE);
-		}
-
-		// DEBUG: 攻撃範囲（赤）・索敵範囲（黄）を可視化（テスト後に削除）
-		// 人型（プレイヤー・Xcode・Mac）はカプセル、浮遊型ドローン（Safari）は球で描く
-		auto attackers{ m_componentManager.getAllEntities<component::AttackComponent>() };
-		for (auto id : attackers)
-		{
-			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
-			auto& atk{ m_componentManager.get<component::AttackComponent>(id) };
-
-			bool isFlying{ false };
-			if (m_componentManager.has<component::AIComponent>(id))
-			{
-				auto& ai{ m_componentManager.get<component::AIComponent>(id) };
-				isFlying = (ai.m_behavior == constant::AIBehavior::RangeKeepDistance);
-			}
-
-			if (!isFlying && m_componentManager.has<component::ColliderComponent>(id))
-			{
-				// コライダーの縦軸に沿ったカプセルとして描画する
-				auto& collider{ m_componentManager.get<component::ColliderComponent>(id) };
-				core::Vector3 center{ atkTransform.m_position + collider.m_offset };
-				float halfHeight{ collider.m_size.y * 0.5f };
-				core::Vector3 bottom{ center.x, center.y - halfHeight, center.z };
-				core::Vector3 top{ center.x, center.y + halfHeight, center.z };
-				m_renderer.drawDebugCapsule(bottom, top, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
-
-				if (m_componentManager.has<component::AIComponent>(id))
-				{
-					auto& ai{ m_componentManager.get<component::AIComponent>(id) };
-					m_renderer.drawDebugCapsule(bottom, top, ai.m_detectionRange, core::utility::Color::rgb(255, 255, 0));
-				}
-			}
-			else
-			{
-				m_renderer.drawDebugSphere(atkTransform.m_position, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
-
-				if (m_componentManager.has<component::AIComponent>(id))
-				{
-					auto& ai{ m_componentManager.get<component::AIComponent>(id) };
-					m_renderer.drawDebugSphere(atkTransform.m_position, ai.m_detectionRange, core::utility::Color::rgb(255, 255, 0));
-				}
-			}
-		}
+		// 描画は InGameView へ委譲する
+		m_view.draw(m_playerId, m_groundId, m_enemyIds);
 	}
 
 	void InGame::saveResultData	(bool isVictory) noexcept

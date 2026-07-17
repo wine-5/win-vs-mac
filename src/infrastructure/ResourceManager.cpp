@@ -15,6 +15,7 @@ namespace infrastructure
 			m_imageRepo = std::make_unique<ImageRepository>();
 			m_animRepo = std::make_unique<AnimationRepository>();
 			m_stageRepo = std::make_unique<StageRepository>();
+			m_projectileRepo = std::make_unique<ProjectileRepository>();
 		}
 		catch (const std::exception& e)
 		{
@@ -69,6 +70,13 @@ namespace infrastructure
 		if (!m_stageRepo)
 			throw std::runtime_error("StageRepository が初期化されていません");
 		return m_stageRepo->getStageMetadata();
+	}
+
+	const core::data::ProjectileMetadata& ResourceManager::getProjectileMetadata(std::string_view projectileId) const
+	{
+		if (!m_projectileRepo)
+			throw std::runtime_error("ProjectileRepository が初期化されていません");
+		return m_projectileRepo->getMetadata(projectileId);
 	}
 
 	int ResourceManager::duplicateModel(int modelHandle)

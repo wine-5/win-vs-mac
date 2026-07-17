@@ -45,5 +45,20 @@ namespace core::iface
 		 * @param color 色（ARGB）
 		 */
 		virtual void drawDebugCapsule(const core::Vector3& bottom, const core::Vector3& top, float radius, unsigned int color) = 0;
+
+		/**
+		 * @brief 常にカメラの方を向く板（ビルボード）として画像を描画する
+		 * @param imageHandle 画像ハンドル（loadImageByIdで取得）
+		 * @param position ワールド座標（板の中心）
+		 * @param size 描画サイズ（ワールド単位・一辺の長さ）
+		 */
+		virtual void drawBillboard(int imageHandle, const core::Vector3& position, float size) = 0;
+
+		/**
+		 * @brief ワールド座標をスクリーン座標へ変換する
+		 * @param worldPos ワールド座標
+		 * @return x/yはスクリーン座標、zは深度（0.0〜1.0の範囲内なら画面に映っている）
+		 */
+		virtual core::Vector3 worldToScreen(const core::Vector3& worldPos) = 0;
 	};
 } // namespace core::iface

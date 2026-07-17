@@ -24,4 +24,10 @@ namespace infrastructure
 		return GetMainWindowHandle();
 	}
 
+	void Screen::setBackgroundColor(int r, int g, int b) noexcept
+	{
+		// ClearDrawScreen で塗られる背景色を変更する
+		SetBackgroundColor(r, g, b);
+	}
+
 } // namespace infrastructure
