@@ -28,6 +28,11 @@ namespace infrastructure
 		DrawCircle(centerX, centerY, radius, color, isFilled ? TRUE : FALSE, thickness);
 	}
 
+	void UIRenderer::drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, unsigned int color, bool isFilled)
+	{
+		DrawTriangle(x1, y1, x2, y2, x3, y3, color, isFilled ? TRUE : FALSE);
+	}
+
 	void UIRenderer::drawText(int x, int y, const char *text, unsigned int color, int fontSize)
 	{
 		const auto key{std::make_pair(m_currentFontName, fontSize)};

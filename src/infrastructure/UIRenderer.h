@@ -43,6 +43,19 @@ namespace infrastructure
 		void drawCircle(int centerX, int centerY, int radius, unsigned int color, bool isFilled, int thickness) override;
 
 		/**
+		 * @brief 三角形を描画する
+		 * @param x1 頂点1のX座標
+		 * @param y1 頂点1のY座標
+		 * @param x2 頂点2のX座標
+		 * @param y2 頂点2のY座標
+		 * @param x3 頂点3のX座標
+		 * @param y3 頂点3のY座標
+		 * @param color 色（ARGB形式：0xAARRGGBB）
+		 * @param isFilled 塗りつぶすかどうか
+		 */
+		void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, unsigned int color, bool isFilled) override;
+
+		/**
          * @brief テキストを描画する
          * @param x X座標
          * @param y Y座標
