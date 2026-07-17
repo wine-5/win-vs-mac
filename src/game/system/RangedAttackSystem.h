@@ -29,7 +29,7 @@ namespace game::system
 		RangedAttackSystem(core::ecs::ComponentManager& componentManager,
 		    core::ecs::EntityId playerId,
 		    factory::ProjectileFactory& projectileFactory,
-		    const core::data::ProjectileMetadata& metadata,
+		    core::data::ProjectileMetadata metadata,
 		    int projectileImageHandle);
 
 		/**

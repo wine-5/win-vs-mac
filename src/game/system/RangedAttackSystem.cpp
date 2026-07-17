@@ -4,18 +4,19 @@
 #include "game/component/TransformComponent.h"
 #include "game/component/PlayerChargeComponent.h"
 #include "game/constant/Tag.h"
+#include <utility>
 
 namespace game::system
 {
 	RangedAttackSystem::RangedAttackSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId playerId,
 	    factory::ProjectileFactory& projectileFactory,
-	    const core::data::ProjectileMetadata& metadata,
+	    core::data::ProjectileMetadata metadata,
 	    int projectileImageHandle)
 	    : m_componentManager{ componentManager }
 	    , m_playerId{ playerId }
 	    , m_projectileFactory{ projectileFactory }
-	    , m_metadata{ metadata }
+	    , m_metadata{ std::move(metadata) }
 	    , m_projectileImageHandle{ projectileImageHandle }
 	{
 	}
