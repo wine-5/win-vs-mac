@@ -6,11 +6,13 @@
 
 namespace
 {
-	constexpr float SHAKE_DURATION{ 0.35f };     // 1回の揺れの継続時間（秒）
-	constexpr float SHAKE_BASE_STRENGTH{ 8.0f }; // 最小ダメージでも出る揺れの振幅（ワールド単位）
-	constexpr float SHAKE_DAMAGE_SCALE{ 0.6f };  // ダメージ1あたり増える振幅
-	constexpr float SHAKE_MAX_STRENGTH{ 40.0f }; // 振幅の上限（大ダメージでも揺れすぎない）
-	constexpr float SHAKE_FREQUENCY{ 40.0f };    // 揺れの振動周波数（大きいほど細かく震える）
+	constexpr float SHAKE_DURATION{ 0.35f };         // 1回の揺れの継続時間（秒）
+	constexpr float SHAKE_BASE_STRENGTH{ 8.0f };     // 最小ダメージでも出る揺れの振幅（ワールド単位）
+	constexpr float SHAKE_DAMAGE_SCALE{ 0.6f };      // ダメージ1あたり増える振幅
+	constexpr float SHAKE_MAX_STRENGTH{ 40.0f };     // 振幅の上限（大ダメージでも揺れすぎない）
+	constexpr float SHAKE_FREQUENCY{ 40.0f };        // 揺れの振動周波数（大きいほど細かく震える）
+	constexpr float SHAKE_SEED_PHASE_STEP{ 10.0f };  // 起動ごとに位相をずらす量（毎回違う揺れにする）
+	constexpr float SHAKE_Y_FREQUENCY_RATIO{ 1.3f }; // Y軸をX軸と別周波数にする比（円状でなく不規則な揺れにする）
 } // namespace
 
 namespace game::system
@@ -62,10 +64,10 @@ namespace game::system
 		const float amplitude{ m_strength * decay };
 
 		// 経過時間から位相を作り、X/Yで別の周波数にして円ではなく不規則な揺れにする
-		const float phase{ (m_duration - m_remainingTime) * SHAKE_FREQUENCY + m_seed * 10.0f };
+		const float phase{ (m_duration - m_remainingTime) * SHAKE_FREQUENCY + m_seed * SHAKE_SEED_PHASE_STEP };
 		effect.m_shakeOffset = core::Vector3{
 			std::sin(phase) * amplitude,
-			std::cos(phase * 1.3f) * amplitude,
+			std::cos(phase * SHAKE_Y_FREQUENCY_RATIO) * amplitude,
 			0.0f
 		};
 	}
