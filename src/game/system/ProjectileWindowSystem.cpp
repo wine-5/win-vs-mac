@@ -11,8 +11,9 @@ namespace
 
 	// 発射位置からこの距離だけ離れるまでウィンドウを出さない。
 	// 実OSウィンドウはゲーム内の奥行きで遮蔽できず常に手前に重なるため、
-	// 弾が発射者の前方へ十分離れてから出現させることで「発射者を覆わない」ようにする
-	constexpr float WINDOW_APPEAR_DISTANCE{ 350.0f };
+	// 弾が発射者の前方へ少し離れてから出現させることで「発射者を覆わない」ようにする。
+	// 大きくしすぎると近い敵に当たる前に消えて見えなくなるので注意
+	constexpr float WINDOW_APPEAR_DISTANCE{ 120.0f };
 } // namespace
 
 namespace game::system

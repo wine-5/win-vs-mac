@@ -58,6 +58,11 @@ namespace game::scene
 		m_isDebugDetectionRangeEnabled = enabled;
 	}
 
+	void InGameView::setDebugProjectileRangeEnabled(bool enabled)
+	{
+		m_isDebugProjectileRangeEnabled = enabled;
+	}
+
 	void InGameView::drawModels(core::ecs::EntityId playerId,
 	    core::ecs::EntityId groundId,
 	    const std::vector<core::ecs::EntityId>& enemyIds)
@@ -153,6 +158,9 @@ namespace game::scene
 
 		if (m_isDebugDetectionRangeEnabled)
 			drawDebugDetectionRanges();
+
+		if (m_isDebugProjectileRangeEnabled)
+			drawDebugProjectileRanges();
 	}
 
 	void InGameView::drawDebugColliders()
@@ -225,6 +233,21 @@ namespace game::scene
 			{
 				m_renderer.drawDebugSphere(atkTransform.m_position, ai.m_detectionRange, core::utility::Color::rgb(255, 255, 0));
 			}
+		}
+	}
+
+	void InGameView::drawDebugProjectileRanges()
+	{
+		auto projectiles{ m_componentManager.getAllEntities<component::ProjectileComponent>() };
+		for (auto id : projectiles)
+		{
+			if (!m_componentManager.has<component::AttackComponent>(id))
+				continue;
+
+			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
+			const auto& atk{ m_componentManager.get<component::AttackComponent>(id) };
+
+			m_renderer.drawDebugSphere(transform.m_position, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
 		}
 	}
 } // namespace game::scene

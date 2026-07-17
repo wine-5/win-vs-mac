@@ -64,6 +64,12 @@ namespace game::scene
 		 */
 		void setDebugDetectionRangeEnabled(bool enabled);
 
+		/**
+		 * @brief 弾（Projectile）の攻撃範囲のデバッグ描画ON/OFFを切り替える
+		 * @param enabled trueで描画、falseで非描画
+		 */
+		void setDebugProjectileRangeEnabled(bool enabled);
+
 	  private:
 		/**
 		 * @brief プレイヤー・地面・敵のモデルを描画する
@@ -103,6 +109,11 @@ namespace game::scene
 		 */
 		void drawDebugDetectionRanges();
 
+		/**
+		 * @brief DEBUG: 弾（Projectile）の攻撃範囲（赤）を可視化する
+		 */
+		void drawDebugProjectileRanges();
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IRenderer& m_renderer;
 		core::iface::IUIRenderer& m_uiRenderer;
@@ -112,5 +123,6 @@ namespace game::scene
 		bool m_isDebugColliderEnabled{ true };
 		bool m_isDebugAttackRangeEnabled{ false };
 		bool m_isDebugDetectionRangeEnabled{ false };
+		bool m_isDebugProjectileRangeEnabled{ false };
 	};
 } // namespace game::scene

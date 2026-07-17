@@ -3,7 +3,7 @@
     {
       "id": "player_window",
       "imageId": "projectile-window",
-      "speed": 1500.0,
+      "speed": 600.0,
       "damage": 20.0,
       "lifetime": 3.0,
       "radius": 40.0,
