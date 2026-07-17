@@ -1,8 +1,13 @@
 #pragma once
+#include <cstddef>
 #include <vector>
 
 namespace core::iface
 {
+	// 同時に表示する弾ウィンドウの上限
+	// （いくつまで出すかはゲーム側のポリシーなのでcore層で定義し、Platform層はこれを参照する）
+	constexpr std::size_t MAX_PROJECTILE_WINDOWS{ 10 };
+
 	/**
 	 * @brief 弾に追従させる実OSウィンドウ1枚分の画面上の配置情報
 	 *
