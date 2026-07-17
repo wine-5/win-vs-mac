@@ -44,6 +44,7 @@
 #include "game/system/ProjectileSystem.h"
 #include "game/system/RangedAttackSystem.h"
 #include "game/system/ProjectileWindowSystem.h"
+#include "game/system/PlayerChargeVisualsSystem.h"
 #include "core/interface/IWindowFactory.h"
 #include "game/event/InGameEvents.h"
 #include "game/utility/ExtensionBonusCalculator.h"
@@ -131,11 +132,8 @@ namespace game::scene
 		initializer.initializePlayer(m_playerData);
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
 
-		// 3人称カメラの状態をプレイヤーに持たせる（CameraSystem/MoveSystemが参照する）
-		m_componentManager.add<component::CameraComponent>(m_playerId, component::CameraComponent{});
-
-		// 照準の敵捕捉状態をプレイヤーに持たせる（TargetingSystemが更新・レティクル/投射が参照）
-		m_componentManager.add<component::AimComponent>(m_playerId, component::AimComponent{});
+		// プレイヤー専用コンポーネント（CameraComponent、AimComponent、PlayerChargeComponent）
+		// は Player.cpp のコンストラクタで初期化済
 
 		m_groundId = initializer.initializeGround();
 		// m_enemyIds = initializer.initializeEnemies();
@@ -194,6 +192,15 @@ namespace game::scene
 
 		auto& effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() };
 		m_systemManager.registerSystem<game::system::EffectSystem>(m_componentManager, m_eventBus, effectFactory);
+
+		// プレイヤーの溜め攻撃の画面演出（集中線）。描画内容はSystemが持ち、
+		// InGameViewには描画フェーズで呼び出させるためにポインタを渡す
+		auto* chargeVisuals{ m_systemManager.registerSystem<game::system::PlayerChargeVisualsSystem>(
+			m_componentManager,
+			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+			*core::base::ServiceLocator::get<core::iface::IScreen>(),
+			m_playerId) };
+		m_view.setPlayerChargeVisualsSystem(chargeVisuals);
 	}
 
 	void InGame::setupEvents()

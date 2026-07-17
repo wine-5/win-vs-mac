@@ -155,6 +155,7 @@
     <ClCompile Include="src\game\factory\ProjectileFactory.cpp" />
     <ClCompile Include="src\game\system\ProjectileSystem.cpp" />
     <ClCompile Include="src\game\system\RangedAttackSystem.cpp" />
+    <ClCompile Include="src\game\system\PlayerChargeVisualsSystem.cpp" />
     <ClCompile Include="src\game\scene\Bios.cpp" />
     <ClCompile Include="src\game\scene\Loading.cpp" />
     <ClCompile Include="src\game\scene\Lockscreen.cpp" />
@@ -331,6 +332,7 @@
     <ClInclude Include="src\game\factory\ProjectileFactory.h" />
     <ClInclude Include="src\game\system\ProjectileSystem.h" />
     <ClInclude Include="src\game\system\RangedAttackSystem.h" />
+    <ClInclude Include="src\game\system\PlayerChargeVisualsSystem.h" />
     <ClInclude Include="src\game\GameManager.h" />
     <ClInclude Include="src\game\scene\Loading.h" />
     <ClInclude Include="src\game\scene\Lockscreen.h" />
@@ -405,6 +407,7 @@
     <ClInclude Include="src\game\component\InputComponent.h" />
     <ClInclude Include="src\game\component\CameraComponent.h" />
     <ClInclude Include="src\game\component\AimComponent.h" />
+    <ClInclude Include="src\game\component\PlayerChargeComponent.h" />
     <ClInclude Include="src\game\component\RenderComponent.h" />
     <ClInclude Include="src\game\component\TransformComponent.h" />
     <ClInclude Include="src\game\component\VelocityComponent.h" />

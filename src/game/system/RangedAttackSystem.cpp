@@ -2,6 +2,7 @@
 #include "game/component/InputComponent.h"
 #include "game/component/CameraComponent.h"
 #include "game/component/TransformComponent.h"
+#include "game/component/PlayerChargeComponent.h"
 #include "game/constant/Tag.h"
 
 namespace game::system
@@ -29,6 +30,18 @@ namespace game::system
 			return;
 
 		const auto& input{ m_componentManager.get<component::InputComponent>(m_playerId) };
+
+		// プレイヤーのPlayerChargeComponentがあれば更新する
+		bool hasChargeComponent{ m_componentManager.has<component::PlayerChargeComponent>(m_playerId) };
+		if (hasChargeComponent)
+		{
+			auto& playerCharge{ m_componentManager.get<component::PlayerChargeComponent>(m_playerId) };
+			playerCharge.m_isCharging = m_isCharging;
+			if (m_metadata.m_chargeMaxTime > 0.0f)
+				playerCharge.m_chargeRate = m_chargeTime / m_metadata.m_chargeMaxTime;
+			else
+				playerCharge.m_chargeRate = 0.0f;
+		}
 
 		// 押している間は溜める（クールダウン中は溜め開始しない）
 		if (input.m_rangedAttackPressed)

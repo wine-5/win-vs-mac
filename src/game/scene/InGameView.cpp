@@ -7,6 +7,7 @@
 #include "game/component/AIComponent.h"
 #include "game/component/AimComponent.h"
 #include "game/component/ProjectileComponent.h"
+#include "game/system/PlayerChargeVisualsSystem.h"
 
 namespace game::scene
 {
@@ -34,8 +35,17 @@ namespace game::scene
 		// DEBUG: デバッグ可視化（テスト後に呼び出しごと削除）
 		drawDebugVisuals();
 
+		// プレイヤーの溜め攻撃の演出（集中線）。描画内容はSystemが持ち、Viewは描画順だけを決める
+		if (m_playerChargeVisualsSystem)
+			m_playerChargeVisualsSystem->draw();
+
 		// 照準レティクル（HUD）は最前面に描く
 		drawReticle(playerId);
+	}
+
+	void InGameView::setPlayerChargeVisualsSystem(system::PlayerChargeVisualsSystem* system)
+	{
+		m_playerChargeVisualsSystem = system;
 	}
 
 	void InGameView::setDebugVisualsEnabled(bool enabled)
@@ -250,4 +260,5 @@ namespace game::scene
 			m_renderer.drawDebugSphere(transform.m_position, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
 		}
 	}
+
 } // namespace game::scene

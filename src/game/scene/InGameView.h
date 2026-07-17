@@ -6,6 +6,11 @@
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 
+namespace game::system
+{
+	class PlayerChargeVisualsSystem;
+} // namespace game::system
+
 namespace game::scene
 {
 	/**
@@ -26,9 +31,9 @@ namespace game::scene
 		 * @param screen 画面サイズ取得のインターフェース
 		 */
 		InGameView(core::ecs::ComponentManager& componentManager,
-		           core::iface::IRenderer& renderer,
-		           core::iface::IUIRenderer& uiRenderer,
-		           core::iface::IScreen& screen);
+		    core::iface::IRenderer& renderer,
+		    core::iface::IUIRenderer& uiRenderer,
+		    core::iface::IScreen& screen);
 
 		/**
 		 * @brief インゲームを描画する
@@ -37,8 +42,8 @@ namespace game::scene
 		 * @param enemyIds 敵のEntityID一覧
 		 */
 		void draw(core::ecs::EntityId playerId,
-		          core::ecs::EntityId groundId,
-		          const std::vector<core::ecs::EntityId>& enemyIds);
+		    core::ecs::EntityId groundId,
+		    const std::vector<core::ecs::EntityId>& enemyIds);
 
 		/**
 		 * @brief デバッグ可視化の全体ON/OFFを切り替える
@@ -70,13 +75,19 @@ namespace game::scene
 		 */
 		void setDebugProjectileRangeEnabled(bool enabled);
 
+		/**
+		 * @brief 溜め攻撃の演出System（集中線の描画元）を設定する
+		 * @param system PlayerChargeVisualsSystemのポインタ（所有はSystemManager）
+		 */
+		void setPlayerChargeVisualsSystem(system::PlayerChargeVisualsSystem* system);
+
 	  private:
 		/**
 		 * @brief プレイヤー・地面・敵のモデルを描画する
 		 */
 		void drawModels(core::ecs::EntityId playerId,
-		                core::ecs::EntityId groundId,
-		                const std::vector<core::ecs::EntityId>& enemyIds);
+		    core::ecs::EntityId groundId,
+		    const std::vector<core::ecs::EntityId>& enemyIds);
 
 		/**
 		 * @brief 画面中央に照準レティクル（クロスヘア）を描画する
@@ -118,6 +129,10 @@ namespace game::scene
 		core::iface::IRenderer& m_renderer;
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
+
+		// 溜め攻撃の集中線の描画元（描画内容はSystemが持ち、Viewは描画順だけを管理する）
+		// 所有はSystemManagerにあり、InGameがsetupSystemsで設定する
+		system::PlayerChargeVisualsSystem* m_playerChargeVisualsSystem{ nullptr };
 
 		bool m_isDebugVisualsEnabled{ true };
 		bool m_isDebugColliderEnabled{ true };

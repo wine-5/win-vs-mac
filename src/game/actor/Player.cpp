@@ -10,6 +10,9 @@
 #include "game/component/AttackComponent.h"
 #include "game/component/HitEffectComponent.h"
 #include "game/component/EffectComponent.h"
+#include "game/component/PlayerChargeComponent.h"
+#include "game/component/CameraComponent.h"
+#include "game/component/AimComponent.h"
 #include "game/constant/Tag.h"
 #include "game/constant/AnimationId.h"
 
@@ -63,6 +66,10 @@ namespace game::actor
 		collider.m_size = playerData.getColliderSize();
 		collider.m_offset = playerData.getColliderOffset();
 		componentManager.add<component::ColliderComponent>(m_entity.getId(), collider);
+
+		componentManager.add<component::PlayerChargeComponent>(m_entity.getId(), {});
+		componentManager.add<component::CameraComponent>(m_entity.getId(), {});
+		componentManager.add<component::AimComponent>(m_entity.getId(), {});
 
 		component::TagComponent tag{};
 		tag.m_tag = constant::Tag::Player;
