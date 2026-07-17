@@ -12,6 +12,7 @@
 #include "game/component/EffectComponent.h"
 #include "game/component/PlayerChargeComponent.h"
 #include "game/component/CameraComponent.h"
+#include "game/component/CameraEffectComponent.h"
 #include "game/component/AimComponent.h"
 #include "game/constant/Tag.h"
 #include "game/constant/AnimationId.h"
@@ -69,6 +70,7 @@ namespace game::actor
 
 		componentManager.add<component::PlayerChargeComponent>(m_entity.getId(), {});
 		componentManager.add<component::CameraComponent>(m_entity.getId(), {});
+		componentManager.add<component::CameraEffectComponent>(m_entity.getId(), {});
 		componentManager.add<component::AimComponent>(m_entity.getId(), {});
 
 		component::TagComponent tag{};

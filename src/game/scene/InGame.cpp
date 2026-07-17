@@ -45,6 +45,8 @@
 #include "game/system/RangedAttackSystem.h"
 #include "game/system/ProjectileWindowSystem.h"
 #include "game/system/PlayerChargeVisualsSystem.h"
+#include "game/system/ChargeZoomSystem.h"
+#include "game/system/DamageShakeSystem.h"
 #include "core/interface/IWindowFactory.h"
 #include "game/event/InGameEvents.h"
 #include "game/utility/ExtensionBonusCalculator.h"
@@ -144,7 +146,7 @@ namespace game::scene
 		// は Player.cpp のコンストラクタで初期化済
 
 		m_groundId = initializer.initializeGround();
-		// m_enemyIds = initializer.initializeEnemies();
+		m_enemyIds = initializer.initializeEnemies();
 
 		// 全敵の追跡対象をプレイヤーに設定する
 		for (auto enemyId : m_enemyIds)
@@ -158,6 +160,9 @@ namespace game::scene
 	{
 		// システム登録
 		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_playerId, m_inputProvider);
+		// カメラ演出（Zoom/Shake）はCameraSystemより前に走らせ、合成結果をCameraEffectComponentへ書いておく
+		m_systemManager.registerSystem<game::system::ChargeZoomSystem>(m_componentManager, m_playerId);
+		m_systemManager.registerSystem<game::system::DamageShakeSystem>(m_componentManager, m_eventBus, m_playerId);
 		// カメラはMoveSystemより前に更新し、最新のyawで移動方向を計算させる
 		m_systemManager.registerSystem<game::system::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera);
 		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
