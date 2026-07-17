@@ -47,7 +47,7 @@ namespace platform::window
 	ProjectileWindowManager::~ProjectileWindowManager()
 	{
 		// GDI+オブジェクト（画像）はGdiplusShutdownより先に破棄する必要がある
-		m_pool.clear();
+		m_slots.clear();
 		m_logoImage.reset();
 		if (m_gdiplusToken != 0)
 			Gdiplus::GdiplusShutdown(m_gdiplusToken);
@@ -55,7 +55,7 @@ namespace platform::window
 			DestroyIcon(m_titleIcon);
 	}
 
-	void ProjectileWindowManager::updateWindows(const std::vector<core::iface::ProjectileWindowInfo>& infos)
+	void ProjectileWindowManager::updateWindows(const std::vector<core::iface::ProjectileWindowInfo>& infos, float deltaTime)
 	{
 		// DxLibのグラフ座標→実ウィンドウのクライアント座標へのスケールを求める
 		// （描画解像度とウィンドウサイズが異なる場合、そのままでは左上へずれるため）
@@ -64,15 +64,22 @@ namespace platform::window
 		const float scaleX{ static_cast<float>(client.right) / static_cast<float>(m_graphWidth) };
 		const float scaleY{ static_cast<float>(client.bottom) / static_cast<float>(m_graphHeight) };
 
+		// 今フレーム存在する弾に、同じIDのウィンドウを対応づけて配置する（identity管理）
 		const size_t visibleCount{ infos.size() < core::iface::MAX_PROJECTILE_WINDOWS
 			                           ? infos.size()
 			                           : core::iface::MAX_PROJECTILE_WINDOWS };
-
 		for (size_t i{ 0 }; i < visibleCount; ++i)
 		{
-			ProjectileWindow* window{ acquireWindow(i) };
-			if (window == nullptr)
-				continue;
+			// 既に同じ弾を追従中のスロットがあれば再利用、無ければ空きを割り当てる
+			Slot* slot{ findActiveSlot(infos[i].m_projectileId) };
+			if (slot == nullptr)
+			{
+				slot = acquireFreeSlot();
+				if (slot == nullptr)
+					continue; // 上限に達していて空きが無い
+				slot->m_projectileId = infos[i].m_projectileId;
+				slot->m_active = true;
+			}
 
 			const int size{ static_cast<int>(infos[i].m_size * scaleY) };
 
@@ -83,41 +90,80 @@ namespace platform::window
 			};
 			ClientToScreen(m_gameWindowHandle, &center);
 
-			window->moveTo(center.x, center.y, size);
+			slot->m_window->moveTo(center.x, center.y, size);
 		}
 
-		// 使っていないウィンドウは隠す
-		for (size_t i{ visibleCount }; i < m_pool.size(); ++i)
+		// 今フレームの弾リストに無くなったアクティブスロットはフェードアウトを開始する
+		for (auto& slot : m_slots)
 		{
-			if (m_pool[i])
-				m_pool[i]->hide();
+			if (!slot.m_active)
+				continue;
+			bool stillAlive{ false };
+			for (size_t i{ 0 }; i < visibleCount; ++i)
+			{
+				if (infos[i].m_projectileId == slot.m_projectileId)
+				{
+					stillAlive = true;
+					break;
+				}
+			}
+			if (!stillAlive)
+			{
+				slot.m_active = false;
+				slot.m_window->startFadeOut();
+			}
 		}
+
+		// フェードを進める（完了するとisFading()がfalseに戻り、acquireFreeSlotで再利用される）
+		for (auto& slot : m_slots)
+			slot.m_window->updateFade(deltaTime);
 	}
 
 	void ProjectileWindowManager::hideAll()
 	{
-		for (auto& window : m_pool)
+		for (auto& slot : m_slots)
 		{
-			if (window)
-				window->hide();
+			slot.m_window->hide();
+			slot.m_active = false;
+			slot.m_projectileId = core::ecs::INVALID_ENTITY_ID;
 		}
 	}
 
-	ProjectileWindow* ProjectileWindowManager::acquireWindow(size_t index)
+	ProjectileWindowManager::Slot* ProjectileWindowManager::findActiveSlot(core::ecs::EntityId projectileId)
 	{
-		// プールを必要数まで広げる（生成はここでの1回だけ・以後使い回す）
-		while (m_pool.size() <= index)
+		for (auto& slot : m_slots)
 		{
-			// ウィンドウクラス名はインスタンスごとに一意にする（同名だと2個目の登録に失敗する）
-			// クラス名はWindowBaseが内部にコピーするため、ローカル文字列でよい
-			const std::wstring className{ L"PuraProjectileWindow" + std::to_wstring(m_pool.size()) };
-			auto window{ std::make_unique<ProjectileWindow>(className.c_str()) };
-			if (!window->createAsProjectile(m_gameWindowHandle))
-				return nullptr;
-			window->setLogoImage(m_logoImage.get());
-			window->setTitleIcon(m_titleIcon);
-			m_pool.push_back(std::move(window));
+			if (slot.m_active && slot.m_projectileId == projectileId)
+				return &slot;
 		}
-		return m_pool[index].get();
+		return nullptr;
+	}
+
+	ProjectileWindowManager::Slot* ProjectileWindowManager::acquireFreeSlot()
+	{
+		// 使用中でもフェード中でもないスロットを再利用する
+		for (auto& slot : m_slots)
+		{
+			if (!slot.m_active && !slot.m_window->isFading())
+				return &slot;
+		}
+
+		// 空きが無ければ上限まで新規生成する
+		if (m_slots.size() >= core::iface::MAX_PROJECTILE_WINDOWS)
+			return nullptr;
+
+		// ウィンドウクラス名はインスタンスごとに一意にする（同名だと2個目の登録に失敗する）
+		// クラス名はWindowBaseが内部にコピーするため、ローカル文字列でよい
+		const std::wstring className{ L"PuraProjectileWindow" + std::to_wstring(m_slots.size()) };
+		auto window{ std::make_unique<ProjectileWindow>(className.c_str()) };
+		if (!window->createAsProjectile(m_gameWindowHandle))
+			return nullptr;
+		window->setLogoImage(m_logoImage.get());
+		window->setTitleIcon(m_titleIcon);
+
+		Slot slot{};
+		slot.m_window = std::move(window);
+		m_slots.push_back(std::move(slot));
+		return &m_slots.back();
 	}
 } // namespace platform::window

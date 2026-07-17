@@ -58,6 +58,23 @@ namespace platform::window
 		void setTitleIcon(HICON icon) noexcept;
 
 		/**
+		 * @brief フェードアウトを開始する（現在のアルファから0へ向かう）
+		 */
+		void startFadeOut() noexcept;
+
+		/**
+		 * @brief フェードを進める（フェード中のみアルファを減らす）
+		 * @param deltaTime フレーム間の時間差
+		 */
+		void updateFade(float deltaTime) noexcept;
+
+		/** @brief フェードアウト中か（完了して非表示になったらfalseに戻る） */
+		[[nodiscard]] bool isFading() const noexcept
+		{
+			return m_isFading;
+		}
+
+		/**
 		 * @brief ウィンドウメッセージハンドラ（ロゴ描画・操作無効化）
 		 */
 		LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
@@ -69,7 +86,14 @@ namespace platform::window
 		 */
 		void paintLogo(HWND hwnd) noexcept;
 
+		/**
+		 * @brief 現在のm_alphaをウィンドウへ適用する（レイヤードアルファ）
+		 */
+		void applyAlpha() noexcept;
+
 		Gdiplus::Image* m_logoImage{ nullptr }; // 非所有（マネージャが所有）
 		bool m_hasChrome{ true };               // タイトルバー等の枠を付けているか
+		float m_alpha{ 255.0f };                // 現在のアルファ（0〜255）
+		bool m_isFading{ false };               // フェードアウト中か
 	};
 } // namespace platform::window

@@ -1,4 +1,5 @@
 #pragma once
+#include "core/utility/Vector3.h"
 
 namespace game::component
 {
@@ -11,7 +12,8 @@ namespace game::component
 	 */
 	struct ProjectileComponent
 	{
-		float m_remainingLifetime{}; // 残り寿命（毎フレーム減算し、0以下で自動消滅する）
-		int m_imageHandle{ -1 };     // ビルボード描画用の画像ハンドル（-1なら仮スフィアで描画）
+		float m_remainingLifetime{};     // 残り寿命（毎フレーム減算し、0以下で自動消滅する）
+		core::Vector3 m_spawnPosition{}; // 発射位置（実ウィンドウの出現ディレイ＝発射者から離れたか判定に使う）
+		int m_imageHandle{ -1 };         // ビルボード描画用の画像ハンドル（-1なら仮スフィアで描画）
 	};
 } // namespace game::component

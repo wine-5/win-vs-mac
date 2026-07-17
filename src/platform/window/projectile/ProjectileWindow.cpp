@@ -17,12 +17,14 @@ namespace
 	constexpr int CHROME_MIN_SIZE{ 96 };
 	// サイズをこの単位に量子化する（毎フレーム1px単位でリサイズ・再描画されるのを防ぐ）
 	constexpr int SIZE_QUANTIZATION{ 4 };
+	// フェードアウトにかける時間（秒）
+	constexpr float FADE_OUT_DURATION{ 0.2f };
 } // namespace
 
 namespace platform::window
 {
 	ProjectileWindow::ProjectileWindow(const wchar_t* className) noexcept
-		: WindowBase(className, L"Windows", 0, 0, 64, 64)
+		: WindowBase(className, L"WindowsAttack", 0, 0, 64, 64)
 	{
 		// 本物のウィンドウに見せるため、タイトルバー＋最小化・最大化・閉じるボタンを持たせる
 		// （操作は onMessage 側ですべて無効化する）
@@ -34,12 +36,14 @@ namespace platform::window
 		if (!create(ownerHwnd))
 			return false;
 
-		// フォーカスを奪わない・常に最前面
+		// フォーカスを奪わない・常に最前面・レイヤード（フェード用のアルファ制御）
 		// WS_EX_TOOLWINDOW は付けない（細枠になり最小化・最大化ボタンが消えるため）。
 		// タスクバー非表示はオーナー付きウィンドウであることで実現される
 		const LONG_PTR exStyle{ GetWindowLongPtrW(m_hwnd, GWL_EXSTYLE) };
 		SetWindowLongPtrW(m_hwnd, GWL_EXSTYLE,
-		    exStyle | WS_EX_NOACTIVATE | WS_EX_TOPMOST);
+		    exStyle | WS_EX_NOACTIVATE | WS_EX_TOPMOST | WS_EX_LAYERED);
+		// 初期は完全不透明にしておく
+		applyAlpha();
 
 		// スタイル変更を非クライアント領域（タイトルバー・ボタン）の描画へ反映させる
 		SetWindowPos(m_hwnd, nullptr, 0, 0, 0, 0,
@@ -51,6 +55,14 @@ namespace platform::window
 	{
 		if (m_hwnd == nullptr)
 			return;
+
+		// 再配置＝生きている弾なので、フェード中なら不透明に戻す
+		if (m_isFading || m_alpha < 255.0f)
+		{
+			m_isFading = false;
+			m_alpha = 255.0f;
+			applyAlpha();
+		}
 
 		// サイズを量子化し、毎フレームの1px単位のリサイズ・全面再描画を防ぐ
 		size -= size % SIZE_QUANTIZATION;
@@ -113,6 +125,35 @@ namespace platform::window
 		// タイトルバー（小）とAlt-Tab等（大）の両方に設定する
 		SendMessageW(m_hwnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(icon));
 		SendMessageW(m_hwnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(icon));
+	}
+
+	void ProjectileWindow::startFadeOut() noexcept
+	{
+		m_isFading = true; // 現在のアルファからフェードを開始する
+	}
+
+	void ProjectileWindow::updateFade(float deltaTime) noexcept
+	{
+		if (!m_isFading || m_hwnd == nullptr)
+			return;
+
+		m_alpha -= (255.0f / FADE_OUT_DURATION) * deltaTime;
+		if (m_alpha <= 0.0f)
+		{
+			m_alpha = 0.0f;
+			applyAlpha();
+			hide();             // 透明になったら非表示にする
+			m_isFading = false; // フェード完了→アイドル状態へ戻し、スロットを再利用可能にする
+			return;
+		}
+		applyAlpha();
+	}
+
+	void ProjectileWindow::applyAlpha() noexcept
+	{
+		if (m_hwnd == nullptr)
+			return;
+		SetLayeredWindowAttributes(m_hwnd, 0, static_cast<BYTE>(m_alpha), LWA_ALPHA);
 	}
 
 	LRESULT ProjectileWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept

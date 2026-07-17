@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <vector>
+#include "core/ecs/Entity.h"
 
 namespace core::iface
 {
@@ -16,6 +17,7 @@ namespace core::iface
 	 */
 	struct ProjectileWindowInfo
 	{
+		core::ecs::EntityId m_projectileId{ core::ecs::INVALID_ENTITY_ID }; // 対応する弾のEntityId（追従の同一性判定に使う）
 		int m_centerX{ 0 }; // 中心X（クライアント座標）
 		int m_centerY{ 0 }; // 中心Y（クライアント座標）
 		int m_size{ 0 };    // 一辺のピクセルサイズ
@@ -36,8 +38,9 @@ namespace core::iface
 		/**
 		 * @brief 今フレームの弾の配置一覧に合わせてウィンドウ群を表示・移動する
 		 * @param infos 表示する弾の配置一覧（空なら全ウィンドウを隠す）
+		 * @param deltaTime フレーム間の時間差（消滅時のフェードアウトに使う）
 		 */
-		virtual void updateWindows(const std::vector<ProjectileWindowInfo>& infos) = 0;
+		virtual void updateWindows(const std::vector<ProjectileWindowInfo>& infos, float deltaTime) = 0;
 
 		/**
 		 * @brief 全ウィンドウを非表示にする

@@ -8,6 +8,11 @@ namespace
 {
 	constexpr int MIN_WINDOW_SIZE{ 24 };  // 遠くの弾でも視認できる最小ピクセルサイズ
 	constexpr int MAX_WINDOW_SIZE{ 512 }; // 近すぎる弾で巨大化しすぎないための上限
+
+	// 発射位置からこの距離だけ離れるまでウィンドウを出さない。
+	// 実OSウィンドウはゲーム内の奥行きで遮蔽できず常に手前に重なるため、
+	// 弾が発射者の前方へ十分離れてから出現させることで「発射者を覆わない」ようにする
+	constexpr float WINDOW_APPEAR_DISTANCE{ 350.0f };
 } // namespace
 
 namespace game::system
@@ -32,6 +37,17 @@ namespace game::system
 				continue;
 
 			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
+			const auto& projectile{ m_componentManager.get<component::ProjectileComponent>(id) };
+
+			// 発射位置から十分離れるまでは出さない（発射者を覆わないようにする）
+			const core::Vector3 fromSpawn{
+				transform.m_position.x - projectile.m_spawnPosition.x,
+				transform.m_position.y - projectile.m_spawnPosition.y,
+				transform.m_position.z - projectile.m_spawnPosition.z
+			};
+			const float distanceSq{ fromSpawn.x * fromSpawn.x + fromSpawn.y * fromSpawn.y + fromSpawn.z * fromSpawn.z };
+			if (distanceSq < WINDOW_APPEAR_DISTANCE * WINDOW_APPEAR_DISTANCE)
+				continue;
 
 			// 弾の中心をスクリーンへ射影する。z が 0〜1 の範囲外なら画面に映っていない
 			const core::Vector3 center{ m_renderer.worldToScreen(transform.m_position) };
@@ -57,13 +73,14 @@ namespace game::system
 				size = MAX_WINDOW_SIZE;
 
 			core::iface::ProjectileWindowInfo info{};
+			info.m_projectileId = id;
 			info.m_centerX = static_cast<int>(center.x);
 			info.m_centerY = static_cast<int>(center.y);
 			info.m_size = size;
 			infos.push_back(info);
 		}
 
-		// 空リストなら全ウィンドウが隠れる
-		m_windowManager.updateWindows(infos);
+		// 空リストなら全ウィンドウがフェードアウトして隠れる
+		m_windowManager.updateWindows(infos, deltaTime);
 	}
 } // namespace game::system
