@@ -10,8 +10,9 @@ namespace game::system
 	/**
 	 * @brief プレイヤーの溜め攻撃の画面演出（集中線）を担当するSystem
 	 *
-	 * PlayerChargeComponentの溜め状態を読み取り、画面中央から放射状の集中線を描画する。
-	 * updateで演出用の時間（回転アニメーション）を進め、
+	 * PlayerChargeComponentの溜め状態を読み取り、画面端から中心へ向かう
+	 * 漫画風のくさび形集中線を描画する（中央は空けて視界を確保する）。
+	 * updateで演出用の時間（ちらつきアニメーション）を進め、
 	 * drawはInGameViewの描画フェーズから呼ばれる（描画順はViewが管理し、描画内容は本Systemが持つ）。
 	 */
 	class PlayerChargeVisualsSystem : public core::ecs::ISystem
@@ -46,6 +47,6 @@ namespace game::system
 		core::iface::IScreen& m_screen;
 		core::ecs::EntityId m_playerId;
 
-		float m_animationTime{ 0.0f }; // 溜め中に蓄積する演出用時間（集中線の回転に使う）
+		float m_animationTime{ 0.0f }; // 溜め中に蓄積する演出用時間（集中線のちらつきに使う）
 	};
 } // namespace game::system
