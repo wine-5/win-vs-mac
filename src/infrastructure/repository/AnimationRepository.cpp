@@ -6,7 +6,7 @@
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	AnimationRepository::AnimationRepository()
 	{
@@ -52,4 +52,4 @@ namespace infrastructure
 		m_handles[id] = handle;
 		return handle;
 	}
-} // namespace infrastructure
+} // namespace infrastructure::repository

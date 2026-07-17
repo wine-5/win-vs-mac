@@ -3,7 +3,7 @@
 #include <fstream>
 #include <stdexcept>
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	FontRepository::FontRepository()
 	{
@@ -44,4 +44,4 @@ namespace infrastructure
 			fonts.push_back({ item["id"], item["path"], item["name"] });
 		return fonts;
 	}
-} // namespace infrastructure
+} // namespace infrastructure::repository

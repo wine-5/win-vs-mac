@@ -84,12 +84,12 @@ namespace infrastructure
 		int duplicateModel(int modelHandle) override;
 
 	private:
-	  std::unique_ptr<ModelRepository> m_modelRepo;
-	  std::unique_ptr<FontRepository> m_fontRepo;
-	  std::unique_ptr<JobRepository> m_jobRepo;
-	  std::unique_ptr<ImageRepository> m_imageRepo;
-	  std::unique_ptr<AnimationRepository> m_animRepo;
-	  std::unique_ptr<StageRepository> m_stageRepo;
-	  std::unique_ptr<ProjectileRepository> m_projectileRepo;
+	  std::unique_ptr<repository::ModelRepository> m_modelRepo;
+	  std::unique_ptr<repository::FontRepository> m_fontRepo;
+	  std::unique_ptr<repository::JobRepository> m_jobRepo;
+	  std::unique_ptr<repository::ImageRepository> m_imageRepo;
+	  std::unique_ptr<repository::AnimationRepository> m_animRepo;
+	  std::unique_ptr<repository::StageRepository> m_stageRepo;
+	  std::unique_ptr<repository::ProjectileRepository> m_projectileRepo;
 	};
 } // namespace infrastructure

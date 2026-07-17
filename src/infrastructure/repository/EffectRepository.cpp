@@ -4,7 +4,7 @@
 #include "thirdparty/effekseer/EffekseerForDXLib.h"
 #include "core/interface/ILogger.h"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	EffectRepository::~EffectRepository()
 	{
@@ -64,4 +64,4 @@ namespace infrastructure
 			m_configs[it->second] = config;
 		}
 	}
-} // namespace infrastructure
+} // namespace infrastructure::repository

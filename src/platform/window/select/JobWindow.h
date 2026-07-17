@@ -66,9 +66,9 @@ namespace platform::window::select
         platform::webview::WebView2Host m_webView{};
         core::constant::JobType m_selectedJob{};
         std::function<void(core::constant::JobType)> m_onJobSelect{};
-        std::optional<infrastructure::JobRepository> m_jobRepository{};
+		std::optional<infrastructure::repository::JobRepository> m_jobRepository{};
 
-        void handleMessage(const std::string& json) noexcept;
+		void handleMessage(const std::string& json) noexcept;
         void sendJobStats() noexcept;
     };
 } // namespace platform::window::select

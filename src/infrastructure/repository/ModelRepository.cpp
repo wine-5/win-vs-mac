@@ -11,7 +11,7 @@ namespace
 	constexpr float HORIZONTAL_SHRINK{ 0.5f };
 } // namespace
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	ModelRepository::ModelRepository()
 	{
@@ -214,4 +214,4 @@ namespace infrastructure
 
 		return metadata;
 	}
-} // namespace infrastructure
+} // namespace infrastructure::repository

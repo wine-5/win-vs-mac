@@ -57,7 +57,7 @@ namespace infrastructure
 
 		void applyBgmVolume(int handle, float normalizedVolume) const;
 
-		AudioRepository m_repository{};
+		repository::AudioRepository m_repository{};
 
 		int       m_currentBgmHandle{ -1 };
 		float     m_currentBgmVolume{ 0.0f };

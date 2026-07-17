@@ -52,10 +52,10 @@ namespace infrastructure
 		void draw() override;
 
 	private:
-		EffectRepository m_repository{};
-		std::unordered_map<core::constant::EffectType, EffectPool> m_pools{};
+	  repository::EffectRepository m_repository{};
+	  std::unordered_map<core::constant::EffectType, EffectPool> m_pools{};
 
-		// stop() でどのプールに返却するかを逆引きするためのマップ
-		std::unordered_map<int, core::constant::EffectType> m_handleToType{};
+	  // stop() でどのプールに返却するかを逆引きするためのマップ
+	  std::unordered_map<int, core::constant::EffectType> m_handleToType{};
 	};
 } // namespace infrastructure

@@ -4,7 +4,7 @@
 #include "core/constant/EffectType.h"
 #include "thirdparty/nlohmann/json.hpp"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
     /**
      * @brief Effekseer エフェクトリソースの設定情報
@@ -46,4 +46,4 @@ namespace infrastructure
 
         std::unordered_map<core::constant::EffectType, EffectConfig> m_configs;
     };
-} // namespace infrastructure
+} // namespace infrastructure::repository

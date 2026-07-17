@@ -9,13 +9,13 @@ namespace infrastructure
 	{
 		try
 		{
-			m_modelRepo = std::make_unique<ModelRepository>();
-			m_fontRepo = std::make_unique<FontRepository>();
-			m_jobRepo = std::make_unique<JobRepository>();
-			m_imageRepo = std::make_unique<ImageRepository>();
-			m_animRepo = std::make_unique<AnimationRepository>();
-			m_stageRepo = std::make_unique<StageRepository>();
-			m_projectileRepo = std::make_unique<ProjectileRepository>();
+			m_modelRepo = std::make_unique<repository::ModelRepository>();
+			m_fontRepo = std::make_unique<repository::FontRepository>();
+			m_jobRepo = std::make_unique<repository::JobRepository>();
+			m_imageRepo = std::make_unique<repository::ImageRepository>();
+			m_animRepo = std::make_unique<repository::AnimationRepository>();
+			m_stageRepo = std::make_unique<repository::StageRepository>();
+			m_projectileRepo = std::make_unique<repository::ProjectileRepository>();
 		}
 		catch (const std::exception& e)
 		{

@@ -7,7 +7,7 @@
 #include "core/data/ModelMetadata.h"
 #include "thirdparty/nlohmann/json.hpp"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	/**
 	 * @brief 3Dモデルリソースを管理するリポジトリクラス
@@ -67,4 +67,4 @@ namespace infrastructure
 		std::unordered_map<std::string, core::data::ModelMetadata> m_metadata;
 		std::unordered_map<std::string, std::string> m_rawModelPaths;
 	};
-} // namespace infrastructure
+} // namespace infrastructure::repository

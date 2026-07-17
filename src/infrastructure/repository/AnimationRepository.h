@@ -3,7 +3,7 @@
 #include <string_view>
 #include <unordered_map>
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	/**
 	 * @brief アニメーションリソースを管理するリポジトリクラス
@@ -36,4 +36,4 @@ namespace infrastructure
 		std::unordered_map<std::string, std::string> m_paths{};
 		std::unordered_map<std::string, int>         m_handles{};
 	};
-} // namespace infrastructure
+} // namespace infrastructure::repository
