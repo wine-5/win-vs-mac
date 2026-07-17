@@ -1,4 +1,5 @@
 #include "platform/window/projectile/ProjectileWindowManager.h"
+#include "core/interface/ILogger.h"
 #include <string>
 
 #include <objidl.h>
@@ -20,13 +21,19 @@ namespace platform::window
 	{
 		// GDI+を初期化してロゴ画像を一度だけ読み込む（全ウィンドウで共有する）
 		Gdiplus::GdiplusStartupInput startupInput{};
-		if (Gdiplus::GdiplusStartup(&m_gdiplusToken, &startupInput, nullptr) == Gdiplus::Ok)
+		if (Gdiplus::GdiplusStartup(&m_gdiplusToken, &startupInput, nullptr) != Gdiplus::Ok)
 		{
-			auto image{ std::make_unique<Gdiplus::Image>(LOGO_IMAGE_PATH) };
-			if (image->GetLastStatus() == Gdiplus::Ok)
-				m_logoImage = std::move(image);
-			// 読み込み失敗時はnullptrのまま＝ウィンドウ側がフォールバック描画する
+			LOG_E("GDI+の初期化に失敗しました（弾ウィンドウのロゴが描画されません）");
+			return;
 		}
+
+		auto image{ std::make_unique<Gdiplus::Image>(LOGO_IMAGE_PATH) };
+		if (image->GetLastStatus() != Gdiplus::Ok)
+		{
+			LOG_E("弾ウィンドウのロゴ画像の読み込みに失敗しました: assets/images/ingame/projectile_window.png");
+			return;
+		}
+		m_logoImage = std::move(image);
 	}
 
 	ProjectileWindowManager::~ProjectileWindowManager()

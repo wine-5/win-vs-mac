@@ -27,7 +27,9 @@ namespace game::scene
 	{
 		drawModels(playerId, groundId, enemyIds);
 
-		drawProjectiles();
+		// プレイヤー弾の見た目は実OSウィンドウ（ProjectileWindowSystem）が担うため、
+		// ゲーム内ビルボードは描かない（敵弾のビルボード実装時に再有効化する）
+		// drawProjectiles();
 
 		// DEBUG: デバッグ可視化（テスト後に呼び出しごと削除）
 		drawDebugVisuals();
