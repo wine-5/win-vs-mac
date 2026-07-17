@@ -73,6 +73,7 @@ namespace platform::window
 	std::unique_ptr<core::iface::IProjectileWindowManager> WindowFactory::createProjectileWindowManager()
 	{
 		HWND gameWindow{ static_cast<HWND>(m_screen.getNativeWindowHandle()) };
-		return std::make_unique<ProjectileWindowManager>(gameWindow);
+		// DxLibの描画解像度を渡し、実ウィンドウのクライアントサイズとの差をスケーリングさせる
+		return std::make_unique<ProjectileWindowManager>(gameWindow, m_screen.getWidth(), m_screen.getHeight());
 	}
 } // namespace platform::window
