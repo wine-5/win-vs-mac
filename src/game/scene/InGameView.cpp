@@ -7,6 +7,7 @@
 #include "game/component/AIComponent.h"
 #include "game/component/AimComponent.h"
 #include "game/component/ProjectileComponent.h"
+#include "game/component/PlayerChargeComponent.h"
 #include "game/system/PlayerChargeVisualsSystem.h"
 
 namespace game::scene
@@ -98,14 +99,24 @@ namespace game::scene
 
 	void InGameView::drawReticle(core::ecs::EntityId playerId)
 	{
-		// 敵を捕捉していれば赤、通常はティール
+		// 敵を捕捉していれば赤、最大溜め完了ならWindowsロゴの水色、通常は黒
+		// （捕捉＝発射判断に直結する情報なので最優先で表示する）
 		bool onTarget{ false };
 		if (m_componentManager.has<component::AimComponent>(playerId))
 			onTarget = m_componentManager.get<component::AimComponent>(playerId).m_hasTarget;
 
-		const unsigned int color{ onTarget
-			                          ? core::utility::Color::rgb(255, 48, 48)    // 敵捕捉時は赤
-			                          : core::utility::Color::rgb(0, 255, 180) }; // 通常はティール
+		bool isMaxCharged{ false };
+		if (m_componentManager.has<component::PlayerChargeComponent>(playerId))
+		{
+			const auto& charge{ m_componentManager.get<component::PlayerChargeComponent>(playerId) };
+			isMaxCharged = charge.m_isCharging && charge.m_chargeRate >= 1.0f;
+		}
+
+		unsigned int color{ core::utility::Color::BLACK };
+		if (onTarget)
+			color = core::utility::Color::rgb(255, 48, 48);
+		else if (isMaxCharged)
+			color = core::utility::Color::WINDOWS_LOGO_BLUE;
 
 		const int centerX{ m_screen.getWidth() / 2 };
 		const int centerY{ m_screen.getHeight() / 2 };

@@ -48,8 +48,9 @@ namespace core::utility
         static constexpr unsigned int LIGHT_GRAY = 0xFFC0C0C0;
         static constexpr unsigned int DARK_BLUE = 0xFF0000C8;
         static constexpr unsigned int MEDIUM_GREEN = 0xFF00B400;
+		static constexpr unsigned int WINDOWS_LOGO_BLUE = 0xFF00ADEF; // Windowsロゴの水色
 
-        // ========== UI用の色 ==========
+		// ========== UI用の色 ==========
 
         // ボタンの色
         static constexpr unsigned int BUTTON_NORMAL    = 0xFF4848A0;
