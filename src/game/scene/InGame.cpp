@@ -84,6 +84,14 @@ namespace game::scene
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio) audio->playBgm(core::constant::BgmType::InGame);
 
+		// 背景（空）をUnityのデフォルトスカイブルー風にする
+		constexpr int SKY_BLUE_R{ 135 };
+		constexpr int SKY_BLUE_G{ 206 };
+		constexpr int SKY_BLUE_B{ 235 };
+		auto* screen{ core::base::ServiceLocator::get<core::iface::IScreen>() };
+		if (screen)
+			screen->setBackgroundColor(SKY_BLUE_R, SKY_BLUE_G, SKY_BLUE_B);
+
 		// DEBUG: 何かと不便なためリリースするときにfalseに変更すること
 		// 3人称マウス視点のためカーソルを非表示にする
 		m_inputProvider.setMouseCursorVisible(true);
