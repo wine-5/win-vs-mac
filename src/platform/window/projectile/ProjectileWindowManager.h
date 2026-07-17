@@ -59,5 +59,6 @@ namespace platform::window
 
 		ULONG_PTR m_gdiplusToken{ 0 };                 // GDI+の初期化トークン
 		std::unique_ptr<Gdiplus::Image> m_logoImage{}; // 全ウィンドウで共有するロゴ画像
+		HICON m_titleIcon{ nullptr };                  // 全ウィンドウで共有するタイトルアイコン
 	};
 } // namespace platform::window

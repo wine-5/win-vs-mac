@@ -52,6 +52,12 @@ namespace platform::window
 		void setLogoImage(Gdiplus::Image* image) noexcept;
 
 		/**
+		 * @brief タイトルバー左上のアプリケーションアイコンを設定する
+		 * @param icon アイコンハンドル（所有権は呼び出し側＝マネージャが持つ）
+		 */
+		void setTitleIcon(HICON icon) noexcept;
+
+		/**
 		 * @brief ウィンドウメッセージハンドラ（ロゴ描画・操作無効化）
 		 */
 		LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;

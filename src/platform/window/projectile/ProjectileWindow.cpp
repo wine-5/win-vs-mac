@@ -106,6 +106,15 @@ namespace platform::window
 		m_logoImage = image;
 	}
 
+	void ProjectileWindow::setTitleIcon(HICON icon) noexcept
+	{
+		if (m_hwnd == nullptr || icon == nullptr)
+			return;
+		// タイトルバー（小）とAlt-Tab等（大）の両方に設定する
+		SendMessageW(m_hwnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(icon));
+		SendMessageW(m_hwnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(icon));
+	}
+
 	LRESULT ProjectileWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 	{
 		switch (msg)

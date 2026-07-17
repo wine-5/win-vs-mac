@@ -10,6 +10,8 @@ namespace
 {
 	// ウィンドウのクライアント全面に描画するロゴ画像のパス
 	constexpr const wchar_t* LOGO_IMAGE_PATH{ L"assets/images/ingame/projectile_window.png" };
+	// タイトルバー左上のアプリケーションアイコンのパス（.ico）
+	constexpr const wchar_t* TITLE_ICON_PATH{ L"assets/images/ui/icons/projectile_window.ico" };
 } // namespace
 
 namespace platform::window
@@ -34,6 +36,12 @@ namespace platform::window
 			return;
 		}
 		m_logoImage = std::move(image);
+
+		// タイトルバー用アイコン（.ico）を一度だけ読み込む（全ウィンドウで共有）
+		m_titleIcon = static_cast<HICON>(LoadImageW(
+		    nullptr, TITLE_ICON_PATH, IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE));
+		if (m_titleIcon == nullptr)
+			LOG_E("弾ウィンドウのアイコン読み込みに失敗しました: assets/images/ui/icons/projectile_window.ico");
 	}
 
 	ProjectileWindowManager::~ProjectileWindowManager()
@@ -43,6 +51,8 @@ namespace platform::window
 		m_logoImage.reset();
 		if (m_gdiplusToken != 0)
 			Gdiplus::GdiplusShutdown(m_gdiplusToken);
+		if (m_titleIcon != nullptr)
+			DestroyIcon(m_titleIcon);
 	}
 
 	void ProjectileWindowManager::updateWindows(const std::vector<core::iface::ProjectileWindowInfo>& infos)
@@ -105,6 +115,7 @@ namespace platform::window
 			if (!window->createAsProjectile(m_gameWindowHandle))
 				return nullptr;
 			window->setLogoImage(m_logoImage.get());
+			window->setTitleIcon(m_titleIcon);
 			m_pool.push_back(std::move(window));
 		}
 		return m_pool[index].get();
