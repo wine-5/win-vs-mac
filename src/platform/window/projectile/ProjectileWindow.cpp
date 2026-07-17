@@ -21,7 +21,7 @@ namespace
 	constexpr float FADE_OUT_DURATION{ 0.2f };
 } // namespace
 
-namespace platform::window
+namespace platform::window::projectile
 {
 	ProjectileWindow::ProjectileWindow(const wchar_t* className) noexcept
 		: WindowBase(className, L"WindowsAttack", 0, 0, 64, 64)
@@ -220,4 +220,4 @@ namespace platform::window
 
 		EndPaint(hwnd, &ps);
 	}
-} // namespace platform::window
+} // namespace platform::window::projectile

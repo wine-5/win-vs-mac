@@ -7,7 +7,7 @@ namespace Gdiplus
 	class Image;
 }
 
-namespace platform::window
+namespace platform::window::projectile
 {
 	/**
 	 * @brief 弾の見た目として飛ばす小型の実OSウィンドウ
@@ -96,4 +96,4 @@ namespace platform::window
 		float m_alpha{ 255.0f };                // 現在のアルファ（0〜255）
 		bool m_isFading{ false };               // フェードアウト中か
 	};
-} // namespace platform::window
+} // namespace platform::window::projectile

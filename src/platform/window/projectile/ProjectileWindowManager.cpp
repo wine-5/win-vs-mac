@@ -14,7 +14,7 @@ namespace
 	constexpr const wchar_t* TITLE_ICON_PATH{ L"assets/images/ui/icons/projectile_window.ico" };
 } // namespace
 
-namespace platform::window
+namespace platform::window::projectile
 {
 	ProjectileWindowManager::ProjectileWindowManager(HWND gameWindowHandle, int graphWidth, int graphHeight)
 	    : m_gameWindowHandle{ gameWindowHandle }
@@ -166,4 +166,4 @@ namespace platform::window
 		m_slots.push_back(std::move(slot));
 		return &m_slots.back();
 	}
-} // namespace platform::window
+} // namespace platform::window::projectile

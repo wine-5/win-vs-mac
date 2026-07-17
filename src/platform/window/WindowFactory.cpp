@@ -74,6 +74,6 @@ namespace platform::window
 	{
 		HWND gameWindow{ static_cast<HWND>(m_screen.getNativeWindowHandle()) };
 		// DxLibの描画解像度を渡し、実ウィンドウのクライアントサイズとの差をスケーリングさせる
-		return std::make_unique<ProjectileWindowManager>(gameWindow, m_screen.getWidth(), m_screen.getHeight());
+		return std::make_unique<projectile::ProjectileWindowManager>(gameWindow, m_screen.getWidth(), m_screen.getHeight());
 	}
 } // namespace platform::window
