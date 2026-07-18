@@ -38,15 +38,15 @@ namespace infrastructure::repository
         auto pathIt{ m_paths.find(id) };
         if (pathIt == m_paths.end())
         {
-            LOG_E("画像ID '%s' が見つかりません", id.c_str());
-            return -1;
+			LOG_E("画像ID '{}' が見つかりません", id.c_str());
+			return -1;
         }
 
         const int handle{ LoadGraph(pathIt->second.c_str()) };
         if (handle == -1)
         {
-            LOG_E("画像の読み込みに失敗しました: %s", pathIt->second.c_str());
-            return -1;
+			LOG_E("画像の読み込みに失敗しました: {}", pathIt->second.c_str());
+			return -1;
         }
 
         m_handles[id] = handle;

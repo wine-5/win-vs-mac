@@ -75,7 +75,7 @@ namespace game::factory
 		auto meta{ m_resourceManager.getMetadata(modelId) };
 		if (!meta.has_value())
 		{
-			LOG("ERROR: 敵メタデータが見つかりません: %s", std::string(modelId).c_str());
+			LOG("ERROR: 敵メタデータが見つかりません: {}", std::string(modelId).c_str());
 			throw std::runtime_error("敵メタデータの読み込みに失敗しました");
 		}
 

@@ -41,7 +41,7 @@ namespace infrastructure::repository
 
 				int handle{ MV1LoadModel(rawIt->second.c_str()) };
 				if (handle == -1)
-					LOG_E("モデルの読み込みに失敗しました: %s", rawIt->second.c_str());
+					LOG_E("モデルの読み込みに失敗しました: {}", rawIt->second.c_str());
 				else
 					m_modelHandles[id] = handle;
 				return handle;
@@ -51,7 +51,7 @@ namespace infrastructure::repository
 		auto metaIt{ m_metadata.find(id) };
 		if (metaIt == m_metadata.end())
 		{
-			LOG_E("モデルID '%s' が見つかりません", id.c_str());
+			LOG_E("モデルID '{}' が見つかりません", id.c_str());
 			return -1;
 		}
 
@@ -63,7 +63,7 @@ namespace infrastructure::repository
 		int handle{ MV1LoadModel(metadata.modelPath.c_str()) };
 		if (handle == -1)
 		{
-			LOG_E("モデルの読み込みに失敗しました: %s", metadata.modelPath.c_str());
+			LOG_E("モデルの読み込みに失敗しました: {}", metadata.modelPath.c_str());
 			return -1;
 		}
 
@@ -110,7 +110,7 @@ namespace infrastructure::repository
 
 			}
 			else
-				LOG_E("'%s' のコライダー自動計算に失敗しました（頂点が取得できません）", id.c_str());
+				LOG_E("'{}' のコライダー自動計算に失敗しました（頂点が取得できません）", id.c_str());
 
 			MV1TerminateReferenceMesh(handle, -1, TRUE);
 		}
@@ -126,7 +126,7 @@ namespace infrastructure::repository
 
 		int duplicated{ MV1DuplicateModel(modelHandle) };
 		if (duplicated == -1)
-			LOG_E("モデルハンドルの複製に失敗しました: %d", modelHandle);
+			LOG_E("モデルハンドルの複製に失敗しました: {}", modelHandle);
 		return duplicated;
 	}
 

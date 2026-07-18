@@ -54,7 +54,7 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 	}
 	catch (const std::exception& e)
 	{
-		LOG_E("ResourceManager の初期化に失敗しました: %s", e.what());
+		LOG_E("ResourceManager の初期化に失敗しました: {}", e.what());
 		return;
 	}
 

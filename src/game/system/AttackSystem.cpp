@@ -93,7 +93,7 @@ namespace game::system
 				health.m_currentHp -= chain.m_damage;
 
 				// 被ダメージのログ（攻撃者・被ダメ者・ダメージ量）
-				LOG("ダメージ発生: 攻撃者=%u 被ダメ者=%u ダメージ=%.1f",
+				LOG("ダメージ発生: 攻撃者={} 被ダメ者={} ダメージ={:.1f}",
 				    static_cast<unsigned int>(attackerId),
 				    static_cast<unsigned int>(targetId),
 				    chain.m_damage);

@@ -19,7 +19,7 @@ namespace infrastructure
 		}
 		catch (const std::exception& e)
 		{
-			LOG_E("リポジトリ初期化に失敗しました: %s", e.what());
+			LOG_E("リポジトリ初期化に失敗しました: {}", e.what());
 		}
 	}
 
