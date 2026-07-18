@@ -24,13 +24,11 @@ namespace game::system
 		 * @param playerId プレイヤーのEntityID
 		 * @param projectileFactory 弾生成ファクトリの参照
 		 * @param metadata 弾定義（projectileData.jsonから取得したもの）
-		 * @param projectileImageHandle 弾のビルボード画像ハンドル（-1なら仮スフィア描画）
 		 */
 		PlayerRangedAttackSystem(core::ecs::ComponentManager& componentManager,
 		    core::ecs::EntityId playerId,
 		    factory::ProjectileFactory& projectileFactory,
-		    core::data::ProjectileMetadata metadata,
-		    int projectileImageHandle);
+		    core::data::ProjectileMetadata metadata);
 
 		/**
 		 * @brief 発射入力に応じて弾を発射する
@@ -49,7 +47,6 @@ namespace game::system
 		void fire(float chargeRate);
 
 		core::data::ProjectileMetadata m_metadata{}; // 弾定義（値コピーで保持）
-		int m_projectileImageHandle{ -1 };           // 弾のビルボード画像ハンドル
 		float m_cooldownTimer{ 0.0f };
 		float m_chargeTime{ 0.0f }; // 現在の溜め時間（秒）
 		bool m_isCharging{ false }; // 溜め中かどうか

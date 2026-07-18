@@ -38,6 +38,7 @@
 #include "game/system/AISystem.h"
 #include "game/system/ai/MeleeChaseAISystem.h"
 #include "game/system/ai/RangeKeepAISystem.h"
+#include "game/system/ai/EnemyRangedAttackSystem.h"
 #include "game/component/AIComponent.h"
 #include "game/system/CameraSystem.h"
 #include "game/component/CameraComponent.h"
@@ -172,9 +173,8 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::TargetingSystem>(m_componentManager);
 		// 発射入力→弾生成（生成はPhysicsSystemより前でよい）。弾定義はjsonから取得する
 		const auto& projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
-		const int projectileImage{ m_resourceManager.loadImageById(projectileMeta.m_imageId) };
 		m_systemManager.registerSystem<game::system::PlayerRangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory,
-		    projectileMeta, projectileImage);
+		    projectileMeta);
 		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager);
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
 		m_systemManager.registerSystem<game::system::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);
@@ -193,6 +193,15 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::ai::MeleeChaseAISystem>(m_componentManager);
 		// AI行動分割：遠距離維持型敵を駆動
 		m_systemManager.registerSystem<game::system::ai::RangeKeepAISystem>(m_componentManager);
+		// 遠距離維持型敵の弾発射（Safariのタブ投擲）。見た目は3種のタブモデルからランダムに選ぶ
+		const auto& tabProjectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::ENEMY_SAFARI_TAB) };
+		std::vector<int> tabModelHandles{
+			m_resourceManager.loadModelById(constant::model_id::TAB_STORAGE_FULL),
+			m_resourceManager.loadModelById(constant::model_id::TAB_SAFARI_ERROR),
+			m_resourceManager.loadModelById(constant::model_id::TAB_XCODE_BUILDING)
+		};
+		m_systemManager.registerSystem<game::system::ai::EnemyRangedAttackSystem>(
+		    m_componentManager, m_projectileFactory, tabProjectileMeta, std::move(tabModelHandles));
 
 		// ジョブに応じた攻撃SEタイプを決定してAttackSystemに渡す
 		core::constant::SeType playerAttackSeType{ core::constant::SeType::None };

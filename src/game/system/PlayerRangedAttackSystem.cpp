@@ -11,13 +11,11 @@ namespace game::system
 	PlayerRangedAttackSystem::PlayerRangedAttackSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId playerId,
 	    factory::ProjectileFactory& projectileFactory,
-	    core::data::ProjectileMetadata metadata,
-	    int projectileImageHandle)
+	    core::data::ProjectileMetadata metadata)
 	    : m_componentManager{ componentManager }
 	    , m_playerId{ playerId }
 	    , m_projectileFactory{ projectileFactory }
 	    , m_metadata{ std::move(metadata) }
-	    , m_projectileImageHandle{ projectileImageHandle }
 	{
 	}
 
@@ -100,7 +98,6 @@ namespace game::system
 		config.m_lifetime = m_metadata.m_lifetime;
 		config.m_radius = m_metadata.m_radius * sizeMultiplier;
 		config.m_scale = m_metadata.m_scale;
-		config.m_imageHandle = m_projectileImageHandle;
 
 		m_projectileFactory.spawn(origin, direction, config, constant::Tag::Player);
 	}
