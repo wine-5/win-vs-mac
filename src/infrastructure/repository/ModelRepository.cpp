@@ -95,10 +95,13 @@ namespace infrastructure::repository
 					vMax.z = (p.z > vMax.z) ? p.z : vMax.z;
 				}
 
+				// 地面などのステージモデルは実寸のまま、キャラは腕幅を絞るため水平方向を縮小する
+				const float horizontalScale{ (mutableMeta.category == "stage") ? 1.0f : HORIZONTAL_SHRINK };
+
 				// 参照メッシュはスケール適用済みなのでそのままワールド寸法になる
-				mutableMeta.colliderSize.x = (vMax.x - vMin.x) * HORIZONTAL_SHRINK;
+				mutableMeta.colliderSize.x = (vMax.x - vMin.x) * horizontalScale;
 				mutableMeta.colliderSize.y = vMax.y - vMin.y;
-				mutableMeta.colliderSize.z = (vMax.z - vMin.z) * HORIZONTAL_SHRINK;
+				mutableMeta.colliderSize.z = (vMax.z - vMin.z) * horizontalScale;
 
 				// コライダー中心も自動計算する（足元原点モデルなら高さの半分が中心になる）
 				mutableMeta.colliderOffset.x = (vMax.x + vMin.x) * 0.5f;
@@ -107,9 +110,7 @@ namespace infrastructure::repository
 
 			}
 			else
-			{
 				LOG_E("'%s' のコライダー自動計算に失敗しました（頂点が取得できません）", id.c_str());
-			}
 
 			MV1TerminateReferenceMesh(handle, -1, TRUE);
 		}

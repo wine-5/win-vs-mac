@@ -36,6 +36,8 @@
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
 #include "game/system/AISystem.h"
+#include "game/system/ai/MeleeChaseAISystem.h"
+#include "game/system/ai/RangeKeepAISystem.h"
 #include "game/component/AIComponent.h"
 #include "game/system/CameraSystem.h"
 #include "game/component/CameraComponent.h"
@@ -187,6 +189,10 @@ namespace game::scene
 
 		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
 		m_systemManager.registerSystem<game::system::AISystem>(m_componentManager);
+		// AI行動分割：近接追跡型敵を駆動
+		m_systemManager.registerSystem<game::system::ai::MeleeChaseAISystem>(m_componentManager);
+		// AI行動分割：遠距離維持型敵を駆動
+		m_systemManager.registerSystem<game::system::ai::RangeKeepAISystem>(m_componentManager);
 
 		// ジョブに応じた攻撃SEタイプを決定してAttackSystemに渡す
 		core::constant::SeType playerAttackSeType{ core::constant::SeType::None };
