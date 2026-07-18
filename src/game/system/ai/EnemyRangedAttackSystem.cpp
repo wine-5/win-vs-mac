@@ -16,11 +16,11 @@ namespace game::system::ai
 	EnemyRangedAttackSystem::EnemyRangedAttackSystem(core::ecs::ComponentManager& componentManager,
 	    factory::ProjectileFactory& projectileFactory,
 	    core::data::ProjectileMetadata metadata,
-	    std::vector<int> modelHandles)
+	    std::vector<RangedProjectileVisual> visuals)
 	    : m_componentManager{ componentManager }
 	    , m_projectileFactory{ projectileFactory }
 	    , m_metadata{ std::move(metadata) }
-	    , m_modelHandles{ std::move(modelHandles) }
+	    , m_visuals{ std::move(visuals) }
 	{
 	}
 
@@ -83,25 +83,28 @@ namespace game::system::ai
 				transform.m_position.z + direction.z * m_metadata.m_spawnForward
 			};
 
+			// 見た目（モデル）と当たり判定半径を1組ランダムに選ぶ
+			const RangedProjectileVisual visual{ pickRandomVisual() };
+
 			factory::ProjectileConfig config{};
 			config.m_speed = m_metadata.m_speed;
 			config.m_damage = m_metadata.m_damage;
 			config.m_lifetime = m_metadata.m_lifetime;
-			config.m_radius = m_metadata.m_radius;
+			config.m_radius = visual.m_radius; // モデル実寸から自動計算 or 手動指定の半径
 			config.m_scale = m_metadata.m_scale;
-			config.m_modelHandle = pickRandomModel(); // 見た目は3Dモデル（タブ3種からランダム）
+			config.m_modelHandle = visual.m_modelHandle;
 
 			m_projectileFactory.spawn(origin, direction, config, constant::Tag::Enemy);
 			rangeKeep.m_currentFireCooldown = rangeKeep.m_fireCooldown;
 		}
 	}
 
-	int EnemyRangedAttackSystem::pickRandomModel()
+	RangedProjectileVisual EnemyRangedAttackSystem::pickRandomVisual()
 	{
-		if (m_modelHandles.empty())
-			return -1;
-		// m_modelHandlesの中からランダムで選出する（std::uniform_int_distributionで範囲をm_modelHandles.size()内に制限）
-		std::uniform_int_distribution<std::size_t> dist{ 0, m_modelHandles.size() - 1 };
-		return m_modelHandles[dist(m_rng)];
+		if (m_visuals.empty())
+			return RangedProjectileVisual{};
+		// m_visualsの中からランダムで選出する（範囲をm_visuals.size()内に制限）
+		std::uniform_int_distribution<std::size_t> dist{ 0, m_visuals.size() - 1 };
+		return m_visuals[dist(m_rng)];
 	}
 } // namespace game::system::ai

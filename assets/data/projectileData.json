@@ -20,7 +20,7 @@
       "speed": 350.0,
       "damage": 8.0,
       "lifetime": 8.0,
-      "radius": 40.0,
+      "radius": 0.0,
       "scale": 2.0,
       "spawnForward": 40.0,
       "spawnHeight": 0.0,
