@@ -8,22 +8,24 @@ namespace infrastructure::utility
         : m_consoleHandle{}
     {
 #ifdef _DEBUG
-		//  //Windowsコンソールウィンドウを作成（不要な場合はコメントアウト）
-		// AllocConsole();
+		// Windowsコンソールウィンドウを作成（不要な場合はコメントアウト）
+		AllocConsole();
 
-		// // 標準出力をコンソールにリダイレクト
-		// FILE* fp;
-		// freopen_s(&fp, "CONOUT$", "w", stdout);
-		// freopen_s(&fp, "CONOUT$", "w", stderr);
+		// 標準出力をコンソールにリダイレクト
+		FILE* fp;
+		freopen_s(&fp, "CONOUT$", "w", stdout);
+		freopen_s(&fp, "CONOUT$", "w", stderr);
 
-		// // コンソールの出力コードページを Shift-JIS に設定（DxLibのボーン名等がShift-JISのため）
-		// SetConsoleOutputCP(932);
+		// コンソールの出力コードページを UTF-8 に設定する。
+		// ソースは /utf-8 でコンパイルされ文字列リテラルがUTF-8バイトのため、
+		// コンソールもUTF-8にしないと日本語ログが文字化けする
+		SetConsoleOutputCP(CP_UTF8);
 
-		// // コンソールハンドルを取得
-		// m_consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+		// コンソールハンドルを取得
+		m_consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
-		// // コンソールウィンドウのタイトルを設定
-		// SetConsoleTitleA("DxLib-3D Debug Console");
+		// コンソールウィンドウのタイトルを設定
+		SetConsoleTitleA("DxLib-3D Debug Console");
 
 		// printf("===========================================\n");
 		// printf("  DxLib-3D Debug Console\n");

@@ -8,6 +8,7 @@
 #include "game/attack/DamageChain.h"
 #include "game/attack/BaseAttackHandler.h"
 #include "game/attack/DefenseHandler.h"
+#include "core/interface/ILogger.h"
 #include "game/event/InGameEvents.h"
 
 namespace game::system
@@ -90,6 +91,12 @@ namespace game::system
 				// HPを減らす
 				auto &health{m_componentManager.get<component::HealthComponent>(targetId)};
 				health.m_currentHp -= chain.m_damage;
+
+				// 被ダメージのログ（攻撃者・被ダメ者・ダメージ量）
+				LOG("ダメージ発生: 攻撃者=%u 被ダメ者=%u ダメージ=%.1f",
+				    static_cast<unsigned int>(attackerId),
+				    static_cast<unsigned int>(targetId),
+				    chain.m_damage);
 
 				if (health.m_currentHp < 0.0f)
 					health.m_currentHp = 0.0f;
