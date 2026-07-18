@@ -71,7 +71,22 @@ namespace game::data
             if (attackCooldownIt != metadata.floatProperties.end())
                 data.m_attackCooldown = attackCooldownIt->second;
 
-            return data;
+			auto hoverHeightIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::HOVER_HEIGHT)) };
+			if (hoverHeightIt != metadata.floatProperties.end())
+				data.m_hoverHeight = hoverHeightIt->second;
+
+			auto preferredDistanceMinIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::PREFERRED_DISTANCE_MIN)) };
+			if (preferredDistanceMinIt != metadata.floatProperties.end())
+				data.m_preferredDistanceMin = preferredDistanceMinIt->second;
+
+			auto preferredDistanceMaxIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::PREFERRED_DISTANCE_MAX)) };
+			if (preferredDistanceMaxIt != metadata.floatProperties.end())
+				data.m_preferredDistanceMax = preferredDistanceMaxIt->second;
+
+			return data;
         }
 
         /** @brief モデルパスを取得 */
@@ -94,7 +109,22 @@ namespace game::data
         [[nodiscard]] float              getAttackPower()    const noexcept { return m_attackPower; }
         /** @brief 攻撃クールダウンを取得 */
         [[nodiscard]] float              getAttackCooldown() const noexcept { return m_attackCooldown; }
-        /** @brief コライダーサイズを取得 */
+		/** @brief 浮遊高度を取得（0なら地上型） */
+		[[nodiscard]] float getHoverHeight() const noexcept
+		{
+			return m_hoverHeight;
+		}
+		/** @brief 維持したい最小距離を取得 */
+		[[nodiscard]] float getPreferredDistanceMin() const noexcept
+		{
+			return m_preferredDistanceMin;
+		}
+		/** @brief 維持したい最大距離を取得 */
+		[[nodiscard]] float getPreferredDistanceMax() const noexcept
+		{
+			return m_preferredDistanceMax;
+		}
+		/** @brief コライダーサイズを取得 */
         [[nodiscard]] core::Vector3      getColliderSize()   const noexcept { return m_colliderSize; }
         /** @brief コライダーオフセットを取得 */
         [[nodiscard]] core::Vector3      getColliderOffset() const noexcept { return m_colliderOffset; }
@@ -116,7 +146,10 @@ namespace game::data
         float         m_defence{ 0.0f };
         float         m_attackPower{ 0.0f };
         float         m_attackCooldown{ 0.0f };
-        core::Vector3 m_colliderSize;
+		float m_hoverHeight{ 0.0f };
+		float m_preferredDistanceMin{ 0.0f };
+		float m_preferredDistanceMax{ 0.0f };
+		core::Vector3 m_colliderSize;
         core::Vector3 m_colliderOffset;
         core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
         core::Vector3 m_position;

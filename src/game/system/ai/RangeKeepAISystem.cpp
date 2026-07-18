@@ -9,6 +9,11 @@
 #include <cmath>
 #include <algorithm>
 
+namespace
+{
+	constexpr float HOVER_RESTORE_SPEED{ 50.0f }; // ホバー高度への復帰速度
+} // namespace
+
 namespace game::system::ai
 {
 	RangeKeepAISystem::RangeKeepAISystem(core::ecs::ComponentManager& componentManager)
@@ -48,9 +53,25 @@ namespace game::system::ai
 
 			float distance{ std::sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z) };
 
-			// 索敵範囲外なら何もしない
+			// 索敵範囲外なら水平移動・攻撃はしないが、浮遊高度だけは維持する（重力で落とさない）
 			if (distance > ai.m_detectionRange)
+			{
+				if (m_componentManager.has<component::VelocityComponent>(entityId))
+				{
+					auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+					velocity.m_velocity.x = 0.0f;
+					velocity.m_velocity.z = 0.0f;
+					// ホバー高度を保つ（指定があれば重力ぶんを補正、なければ垂直速度を0で維持）
+					if (rangeKeep.m_hoverHeight > 0.0f)
+					{
+						const float heightDiff{ rangeKeep.m_hoverHeight - transform.m_position.y };
+						velocity.m_velocity.y = heightDiff * HOVER_RESTORE_SPEED * deltaTime;
+					}
+					else
+						velocity.m_velocity.y = 0.0f;
+				}
 				continue;
+			}
 
 			// 方向ベクトルを正規化
 			if (distance > 0.0f)
@@ -95,11 +116,10 @@ namespace game::system::ai
 				// ホバー高度と現在位置の差を垂直速度に反映させる
 				// （重力があれば、重力で下がるので、その分を補正）
 				const float heightDiff{ rangeKeep.m_hoverHeight - transform.m_position.y };
-				const float hoverRestoreSpeed{ 50.0f }; // ホバー高度への復帰速度
 				if (m_componentManager.has<component::VelocityComponent>(entityId))
 				{
 					auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
-					velocity.m_velocity.y += heightDiff * hoverRestoreSpeed * deltaTime;
+					velocity.m_velocity.y += heightDiff * HOVER_RESTORE_SPEED * deltaTime;
 				}
 			}
 

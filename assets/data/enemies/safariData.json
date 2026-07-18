@@ -16,6 +16,9 @@
     "maxHp": 30.0,
     "defence": 0.0,
     "attackPower": 10.0,
-    "attackCooldown": 4.0
+    "attackCooldown": 4.0,
+    "hoverHeight": 300.0,
+    "preferredDistanceMin": 400.0,
+    "preferredDistanceMax": 600.0
   }
 }

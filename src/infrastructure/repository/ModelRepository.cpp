@@ -211,6 +211,12 @@ namespace infrastructure::repository
 			if (gp.contains("defence"))        metadata.floatProperties["defence"]        = gp["defence"];
 			if (gp.contains("attackPower"))    metadata.floatProperties["attackPower"]    = gp["attackPower"];
 			if (gp.contains("attackCooldown")) metadata.floatProperties["attackCooldown"] = gp["attackCooldown"];
+			if (gp.contains("hoverHeight"))
+				metadata.floatProperties["hoverHeight"] = gp["hoverHeight"];
+			if (gp.contains("preferredDistanceMin"))
+				metadata.floatProperties["preferredDistanceMin"] = gp["preferredDistanceMin"];
+			if (gp.contains("preferredDistanceMax"))
+				metadata.floatProperties["preferredDistanceMax"] = gp["preferredDistanceMax"];
 		}
 
 		return metadata;
