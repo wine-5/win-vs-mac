@@ -159,6 +159,7 @@
     <ClCompile Include="src\game\system\ChargeZoomSystem.cpp" />
     <ClCompile Include="src\game\system\DamageShakeSystem.cpp" />
     <ClCompile Include="src\game\system\ai\MeleeChaseAISystem.cpp" />
+    <ClCompile Include="src\game\system\ai\RangeKeepAISystem.cpp" />
     <ClCompile Include="src\game\scene\Bios.cpp" />
     <ClCompile Include="src\game\scene\Loading.cpp" />
     <ClCompile Include="src\game\scene\Lockscreen.cpp" />
@@ -352,6 +353,7 @@
     <ClInclude Include="src\game\system\ChargeZoomSystem.h" />
     <ClInclude Include="src\game\system\DamageShakeSystem.h" />
     <ClInclude Include="src\game\system\ai\MeleeChaseAISystem.h" />
+    <ClInclude Include="src\game\system\ai\RangeKeepAISystem.h" />
     <ClInclude Include="src\game\system\TargetingSystem.h" />
     <ClInclude Include="src\game\event\AudioEventListener.h" />
     <ClInclude Include="src\game\system\EffectSystem.h" />

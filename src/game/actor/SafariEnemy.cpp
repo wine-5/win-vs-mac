@@ -1,5 +1,6 @@
 #include "SafariEnemy.h"
 #include "game/component/AIComponent.h"
+#include "game/component/ai/RangeKeepAIComponent.h"
 
 namespace game::actor
 {
@@ -17,8 +18,12 @@ namespace game::actor
 
 		auto& ai = m_componentManager.get<component::AIComponent>(m_entity.getId());
 		ai.m_behavior = constant::AIBehavior::RangeKeepDistance;
-		ai.m_preferredDistanceMin = PREFERRED_DISTANCE_MIN;
-		ai.m_preferredDistanceMax = PREFERRED_DISTANCE_MAX;
-		ai.m_hoverHeight = HOVER_HEIGHT;
+
+		// RangeKeepAISystemがこのコンポーネントの有無で距離維持型敵を判定する
+		component::ai::RangeKeepAIComponent rangeKeep{};
+		rangeKeep.m_preferredDistanceMin = PREFERRED_DISTANCE_MIN;
+		rangeKeep.m_preferredDistanceMax = PREFERRED_DISTANCE_MAX;
+		rangeKeep.m_hoverHeight = HOVER_HEIGHT;
+		m_componentManager.add<component::ai::RangeKeepAIComponent>(m_entity.getId(), rangeKeep);
 	}
 } // namespace game::actor
