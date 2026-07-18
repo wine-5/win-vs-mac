@@ -169,8 +169,8 @@ namespace game::scene
 			const float distance{ std::sqrt(traveled.x * traveled.x + traveled.y * traveled.y + traveled.z * traveled.z) };
 			const float tumble{ distance * TUMBLE_PER_UNIT };
 
-			// 横（左右＝X軸）を軸に宙返りさせる
-			const core::Vector3 rotation{ tumble, 0.0f, 0.0f };
+			// 左右にぐるぐる回す（垂直＝Y軸まわりの回転）
+			const core::Vector3 rotation{ 0.0f, tumble, 0.0f };
 			m_renderer.drawModel(render.m_modelHandle, transform.m_position, rotation, transform.m_scale);
 		}
 	}
