@@ -245,8 +245,11 @@
     <None Include=".gitignore" />
     <None Include="assets\data\enemyData.json" />
     <None Include="assets\data\groundData.json" />
+    <None Include="assets\data\jobData.json" />
     <None Include="assets\data\playerData.json" />
     <None Include="assets\config\resources.json" />
+    <None Include="assets\data\projectileData.json" />
+    <None Include="assets\data\stageData.json" />
     <None Include="docs\architecture.md" />
     <None Include="docs\game_concept.md" />
     <None Include="docs\game_design.md">
