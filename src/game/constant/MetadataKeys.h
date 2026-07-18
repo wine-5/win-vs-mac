@@ -20,5 +20,6 @@ namespace game::constant
 		constexpr std::string_view PREFERRED_DISTANCE_MIN = "preferredDistanceMin";
 		constexpr std::string_view PREFERRED_DISTANCE_MAX = "preferredDistanceMax";
 		constexpr std::string_view FIRE_COOLDOWN = "fireCooldown";
+		constexpr std::string_view FACING_YAW_OFFSET = "facingYawOffset";
 	} // namespace metadata_keys
 } // namespace game::constant

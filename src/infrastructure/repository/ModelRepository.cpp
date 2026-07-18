@@ -250,6 +250,8 @@ namespace infrastructure::repository
 				metadata.floatProperties["preferredDistanceMax"] = gp["preferredDistanceMax"];
 			if (gp.contains("fireCooldown"))
 				metadata.floatProperties["fireCooldown"] = gp["fireCooldown"];
+			if (gp.contains("facingYawOffset"))
+				metadata.floatProperties["facingYawOffset"] = gp["facingYawOffset"];
 		}
 
 		return metadata;

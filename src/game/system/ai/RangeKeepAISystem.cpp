@@ -123,13 +123,14 @@ namespace game::system::ai
 				}
 			}
 
-			// 向きを更新（プレイヤーの方を向く、水平面のみ）
+			// 向きを更新（プレイヤーの方を向く、水平面のみ）。
+			// 機体モデルの正面軸のズレは facingYawOffset で補正する
 			const float horizontalDistance{ std::sqrt(direction.x * direction.x + direction.z * direction.z) };
 			if (horizontalDistance > 0.0f)
 			{
 				const float normalizedDirX{ direction.x / horizontalDistance };
 				const float normalizedDirZ{ direction.z / horizontalDistance };
-				transform.m_rotation.y = std::atan2f(-normalizedDirX, -normalizedDirZ);
+				transform.m_rotation.y = std::atan2f(-normalizedDirX, -normalizedDirZ) + rangeKeep.m_facingYawOffset;
 			}
 
 			// アニメーション要求：移動中は Walk、停止時は Idle

@@ -16,5 +16,6 @@ namespace game::component::ai
 		float m_hoverHeight{ 0.0f };          // 浮遊高度（0なら地上。Safariなど空を飛ぶ敵用）
 		float m_fireCooldown{ 0.0f };         // 遠距離攻撃（弾発射）の間隔（秒）。接触攻撃とは別系統
 		float m_currentFireCooldown{ 0.0f };  // 現在の発射クールダウン残り（EnemyRangedAttackSystemが管理）
+		float m_facingYawOffset{ 0.0f };      // 正面向きのyawオフセット（ラジアン）。機体モデルの正面軸のズレを補正する
 	};
 } // namespace game::component::ai
