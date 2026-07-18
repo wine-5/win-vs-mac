@@ -58,6 +58,10 @@
 #include <cassert>
 #include <stdexcept>
 #include <cmath>
+#include <array>
+#include <vector>
+#include <string_view>
+#include <utility>
 
 namespace game::scene
 {
@@ -193,15 +197,25 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::ai::MeleeChaseAISystem>(m_componentManager);
 		// AI行動分割：遠距離維持型敵を駆動
 		m_systemManager.registerSystem<game::system::ai::RangeKeepAISystem>(m_componentManager);
-		// 遠距離維持型敵の弾発射（Safariのタブ投擲）。見た目は3種のタブモデルからランダムに選ぶ
+		// 遠距離維持型敵の弾発射（Safariのタブ投擲）。見た目は3種のタブモデルからランダムに選ぶ。
+		// 当たり判定半径は projectileData.json の radius が 0 ならモデル実寸から自動計算、0以外なら手動指定
 		const auto& tabProjectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::ENEMY_SAFARI_TAB) };
-		std::vector<int> tabModelHandles{
-			m_resourceManager.loadModelById(constant::model_id::TAB_STORAGE_FULL),
-			m_resourceManager.loadModelById(constant::model_id::TAB_SAFARI_ERROR),
-			m_resourceManager.loadModelById(constant::model_id::TAB_XCODE_BUILDING)
+		const std::array<std::string_view, 3> tabModelIds{
+			constant::model_id::TAB_STORAGE_FULL,
+			constant::model_id::TAB_SAFARI_ERROR,
+			constant::model_id::TAB_XCODE_BUILDING
 		};
+		std::vector<game::system::ai::RangedProjectileVisual> tabVisuals{};
+		for (const auto tabModelId : tabModelIds)
+		{
+			const int handle{ m_resourceManager.loadModelById(tabModelId) };
+			const float radius{ tabProjectileMeta.m_radius > 0.0f
+				                    ? tabProjectileMeta.m_radius
+				                    : m_resourceManager.computeBoundingRadius(handle, tabProjectileMeta.m_scale) };
+			tabVisuals.push_back({ handle, radius });
+		}
 		m_systemManager.registerSystem<game::system::ai::EnemyRangedAttackSystem>(
-		    m_componentManager, m_projectileFactory, tabProjectileMeta, std::move(tabModelHandles));
+		    m_componentManager, m_projectileFactory, tabProjectileMeta, std::move(tabVisuals));
 
 		// ジョブに応じた攻撃SEタイプを決定してAttackSystemに渡す
 		core::constant::SeType playerAttackSeType{ core::constant::SeType::None };
