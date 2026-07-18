@@ -96,9 +96,12 @@ namespace game::scene
 		void drawReticle(core::ecs::EntityId playerId);
 
 		/**
-		 * @brief 弾（投射物）を描画する（仮：スフィア。後でビルボード/モデルに差し替え）
+		 * @brief モデルを持つ弾（Safariのタブ等）を回転させながら描画する
+		 *
+		 * RenderComponentを持つ弾を対象に、進行方向へyawを向けつつ
+		 * 発射地点からの移動距離に応じてタンブル（宙返り）回転させる。
 		 */
-		void drawProjectiles();
+		void drawProjectileModels();
 
 		/**
 		 * @brief DEBUG: 当たり判定（青）・攻撃範囲（赤）・索敵範囲（黄）を可視化する（テスト後に削除）

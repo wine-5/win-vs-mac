@@ -9,6 +9,7 @@
 #include "game/component/ProjectileComponent.h"
 #include "game/component/PlayerChargeComponent.h"
 #include "game/system/PlayerChargeVisualsSystem.h"
+#include <cmath>
 
 namespace game::scene
 {
@@ -29,9 +30,9 @@ namespace game::scene
 	{
 		drawModels(playerId, groundId, enemyIds);
 
-		// プレイヤー弾の見た目は実OSウィンドウ（ProjectileWindowSystem）が担うため、
-		// ゲーム内ビルボードは描かない（敵弾のビルボード実装時に再有効化する）
-		// drawProjectiles();
+		// プレイヤー弾の見た目は実OSウィンドウ（ProjectileWindowSystem）が担うため描かない。
+		// 敵のタブ弾など3Dモデルを持つ弾はここで回転描画する
+		drawProjectileModels();
 
 		// DEBUG: デバッグ可視化（テスト後に呼び出しごと削除）
 		drawDebugVisuals();
@@ -141,28 +142,36 @@ namespace game::scene
 		m_uiRenderer.drawCircle(centerX, centerY, DOT_RADIUS, color, true, 1);
 	}
 
-	void InGameView::drawProjectiles()
+	void InGameView::drawProjectileModels()
 	{
+		// 発射地点からの移動距離に掛ける係数（1ワールド単位あたりのタンブル回転量[rad]）
+		constexpr float TUMBLE_PER_UNIT{ 0.015f };
+
 		auto projectiles{ m_componentManager.getAllEntities<component::ProjectileComponent>() };
 		for (auto id : projectiles)
 		{
-			const auto& projectile{ m_componentManager.get<component::ProjectileComponent>(id) };
-			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
-			float radius{ 40.0f };
-			if (m_componentManager.has<component::AttackComponent>(id))
-				radius = m_componentManager.get<component::AttackComponent>(id).m_attackRange;
+			if (!m_componentManager.has<component::RenderComponent>(id))
+				continue;
 
-			if (projectile.m_imageHandle != -1)
-			{
-				// 常にカメラを向くビルボードとして描画する（一辺＝直径×スケール）
-				const float size{ radius * 2.0f * transform.m_scale.x };
-				m_renderer.drawBillboard(projectile.m_imageHandle, transform.m_position, size);
-			}
-			else
-			{
-				// 画像未設定時の仮描画：ティールのスフィア
-				m_renderer.drawDebugSphere(transform.m_position, radius, core::utility::Color::rgb(0, 255, 180));
-			}
+			const auto& render{ m_componentManager.get<component::RenderComponent>(id) };
+			if (!render.m_isVisible || render.m_modelHandle == -1)
+				continue;
+
+			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
+			const auto& projectile{ m_componentManager.get<component::ProjectileComponent>(id) };
+
+			// 発射地点からの移動距離に応じてタンブルさせる（状態を持たず距離から導出する）
+			const core::Vector3 traveled{
+				transform.m_position.x - projectile.m_spawnPosition.x,
+				transform.m_position.y - projectile.m_spawnPosition.y,
+				transform.m_position.z - projectile.m_spawnPosition.z
+			};
+			const float distance{ std::sqrt(traveled.x * traveled.x + traveled.y * traveled.y + traveled.z * traveled.z) };
+			const float tumble{ distance * TUMBLE_PER_UNIT };
+
+			// 横（左右＝X軸）を軸に宙返りさせる
+			const core::Vector3 rotation{ tumble, 0.0f, 0.0f };
+			m_renderer.drawModel(render.m_modelHandle, transform.m_position, rotation, transform.m_scale);
 		}
 	}
 
