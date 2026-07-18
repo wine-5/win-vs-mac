@@ -6,6 +6,15 @@
 #include "core/data/ProjectileMetadata.h"
 #include "game/factory/ProjectileFactory.h"
 
+namespace game::component
+{
+	struct TransformComponent;
+	namespace ai
+	{
+		struct RangeKeepAIComponent;
+	}
+} // namespace game::component
+
 namespace game::system::ai
 {
 	/**
@@ -58,10 +67,23 @@ namespace game::system::ai
 		 */
 		RangedProjectileVisual pickRandomVisual();
 
+		/**
+		 * @brief 攻撃の予備動作・発射時ポップを毎フレーム反映する
+		 *
+		 * 発射直前は後傾（ため）＋ブルブル振動、発射直後は前のめり＋スケールポップ。
+		 * rotation.x / rotation.z / scale のみ操作し、向き（rotation.y）や移動には干渉しない。
+		 * @param transform 対象のTransform
+		 * @param rangeKeep 対象のRangeKeepAIComponent（タイマー・基準スケールを参照）
+		 * @param inRange プレイヤーが索敵範囲内か
+		 */
+		void applyAttackAnimation(component::TransformComponent& transform,
+		    component::ai::RangeKeepAIComponent& rangeKeep, bool inRange);
+
 		core::ecs::ComponentManager& m_componentManager;
 		factory::ProjectileFactory& m_projectileFactory;
 		core::data::ProjectileMetadata m_metadata{};     // 弾定義（値コピーで保持）
 		std::vector<RangedProjectileVisual> m_visuals{}; // 弾の見た目候補
-		std::mt19937 m_rng{ std::random_device{}() };
+		std::mt19937 m_rng{ std::random_device{}() };    // モデルをランダムに選択するための乱数エンジン
+		float m_elapsedTime{ 0.0f };                     // 振動演出の位相計算用の経過時間
 	};
 } // namespace game::system::ai

@@ -1,4 +1,5 @@
 #pragma once
+#include "core/utility/Vector3.h"
 
 namespace game::component::ai
 {
@@ -17,5 +18,7 @@ namespace game::component::ai
 		float m_fireCooldown{ 0.0f };         // 遠距離攻撃（弾発射）の間隔（秒）。接触攻撃とは別系統
 		float m_currentFireCooldown{ 0.0f };  // 現在の発射クールダウン残り（EnemyRangedAttackSystemが管理）
 		float m_facingYawOffset{ 0.0f };      // 正面向きのyawオフセット（ラジアン）。機体モデルの正面軸のズレを補正する
+		float m_attackAnimTimer{ 0.0f };      // 発射直後の演出（前のめり＋ポップ）の残り時間（秒）
+		core::Vector3 m_baseScale{ 0.0f, 0.0f, 0.0f }; // 予備動作のスケール演出用に保持する基準スケール（0なら未取得）
 	};
 } // namespace game::component::ai

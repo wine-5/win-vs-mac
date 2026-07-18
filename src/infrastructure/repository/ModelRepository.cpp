@@ -71,8 +71,8 @@ namespace infrastructure::repository
 		MV1SetScale(handle, scale);
 
 		if (metadata.colliderSize.x == 0.0f &&
-			metadata.colliderSize.y == 0.0f &&
-			metadata.colliderSize.z == 0.0f)
+		    metadata.colliderSize.y == 0.0f &&
+		    metadata.colliderSize.z == 0.0f)
 		{
 			auto& mutableMeta = m_metadata[id];
 
@@ -107,7 +107,6 @@ namespace infrastructure::repository
 				mutableMeta.colliderOffset.x = (vMax.x + vMin.x) * 0.5f;
 				mutableMeta.colliderOffset.y = (vMax.y + vMin.y) * 0.5f;
 				mutableMeta.colliderOffset.z = (vMax.z + vMin.z) * 0.5f;
-
 			}
 			else
 				LOG_E("'{}' のコライダー自動計算に失敗しました（頂点が取得できません）", id.c_str());
@@ -199,12 +198,12 @@ namespace infrastructure::repository
 
 		nlohmann::json j = nlohmann::json::parse(file);
 		core::data::ModelMetadata metadata;
-		metadata.id        = j["id"];
-		metadata.category  = j["category"];
+		metadata.id = j["id"];
+		metadata.category = j["category"];
 		metadata.modelPath = j["model"]["path"];
-		metadata.scale.x   = j["model"]["scale"][0];
-		metadata.scale.y   = j["model"]["scale"][1];
-		metadata.scale.z   = j["model"]["scale"][2];
+		metadata.scale.x = j["model"]["scale"][0];
+		metadata.scale.y = j["model"]["scale"][1];
+		metadata.scale.z = j["model"]["scale"][2];
 		metadata.colliderSize.x   = j["collider"]["size"][0];
 		metadata.colliderSize.y   = j["collider"]["size"][1];
 		metadata.colliderSize.z   = j["collider"]["size"][2];
@@ -226,22 +225,31 @@ namespace infrastructure::repository
 		if (j.contains("animations"))
 		{
 			auto& anim = j["animations"];
-			if (anim.contains("idle")) metadata.stringProperties["idleAnim"] = anim["idle"];
-			if (anim.contains("walk")) metadata.stringProperties["walkAnim"] = anim["walk"];
+			if (anim.contains("idle"))
+				metadata.stringProperties["idleAnim"] = anim["idle"];
+			if (anim.contains("walk"))
+				metadata.stringProperties["walkAnim"] = anim["walk"];
 		}
 
 		if (j.contains("gameplay"))
 		{
 			auto& gp = j["gameplay"];
-			if (gp.contains("moveSpeed"))      metadata.floatProperties["moveSpeed"]      = gp["moveSpeed"];
+			if (gp.contains("moveSpeed"))
+				metadata.floatProperties["moveSpeed"] = gp["moveSpeed"];
 			if (gp.contains("dashMultiplier"))
 				metadata.floatProperties["dashMultiplier"] = gp["dashMultiplier"];
-			if (gp.contains("detectionRange")) metadata.floatProperties["detectionRange"] = gp["detectionRange"];
-			if (gp.contains("attackRange"))    metadata.floatProperties["attackRange"]    = gp["attackRange"];
-			if (gp.contains("maxHp"))          metadata.floatProperties["maxHp"]          = gp["maxHp"];
-			if (gp.contains("defence"))        metadata.floatProperties["defence"]        = gp["defence"];
-			if (gp.contains("attackPower"))    metadata.floatProperties["attackPower"]    = gp["attackPower"];
-			if (gp.contains("attackCooldown")) metadata.floatProperties["attackCooldown"] = gp["attackCooldown"];
+			if (gp.contains("detectionRange"))
+				metadata.floatProperties["detectionRange"] = gp["detectionRange"];
+			if (gp.contains("attackRange"))
+				metadata.floatProperties["attackRange"] = gp["attackRange"];
+			if (gp.contains("maxHp"))
+				metadata.floatProperties["maxHp"] = gp["maxHp"];
+			if (gp.contains("defence"))
+				metadata.floatProperties["defence"] = gp["defence"];
+			if (gp.contains("attackPower"))
+				metadata.floatProperties["attackPower"] = gp["attackPower"];
+			if (gp.contains("attackCooldown"))
+				metadata.floatProperties["attackCooldown"] = gp["attackCooldown"];
 			if (gp.contains("hoverHeight"))
 				metadata.floatProperties["hoverHeight"] = gp["hoverHeight"];
 			if (gp.contains("preferredDistanceMin"))
