@@ -19,6 +19,7 @@
     "attackCooldown": 4.0,
     "hoverHeight": 300.0,
     "preferredDistanceMin": 400.0,
-    "preferredDistanceMax": 600.0
+    "preferredDistanceMax": 600.0,
+    "fireCooldown": 2.5
   }
 }

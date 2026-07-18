@@ -20,6 +20,7 @@ namespace game::actor
 		rangeKeep.m_preferredDistanceMin = m_enemyData.getPreferredDistanceMin();
 		rangeKeep.m_preferredDistanceMax = m_enemyData.getPreferredDistanceMax();
 		rangeKeep.m_hoverHeight = m_enemyData.getHoverHeight();
+		rangeKeep.m_fireCooldown = m_enemyData.getFireCooldown();
 		m_componentManager.add<component::ai::RangeKeepAIComponent>(m_entity.getId(), rangeKeep);
 	}
 } // namespace game::actor

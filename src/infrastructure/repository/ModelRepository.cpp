@@ -217,6 +217,8 @@ namespace infrastructure::repository
 				metadata.floatProperties["preferredDistanceMin"] = gp["preferredDistanceMin"];
 			if (gp.contains("preferredDistanceMax"))
 				metadata.floatProperties["preferredDistanceMax"] = gp["preferredDistanceMax"];
+			if (gp.contains("fireCooldown"))
+				metadata.floatProperties["fireCooldown"] = gp["fireCooldown"];
 		}
 
 		return metadata;
