@@ -44,7 +44,7 @@
 #include "game/system/TargetingSystem.h"
 #include "game/component/AimComponent.h"
 #include "game/system/ProjectileSystem.h"
-#include "game/system/RangedAttackSystem.h"
+#include "game/system/PlayerRangedAttackSystem.h"
 #include "game/system/ProjectileWindowSystem.h"
 #include "game/system/PlayerChargeVisualsSystem.h"
 #include "game/system/ChargeZoomSystem.h"
@@ -173,7 +173,7 @@ namespace game::scene
 		// 発射入力→弾生成（生成はPhysicsSystemより前でよい）。弾定義はjsonから取得する
 		const auto& projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
 		const int projectileImage{ m_resourceManager.loadImageById(projectileMeta.m_imageId) };
-		m_systemManager.registerSystem<game::system::RangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory,
+		m_systemManager.registerSystem<game::system::PlayerRangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory,
 		    projectileMeta, projectileImage);
 		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager);
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）

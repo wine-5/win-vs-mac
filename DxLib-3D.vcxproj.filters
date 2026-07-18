@@ -270,7 +270,7 @@
     <ClCompile Include="src\game\system\ProjectileSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\RangedAttackSystem.cpp">
+    <ClCompile Include="src\game\system\PlayerRangedAttackSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\factory\ProjectileFactory.cpp">
@@ -809,7 +809,7 @@
     <ClInclude Include="src\game\system\ProjectileSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\RangedAttackSystem.h">
+    <ClInclude Include="src\game\system\PlayerRangedAttackSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\factory\ProjectileFactory.h">

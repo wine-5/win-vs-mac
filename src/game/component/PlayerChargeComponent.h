@@ -5,7 +5,7 @@ namespace game::component
 	/**
 	 * @brief プレイヤーの溜め攻撃の視覚演出を担当するコンポーネント
 	 *
-	 * 溜め状態と溜め率を保持し、RangedAttackSystemによって毎フレーム更新される。
+	 * 溜め状態と溜め率を保持し、PlayerRangedAttackSystemによって毎フレーム更新される。
 	 * PlayerChargeVisualsSystemが読み取り、画面演出（集中線など）を指示する。
 	 */
 	struct PlayerChargeComponent

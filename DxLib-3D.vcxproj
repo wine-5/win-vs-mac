@@ -154,7 +154,7 @@
     <ClCompile Include="src\game\factory\EnemyFactory.cpp" />
     <ClCompile Include="src\game\factory\ProjectileFactory.cpp" />
     <ClCompile Include="src\game\system\ProjectileSystem.cpp" />
-    <ClCompile Include="src\game\system\RangedAttackSystem.cpp" />
+    <ClCompile Include="src\game\system\PlayerRangedAttackSystem.cpp" />
     <ClCompile Include="src\game\system\PlayerChargeVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\ChargeZoomSystem.cpp" />
     <ClCompile Include="src\game\system\DamageShakeSystem.cpp" />
@@ -338,7 +338,7 @@
     <ClInclude Include="src\game\factory\EnemyFactory.h" />
     <ClInclude Include="src\game\factory\ProjectileFactory.h" />
     <ClInclude Include="src\game\system\ProjectileSystem.h" />
-    <ClInclude Include="src\game\system\RangedAttackSystem.h" />
+    <ClInclude Include="src\game\system\PlayerRangedAttackSystem.h" />
     <ClInclude Include="src\game\system\PlayerChargeVisualsSystem.h" />
     <ClInclude Include="src\game\GameManager.h" />
     <ClInclude Include="src\game\scene\Loading.h" />

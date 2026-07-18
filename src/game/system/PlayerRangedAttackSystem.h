@@ -15,18 +15,18 @@ namespace game::system
 	 * 弾のパラメータは projectileData.json（ProjectileMetadata）から与えられ、
 	 * 弾の生成自体は ProjectileFactory に委譲する（敵の遠距離でも同じFactoryを使う）。
 	 */
-	class RangedAttackSystem : public core::ecs::ISystem
+	class PlayerRangedAttackSystem : public core::ecs::ISystem
 	{
 	  public:
 		/**
-		 * @brief RangedAttackSystemのコンストラクタ
+		 * @brief PlayerRangedAttackSystemのコンストラクタ
 		 * @param componentManager ComponentManagerの参照
 		 * @param playerId プレイヤーのEntityID
 		 * @param projectileFactory 弾生成ファクトリの参照
 		 * @param metadata 弾定義（projectileData.jsonから取得したもの）
 		 * @param projectileImageHandle 弾のビルボード画像ハンドル（-1なら仮スフィア描画）
 		 */
-		RangedAttackSystem(core::ecs::ComponentManager& componentManager,
+		PlayerRangedAttackSystem(core::ecs::ComponentManager& componentManager,
 		    core::ecs::EntityId playerId,
 		    factory::ProjectileFactory& projectileFactory,
 		    core::data::ProjectileMetadata metadata,

@@ -1,4 +1,4 @@
-#include "RangedAttackSystem.h"
+#include "PlayerRangedAttackSystem.h"
 #include "game/component/InputComponent.h"
 #include "game/component/CameraComponent.h"
 #include "game/component/TransformComponent.h"
@@ -8,7 +8,7 @@
 
 namespace game::system
 {
-	RangedAttackSystem::RangedAttackSystem(core::ecs::ComponentManager& componentManager,
+	PlayerRangedAttackSystem::PlayerRangedAttackSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId playerId,
 	    factory::ProjectileFactory& projectileFactory,
 	    core::data::ProjectileMetadata metadata,
@@ -21,7 +21,7 @@ namespace game::system
 	{
 	}
 
-	void RangedAttackSystem::update(float deltaTime)
+	void PlayerRangedAttackSystem::update(float deltaTime)
 	{
 		if (m_cooldownTimer > 0.0f)
 			m_cooldownTimer -= deltaTime;
@@ -77,7 +77,7 @@ namespace game::system
 		}
 	}
 
-	void RangedAttackSystem::fire(float chargeRate)
+	void PlayerRangedAttackSystem::fire(float chargeRate)
 	{
 		const auto& camera{ m_componentManager.get<component::CameraComponent>(m_playerId) };
 		const auto& transform{ m_componentManager.get<component::TransformComponent>(m_playerId) };
