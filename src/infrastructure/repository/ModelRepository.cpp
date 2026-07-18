@@ -130,6 +130,37 @@ namespace infrastructure::repository
 		return duplicated;
 	}
 
+	float ModelRepository::computeBoundingRadius(int modelHandle, float scale) const
+	{
+		if (modelHandle == -1)
+			return 0.0f;
+
+		// 参照メッシュからAABBを求める（水平方向の大きい辺の半分を半径とする）
+		MV1SetupReferenceMesh(modelHandle, -1, TRUE);
+		const MV1_REF_POLYGONLIST refPoly{ MV1GetReferenceMesh(modelHandle, -1, TRUE) };
+
+		float radius{ 0.0f };
+		if (refPoly.VertexNum > 0)
+		{
+			VECTOR vMin{ refPoly.Vertexs[0].Position };
+			VECTOR vMax{ refPoly.Vertexs[0].Position };
+			for (int i{ 1 }; i < refPoly.VertexNum; ++i)
+			{
+				const VECTOR& p{ refPoly.Vertexs[i].Position };
+				vMin.x = (p.x < vMin.x) ? p.x : vMin.x;
+				vMin.z = (p.z < vMin.z) ? p.z : vMin.z;
+				vMax.x = (p.x > vMax.x) ? p.x : vMax.x;
+				vMax.z = (p.z > vMax.z) ? p.z : vMax.z;
+			}
+			const float sizeX{ vMax.x - vMin.x };
+			const float sizeZ{ vMax.z - vMin.z };
+			radius = 0.5f * ((sizeX > sizeZ) ? sizeX : sizeZ) * scale;
+		}
+
+		MV1TerminateReferenceMesh(modelHandle, -1, TRUE);
+		return radius;
+	}
+
 	std::optional<core::data::ModelMetadata> ModelRepository::getMetadata(std::string_view modelId) const
 	{
 		auto it{ m_metadata.find(std::string(modelId)) };

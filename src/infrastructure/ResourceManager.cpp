@@ -85,4 +85,11 @@ namespace infrastructure
 			return -1;
 		return m_modelRepo->duplicateModel(modelHandle);
 	}
+
+	float ResourceManager::computeBoundingRadius(int modelHandle, float scale) const
+	{
+		if (!m_modelRepo)
+			return 0.0f;
+		return m_modelRepo->computeBoundingRadius(modelHandle, scale);
+	}
 } // namespace infrastructure

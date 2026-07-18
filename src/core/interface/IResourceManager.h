@@ -83,5 +83,15 @@ namespace core::iface
 		 * @return 複製したモデルハンドル、失敗時は-1
 		 */
 		virtual int duplicateModel(int modelHandle) = 0;
+
+		/**
+		 * @brief モデルの水平方向の外接半径を計算する（弾などの当たり判定サイズ自動取得用）
+		 *
+		 * モデルのバウンディングボックス（X/Z の大きい方）の半分に scale を掛けて返す。
+		 * @param modelHandle モデルハンドル
+		 * @param scale 適用するスケール
+		 * @return 水平方向の外接半径。失敗時は 0.0f
+		 */
+		[[nodiscard]] virtual float computeBoundingRadius(int modelHandle, float scale) const = 0;
 	};
 } // namespace core::iface
