@@ -37,8 +37,9 @@ namespace infrastructure::repository
 		if (!json.contains("effects")) return;
 
 		const std::unordered_map<std::string, core::constant::EffectType> typeMap{
-			{ "Hit", core::constant::EffectType::Hit },
-			{ "EnemySpawn", core::constant::EffectType::EnemySpawn },
+			{ "Enemy_HitSword", core::constant::EffectType::Enemy_HitSword },
+			{ "Enemy_HitWindow", core::constant::EffectType::Enemy_HitWindow },
+			{ "Enemy_Spawn", core::constant::EffectType::Enemy_Spawn },
 		};
 
 		for (const auto& entry : json["effects"])

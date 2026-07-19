@@ -22,20 +22,20 @@ namespace game::event
 		float m_damage{ 0.0f };
 
 		/** @brief 再生するエフェクトの種類 */
-		core::constant::EffectType m_effectType{ core::constant::EffectType::Hit };
+		core::constant::EffectType m_effectType{ core::constant::EffectType::Enemy_HitSword };
 
 		/** @brief 再生するSEの種類 */
 		core::constant::SeType m_seType{ core::constant::SeType::None };
 
 		AttackHitEvent() = default;
 		AttackHitEvent(core::ecs::EntityId atkId, core::ecs::EntityId tgtId, float dmg,
-			core::constant::EffectType effectType = core::constant::EffectType::Hit,
-			core::constant::SeType seType = core::constant::SeType::None)
-			: m_attackerId{ atkId }
-			, m_targetId{ tgtId }
-			, m_damage{ dmg }
-			, m_effectType{effectType}
-			, m_seType{seType}
+		    core::constant::EffectType effectType = core::constant::EffectType::Enemy_HitSword,
+		    core::constant::SeType seType = core::constant::SeType::None)
+		    : m_attackerId{ atkId }
+		    , m_targetId{ tgtId }
+		    , m_damage{ dmg }
+		    , m_effectType{ effectType }
+		    , m_seType{ seType }
 		{
 		}
 	};

@@ -155,7 +155,7 @@ namespace game::scene
 		// は Player.cpp のコンストラクタで初期化済
 
 		m_groundId = initializer.initializeGround();
-		m_enemyIds = initializer.initializeEnemies();
+		// m_enemyIds = initializer.initializeEnemies();
 
 		// 全敵の追跡対象をプレイヤーに設定する
 		for (auto enemyId : m_enemyIds)
@@ -308,11 +308,12 @@ namespace game::scene
 		m_elapsedTime += deltaTime;
 		m_systemManager.update(deltaTime);
 
-		// DEBUG: Tキーでプレイヤー位置にテストエフェクト（EnemySpawn）を再生する（テスト後に削除）
+		// DEBUG: Tキーでプレイヤー位置にテストエフェクト（Enemy_Spawn）を再生する（テスト後に削除）
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::T))
 		{
 			const auto& transform{ m_componentManager.get<component::TransformComponent>(m_playerId) };
-			m_effectFactory.play(core::constant::EffectType::EnemySpawn, transform.m_position);
+			m_effectFactory.play(core::constant::EffectType::Enemy_HitWindow, transform.m_position);
+			LOG("エフェクトが再生");
 		}
 
 		// フレーム最後に入力状態を更新

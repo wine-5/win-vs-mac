@@ -1,17 +1,24 @@
 {
   "effects": [
     {
-      "type": "Hit",
+      "type": "Enemy_HitSword",
       "path": "assets/effects/slash.efk",
       "poolSize": 10,
       "yOffset": 75.0,
       "scale": 10.0
     },
     {
-      "type": "EnemySpawn",
+      "type": "Enemy_HitWindow",
+      "path": "assets/effects/hit_window.efk",
+      "poolSize": 10,
+      "yOffset": 75.0,
+      "scale": 10.0
+    },
+    {
+      "type": "Enemy_Spawn",
       "path": "assets/effects/enemy_spawn.efk",
       "poolSize": 5,
-      "yOffset": 0.0,
+      "yOffset": 10.0,
       "scale": 10.0
     }
   ]

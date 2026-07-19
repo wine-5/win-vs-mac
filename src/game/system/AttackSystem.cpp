@@ -4,6 +4,7 @@
 #include "game/component/InputComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/TagComponent.h"
+#include "game/component/ProjectileComponent.h"
 #include "game/constant/Tag.h"
 #include "game/attack/DamageChain.h"
 #include "game/attack/BaseAttackHandler.h"
@@ -93,10 +94,10 @@ namespace game::system
 				health.m_currentHp -= chain.m_damage;
 
 				// 被ダメージのログ（攻撃者・被ダメ者・ダメージ量）
-				LOG("ダメージ発生: 攻撃者={} 被ダメ者={} ダメージ={:.1f}",
-				    static_cast<unsigned int>(attackerId),
-				    static_cast<unsigned int>(targetId),
-				    chain.m_damage);
+				// LOG("ダメージ発生: 攻撃者={} 被ダメ者={} ダメージ={:.1f}",
+				//     static_cast<unsigned int>(attackerId),
+				//     static_cast<unsigned int>(targetId),
+				//     chain.m_damage);
 
 				if (health.m_currentHp < 0.0f)
 					health.m_currentHp = 0.0f;
@@ -117,6 +118,12 @@ namespace game::system
 				hitEvent.m_attackerId = attackerId;
 				hitEvent.m_targetId = targetId;
 				hitEvent.m_damage = chain.m_damage;
+
+				// 攻撃者がProjectileComponentを持つ（=弾＝Window投撃などの遠距離攻撃）ならEnemy_HitWindow、
+				// そうでなければ（=本体による近接攻撃）Enemy_HitSwordを再生する
+				hitEvent.m_effectType = m_componentManager.has<component::ProjectileComponent>(attackerId)
+				                            ? core::constant::EffectType::Enemy_HitWindow
+				                            : core::constant::EffectType::Enemy_HitSword;
 
 				// 攻撃者がプレイヤーの場合、ジョブに応じた攻撃SEをセット
 				const auto& attackerTag{ m_componentManager.get<component::TagComponent>(attackerId) };

@@ -14,7 +14,7 @@
     "walk": "assets/animations/player/Player_Walking.mv1"
   },
   "gameplay": {
-    "moveSpeed": 20.0,
+    "moveSpeed": 50.0,
     "dashMultiplier": 10.0,
     "maxHp": 100.0,
     "defence": 10.0,
