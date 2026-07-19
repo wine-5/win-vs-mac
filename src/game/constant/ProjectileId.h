@@ -8,5 +8,6 @@ namespace game::constant
 	{
 		constexpr std::string_view PLAYER_WINDOW = "player_window";
 		constexpr std::string_view ENEMY_SAFARI_TAB = "enemy_safari_tab";
+		constexpr std::string_view BOSS_RAINBOW = "boss_rainbow";
 	} // namespace projectile_id
 } // namespace game::constant

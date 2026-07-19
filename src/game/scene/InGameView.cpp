@@ -47,7 +47,7 @@ namespace game::scene
 		drawReticle(playerId);
 
 		// Effekseerエフェクトの描画（3Dモデル描画後・UI手前に呼び出す）
-		m_effectFactory.draw();
+		// m_effectFactory.draw();
 	}
 
 	void InGameView::setPlayerChargeVisualsSystem(system::PlayerChargeVisualsSystem* system)
@@ -265,9 +265,7 @@ namespace game::scene
 				m_renderer.drawDebugCapsule(bottom, top, ai.m_detectionRange, core::utility::Color::rgb(255, 255, 0));
 			}
 			else
-			{
 				m_renderer.drawDebugSphere(atkTransform.m_position, ai.m_detectionRange, core::utility::Color::rgb(255, 255, 0));
-			}
 		}
 	}
 
