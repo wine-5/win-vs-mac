@@ -7,5 +7,3 @@ AppStore：https://apps.apple.com/jp/app/tofurunner/id6755136719
 
 :video_game: 趣味・ゲーム：趣味はトランプを集めることです！好きなゲームはモンスターストライクとぷよぷよテトリスです！
 :speech_balloon: ひとこと：まだまだ分からないことたくさんありますが、気軽に絡んでくれとうれしいです！よろしくお願いします！
-
-

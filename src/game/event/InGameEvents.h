@@ -3,6 +3,7 @@
 #include "core/event/IGameEvent.h"
 #include "core/constant/EffectType.h"
 #include "core/constant/SeType.h"
+#include "core/data/BossMetadata.h"
 #include "game/constant/AnimationState.h"
 
 namespace game::event
@@ -111,11 +112,11 @@ namespace game::event
 		/** @brief 移行したボスのEntityId */
 		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
 
-		/** @brief 移行後のフェーズ番号（0始まり。Phase2なら1） */
-		int m_newPhase{ 0 };
+		/** @brief 移行後のフェーズ */
+		core::data::BossPhase m_newPhase{ core::data::BossPhase::Awakened };
 
 		BossPhaseTransitionEvent() = default;
-		BossPhaseTransitionEvent(core::ecs::EntityId id, int newPhase)
+		BossPhaseTransitionEvent(core::ecs::EntityId id, core::data::BossPhase newPhase)
 		    : m_entityId{ id }
 		    , m_newPhase{ newPhase }
 		{

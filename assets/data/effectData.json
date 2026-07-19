@@ -19,7 +19,7 @@
       "path": "assets/effects/enemy_spawn.efk",
       "poolSize": 5,
       "yOffset": 10.0,
-      "scale": 10.0
+      "scale": 20.0
     },
     {
       "type": "Player_Slash",
