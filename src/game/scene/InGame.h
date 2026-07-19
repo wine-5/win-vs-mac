@@ -17,6 +17,7 @@
 /* game層のインクルード */
 #include "core/interface/IProjectileWindowManager.h"
 #include "game/factory/FactoryManager.h"
+#include "game/factory/EnemySpawner.h"
 #include "game/component/RenderComponent.h"
 #include "game/data/PlayerData.h"
 #include "game/data/FileEquipmentData.h"
@@ -86,6 +87,7 @@ namespace game::scene
 		core::iface::IEffectFactory& m_effectFactory;
 
 		game::factory::FactoryManager m_factoryManager;
+		game::factory::EnemySpawner m_enemySpawner;
 		game::factory::ProjectileFactory m_projectileFactory;
 		game::data::PlayerData m_playerData;
 		InGameView m_view;
