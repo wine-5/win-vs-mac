@@ -20,6 +20,20 @@
       "poolSize": 5,
       "yOffset": 10.0,
       "scale": 10.0
+    },
+    {
+      "type": "Player_Slash",
+      "path": "assets/effects/player_slash.efk",
+      "poolSize": 5,
+      "yOffset": 75.0,
+      "scale": 10.0
+    },
+    {
+      "type": "Enemy_Slash",
+      "path": "assets/effects/enemy_slash.efk",
+      "poolSize": 5,
+      "yOffset": 75.0,
+      "scale": 10.0
     }
   ]
 }
