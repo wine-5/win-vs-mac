@@ -73,6 +73,20 @@ namespace infrastructure::repository
 		std::vector<ResourceDefinition> loadRawModelList(const nlohmann::json& json);
 		core::data::ModelMetadata parseJsonFile(const std::string& filePath);
 
+		/**
+		 * @brief JSONの"boss"要素をBossMetadataへ変換する
+		 * @param j boss要素のJSONオブジェクト
+		 * @return 変換したBossMetadata
+		 */
+		core::data::BossMetadata parseBoss(const nlohmann::json& j);
+
+		/**
+		 * @brief JSONの1フェーズ要素（phase1/phase2）をBossPhaseDataへ変換する
+		 * @param p フェーズ要素のJSONオブジェクト
+		 * @return 変換したBossPhaseData
+		 */
+		core::data::BossPhaseData parseBossPhase(const nlohmann::json& p);
+
 		std::unordered_map<std::string, int> m_modelHandles;
 		std::unordered_map<std::string, core::data::ModelMetadata> m_metadata;
 		std::unordered_map<std::string, std::string> m_rawModelPaths;

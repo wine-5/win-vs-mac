@@ -262,6 +262,64 @@ namespace infrastructure::repository
 				metadata.floatProperties["facingYawOffset"] = gp["facingYawOffset"];
 		}
 
+		if (j.contains("boss"))
+			metadata.boss = parseBoss(j["boss"]);
+
 		return metadata;
+	}
+
+	core::data::BossMetadata ModelRepository::parseBoss(const nlohmann::json& j)
+	{
+		core::data::BossMetadata boss{};
+		if (j.contains("phase2HpRatio"))
+			boss.m_phase2HpRatio = j["phase2HpRatio"];
+
+		if (j.contains("phase1"))
+			boss.m_phase1 = parseBossPhase(j["phase1"]);
+		if (j.contains("phase2"))
+		{
+			boss.m_phase2 = parseBossPhase(j["phase2"]);
+			boss.m_hasPhase2 = true;
+		}
+		return boss;
+	}
+
+	core::data::BossPhaseData ModelRepository::parseBossPhase(const nlohmann::json& p)
+	{
+		core::data::BossPhaseData phase{};
+		if (p.contains("moveSpeed"))
+			phase.m_moveSpeed = p["moveSpeed"];
+		if (p.contains("actionInterval"))
+			phase.m_actionInterval = p["actionInterval"];
+		if (p.contains("meleeRange"))
+			phase.m_meleeRange = p["meleeRange"];
+
+		if (p.contains("weights"))
+		{
+			const auto& w = p["weights"];
+			if (w.contains("melee"))
+				phase.m_weightMelee = w["melee"];
+			if (w.contains("ranged"))
+				phase.m_weightRanged = w["ranged"];
+			if (w.contains("summon"))
+				phase.m_weightSummon = w["summon"];
+		}
+
+		if (p.contains("rainbowCount"))
+			phase.m_rainbowCount = p["rainbowCount"];
+		if (p.contains("rainbowSpreadDeg"))
+			phase.m_rainbowSpreadDeg = p["rainbowSpreadDeg"];
+
+		if (p.contains("summonTypes"))
+			for (const auto& t : p["summonTypes"])
+				phase.m_summonTypes.push_back(t.get<std::string>());
+		if (p.contains("summonCount"))
+			phase.m_summonCount = p["summonCount"];
+		if (p.contains("summonMax"))
+			phase.m_summonMax = p["summonMax"];
+		if (p.contains("summonRadiusMin")) phase.m_summonRadiusMin = p["summonRadiusMin"];
+		if (p.contains("summonRadiusMax")) phase.m_summonRadiusMax = p["summonRadiusMax"];
+
+		return phase;
 	}
 } // namespace infrastructure::repository
