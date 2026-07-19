@@ -309,6 +309,8 @@ namespace infrastructure::repository
 			phase.m_rainbowCount = p["rainbowCount"];
 		if (p.contains("rainbowSpreadDeg"))
 			phase.m_rainbowSpreadDeg = p["rainbowSpreadDeg"];
+		if (p.contains("rainbowSpeed"))
+			phase.m_rainbowSpeed = p["rainbowSpeed"];
 
 		if (p.contains("summonTypes"))
 			for (const auto& t : p["summonTypes"])

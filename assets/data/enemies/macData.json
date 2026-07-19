@@ -19,14 +19,15 @@
     "attackCooldown": 4.0
   },
   "boss": {
-    "phase2HpRatio": 0.5,
+    "phase2HpRatio": 0.99,
     "phase1": {
       "moveSpeed": 10.0,
       "actionInterval": 4.0,
       "meleeRange": 180.0,
-      "weights": { "melee": 3, "ranged": 2, "summon": 1 },
+      "weights": { "melee": 0, "ranged": 2, "summon": 0 },
       "rainbowCount": 3,
       "rainbowSpreadDeg": 40.0,
+      "rainbowSpeed": 50.0,
       "summonTypes": [ "xcode", "safari" ],
       "summonCount": 1,
       "summonMax": 4,
@@ -40,6 +41,7 @@
       "weights": { "melee": 2, "ranged": 3, "summon": 3 },
       "rainbowCount": 6,
       "rainbowSpreadDeg": 70.0,
+      "rainbowSpeed": 550.0,
       "summonTypes": [ "xcode", "safari" ],
       "summonCount": 2,
       "summonMax": 6,
