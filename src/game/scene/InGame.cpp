@@ -33,6 +33,7 @@
 #include "game/constant/ModelId.h"
 #include "game/constant/AnimationId.h"
 #include "game/constant/ProjectileId.h"
+#include "game/constant/EnemyType.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
 #include "game/system/AISystem.h"
@@ -161,6 +162,12 @@ namespace game::scene
 		// 生成される敵の追跡対象をプレイヤーに設定してからスポーンする
 		m_enemySpawner.setTargetEntity(core::ecs::Entity(m_playerId));
 		m_enemyIds = m_enemySpawner.spawnStageEnemies();
+
+		// ボス（Mac）をステージ定義の boss 位置に生成する。撃破判定用にIDを保持する。
+		// テスト時は stageData.json の boss.position を近くにすればすぐ戦える
+		const auto& bossSpawn{ m_resourceManager.getStageMetadata().m_boss };
+		if (!bossSpawn.m_type.empty())
+			m_bossId = m_enemySpawner.spawn(constant::toEnemyType(bossSpawn.m_type), bossSpawn.m_position);
 	}
 
 	void InGame::setupSystems()
@@ -289,22 +296,16 @@ namespace game::scene
 							render.m_isVisible = false;
 						}
 
-						m_killCount++;
+			            // AIを停止する。これをしないと死亡（非表示）後も移動や弾発射が続き、
+			            // 「見えないのにSafariがタブをまだPlayerに投げてくる」状態になる
+			            if (m_componentManager.has<component::AIComponent>(e.m_entityId))
+				            m_componentManager.get<component::AIComponent>(e.m_entityId).m_isActive = false;
 
-				// 敵が全滅しているかチェック
-						auto enemies{ m_componentManager.getAllEntities<component::AIComponent>() };
-						bool allDead{ true };
-						for (auto enemyId : enemies)
-						{
-							auto& health{ m_componentManager.get<component::HealthComponent>(enemyId) };
-							if (!health.m_isDead)
-							{
-								allDead = false;
-								break;
-							}
-						}
-						if (allDead)
-						{
+			            m_killCount++;
+
+			            // 勝利条件はボス撃破のみ（ボスは雑魚を絶えず生成するため全滅判定にしない）
+			            if (e.m_entityId == m_bossId)
+			            {
 							saveResultData(true);
 				            // メニュー操作用にカーソルを戻してからシーンを切り替える
 				            m_inputProvider.setMouseCursorVisible(true);
@@ -332,8 +333,9 @@ namespace game::scene
 
 	void InGame::draw()
 	{
-		// 描画は InGameView へ委譲する
-		m_view.draw(m_playerId, m_groundId, m_enemyIds);
+		// 描画は InGameView へ委譲する。ボスが召喚する雑魚も実行時に増えるため、
+		// スポーン時のスナップショットではなく EnemyFactory が持つ最新の敵一覧を渡す
+		m_view.draw(m_playerId, m_groundId, m_factoryManager.getEnemyFactory().getEnemyIds());
 	}
 
 	void InGame::saveResultData	(bool isVictory) noexcept

@@ -94,6 +94,7 @@ namespace game::scene
 
 		core::ecs::EntityId m_groundId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
+		core::ecs::EntityId m_bossId{ core::ecs::INVALID_ENTITY_ID };
 		std::vector<core::ecs::EntityId> m_enemyIds{};
 
 		core::base::EventBus m_eventBus;
