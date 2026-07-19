@@ -1,10 +1,11 @@
 #include "SafariEnemy.h"
 #include "game/component/AIComponent.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
+#include <numbers>
 
 namespace
 {
-	constexpr float DEG_TO_RAD{ 3.14159265358979323846f / 180.0f };
+	constexpr float DEG_TO_RAD{ std::numbers::pi_v<float> / 180.0f };
 } // namespace
 
 namespace game::actor

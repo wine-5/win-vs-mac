@@ -81,7 +81,7 @@ namespace game::system
 		// 一定間隔で乱数の種を切り替え、手描きの集中線が揺れているようなちらつきを出す
 		const int flickerStep{ static_cast<int>(m_animationTime * FLICKER_FREQUENCY) };
 
-		constexpr float PI{ static_cast<float>(std::numbers::pi) };
+		constexpr float PI{ std::numbers::pi_v<float> };
 		const float angleStep{ 2.0f * PI / lineCount };
 
 		// 溜めるほど太くなる（開始時は35%の細さから最大溜めで100%へ）

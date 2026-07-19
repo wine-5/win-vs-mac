@@ -11,10 +11,11 @@
 #include <cmath>
 #include <utility>
 #include <algorithm>
+#include <numbers>
 
 namespace
 {
-	constexpr float PI{ 3.14159265358979323846f };
+	constexpr float PI{ std::numbers::pi_v<float> };
 	constexpr float DEG_TO_RAD{ PI / 180.0f };
 
 	// 各アクションの再生ロック時間（秒）。この間は次の行動を抽選しない（アニメ・演出の尺）
@@ -94,7 +95,7 @@ namespace game::system::ai
 						m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 
 					// 覚醒演出（カメラズーム・シェイク・赤ビネット）のトリガー
-					m_eventBus.publish(event::BossPhaseTransitionEvent{ entityId, 2 });
+					m_eventBus.publish(event::BossPhaseTransitionEvent{ entityId, core::data::BossPhase::Awakened });
 					continue;
 				}
 			}
