@@ -80,9 +80,11 @@ namespace game::scene
 	    , m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }
 	    , m_projectileFactory{ m_entityManager, m_componentManager }
 	    , m_playerData{ game::data::PlayerData::fromMetadata(m_resourceManager.getMetadata(constant::model_id::PLAYER).value()) }
+	    , m_effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() }
 	    , m_view{ m_componentManager, m_renderer,
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
-		    *core::base::ServiceLocator::get<core::iface::IScreen>() }
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_effectFactory }
 	{
 		loadResources();
 		spawnEntities();
@@ -232,8 +234,7 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::AttackSystem>(m_componentManager, m_eventBus, playerAttackSeType);
 		m_systemManager.registerSystem<game::system::HitEffectSystem>(m_componentManager, m_eventBus);
 
-		auto& effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() };
-		m_systemManager.registerSystem<game::system::EffectSystem>(m_componentManager, m_eventBus, effectFactory);
+		m_systemManager.registerSystem<game::system::EffectSystem>(m_componentManager, m_eventBus, m_effectFactory);
 
 		// プレイヤーの溜め攻撃の画面演出（集中線）。描画内容はSystemが持ち、
 		// InGameViewには描画フェーズで呼び出させるためにポインタを渡す
@@ -306,6 +307,13 @@ namespace game::scene
 	{
 		m_elapsedTime += deltaTime;
 		m_systemManager.update(deltaTime);
+
+		// DEBUG: Tキーでプレイヤー位置にテストエフェクト（EnemySpawn）を再生する（テスト後に削除）
+		if (m_inputProvider.isKeyPressed(core::input::KeyCode::T))
+		{
+			const auto& transform{ m_componentManager.get<component::TransformComponent>(m_playerId) };
+			m_effectFactory.play(core::constant::EffectType::EnemySpawn, transform.m_position);
+		}
 
 		// フレーム最後に入力状態を更新
 		m_inputProvider.updatePreviousState();

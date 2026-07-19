@@ -8,8 +8,9 @@ namespace core::constant
 	enum class EffectType
 	{
 		None,
-		Hit,  // ヒット
-		
+		Hit,        // ヒット
+		EnemySpawn, // 敵スポーン（テスト用：Tキーでプレイヤー位置に再生）
+
 		// 今後攻撃のエフェクトなど追加予定
 		// EffectRepositoryのtypeMapにも追加を忘れないように
 	};

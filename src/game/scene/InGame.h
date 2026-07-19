@@ -11,6 +11,7 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IAnimator.h"
+#include "core/interface/IEffectFactory.h"
 #include "core/base/EventBus.h"
 
 /* game層のインクルード */
@@ -82,6 +83,7 @@ namespace game::scene
 		core::iface::IResourceManager &m_resourceManager;
 		core::iface::IInputProvider   &m_inputProvider;
 		data::FileEquipmentData       &m_fileEquipmentData;
+		core::iface::IEffectFactory& m_effectFactory;
 
 		game::factory::FactoryManager m_factoryManager;
 		game::factory::ProjectileFactory m_projectileFactory;

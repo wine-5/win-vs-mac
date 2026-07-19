@@ -5,6 +5,7 @@
 #include "core/interface/IRenderer.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "core/interface/IEffectFactory.h"
 
 namespace game::system
 {
@@ -29,11 +30,13 @@ namespace game::scene
 		 * @param renderer 3D描画のインターフェース
 		 * @param uiRenderer UI描画のインターフェース
 		 * @param screen 画面サイズ取得のインターフェース
+		 * @param effectFactory エフェクト（Effekseer）描画のインターフェース
 		 */
 		InGameView(core::ecs::ComponentManager& componentManager,
 		    core::iface::IRenderer& renderer,
 		    core::iface::IUIRenderer& uiRenderer,
-		    core::iface::IScreen& screen);
+		    core::iface::IScreen& screen,
+		    core::iface::IEffectFactory& effectFactory);
 
 		/**
 		 * @brief インゲームを描画する
@@ -132,6 +135,7 @@ namespace game::scene
 		core::iface::IRenderer& m_renderer;
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
+		core::iface::IEffectFactory& m_effectFactory;
 
 		// 溜め攻撃の集中線の描画元（描画内容はSystemが持ち、Viewは描画順だけを管理する）
 		// 所有はSystemManagerにあり、InGameがsetupSystemsで設定する
@@ -139,8 +143,8 @@ namespace game::scene
 
 		bool m_isDebugVisualsEnabled{ true };
 		bool m_isDebugColliderEnabled{ false };
-		bool m_isDebugAttackRangeEnabled{ true };
-		bool m_isDebugDetectionRangeEnabled{ true };
+		bool m_isDebugAttackRangeEnabled{ false };
+		bool m_isDebugDetectionRangeEnabled{ false };
 		bool m_isDebugProjectileRangeEnabled{ false };
 	};
 } // namespace game::scene

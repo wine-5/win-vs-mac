@@ -11,8 +11,9 @@ namespace core::input
         A,
         S,
         D,
-        R, // デバック用
-        Space,
+		R, // DEBUG: デバッグ用
+		T, // DEBUG: テストエフェクト再生
+		Space,
         Escape, // TODO:将来的にPauseにする予定
 
         Up,

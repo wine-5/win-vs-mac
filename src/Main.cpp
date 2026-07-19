@@ -18,7 +18,7 @@ namespace
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	int screenWidth{}, screenHeight{};
-#ifdef _DEBUG // デバック用
+#ifdef _DEBUG // DEBUG: 開発中はウインドウモードで起動
 	screenWidth = 1280;
 	screenHeight = 720;
 	SetGraphMode(screenWidth, screenHeight, COLOR_BIT);

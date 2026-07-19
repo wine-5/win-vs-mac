@@ -16,11 +16,13 @@ namespace game::scene
 	InGameView::InGameView(core::ecs::ComponentManager& componentManager,
 	    core::iface::IRenderer& renderer,
 	    core::iface::IUIRenderer& uiRenderer,
-	    core::iface::IScreen& screen)
+	    core::iface::IScreen& screen,
+	    core::iface::IEffectFactory& effectFactory)
 	    : m_componentManager{ componentManager }
 	    , m_renderer{ renderer }
 	    , m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
+	    , m_effectFactory{ effectFactory }
 	{
 	}
 
@@ -43,6 +45,9 @@ namespace game::scene
 
 		// 照準レティクル（HUD）は最前面に描く
 		drawReticle(playerId);
+
+		// Effekseerエフェクトの描画（3Dモデル描画後・UI手前に呼び出す）
+		m_effectFactory.draw();
 	}
 
 	void InGameView::setPlayerChargeVisualsSystem(system::PlayerChargeVisualsSystem* system)
