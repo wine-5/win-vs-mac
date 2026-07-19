@@ -36,6 +36,7 @@ namespace core::data
 		int m_rainbowCount{ 0 };          // 1回の発射数
 		float m_rainbowSpreadDeg{ 0.0f }; // 扇の全開き角（度）
 		float m_rainbowSpeed{ 0.0f };     // 弾速（0ならprojectileData.jsonの既定値を使う）
+		float m_rainbowSpinSpeed{ 0.0f }; // ルーレット回転の速さ（1ワールド単位進むごとの回転量[rad]）
 
 		// 召喚
 		std::vector<std::string> m_summonTypes{}; // 召喚候補の敵タイプ名（"xcode" / "safari"）

@@ -17,7 +17,10 @@ namespace game::factory
 		float m_radius{ 0.0f };   // 大きさの半径（AttackComponent.m_attackRange に入る＝当たり判定）
 		float m_scale{ 1.0f };    // 見た目スケール（0だと描画されないため1.0を既定にする）
 		int m_modelHandle{ -1 };  // 3Dモデル描画用のハンドル（-1ならモデル描画なし）
-		bool m_spinRoll{ false }; // trueなら進行軸まわりにも回す（レインボーのルーレット回転演出）
+
+		// 0より大きければルーレット回転（画面正対のZ軸スピン）で描画する。
+		// 値は1ワールド単位進むごとの回転量[rad]（レインボーの演出用）
+		float m_spinRollSpeed{ 0.0f };
 	};
 
 	/**

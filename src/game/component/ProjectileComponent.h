@@ -14,6 +14,9 @@ namespace game::component
 	{
 		float m_remainingLifetime{};     // 残り寿命（毎フレーム減算し、0以下で自動消滅する）
 		core::Vector3 m_spawnPosition{}; // 発射位置（実ウィンドウの出現ディレイ＝発射者から離れたか判定に使う）
-		bool m_spinRoll{ false };        // trueなら進行軸まわりにも回す（レインボーのルーレット回転演出）
+
+		// 0より大きければルーレット回転（画面正対のZ軸スピン）で描画する。
+		// 値は1ワールド単位進むごとの回転量[rad]（レインボーの演出用）
+		float m_spinRollSpeed{ 0.0f };
 	};
 } // namespace game::component

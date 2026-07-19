@@ -311,6 +311,8 @@ namespace infrastructure::repository
 			phase.m_rainbowSpreadDeg = p["rainbowSpreadDeg"];
 		if (p.contains("rainbowSpeed"))
 			phase.m_rainbowSpeed = p["rainbowSpeed"];
+		if (p.contains("rainbowSpinSpeed"))
+			phase.m_rainbowSpinSpeed = p["rainbowSpinSpeed"];
 
 		if (p.contains("summonTypes"))
 			for (const auto& t : p["summonTypes"])
