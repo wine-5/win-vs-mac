@@ -23,8 +23,6 @@ namespace game::actor
 
 	void XcodeEnemy::setupAI()
 	{
-		auto& ai = m_componentManager.get<component::AIComponent>(m_entity.getId());
-		ai.m_behavior = constant::AIBehavior::MeleeChase;
 		// MeleeChaseAISystemがこのコンポーネントの有無で近接敵を判定する
 		m_componentManager.add<component::ai::MeleeChaseAIComponent>(m_entity.getId(), {});
 	}

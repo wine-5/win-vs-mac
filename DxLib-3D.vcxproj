@@ -285,7 +285,6 @@
     <ClInclude Include="src\game\actor\SafariEnemy.h" />
     <ClInclude Include="src\game\actor\XcodeEnemy.h" />
     <ClInclude Include="src\game\component\ProjectileComponent.h" />
-    <ClInclude Include="src\game\constant\AIBehavior.h" />
     <ClInclude Include="src\core\constant\BgmType.h" />
     <ClInclude Include="src\core\constant\EffectType.h" />
     <ClInclude Include="src\core\constant\JobType.h" />

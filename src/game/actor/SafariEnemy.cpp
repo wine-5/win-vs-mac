@@ -17,9 +17,6 @@ namespace game::actor
 
 	void SafariEnemy::setupAI()
 	{
-		auto& ai = m_componentManager.get<component::AIComponent>(m_entity.getId());
-		ai.m_behavior = constant::AIBehavior::RangeKeepDistance;
-
 		// RangeKeepAISystemがこのコンポーネントの有無で距離維持型敵を判定する。
 		// 距離維持・浮遊高度のパラメータはsafariData.jsonのgameplayから読み込む
 		component::ai::RangeKeepAIComponent rangeKeep{};

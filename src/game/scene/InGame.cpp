@@ -161,7 +161,7 @@ namespace game::scene
 
 		// 生成される敵の追跡対象をプレイヤーに設定してからスポーンする
 		m_enemySpawner.setTargetEntity(core::ecs::Entity(m_playerId));
-		m_enemyIds = m_enemySpawner.spawnStageEnemies();
+		m_enemySpawner.spawnStageEnemies();
 
 		// ボス（Mac）をステージ定義の boss 位置に生成する。撃破判定用にIDを保持する。
 		// テスト時は stageData.json の boss.position を近くにすればすぐ戦える

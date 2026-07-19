@@ -29,9 +29,6 @@ namespace game::actor
 
 	void MacEnemy::setupAI()
 	{
-		auto& ai = m_componentManager.get<component::AIComponent>(m_entity.getId());
-		ai.m_behavior = constant::AIBehavior::Boss;
-
 		// 近接攻撃の発生タイミングはBossAISystemのFSM（actionInterval）が管理するため、
 		// AttackComponent側のクールダウンによる二重ゲートを無効化する
 		if (m_componentManager.has<component::AttackComponent>(m_entity.getId()))

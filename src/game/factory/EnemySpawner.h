@@ -4,7 +4,6 @@
 #include "core/interface/IResourceManager.h"
 #include "core/utility/Vector3.h"
 #include "game/constant/EnemyType.h"
-#include <vector>
 
 namespace game::factory
 {
@@ -53,9 +52,10 @@ namespace game::factory
 
 		/**
 		 * @brief ステージ配置定義に基づき雑魚敵を全て生成する
-		 * @return 生成した全EnemyのEntityId
+		 *
+		 * 生成した敵のIDは EnemyFactory::getEnemyIds() から取得できる
 		 */
-		std::vector<core::ecs::EntityId> spawnStageEnemies();
+		void spawnStageEnemies();
 
 	  private:
 		FactoryManager& m_factoryManager;
