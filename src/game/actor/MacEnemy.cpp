@@ -1,7 +1,11 @@
 #include "MacEnemy.h"
 #include "game/component/AnimationComponent.h"
 #include "game/component/AIComponent.h"
+#include "game/component/AttackComponent.h"
+#include "game/component/ai/BossAIComponent.h"
 #include "game/constant/AnimationId.h"
+#include "game/constant/ModelId.h"
+#include "core/interface/ILogger.h"
 
 namespace game::actor
 {
@@ -27,6 +31,22 @@ namespace game::actor
 	{
 		auto& ai = m_componentManager.get<component::AIComponent>(m_entity.getId());
 		ai.m_behavior = constant::AIBehavior::Boss;
+
+		// 近接攻撃の発生タイミングはBossAISystemのFSM（actionInterval）が管理するため、
+		// AttackComponent側のクールダウンによる二重ゲートを無効化する
+		if (m_componentManager.has<component::AttackComponent>(m_entity.getId()))
+			m_componentManager.get<component::AttackComponent>(m_entity.getId()).m_attackCooldown = 0.0f;
+
+		// BossAISystemがこのコンポーネントの有無でボスを判定する。
+		// フェーズ定義（macData.jsonのboss要素）を読み込んで載せる
+		component::ai::BossAIComponent boss{};
+		auto meta{ m_resourceManager.getMetadata(constant::model_id::ENEMY_MAC) };
+		if (meta.has_value() && meta->boss.has_value())
+			boss.m_config = meta->boss.value();
+		else
+			LOG_E("Macのボス定義(boss)がmacData.jsonに見つかりません");
+
+		m_componentManager.add<component::ai::BossAIComponent>(m_entity.getId(), boss);
 	}
 
 } // namespace game::actor

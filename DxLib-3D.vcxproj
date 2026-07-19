@@ -161,6 +161,7 @@
     <ClCompile Include="src\game\system\DamageShakeSystem.cpp" />
     <ClCompile Include="src\game\system\ai\MeleeChaseAISystem.cpp" />
     <ClCompile Include="src\game\system\ai\RangeKeepAISystem.cpp" />
+    <ClCompile Include="src\game\system\ai\BossAISystem.cpp" />
     <ClCompile Include="src\game\system\ai\EnemyRangedAttackSystem.cpp" />
     <ClCompile Include="src\game\scene\Bios.cpp" />
     <ClCompile Include="src\game\scene\Loading.cpp" />
@@ -290,6 +291,7 @@
     <ClInclude Include="src\core\constant\JobType.h" />
     <ClInclude Include="src\core\constant\SelectWindowId.h" />
     <ClInclude Include="src\core\constant\SeType.h" />
+    <ClInclude Include="src\core\data\BossMetadata.h" />
     <ClInclude Include="src\core\data\ModelMetadata.h" />
     <ClInclude Include="src\core\base\EventBus.h" />
     <ClInclude Include="src\core\ecs\ObjectPool.h" />
@@ -360,6 +362,7 @@
     <ClInclude Include="src\game\system\DamageShakeSystem.h" />
     <ClInclude Include="src\game\system\ai\MeleeChaseAISystem.h" />
     <ClInclude Include="src\game\system\ai\RangeKeepAISystem.h" />
+    <ClInclude Include="src\game\system\ai\BossAISystem.h" />
     <ClInclude Include="src\game\system\ai\EnemyRangedAttackSystem.h" />
     <ClInclude Include="src\game\system\TargetingSystem.h" />
     <ClInclude Include="src\game\event\AudioEventListener.h" />
