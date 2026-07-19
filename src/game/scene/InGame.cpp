@@ -39,6 +39,7 @@
 #include "game/system/ai/MeleeChaseAISystem.h"
 #include "game/system/ai/RangeKeepAISystem.h"
 #include "game/system/ai/EnemyRangedAttackSystem.h"
+#include "game/system/ai/BossAISystem.h"
 #include "game/component/AIComponent.h"
 #include "game/system/CameraSystem.h"
 #include "game/component/CameraComponent.h"
@@ -78,6 +79,7 @@ namespace game::scene
 	    , m_inputProvider{ inputProvider }
 	    , m_fileEquipmentData{ fileEquipmentData }
 	    , m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }
+	    , m_enemySpawner{ m_factoryManager, m_componentManager, m_resourceManager }
 	    , m_projectileFactory{ m_entityManager, m_componentManager }
 	    , m_playerData{ game::data::PlayerData::fromMetadata(m_resourceManager.getMetadata(constant::model_id::PLAYER).value()) }
 	    , m_effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() }
@@ -155,14 +157,10 @@ namespace game::scene
 		// は Player.cpp のコンストラクタで初期化済
 
 		m_groundId = initializer.initializeGround();
-		// m_enemyIds = initializer.initializeEnemies();
 
-		// 全敵の追跡対象をプレイヤーに設定する
-		for (auto enemyId : m_enemyIds)
-		{
-			auto& ai = m_componentManager.get<component::AIComponent>(enemyId);
-			ai.m_targetEntity = core::ecs::Entity(m_playerId);
-		}
+		// 生成される敵の追跡対象をプレイヤーに設定してからスポーンする
+		m_enemySpawner.setTargetEntity(core::ecs::Entity(m_playerId));
+		m_enemyIds = m_enemySpawner.spawnStageEnemies();
 	}
 
 	void InGame::setupSystems()
@@ -218,6 +216,18 @@ namespace game::scene
 		}
 		m_systemManager.registerSystem<game::system::ai::EnemyRangedAttackSystem>(
 		    m_componentManager, m_projectileFactory, tabProjectileMeta, std::move(tabVisuals));
+
+		// ボス（Mac）のFSM駆動。遠距離はレインボー弾を扇状に、召喚はEnemySpawner経由で行う。
+		// レインボーの当たり判定半径は projectileData.json の radius が 0 ならモデル実寸から自動計算
+		const auto& rainbowMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::BOSS_RAINBOW) };
+		const int rainbowHandle{ m_resourceManager.loadModelById(constant::model_id::BOSS_RAINBOW_WHEEL) };
+		const float rainbowRadius{ rainbowMeta.m_radius > 0.0f
+			                           ? rainbowMeta.m_radius
+			                           : m_resourceManager.computeBoundingRadius(rainbowHandle, rainbowMeta.m_scale) };
+
+		m_systemManager.registerSystem<game::system::ai::BossAISystem>(
+		    m_componentManager, m_eventBus, m_projectileFactory, m_enemySpawner,
+		    rainbowMeta, rainbowHandle, rainbowRadius);
 
 		// ジョブに応じた攻撃SEタイプを決定してAttackSystemに渡す
 		core::constant::SeType playerAttackSeType{ core::constant::SeType::None };
