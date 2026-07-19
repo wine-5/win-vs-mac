@@ -23,5 +23,15 @@ namespace game::component
 
 		// シェイク：今フレームのカメラ位置・注視点への揺れオフセット。DamageShakeSystemが書く。
 		core::Vector3 m_shakeOffset{ 0.0f, 0.0f, 0.0f };
+
+		// ボス覚醒演出の揺れオフセット（m_shakeOffsetに加算される）。BossAwakenEffectSystemが書く。
+		core::Vector3 m_awakenShakeOffset{ 0.0f, 0.0f, 0.0f };
+
+		// シネマ演出：カメラをボス等へ寄せるブレンド量（0＝通常カメラ、1＝完全に注視先へ寄る）。
+		// BossAwakenEffectSystemが書き、CameraSystemが通常カメラと注視先カメラを補間する。
+		float m_cinematicBlend{ 0.0f };
+
+		// シネマ演出の注視先（ワールド座標）。m_cinematicBlend > 0 のときだけ使われる。
+		core::Vector3 m_cinematicTarget{ 0.0f, 0.0f, 0.0f };
 	};
 } // namespace game::component

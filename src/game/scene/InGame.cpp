@@ -36,7 +36,6 @@
 #include "game/constant/EnemyType.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
-#include "game/system/AISystem.h"
 #include "game/system/ai/MeleeChaseAISystem.h"
 #include "game/system/ai/RangeKeepAISystem.h"
 #include "game/system/ai/EnemyRangedAttackSystem.h"
@@ -52,6 +51,7 @@
 #include "game/system/PlayerChargeVisualsSystem.h"
 #include "game/system/ChargeZoomSystem.h"
 #include "game/system/DamageShakeSystem.h"
+#include "game/system/BossAwakenEffectSystem.h"
 #include "core/interface/IWindowFactory.h"
 #include "game/event/InGameEvents.h"
 #include "game/utility/ExtensionBonusCalculator.h"
@@ -177,6 +177,14 @@ namespace game::scene
 		// カメラ演出（Zoom/Shake）はCameraSystemより前に走らせ、合成結果をCameraEffectComponentへ書いておく
 		m_systemManager.registerSystem<game::system::ChargeZoomSystem>(m_componentManager, m_playerId);
 		m_systemManager.registerSystem<game::system::DamageShakeSystem>(m_componentManager, m_eventBus, m_playerId);
+		// ボス覚醒演出（ズーム・シェイク・赤ビネット）。CameraSystemより前に走らせて演出チャンネルを書く。
+		// 描画（赤ビネット）はInGameViewの描画フェーズから呼ぶためポインタを渡す
+		auto* bossAwakenEffect{ m_systemManager.registerSystem<game::system::BossAwakenEffectSystem>(
+			m_componentManager, m_eventBus,
+			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+			*core::base::ServiceLocator::get<core::iface::IScreen>(),
+			m_playerId) };
+		m_view.setBossAwakenEffectSystem(bossAwakenEffect);
 		// カメラはMoveSystemより前に更新し、最新のyawで移動方向を計算させる
 		m_systemManager.registerSystem<game::system::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera);
 		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
@@ -199,7 +207,6 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
 
 		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
-		m_systemManager.registerSystem<game::system::AISystem>(m_componentManager);
 		// AI行動分割：近接追跡型敵を駆動
 		m_systemManager.registerSystem<game::system::ai::MeleeChaseAISystem>(m_componentManager);
 		// AI行動分割：遠距離維持型敵を駆動

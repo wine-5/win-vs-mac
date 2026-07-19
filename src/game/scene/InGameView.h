@@ -10,6 +10,7 @@
 namespace game::system
 {
 	class PlayerChargeVisualsSystem;
+	class BossAwakenEffectSystem;
 } // namespace game::system
 
 namespace game::scene
@@ -84,6 +85,12 @@ namespace game::scene
 		 */
 		void setPlayerChargeVisualsSystem(system::PlayerChargeVisualsSystem* system);
 
+		/**
+		 * @brief ボス覚醒演出System（赤ビネットの描画元）を設定する
+		 * @param system BossAwakenEffectSystemのポインタ（所有はSystemManager）
+		 */
+		void setBossAwakenEffectSystem(system::BossAwakenEffectSystem* system);
+
 	  private:
 		/**
 		 * @brief プレイヤー・地面・敵のモデルを描画する
@@ -140,6 +147,9 @@ namespace game::scene
 		// 溜め攻撃の集中線の描画元（描画内容はSystemが持ち、Viewは描画順だけを管理する）
 		// 所有はSystemManagerにあり、InGameがsetupSystemsで設定する
 		system::PlayerChargeVisualsSystem* m_playerChargeVisualsSystem{ nullptr };
+
+		// ボス覚醒演出の赤ビネットの描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
+		system::BossAwakenEffectSystem* m_bossAwakenEffectSystem{ nullptr };
 
 		bool m_isDebugVisualsEnabled{ true };
 		bool m_isDebugColliderEnabled{ false };

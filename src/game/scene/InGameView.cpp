@@ -5,10 +5,12 @@
 #include "game/component/ColliderComponent.h"
 #include "game/component/AttackComponent.h"
 #include "game/component/AIComponent.h"
+#include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/AimComponent.h"
 #include "game/component/ProjectileComponent.h"
 #include "game/component/PlayerChargeComponent.h"
 #include "game/system/PlayerChargeVisualsSystem.h"
+#include "game/system/BossAwakenEffectSystem.h"
 #include <cmath>
 
 namespace game::scene
@@ -43,6 +45,10 @@ namespace game::scene
 		if (m_playerChargeVisualsSystem)
 			m_playerChargeVisualsSystem->draw();
 
+		// ボス覚醒の赤ビネット（画面全体の演出。HUDより奥に描く）
+		if (m_bossAwakenEffectSystem)
+			m_bossAwakenEffectSystem->draw();
+
 		// 照準レティクル（HUD）は最前面に描く
 		drawReticle(playerId);
 
@@ -53,6 +59,11 @@ namespace game::scene
 	void InGameView::setPlayerChargeVisualsSystem(system::PlayerChargeVisualsSystem* system)
 	{
 		m_playerChargeVisualsSystem = system;
+	}
+
+	void InGameView::setBossAwakenEffectSystem(system::BossAwakenEffectSystem* system)
+	{
+		m_bossAwakenEffectSystem = system;
 	}
 
 	void InGameView::setDebugVisualsEnabled(bool enabled)
@@ -174,8 +185,13 @@ namespace game::scene
 			const float distance{ std::sqrt(traveled.x * traveled.x + traveled.y * traveled.y + traveled.z * traveled.z) };
 			const float tumble{ distance * TUMBLE_PER_UNIT };
 
-			// 左右にぐるぐる回す（垂直＝Y軸まわりの回転）
-			const core::Vector3 rotation{ 0.0f, tumble, 0.0f };
+			// レインボーは画面に正対して回る「ルーレット（Loading）」にする＝Z軸（画面奥行き）単独で回す。
+			// Y軸タンブルと混ぜると2つのEuler回転が合成されて軸が傾くため、レインボーではYを使わない。
+			// 回転の速さ（m_spinRollSpeed）はmacData.jsonのrainbowSpinSpeedから渡される。
+			// それ以外の弾（タブ等）は従来どおり左右にぐるぐる（Y軸まわり）回す。
+			const core::Vector3 rotation{ (projectile.m_spinRollSpeed > 0.0f)
+				                              ? core::Vector3{ 0.0f, 0.0f, distance * projectile.m_spinRollSpeed }
+				                              : core::Vector3{ 0.0f, tumble, 0.0f } };
 			m_renderer.drawModel(render.m_modelHandle, transform.m_position, rotation, transform.m_scale);
 		}
 	}
@@ -219,12 +235,8 @@ namespace game::scene
 			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
 			auto& atk{ m_componentManager.get<component::AttackComponent>(id) };
 
-			bool isFlying{ false };
-			if (m_componentManager.has<component::AIComponent>(id))
-			{
-				auto& ai{ m_componentManager.get<component::AIComponent>(id) };
-				isFlying = (ai.m_behavior == constant::AIBehavior::RangeKeepDistance);
-			}
+			// 浮遊型（Safari）はRangeKeepAIComponentのマーカーで判定する
+			const bool isFlying{ m_componentManager.has<component::ai::RangeKeepAIComponent>(id) };
 
 			if (!isFlying && m_componentManager.has<component::ColliderComponent>(id))
 			{
@@ -254,7 +266,8 @@ namespace game::scene
 			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
 			auto& ai{ m_componentManager.get<component::AIComponent>(id) };
 
-			const bool isFlying{ ai.m_behavior == constant::AIBehavior::RangeKeepDistance };
+			// 浮遊型（Safari）はRangeKeepAIComponentのマーカーで判定する
+			const bool isFlying{ m_componentManager.has<component::ai::RangeKeepAIComponent>(id) };
 			if (!isFlying && m_componentManager.has<component::ColliderComponent>(id))
 			{
 				auto& collider{ m_componentManager.get<component::ColliderComponent>(id) };
