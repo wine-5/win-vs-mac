@@ -1,0 +1,18 @@
+{
+  "effects": [
+    {
+      "type": "Hit",
+      "path": "assets/effects/slash.efk",
+      "poolSize": 10,
+      "yOffset": 75.0,
+      "scale": 10.0
+    },
+    {
+      "type": "EnemySpawn",
+      "path": "assets/effects/enemy_spawn.efk",
+      "poolSize": 5,
+      "yOffset": 0.0,
+      "scale": 10.0
+    }
+  ]
+}

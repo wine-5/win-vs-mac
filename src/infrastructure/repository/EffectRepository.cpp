@@ -17,9 +17,9 @@ namespace infrastructure::repository
 
 	void EffectRepository::initialize()
 	{
-		std::ifstream file{ "assets/config/resources.json" };
+		std::ifstream file{ "assets/data/effectData.json" };
 		if (!file.is_open())
-			throw std::runtime_error{ "resoures.jsonを開けませんでした" };
+			throw std::runtime_error{ "assets/data/effectData.jsonを開けませんでした" };
 
 		nlohmann::json json{};
 		file >> json;
@@ -36,9 +36,9 @@ namespace infrastructure::repository
 	{
 		if (!json.contains("effects")) return;
 
-		const std::unordered_map<std::string, core::constant::EffectType> typeMap
-		{
+		const std::unordered_map<std::string, core::constant::EffectType> typeMap{
 			{ "Hit", core::constant::EffectType::Hit },
+			{ "EnemySpawn", core::constant::EffectType::EnemySpawn },
 		};
 
 		for (const auto& entry : json["effects"])

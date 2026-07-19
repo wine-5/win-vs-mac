@@ -41,15 +41,6 @@
     {"id": "desktop-bg",        "path": "assets/images/background/DesktopBG.jpg"},
     {"id": "projectile-window", "path": "assets/images/ingame/projectile_window.png"}
   ],
-  "effects": [
-    {
-      "type": "Hit",
-      "path": "assets/effects/slash.efk",
-      "poolSize": 10,
-      "yOffset": 75.0,
-      "scale": 10.0
-    }
-  ],
   "bgm": [
     { "type": "Title",      "path": "assets/audio/bgm/bgm_title.mp3",         "volume":0.0, "useFade": true  },
     { "type": "Select",     "path": "assets/audio/bgm/bgm_select.mp3",        "volume":0.0, "useFade": true  },
