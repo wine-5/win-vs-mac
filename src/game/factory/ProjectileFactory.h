@@ -17,6 +17,7 @@ namespace game::factory
 		float m_radius{ 0.0f };   // 大きさの半径（AttackComponent.m_attackRange に入る＝当たり判定）
 		float m_scale{ 1.0f };    // 見た目スケール（0だと描画されないため1.0を既定にする）
 		int m_modelHandle{ -1 };  // 3Dモデル描画用のハンドル（-1ならモデル描画なし）
+		bool m_spinRoll{ false }; // trueなら進行軸まわりにも回す（レインボーのルーレット回転演出）
 	};
 
 	/**

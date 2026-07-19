@@ -273,12 +273,14 @@ namespace game::system::ai
 			};
 
 			factory::ProjectileConfig config{};
-			config.m_speed = m_rainbowMeta.m_speed;
+			// 弾速はフェーズ指定(rainbowSpeed>0)を優先し、未指定ならprojectileData.jsonの既定値
+			config.m_speed = (phase.m_rainbowSpeed > 0.0f) ? phase.m_rainbowSpeed : m_rainbowMeta.m_speed;
 			config.m_damage = m_rainbowMeta.m_damage;
 			config.m_lifetime = m_rainbowMeta.m_lifetime;
 			config.m_radius = m_rainbowRadius;
 			config.m_scale = m_rainbowMeta.m_scale;
 			config.m_modelHandle = m_rainbowModelHandle;
+			config.m_spinRoll = true; // レインボーは進行軸まわりにも回してルーレット感を出す
 
 			m_projectileFactory.spawn(origin, fanDir, config, constant::Tag::Enemy);
 		}
