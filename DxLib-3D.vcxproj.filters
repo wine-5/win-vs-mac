@@ -117,6 +117,9 @@
     <ClCompile Include="src\game\factory\EnemyFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\factory\EnemySpawner.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="src\game\attack\BaseAttackHandler.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -552,6 +555,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\factory\EnemyFactory.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\factory\EnemySpawner.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\attack\DamageChain.h">

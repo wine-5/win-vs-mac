@@ -11,10 +11,18 @@
 
 namespace game::factory
 {
-    /**
-     * @brief Enemyオブジェクトの生成と寿命管理を担当
-     */
-    class EnemyFactory : public IFactory
+	/**
+	 * @brief EnemyType→具体クラスのインスタンス化と、生成後の寿命管理を担当する低レベルなFactory
+	 *
+	 * 「型を渡されたら対応するEnemyを作って所有する」ことだけに責務を絞る。
+	 * 生成に必要な材料（modelHandle・EnemyData）は呼び出し側で用意済みの前提とし、
+	 * リソースのロードやステージ配置、AI追跡対象の設定などゲーム文脈は一切知らない。
+	 * これによりResourceManager等への依存が広がらず、生成の抽象として単体テストしやすく保つ。
+	 *
+	 * ゲーム文脈を組み立てて本クラスを呼び出す高レベルな役割は EnemySpawner が担う。
+	 * （生成の「オーケストレーション」と「インスタンス化」を意図的に分離している）
+	 */
+	class EnemyFactory : public IFactory
     {
     public:
         /**

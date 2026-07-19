@@ -1,20 +1,15 @@
 ﻿#pragma once
 #include "FactoryManager.h"
 #include "core/interface/IResourceManager.h"
-#include "core/data/StageMetadata.h"
 #include "game/data/PlayerData.h"
 #include "game/data/GroundData.h"
-#include "game/data/EnemyData.h"
-#include "game/constant/ModelId.h"
 #include <cassert>
-#include <vector>
 
 namespace game::factory
 {
 	/**
 	 * @brief FactoryManagerを使ったエンティティの初期化処理のみを担当
-	 * @note オブジェクトの種類が増えた場合は、JSONからの一括読み込みや
-	 *       クラス分離への切り替えを検討すること。
+	 * @note 敵の生成は EnemySpawner に委譲している（初期スポーン・召喚で共有するため）。
 	 */
 	class FactoryInitializer
 	{
@@ -40,20 +35,7 @@ namespace game::factory
 		 */
 		core::ecs::EntityId initializeGround();
 
-		/**
-		 * @brief ステージ配置定義に基づき雑魚敵を全て生成する
-		 * @return 生成した全EnemyのEntityId
-		 */
-		std::vector<core::ecs::EntityId> initializeEnemies();
-
 	private:
-		/**
-		 * @brief スポーン定義1件から敵を生成する
-		 * @param spawn スポーン定義
-		 * @return 生成したEnemyのEntityId
-		 */
-		core::ecs::EntityId spawnEnemy(const core::data::SpawnMetadata& spawn);
-
 		FactoryManager& m_factoryManager;
 		core::iface::IResourceManager& m_resourceManager;
 	};
