@@ -158,6 +158,7 @@
     <ClCompile Include="src\game\system\PlayerRangedAttackSystem.cpp" />
     <ClCompile Include="src\game\system\PlayerChargeVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\ChargeZoomSystem.cpp" />
+    <ClCompile Include="src\game\system\BossAwakenEffectSystem.cpp" />
     <ClCompile Include="src\game\system\DamageShakeSystem.cpp" />
     <ClCompile Include="src\game\system\ai\MeleeChaseAISystem.cpp" />
     <ClCompile Include="src\game\system\ai\RangeKeepAISystem.cpp" />
@@ -173,7 +174,6 @@
     <ClCompile Include="src\game\scene\SelectView.cpp" />
     <ClCompile Include="src\game\scene\Title.cpp" />
     <ClCompile Include="src\game\scene\TitleView.cpp" />
-    <ClCompile Include="src\game\system\AISystem.cpp" />
     <ClCompile Include="src\game\system\AttackSystem.cpp" />
     <ClCompile Include="src\game\system\CameraSystem.cpp" />
     <ClCompile Include="src\game\system\TargetingSystem.cpp" />
@@ -355,10 +355,10 @@
     <ClInclude Include="src\game\scene\SelectView.h" />
     <ClInclude Include="src\game\scene\Title.h" />
     <ClInclude Include="src\game\scene\TitleView.h" />
-    <ClInclude Include="src\game\system\AISystem.h" />
     <ClInclude Include="src\game\system\AttackSystem.h" />
     <ClInclude Include="src\game\system\CameraSystem.h" />
     <ClInclude Include="src\game\system\ChargeZoomSystem.h" />
+    <ClInclude Include="src\game\system\BossAwakenEffectSystem.h" />
     <ClInclude Include="src\game\system\DamageShakeSystem.h" />
     <ClInclude Include="src\game\system\ai\MeleeChaseAISystem.h" />
     <ClInclude Include="src\game\system\ai\RangeKeepAISystem.h" />
