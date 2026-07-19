@@ -40,6 +40,8 @@ namespace infrastructure::repository
 			{ "Enemy_HitSword", core::constant::EffectType::Enemy_HitSword },
 			{ "Enemy_HitWindow", core::constant::EffectType::Enemy_HitWindow },
 			{ "Enemy_Spawn", core::constant::EffectType::Enemy_Spawn },
+			{ "Player_Slash", core::constant::EffectType::Player_Slash },
+			{ "Enemy_Slash", core::constant::EffectType::Enemy_Slash },
 		};
 
 		for (const auto& entry : json["effects"])

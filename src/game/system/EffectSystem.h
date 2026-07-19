@@ -25,8 +25,9 @@ namespace game::system
 
     private:
         void onAttackHit(const game::event::AttackHitEvent& event);
+		void onAttackStart(const game::event::AttackStartEvent& event);
 
-        core::ecs::ComponentManager& m_componentManager;
+		core::ecs::ComponentManager& m_componentManager;
         core::base::EventBus&        m_eventBus;
         core::iface::IEffectFactory& m_effectFactory;
     };

@@ -18,6 +18,13 @@ namespace game::system
 				onAttackHit(e);
 			}
 		);
+
+		// AttackStartEventを購読する
+		m_eventBus.subscribe<game::event::AttackStartEvent>(
+		    [this](const game::event::AttackStartEvent& e)
+		    {
+			    onAttackStart(e);
+		    });
 	}
 
 
@@ -65,6 +72,34 @@ namespace game::system
 		auto& effect{ m_componentManager.get<component::EffectComponent>(event.m_targetId) };
 		component::EffectComponent::Slot slot{};
 		slot.m_type   = event.m_effectType;
+		slot.m_handle = handle;
+		effect.m_slots.push_back(slot);
+	}
+
+	void EffectSystem::onAttackStart(const game::event::AttackStartEvent& event)
+	{
+		// 攻撃者自身の位置でエフェクトを再生する（斬撃などの演出用）
+		if (!m_componentManager.has<component::TransformComponent>(event.m_attackerId))
+		{
+			return;
+		}
+
+		const auto& transform{ m_componentManager.get<component::TransformComponent>(event.m_attackerId) };
+
+		int handle{ m_effectFactory.play(event.m_effectType, transform.m_position) };
+		if (handle == -1)
+		{
+			return;
+		}
+
+		if (!m_componentManager.has<component::EffectComponent>(event.m_attackerId))
+		{
+			return;
+		}
+
+		auto& effect{ m_componentManager.get<component::EffectComponent>(event.m_attackerId) };
+		component::EffectComponent::Slot slot{};
+		slot.m_type = event.m_effectType;
 		slot.m_handle = handle;
 		effect.m_slots.push_back(slot);
 	}

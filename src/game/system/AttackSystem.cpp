@@ -56,6 +56,14 @@ namespace game::system
 
 			attack.m_attackRequested = false;
 
+			// 攻撃を開始した瞬間に再生する演出用エフェクト（ヒットの有無に関わらず発行）
+			// Playerの剣攻撃（左クリック）はPlayer_Slash、Enemyの攻撃（近接/遠距離問わず）はEnemy_Slashを再生する
+			const auto& attackerTagForStart{ m_componentManager.get<component::TagComponent>(attackerId) };
+			if (attackerTagForStart.m_tag == constant::Tag::Player)
+				m_eventBus.publish(event::AttackStartEvent{ attackerId, core::constant::EffectType::Player_Slash });
+			else if (attackerTagForStart.m_tag == constant::Tag::Enemy)
+				m_eventBus.publish(event::AttackStartEvent{ attackerId, core::constant::EffectType::Enemy_Slash });
+
 			auto targets{m_componentManager.getAllEntities<component::HealthComponent>()};
 			for (auto targetId : targets)
 			{

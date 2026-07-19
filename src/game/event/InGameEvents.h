@@ -41,6 +41,28 @@ namespace game::event
 	};
 
 	/**
+	 * @brief 攻撃を開始した（振り始めた）ときに発行されるイベント
+	 * ヒットの有無に関わらず、攻撃モーションの再生に合わせたエフェクト（斬撃など）を出すために使用する
+	 */
+	struct AttackStartEvent : public core::event::IGameEvent
+	{
+		/** @brief 攻撃者のEntityId */
+		core::ecs::EntityId m_attackerId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief 再生するエフェクトの種類 */
+		core::constant::EffectType m_effectType{ core::constant::EffectType::None };
+
+		// TODO: ここに音も追加して敵、Playerごとに異なる音を再生するようにする予定
+
+		AttackStartEvent() = default;
+		AttackStartEvent(core::ecs::EntityId attackerId, core::constant::EffectType effectType)
+		    : m_attackerId{ attackerId }
+		    , m_effectType{ effectType }
+		{
+		}
+	};
+
+	/**
 	 * @brief 非ループアニメーションが再生完了したときに発行されるイベント
 	 */
 	struct AnimationFinishedEvent : public core::event::IGameEvent
