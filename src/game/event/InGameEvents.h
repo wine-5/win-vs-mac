@@ -100,4 +100,25 @@ namespace game::event
 		EnemyDeadEvent() = default;
 		EnemyDeadEvent(core::ecs::EntityId id) : m_entityId(id) {}
 	};
+
+	/**
+	 * @brief ボスがフェーズ移行（覚醒）した瞬間に発行されるイベント
+	 *
+	 * 覚醒演出（カメラのズーム・シェイク・赤ビネット等）のトリガーに使う。
+	 */
+	struct BossPhaseTransitionEvent : public core::event::IGameEvent
+	{
+		/** @brief 移行したボスのEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief 移行後のフェーズ番号（0始まり。Phase2なら1） */
+		int m_newPhase{ 0 };
+
+		BossPhaseTransitionEvent() = default;
+		BossPhaseTransitionEvent(core::ecs::EntityId id, int newPhase)
+		    : m_entityId{ id }
+		    , m_newPhase{ newPhase }
+		{
+		}
+	};
 } // namespace game::event
