@@ -55,6 +55,7 @@ namespace game::factory
 		projectile.m_remainingLifetime = config.m_lifetime;
 		projectile.m_spawnPosition = origin;
 		projectile.m_spinRollSpeed = config.m_spinRollSpeed;
+		projectile.m_spinCenter = config.m_spinCenter;
 		m_componentManager.add<component::ProjectileComponent>(id, projectile);
 
 		// 3Dモデルの弾（Safariのタブ等）はRenderComponentを付与し、InGameViewが回転描画する

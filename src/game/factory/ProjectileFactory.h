@@ -21,6 +21,9 @@ namespace game::factory
 		// 0より大きければルーレット回転（画面正対のZ軸スピン）で描画する。
 		// 値は1ワールド単位進むごとの回転量[rad]（レインボーの演出用）
 		float m_spinRollSpeed{ 0.0f };
+
+		// モデルのAABB中心（ローカル・スケール未適用）。原点ズレを打ち消して中心まわりに回すために使う
+		core::Vector3 m_spinCenter{ 0.0f, 0.0f, 0.0f };
 	};
 
 	/**

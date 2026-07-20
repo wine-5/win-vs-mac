@@ -13,5 +13,8 @@ namespace game::component
 		bool  m_attackPressed{ false };
 		bool m_dashPressed{ false };         // Shift押下でダッシュ
 		bool m_rangedAttackPressed{ false }; // 右クリックで遠距離攻撃
+
+		// trueの間は全入力を無効化する（ボス覚醒などのシネマ演出中）。演出Systemが書く
+		bool m_locked{ false };
 	};
 } // namespace game::component

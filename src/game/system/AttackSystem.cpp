@@ -5,6 +5,7 @@
 #include "game/component/TransformComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/ProjectileComponent.h"
+#include "game/component/HitEffectComponent.h"
 #include "game/constant/Tag.h"
 #include "game/attack/DamageChain.h"
 #include "game/attack/BaseAttackHandler.h"
@@ -77,6 +78,17 @@ namespace game::system
 					continue;
 
 				if (!m_componentManager.has<component::TransformComponent>(targetId))
+					continue;
+
+				// 無敵中（ボス覚醒演出など）はダメージを与えない
+				if (m_componentManager.get<component::HealthComponent>(targetId).m_isInvincible)
+					continue;
+
+				// プレイヤーは被弾後の点滅（HitEffect）中は無敵＝連続ヒット防止。
+				// 無敵時間はHitEffectComponent.m_duration（1秒）に自動で同期する
+				if (targetTagCheck.m_tag == constant::Tag::Player &&
+				    m_componentManager.has<component::HitEffectComponent>(targetId) &&
+				    m_componentManager.get<component::HitEffectComponent>(targetId).m_isActive)
 					continue;
 
 				// AttackComponentを持つEntityの攻撃範囲チェック
