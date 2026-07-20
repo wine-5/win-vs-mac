@@ -1,18 +1,12 @@
-﻿#include "DxLib.h"
-#include "resource.h"
-#include "SingletonInitializer.h"
-#include "ServiceLocatorInitializer.h"
+﻿// 自前ヘッダを先にincludeする（DxLibのマクロ（DEFAULT_FONT_SIZE等）と定数名の衝突を防ぐ）
+#include "Application.h"
 #include "core/base/ServiceLocator.h"
-#include "core/interface/ILogger.h"
-#include "core/interface/IAudioManager.h"
-#include "game/scene/SceneManager.h"
-#include "game/scene/SceneType.h"
+#include "DxLib.h"
+#include "resource.h"
 
 namespace
 {
-	constexpr float TARGET_FPS = 60.0f;
-	constexpr float DELTA_TIME = 1.0f / TARGET_FPS;
-	constexpr int   COLOR_BIT = 32;
+	constexpr int COLOR_BIT = 32;
 } // namespace
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
@@ -48,33 +42,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SetMouseDispFlag(TRUE); // リリース・デバッグ問わずマウスカーソルを常時表示
 	SetUseLighting(FALSE);
 
-	// Singletonインスタンスを初期化（ServiceLocatorInitializer より先に呼ぶ）
-	SingletonInitializer::init();
-
-	// サービスを登録
-	ServiceLocatorInitializer::init(screenWidth, screenHeight);
-
-	// ServiceLocatorからSceneManagerを取得
-	auto* sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();	
-	
-	// 初期シーンをBiosに設定
-	sceneManager->changeScene(game::scene::SceneType::InGame);
-	
-	while (ProcessMessage() == 0)
 	{
-		ClearDrawScreen();// 画面クリア
+		// アプリケーション本体（サービス初期化・メインループ・ポーズ制御を統括する）
+		// GameManager/PauseManagerの寿命をServiceLocator::clear()より先に終わらせないよう
+		// スコープで囲む
+		Application app{ screenWidth, screenHeight };
+		app.run();
 
-		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
-		if (audio) audio->update();
-
-		sceneManager->update(DELTA_TIME);
-		sceneManager->draw();
-
-		ScreenFlip();       // 画面を反映
+		// DxLib_End の前にサービスを解放する（Effekseer 等のリソース破棄順序を保証する）
+		core::base::ServiceLocator::clear();
 	}
-
-	// DxLib_End の前にサービスを解放する（Effekseer 等のリソース破棄順序を保証する）
-	core::base::ServiceLocator::clear();
 
 	DxLib_End();
 	return 0;
