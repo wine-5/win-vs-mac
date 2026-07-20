@@ -23,6 +23,8 @@
 #include "infrastructure/Renderer.h"
 #include "infrastructure/Animator.h"
 #include "game/scene/SceneManager.h"
+#include "game/GameManager.h"
+#include "game/PauseManager.h"
 #include "core/interface/IPerformanceDataProvider.h"
 #include "platform/system/WindowsPerformanceProvider.h"
 #include "core/interface/IAudioManager.h"
@@ -30,7 +32,8 @@
 #include "infrastructure/AudioManager.h"
 #include "infrastructure/EffectFactory.h"
 
-void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
+void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
+    game::GameManager& gameManager, game::PauseManager& pauseManager)
 {
 	// ファイルプロバイダを登録
 	core::base::ServiceLocator::provide<core::iface::IFileProvider>(
@@ -100,10 +103,9 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight)
 		std::make_unique<platform::window::WindowFactory>(*screenPtr)
 	);
 
-	// SceneManager登録（内部でSceneFactoryを所有）
+	// SceneManager登録（内部でSceneFactoryを所有。GameManager/PauseManagerを各シーンへ注入する）
 	core::base::ServiceLocator::provide(
-		std::make_unique<game::scene::SceneManager>()
-	);
+	    std::make_unique<game::scene::SceneManager>(gameManager, pauseManager));
 
 	// パフォーマンスデータプロバイダを登録
 	core::base::ServiceLocator::provide<core::iface::IPerformanceDataProvider>(
