@@ -3,6 +3,7 @@
 #include "game/component/TransformComponent.h"
 #include "game/component/InputComponent.h"
 #include "game/event/InGameEvents.h"
+#include "game/constant/BossAwakenTiming.h"
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
 #include <cmath>
@@ -10,11 +11,8 @@
 
 namespace
 {
-	// 演出タイムライン（秒）。合計は BossAISystem の PHASE_TRANSITION_LOCK と揃えること
-	constexpr float ZOOM_IN_TIME{ 1.5f };  // ①カメラがボスへ寄る
-	constexpr float HOLD_TIME{ 2.0f };     // ②寄ったまま：シェイク＋赤ビネット
-	constexpr float ZOOM_OUT_TIME{ 1.0f }; // ③カメラを引いて通常へ戻す
-	constexpr float TOTAL_TIME{ ZOOM_IN_TIME + HOLD_TIME + ZOOM_OUT_TIME };
+	// 演出タイムライン（秒）は game/constant/BossAwakenTiming.h で BossAISystem と共有する
+	namespace timing = game::constant::boss_awaken;
 
 	constexpr float BOSS_LOOK_HEIGHT{ 180.0f }; // ボスの足元でなく胴体〜頭あたりを注視する高さ
 
@@ -83,7 +81,7 @@ namespace game::system
 		m_elapsedTime += deltaTime;
 
 		// 演出終了：チャンネルを戻し、入力ロックを解除する
-		if (m_elapsedTime >= TOTAL_TIME || !m_componentManager.has<component::TransformComponent>(m_bossId))
+		if (m_elapsedTime >= timing::TOTAL_TIME || !m_componentManager.has<component::TransformComponent>(m_bossId))
 		{
 			m_isPlaying = false;
 			effect.m_cinematicBlend = 0.0f;
@@ -109,12 +107,12 @@ namespace game::system
 		// --- タイムラインからブレンド量（カメラの寄り具合）を決める ---
 		float blend{ 0.0f };
 		float holdIntensity{ 0.0f }; // ホールド演出（シェイク・ビネット）の強さ（0〜1）
-		if (m_elapsedTime < ZOOM_IN_TIME)
+		if (m_elapsedTime < timing::ZOOM_IN_TIME)
 		{
 			// ①ズームイン：0→1へ滑らかに寄る
-			blend = smoothstep(m_elapsedTime / ZOOM_IN_TIME);
+			blend = smoothstep(m_elapsedTime / timing::ZOOM_IN_TIME);
 		}
-		else if (m_elapsedTime < ZOOM_IN_TIME + HOLD_TIME)
+		else if (m_elapsedTime < timing::ZOOM_IN_TIME + timing::HOLD_TIME)
 		{
 			// ②ホールド：寄ったままシェイク＋赤ビネット
 			blend = 1.0f;
@@ -123,7 +121,7 @@ namespace game::system
 		else
 		{
 			// ③ズームアウト：1→0へ滑らかに引く
-			const float t{ (m_elapsedTime - ZOOM_IN_TIME - HOLD_TIME) / ZOOM_OUT_TIME };
+			const float t{ (m_elapsedTime - timing::ZOOM_IN_TIME - timing::HOLD_TIME) / timing::ZOOM_OUT_TIME };
 			blend = 1.0f - smoothstep(t);
 		}
 		effect.m_cinematicBlend = blend;

@@ -32,6 +32,7 @@ namespace game::system::ai
 		 * @param rainbowMeta レインボー弾のメタデータ
 		 * @param rainbowModelHandle レインボーモデルのハンドル
 		 * @param rainbowRadius レインボー弾の当たり判定半径
+		 * @param rainbowCenter レインボーモデルのAABB中心（回転の原点ズレ補正用）
 		 */
 		BossAISystem(core::ecs::ComponentManager& componentManager,
 		    core::base::EventBus& eventBus,
@@ -39,7 +40,8 @@ namespace game::system::ai
 		    factory::EnemySpawner& enemySpawner,
 		    core::data::ProjectileMetadata rainbowMeta,
 		    int rainbowModelHandle,
-		    float rainbowRadius);
+		    float rainbowRadius,
+		    core::Vector3 rainbowCenter);
 
 		/**
 		 * @brief FSMを1フレーム分更新する
@@ -97,6 +99,7 @@ namespace game::system::ai
 		core::data::ProjectileMetadata m_rainbowMeta{};
 		int m_rainbowModelHandle{ -1 };
 		float m_rainbowRadius{ 0.0f };
+		core::Vector3 m_rainbowCenter{ 0.0f, 0.0f, 0.0f };
 
 		std::mt19937 m_rng{ std::random_device{}() };
 	};

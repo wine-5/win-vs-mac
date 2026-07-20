@@ -7,6 +7,7 @@
 #include "game/constant/AnimationState.h"
 #include "game/constant/Tag.h"
 #include "game/constant/EnemyType.h"
+#include "game/constant/BossAwakenTiming.h"
 #include "game/event/InGameEvents.h"
 #include <cmath>
 #include <utility>
@@ -22,7 +23,8 @@ namespace
 	constexpr float MELEE_LOCK{ 1.0f };
 	constexpr float RANGED_LOCK{ 1.2f };
 	constexpr float SUMMON_LOCK{ 1.2f };
-	constexpr float PHASE_TRANSITION_LOCK{ 2.0f }; // 覚醒演出の停止時間
+	// 覚醒演出の停止時間。演出タイムラインの合計（BossAwakenTiming.h）と共有し、ズレを防ぐ
+	constexpr float PHASE_TRANSITION_LOCK{ game::constant::boss_awaken::TOTAL_TIME };
 } // namespace
 
 namespace game::system::ai
@@ -33,7 +35,8 @@ namespace game::system::ai
 	    factory::EnemySpawner& enemySpawner,
 	    core::data::ProjectileMetadata rainbowMeta,
 	    int rainbowModelHandle,
-	    float rainbowRadius)
+	    float rainbowRadius,
+	    core::Vector3 rainbowCenter)
 	    : m_componentManager{ componentManager }
 	    , m_eventBus{ eventBus }
 	    , m_projectileFactory{ projectileFactory }
@@ -41,6 +44,7 @@ namespace game::system::ai
 	    , m_rainbowMeta{ std::move(rainbowMeta) }
 	    , m_rainbowModelHandle{ rainbowModelHandle }
 	    , m_rainbowRadius{ rainbowRadius }
+	    , m_rainbowCenter{ rainbowCenter }
 	{
 	}
 
@@ -78,6 +82,13 @@ namespace game::system::ai
 			if (boss.m_animLockTimer > 0.0f)
 				boss.m_animLockTimer -= deltaTime;
 
+			// 覚醒演出が終わったら無敵を解除して行動再開する
+			if (boss.m_state == BossState::PhaseTransition && boss.m_animLockTimer <= 0.0f)
+			{
+				health.m_isInvincible = false;
+				boss.m_state = BossState::Chase;
+			}
+
 			// --- フェーズ移行（1回だけ） ---
 			if (!boss.m_phase2Triggered && boss.m_config.m_hasPhase2)
 			{
@@ -89,12 +100,13 @@ namespace game::system::ai
 					boss.m_state = BossState::PhaseTransition;
 					boss.m_animLockTimer = PHASE_TRANSITION_LOCK;
 					boss.m_actionTimer = boss.currentPhase().m_actionInterval;
+					health.m_isInvincible = true; // 覚醒演出中は無敵（演出終了時に解除する）
 					if (hasVelocity)
 						m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
 					if (m_componentManager.has<component::AnimationComponent>(entityId))
 						m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 
-					// 覚醒演出（カメラズーム・シェイク・赤ビネット）のトリガー
+					// 覚醒演出（カメラをボスへ寄せる・シェイク・赤ビネット）のトリガー
 					m_eventBus.publish(event::BossPhaseTransitionEvent{ entityId, core::data::BossPhase::Awakened });
 					continue;
 				}
@@ -280,7 +292,8 @@ namespace game::system::ai
 			config.m_radius = m_rainbowRadius;
 			config.m_scale = m_rainbowMeta.m_scale;
 			config.m_modelHandle = m_rainbowModelHandle;
-			config.m_spinRoll = true; // レインボーは進行軸まわりにも回してルーレット感を出す
+			config.m_spinRollSpeed = phase.m_rainbowSpinSpeed; // レインボーのルーレット回転（速さはJSONで調整）
+			config.m_spinCenter = m_rainbowCenter;             // 原点ズレを打ち消して中心まわりに回す
 
 			m_projectileFactory.spawn(origin, fanDir, config, constant::Tag::Enemy);
 		}

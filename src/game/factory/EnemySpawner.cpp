@@ -71,12 +71,10 @@ namespace game::factory
 		return enemyId;
 	}
 
-	std::vector<core::ecs::EntityId> EnemySpawner::spawnStageEnemies()
+	void EnemySpawner::spawnStageEnemies()
 	{
-		std::vector<core::ecs::EntityId> enemyIds{};
 		const auto& stage{ m_resourceManager.getStageMetadata() };
 		for (const auto& spawn : stage.m_spawns)
-			enemyIds.push_back(this->spawn(constant::toEnemyType(spawn.m_type), spawn.m_position));
-		return enemyIds;
+			this->spawn(constant::toEnemyType(spawn.m_type), spawn.m_position);
 	}
 } // namespace game::factory
