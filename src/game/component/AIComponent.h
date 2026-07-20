@@ -1,16 +1,17 @@
 ﻿#pragma once
 #include "core/ecs/Entity.h"
-#include "game/constant/AIBehavior.h"
 
 namespace game::component
 {
 	/**
-     * @brief AI追従行動を制御するコンポーネント	
-     */
+	 * @brief AI追従行動を制御するコンポーネント
+	 *
+	 * 行動タイプの判別は各AI専用マーカーコンポーネント
+	 * （MeleeChaseAIComponent / RangeKeepAIComponent / BossAIComponent）の有無で行う
+	 */
 	struct AIComponent
 	{
 		core::ecs::Entity m_targetEntity{ 0 };
-		constant::AIBehavior m_behavior{ constant::AIBehavior::MeleeChase };
 
 		// 以下はJSON未設定時に即座に異常検知できるようにするための意図的な初期値
 		float m_moveSpeed{ 0.0f };

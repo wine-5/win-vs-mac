@@ -160,6 +160,41 @@ namespace infrastructure::repository
 		return radius;
 	}
 
+	core::Vector3 ModelRepository::computeBoundingCenter(int modelHandle) const
+	{
+		if (modelHandle == -1)
+			return core::Vector3{};
+
+		// 参照メッシュからAABBを求め、その中心（ローカル座標）を返す
+		MV1SetupReferenceMesh(modelHandle, -1, TRUE);
+		const MV1_REF_POLYGONLIST refPoly{ MV1GetReferenceMesh(modelHandle, -1, TRUE) };
+
+		core::Vector3 center{};
+		if (refPoly.VertexNum > 0)
+		{
+			VECTOR vMin{ refPoly.Vertexs[0].Position };
+			VECTOR vMax{ refPoly.Vertexs[0].Position };
+			for (int i{ 1 }; i < refPoly.VertexNum; ++i)
+			{
+				const VECTOR& p{ refPoly.Vertexs[i].Position };
+				vMin.x = (p.x < vMin.x) ? p.x : vMin.x;
+				vMin.y = (p.y < vMin.y) ? p.y : vMin.y;
+				vMin.z = (p.z < vMin.z) ? p.z : vMin.z;
+				vMax.x = (p.x > vMax.x) ? p.x : vMax.x;
+				vMax.y = (p.y > vMax.y) ? p.y : vMax.y;
+				vMax.z = (p.z > vMax.z) ? p.z : vMax.z;
+			}
+			center = core::Vector3{
+				(vMax.x + vMin.x) * 0.5f,
+				(vMax.y + vMin.y) * 0.5f,
+				(vMax.z + vMin.z) * 0.5f
+			};
+		}
+
+		MV1TerminateReferenceMesh(modelHandle, -1, TRUE);
+		return center;
+	}
+
 	std::optional<core::data::ModelMetadata> ModelRepository::getMetadata(std::string_view modelId) const
 	{
 		auto it{ m_metadata.find(std::string(modelId)) };

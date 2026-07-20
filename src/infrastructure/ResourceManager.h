@@ -91,6 +91,8 @@ namespace infrastructure
 		 */
 		[[nodiscard]] float computeBoundingRadius(int modelHandle, float scale) const override;
 
+		[[nodiscard]] core::Vector3 computeBoundingCenter(int modelHandle) const override;
+
 	  private:
 		std::unique_ptr<repository::ModelRepository> m_modelRepo;
 		std::unique_ptr<repository::FontRepository> m_fontRepo;

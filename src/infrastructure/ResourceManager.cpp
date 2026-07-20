@@ -92,4 +92,11 @@ namespace infrastructure
 			return 0.0f;
 		return m_modelRepo->computeBoundingRadius(modelHandle, scale);
 	}
+
+	core::Vector3 ResourceManager::computeBoundingCenter(int modelHandle) const
+	{
+		if (!m_modelRepo)
+			return core::Vector3{};
+		return m_modelRepo->computeBoundingCenter(modelHandle);
+	}
 } // namespace infrastructure

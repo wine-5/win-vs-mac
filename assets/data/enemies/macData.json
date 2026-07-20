@@ -42,7 +42,7 @@
       "weights": { "melee": 2, "ranged": 3, "summon": 3 },
       "rainbowCount": 6,
       "rainbowSpreadDeg": 70.0,
-      "rainbowSpeed": 550.0,
+      "rainbowSpeed": 100.0,
       "rainbowSpinSpeed": 0.15,
       "summonTypes": [ "xcode", "safari" ],
       "summonCount": 2,

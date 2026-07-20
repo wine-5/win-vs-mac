@@ -62,6 +62,16 @@ namespace infrastructure::repository
 		 */
 		[[nodiscard]] float computeBoundingRadius(int modelHandle, float scale) const;
 
+		/**
+		 * @brief モデルのAABB中心（ローカル座標・スケール未適用）を計算する
+		 *
+		 * モデル原点が見た目の中心とズレていると、原点まわりの回転で
+		 * 円軌道を描いてしまう。その逆補正（中心まわりの回転）に使う。
+		 * @param modelHandle モデルハンドル
+		 * @return AABB中心のローカル座標。失敗時はゼロベクトル
+		 */
+		[[nodiscard]] core::Vector3 computeBoundingCenter(int modelHandle) const;
+
 	  private:
 		struct ResourceDefinition
 		{

@@ -93,5 +93,15 @@ namespace core::iface
 		 * @return 水平方向の外接半径。失敗時は 0.0f
 		 */
 		[[nodiscard]] virtual float computeBoundingRadius(int modelHandle, float scale) const = 0;
+
+		/**
+		 * @brief モデルのAABB中心（ローカル座標・スケール未適用）を計算する
+		 *
+		 * モデル原点が見た目の中心とズレていると、原点まわりの回転で円軌道を描く。
+		 * その逆補正（中心まわりの回転）に使う。
+		 * @param modelHandle モデルハンドル
+		 * @return AABB中心のローカル座標。失敗時はゼロベクトル
+		 */
+		[[nodiscard]] virtual core::Vector3 computeBoundingCenter(int modelHandle) const = 0;
 	};
 } // namespace core::iface
