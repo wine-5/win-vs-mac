@@ -6,10 +6,11 @@
 
 namespace game::system
 {
-	InputSystem::InputSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId ,core::iface::IInputProvider& inputProvider)
-		: m_componentManager{componentManager}
-		, m_entityId{entityId}
-		, m_inputProvider{inputProvider}
+	InputSystem::InputSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId, core::iface::IInputProvider& inputProvider, GameManager& gameManager)
+	    : m_componentManager{ componentManager }
+	    , m_entityId{ entityId }
+	    , m_inputProvider{ inputProvider }
+	    , m_gameManager{ gameManager }
 	{
 	}
 
@@ -31,7 +32,7 @@ namespace game::system
 
 		// DEBUG: デバッグモード中はWASD/Space/Shift/マウスをフリーカメラが使うため、
 		// Playerの移動は矢印キーのみで行う（リリース時に削除）
-		const bool debugMode{ GameManager::getInstance().isDebugMode() };
+		const bool debugMode{ m_gameManager.isDebugMode() };
 		const bool allowWasd{ !debugMode };
 
 		// -------------------------------------------------------
