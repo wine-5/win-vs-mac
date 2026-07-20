@@ -154,6 +154,7 @@
     <ClCompile Include="src\game\factory\EnemyFactory.cpp" />
     <ClCompile Include="src\game\factory\EnemySpawner.cpp" />
     <ClCompile Include="src\game\factory\ProjectileFactory.cpp" />
+    <ClCompile Include="src\game\system\ProjectileReflectSystem.cpp" />
     <ClCompile Include="src\game\system\ProjectileSystem.cpp" />
     <ClCompile Include="src\game\system\PlayerRangedAttackSystem.cpp" />
     <ClCompile Include="src\game\system\PlayerChargeVisualsSystem.cpp" />
@@ -328,6 +329,7 @@
     <ClInclude Include="src\game\component\HitEffectComponent.h" />
     <ClInclude Include="src\game\component\TagComponent.h" />
     <ClInclude Include="src\game\constant\EnemyAnimationState.h" />
+    <ClInclude Include="src\game\constant\BossAwakenTiming.h" />
     <ClInclude Include="src\game\constant\EnemyType.h" />
     <ClInclude Include="src\game\constant\MetadataKeys.h" />
     <ClInclude Include="src\game\data\EnemyData.h" />
@@ -341,6 +343,7 @@
     <ClInclude Include="src\game\factory\EnemyFactory.h" />
     <ClInclude Include="src\game\factory\EnemySpawner.h" />
     <ClInclude Include="src\game\factory\ProjectileFactory.h" />
+    <ClInclude Include="src\game\system\ProjectileReflectSystem.h" />
     <ClInclude Include="src\game\system\ProjectileSystem.h" />
     <ClInclude Include="src\game\system\PlayerRangedAttackSystem.h" />
     <ClInclude Include="src\game\system\PlayerChargeVisualsSystem.h" />

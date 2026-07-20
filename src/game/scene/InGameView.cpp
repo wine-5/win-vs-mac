@@ -185,14 +185,34 @@ namespace game::scene
 			const float distance{ std::sqrt(traveled.x * traveled.x + traveled.y * traveled.y + traveled.z * traveled.z) };
 			const float tumble{ distance * TUMBLE_PER_UNIT };
 
-			// レインボーは画面に正対して回る「ルーレット（Loading）」にする＝Z軸（画面奥行き）単独で回す。
-			// Y軸タンブルと混ぜると2つのEuler回転が合成されて軸が傾くため、レインボーではYを使わない。
-			// 回転の速さ（m_spinRollSpeed）はmacData.jsonのrainbowSpinSpeedから渡される。
 			// それ以外の弾（タブ等）は従来どおり左右にぐるぐる（Y軸まわり）回す。
-			const core::Vector3 rotation{ (projectile.m_spinRollSpeed > 0.0f)
-				                              ? core::Vector3{ 0.0f, 0.0f, distance * projectile.m_spinRollSpeed }
-				                              : core::Vector3{ 0.0f, tumble, 0.0f } };
-			m_renderer.drawModel(render.m_modelHandle, transform.m_position, rotation, transform.m_scale);
+			core::Vector3 rotation{ 0.0f, tumble, 0.0f };
+			core::Vector3 drawPos{ transform.m_position };
+
+			if (projectile.m_spinRollSpeed > 0.0f)
+			{
+				// レインボーは画面に正対して回る「ルーレット（Loading）」にする＝Z軸（画面奥行き）単独で回す。
+				// Y軸タンブルと混ぜると2つのEuler回転が合成されて軸が傾くため、レインボーではYを使わない。
+				// 回転の速さ（m_spinRollSpeed）はmacData.jsonのrainbowSpinSpeedから渡される。
+				const float roll{ distance * projectile.m_spinRollSpeed };
+				rotation = core::Vector3{ 0.0f, 0.0f, roll };
+
+				// モデル原点が見た目の中心とズレていると原点まわりの回転で円軌道を描く。
+				// 回転後の中心オフセット（スケール適用）を位置から引き、中心まわりのその場回転にする。
+				const float scale{ transform.m_scale.x };
+				const float cx{ projectile.m_spinCenter.x * scale };
+				const float cy{ projectile.m_spinCenter.y * scale };
+				const float cz{ projectile.m_spinCenter.z * scale };
+				const float cosR{ std::cos(roll) };
+				const float sinR{ std::sin(roll) };
+				drawPos = core::Vector3{
+					transform.m_position.x - (cx * cosR - cy * sinR),
+					transform.m_position.y - (cx * sinR + cy * cosR),
+					transform.m_position.z - cz
+				};
+			}
+
+			m_renderer.drawModel(render.m_modelHandle, drawPos, rotation, transform.m_scale);
 		}
 	}
 

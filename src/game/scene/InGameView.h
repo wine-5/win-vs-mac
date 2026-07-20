@@ -153,7 +153,7 @@ namespace game::scene
 
 		bool m_isDebugVisualsEnabled{ true };
 		bool m_isDebugColliderEnabled{ false };
-		bool m_isDebugAttackRangeEnabled{ false };
+		bool m_isDebugAttackRangeEnabled{ true };
 		bool m_isDebugDetectionRangeEnabled{ false };
 		bool m_isDebugProjectileRangeEnabled{ false };
 	};

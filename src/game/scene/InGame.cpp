@@ -42,10 +42,12 @@
 #include "game/system/ai/BossAISystem.h"
 #include "game/component/AIComponent.h"
 #include "game/system/CameraSystem.h"
+#include "game/system/DebugCameraSystem.h" // DEBUG: フリーカメラ（リリース時に削除）
 #include "game/component/CameraComponent.h"
 #include "game/system/TargetingSystem.h"
 #include "game/component/AimComponent.h"
 #include "game/system/ProjectileSystem.h"
+#include "game/system/ProjectileReflectSystem.h"
 #include "game/system/PlayerRangedAttackSystem.h"
 #include "game/system/ProjectileWindowSystem.h"
 #include "game/system/PlayerChargeVisualsSystem.h"
@@ -187,6 +189,8 @@ namespace game::scene
 		m_view.setBossAwakenEffectSystem(bossAwakenEffect);
 		// カメラはMoveSystemより前に更新し、最新のyawで移動方向を計算させる
 		m_systemManager.registerSystem<game::system::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera);
+		// DEBUG: デバッグモード時のフリーカメラ。CameraSystem直後・MoveSystemより前に走らせる（リリース時に削除）
+		m_systemManager.registerSystem<game::system::DebugCameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera);
 		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
 		// 照準の敵捕捉判定（カメラ更新後・描画前に走らせる）
 		m_systemManager.registerSystem<game::system::TargetingSystem>(m_componentManager);
@@ -197,6 +201,8 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager);
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
 		m_systemManager.registerSystem<game::system::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);
+		// 敵弾をプレイヤーのWindow弾で跳ね返す（移動後・ダメージ判定AttackSystemより前に判定する）
+		m_systemManager.registerSystem<game::system::ProjectileReflectSystem>(m_componentManager);
 
 		// 弾の見た目として実OSウィンドウを追従させる（移動後の位置を射影するためPhysicsSystemより後）
 		auto* windowFactory{ core::base::ServiceLocator::get<core::iface::IWindowFactory>() };
@@ -238,10 +244,12 @@ namespace game::scene
 		const float rainbowRadius{ rainbowMeta.m_radius > 0.0f
 			                           ? rainbowMeta.m_radius
 			                           : m_resourceManager.computeBoundingRadius(rainbowHandle, rainbowMeta.m_scale) };
+		// モデル原点が見た目の中心とズレていると回転で円軌道を描くため、中心を求めて逆補正する
+		const core::Vector3 rainbowCenter{ m_resourceManager.computeBoundingCenter(rainbowHandle) };
 
 		m_systemManager.registerSystem<game::system::ai::BossAISystem>(
 		    m_componentManager, m_eventBus, m_projectileFactory, m_enemySpawner,
-		    rainbowMeta, rainbowHandle, rainbowRadius);
+		    rainbowMeta, rainbowHandle, rainbowRadius, rainbowCenter);
 
 		// ジョブに応じた攻撃SEタイプを決定してAttackSystemに渡す
 		core::constant::SeType playerAttackSeType{ core::constant::SeType::None };
@@ -324,6 +332,17 @@ namespace game::scene
 	void InGame::update(float deltaTime)
 	{
 		m_elapsedTime += deltaTime;
+
+		// DEBUG: F1キーでデバッグモード（フリーカメラ）のON/OFFを切り替える（リリース時に削除）
+		if (m_inputProvider.isKeyPressed(core::input::KeyCode::F1))
+		{
+			GameManager::getInstance().toggleDebugMode();
+			if (GameManager::getInstance().isDebugMode())
+				LOG("DEBUG: デバッグモードON");
+			else
+				LOG("DEBUG: デバッグモードOFF");
+		}
+
 		m_systemManager.update(deltaTime);
 
 		// DEBUG: Tキーでプレイヤー位置にテストエフェクト（Enemy_Spawn）を再生する（テスト後に削除）
