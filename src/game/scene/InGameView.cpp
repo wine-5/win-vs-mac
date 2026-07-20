@@ -11,6 +11,7 @@
 #include "game/component/PlayerChargeComponent.h"
 #include "game/system/PlayerChargeVisualsSystem.h"
 #include "game/system/BossAwakenEffectSystem.h"
+#include "game/GameManager.h" // DEBUG: デバッグモード状態の参照（リリース時に削除）
 #include <cmath>
 
 namespace game::scene
@@ -52,8 +53,29 @@ namespace game::scene
 		// 照準レティクル（HUD）は最前面に描く
 		drawReticle(playerId);
 
+		// DEBUG: デバッグモード中は左上に「DebugCamera」ラベルを表示する（リリース時に削除）
+		drawDebugCameraLabel();
+
 		// Effekseerエフェクトの描画（3Dモデル描画後・UI手前に呼び出す）
 		// m_effectFactory.draw();
+	}
+
+	void InGameView::drawDebugCameraLabel()
+	{
+		if (!GameManager::getInstance().isDebugMode())
+			return;
+
+		constexpr int LABEL_X{ 16 };
+		constexpr int LABEL_Y{ 16 };
+		constexpr int FONT_SIZE{ 28 };
+		constexpr unsigned int TEXT_COLOR{ 0xFFFFFF00 }; // 黄色（ARGB）
+
+		m_uiRenderer.drawText(LABEL_X, LABEL_Y, "DebugCamera", TEXT_COLOR, FONT_SIZE);
+
+		// 操作方法を併記する（WASD=カメラ、矢印キー=Player）
+		m_uiRenderer.drawText(LABEL_X, LABEL_Y + FONT_SIZE + 4,
+		    "WASD/Space/Shift: Camera   Arrows: Player",
+		    TEXT_COLOR, FONT_SIZE);
 	}
 
 	void InGameView::setPlayerChargeVisualsSystem(system::PlayerChargeVisualsSystem* system)

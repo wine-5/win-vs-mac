@@ -12,6 +12,7 @@ namespace infrastructure
 		{ core::input::KeyCode::D, KEY_INPUT_D },
 		{ core::input::KeyCode::R, KEY_INPUT_R },
 		{ core::input::KeyCode::T, KEY_INPUT_T },
+		{ core::input::KeyCode::F1, KEY_INPUT_F1 }, // DEBUG: デバッグモード切り替え（リリース時に削除）
 		{ core::input::KeyCode::Space, KEY_INPUT_SPACE },
 		{ core::input::KeyCode::Escape, KEY_INPUT_ESCAPE },
 

@@ -2,6 +2,7 @@
 #include "game/component/CameraComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/CameraEffectComponent.h"
+#include "game/GameManager.h"
 #include <cmath>
 #include <algorithm>
 
@@ -20,6 +21,10 @@ namespace game::system
 
 	void CameraSystem::update(float deltaTime)
 	{
+		// DEBUG: デバッグモード中はDebugCameraSystemがカメラを制御するため通常追従を止める（リリース時に削除）
+		if (GameManager::getInstance().isDebugMode())
+			return;
+
 		if (!m_componentManager.has<component::CameraComponent>(m_targetEntityId))
 			return;
 

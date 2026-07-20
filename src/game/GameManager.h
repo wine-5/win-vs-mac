@@ -51,7 +51,28 @@ namespace game
             return m_resultData;
         }
 
-        /**
+		// DEBUG: ここからデバッグモード関連（リリース時にまとめて削除する）
+
+		/**
+		 * @brief デバッグモードのON/OFFを切り替える
+		 */
+		void toggleDebugMode() noexcept
+		{
+			m_debugMode = !m_debugMode;
+		}
+
+		/**
+		 * @brief デバッグモードが有効かどうかを返す
+		 * @return 有効ならtrue
+		 */
+		[[nodiscard]] bool isDebugMode() const noexcept
+		{
+			return m_debugMode;
+		}
+
+		// DEBUG: ここまでデバッグモード関連
+
+		/**
          * @brief デフォルトコンストラクタ（Singleton初期化用）
          */
         GameManager() = default;
@@ -61,5 +82,8 @@ namespace game
         data::FileEquipmentData m_fileEquipmentData{};
         data::JobSelectionData m_jobSelectionData{};
         core::data::ResultData m_resultData{};
-    };
+
+		// DEBUG: デバッグモードの状態（リリース時に削除）
+		bool m_debugMode{ false };
+	};
 } // namespace game

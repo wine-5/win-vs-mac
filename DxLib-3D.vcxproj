@@ -177,6 +177,7 @@
     <ClCompile Include="src\game\scene\TitleView.cpp" />
     <ClCompile Include="src\game\system\AttackSystem.cpp" />
     <ClCompile Include="src\game\system\CameraSystem.cpp" />
+    <ClCompile Include="src\game\system\DebugCameraSystem.cpp" />
     <ClCompile Include="src\game\system\TargetingSystem.cpp" />
     <ClCompile Include="src\game\event\AudioEventListener.cpp" />
     <ClCompile Include="src\game\system\EffectSystem.cpp" />
@@ -359,6 +360,7 @@
     <ClInclude Include="src\game\scene\TitleView.h" />
     <ClInclude Include="src\game\system\AttackSystem.h" />
     <ClInclude Include="src\game\system\CameraSystem.h" />
+    <ClInclude Include="src\game\system\DebugCameraSystem.h" />
     <ClInclude Include="src\game\system\ChargeZoomSystem.h" />
     <ClInclude Include="src\game\system\BossAwakenEffectSystem.h" />
     <ClInclude Include="src\game\system\DamageShakeSystem.h" />

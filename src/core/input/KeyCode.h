@@ -11,8 +11,9 @@ namespace core::input
         A,
         S,
         D,
-		R, // DEBUG: デバッグ用
-		T, // DEBUG: テストエフェクト再生
+		R,  // DEBUG: デバッグ用（現在未使用）
+		T,  // DEBUG: テストエフェクト再生
+		F1, // DEBUG: デバッグモードのON/OFF切り替え
 		Space,
         Escape, // TODO:将来的にPauseにする予定
 

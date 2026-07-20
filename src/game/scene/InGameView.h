@@ -138,6 +138,11 @@ namespace game::scene
 		 */
 		void drawDebugProjectileRanges();
 
+		/**
+		 * @brief DEBUG: デバッグモード中に左上へ「DebugCamera」と操作対象を表示する（リリース時に削除）
+		 */
+		void drawDebugCameraLabel();
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IRenderer& m_renderer;
 		core::iface::IUIRenderer& m_uiRenderer;
