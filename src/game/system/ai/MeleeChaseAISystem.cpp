@@ -8,6 +8,21 @@
 #include "game/constant/AnimationState.h"
 #include <cmath>
 #include <algorithm>
+#include <numbers>
+
+namespace
+{
+	// 巡回時の移動速度倍率（追跡時より遅くうろつかせる）
+	constexpr float PATROL_SPEED_FACTOR{ 0.7f };
+	// 徘徊目的地をスポーン地点から選ぶ距離の範囲
+	constexpr float WANDER_RADIUS_MIN{ 40.0f };
+	constexpr float WANDER_RADIUS_MAX{ 160.0f };
+	// 目的地に到着したとみなす距離
+	constexpr float WANDER_REACH_DISTANCE{ 15.0f };
+	// 目的地到着後に立ち止まる時間の範囲（秒）
+	constexpr float PAUSE_MIN{ 1.0f };
+	constexpr float PAUSE_MAX{ 2.5f };
+} // namespace
 
 namespace game::system::ai
 {
@@ -28,80 +43,185 @@ namespace game::system::ai
 
 			auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
 
-			// AIが無効なら処理をスキップ
+			// AIが無効なら処理をスキップ（死亡後など）
 			if (!ai.m_isActive)
 				continue;
 
-			// 追跡対象が設定されていない場合はスキップ
-			if (ai.m_targetEntity.getId() == 0)
-				continue;
-
+			auto& melee{ m_componentManager.get<component::ai::MeleeChaseAIComponent>(entityId) };
 			auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
-			auto& targetTransform{ m_componentManager.get<component::TransformComponent>(ai.m_targetEntity.getId()) };
 
-			// ターゲットへの方向ベクトルを計算（水平面のみ）
-			core::Vector3 direction{};
-			direction.x = targetTransform.m_position.x - transform.m_position.x;
-			direction.y = 0.0f;
-			direction.z = targetTransform.m_position.z - transform.m_position.z;
-
-			float distance{ std::sqrt(direction.x * direction.x + direction.z * direction.z) };
-
-			// 索敵範囲外なら何もしない
-			if (distance > ai.m_detectionRange)
-				continue;
-
-			// 方向ベクトルを正規化
-			if (distance > 0.0f)
+			// 徘徊の基準点（スポーン地点）を初回だけ記録する
+			if (!melee.m_homeInitialized)
 			{
-				direction.x /= distance;
-				direction.z /= distance;
+				melee.m_homePosition = transform.m_position;
+				melee.m_homeInitialized = true;
 			}
 
-			// 移動速度を設定（AIComponentから移動速度を読む）
-			if (m_componentManager.has<component::VelocityComponent>(entityId))
+			// プレイヤーとの水平距離・方向を測り、索敵範囲内かどうかで状態を切り替える
+			bool canSeePlayer{ false };
+			core::Vector3 dirToPlayer{};
+			float distanceToPlayer{ 0.0f };
+			if (ai.m_targetEntity.getId() != 0)
 			{
-				auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
-				velocity.m_velocity.x = direction.x * ai.m_moveSpeed;
-				velocity.m_velocity.z = direction.z * ai.m_moveSpeed;
-			}
-
-			// 向きを更新（プレイヤーの方を向く）
-			if (distance > 0.0f)
-				transform.m_rotation.y = std::atan2f(-direction.x, -direction.z);
-
-			// アニメーション要求：移動中は Walk、停止時は Idle
-			if (m_componentManager.has<component::AnimationComponent>(entityId))
-			{
-				auto& anim{ m_componentManager.get<component::AnimationComponent>(entityId) };
-				anim.m_requested = (distance > 0.0f)
-				                       ? constant::AnimationState::Walk
-				                       : constant::AnimationState::Idle;
-			}
-
-			// 攻撃のクールダウンを更新
-			if (ai.m_currentAttackCooldown > 0.0f)
-				ai.m_currentAttackCooldown -= deltaTime;
-
-			// 攻撃判定：レンジ内かつクールダウンが完了なら攻撃
-			if (m_componentManager.has<component::AttackComponent>(entityId))
-			{
-				auto& attack{ m_componentManager.get<component::AttackComponent>(entityId) };
-				float attackRange{ attack.m_attackRange };
-
-				// レンジ内かつクールダウンが0以下なら攻撃要求
-				if (distance <= attackRange && ai.m_currentAttackCooldown <= 0.0f)
+				auto& targetTransform{ m_componentManager.get<component::TransformComponent>(ai.m_targetEntity.getId()) };
+				dirToPlayer.x = targetTransform.m_position.x - transform.m_position.x;
+				dirToPlayer.z = targetTransform.m_position.z - transform.m_position.z;
+				distanceToPlayer = std::sqrt(dirToPlayer.x * dirToPlayer.x + dirToPlayer.z * dirToPlayer.z);
+				if (distanceToPlayer > 0.0f)
 				{
-					attack.m_attackRequested = true;
-					// Attack1アニメを要求
-					if (m_componentManager.has<component::AnimationComponent>(entityId))
-					{
-						auto& anim{ m_componentManager.get<component::AnimationComponent>(entityId) };
-						anim.m_requested = constant::AnimationState::Attack1;
-					}
-					ai.m_currentAttackCooldown = ai.m_attackCooldown;
+					dirToPlayer.x /= distanceToPlayer;
+					dirToPlayer.z /= distanceToPlayer;
 				}
+				canSeePlayer = distanceToPlayer <= ai.m_detectionRange;
+			}
+
+			melee.m_state = canSeePlayer ? component::ai::MeleeChaseState::Chase
+			                             : component::ai::MeleeChaseState::Patrol;
+
+			if (melee.m_state == component::ai::MeleeChaseState::Chase)
+				updateChase(entityId, distanceToPlayer, dirToPlayer, deltaTime);
+			else
+				updatePatrol(entityId, deltaTime);
+		}
+	}
+
+	void MeleeChaseAISystem::updateChase(core::ecs::EntityId entityId, float distanceToPlayer,
+	    const core::Vector3& dirToPlayer, float deltaTime)
+	{
+		auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+		auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+
+		// 攻撃レンジ内かどうかを判定
+		bool inAttackRange{ false };
+		if (m_componentManager.has<component::AttackComponent>(entityId))
+			inAttackRange = distanceToPlayer <= m_componentManager.get<component::AttackComponent>(entityId).m_attackRange;
+
+		// 移動：攻撃レンジ内では止まり、外なら接近する
+		// （従来はレンジ内でも速度を与え続け、プレイヤーへ押し込んでいた）
+		if (m_componentManager.has<component::VelocityComponent>(entityId))
+		{
+			auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+			if (inAttackRange)
+			{
+				velocity.m_velocity.x = 0.0f;
+				velocity.m_velocity.z = 0.0f;
+			}
+			else
+			{
+				velocity.m_velocity.x = dirToPlayer.x * ai.m_moveSpeed;
+				velocity.m_velocity.z = dirToPlayer.z * ai.m_moveSpeed;
 			}
 		}
+
+		// 常にプレイヤーの方を向く
+		if (distanceToPlayer > 0.0f)
+			transform.m_rotation.y = std::atan2f(-dirToPlayer.x, -dirToPlayer.z);
+
+		// 攻撃クールダウンを更新
+		if (ai.m_currentAttackCooldown > 0.0f)
+			ai.m_currentAttackCooldown -= deltaTime;
+
+		// 攻撃：レンジ内かつクールダウン完了で攻撃を要求する
+		bool attacking{ false };
+		if (inAttackRange && ai.m_currentAttackCooldown <= 0.0f &&
+		    m_componentManager.has<component::AttackComponent>(entityId))
+		{
+			auto& attack{ m_componentManager.get<component::AttackComponent>(entityId) };
+			attack.m_attackRequested = true;
+			ai.m_currentAttackCooldown = ai.m_attackCooldown;
+			attacking = true;
+		}
+
+		// アニメ要求：攻撃時はAttack1、レンジ内待機はIdle、接近中はWalk
+		if (attacking)
+			requestAnimation(entityId, constant::AnimationState::Attack1);
+		else if (inAttackRange)
+			requestAnimation(entityId, constant::AnimationState::Idle);
+		else
+			requestAnimation(entityId, constant::AnimationState::Walk);
+	}
+
+	void MeleeChaseAISystem::updatePatrol(core::ecs::EntityId entityId, float deltaTime)
+	{
+		auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+		auto& melee{ m_componentManager.get<component::ai::MeleeChaseAIComponent>(entityId) };
+		auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+
+		const bool hasVelocity{ m_componentManager.has<component::VelocityComponent>(entityId) };
+
+		// 立ち止まり中：時間を消化し、その間は停止＋Idle
+		if (melee.m_pauseTimer > 0.0f)
+		{
+			melee.m_pauseTimer -= deltaTime;
+			if (hasVelocity)
+			{
+				auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+				velocity.m_velocity.x = 0.0f;
+				velocity.m_velocity.z = 0.0f;
+			}
+			requestAnimation(entityId, constant::AnimationState::Idle);
+			return;
+		}
+
+		// 目的地が無ければスポーン地点まわりから新たに選ぶ
+		if (!melee.m_hasWanderTarget)
+		{
+			melee.m_wanderTarget = pickWanderTarget(melee.m_homePosition);
+			melee.m_hasWanderTarget = true;
+		}
+
+		// 目的地への水平距離・方向
+		core::Vector3 toTarget{};
+		toTarget.x = melee.m_wanderTarget.x - transform.m_position.x;
+		toTarget.z = melee.m_wanderTarget.z - transform.m_position.z;
+		const float distance{ std::sqrt(toTarget.x * toTarget.x + toTarget.z * toTarget.z) };
+
+		// 到着したら停止して少し立ち止まり、次のフレーム以降で新たな目的地を選ぶ
+		if (distance <= WANDER_REACH_DISTANCE)
+		{
+			melee.m_hasWanderTarget = false;
+			std::uniform_real_distribution<float> pauseDist{ PAUSE_MIN, PAUSE_MAX };
+			melee.m_pauseTimer = pauseDist(m_rng);
+			if (hasVelocity)
+			{
+				auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+				velocity.m_velocity.x = 0.0f;
+				velocity.m_velocity.z = 0.0f;
+			}
+			requestAnimation(entityId, constant::AnimationState::Idle);
+			return;
+		}
+
+		// 目的地へゆっくり移動し、その方向を向く
+		toTarget.x /= distance;
+		toTarget.z /= distance;
+		const float patrolSpeed{ ai.m_moveSpeed * PATROL_SPEED_FACTOR };
+		if (hasVelocity)
+		{
+			auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+			velocity.m_velocity.x = toTarget.x * patrolSpeed;
+			velocity.m_velocity.z = toTarget.z * patrolSpeed;
+		}
+		transform.m_rotation.y = std::atan2f(-toTarget.x, -toTarget.z);
+		requestAnimation(entityId, constant::AnimationState::Walk);
+	}
+
+	core::Vector3 MeleeChaseAISystem::pickWanderTarget(const core::Vector3& home)
+	{
+		std::uniform_real_distribution<float> angleDist{ 0.0f, 2.0f * std::numbers::pi_v<float> };
+		std::uniform_real_distribution<float> radiusDist{ WANDER_RADIUS_MIN, WANDER_RADIUS_MAX };
+		const float angle{ angleDist(m_rng) };
+		const float radius{ radiusDist(m_rng) };
+
+		core::Vector3 target{ home };
+		target.x += std::cos(angle) * radius;
+		target.z += std::sin(angle) * radius;
+		return target;
+	}
+
+	void MeleeChaseAISystem::requestAnimation(core::ecs::EntityId entityId, constant::AnimationState state)
+	{
+		if (m_componentManager.has<component::AnimationComponent>(entityId))
+			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = state;
 	}
 } // namespace game::system::ai
