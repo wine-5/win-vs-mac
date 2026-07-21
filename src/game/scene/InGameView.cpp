@@ -7,6 +7,7 @@
 #include "game/component/PlayerChargeComponent.h"
 #include "game/system/PlayerChargeVisualsSystem.h"
 #include "game/system/BossAwakenEffectSystem.h"
+#include "game/system/DetectionAlertVisualsSystem.h"
 #include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
 #include <cmath>
@@ -48,6 +49,10 @@ namespace game::scene
 		if (m_bossAwakenEffectSystem)
 			m_bossAwakenEffectSystem->draw();
 
+		// 敵の発見演出（頭上の通知バッジ）。モデルの手前・HUDより奥に描く
+		if (m_detectionAlertSystem)
+			m_detectionAlertSystem->draw();
+
 		// 照準レティクル（HUD）は最前面に描く
 		drawReticle(playerId);
 
@@ -67,6 +72,11 @@ namespace game::scene
 	void InGameView::setBossAwakenEffectSystem(system::BossAwakenEffectSystem* system)
 	{
 		m_bossAwakenEffectSystem = system;
+	}
+
+	void InGameView::setDetectionAlertVisualsSystem(system::DetectionAlertVisualsSystem* system)
+	{
+		m_detectionAlertSystem = system;
 	}
 
 	void InGameView::setDebugGizmoView(ui::debug::DebugGizmoView* view)

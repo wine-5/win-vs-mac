@@ -27,6 +27,8 @@
 #include "game/system/CollisionSystem.h"
 #include "game/system/HitEffectSystem.h"
 #include "game/system/EnemyDeathSystem.h"
+#include "game/system/ai/DetectionSystem.h"
+#include "game/system/DetectionAlertVisualsSystem.h"
 #include "game/system/EffectSystem.h"
 #include "core/interface/IEffectFactory.h"
 #include "game/system/AttackSystem.h"
@@ -277,6 +279,9 @@ namespace game::scene
 		    m_componentManager, m_eventBus, m_projectileFactory, m_enemySpawner,
 		    rainbowMeta, rainbowHandle, rainbowRadius, rainbowCenter);
 
+		// 敵がプレイヤーを発見した瞬間を検知（全敵共通）。発見演出のトリガーになる
+		m_systemManager.registerSystem<game::system::ai::DetectionSystem>(m_componentManager, m_eventBus);
+
 		// ジョブに応じた攻撃SEタイプを決定してAttackSystemに渡す
 		core::constant::SeType playerAttackSeType{ core::constant::SeType::None };
 		const auto& jobData{ m_gameManager.getJobSelectionData() };
@@ -304,6 +309,15 @@ namespace game::scene
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
 			m_playerId) };
 		m_view.setPlayerChargeVisualsSystem(chargeVisuals);
+
+		// 敵の発見演出（頭上の通知バッジ）。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
+		auto* detectionAlert{ m_systemManager.registerSystem<game::system::DetectionAlertVisualsSystem>(
+			m_componentManager,
+			m_eventBus,
+			m_renderer,
+			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+			*core::base::ServiceLocator::get<core::iface::IScreen>()) };
+		m_view.setDetectionAlertVisualsSystem(detectionAlert);
 	}
 
 	void InGame::setupEvents()

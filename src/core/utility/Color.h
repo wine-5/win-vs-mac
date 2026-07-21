@@ -64,5 +64,11 @@ namespace core::utility
         static constexpr unsigned int GRAPH_MEMORY = 0xFF40FF80; // 緑：メモリ使用率
         static constexpr unsigned int GRAPH_DISK   = 0xFF80FFFF; // シアン：ディスク活動率
         static constexpr unsigned int CARD_BG      = 0xFF081024; // タスクマネージャー風カード背景（濃い紺）
-    };
+
+		// ========== 発見演出（通知バナー）用の色 ==========
+
+		static constexpr unsigned int ALERT_BANNER_BG = 0xFFF8F8FA;  // iOS通知バナー風の明るい地
+		static constexpr unsigned int ALERT_ICON_RED = 0xFFFF555C;   // アプリアイコンのコーラルレッド
+		static constexpr unsigned int ALERT_DANGER_RED = 0xFFE02424; // 「！」と危険メッセージの赤
+	};
 } // namespace core::utility

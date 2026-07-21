@@ -1,4 +1,4 @@
-#include "DetectionAlertVisualsSystem.h"
+﻿#include "DetectionAlertVisualsSystem.h"
 #include "game/component/AlertComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/ColliderComponent.h"
@@ -10,7 +10,7 @@
 namespace
 {
 	// バナーの表示時間（秒）
-	constexpr float ALERT_DURATION{ 1.6f };
+	constexpr float ALERT_DURATION{ 10.6f };
 	// 出現時のフェードイン・せり上がりにかける時間（秒）
 	constexpr float APPEAR_TIME{ 0.18f };
 	// 表示終了間際にフェードアウトする時間（秒）
@@ -27,11 +27,6 @@ namespace
 
 	// 危険メッセージ（発見時にランダムで1つ選ぶ）
 	constexpr std::array<const char*, 3> ALERT_MESSAGES{ "危険！", "見つかった！", "発見！" };
-
-	// 配色
-	constexpr unsigned int BANNER_BG{ core::utility::Color::rgb(248, 248, 250) }; // iOS通知バナー風の明るい地
-	constexpr unsigned int ICON_BG{ core::utility::Color::rgb(255, 228, 228) };   // アイコンの明るい赤（薄）
-	constexpr unsigned int DANGER_RED{ core::utility::Color::rgb(224, 36, 36) };  // 「！」とメッセージの赤
 } // namespace
 
 namespace game::system
@@ -149,28 +144,29 @@ namespace game::system
 		const int y{ topY };
 		const int radius{ std::max(2, static_cast<int>(bannerH * 0.28f)) };
 
-		// 背景（明るい角丸バー）
-		drawRoundedRect(x, y, bannerW, bannerH, radius, BANNER_BG);
+		using core::utility::Color;
 
-		// 左のアプリアイコン風の角丸四角（赤い縁取り＋薄赤地）
+		// 背景（明るい角丸バー）
+		drawRoundedRect(x, y, bannerW, bannerH, radius, Color::ALERT_BANNER_BG);
+
+		// 左のアイコン：コーラルレッドの円の中央に白い「！」（＝「円の中に！」のイメージ）
 		const int iconX{ x + pad };
 		const int iconY{ y + pad };
-		const int iconRadius{ std::max(2, static_cast<int>(iconSize * 0.28f)) };
-		const int borderInset{ std::max(1, iconSize / 12) };
-		drawRoundedRect(iconX, iconY, iconSize, iconSize, iconRadius, DANGER_RED);
-		drawRoundedRect(iconX + borderInset, iconY + borderInset,
-		    iconSize - borderInset * 2, iconSize - borderInset * 2, iconRadius, ICON_BG);
+		const int iconCenterX{ iconX + iconSize / 2 };
+		const int iconCenterY{ iconY + iconSize / 2 };
+		const int iconCircleRadius{ std::max(2, iconSize / 2) };
+		m_uiRenderer.drawCircle(iconCenterX, iconCenterY, iconCircleRadius, Color::ALERT_ICON_RED, true, 0);
 
-		// アイコン内に赤い「！」を中央寄せで描く
-		const int iconFont{ std::max(8, static_cast<int>(iconSize * 0.66f)) };
+		// 円の中央に白い「！」を収める
+		const int iconFont{ std::max(8, static_cast<int>(iconSize * 0.72f)) };
 		const int exWidth{ m_uiRenderer.getTextWidth("!", iconFont) };
-		m_uiRenderer.drawText(iconX + (iconSize - exWidth) / 2, iconY + (iconSize - iconFont) / 2,
-		    "!", DANGER_RED, iconFont);
+		m_uiRenderer.drawText(iconCenterX - exWidth / 2, iconCenterY - iconFont / 2,
+		    "!", Color::WHITE, iconFont);
 
 		// 危険メッセージ（赤）をアイコンの右へ、縦中央で描く
 		const int msgX{ iconX + iconSize + pad };
 		const int msgY{ y + (bannerH - msgFont) / 2 };
-		m_uiRenderer.drawText(msgX, msgY, message, DANGER_RED, msgFont);
+		m_uiRenderer.drawText(msgX, msgY, message, Color::ALERT_DANGER_RED, msgFont);
 	}
 
 	void DetectionAlertVisualsSystem::drawRoundedRect(int x, int y, int width, int height, int radius, unsigned int color)

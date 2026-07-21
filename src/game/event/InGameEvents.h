@@ -123,6 +123,24 @@ namespace game::event
 	};
 
 	/**
+	 * @brief 敵がプレイヤーを発見した（未索敵→索敵に切り替わった）瞬間に発行されるイベント
+	 *
+	 * DetectionSystemが敵の種類に依らず一律に検知して発行する。
+	 * 発見演出（通知バッジ表示など）のトリガーに使う
+	 */
+	struct EnemyAlertedEvent : public core::event::IGameEvent
+	{
+		/** @brief 発見した敵のEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		EnemyAlertedEvent() = default;
+		explicit EnemyAlertedEvent(core::ecs::EntityId id)
+		    : m_entityId{ id }
+		{
+		}
+	};
+
+	/**
 	 * @brief ボスがフェーズ移行（覚醒）した瞬間に発行されるイベント
 	 *
 	 * 覚醒演出（カメラのズーム・シェイク・赤ビネット等）のトリガーに使う。

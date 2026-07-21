@@ -11,6 +11,7 @@ namespace game::system
 {
 	class PlayerChargeVisualsSystem;
 	class BossAwakenEffectSystem;
+	class DetectionAlertVisualsSystem;
 } // namespace game::system
 
 namespace game::ui::debug
@@ -68,6 +69,12 @@ namespace game::scene
 		void setBossAwakenEffectSystem(system::BossAwakenEffectSystem* system);
 
 		/**
+		 * @brief 発見演出System（頭上の通知バッジの描画元）を設定する
+		 * @param system DetectionAlertVisualsSystemのポインタ（所有はSystemManager）
+		 */
+		void setDetectionAlertVisualsSystem(system::DetectionAlertVisualsSystem* system);
+
+		/**
 		 * @brief DEBUG: ワールド空間デバッグ可視化Viewを設定する（リリース時に削除）
 		 * @param view DebugGizmoViewのポインタ（所有はInGame）
 		 */
@@ -113,6 +120,9 @@ namespace game::scene
 
 		// ボス覚醒演出の赤ビネットの描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::BossAwakenEffectSystem* m_bossAwakenEffectSystem{ nullptr };
+
+		// 発見演出（頭上の通知バッジ）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
+		system::DetectionAlertVisualsSystem* m_detectionAlertSystem{ nullptr };
 
 		// DEBUG: デバッグ可視化・HUDの描画元（所有はInGame。リリース時に削除）
 		ui::debug::DebugGizmoView* m_debugGizmoView{ nullptr };
