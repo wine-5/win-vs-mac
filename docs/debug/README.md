@@ -31,3 +31,4 @@ git grep -n "DEBUG:"
 | 機能 | ドキュメント | 追加コミット |
 |---|---|---|
 | デバッグカメラ（フリーカメラ） | [debug_camera.md](debug_camera.md) | `485cd91` |
+| シーンビュー（時間停止＋フリーカメラ） | [debug_scene_view.md](debug_scene_view.md) |
