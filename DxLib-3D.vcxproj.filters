@@ -165,6 +165,12 @@
     <ClCompile Include="src\Application.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\ui\debug\DebugGizmoView.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\ui\debug\DebugHUDView.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="src\game\ui\pause\PauseMenuController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -687,6 +693,12 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\PauseManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\ui\debug\DebugGizmoView.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\ui\debug\DebugHUDView.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\ui\pause\PauseMenuController.h">
