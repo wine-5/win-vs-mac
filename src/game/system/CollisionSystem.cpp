@@ -3,8 +3,17 @@
 #include "game/component/ColliderComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/VelocityComponent.h"
+#include "game/component/DeathComponent.h"
 #include "game/constant/Tag.h"
 #include <cmath>
+
+namespace
+{
+	// 死亡中の敵が地面で反発する際の反発係数（1回のバウンドで垂直速度がこの割合になる）
+	constexpr float DEATH_BOUNCE_RESTITUTION{ 0.5f };
+	// これより落下速度が遅くなったらバウンドをやめて地面で静止させる
+	constexpr float DEATH_BOUNCE_MIN_SPEED{ 20.0f };
+} // namespace
 
 namespace game::system
 {
@@ -144,8 +153,18 @@ namespace game::system
 				float correction{groundTop - enemyBottom};
 				enemyTransform.m_position.y += correction;
 
-				if (enemyVelocity.m_velocity.y < 0.0f)
+				// 死亡中の敵は地面で反発してバウンドする（Safariの落下演出）。
+				// 落下速度が閾値を下回ったら跳ねるのをやめて静止させ、着地済みとして記録する。
+				// この着地フラグを見てEnemyDeathSystemがバウンド完了後に消失フェードを始める
+				const bool isDying{ m_componentManager.has<component::DeathComponent>(enemyId) };
+				if (isDying && enemyVelocity.m_velocity.y < -DEATH_BOUNCE_MIN_SPEED)
+					enemyVelocity.m_velocity.y = -enemyVelocity.m_velocity.y * DEATH_BOUNCE_RESTITUTION;
+				else if (enemyVelocity.m_velocity.y < 0.0f)
+				{
 					enemyVelocity.m_velocity.y = 0.0f;
+					if (isDying)
+						m_componentManager.get<component::DeathComponent>(enemyId).m_hasLanded = true;
+				}
 			}
 		}
 	}

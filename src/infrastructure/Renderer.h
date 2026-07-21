@@ -25,9 +25,10 @@ namespace infrastructure
 		/**
 		 * @brief 敵撃破時の赤化＋ディゾルブ（消失）演出をモデルに適用する
 		 * @param modelHandle 対象のモデルハンドル
-		 * @param progress 演出の進行度（0.0=死亡直後 〜 1.0=消失完了）
+		 * @param redProgress 赤化の進行度（0.0=元の色 〜 1.0=赤）
+		 * @param alpha 不透明度（1.0=不透明 〜 0.0=完全に消失）
 		 */
-		void applyDeathDissolve(int modelHandle, float progress) override;
+		void applyDeathDissolve(int modelHandle, float redProgress, float alpha) override;
 
 		/**
 		 * @brief applyDeathDissolveで変更した見た目を元に戻す

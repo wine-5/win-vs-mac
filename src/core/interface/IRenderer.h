@@ -24,11 +24,13 @@ namespace core::iface
 		 * @brief 敵撃破時の赤化＋ディゾルブ（消失）演出をモデルに適用する
 		 *
 		 * 初回呼び出し時にモデルの元の色を内部に保存し、以後はそこから赤へブレンドする。
+		 * 赤化と消失フェードは独立に制御できる（落下バウンド中は赤くしつつ不透明を保つ等）。
 		 * モデルハンドルをプールへ返却する前に resetModelAppearance を呼んで元に戻すこと
 		 * @param modelHandle 対象のモデルハンドル
-		 * @param progress 演出の進行度（0.0=死亡直後 〜 1.0=消失完了）
+		 * @param redProgress 赤化の進行度（0.0=元の色 〜 1.0=赤）
+		 * @param alpha 不透明度（1.0=不透明 〜 0.0=完全に消失）
 		 */
-		virtual void applyDeathDissolve(int modelHandle, float progress) = 0;
+		virtual void applyDeathDissolve(int modelHandle, float redProgress, float alpha) = 0;
 
 		/**
 		 * @brief applyDeathDissolveで変更した見た目を元に戻す

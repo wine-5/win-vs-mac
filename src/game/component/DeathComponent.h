@@ -3,14 +3,17 @@
 namespace game::component
 {
 	/**
-	 * @brief 死亡後、Entity破棄までの残り時間を管理する汎用コンポーネント
+	 * @brief 死亡してから後始末されるまでの、死亡ライフサイクルの状態を持つコンポーネント
 	 *
-	 * 「死亡状態で後始末待ち」であることと、その残り時間だけを表す。
-	 * 演出の内容（敵の赤化＋ディゾルブなど）や合計時間は各Systemが持つ責務とし、
-	 * ここには持たせない（PlayerとEnemyで演出が異なるため）
+	 * 「死亡状態で後始末待ち」であることと、その進行状態だけを表す汎用データ。
+	 * 演出の内容（敵の赤化＋ディゾルブ・落下バウンドなど）や時間の意味付けは
+	 * 各Systemの責務とし、ここには演出固有の定数は持たせない（PlayerとEnemyで異なるため）
 	 */
 	struct DeathComponent
 	{
-		float m_timer{ 0.0f };
+		float m_elapsed{ 0.0f };   // 死亡してからの経過秒
+		float m_fadeTimer{ 0.0f }; // 消失フェード開始からの経過秒
+		bool m_fading{ false };    // 消失フェード中か
+		bool m_hasLanded{ false }; // 地面に着地して静止したか（落下する敵用。CollisionSystemが立てる）
 	};
 } // namespace game::component

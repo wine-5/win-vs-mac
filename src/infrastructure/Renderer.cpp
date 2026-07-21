@@ -9,9 +9,6 @@ namespace
 	constexpr float DISSOLVE_RED_R{ 1.0f };
 	constexpr float DISSOLVE_RED_G{ 0.1f };
 	constexpr float DISSOLVE_RED_B{ 0.08f };
-
-	// アルファのフェードアウトを始める進行度（これ以前は不透明のまま死亡アニメを見せる）
-	constexpr float FADE_START_PROGRESS{ 0.5f };
 } // namespace
 
 namespace infrastructure
@@ -34,12 +31,14 @@ namespace infrastructure
 		MV1DrawModel(modelHandle);
 	}
 
-	void Renderer::applyDeathDissolve(int modelHandle, float progress)
+	void Renderer::applyDeathDissolve(int modelHandle, float redProgress, float alpha)
 	{
 		if (modelHandle == -1)
 			return;
 
-		progress = std::clamp(progress, 0.0f, 1.0f);
+		redProgress = std::clamp(redProgress, 0.0f, 1.0f);
+		alpha = std::clamp(alpha, 0.0f, 1.0f);
+		const float progress{ redProgress };
 
 		const int materialNum{ MV1GetMaterialNum(modelHandle) };
 		if (materialNum <= 0)
@@ -84,12 +83,9 @@ namespace infrastructure
 		}
 
 		// ディゾルブ（消失）はアルファのフェードアウトで表現する。
-		// FADE_START_PROGRESS までは不透明を保ち、死亡アニメ・落下を見せてから消えていく
-		float fade{ 0.0f };
-		if (progress > FADE_START_PROGRESS)
-			fade = (progress - FADE_START_PROGRESS) / (1.0f - FADE_START_PROGRESS);
-		const int alpha{ static_cast<int>(255.0f * (1.0f - fade)) };
-		MV1SetMaterialDrawBlendParamAll(modelHandle, alpha);
+		// フェード開始タイミングの制御は呼び出し側（EnemyDeathSystem）の責務
+		const int alphaParam{ static_cast<int>(255.0f * alpha) };
+		MV1SetMaterialDrawBlendParamAll(modelHandle, alphaParam);
 	}
 
 	void Renderer::resetModelAppearance(int modelHandle)
