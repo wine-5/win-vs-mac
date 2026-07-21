@@ -3,6 +3,7 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/interface/IResourceManager.h"
 #include "core/utility/Vector3.h"
+#include "core/base/EventBus.h"
 #include "game/constant/EnemyType.h"
 
 namespace game::factory
@@ -30,11 +31,13 @@ namespace game::factory
 		 * @param factoryManager FactoryManagerの参照
 		 * @param componentManager ComponentManagerの参照
 		 * @param resourceManager IResourceManagerの参照
+		 * @param eventBus スポーン時にEnemySpawnedEventを発行するEventBusの参照
 		 */
 		EnemySpawner(
 		    FactoryManager& factoryManager,
 		    core::ecs::ComponentManager& componentManager,
-		    core::iface::IResourceManager& resourceManager);
+		    core::iface::IResourceManager& resourceManager,
+		    core::base::EventBus& eventBus);
 
 		/**
 		 * @brief 生成する敵の追跡対象（通常はプレイヤー）を設定する
@@ -61,6 +64,7 @@ namespace game::factory
 		FactoryManager& m_factoryManager;
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IResourceManager& m_resourceManager;
+		core::base::EventBus& m_eventBus;
 
 		// 生成した敵に設定する追跡対象。未設定(0)なら設定しない
 		core::ecs::Entity m_target{ 0 };

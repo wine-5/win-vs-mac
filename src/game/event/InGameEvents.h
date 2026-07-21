@@ -4,6 +4,7 @@
 #include "core/constant/EffectType.h"
 #include "core/constant/SeType.h"
 #include "core/data/BossMetadata.h"
+#include "core/utility/Vector3.h"
 #include "game/constant/AnimationState.h"
 
 namespace game::event
@@ -100,6 +101,25 @@ namespace game::event
 
 		EnemyDeadEvent() = default;
 		EnemyDeadEvent(core::ecs::EntityId id) : m_entityId(id) {}
+	};
+
+	/**
+	 * @brief 敵がスポーンしたときに発行されるイベント（初期配置・ボスの召喚の両方で発行）
+	 */
+	struct EnemySpawnedEvent : public core::event::IGameEvent
+	{
+		/** @brief スポーンした敵のEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief スポーン位置 */
+		core::Vector3 m_position{};
+
+		EnemySpawnedEvent() = default;
+		EnemySpawnedEvent(core::ecs::EntityId id, core::Vector3 position)
+		    : m_entityId{ id }
+		    , m_position{ position }
+		{
+		}
 	};
 
 	/**

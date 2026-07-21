@@ -3,6 +3,7 @@
 #include "core/interface/ILogger.h"
 #include "game/component/AIComponent.h"
 #include "game/constant/ModelId.h"
+#include "game/event/InGameEvents.h"
 #include <stdexcept>
 
 namespace
@@ -31,10 +32,12 @@ namespace game::factory
 	EnemySpawner::EnemySpawner(
 	    FactoryManager& factoryManager,
 	    core::ecs::ComponentManager& componentManager,
-	    core::iface::IResourceManager& resourceManager)
+	    core::iface::IResourceManager& resourceManager,
+	    core::base::EventBus& eventBus)
 	    : m_factoryManager{ factoryManager }
 	    , m_componentManager{ componentManager }
 	    , m_resourceManager{ resourceManager }
+	    , m_eventBus{ eventBus }
 	{
 	}
 
@@ -67,6 +70,9 @@ namespace game::factory
 			auto& ai = m_componentManager.get<component::AIComponent>(enemyId);
 			ai.m_targetEntity = m_target;
 		}
+
+		// スポーン演出（Enemy_Spawn）のトリガー。初期配置・ボスの召喚どちらもここを通る
+		m_eventBus.publish(event::EnemySpawnedEvent{ enemyId, position });
 
 		return enemyId;
 	}

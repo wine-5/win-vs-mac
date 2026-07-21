@@ -102,6 +102,9 @@ namespace game::scene
 		core::ecs::ComponentManager m_componentManager;
 		core::ecs::SystemManager 	m_systemManager;
 
+		// 各クラスにイベントバスの参照を渡したいため先にメンバ変数として宣言しておく
+		core::base::EventBus m_eventBus;
+
 		core::iface::ICamera          &m_camera;
 		core::iface::IRenderer        &m_renderer;
 		core::iface::IAnimator        &m_animator;
@@ -121,8 +124,6 @@ namespace game::scene
 		core::ecs::EntityId m_groundId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_bossId{ core::ecs::INVALID_ENTITY_ID };
-
-		core::base::EventBus m_eventBus;
 
 		std::unique_ptr<game::event::AudioEventListener> m_audioEventListener;
 

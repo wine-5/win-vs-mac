@@ -56,7 +56,6 @@ namespace game::scene
 			m_debugHUDView->draw(static_cast<int>(enemyIds.size()));
 
 		// Effekseerエフェクトの描画（3Dモデル描画後・UI手前に呼び出す）
-		// DEBUG: TEST - Active Effectsが減らない原因の切り分けのため一時的に有効化（確認後に戻す）
 		m_effectFactory.draw();
 	}
 
