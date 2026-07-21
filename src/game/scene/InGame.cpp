@@ -291,8 +291,8 @@ namespace game::scene
 		}
 		m_systemManager.registerSystem<game::system::AttackSystem>(m_componentManager, m_eventBus, playerAttackSeType);
 		m_systemManager.registerSystem<game::system::HitEffectSystem>(m_componentManager, m_eventBus);
-		// 死亡した敵の後始末（演出待機→Entity破棄＋モデルハンドルのプール返却）
-		m_systemManager.registerSystem<game::system::EnemyDeathSystem>(m_componentManager, m_entityManager, m_eventBus, m_enemySpawner);
+		// 死亡した敵の後始末（赤化＋ディゾルブ演出→Entity破棄＋モデルハンドルのプール返却）
+		m_systemManager.registerSystem<game::system::EnemyDeathSystem>(m_componentManager, m_entityManager, m_eventBus, m_enemySpawner, m_renderer);
 
 		m_systemManager.registerSystem<game::system::EffectSystem>(m_componentManager, m_eventBus, m_effectFactory);
 
@@ -345,14 +345,11 @@ namespace game::scene
 							enemyTypeName = "Xcode";
 						LOG("敵を撃破: {} (EntityId={})", enemyTypeName, static_cast<unsigned int>(e.m_entityId));
 
-						if (m_componentManager.has<component::RenderComponent>(e.m_entityId))
-						{
-							auto& render{ m_componentManager.get<component::RenderComponent>(e.m_entityId) };
-							render.m_isVisible = false;
-						}
+			            // モデルはここで非表示にしない。EnemyDeathSystemが赤化＋ディゾルブ演出を
+			            // 進めながら表示し続け、演出完了時にEntityごと破棄する
 
-			            // AIを停止する。これをしないと死亡（非表示）後も移動や弾発射が続き、
-			            // 「見えないのにSafariがタブをまだPlayerに投げてくる」状態になる
+			            // AIを停止する。これをしないと死亡後も移動や弾発射が続き、
+			            // 「まだSafariがタブをPlayerに投げてくる」状態になる
 			            if (m_componentManager.has<component::AIComponent>(e.m_entityId))
 				            m_componentManager.get<component::AIComponent>(e.m_entityId).m_isActive = false;
 

@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include "core/utility/Vector3.h"
 #include "core/interface/IRenderer.h"
+#include <unordered_map>
+#include <vector>
+#include <array>
 
 namespace infrastructure
 {
@@ -18,7 +21,20 @@ namespace infrastructure
 		 * @param scale スケール
 		 */
 		void drawModel(int modelHandle, const core::Vector3& position, const core::Vector3& rotation, const core::Vector3& scale) override;
-		
+
+		/**
+		 * @brief 敵撃破時の赤化＋ディゾルブ（消失）演出をモデルに適用する
+		 * @param modelHandle 対象のモデルハンドル
+		 * @param progress 演出の進行度（0.0=死亡直後 〜 1.0=消失完了）
+		 */
+		void applyDeathDissolve(int modelHandle, float progress) override;
+
+		/**
+		 * @brief applyDeathDissolveで変更した見た目を元に戻す
+		 * @param modelHandle 対象のモデルハンドル
+		 */
+		void resetModelAppearance(int modelHandle) override;
+
 		/**
 		 * @brief デバッグ用にコライダーを可視化する
 		 * @param center 中心座標
@@ -58,5 +74,16 @@ namespace infrastructure
 		 * @return x/yはスクリーン座標、zは深度（0.0〜1.0の範囲内なら画面に映っている）
 		 */
 		core::Vector3 worldToScreen(const core::Vector3& worldPos) override;
+
+	  private:
+		// applyDeathDissolveで初回に保存する、マテリアルの元のディフューズ色とエミッシブ色
+		struct MaterialColors
+		{
+			std::array<float, 4> m_dif{};
+			std::array<float, 4> m_emi{};
+		};
+
+		// modelHandle -> マテリアルごとの元の色。プールで使い回すハンドルの復元に使う
+		std::unordered_map<int, std::vector<MaterialColors>> m_originalColors;
 	};
 } // namespace infrastructure

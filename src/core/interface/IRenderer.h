@@ -20,7 +20,25 @@ namespace core::iface
 		 * @param scale スケール
 		 */
 		virtual void drawModel(int modelHandle, const core::Vector3& position, const::core::Vector3& rotation, const core::Vector3& scale) = 0;
-		
+		/**
+		 * @brief 敵撃破時の赤化＋ディゾルブ（消失）演出をモデルに適用する
+		 *
+		 * 初回呼び出し時にモデルの元の色を内部に保存し、以後はそこから赤へブレンドする。
+		 * モデルハンドルをプールへ返却する前に resetModelAppearance を呼んで元に戻すこと
+		 * @param modelHandle 対象のモデルハンドル
+		 * @param progress 演出の進行度（0.0=死亡直後 〜 1.0=消失完了）
+		 */
+		virtual void applyDeathDissolve(int modelHandle, float progress) = 0;
+
+		/**
+		 * @brief applyDeathDissolveで変更した見た目を元に戻す
+		 *
+		 * モデルハンドルをプールへ返却し使い回す前に必ず呼ぶこと。
+		 * 呼ばないと次にこのハンドルを使う敵が赤く透けた状態のまま出現してしまう
+		 * @param modelHandle 対象のモデルハンドル
+		 */
+		virtual void resetModelAppearance(int modelHandle) = 0;
+
 		/**
 		 * @brief デバッグ用にコライダーを可視化する
 		 * @param center 中心座標

@@ -1,6 +1,18 @@
 ﻿#include "Renderer.h"
 #include "DxLib.h"
 #include "core/interface/ILogger.h"
+#include <algorithm>
+
+namespace
+{
+	// ディゾルブ演出で最終的に寄せる赤色（元の色からこの色へブレンドする）
+	constexpr float DISSOLVE_RED_R{ 1.0f };
+	constexpr float DISSOLVE_RED_G{ 0.1f };
+	constexpr float DISSOLVE_RED_B{ 0.08f };
+
+	// アルファのフェードアウトを始める進行度（これ以前は不透明のまま死亡アニメを見せる）
+	constexpr float FADE_START_PROGRESS{ 0.5f };
+} // namespace
 
 namespace infrastructure
 {
@@ -20,6 +32,83 @@ namespace infrastructure
 		MV1SetPosition(modelHandle, pos);
 		MV1SetRotationXYZ(modelHandle, rot);
 		MV1DrawModel(modelHandle);
+	}
+
+	void Renderer::applyDeathDissolve(int modelHandle, float progress)
+	{
+		if (modelHandle == -1)
+			return;
+
+		progress = std::clamp(progress, 0.0f, 1.0f);
+
+		const int materialNum{ MV1GetMaterialNum(modelHandle) };
+		if (materialNum <= 0)
+			return;
+
+		// 初回呼び出し時に元の色を保存し、以後はこのプールされたハンドルを
+		// 使い回しても正しく元の色から赤へブレンドできるようにする
+		auto& cache{ m_originalColors[modelHandle] };
+		if (cache.empty())
+		{
+			cache.reserve(materialNum);
+			for (int i{ 0 }; i < materialNum; ++i)
+			{
+				const COLOR_F dif{ MV1GetMaterialDifColor(modelHandle, i) };
+				const COLOR_F emi{ MV1GetMaterialEmiColor(modelHandle, i) };
+				cache.push_back({ { dif.r, dif.g, dif.b, dif.a }, { emi.r, emi.g, emi.b, emi.a } });
+			}
+			MV1SetMaterialDrawBlendModeAll(modelHandle, DX_BLENDMODE_ALPHA);
+		}
+
+		for (int i{ 0 }; i < materialNum && i < static_cast<int>(cache.size()); ++i)
+		{
+			const auto& origDif{ cache[i].m_dif };
+			const auto& origEmi{ cache[i].m_emi };
+
+			// ディフューズも赤へ寄せる（ライティングONのマテリアル対策）
+			COLOR_F dif{};
+			dif.r = origDif[0] + (DISSOLVE_RED_R - origDif[0]) * progress;
+			dif.g = origDif[1] + (DISSOLVE_RED_G - origDif[1]) * progress;
+			dif.b = origDif[2] + (DISSOLVE_RED_B - origDif[2]) * progress;
+			dif.a = origDif[3];
+			MV1SetMaterialDifColor(modelHandle, i, dif);
+
+			// このプロジェクトはライティングOFF。ディフューズ色は乗りづらいため、
+			// 自己発光（エミッシブ）に赤を足して確実に赤く光らせる
+			COLOR_F emi{};
+			emi.r = origEmi[0] + (DISSOLVE_RED_R - origEmi[0]) * progress;
+			emi.g = origEmi[1] + (DISSOLVE_RED_G - origEmi[1]) * progress;
+			emi.b = origEmi[2] + (DISSOLVE_RED_B - origEmi[2]) * progress;
+			emi.a = origEmi[3];
+			MV1SetMaterialEmiColor(modelHandle, i, emi);
+		}
+
+		// ディゾルブ（消失）はアルファのフェードアウトで表現する。
+		// FADE_START_PROGRESS までは不透明を保ち、死亡アニメ・落下を見せてから消えていく
+		float fade{ 0.0f };
+		if (progress > FADE_START_PROGRESS)
+			fade = (progress - FADE_START_PROGRESS) / (1.0f - FADE_START_PROGRESS);
+		const int alpha{ static_cast<int>(255.0f * (1.0f - fade)) };
+		MV1SetMaterialDrawBlendParamAll(modelHandle, alpha);
+	}
+
+	void Renderer::resetModelAppearance(int modelHandle)
+	{
+		auto it{ m_originalColors.find(modelHandle) };
+		if (it == m_originalColors.end())
+			return;
+
+		const int materialNum{ MV1GetMaterialNum(modelHandle) };
+		for (int i{ 0 }; i < materialNum && i < static_cast<int>(it->second.size()); ++i)
+		{
+			const auto& orig{ it->second[i] };
+			MV1SetMaterialDifColor(modelHandle, i, COLOR_F{ orig.m_dif[0], orig.m_dif[1], orig.m_dif[2], orig.m_dif[3] });
+			MV1SetMaterialEmiColor(modelHandle, i, COLOR_F{ orig.m_emi[0], orig.m_emi[1], orig.m_emi[2], orig.m_emi[3] });
+		}
+		MV1SetMaterialDrawBlendModeAll(modelHandle, DX_BLENDMODE_NOBLEND);
+		MV1SetMaterialDrawBlendParamAll(modelHandle, 255);
+
+		m_originalColors.erase(it);
 	}
 
 	void Renderer::drawCollider(const core::Vector3& center, const core::Vector3& size, unsigned int color)
