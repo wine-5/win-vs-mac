@@ -7,6 +7,12 @@
 #include "core/interface/IScreen.h"
 #include "core/interface/IEffectFactory.h"
 
+namespace game
+{
+	class GameManager;  // DEBUG: デバッグモード状態の参照用の前方宣言（リリース時に削除）
+	class PauseManager; // DEBUG: シーンビュー状態の参照用の前方宣言（リリース時に削除）
+} // namespace game
+
 namespace game::system
 {
 	class PlayerChargeVisualsSystem;
@@ -32,12 +38,16 @@ namespace game::scene
 		 * @param uiRenderer UI描画のインターフェース
 		 * @param screen 画面サイズ取得のインターフェース
 		 * @param effectFactory エフェクト（Effekseer）描画のインターフェース
+		 * @param gameManager デバッグモード状態の参照（DEBUG: リリース時に削除）
+		 * @param pauseManager シーンビュー状態の参照（DEBUG: リリース時に削除）
 		 */
 		InGameView(core::ecs::ComponentManager& componentManager,
 		    core::iface::IRenderer& renderer,
 		    core::iface::IUIRenderer& uiRenderer,
 		    core::iface::IScreen& screen,
-		    core::iface::IEffectFactory& effectFactory);
+		    core::iface::IEffectFactory& effectFactory,
+		    GameManager& gameManager,
+		    PauseManager& pauseManager);
 
 		/**
 		 * @brief インゲームを描画する
@@ -148,6 +158,8 @@ namespace game::scene
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
 		core::iface::IEffectFactory& m_effectFactory;
+		GameManager& m_gameManager;   // DEBUG: デバッグモード状態の参照（リリース時に削除）
+		PauseManager& m_pauseManager; // DEBUG: シーンビュー状態の参照（リリース時に削除）
 
 		// 溜め攻撃の集中線の描画元（描画内容はSystemが持ち、Viewは描画順だけを管理する）
 		// 所有はSystemManagerにあり、InGameがsetupSystemsで設定する

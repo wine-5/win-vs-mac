@@ -2,7 +2,6 @@
 #include "SceneManager.h"
 #include "SceneType.h"
 #include "core/base/ServiceLocator.h"
-#include "game/GameManager.h"
 #include "core/interface/ILogger.h"
 #include "core/interface/IAudioManager.h"
 #include "core/constant/BgmType.h"

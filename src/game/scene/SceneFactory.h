@@ -18,6 +18,12 @@
 #include "core/interface/IWindowFactory.h"
 #include <memory>
 
+namespace game
+{
+	class GameManager;  // 前方宣言
+	class PauseManager; // 前方宣言
+} // namespace game
+
 namespace game::scene
 {
     /**
@@ -27,35 +33,43 @@ namespace game::scene
     class SceneFactory
     {
     public:
-        SceneFactory();
+	  /**
+	   * @brief SceneFactoryのコンストラクタ
+	   * @param gameManager シーン間共有データ（各シーンへ注入する）
+	   * @param pauseManager ポーズ状態（各シーンへ注入する）
+	   */
+	  SceneFactory(GameManager& gameManager, PauseManager& pauseManager);
 
-        /**
-         * @brief デストラクタ
-         */
-        ~SceneFactory();
+	  /**
+	   * @brief デストラクタ
+	   */
+	  ~SceneFactory();
 
-        /**
-         * @brief 指定されたタイプのシーンを生成
-         * @param sceneType シーンの種類
-         * @return 生成されたシーンへのポインタ（所有権はFactoryが保持）
-         */
-        IScene* createScene(SceneType sceneType);
+	  /**
+	   * @brief 指定されたタイプのシーンを生成
+	   * @param sceneType シーンの種類
+	   * @return 生成されたシーンへのポインタ（所有権はFactoryが保持）
+	   */
+	  IScene* createScene(SceneType sceneType);
 
-        /**
-         * @brief 指定されたタイプのシーンを破棄する
-         * @details シーンが保持するウィンドウなどのリソースも合わせて解放する
-         * @param sceneType 破棄するシーンの種類
-         */
-        void resetScene(SceneType sceneType) noexcept;
+	  /**
+	   * @brief 指定されたタイプのシーンを破棄する
+	   * @details シーンが保持するウィンドウなどのリソースも合わせて解放する
+	   * @param sceneType 破棄するシーンの種類
+	   */
+	  void resetScene(SceneType sceneType) noexcept;
 
     private:
-        // シーンインスタンスの管理
-        std::unique_ptr<InGame>      m_inGameScene;
-        std::unique_ptr<Title>       m_titleScene;
-        std::unique_ptr<Lockscreen>  m_lockscreenScene;
-        std::unique_ptr<Select>      m_selectScene;
-        std::unique_ptr<Loading>     m_loadingScene;
-        std::unique_ptr<Result>      m_resultScene;
-        std::unique_ptr<Bios>        m_biosScene;
+	  GameManager& m_gameManager;
+	  PauseManager& m_pauseManager;
+
+	  // シーンインスタンスの管理
+	  std::unique_ptr<InGame> m_inGameScene;
+	  std::unique_ptr<Title> m_titleScene;
+	  std::unique_ptr<Lockscreen> m_lockscreenScene;
+	  std::unique_ptr<Select> m_selectScene;
+	  std::unique_ptr<Loading> m_loadingScene;
+	  std::unique_ptr<Result> m_resultScene;
+	  std::unique_ptr<Bios> m_biosScene;
     };
 } // namespace game::scene

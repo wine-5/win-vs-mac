@@ -3,9 +3,9 @@
 
 namespace game::scene
 {
-	SceneManager::SceneManager()
-		: m_sceneFactory(std::make_unique<SceneFactory>())
-		, m_currentScene{}
+	SceneManager::SceneManager(GameManager& gameManager, PauseManager& pauseManager)
+	    : m_sceneFactory(std::make_unique<SceneFactory>(gameManager, pauseManager))
+	    , m_currentScene{}
 	{
 	}
 

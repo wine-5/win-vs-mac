@@ -19,6 +19,7 @@
 #include "game/component/TransformComponent.h"
 #include "game/actor/Player.h"
 #include "game/GameManager.h"
+#include "game/PauseManager.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/HealthComponent.h"
 #include "game/component/HitEffectComponent.h"
@@ -74,13 +75,16 @@ namespace game::scene
 	    core::iface::IAnimator& animator,
 	    core::iface::IResourceManager& resourceManager,
 	    core::iface::IInputProvider& inputProvider,
-	    data::FileEquipmentData& fileEquipmentData)
+	    GameManager& gameManager,
+	    PauseManager& pauseManager)
 	    : m_camera{ camera }
 	    , m_renderer{ renderer }
 	    , m_animator{ animator }
 	    , m_resourceManager{ resourceManager }
 	    , m_inputProvider{ inputProvider }
-	    , m_fileEquipmentData{ fileEquipmentData }
+	    , m_gameManager{ gameManager }
+	    , m_pauseManager{ pauseManager }
+	    , m_fileEquipmentData{ gameManager.getFileEquipmentData() }
 	    , m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }
 	    , m_enemySpawner{ m_factoryManager, m_componentManager, m_resourceManager }
 	    , m_projectileFactory{ m_entityManager, m_componentManager }
@@ -89,7 +93,9 @@ namespace game::scene
 	    , m_view{ m_componentManager, m_renderer,
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
-		    m_effectFactory }
+		    m_effectFactory,
+		    gameManager,
+		    pauseManager }
 	{
 		loadResources();
 		spawnEntities();
@@ -134,7 +140,7 @@ namespace game::scene
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
 
 		// 職業パラメータをPlayerDataに反映
-		const auto& jobSelectionData{ GameManager::getInstance().getJobSelectionData() };
+		const auto& jobSelectionData{ m_gameManager.getJobSelectionData() };
 		if (jobSelectionData.hasJobSelected())
 		{
 			const auto jobType{ jobSelectionData.getSelectedJobType() };
@@ -175,7 +181,7 @@ namespace game::scene
 	void InGame::setupSystems()
 	{
 		// システム登録
-		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_playerId, m_inputProvider);
+		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_playerId, m_inputProvider, m_gameManager);
 		// カメラ演出（Zoom/Shake）はCameraSystemより前に走らせ、合成結果をCameraEffectComponentへ書いておく
 		m_systemManager.registerSystem<game::system::ChargeZoomSystem>(m_componentManager, m_playerId);
 		m_systemManager.registerSystem<game::system::DamageShakeSystem>(m_componentManager, m_eventBus, m_playerId);
@@ -188,9 +194,11 @@ namespace game::scene
 			m_playerId) };
 		m_view.setBossAwakenEffectSystem(bossAwakenEffect);
 		// カメラはMoveSystemより前に更新し、最新のyawで移動方向を計算させる
-		m_systemManager.registerSystem<game::system::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera);
+		m_systemManager.registerSystem<game::system::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera, m_gameManager);
 		// DEBUG: デバッグモード時のフリーカメラ。CameraSystem直後・MoveSystemより前に走らせる（リリース時に削除）
-		m_systemManager.registerSystem<game::system::DebugCameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera);
+		// シーンビュー凍結中に単独更新するためポインタも保持する
+		m_debugCameraSystem = m_systemManager.registerSystem<game::system::DebugCameraSystem>(
+		    m_componentManager, m_playerId, m_inputProvider, m_camera, m_gameManager, m_pauseManager);
 		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
 		// 照準の敵捕捉判定（カメラ更新後・描画前に走らせる）
 		m_systemManager.registerSystem<game::system::TargetingSystem>(m_componentManager);
@@ -253,7 +261,7 @@ namespace game::scene
 
 		// ジョブに応じた攻撃SEタイプを決定してAttackSystemに渡す
 		core::constant::SeType playerAttackSeType{ core::constant::SeType::None };
-		const auto& jobData{ GameManager::getInstance().getJobSelectionData() };
+		const auto& jobData{ m_gameManager.getJobSelectionData() };
 		if (jobData.hasJobSelected())
 		{
 			switch (jobData.getSelectedJobType())
@@ -331,18 +339,36 @@ namespace game::scene
 
 	void InGame::update(float deltaTime)
 	{
-		m_elapsedTime += deltaTime;
-
 		// DEBUG: F1キーでデバッグモード（フリーカメラ）のON/OFFを切り替える（リリース時に削除）
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::F1))
 		{
-			GameManager::getInstance().toggleDebugMode();
-			if (GameManager::getInstance().isDebugMode())
+			m_gameManager.toggleDebugMode();
+			if (m_gameManager.isDebugMode())
 				LOG("DEBUG: デバッグモードON");
 			else
 				LOG("DEBUG: デバッグモードOFF");
 		}
 
+		// DEBUG: F2キーでシーンビュー（時間停止＋フリーカメラ）のON/OFFを切り替える（リリース時に削除）
+		if (m_inputProvider.isKeyPressed(core::input::KeyCode::F2))
+		{
+			m_pauseManager.toggle(PauseReason::DebugSceneView);
+			if (m_pauseManager.isPausedBy(PauseReason::DebugSceneView))
+				LOG("DEBUG: シーンビューON（時間停止）");
+			else
+				LOG("DEBUG: シーンビューOFF");
+		}
+
+		// DEBUG: シーンビュー凍結中はゲームロジックを止め、フリーカメラだけを更新する（リリース時に削除）
+		if (m_pauseManager.isPausedBy(PauseReason::DebugSceneView))
+		{
+			if (m_debugCameraSystem)
+				m_debugCameraSystem->update(deltaTime);
+			m_inputProvider.updatePreviousState();
+			return;
+		}
+
+		m_elapsedTime += deltaTime;
 		m_systemManager.update(deltaTime);
 
 		// DEBUG: Tキーでプレイヤー位置にテストエフェクト（Enemy_Spawn）を再生する（テスト後に削除）
@@ -378,6 +404,6 @@ namespace game::scene
 				result.m_usedFiles.push_back(m_fileEquipmentData.getFilePath(i));
 		}
 
-		game::GameManager::getInstance().setResultData(result);
+		m_gameManager.setResultData(result);
 	}
 } // namespace game::scene

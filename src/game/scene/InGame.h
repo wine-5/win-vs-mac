@@ -26,6 +26,17 @@
 #include "game/scene/InGameView.h"
 #include <memory>
 
+namespace game
+{
+	class GameManager;  // 前方宣言
+	class PauseManager; // 前方宣言
+
+	namespace system
+	{
+		class DebugCameraSystem; // DEBUG: 前方宣言（リリース時に削除）
+	} // namespace system
+} // namespace game
+
 namespace game::scene
 {
 	/**
@@ -34,32 +45,34 @@ namespace game::scene
 	class InGame : public IScene
 	{
 	public:
-		/**
-		 * @brief InGameのコンストラクタ
-		 * @param camera カメラのインターフェース
-		 * @param renderer 描画のインターフェース
-		 * @param animator アニメーションのインターフェース
-		 * @param resourceManager リソース管理のインターフェース
-		 * @param inputProvider 入力のインターフェース
-		 * @param fileEquipmentData 選択ファイルデータの参照
-		 */
-		InGame(core::iface::ICamera &camera,
-			   core::iface::IRenderer &renderer,
-			   core::iface::IAnimator &animator,
-			   core::iface::IResourceManager &resourceManager,
-			   core::iface::IInputProvider &inputProvider,
-			   data::FileEquipmentData &fileEquipmentData);
+	  /**
+	   * @brief InGameのコンストラクタ
+	   * @param camera カメラのインターフェース
+	   * @param renderer 描画のインターフェース
+	   * @param animator アニメーションのインターフェース
+	   * @param resourceManager リソース管理のインターフェース
+	   * @param inputProvider 入力のインターフェース
+	   * @param gameManager シーン間共有データの参照
+	   * @param pauseManager ポーズ状態の参照
+	   */
+	  InGame(core::iface::ICamera& camera,
+		  core::iface::IRenderer& renderer,
+		  core::iface::IAnimator& animator,
+		  core::iface::IResourceManager& resourceManager,
+		  core::iface::IInputProvider& inputProvider,
+		  GameManager& gameManager,
+		  PauseManager& pauseManager);
 
-		/**
-		 * @brief シーンの更新処理
-		 * @param deltaTime フレーム間の時間差
-		 */
-		void update(float deltaTime) override;
+	  /**
+	   * @brief シーンの更新処理
+	   * @param deltaTime フレーム間の時間差
+	   */
+	  void update(float deltaTime) override;
 
-		/**
-		 * @brief シーンの描画処理
-		 */
-		void draw() override;
+	  /**
+	   * @brief シーンの描画処理
+	   */
+	  void draw() override;
 
 	private:
 		/* コンストラクタで参照する関数 */
@@ -83,6 +96,8 @@ namespace game::scene
 		core::iface::IAnimator        &m_animator;
 		core::iface::IResourceManager &m_resourceManager;
 		core::iface::IInputProvider   &m_inputProvider;
+		GameManager& m_gameManager;
+		PauseManager& m_pauseManager;
 		data::FileEquipmentData       &m_fileEquipmentData;
 		core::iface::IEffectFactory& m_effectFactory;
 
@@ -102,6 +117,9 @@ namespace game::scene
 
 		// 弾の見た目として実OSウィンドウを追従表示するマネージャ（Platform層実装）
 		std::unique_ptr<core::iface::IProjectileWindowManager> m_projectileWindowManager;
+
+		// DEBUG: シーンビュー凍結中に単独更新するための参照（所有はSystemManager。リリース時に削除）
+		system::DebugCameraSystem* m_debugCameraSystem{ nullptr };
 
 		// 進行トラッキング
 		float m_elapsedTime{0.0f};

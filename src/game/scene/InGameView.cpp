@@ -11,7 +11,8 @@
 #include "game/component/PlayerChargeComponent.h"
 #include "game/system/PlayerChargeVisualsSystem.h"
 #include "game/system/BossAwakenEffectSystem.h"
-#include "game/GameManager.h" // DEBUG: デバッグモード状態の参照（リリース時に削除）
+#include "game/GameManager.h"  // DEBUG: デバッグモード状態の参照（リリース時に削除）
+#include "game/PauseManager.h" // DEBUG: シーンビュー状態の参照（リリース時に削除）
 #include <cmath>
 
 namespace game::scene
@@ -20,12 +21,16 @@ namespace game::scene
 	    core::iface::IRenderer& renderer,
 	    core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
-	    core::iface::IEffectFactory& effectFactory)
+	    core::iface::IEffectFactory& effectFactory,
+	    GameManager& gameManager,
+	    PauseManager& pauseManager)
 	    : m_componentManager{ componentManager }
 	    , m_renderer{ renderer }
 	    , m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_effectFactory{ effectFactory }
+	    , m_gameManager{ gameManager }
+	    , m_pauseManager{ pauseManager }
 	{
 	}
 
@@ -62,7 +67,8 @@ namespace game::scene
 
 	void InGameView::drawDebugCameraLabel()
 	{
-		if (!GameManager::getInstance().isDebugMode())
+		const bool isSceneView{ m_pauseManager.isPausedBy(PauseReason::DebugSceneView) };
+		if (!m_gameManager.isDebugMode() && !isSceneView)
 			return;
 
 		constexpr int LABEL_X{ 16 };
@@ -70,11 +76,13 @@ namespace game::scene
 		constexpr int FONT_SIZE{ 28 };
 		constexpr unsigned int TEXT_COLOR{ 0xFFFFFF00 }; // 黄色（ARGB）
 
-		m_uiRenderer.drawText(LABEL_X, LABEL_Y, "DebugCamera", TEXT_COLOR, FONT_SIZE);
+		m_uiRenderer.drawText(LABEL_X, LABEL_Y,
+		    isSceneView ? "SceneView (Time Stopped)" : "DebugCamera",
+		    TEXT_COLOR, FONT_SIZE);
 
 		// 操作方法を併記する（WASD=カメラ、矢印キー=Player）
 		m_uiRenderer.drawText(LABEL_X, LABEL_Y + FONT_SIZE + 4,
-		    "WASD/Space/Shift: Camera   Arrows: Player",
+		    isSceneView ? "WASD/Space/Shift: Camera" : "WASD/Space/Shift: Camera   Arrows: Player",
 		    TEXT_COLOR, FONT_SIZE);
 	}
 
