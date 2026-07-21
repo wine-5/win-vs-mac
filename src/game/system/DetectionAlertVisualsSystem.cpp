@@ -6,6 +6,7 @@
 #include "core/constant/UI.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IStringConverter.h"
+#include "core/interface/ILogger.h"
 #include <algorithm>
 #include <array>
 #include <string>
@@ -13,7 +14,7 @@
 namespace
 {
 	// バナーの表示時間（秒）
-	constexpr float ALERT_DURATION{ 10.6f };
+	constexpr float ALERT_DURATION{ 1.6f };
 	// 出現時のフェードイン・せり上がりにかける時間（秒）
 	constexpr float APPEAR_TIME{ 0.18f };
 	// 表示終了間際にフェードアウトする時間（秒）
@@ -30,6 +31,9 @@ namespace
 
 	// 危険メッセージ（発見時にランダムで1つ選ぶ）
 	constexpr std::array<const char*, 3> ALERT_MESSAGES{ "危険！", "見つかった！", "発見！" };
+
+	// 左のアプリアイコン画像のリソースID
+	constexpr const char* ALERT_ICON_IMAGE_ID{ "alert-icon" };
 } // namespace
 
 namespace game::system
@@ -38,7 +42,8 @@ namespace game::system
 	    core::base::EventBus& eventBus,
 	    core::iface::IRenderer& renderer,
 	    core::iface::IUIRenderer& uiRenderer,
-	    core::iface::IScreen& screen)
+	    core::iface::IScreen& screen,
+	    core::iface::IResourceManager& resourceManager)
 	    : m_componentManager{ componentManager }
 	    , m_eventBus{ eventBus }
 	    , m_renderer{ renderer }
@@ -47,6 +52,11 @@ namespace game::system
 	{
 		// DxLibはShift-JISで描画するため、日本語メッセージの変換器を取得しておく
 		m_stringConverter = core::base::ServiceLocator::get<core::iface::IStringConverter>();
+
+		// 左のアプリアイコン画像を読み込む。失敗時はアイコンを描かず、ここでエラーを記録する
+		m_iconHandle = resourceManager.loadImageById(ALERT_ICON_IMAGE_ID);
+		if (m_iconHandle == -1)
+			LOG_E("発見演出のアイコン画像 '{}' の読み込みに失敗しました", ALERT_ICON_IMAGE_ID);
 
 		m_eventBus.subscribe<event::EnemyAlertedEvent>(
 		    [this](const event::EnemyAlertedEvent& e)
@@ -160,19 +170,10 @@ namespace game::system
 		// 背景（明るい角丸バー）
 		drawRoundedRect(x, y, bannerW, bannerH, radius, Color::ALERT_BANNER_BG);
 
-		// 左のアイコン：コーラルレッドの円の中央に白い「！」（＝「円の中に！」のイメージ）
+		// 左のアプリアイコン画像を描く（未ロード時は読み込み時にエラー記録済みなので何も描かない）
 		const int iconX{ x + pad };
 		const int iconY{ y + pad };
-		const int iconCenterX{ iconX + iconSize / 2 };
-		const int iconCenterY{ iconY + iconSize / 2 };
-		const int iconCircleRadius{ std::max(2, iconSize / 2) };
-		m_uiRenderer.drawCircle(iconCenterX, iconCenterY, iconCircleRadius, Color::ALERT_ICON_RED, true, 0);
-
-		// 円の中央に白い「！」を収める
-		const int iconFont{ std::max(8, static_cast<int>(iconSize * 0.72f)) };
-		const int exWidth{ m_uiRenderer.getTextWidth("!", iconFont) };
-		m_uiRenderer.drawText(iconCenterX - exWidth / 2, iconCenterY - iconFont / 2,
-		    "!", Color::WHITE, iconFont);
+		m_uiRenderer.drawImage(m_iconHandle, iconX, iconY, iconSize, iconSize);
 
 		// 危険メッセージ（赤）をアイコンの右へ、縦中央で描く
 		const int msgX{ iconX + iconSize + pad };

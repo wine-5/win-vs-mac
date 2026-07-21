@@ -5,6 +5,7 @@
 #include "core/interface/IRenderer.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "core/interface/IResourceManager.h"
 #include "game/event/InGameEvents.h"
 #include <random>
 
@@ -35,12 +36,14 @@ namespace game::system
 		 * @param renderer ワールド→スクリーン変換に使うIRenderer
 		 * @param uiRenderer バナー描画に使うIUIRenderer
 		 * @param screen 画面サイズ取得のインターフェース
+		 * @param resourceManager アイコン画像の読み込みに使うIResourceManager
 		 */
 		DetectionAlertVisualsSystem(core::ecs::ComponentManager& componentManager,
 		    core::base::EventBus& eventBus,
 		    core::iface::IRenderer& renderer,
 		    core::iface::IUIRenderer& uiRenderer,
-		    core::iface::IScreen& screen);
+		    core::iface::IScreen& screen,
+		    core::iface::IResourceManager& resourceManager);
 
 		/**
 		 * @brief バナーの表示タイマーを進め、尽きたら消す
@@ -82,6 +85,8 @@ namespace game::system
 		core::iface::IScreen& m_screen;
 		// DxLibはShift-JISで描画するため、日本語メッセージの変換に使う（無ければ変換せず素通し）
 		core::iface::IStringConverter* m_stringConverter{ nullptr };
+		// 左のアプリアイコン画像のハンドル（-1なら未ロード。その場合は角丸四角＋「！」で代替描画）
+		int m_iconHandle{ -1 };
 		std::mt19937 m_rng{ std::random_device{}() };
 	};
 } // namespace game::system

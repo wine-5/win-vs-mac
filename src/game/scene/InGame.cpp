@@ -316,7 +316,8 @@ namespace game::scene
 			m_eventBus,
 			m_renderer,
 			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
-			*core::base::ServiceLocator::get<core::iface::IScreen>()) };
+			*core::base::ServiceLocator::get<core::iface::IScreen>(),
+			m_resourceManager) };
 		m_view.setDetectionAlertVisualsSystem(detectionAlert);
 	}
 

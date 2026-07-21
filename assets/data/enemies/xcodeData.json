@@ -17,6 +17,6 @@
     "defence": 2.0,
     "attackPower": 25.0,
     "attackCooldown": 3.0,
-    "attackWindup": 1.0
+    "attackWindup": 0.65
   }
 }
