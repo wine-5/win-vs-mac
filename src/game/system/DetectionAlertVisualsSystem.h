@@ -8,6 +8,11 @@
 #include "game/event/InGameEvents.h"
 #include <random>
 
+namespace core::iface
+{
+	class IStringConverter; // 前方宣言
+} // namespace core::iface
+
 namespace game::system
 {
 	/**
@@ -75,6 +80,8 @@ namespace game::system
 		core::iface::IRenderer& m_renderer;
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
+		// DxLibはShift-JISで描画するため、日本語メッセージの変換に使う（無ければ変換せず素通し）
+		core::iface::IStringConverter* m_stringConverter{ nullptr };
 		std::mt19937 m_rng{ std::random_device{}() };
 	};
 } // namespace game::system

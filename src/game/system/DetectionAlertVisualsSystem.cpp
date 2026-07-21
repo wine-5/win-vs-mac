@@ -4,8 +4,11 @@
 #include "game/component/ColliderComponent.h"
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IStringConverter.h"
 #include <algorithm>
 #include <array>
+#include <string>
 
 namespace
 {
@@ -42,6 +45,9 @@ namespace game::system
 	    , m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	{
+		// DxLibはShift-JISで描画するため、日本語メッセージの変換器を取得しておく
+		m_stringConverter = core::base::ServiceLocator::get<core::iface::IStringConverter>();
+
 		m_eventBus.subscribe<event::EnemyAlertedEvent>(
 		    [this](const event::EnemyAlertedEvent& e)
 		    { onEnemyAlerted(e); });
@@ -121,9 +127,14 @@ namespace game::system
 			const int centerX{ static_cast<int>(screen.x) };
 			const int topY{ static_cast<int>(screen.y - bannerH + riseOffset) };
 
+			// DxLibのマルチバイト描画はShift-JISを期待するため、UTF-8のメッセージを変換する
+			std::string message{ ALERT_MESSAGES[alert.m_messageIndex] };
+			if (m_stringConverter)
+				message = m_stringConverter->utf8ToShiftJis(message);
+
 			const int alphaParam{ static_cast<int>(255.0f * alpha) };
 			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alphaParam);
-			drawBanner(centerX, topY, ALERT_MESSAGES[alert.m_messageIndex]);
+			drawBanner(centerX, topY, message.c_str());
 			m_uiRenderer.resetBlendMode();
 		}
 	}
