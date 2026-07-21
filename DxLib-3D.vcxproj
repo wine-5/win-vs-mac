@@ -182,6 +182,7 @@
     <ClCompile Include="src\game\event\AudioEventListener.cpp" />
     <ClCompile Include="src\game\system\EffectSystem.cpp" />
     <ClCompile Include="src\game\system\HitEffectSystem.cpp" />
+    <ClCompile Include="src\game\system\EnemyDeathSystem.cpp" />
     <ClCompile Include="src\game\ui\FadeTransition.cpp" />
     <ClCompile Include="src\game\ui\Label.cpp" />
     <ClCompile Include="src\infrastructure\AudioManager.cpp" />
@@ -376,6 +377,8 @@
     <ClInclude Include="src\game\event\AudioEventListener.h" />
     <ClInclude Include="src\game\system\EffectSystem.h" />
     <ClInclude Include="src\game\system\HitEffectSystem.h" />
+    <ClInclude Include="src\game\system\EnemyDeathSystem.h" />
+    <ClInclude Include="src\game\component\DeathComponent.h" />
     <ClInclude Include="src\game\ui\FadeTransition.h" />
     <ClInclude Include="src\game\ui\Label.h" />
     <ClInclude Include="src\game\utility\ExtensionBonusCalculator.h" />
