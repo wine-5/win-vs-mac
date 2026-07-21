@@ -32,12 +32,27 @@ namespace infrastructure
 	{
 	}
 
+	void InputManager::captureFrameInput()
+	{
+		// ゲームウィンドウが非アクティブな間はキー入力を無視する。
+		// これが無いと、起動直後やAlt+Tab等でウィンドウの前面/フォーカスが
+		// 遷移している最中に CheckHitKey が誤ってキーが押されたままの状態を
+		// 返すことがあり、以後 isKeyPressed のエッジ検出が働かなくなる
+		// （Escでポーズが開かない等）。
+		const bool focused{ GetForegroundWindow() == GetMainWindowHandle() };
+
+		// KEY_MAP内の全キーについて、このフレームで使う状態を一括でスナップショットする。
+		// isKeyDownは以後この値を返すだけになるため、フレーム内のどこで何度チェックしても
+		// 一貫した値になる（Application/各Scene/各Systemでチェックタイミングがバラバラでも、
+		// isKeyPressedのエッジ検出が1フレームずれて取りこぼされることがなくなる）。
+		for (const auto& [keyCode, dxKey] : KEY_MAP)
+			m_currentKeyState[keyCode] = focused && (CheckHitKey(dxKey) != 0);
+	}
+
 	bool InputManager::isKeyDown(core::input::KeyCode keyCode) const
 	{
-		auto it{ KEY_MAP.find(keyCode) };
-		if (it == KEY_MAP.end())
-			return false;
-		return CheckHitKey(it->second) != 0;
+		auto it{ m_currentKeyState.find(keyCode) };
+		return it != m_currentKeyState.end() && it->second;
 	}
 
 	bool InputManager::isKeyPressed(core::input::KeyCode keyCode) const
@@ -49,6 +64,7 @@ namespace infrastructure
 
 	void InputManager::updatePreviousState()
 	{
+		// captureFrameInput()でキャプチャした今フレームの状態を、次フレームの「前回状態」として保存する
 		for (const auto& [keyCode, dxKey] : KEY_MAP)
 		{
 			m_previousKeyState[keyCode] = isKeyDown(keyCode);

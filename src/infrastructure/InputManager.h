@@ -14,6 +14,13 @@ namespace infrastructure
 		// ========== キーボード入力 ==========
 
 		/**
+		 * @brief フレームの最初に呼び出し、このフレームで使うキー状態を確定させる
+		 * @details KEY_MAP内の全キーについて現在の状態をスナップショットに保存する。
+		 * これにより、isKeyDown/isKeyPressedはこのフレーム中は常に同じ値を返す。
+		 */
+		void captureFrameInput() override;
+
+		/**
 		 * @brief 指定したキーが押されているか判定する
 		 * @param keyCode キーコード
 		 * @return 押されている場合true
@@ -89,7 +96,8 @@ namespace infrastructure
 		void setMouseCursorVisible(bool visible) override;
 
 	  private:
-		mutable std::unordered_map<core::input::KeyCode, bool> m_previousKeyState;
+		std::unordered_map<core::input::KeyCode, bool> m_currentKeyState;          // captureFrameInput()でキャプチャした今フレームの状態
+		mutable std::unordered_map<core::input::KeyCode, bool> m_previousKeyState; // isKeyPressed(const)内でoperator[]により新規挿入されうる
 		bool m_cursorVisible{ true }; // 表示中は前回座標との差分、非表示中は中央固定差分を使う
 		int m_previousMouseX{ 0 };
 		int m_previousMouseY{ 0 };

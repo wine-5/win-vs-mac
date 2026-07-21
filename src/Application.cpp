@@ -5,7 +5,6 @@
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IAudioManager.h"
-#include "core/interface/ILogger.h" // DEBUG: 調査用ログ（原因特定後に削除）
 #include "core/input/KeyCode.h"
 #include "game/scene/SceneManager.h"
 #include <DxLib.h>
@@ -41,6 +40,10 @@ void Application::run()
 	{
 		ClearDrawScreen(); // 画面クリア
 
+		// このフレームで使うキー入力状態を確定させる（Application/Scene/Systemの
+		// どこで何度チェックしても同じ値になるようにする。詳細はIInputProvider参照）
+		m_inputProvider->captureFrameInput();
+
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio)
 			audio->update();
@@ -71,27 +74,15 @@ void Application::updatePauseMenu()
 {
 	const auto sceneType{ m_sceneManager->getCurrentSceneType() };
 
-	// DEBUG: 原因調査用ログ（Escが押されているかを毎フレーム出す。原因特定後に削除）
-	if (m_inputProvider->isKeyDown(core::input::KeyCode::Escape))
-		LOG("DEBUG: Escキー押下を検出（isKeyDown）");
-
 	// Escで開閉する（別の理由（シーンビュー等）でポーズ中は何もしない）
 	if (m_inputProvider->isKeyPressed(core::input::KeyCode::Escape))
 	{
-		// DEBUG: 調査用ログ（原因特定後に削除）
-		LOG("DEBUG: Escキーのpressエッジを検出。sceneType={}, isPausedByMenu={}, isPaused={}, canOpen={}",
-		    static_cast<int>(sceneType),
-		    m_pauseManager.isPausedBy(game::PauseReason::Menu),
-		    m_pauseManager.isPaused(),
-		    canOpenPauseMenu(sceneType));
-
 		if (m_pauseManager.isPausedBy(game::PauseReason::Menu))
 			m_pauseManager.resume();
 		else if (!m_pauseManager.isPaused() && canOpenPauseMenu(sceneType))
 		{
 			m_pauseManager.pause(game::PauseReason::Menu);
 			m_pauseMenuController->open(allowBackToTitle(sceneType));
-			LOG("DEBUG: PauseManager.pause(Menu)実行、PauseMenuController.open()実行");
 		}
 	}
 
