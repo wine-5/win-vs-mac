@@ -8,6 +8,12 @@
 
 // DEBUG: このファイルはデバッグ用のフリーカメラ機能。リリース時にまとめて削除する。
 
+namespace game
+{
+	class GameManager;  // 前方宣言
+	class PauseManager; // 前方宣言
+} // namespace game
+
 namespace game::system
 {
 	/**
@@ -26,11 +32,15 @@ namespace game::system
 		 * @param targetEntityId 参照対象（プレイヤー）のEntityID
 		 * @param inputProvider 入力のインターフェース
 		 * @param camera カメラ装置のインターフェース
+		 * @param gameManager デバッグモード状態の参照
+		 * @param pauseManager ポーズ状態の参照（シーンビュー判定用）
 		 */
 		DebugCameraSystem(core::ecs::ComponentManager& componentManager,
 		    core::ecs::EntityId targetEntityId,
 		    core::iface::IInputProvider& inputProvider,
-		    core::iface::ICamera& camera);
+		    core::iface::ICamera& camera,
+		    GameManager& gameManager,
+		    PauseManager& pauseManager);
 
 		/**
 		 * @brief デバッグモード時にフリーカメラを更新する
@@ -48,6 +58,8 @@ namespace game::system
 		core::ecs::EntityId m_targetEntityId{};
 		core::iface::IInputProvider& m_inputProvider;
 		core::iface::ICamera& m_camera;
+		GameManager& m_gameManager;
+		PauseManager& m_pauseManager;
 
 		core::Vector3 m_position{ 0.0f, 0.0f, 0.0f }; // フリーカメラのワールド座標
 		float m_yaw{ 0.0f };                          // 水平回転（ラジアン）

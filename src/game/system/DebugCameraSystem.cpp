@@ -1,5 +1,6 @@
 #include "DebugCameraSystem.h"
 #include "game/GameManager.h"
+#include "game/PauseManager.h"
 #include "game/component/CameraComponent.h"
 #include "game/component/TransformComponent.h"
 #include <cmath>
@@ -19,17 +20,23 @@ namespace game::system
 	DebugCameraSystem::DebugCameraSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId targetEntityId,
 	    core::iface::IInputProvider& inputProvider,
-	    core::iface::ICamera& camera)
+	    core::iface::ICamera& camera,
+	    GameManager& gameManager,
+	    PauseManager& pauseManager)
 	    : m_componentManager{ componentManager }
 	    , m_targetEntityId{ targetEntityId }
 	    , m_inputProvider{ inputProvider }
 	    , m_camera{ camera }
+	    , m_gameManager{ gameManager }
+	    , m_pauseManager{ pauseManager }
 	{
 	}
 
 	void DebugCameraSystem::update(float deltaTime)
 	{
-		const bool debugMode{ GameManager::getInstance().isDebugMode() };
+		// F1のフリーカメラ中、またはF2のシーンビュー（時間停止）中に動作する
+		const bool debugMode{ m_gameManager.isDebugMode() ||
+			                  m_pauseManager.isPausedBy(PauseReason::DebugSceneView) };
 
 		// デバッグOFF時は何もしない（通常のCameraSystemに任せる）
 		if (!debugMode)

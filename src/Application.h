@@ -1,7 +1,7 @@
 #pragma once
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
-#include "game/ui/pause/PauseMenu.h"
+#include "game/ui/pause/PauseMenuController.h"
 #include "game/scene/SceneType.h"
 #include <memory>
 
@@ -61,7 +61,7 @@ class Application
 	game::PauseManager m_pauseManager{};
 
 	// サービス初期化後に生成するためポインタで持つ（所有はApplication）
-	std::unique_ptr<game::ui::pause::PauseMenu> m_pauseMenu;
+	std::unique_ptr<game::ui::pause::PauseMenuController> m_pauseMenuController;
 
 	// ServiceLocatorが所有するサービスへの参照（初期化後に取得する）
 	game::scene::SceneManager* m_sceneManager{ nullptr };

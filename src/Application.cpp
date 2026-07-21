@@ -5,6 +5,7 @@
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IAudioManager.h"
+#include "core/interface/ILogger.h" // DEBUG: 調査用ログ（原因特定後に削除）
 #include "core/input/KeyCode.h"
 #include "game/scene/SceneManager.h"
 #include <DxLib.h>
@@ -24,7 +25,7 @@ Application::Application(int screenWidth, int screenHeight)
 	m_inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
 
 	// ポーズメニューを生成する（UIサービスの初期化後に行う）
-	m_pauseMenu = std::make_unique<game::ui::pause::PauseMenu>(
+	m_pauseMenuController = std::make_unique<game::ui::pause::PauseMenuController>(
 	    *m_inputProvider,
 	    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 	    *core::base::ServiceLocator::get<core::iface::IScreen>());
@@ -51,7 +52,7 @@ void Application::run()
 		{
 			// メニュー中はシーンの時間を完全に止め、止まった画面の上へメニューを重ねる
 			m_sceneManager->draw();
-			m_pauseMenu->draw();
+			m_pauseMenuController->draw();
 
 			// シーンのupdateを飛ばすため、入力のフレーム更新はここで行う
 			m_inputProvider->updatePreviousState();
@@ -70,15 +71,27 @@ void Application::updatePauseMenu()
 {
 	const auto sceneType{ m_sceneManager->getCurrentSceneType() };
 
+	// DEBUG: 原因調査用ログ（Escが押されているかを毎フレーム出す。原因特定後に削除）
+	if (m_inputProvider->isKeyDown(core::input::KeyCode::Escape))
+		LOG("DEBUG: Escキー押下を検出（isKeyDown）");
+
 	// Escで開閉する（別の理由（シーンビュー等）でポーズ中は何もしない）
 	if (m_inputProvider->isKeyPressed(core::input::KeyCode::Escape))
 	{
+		// DEBUG: 調査用ログ（原因特定後に削除）
+		LOG("DEBUG: Escキーのpressエッジを検出。sceneType={}, isPausedByMenu={}, isPaused={}, canOpen={}",
+		    static_cast<int>(sceneType),
+		    m_pauseManager.isPausedBy(game::PauseReason::Menu),
+		    m_pauseManager.isPaused(),
+		    canOpenPauseMenu(sceneType));
+
 		if (m_pauseManager.isPausedBy(game::PauseReason::Menu))
 			m_pauseManager.resume();
 		else if (!m_pauseManager.isPaused() && canOpenPauseMenu(sceneType))
 		{
 			m_pauseManager.pause(game::PauseReason::Menu);
-			m_pauseMenu->open(allowBackToTitle(sceneType));
+			m_pauseMenuController->open(allowBackToTitle(sceneType));
+			LOG("DEBUG: PauseManager.pause(Menu)実行、PauseMenuController.open()実行");
 		}
 	}
 
@@ -86,7 +99,7 @@ void Application::updatePauseMenu()
 		return;
 
 	// メニューの選択・決定を処理する
-	switch (m_pauseMenu->update())
+	switch (m_pauseMenuController->update())
 	{
 	case game::ui::pause::PauseMenuAction::Resume:
 		m_pauseManager.resume();

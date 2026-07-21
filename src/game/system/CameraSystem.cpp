@@ -11,18 +11,20 @@ namespace game::system
 	CameraSystem::CameraSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId targetEntityId,
 	    core::iface::IInputProvider& inputProvider,
-	    core::iface::ICamera& camera)
+	    core::iface::ICamera& camera,
+	    GameManager& gameManager)
 	    : m_componentManager{ componentManager }
 	    , m_targetEntityId{ targetEntityId }
 	    , m_inputProvider{ inputProvider }
 	    , m_camera{ camera }
+	    , m_gameManager{ gameManager }
 	{
 	}
 
 	void CameraSystem::update(float deltaTime)
 	{
 		// DEBUG: デバッグモード中はDebugCameraSystemがカメラを制御するため通常追従を止める（リリース時に削除）
-		if (GameManager::getInstance().isDebugMode())
+		if (m_gameManager.isDebugMode())
 			return;
 
 		if (!m_componentManager.has<component::CameraComponent>(m_targetEntityId))
