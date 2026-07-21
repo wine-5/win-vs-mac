@@ -127,7 +127,8 @@ namespace game::scene
 		    m_componentManager,
 		    m_gameManager,
 		    m_pauseManager,
-		    *core::base::ServiceLocator::get<core::iface::IPerformanceDataProvider>());
+		    *core::base::ServiceLocator::get<core::iface::IPerformanceDataProvider>(),
+		    m_effectFactory);
 		m_view.setDebugGizmoView(m_debugGizmoView.get());
 		m_view.setDebugHUDView(m_debugHUDView.get());
 	}
@@ -354,7 +355,7 @@ namespace game::scene
 	{
 		// DEBUG: シーンビュー凍結中もFPS計測やCPU/メモリ取得は続ける（リリース時に削除）
 		if (m_debugHUDView)
-			m_debugHUDView->update(deltaTime);
+			m_debugHUDView->update();
 
 		// DEBUG: F1キーでデバッグモード（フリーカメラ）のON/OFFを切り替える（リリース時に削除）
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::F1))

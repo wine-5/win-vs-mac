@@ -33,10 +33,18 @@ namespace platform::system
 		float m_memoryUsage{};
 		float m_diskActivity{};
 
+		// DEBUG: 自プロセス単体の値（リリース時に削除）
+		float m_processCpuUsage{};
+		float m_processMemoryUsageMB{};
+
 		// CPU計算用（前フレームの値）
 		int64_t m_prevIdleTime{};   // CPUが何もしていなかった時間
 		int64_t m_prevKernelTime{}; // CPUがOSの処理に使った時間
 		int64_t m_prevUserTime{};   // CPUがアプリケーションの処理に使った時間
+
+		// DEBUG: 自プロセスCPU計算用（前フレームの値。リリース時に削除）
+		int64_t m_prevProcessKernelTime{};
+		int64_t m_prevProcessUserTime{};
 
 		// ディスクI/O計算用（前回の累積時間）
 		int64_t m_prevReadTime{};
@@ -48,5 +56,9 @@ namespace platform::system
 		void updateCpu();
 		void updateMemory();
 		void updateDisk();
+
+		// DEBUG: 自プロセスのCPU/メモリ使用量を計算する（リリース時に削除）
+		void updateProcessCpu(int64_t systemKernelDelta, int64_t systemUserDelta);
+		void updateProcessMemory();
 	};
 } // namespace platform::system

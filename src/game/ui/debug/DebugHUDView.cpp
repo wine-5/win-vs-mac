@@ -1,5 +1,6 @@
 #include "DebugHUDView.h"
 #include "core/interface/IPerformanceDataProvider.h"
+#include "core/interface/IEffectFactory.h" // DEBUG: リリース時に削除
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
 #include "game/component/TransformComponent.h"
@@ -22,22 +23,36 @@ namespace game::ui::debug
 	    core::ecs::ComponentManager& componentManager,
 	    GameManager& gameManager,
 	    PauseManager& pauseManager,
-	    core::iface::IPerformanceDataProvider& perfProvider)
+	    core::iface::IPerformanceDataProvider& perfProvider,
+	    core::iface::IEffectFactory& effectFactory)
 	    : m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_componentManager{ componentManager }
 	    , m_gameManager{ gameManager }
 	    , m_pauseManager{ pauseManager }
 	    , m_perfProvider{ perfProvider }
+	    , m_effectFactory{ effectFactory }
 	{
 	}
 
-	void DebugHUDView::update(float deltaTime)
+	void DebugHUDView::update()
 	{
+		// 実際の壁時計時間を計測する（Applicationの固定タイムステップは使わない。
+		// ヘッダのコメント参照）
+		const auto now{ std::chrono::steady_clock::now() };
+		if (!m_hasLastUpdateTime)
+		{
+			m_lastUpdateTime = now;
+			m_hasLastUpdateTime = true;
+			return;
+		}
+		const float realDeltaTime{ std::chrono::duration<float>(now - m_lastUpdateTime).count() };
+		m_lastUpdateTime = now;
+
 		// FPS/フレーム時間は直近FPS_UPDATE_INTERVAL秒間のフレーム数から算出する
 		// （毎フレームの瞬間値だと数値が激しく揺れて読みにくいため）
 		++m_fpsFrameAccum;
-		m_fpsTimeAccum += deltaTime;
+		m_fpsTimeAccum += realDeltaTime;
 		if (m_fpsTimeAccum >= FPS_UPDATE_INTERVAL)
 		{
 			m_displayFps = static_cast<float>(m_fpsFrameAccum) / m_fpsTimeAccum;
@@ -47,7 +62,7 @@ namespace game::ui::debug
 		}
 
 		// CPU/メモリ使用率は重い処理を伴うため一定間隔でのみ更新する
-		m_perfUpdateTimer += deltaTime;
+		m_perfUpdateTimer += realDeltaTime;
 		if (m_perfUpdateTimer >= PERF_UPDATE_INTERVAL)
 		{
 			m_perfUpdateTimer -= PERF_UPDATE_INTERVAL;
@@ -86,15 +101,18 @@ namespace game::ui::debug
 	{
 		const int entityCount{ static_cast<int>(m_componentManager.getAllEntities<component::TransformComponent>().size()) };
 		const int projectileCount{ static_cast<int>(m_componentManager.getAllEntities<component::ProjectileComponent>().size()) };
+		const int activeEffectCount{ m_effectFactory.getActiveEffectCount() };
 		const auto snapshot{ m_perfProvider.getSnapshot() };
 
-		char lines[4][64]{};
+		char lines[6][64]{};
 		std::snprintf(lines[0], sizeof(lines[0]), "FPS: %.1f (%.2fms)", m_displayFps, m_displayFrameMs);
 		std::snprintf(lines[1], sizeof(lines[1]), "Entity: %d", entityCount);
 		std::snprintf(lines[2], sizeof(lines[2]), "Enemy: %d  Bullet: %d", enemyCount, projectileCount);
-		std::snprintf(lines[3], sizeof(lines[3]), "CPU: %.1f%%  Mem: %.1f%%", snapshot.cpuUsage * 100.0f, snapshot.memoryUsage * 100.0f);
+		std::snprintf(lines[3], sizeof(lines[3]), "Active Effects: %d", activeEffectCount);
+		std::snprintf(lines[4], sizeof(lines[4]), "System  CPU: %.1f%%  Mem: %.1f%%", snapshot.cpuUsage * 100.0f, snapshot.memoryUsage * 100.0f);
+		std::snprintf(lines[5], sizeof(lines[5]), "This Game  CPU: %.1f%%  Mem: %.0fMB", snapshot.processCpuUsage * 100.0f, snapshot.processMemoryUsageMB);
 
-		for (int i{ 0 }; i < 4; ++i)
+		for (int i{ 0 }; i < 6; ++i)
 		{
 			const int textWidth{ m_uiRenderer.getTextWidth(lines[i], STATS_FONT_SIZE) };
 			const int x{ m_screen.getWidth() - textWidth - STATS_MARGIN };
