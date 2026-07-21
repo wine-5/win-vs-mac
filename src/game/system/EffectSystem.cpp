@@ -25,6 +25,13 @@ namespace game::system
 		    {
 			    onAttackStart(e);
 		    });
+
+		// EnemyDeadEventを購読する
+		m_eventBus.subscribe<game::event::EnemyDeadEvent>(
+		    [this](const game::event::EnemyDeadEvent& e)
+		    {
+			    onEnemyDead(e);
+		    });
 	}
 
 
@@ -100,6 +107,28 @@ namespace game::system
 		auto& effect{ m_componentManager.get<component::EffectComponent>(event.m_attackerId) };
 		component::EffectComponent::Slot slot{};
 		slot.m_type = event.m_effectType;
+		slot.m_handle = handle;
+		effect.m_slots.push_back(slot);
+	}
+
+	void EffectSystem::onEnemyDead(const game::event::EnemyDeadEvent& event)
+	{
+		// 死亡した敵の位置で撃破エフェクトを再生する（Tキーのデバッグテストと同じEnemy_HitWindowを使用）
+		if (!m_componentManager.has<component::TransformComponent>(event.m_entityId))
+			return;
+
+		const auto& transform{ m_componentManager.get<component::TransformComponent>(event.m_entityId) };
+
+		int handle{ m_effectFactory.play(core::constant::EffectType::Enemy_HitWindow, transform.m_position) };
+		if (handle == -1)
+			return;
+
+		if (!m_componentManager.has<component::EffectComponent>(event.m_entityId))
+			return;
+
+		auto& effect{ m_componentManager.get<component::EffectComponent>(event.m_entityId) };
+		component::EffectComponent::Slot slot{};
+		slot.m_type = core::constant::EffectType::Enemy_HitWindow;
 		slot.m_handle = handle;
 		effect.m_slots.push_back(slot);
 	}

@@ -2,6 +2,7 @@
 #include "game/component/ProjectileComponent.h"
 #include "game/component/AttackComponent.h"
 #include "game/event/InGameEvents.h"
+#include <algorithm>
 
 namespace game::system
 {
@@ -24,6 +25,15 @@ namespace game::system
 		auto projectiles{ m_componentManager.getAllEntities<component::ProjectileComponent>() };
 		for (auto id : projectiles)
 		{
+			// 既にヒット等で破棄予約済みの弾は再ヒット判定させない。
+			// AttackSystemはProjectileSystemより後に実行されるため、ヒットした弾は
+			// このフレームの購読コールバックでm_pendingDestroyに積まれるが、実際の破棄は
+			// このupdate関数の末尾まで遅延される。ここでスキップしないと、次フレームの
+			// このループでm_attackRequestedが再度trueになり、破棄されるまでの間
+			// 毎フレーム再ヒットしてエフェクトが際限なく積み重なってしまう。
+			if (std::ranges::find(m_pendingDestroy, id) != m_pendingDestroy.end())
+				continue;
+
 			auto& projectile{ m_componentManager.get<component::ProjectileComponent>(id) };
 			projectile.m_remainingLifetime -= deltaTime;
 			if (projectile.m_remainingLifetime <= 0.0f)

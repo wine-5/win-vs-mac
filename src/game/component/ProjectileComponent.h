@@ -21,5 +21,9 @@ namespace game::component
 
 		// モデルのAABB中心（ローカル・スケール未適用）。原点ズレを打ち消して中心まわりに回すために使う
 		core::Vector3 m_spinCenter{ 0.0f, 0.0f, 0.0f };
+
+		// 発射時の演出（AttackStartEvent）を再生済みか。ProjectileSystemが毎フレーム
+		// m_attackRequestedを立て直すため、AttackSystem側でこれを見て初回の1回だけに絞る
+		bool m_hasPlayedStartEffect{ false };
 	};
 } // namespace game::component

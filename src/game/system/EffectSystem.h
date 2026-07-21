@@ -26,6 +26,7 @@ namespace game::system
     private:
         void onAttackHit(const game::event::AttackHitEvent& event);
 		void onAttackStart(const game::event::AttackStartEvent& event);
+		void onEnemyDead(const game::event::EnemyDeadEvent& event);
 
 		core::ecs::ComponentManager& m_componentManager;
         core::base::EventBus&        m_eventBus;

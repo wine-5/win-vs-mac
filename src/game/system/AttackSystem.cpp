@@ -59,11 +59,34 @@ namespace game::system
 
 			// 攻撃を開始した瞬間に再生する演出用エフェクト（ヒットの有無に関わらず発行）
 			// Playerの剣攻撃（左クリック）はPlayer_Slash、Enemyの攻撃（近接/遠距離問わず）はEnemy_Slashを再生する
+			//
+			// 弾（ProjectileComponent持ち）はProjectileSystemが「AttackSystemに毎フレーム拾わせ続ける」
+			// ためにm_attackRequestedを毎フレームtrueにし続ける。素通りさせるとエフェクトが際限なく
+			// 積み重なるため、ここで絞る：
+			// ・Playerの弾（Window弾＝右クリック遠距離攻撃）：Player_Slash（剣の斬撃）は近接専用の演出
+			//   なので弾からは一切発行しない
+			// ・Enemyの弾（レインボー等）：発射された瞬間の1回だけEnemy_Slashを発行する
 			const auto& attackerTagForStart{ m_componentManager.get<component::TagComponent>(attackerId) };
-			if (attackerTagForStart.m_tag == constant::Tag::Player)
-				m_eventBus.publish(event::AttackStartEvent{ attackerId, core::constant::EffectType::Player_Slash });
-			else if (attackerTagForStart.m_tag == constant::Tag::Enemy)
-				m_eventBus.publish(event::AttackStartEvent{ attackerId, core::constant::EffectType::Enemy_Slash });
+			bool shouldPlayStartEffect{ true };
+			if (m_componentManager.has<component::ProjectileComponent>(attackerId))
+			{
+				if (attackerTagForStart.m_tag == constant::Tag::Player)
+					shouldPlayStartEffect = false;
+				else
+				{
+					auto& projectile{ m_componentManager.get<component::ProjectileComponent>(attackerId) };
+					shouldPlayStartEffect = !projectile.m_hasPlayedStartEffect;
+					projectile.m_hasPlayedStartEffect = true;
+				}
+			}
+
+			if (shouldPlayStartEffect)
+			{
+				if (attackerTagForStart.m_tag == constant::Tag::Player)
+					m_eventBus.publish(event::AttackStartEvent{ attackerId, core::constant::EffectType::Player_Slash });
+				else if (attackerTagForStart.m_tag == constant::Tag::Enemy)
+					m_eventBus.publish(event::AttackStartEvent{ attackerId, core::constant::EffectType::Enemy_Slash });
+			}
 
 			auto targets{m_componentManager.getAllEntities<component::HealthComponent>()};
 			for (auto targetId : targets)

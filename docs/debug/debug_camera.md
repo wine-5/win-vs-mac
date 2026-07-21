@@ -80,11 +80,9 @@
 - `setupSystems()` 内の `m_debugCameraSystem = m_systemManager.registerSystem<DebugCameraSystem>(...)`（`// DEBUG:` コメント付き）を削除。
 - `update()` 先頭の `// DEBUG: F1キーで...` トグルブロック（`isKeyPressed(F1)` の if 全体）を削除。
 
-#### `src/game/scene/InGameView.h` / `.cpp`
-- `GameManager` の前方宣言・コンストラクタ引数・`m_gameManager` メンバ（すべて `// DEBUG:` コメント付き）を削除。
-- `draw()` 内の `drawDebugCameraLabel();` 呼び出しと、`drawDebugCameraLabel()` の宣言・定義を削除。
-- `#include "game/GameManager.h"` を削除。
-- 呼び出し側（InGame.cpp の `m_view{...}` 初期化）の `gameManager` 引数も削除。
+#### `src/game/ui/debug/DebugHUDView.h` / `.cpp`
+- カメラ状態ラベル（`drawCameraLabel()`）は [debug_hud_and_gizmo_view.md](debug_hud_and_gizmo_view.md) の削除手順を参照
+  （`DebugHUDView` クラスごと削除する場合、この機能もまとめて消える）。
 
 ---
 

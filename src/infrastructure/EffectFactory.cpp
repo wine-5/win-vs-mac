@@ -1,6 +1,5 @@
 #include "infrastructure/EffectFactory.h"
 #include "thirdparty/effekseer/EffekseerForDXLib.h"
-#include <core\interface\ILogger.h>
 
 namespace infrastructure
 {
@@ -43,6 +42,7 @@ namespace infrastructure
 
 		// stop()で正しいプールに返却できるようハンドルを記録する
 		m_handleToType[handle] = type;
+
 		return handle;
 	}
 
@@ -90,6 +90,14 @@ namespace infrastructure
 		// DxLib のカメラ設定を Effekseer に同期してからエフェクトを描画する
 		Effekseer_Sync3DSetting();
 		DrawEffekseer3D();
+	}
+
+	int EffectFactory::getActiveEffectCount() const noexcept
+	{
+		int total{ 0 };
+		for (const auto& [type, pool] : m_pools)
+			total += pool.getActiveCount();
+		return total;
 	}
 
 } // namespace infrastructure
