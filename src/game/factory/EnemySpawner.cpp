@@ -51,8 +51,8 @@ namespace game::factory
 		const auto modelId{ toModelId(type) };
 
 		// 同種の敵が複数体いてもアニメーション状態が競合しないよう、複製ハンドルを使う
-		int baseHandle{ m_resourceManager.loadModelById(modelId) };
-		int modelHandle{ m_resourceManager.duplicateModel(baseHandle) };
+		// （死亡した同種の敵が返却したハンドルがあればそれを使い回す）
+		int modelHandle{ acquireModelHandle(type, modelId) };
 		auto meta{ m_resourceManager.getMetadata(modelId) };
 		if (!meta.has_value())
 		{
@@ -82,5 +82,28 @@ namespace game::factory
 		const auto& stage{ m_resourceManager.getStageMetadata() };
 		for (const auto& spawn : stage.m_spawns)
 			this->spawn(constant::toEnemyType(spawn.m_type), spawn.m_position);
+	}
+
+	void EnemySpawner::returnEnemy(constant::EnemyType type, core::ecs::EntityId entityId, int modelHandle)
+	{
+		// 前の持ち主のアニメーションアタッチ状態を消し、次に使い回す際の二重アタッチを防ぐ
+		m_resourceManager.detachAllAnimations(modelHandle);
+		m_modelHandlePool[type].push_back(modelHandle);
+
+		m_factoryManager.getEnemyFactory().remove(entityId);
+	}
+
+	int EnemySpawner::acquireModelHandle(constant::EnemyType type, std::string_view modelId)
+	{
+		auto& pool{ m_modelHandlePool[type] };
+		if (!pool.empty())
+		{
+			int handle{ pool.back() };
+			pool.pop_back();
+			return handle;
+		}
+
+		int baseHandle{ m_resourceManager.loadModelById(modelId) };
+		return m_resourceManager.duplicateModel(baseHandle);
 	}
 } // namespace game::factory

@@ -103,6 +103,10 @@ namespace game::system
 				if (!m_componentManager.has<component::TransformComponent>(targetId))
 					continue;
 
+				// 死亡済み（後始末待ち）のEntityは攻撃対象にしない
+				if (m_componentManager.get<component::HealthComponent>(targetId).m_isDead)
+					continue;
+
 				// 無敵中（ボス覚醒演出など）はダメージを与えない
 				if (m_componentManager.get<component::HealthComponent>(targetId).m_isInvincible)
 					continue;

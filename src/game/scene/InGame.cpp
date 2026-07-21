@@ -26,6 +26,7 @@
 #include "game/system/AnimationSystem.h"
 #include "game/system/CollisionSystem.h"
 #include "game/system/HitEffectSystem.h"
+#include "game/system/EnemyDeathSystem.h"
 #include "game/system/EffectSystem.h"
 #include "core/interface/IEffectFactory.h"
 #include "game/system/AttackSystem.h"
@@ -290,6 +291,8 @@ namespace game::scene
 		}
 		m_systemManager.registerSystem<game::system::AttackSystem>(m_componentManager, m_eventBus, playerAttackSeType);
 		m_systemManager.registerSystem<game::system::HitEffectSystem>(m_componentManager, m_eventBus);
+		// 死亡した敵の後始末（演出待機→Entity破棄＋モデルハンドルのプール返却）
+		m_systemManager.registerSystem<game::system::EnemyDeathSystem>(m_componentManager, m_entityManager, m_eventBus, m_enemySpawner);
 
 		m_systemManager.registerSystem<game::system::EffectSystem>(m_componentManager, m_eventBus, m_effectFactory);
 

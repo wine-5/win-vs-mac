@@ -134,8 +134,14 @@ namespace infrastructure::repository
 		if (modelHandle == -1)
 			return;
 
-		while (MV1GetAttachAnimNum(modelHandle) > 0)
-			MV1DetachAnim(modelHandle, 0);
+		// DxLibにアタッチ数を取得するAPIがないため、想定しうるアタッチ枠を
+		// 高いインデックスから走査する（デタッチによるインデックス詰めの影響を避けるため降順）
+		constexpr int MAX_ATTACH_SLOTS{ 16 };
+		for (int i{ MAX_ATTACH_SLOTS - 1 }; i >= 0; --i)
+		{
+			if (MV1GetAttachAnim(modelHandle, i) != -1)
+				MV1DetachAnim(modelHandle, i);
+		}
 	}
 
 	float ModelRepository::computeBoundingRadius(int modelHandle, float scale) const

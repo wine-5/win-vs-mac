@@ -51,7 +51,16 @@ namespace game::factory
          */
         [[nodiscard]] const std::vector<core::ecs::EntityId>& getEnemyIds() const noexcept;
 
-    private:
+		/**
+		 * @brief 内部で保持しているEnemyを破棄する（死亡後の後始末で呼ぶ）
+		 *
+		 * Entity/Componentの破棄はこのクラスの責務外。あくまで内部リスト
+		 * （m_enemies・m_enemyIds）からの除去のみを行う
+		 * @param id 除去するEnemyのEntityId
+		 */
+		void remove(core::ecs::EntityId id);
+
+	  private:
         core::ecs::EntityManager& m_entityManager;
         core::ecs::ComponentManager& m_componentManager;
         core::iface::IResourceManager& m_resourceManager;

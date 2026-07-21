@@ -5,6 +5,8 @@
 #include "core/utility/Vector3.h"
 #include "core/base/EventBus.h"
 #include "game/constant/EnemyType.h"
+#include <unordered_map>
+#include <vector>
 
 namespace game::factory
 {
@@ -60,7 +62,27 @@ namespace game::factory
 		 */
 		void spawnStageEnemies();
 
+		/**
+		 * @brief 死亡した敵の後始末をする（EnemyDeathSystemから呼ばれる）
+		 *
+		 * モデルハンドルをアニメーションデタッチ済みの状態で種別ごとのプールへ返却し、
+		 * EnemyFactory内部の追跡リストからも除去する。
+		 * Entity・Componentそのものの破棄は呼び出し側（EnemyDeathSystem）の責務
+		 * @param type 敵の種類
+		 * @param entityId 破棄対象のEntityId
+		 * @param modelHandle 返却するモデルハンドル
+		 */
+		void returnEnemy(constant::EnemyType type, core::ecs::EntityId entityId, int modelHandle);
+
 	  private:
+		/**
+		 * @brief 種別ごとのモデルハンドルプールから取得する。プールが空なら新規複製する
+		 * @param type 敵の種類
+		 * @param modelId モデルID（新規複製が必要な場合のロードに使う）
+		 * @return モデルハンドル
+		 */
+		int acquireModelHandle(constant::EnemyType type, std::string_view modelId);
+
 		FactoryManager& m_factoryManager;
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IResourceManager& m_resourceManager;
@@ -68,5 +90,8 @@ namespace game::factory
 
 		// 生成した敵に設定する追跡対象。未設定(0)なら設定しない
 		core::ecs::Entity m_target{ 0 };
+
+		// 種別ごとに使い回すモデルハンドルのプール（死亡した敵から返却されたもの）
+		std::unordered_map<constant::EnemyType, std::vector<int>> m_modelHandlePool;
 	};
 } // namespace game::factory
