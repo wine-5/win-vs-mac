@@ -1,4 +1,5 @@
 ﻿#include "LogUtil.h"
+#include <DxLib.h>
 #include <cstdio>
 #include <ctime>
 
@@ -26,6 +27,13 @@ namespace infrastructure::utility
 
 		// コンソールウィンドウのタイトルを設定
 		SetConsoleTitleA("DxLib-3D Debug Console");
+
+		// AllocConsole() は新しいコンソールウィンドウにフォーカスを移してしまい、
+		// ゲーム本体ウィンドウが非アクティブになってキー入力を取得できなくなる
+		// （Escでポーズが開かない等の不具合の原因になる）。明示的にフォーカスを戻す。
+		HWND gameWindow{ GetMainWindowHandle() };
+		if (gameWindow)
+			SetForegroundWindow(gameWindow);
 
 		// printf("===========================================\n");
 		// printf("  DxLib-3D Debug Console\n");
