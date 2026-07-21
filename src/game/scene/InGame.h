@@ -26,6 +26,11 @@
 #include "game/scene/InGameView.h"
 #include <memory>
 
+namespace core::iface
+{
+	class IPerformanceDataProvider; // DEBUG: 前方宣言（リリース時に削除）
+} // namespace core::iface
+
 namespace game
 {
 	class GameManager;  // 前方宣言
@@ -35,6 +40,12 @@ namespace game
 	{
 		class DebugCameraSystem; // DEBUG: 前方宣言（リリース時に削除）
 	} // namespace system
+
+	namespace ui::debug
+	{
+		class DebugGizmoView; // DEBUG: 前方宣言（リリース時に削除）
+		class DebugHUDView;   // DEBUG: 前方宣言（リリース時に削除）
+	} // namespace ui::debug
 } // namespace game
 
 namespace game::scene
@@ -120,6 +131,10 @@ namespace game::scene
 
 		// DEBUG: シーンビュー凍結中に単独更新するための参照（所有はSystemManager。リリース時に削除）
 		system::DebugCameraSystem* m_debugCameraSystem{ nullptr };
+
+		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（リリース時にまとめて削除）
+		std::unique_ptr<ui::debug::DebugGizmoView> m_debugGizmoView;
+		std::unique_ptr<ui::debug::DebugHUDView> m_debugHUDView;
 
 		// 進行トラッキング
 		float m_elapsedTime{0.0f};

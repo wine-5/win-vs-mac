@@ -55,6 +55,9 @@
 #include "game/system/ChargeZoomSystem.h"
 #include "game/system/DamageShakeSystem.h"
 #include "game/system/BossAwakenEffectSystem.h"
+#include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
+#include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
+#include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
 #include "core/interface/IWindowFactory.h"
 #include "game/event/InGameEvents.h"
 #include "game/utility/ExtensionBonusCalculator.h"
@@ -93,9 +96,7 @@ namespace game::scene
 	    , m_view{ m_componentManager, m_renderer,
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
-		    m_effectFactory,
-		    gameManager,
-		    pauseManager }
+		    m_effectFactory }
 	{
 		loadResources();
 		spawnEntities();
@@ -117,6 +118,18 @@ namespace game::scene
 		// DEBUG: 何かと不便なためリリースするときにfalseに変更すること
 		// 3人称マウス視点のためカーソルを非表示にする
 		m_inputProvider.setMouseCursorVisible(true);
+
+		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（リリース時にまとめて削除）
+		m_debugGizmoView = std::make_unique<ui::debug::DebugGizmoView>(m_componentManager, m_renderer);
+		m_debugHUDView = std::make_unique<ui::debug::DebugHUDView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager,
+		    m_gameManager,
+		    m_pauseManager,
+		    *core::base::ServiceLocator::get<core::iface::IPerformanceDataProvider>());
+		m_view.setDebugGizmoView(m_debugGizmoView.get());
+		m_view.setDebugHUDView(m_debugHUDView.get());
 	}
 
 	void InGame::loadResources()
@@ -339,6 +352,10 @@ namespace game::scene
 
 	void InGame::update(float deltaTime)
 	{
+		// DEBUG: シーンビュー凍結中もFPS計測やCPU/メモリ取得は続ける（リリース時に削除）
+		if (m_debugHUDView)
+			m_debugHUDView->update(deltaTime);
+
 		// DEBUG: F1キーでデバッグモード（フリーカメラ）のON/OFFを切り替える（リリース時に削除）
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::F1))
 		{

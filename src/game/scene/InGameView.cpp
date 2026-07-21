@@ -2,17 +2,13 @@
 #include "core/utility/Color.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/RenderComponent.h"
-#include "game/component/ColliderComponent.h"
-#include "game/component/AttackComponent.h"
-#include "game/component/AIComponent.h"
-#include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/AimComponent.h"
 #include "game/component/ProjectileComponent.h"
 #include "game/component/PlayerChargeComponent.h"
 #include "game/system/PlayerChargeVisualsSystem.h"
 #include "game/system/BossAwakenEffectSystem.h"
-#include "game/GameManager.h"  // DEBUG: デバッグモード状態の参照（リリース時に削除）
-#include "game/PauseManager.h" // DEBUG: シーンビュー状態の参照（リリース時に削除）
+#include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
+#include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
 #include <cmath>
 
 namespace game::scene
@@ -21,16 +17,12 @@ namespace game::scene
 	    core::iface::IRenderer& renderer,
 	    core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
-	    core::iface::IEffectFactory& effectFactory,
-	    GameManager& gameManager,
-	    PauseManager& pauseManager)
+	    core::iface::IEffectFactory& effectFactory)
 	    : m_componentManager{ componentManager }
 	    , m_renderer{ renderer }
 	    , m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_effectFactory{ effectFactory }
-	    , m_gameManager{ gameManager }
-	    , m_pauseManager{ pauseManager }
 	{
 	}
 
@@ -44,8 +36,9 @@ namespace game::scene
 		// 敵のタブ弾など3Dモデルを持つ弾はここで回転描画する
 		drawProjectileModels();
 
-		// DEBUG: デバッグ可視化（テスト後に呼び出しごと削除）
-		drawDebugVisuals();
+		// DEBUG: 当たり判定等のワールド空間デバッグ可視化（リリース時に削除）
+		if (m_debugGizmoView)
+			m_debugGizmoView->draw();
 
 		// プレイヤーの溜め攻撃の演出（集中線）。描画内容はSystemが持ち、Viewは描画順だけを決める
 		if (m_playerChargeVisualsSystem)
@@ -58,32 +51,12 @@ namespace game::scene
 		// 照準レティクル（HUD）は最前面に描く
 		drawReticle(playerId);
 
-		// DEBUG: デバッグモード中は左上に「DebugCamera」ラベルを表示する（リリース時に削除）
-		drawDebugCameraLabel();
+		// DEBUG: デバッグHUD（FPS等の統計・カメラ状態ラベル）（リリース時に削除）
+		if (m_debugHUDView)
+			m_debugHUDView->draw(static_cast<int>(enemyIds.size()));
 
 		// Effekseerエフェクトの描画（3Dモデル描画後・UI手前に呼び出す）
 		// m_effectFactory.draw();
-	}
-
-	void InGameView::drawDebugCameraLabel()
-	{
-		const bool isSceneView{ m_pauseManager.isPausedBy(PauseReason::DebugSceneView) };
-		if (!m_gameManager.isDebugMode() && !isSceneView)
-			return;
-
-		constexpr int LABEL_X{ 16 };
-		constexpr int LABEL_Y{ 16 };
-		constexpr int FONT_SIZE{ 28 };
-		constexpr unsigned int TEXT_COLOR{ 0xFFFFFF00 }; // 黄色（ARGB）
-
-		m_uiRenderer.drawText(LABEL_X, LABEL_Y,
-		    isSceneView ? "SceneView (Time Stopped)" : "DebugCamera",
-		    TEXT_COLOR, FONT_SIZE);
-
-		// 操作方法を併記する（WASD=カメラ、矢印キー=Player）
-		m_uiRenderer.drawText(LABEL_X, LABEL_Y + FONT_SIZE + 4,
-		    isSceneView ? "WASD/Space/Shift: Camera" : "WASD/Space/Shift: Camera   Arrows: Player",
-		    TEXT_COLOR, FONT_SIZE);
 	}
 
 	void InGameView::setPlayerChargeVisualsSystem(system::PlayerChargeVisualsSystem* system)
@@ -96,29 +69,14 @@ namespace game::scene
 		m_bossAwakenEffectSystem = system;
 	}
 
-	void InGameView::setDebugVisualsEnabled(bool enabled)
+	void InGameView::setDebugGizmoView(ui::debug::DebugGizmoView* view)
 	{
-		m_isDebugVisualsEnabled = enabled;
+		m_debugGizmoView = view;
 	}
 
-	void InGameView::setDebugColliderEnabled(bool enabled)
+	void InGameView::setDebugHUDView(ui::debug::DebugHUDView* view)
 	{
-		m_isDebugColliderEnabled = enabled;
-	}
-
-	void InGameView::setDebugAttackRangeEnabled(bool enabled)
-	{
-		m_isDebugAttackRangeEnabled = enabled;
-	}
-
-	void InGameView::setDebugDetectionRangeEnabled(bool enabled)
-	{
-		m_isDebugDetectionRangeEnabled = enabled;
-	}
-
-	void InGameView::setDebugProjectileRangeEnabled(bool enabled)
-	{
-		m_isDebugProjectileRangeEnabled = enabled;
+		m_debugHUDView = view;
 	}
 
 	void InGameView::drawModels(core::ecs::EntityId playerId,
@@ -245,106 +203,4 @@ namespace game::scene
 			m_renderer.drawModel(render.m_modelHandle, drawPos, rotation, transform.m_scale);
 		}
 	}
-
-	void InGameView::drawDebugVisuals()
-	{
-		if (!m_isDebugVisualsEnabled)
-			return;
-
-		if (m_isDebugColliderEnabled)
-			drawDebugColliders();
-
-		if (m_isDebugAttackRangeEnabled)
-			drawDebugAttackRanges();
-
-		if (m_isDebugDetectionRangeEnabled)
-			drawDebugDetectionRanges();
-
-		if (m_isDebugProjectileRangeEnabled)
-			drawDebugProjectileRanges();
-	}
-
-	void InGameView::drawDebugColliders()
-	{
-		auto colliderEntities{ m_componentManager.getAllEntities<component::ColliderComponent>() };
-		for (auto id : colliderEntities)
-		{
-			auto& colliderTf{ m_componentManager.get<component::TransformComponent>(id) };
-			auto& collider{ m_componentManager.get<component::ColliderComponent>(id) };
-			core::Vector3 colliderCenter{ colliderTf.m_position + collider.m_offset };
-			m_renderer.drawCollider(colliderCenter, collider.m_size, core::utility::Color::BLUE);
-		}
-	}
-
-	void InGameView::drawDebugAttackRanges()
-	{
-		// 人型（プレイヤー・Xcode・Mac）はカプセル、浮遊型ドローン（Safari）は球で描く
-		auto attackers{ m_componentManager.getAllEntities<component::AttackComponent>() };
-		for (auto id : attackers)
-		{
-			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
-			auto& atk{ m_componentManager.get<component::AttackComponent>(id) };
-
-			// 浮遊型（Safari）はRangeKeepAIComponentのマーカーで判定する
-			const bool isFlying{ m_componentManager.has<component::ai::RangeKeepAIComponent>(id) };
-
-			if (!isFlying && m_componentManager.has<component::ColliderComponent>(id))
-			{
-				auto& collider{ m_componentManager.get<component::ColliderComponent>(id) };
-				core::Vector3 center{ atkTransform.m_position + collider.m_offset };
-				float halfHeight{ collider.m_size.y * 0.5f };
-				core::Vector3 bottom{ center.x, center.y - halfHeight, center.z };
-				core::Vector3 top{ center.x, center.y + halfHeight, center.z };
-				m_renderer.drawDebugCapsule(bottom, top, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
-			}
-			else
-			{
-				m_renderer.drawDebugSphere(atkTransform.m_position, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
-			}
-		}
-	}
-
-	void InGameView::drawDebugDetectionRanges()
-	{
-		// 人型（プレイヤー・Xcode・Mac）はカプセル、浮遊型ドローン（Safari）は球で描く
-		auto attackers{ m_componentManager.getAllEntities<component::AttackComponent>() };
-		for (auto id : attackers)
-		{
-			if (!m_componentManager.has<component::AIComponent>(id))
-				continue;
-
-			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
-			auto& ai{ m_componentManager.get<component::AIComponent>(id) };
-
-			// 浮遊型（Safari）はRangeKeepAIComponentのマーカーで判定する
-			const bool isFlying{ m_componentManager.has<component::ai::RangeKeepAIComponent>(id) };
-			if (!isFlying && m_componentManager.has<component::ColliderComponent>(id))
-			{
-				auto& collider{ m_componentManager.get<component::ColliderComponent>(id) };
-				core::Vector3 center{ atkTransform.m_position + collider.m_offset };
-				float halfHeight{ collider.m_size.y * 0.5f };
-				core::Vector3 bottom{ center.x, center.y - halfHeight, center.z };
-				core::Vector3 top{ center.x, center.y + halfHeight, center.z };
-				m_renderer.drawDebugCapsule(bottom, top, ai.m_detectionRange, core::utility::Color::rgb(255, 255, 0));
-			}
-			else
-				m_renderer.drawDebugSphere(atkTransform.m_position, ai.m_detectionRange, core::utility::Color::rgb(255, 255, 0));
-		}
-	}
-
-	void InGameView::drawDebugProjectileRanges()
-	{
-		auto projectiles{ m_componentManager.getAllEntities<component::ProjectileComponent>() };
-		for (auto id : projectiles)
-		{
-			if (!m_componentManager.has<component::AttackComponent>(id))
-				continue;
-
-			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
-			const auto& atk{ m_componentManager.get<component::AttackComponent>(id) };
-
-			m_renderer.drawDebugSphere(transform.m_position, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
-		}
-	}
-
 } // namespace game::scene
