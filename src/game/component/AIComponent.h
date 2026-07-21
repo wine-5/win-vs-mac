@@ -20,6 +20,10 @@ namespace game::component
 		float m_currentAttackCooldown{};
 		bool m_isActive{ true };
 
+		// 前フレームでプレイヤーを索敵範囲内に捉えていたか。
+		// DetectionSystemが「未索敵→索敵」の切り替わり（発見の瞬間）を検知するのに使う
+		bool m_wasAware{ false };
+
 		// 距離維持型用のパラメータ
 		float m_preferredDistanceMin{0.0f}; // これより近づかれたら後退する
 		float m_preferredDistanceMax{0.0f}; // これより遠ければ接近する
