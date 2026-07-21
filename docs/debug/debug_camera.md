@@ -49,44 +49,42 @@
 
 ### 3. 一部を削除・元に戻すファイル
 
+> 注：脱シングルトンリファクタ以降、デバッグモード状態は `GameManager&` の**コンストラクタ注入**で
+> 参照している。削除時は「DEBUGコメント付きの引数・メンバ」も一緒に剥がすこと。
+
 #### `src/game/GameManager.h`
 - `// DEBUG: ここからデバッグモード関連` 〜 `// DEBUG: ここまでデバッグモード関連` のブロック（`toggleDebugMode()` / `isDebugMode()`）を削除。
 - private の `// DEBUG: デバッグモードの状態` と `bool m_debugMode{ false };` を削除。
 
 #### `src/core/input/KeyCode.h`
-- `F1, // DEBUG: デバッグモードのON/OFF切り替え` の行を削除。
+- `F1, // DEBUG: ...` の行を削除（F2は [debug_scene_view.md](debug_scene_view.md) 参照）。
 - ※ `R`（`// DEBUG: デバッグ用（現在未使用）`）は本機能で追加したものではないため任意。
 
 #### `src/infrastructure/InputManager.cpp`
 - `KEY_MAP` 内の `{ core::input::KeyCode::F1, KEY_INPUT_F1 }, // DEBUG: ...` の行を削除。
 
-#### `src/game/system/CameraSystem.cpp`
-- `#include "game/GameManager.h"` を削除。
-- `update()` 先頭の `// DEBUG: デバッグモード中は...` 早期リターンブロック（`if (GameManager::getInstance().isDebugMode()) return;`）を削除。
+#### `src/game/system/CameraSystem.h` / `.cpp`
+- `GameManager` の前方宣言・コンストラクタ引数・`m_gameManager` メンバ（すべて `// DEBUG:` コメント付き）を削除。
+- `update()` 先頭の `// DEBUG: ...` 早期リターンブロック（`if (m_gameManager.isDebugMode()) return;`）と
+  `#include "game/GameManager.h"` を削除。
+- 呼び出し側（InGame.cpp の registerSystem）の `m_gameManager` 引数も削除。
 
-#### `src/game/system/InputSystem.cpp`
-- `#include "game/GameManager.h"` を削除。
+#### `src/game/system/InputSystem.h` / `.cpp`
+- `GameManager` の前方宣言・コンストラクタ引数・`m_gameManager` メンバ（すべて `// DEBUG:` コメント付き）を削除。
 - `// DEBUG: デバッグモード中は...` の `const bool debugMode` / `const bool allowWasd` ブロックを削除。
-- 移動キーの条件を元に戻す（`allowWasd &&` を外す）:
-  ```cpp
-  if (m_inputProvider.isKeyDown(core::input::KeyCode::D) || m_inputProvider.isKeyDown(core::input::KeyCode::Right))
-  // A / W / S も同様
-  if (m_inputProvider.isKeyDown(core::input::KeyCode::Space)) input.m_jumpPressed = true;
-  if (m_inputProvider.isKeyDown(core::input::KeyCode::Shift)) input.m_dashPressed = true;
-  ```
+- 移動キーの条件を元に戻す（`allowWasd &&` を外す）。
+- 呼び出し側（InGame.cpp の registerSystem）の `m_gameManager` 引数も削除。
 
 #### `src/game/scene/InGame.cpp`
 - `#include "game/system/DebugCameraSystem.h" // DEBUG: ...` を削除。
-- `setupSystems()` 内の `registerSystem<game::system::DebugCameraSystem>(...)`（`// DEBUG:` コメント付き）を削除。
+- `setupSystems()` 内の `m_debugCameraSystem = m_systemManager.registerSystem<DebugCameraSystem>(...)`（`// DEBUG:` コメント付き）を削除。
 - `update()` 先頭の `// DEBUG: F1キーで...` トグルブロック（`isKeyPressed(F1)` の if 全体）を削除。
 
-#### `src/game/scene/InGameView.h`
-- `drawDebugCameraLabel()` の宣言（`// DEBUG:` コメント付き）を削除。
-
-#### `src/game/scene/InGameView.cpp`
-- `#include "game/GameManager.h" // DEBUG: ...` を削除。
-- `draw()` 内の `// DEBUG: ...左上に「DebugCamera」ラベル...` と `drawDebugCameraLabel();` の呼び出しを削除。
-- `drawDebugCameraLabel()` の定義（関数まるごと）を削除。
+#### `src/game/scene/InGameView.h` / `.cpp`
+- `GameManager` の前方宣言・コンストラクタ引数・`m_gameManager` メンバ（すべて `// DEBUG:` コメント付き）を削除。
+- `draw()` 内の `drawDebugCameraLabel();` 呼び出しと、`drawDebugCameraLabel()` の宣言・定義を削除。
+- `#include "game/GameManager.h"` を削除。
+- 呼び出し側（InGame.cpp の `m_view{...}` 初期化）の `gameManager` 引数も削除。
 
 ---
 
