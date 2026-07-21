@@ -240,8 +240,10 @@
     <ClCompile Include="src\platform\window\select\Win32SelectWindowManager.cpp" />
     <ClCompile Include="src\platform\window\result\ResultWindow.cpp" />
     <ClCompile Include="src\platform\window\loading\LoadingWindow.cpp" />
+    <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\ServiceLocatorInitializer.cpp" />
-    <ClCompile Include="src\SingletonInitializer.cpp" />
+    <ClCompile Include="src\game\ui\pause\PauseMenuController.cpp" />
+    <ClCompile Include="src\game\ui\pause\PauseMenuView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resource.rc" />
@@ -460,8 +462,12 @@
     <ClInclude Include="src\platform\window\WindowFactory.h" />
     <ClInclude Include="src\platform\window\result\ResultWindow.h" />
     <ClInclude Include="src\platform\window\loading\LoadingWindow.h" />
+    <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\ServiceLocatorInitializer.h" />
-    <ClInclude Include="src\SingletonInitializer.h" />
+    <ClInclude Include="src\core\base\NonCopyable.h" />
+    <ClInclude Include="src\game\PauseManager.h" />
+    <ClInclude Include="src\game\ui\pause\PauseMenuController.h" />
+    <ClInclude Include="src\game\ui\pause\PauseMenuView.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
