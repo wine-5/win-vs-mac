@@ -84,6 +84,12 @@ namespace infrastructure
 		int duplicateModel(int modelHandle) override;
 
 		/**
+		 * @brief モデルにアタッチされている全アニメーションをデタッチする
+		 * @param modelHandle 対象のモデルハンドル
+		 */
+		void detachAllAnimations(int modelHandle) override;
+
+		/**
 		 * @brief モデルの水平方向の外接半径を計算する（弾などの当たり判定サイズ自動取得用）
 		 * @param modelHandle モデルハンドル
 		 * @param scale 適用するスケール

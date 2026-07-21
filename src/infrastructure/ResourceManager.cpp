@@ -86,6 +86,12 @@ namespace infrastructure
 		return m_modelRepo->duplicateModel(modelHandle);
 	}
 
+	void ResourceManager::detachAllAnimations(int modelHandle)
+	{
+		if (m_modelRepo)
+			m_modelRepo->detachAllAnimations(modelHandle);
+	}
+
 	float ResourceManager::computeBoundingRadius(int modelHandle, float scale) const
 	{
 		if (!m_modelRepo)

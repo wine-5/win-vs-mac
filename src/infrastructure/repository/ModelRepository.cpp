@@ -129,6 +129,15 @@ namespace infrastructure::repository
 		return duplicated;
 	}
 
+	void ModelRepository::detachAllAnimations(int modelHandle)
+	{
+		if (modelHandle == -1)
+			return;
+
+		while (MV1GetAttachAnimNum(modelHandle) > 0)
+			MV1DetachAnim(modelHandle, 0);
+	}
+
 	float ModelRepository::computeBoundingRadius(int modelHandle, float scale) const
 	{
 		if (modelHandle == -1)

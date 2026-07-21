@@ -53,6 +53,12 @@ namespace infrastructure::repository
 		int duplicateModel(int modelHandle);
 
 		/**
+		 * @brief モデルにアタッチされている全アニメーションをデタッチする
+		 * @param modelHandle 対象のモデルハンドル
+		 */
+		void detachAllAnimations(int modelHandle);
+
+		/**
 		 * @brief モデルの水平方向の外接半径を計算する（弾などの当たり判定サイズ自動取得用）
 		 *
 		 * 参照メッシュのAABB（X/Zの大きい方）の半分に scale を掛けて返す。

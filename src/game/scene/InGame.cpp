@@ -42,6 +42,9 @@
 #include "game/system/ai/EnemyRangedAttackSystem.h"
 #include "game/system/ai/BossAISystem.h"
 #include "game/component/AIComponent.h"
+#include "game/component/ai/MeleeChaseAIComponent.h"
+#include "game/component/ai/RangeKeepAIComponent.h"
+#include "game/component/ai/BossAIComponent.h"
 #include "game/system/CameraSystem.h"
 #include "game/system/DebugCameraSystem.h" // DEBUG: フリーカメラ（リリース時に削除）
 #include "game/component/CameraComponent.h"
@@ -325,8 +328,20 @@ namespace game::scene
 						sceneManager->changeScene(game::scene::SceneType::Result); });
 
 				// 敵の死亡イベントの購読
-				m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
-					{
+		        m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
+		            {
+						// 倒した敵の種類をログに出す（動作確認用）。
+						// 種別専用の判定コンポーネント（各SystemがAI行動の分岐に使っているもの）の
+						// 有無で判定する。専用コンポーネントを新設せず既存の設計をそのまま流用する
+						std::string_view enemyTypeName{ "Unknown" };
+						if (m_componentManager.has<component::ai::BossAIComponent>(e.m_entityId))
+							enemyTypeName = "Mac";
+						else if (m_componentManager.has<component::ai::RangeKeepAIComponent>(e.m_entityId))
+							enemyTypeName = "Safari";
+						else if (m_componentManager.has<component::ai::MeleeChaseAIComponent>(e.m_entityId))
+							enemyTypeName = "Xcode";
+						LOG("敵を撃破: {} (EntityId={})", enemyTypeName, static_cast<unsigned int>(e.m_entityId));
+
 						if (m_componentManager.has<component::RenderComponent>(e.m_entityId))
 						{
 							auto& render{ m_componentManager.get<component::RenderComponent>(e.m_entityId) };
