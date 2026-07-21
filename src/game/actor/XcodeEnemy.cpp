@@ -24,6 +24,8 @@ namespace game::actor
 	void XcodeEnemy::setupAI()
 	{
 		// MeleeChaseAISystemがこのコンポーネントの有無で近接敵を判定する
+		// 攻撃のワインドアップ（アニメの振り終わりにダメージを与える遅延）は
+		// xcodeData.jsonのgameplay.attackWindupで設定する
 		m_componentManager.add<component::ai::MeleeChaseAIComponent>(m_entity.getId(), {});
 	}
 } // namespace game::actor

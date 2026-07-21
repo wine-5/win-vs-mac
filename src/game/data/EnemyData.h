@@ -71,6 +71,11 @@ namespace game::data
             if (attackCooldownIt != metadata.floatProperties.end())
                 data.m_attackCooldown = attackCooldownIt->second;
 
+			auto attackWindupIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::ATTACK_WINDUP)) };
+			if (attackWindupIt != metadata.floatProperties.end())
+				data.m_attackWindup = attackWindupIt->second;
+
 			auto hoverHeightIt{ metadata.floatProperties.find(
 				std::string(constant::metadata_keys::HOVER_HEIGHT)) };
 			if (hoverHeightIt != metadata.floatProperties.end())
@@ -159,6 +164,12 @@ namespace game::data
 			return m_attackCooldown;
 		}
 
+		/** @brief 攻撃のワインドアップ（要求からダメージ判定までの遅延・秒）を取得。0なら即時 */
+		[[nodiscard]] float getAttackWindup() const noexcept
+		{
+			return m_attackWindup;
+		}
+
 		/** @brief 浮遊高度を取得（0なら地上型） */
 		[[nodiscard]] float getHoverHeight() const noexcept
 		{
@@ -230,6 +241,7 @@ namespace game::data
         float         m_defence{ 0.0f };
         float         m_attackPower{ 0.0f };
         float         m_attackCooldown{ 0.0f };
+		float m_attackWindup{ 0.0f };
 		float m_hoverHeight{ 0.0f };
 		float m_preferredDistanceMin{ 0.0f };
 		float m_preferredDistanceMax{ 0.0f };

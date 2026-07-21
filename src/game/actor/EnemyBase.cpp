@@ -59,6 +59,7 @@ namespace game::actor
 		attack.m_attackPower = m_enemyData.getAttackPower();
 		attack.m_attackRange = m_enemyData.getAttackRange();
 		attack.m_attackCooldown = m_enemyData.getAttackCooldown();
+		attack.m_windupDelay = m_enemyData.getAttackWindup();
 		m_componentManager.add<component::AttackComponent>(m_entity.getId(), attack);
 
 		component::ColliderComponent collider{};
