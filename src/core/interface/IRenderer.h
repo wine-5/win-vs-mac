@@ -79,6 +79,20 @@ namespace core::iface
 		virtual void drawGroundCircle(const core::Vector3& center, float radius, unsigned int color, bool filled) = 0;
 
 		/**
+		 * @brief 地面（XZ平面）に扇形（セクター）を描く（扇状攻撃の予兆表示などに使う）
+		 *
+		 * center を要として facingRad 方向を中心に、左右 halfAngleRad ずつ開いた扇を描く。
+		 * @param center 扇の要（ワールド座標）
+		 * @param facingRad 扇の中心方向（ラジアン。XZ平面で+X軸からの角度、atan2(dz,dx)）
+		 * @param radius 半径（ワールド単位）
+		 * @param halfAngleRad 中心方向からの片側の開き角（ラジアン。全開き角の半分）
+		 * @param color 色（ARGB形式：0xAARRGGBB）
+		 * @param filled true=塗りつぶし、false=輪郭のみ
+		 */
+		virtual void drawGroundSector(const core::Vector3& center, float facingRad, float radius,
+		    float halfAngleRad, unsigned int color, bool filled) = 0;
+
+		/**
 		 * @brief 常にカメラの方を向く板（ビルボード）として画像を描画する
 		 * @param imageHandle 画像ハンドル（loadImageByIdで取得）
 		 * @param position ワールド座標（板の中心）

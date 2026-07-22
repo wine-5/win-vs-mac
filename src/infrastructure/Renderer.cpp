@@ -185,6 +185,53 @@ namespace infrastructure
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 	}
 
+	void Renderer::drawGroundSector(const core::Vector3& center, float facingRad, float radius,
+	    float halfAngleRad, unsigned int color, bool filled)
+	{
+		if (radius <= 0.0f || halfAngleRad <= 0.0f)
+			return;
+
+		constexpr int SEGMENTS{ 48 };
+
+		// ARGBのアルファを取り出して半透明合成する（円と同じ扱い）
+		const int alpha{ static_cast<int>((color >> 24) & 0xFF) };
+		const int r{ static_cast<int>((color >> 16) & 0xFF) };
+		const int g{ static_cast<int>((color >> 8) & 0xFF) };
+		const int b{ static_cast<int>(color & 0xFF) };
+		const unsigned int drawColor{ GetColor(r, g, b) };
+
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+		SetWriteZBuffer3D(FALSE);
+
+		const VECTOR c{ VGet(center.x, center.y, center.z) };
+		const float start{ facingRad - halfAngleRad };
+		const float sweep{ 2.0f * halfAngleRad };
+
+		VECTOR prev{ VGet(center.x + std::cos(start) * radius, center.y, center.z + std::sin(start) * radius) };
+		for (int i{ 1 }; i <= SEGMENTS; ++i)
+		{
+			const float angle{ start + sweep * i / SEGMENTS };
+			const VECTOR cur{ VGet(center.x + std::cos(angle) * radius, center.y, center.z + std::sin(angle) * radius) };
+			if (filled)
+				DrawTriangle3D(c, prev, cur, drawColor, TRUE);
+			else
+				DrawLine3D(prev, cur, drawColor);
+			prev = cur;
+		}
+
+		// 輪郭のみの場合は要から両端への2辺も描いて扇の形を閉じる
+		if (!filled)
+		{
+			const VECTOR endA{ VGet(center.x + std::cos(start) * radius, center.y, center.z + std::sin(start) * radius) };
+			const VECTOR endB{ VGet(center.x + std::cos(start + sweep) * radius, center.y, center.z + std::sin(start + sweep) * radius) };
+			DrawLine3D(c, endA, drawColor);
+			DrawLine3D(c, endB, drawColor);
+		}
+
+		SetWriteZBuffer3D(TRUE);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+	}
+
 	void Renderer::drawBillboard(int imageHandle, const core::Vector3& position, float size)
 	{
 		if (imageHandle == -1)

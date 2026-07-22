@@ -71,6 +71,18 @@ namespace infrastructure
 		void drawGroundCircle(const core::Vector3& center, float radius, unsigned int color, bool filled) override;
 
 		/**
+		 * @brief 地面（XZ平面）に扇形を描く（扇状攻撃の予兆表示などに使う）
+		 * @param center 扇の要（ワールド座標）
+		 * @param facingRad 扇の中心方向（ラジアン。XZ平面で+X軸からの角度、atan2(dz,dx)）
+		 * @param radius 半径（ワールド単位）
+		 * @param halfAngleRad 中心方向からの片側の開き角（ラジアン。全開き角の半分）
+		 * @param color 色（ARGB形式：0xAARRGGBB。アルファで半透明度を指定）
+		 * @param filled true=塗りつぶし、false=輪郭のみ
+		 */
+		void drawGroundSector(const core::Vector3& center, float facingRad, float radius,
+		    float halfAngleRad, unsigned int color, bool filled) override;
+
+		/**
 		 * @brief 常にカメラの方を向く板（ビルボード）として画像を描画する
 		 * @param imageHandle 画像ハンドル（loadImageByIdで取得）
 		 * @param position ワールド座標（板の中心）
