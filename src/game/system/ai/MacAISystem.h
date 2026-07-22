@@ -107,6 +107,15 @@ namespace game::system::ai
 		 */
 		int countAliveMinions();
 
+		/**
+		 * @brief 水平方向の移動だけ止める（Y＝重力ぶんの落下速度は残す）
+		 *
+		 * 待機・溜め・攻撃中に velocity を全ゼロにすると重力が効かず宙に浮くため、
+		 * X/ZのみゼロにしてY（重力）を残し、ボスが地面に接地し続けるようにする。
+		 * @param entityId 対象のEntityId
+		 */
+		void stopHorizontalVelocity(core::ecs::EntityId entityId);
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::base::EventBus& m_eventBus;
 		factory::ProjectileFactory& m_projectileFactory;

@@ -82,7 +82,7 @@ namespace game::system::ai
 			{
 				mac.m_state = MacState::Dead;
 				if (hasVelocity)
-					m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
+					stopHorizontalVelocity(entityId);
 				if (m_componentManager.has<component::AnimationComponent>(entityId))
 					m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Dying;
 				continue;
@@ -112,7 +112,7 @@ namespace game::system::ai
 					mac.m_actionTimer = mac.currentPhase().m_actionInterval;
 					health.m_isInvincible = true; // 覚醒演出中は無敵（演出終了時に解除する）
 					if (hasVelocity)
-						m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
+						stopHorizontalVelocity(entityId);
 					if (m_componentManager.has<component::AnimationComponent>(entityId))
 						m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 
@@ -127,7 +127,7 @@ namespace game::system::ai
 			{
 				mac.m_state = MacState::Idle;
 				if (hasVelocity)
-					m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
+					stopHorizontalVelocity(entityId);
 				continue;
 			}
 
@@ -150,7 +150,7 @@ namespace game::system::ai
 			if (mac.m_state == MacState::Windup)
 			{
 				if (hasVelocity)
-					m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
+					stopHorizontalVelocity(entityId);
 				if (m_componentManager.has<component::AnimationComponent>(entityId))
 					m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 
@@ -202,7 +202,7 @@ namespace game::system::ai
 			{
 				mac.m_state = MacState::Idle;
 				if (hasVelocity)
-					m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
+					stopHorizontalVelocity(entityId);
 				if (m_componentManager.has<component::AnimationComponent>(entityId))
 					m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 				continue;
@@ -212,7 +212,7 @@ namespace game::system::ai
 			if (mac.m_animLockTimer > 0.0f)
 			{
 				if (hasVelocity)
-					m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
+					stopHorizontalVelocity(entityId);
 				continue;
 			}
 
@@ -244,7 +244,7 @@ namespace game::system::ai
 				else
 				{
 					if (hasVelocity)
-						m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
+						stopHorizontalVelocity(entityId);
 					if (m_componentManager.has<component::AnimationComponent>(entityId))
 						m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 				}
@@ -253,7 +253,7 @@ namespace game::system::ai
 
 			// --- アクション抽選：技を決めて「溜め」に入る（発動は溜め完了時） ---
 			if (hasVelocity)
-				m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
+				stopHorizontalVelocity(entityId);
 
 			const int aliveMinions{ countAliveMinions() };
 			const bool canSummon{ !phase.m_summonTypes.empty() && phase.m_summonCount > 0 && aliveMinions < phase.m_summonMax };
@@ -467,5 +467,14 @@ namespace game::system::ai
 				++count;
 		}
 		return count;
+	}
+	void MacAISystem::stopHorizontalVelocity(core::ecs::EntityId entityId)
+	{
+		if (!m_componentManager.has<component::VelocityComponent>(entityId))
+			return;
+		auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+		velocity.m_velocity.x = 0.0f;
+		velocity.m_velocity.z = 0.0f;
+		// Y（重力ぶんの落下速度）は残す＝ボスが地面に着地・接地し続けるようにする
 	}
 } // namespace game::system::ai
