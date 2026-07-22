@@ -18,8 +18,8 @@ namespace core::data
 		core::Vector3 scale{1.0f, 1.0f, 1.0f};
 		core::Vector3 position{0.0f, 0.0f, 0.0f};      // Transform情報（全Entity共通）
 		core::Vector3 rotation{0.0f, 0.0f, 0.0f};      // Transform情報（全Entity共通）
-		core::Vector3 colliderSize{0.0f, 0.0f, 0.0f}; // コライダーサイズ（0なら自動計算の予定だがまだ未完成）
-		core::Vector3 colliderOffset{0.0f, 0.0f, 0.0f};
+		core::Vector3 colliderSize{ 0.0f, 0.0f, 0.0f };   // コライダーサイズ（全成分0ならModelRepositoryがモデルのAABBから自動算出する）
+		core::Vector3 colliderOffset{ 0.0f, 0.0f, 0.0f }; // コライダー中心オフセット（size自動算出時にAABB中心から併せて算出される）
 
 		std::unordered_map<std::string, float> floatProperties;
 		std::unordered_map<std::string, std::string> stringProperties; // 例: {"idleAnim": "path/to/anim.mv1"}

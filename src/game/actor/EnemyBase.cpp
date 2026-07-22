@@ -16,11 +16,15 @@ namespace game::actor
 {
 
 	EnemyBase::EnemyBase(core::ecs::EntityManager& entityManager,
-	                     core::ecs::ComponentManager& componentManager,
-	                     core::iface::IResourceManager& resourceManager,
-	                     int modelHandle,
-	                     data::EnemyData enemyData)
-	    : m_entity{ entityManager.create() }, m_componentManager{ componentManager }, m_resourceManager{ resourceManager }, m_modelHandle{ modelHandle }, m_enemyData{ std::move(enemyData) }
+	    core::ecs::ComponentManager& componentManager,
+	    core::iface::IResourceManager& resourceManager,
+	    int modelHandle,
+	    data::EnemyData enemyData)
+	    : m_entity{ entityManager.create() }
+	    , m_componentManager{ componentManager }
+	    , m_resourceManager{ resourceManager }
+	    , m_modelHandle{ modelHandle }
+	    , m_enemyData{ std::move(enemyData) }
 	{
 	}
 
@@ -30,7 +34,6 @@ namespace game::actor
 		setupAnimation();
 		setupAI();
 	}
-
 
 	core::ecs::EntityId EnemyBase::getId() const noexcept
 	{

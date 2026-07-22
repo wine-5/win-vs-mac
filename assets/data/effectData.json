@@ -29,8 +29,8 @@
       "scale": 30.0
     },
     {
-      "type": "Enemy_Slash",
-      "path": "assets/effects/enemy_slash.efk",
+      "type": "Mac_Rainbow",
+      "path": "assets/effects/mac_rainbow.efk",
       "poolSize": 5,
       "yOffset": 75.0,
       "scale": 30.0

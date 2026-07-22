@@ -3,12 +3,14 @@
 #include "game/component/RenderComponent.h"
 #include "game/component/AnimationComponent.h"
 #include "game/component/VelocityComponent.h"
+#include "game/component/TransformComponent.h"
 #include "game/component/ai/MeleeChaseAIComponent.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/MacAIComponent.h"
 #include "game/constant/EnemyType.h"
 #include "game/constant/AnimationState.h"
 #include <algorithm>
+#include <cmath>
 
 namespace
 {
@@ -24,6 +26,12 @@ namespace
 	// 落下する敵に死亡時に与える下向き初速。高所の浮遊敵を素早く落とすため終端速度で落とす。
 	// PhysicsSystemの落下上限(-200)と同値にし、上限クランプを活かして地面すり抜けを防ぐ
 	constexpr float FLYING_PLUNGE_SPEED{ -200.0f };
+
+	// 落下死（Safari）の「故障してガタガタ落ちる」演出。着地するまで左右に激しく振れる
+	constexpr float DEATH_SHAKE_FREQ{ 9.0f };     // 揺れの速さ（rad/秒）
+	constexpr float DEATH_SHAKE_ROLL{ 0.5f };     // 左右ロール（z回転）の振幅[rad]（約29度）
+	constexpr float DEATH_SHAKE_PITCH{ 0.07f };   // 前後ピッチ（x回転）の振幅[rad]。別周波数で不規則さを足す
+	constexpr float DEATH_SHAKE_LATERAL{ 45.0f }; // 横方向の小刻みなガタつき（水平速度）[単位/秒]
 
 	/**
 	 * @brief AI専用マーカーコンポーネントの有無からEnemyTypeを判定する
@@ -132,6 +140,36 @@ namespace game::system
 		{
 			auto& death{ m_componentManager.get<component::DeathComponent>(entityId) };
 			death.m_elapsed += deltaTime;
+
+			// 落下する敵（Safari）は着地するまで左右にガタガタ揺れながら故障したように落ちる。
+			// 機体正面がローカルX軸のため、z回転が左右のロール（傾き）に見える。
+			if (isFallingDeath(m_componentManager, entityId) &&
+			    m_componentManager.has<component::TransformComponent>(entityId))
+			{
+				auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+				// 地面に触れるまでの落下中だけ揺らす。初回接地でピタッと止める（バウンド完了は待たない）
+				if (!death.m_hasTouchedGround)
+				{
+					const float t{ death.m_elapsed };
+					// z回転で左右ロール、x回転を別周波数で混ぜて規則的でない「故障」感を出す
+					transform.m_rotation.z = std::sinf(t * DEATH_SHAKE_FREQ) * DEATH_SHAKE_ROLL;
+					transform.m_rotation.x = std::sinf(t * DEATH_SHAKE_FREQ * 1.53f) * DEATH_SHAKE_PITCH;
+					// 横方向の小刻みなガタつき（平均0で位置は概ね保ちつつ震わせる）
+					if (m_componentManager.has<component::VelocityComponent>(entityId))
+					{
+						auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+						velocity.m_velocity.x = std::sinf(t * DEATH_SHAKE_FREQ * 0.9f) * DEATH_SHAKE_LATERAL;
+						velocity.m_velocity.z = std::cosf(t * DEATH_SHAKE_FREQ * 1.1f) * DEATH_SHAKE_LATERAL;
+					}
+				}
+				else if (m_componentManager.has<component::VelocityComponent>(entityId))
+				{
+					// 接地後は横のガタつきを止めて死体が滑らないようにする（傾きはそのまま倒れた姿勢で残す）
+					auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+					velocity.m_velocity.x = 0.0f;
+					velocity.m_velocity.z = 0.0f;
+				}
+			}
 
 			const int modelHandle{ m_componentManager.has<component::RenderComponent>(entityId)
 				                       ? m_componentManager.get<component::RenderComponent>(entityId).m_modelHandle
