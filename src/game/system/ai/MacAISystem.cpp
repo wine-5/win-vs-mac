@@ -160,7 +160,8 @@ namespace game::system::ai
 				if (m_componentManager.has<component::TelegraphComponent>(entityId))
 				{
 					auto& tel{ m_componentManager.get<component::TelegraphComponent>(entityId) };
-					tel.m_center = transform.m_position;
+					// 予兆はボスの高さではなく足元の地面（Y=0）に描く
+					tel.m_center = core::Vector3{ transform.m_position.x, 0.0f, transform.m_position.z };
 					tel.m_progress = std::clamp(1.0f - mac.m_windupTimer / mac.m_windupDuration, 0.0f, 1.0f);
 				}
 
@@ -280,7 +281,8 @@ namespace game::system::ai
 			{
 				auto& tel{ m_componentManager.get<component::TelegraphComponent>(entityId) };
 				tel.m_active = true;
-				tel.m_center = transform.m_position;
+				// 予兆はボスの高さではなく足元の地面（Y=0）に描く
+				tel.m_center = core::Vector3{ transform.m_position.x, 0.0f, transform.m_position.z };
 				tel.m_progress = 0.0f;
 				if (action == MacState::Ranged)
 				{
