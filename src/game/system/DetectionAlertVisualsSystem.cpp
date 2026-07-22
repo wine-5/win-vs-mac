@@ -16,7 +16,7 @@
 namespace
 {
 	// バナーの表示時間（秒）
-	constexpr float ALERT_DURATION{ 10.6f };
+	constexpr float ALERT_DURATION{ 1.6f };
 	// 出現時のフェードイン・せり上がりにかける時間（秒）
 	constexpr float APPEAR_TIME{ 0.18f };
 	// 表示終了間際にフェードアウトする時間（秒）
@@ -116,8 +116,7 @@ namespace game::system
 		}
 		else
 		{
-			m_componentManager.add<component::AlertComponent>(e.m_entityId,
-			    component::AlertComponent{ ALERT_DURATION, messageIndex });
+			m_componentManager.add<component::AlertComponent>(e.m_entityId, { ALERT_DURATION, messageIndex });
 		}
 	}
 
