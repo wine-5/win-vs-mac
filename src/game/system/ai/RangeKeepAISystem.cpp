@@ -13,6 +13,27 @@ namespace
 {
 	constexpr float HOVER_RESTORE_SPEED{ 50.0f }; // ホバー高度への復帰速度
 	constexpr float STRAFE_RATIO{ 0.85f };        // 横ストレイフ成分の強さ（前後方向の速度に対する倍率）
+
+	// アイドル時のホバー揺らぎ（上下動）：止まっていても「生きている」感を出す
+	constexpr float SWAY_AMPLITUDE{ 18.0f }; // 上下に揺れる振幅（ワールド単位）
+	constexpr float SWAY_FREQ{ 2.2f };       // 揺れの速さ（rad/秒）
+	// 発射時のリコイル：撃った直後に軽く上へ跳ね上がって戻る
+	constexpr float RECOIL_KICK{ 90.0f }; // リコイルの押し上げ量係数（m_attackAnimTimer[秒]に掛ける）
+
+	/**
+	 * @brief ホバーの目標高度に、アイドル揺らぎと発射リコイルを重ねた値を返す
+	 * @param baseHeight 基準のホバー高度
+	 * @param elapsedTime 揺らぎの位相計算用の経過時間
+	 * @param phase 個体ごとの位相オフセット（群れが同期して揺れないようにする）
+	 * @param attackAnimTimer 発射直後の演出タイマー（>0の間リコイルで持ち上がる）
+	 * @return 揺らぎ・リコイルを加味した目標高度
+	 */
+	float hoverTargetHeight(float baseHeight, float elapsedTime, float phase, float attackAnimTimer)
+	{
+		const float sway{ SWAY_AMPLITUDE * std::sinf(elapsedTime * SWAY_FREQ + phase) };
+		const float recoil{ (attackAnimTimer > 0.0f) ? attackAnimTimer * RECOIL_KICK : 0.0f };
+		return baseHeight + sway + recoil;
+	}
 } // namespace
 
 namespace game::system::ai
@@ -24,6 +45,8 @@ namespace game::system::ai
 
 	void RangeKeepAISystem::update(float deltaTime)
 	{
+		m_elapsedTime += deltaTime; // ホバー揺らぎの位相計算に使う
+
 		// RangeKeepAIComponentを持つ敵だけを処理する
 		auto entities{ m_componentManager.getAllEntities<component::ai::RangeKeepAIComponent>() };
 
@@ -31,6 +54,9 @@ namespace game::system::ai
 		{
 			if (!m_componentManager.has<component::AIComponent>(entityId))
 				continue;
+
+			// 個体ごとに揺らぎの位相をずらし、複数体が同じタイミングで上下しないようにする
+			const float swayPhase{ static_cast<float>(entityId) * 1.7f };
 
 			auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
 			auto& rangeKeep{ m_componentManager.get<component::ai::RangeKeepAIComponent>(entityId) };
@@ -62,10 +88,12 @@ namespace game::system::ai
 					auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
 					velocity.m_velocity.x = 0.0f;
 					velocity.m_velocity.z = 0.0f;
-					// ホバー高度を保つ（指定があれば重力ぶんを補正、なければ垂直速度を0で維持）
+					// ホバー高度を保つ（指定があれば重力ぶんを補正、なければ垂直速度を0で維持）。
+					// 索敵範囲外でもアイドルの上下揺らぎは効かせて「浮いて生きている」感を残す
 					if (rangeKeep.m_hoverHeight > 0.0f)
 					{
-						const float heightDiff{ rangeKeep.m_hoverHeight - transform.m_position.y };
+						const float target{ hoverTargetHeight(rangeKeep.m_hoverHeight, m_elapsedTime, swayPhase, rangeKeep.m_attackAnimTimer) };
+						const float heightDiff{ target - transform.m_position.y };
 						velocity.m_velocity.y = heightDiff * HOVER_RESTORE_SPEED * deltaTime;
 					}
 					else
@@ -122,12 +150,13 @@ namespace game::system::ai
 				velocity.m_velocity.z = moveDirection.z * ai.m_moveSpeed;
 			}
 
-			// ホバー高度を保つ（浮遊敵用）
+			// ホバー高度を保つ（浮遊敵用）。基準高度にアイドル揺らぎ＋発射リコイルを重ねる
 			if (rangeKeep.m_hoverHeight > 0.0f)
 			{
-				// ホバー高度と現在位置の差を垂直速度に反映させる
+				// 目標高度（揺らぎ・リコイル込み）と現在位置の差を垂直速度に反映させる
 				// （重力があれば、重力で下がるので、その分を補正）
-				const float heightDiff{ rangeKeep.m_hoverHeight - transform.m_position.y };
+				const float target{ hoverTargetHeight(rangeKeep.m_hoverHeight, m_elapsedTime, swayPhase, rangeKeep.m_attackAnimTimer) };
+				const float heightDiff{ target - transform.m_position.y };
 				if (m_componentManager.has<component::VelocityComponent>(entityId))
 				{
 					auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };

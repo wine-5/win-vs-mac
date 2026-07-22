@@ -29,5 +29,6 @@ namespace game::system::ai
 
 	  private:
 		core::ecs::ComponentManager& m_componentManager;
+		float m_elapsedTime{ 0.0f }; // ホバーの揺らぎ（アイドルの上下動）の位相計算用の経過時間
 	};
 } // namespace game::system::ai
