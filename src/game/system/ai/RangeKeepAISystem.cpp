@@ -12,6 +12,7 @@
 namespace
 {
 	constexpr float HOVER_RESTORE_SPEED{ 50.0f }; // ホバー高度への復帰速度
+	constexpr float STRAFE_RATIO{ 0.85f };        // 横ストレイフ成分の強さ（前後方向の速度に対する倍率）
 } // namespace
 
 namespace game::system::ai
@@ -81,8 +82,8 @@ namespace game::system::ai
 				direction.z /= distance;
 			}
 
-			// 距離維持ロジック：推奨距離の範囲内に入るよう移動する
-			core::Vector3 moveDirection{ direction };
+			// 距離維持ロジック：推奨距離の帯に入るよう前後方向（ラジアル成分）を決める
+			core::Vector3 moveDirection{ 0.0f, 0.0f, 0.0f };
 			if (distance < rangeKeep.m_preferredDistanceMin)
 			{
 				// 近すぎたら後退
@@ -92,13 +93,24 @@ namespace game::system::ai
 			}
 			else if (distance > rangeKeep.m_preferredDistanceMax)
 			{
-				// 遠すぎたら接近（そのままdirection）
-				// moveDirection = direction; // 既にそう
+				// 遠すぎたら接近
+				moveDirection.x = direction.x;
+				moveDirection.y = direction.y;
+				moveDirection.z = direction.z;
 			}
-			else
+			// 推奨距離帯の中では前後成分は0のまま（横のストレイフのみで周回する）
+
+			// 横ストレイフ成分を合成する：プレイヤーを中心に円周を横滑りして回り込む。
+			// 水平方向のdirectionを90°回した横ベクトルに、個体ごとの周回向き(+1/-1)を掛ける。
+			// 前後（ラジアル）と横（ストレイフ）を合成することで、間合いを保ちつつ回り込む動きになる。
+			const float horizontalLen{ std::sqrt(direction.x * direction.x + direction.z * direction.z) };
+			if (horizontalLen > 0.0f)
 			{
-				// 推奨距離内なら停止
-				moveDirection = core::Vector3{ 0.0f, 0.0f, 0.0f };
+				const float normalizedX{ direction.x / horizontalLen };
+				const float normalizedZ{ direction.z / horizontalLen };
+				const float strafeSign{ static_cast<float>(rangeKeep.m_strafeDirection) };
+				moveDirection.x += -normalizedZ * strafeSign * STRAFE_RATIO;
+				moveDirection.z += normalizedX * strafeSign * STRAFE_RATIO;
 			}
 
 			// 移動速度を設定（水平と垂直を分ける場合もあるが、ここでは統一）

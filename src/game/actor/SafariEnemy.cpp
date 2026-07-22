@@ -2,10 +2,22 @@
 #include "game/component/AIComponent.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include <numbers>
+#include <random>
 
 namespace
 {
 	constexpr float DEG_TO_RAD{ std::numbers::pi_v<float> / 180.0f };
+
+	/**
+	 * @brief ストレイフ（周回）の向きを個体ごとにランダムに決める
+	 * @return 右回り(+1) または 左回り(-1)
+	 */
+	int pickStrafeDirection()
+	{
+		static std::mt19937 rng{ std::random_device{}() };
+		static std::uniform_int_distribution<int> dist{ 0, 1 };
+		return dist(rng) == 0 ? 1 : -1;
+	}
 } // namespace
 
 namespace game::actor
@@ -23,6 +35,8 @@ namespace game::actor
 		rangeKeep.m_preferredDistanceMin = m_enemyData.getPreferredDistanceMin();
 		rangeKeep.m_preferredDistanceMax = m_enemyData.getPreferredDistanceMax();
 		rangeKeep.m_hoverHeight = m_enemyData.getHoverHeight();
+		// 周回の向きを個体ごとにランダムに固定する（複数体が散開して包囲する隊形になる）
+		rangeKeep.m_strafeDirection = pickStrafeDirection();
 		rangeKeep.m_fireCooldown = m_enemyData.getFireCooldown();
 		// JSONは度で持つのでラジアンへ変換して保持する
 		rangeKeep.m_facingYawOffset = m_enemyData.getFacingYawOffset() * DEG_TO_RAD;

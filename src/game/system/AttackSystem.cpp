@@ -77,36 +77,39 @@ namespace game::system
 
 			attack.m_attackRequested = false;
 
-			// 攻撃を開始した瞬間に再生する演出用エフェクト（ヒットの有無に関わらず発行）
-			// Playerの剣攻撃（左クリック）はPlayer_Slash、Enemyの攻撃（近接/遠距離問わず）はEnemy_Slashを再生する
-			//
-			// 弾（ProjectileComponent持ち）はProjectileSystemが「AttackSystemに毎フレーム拾わせ続ける」
-			// ためにm_attackRequestedを毎フレームtrueにし続ける。素通りさせるとエフェクトが際限なく
-			// 積み重なるため、ここで絞る：
-			// ・Playerの弾（Window弾＝右クリック遠距離攻撃）：Player_Slash（剣の斬撃）は近接専用の演出
-			//   なので弾からは一切発行しない
-			// ・Enemyの弾（レインボー等）：発射された瞬間の1回だけEnemy_Slashを発行する
+			// 攻撃開始時の演出用エフェクト（AttackStartEvent）の発行を絞る：
+			// ・Playerの近接（剣）：Player_Slash を出す。Playerの弾（Window弾）はエフェクト無し
+			// ・Enemyは「物を投げる（弾）」ときだけ Enemy_Slash を出す。地面を叩く近接はエフェクト無し
+			//   （弾はProjectileSystemが毎フレームm_attackRequestedを立て直すため、初回1回のみに絞る）
 			const auto& attackerTagForStart{ m_componentManager.get<component::TagComponent>(attackerId) };
-			bool shouldPlayStartEffect{ true };
-			if (m_componentManager.has<component::ProjectileComponent>(attackerId))
+			const bool isProjectile{ m_componentManager.has<component::ProjectileComponent>(attackerId) };
+
+			bool shouldPlayStartEffect{ false };
+			core::constant::EffectType startEffect{ core::constant::EffectType::None };
+
+			if (attackerTagForStart.m_tag == constant::Tag::Player)
 			{
-				if (attackerTagForStart.m_tag == constant::Tag::Player)
-					shouldPlayStartEffect = false;
-				else
+				// プレイヤーは近接（剣）のときだけ斬撃エフェクト。弾（遠距離）は出さない
+				if (!isProjectile)
+				{
+					shouldPlayStartEffect = true;
+					startEffect = core::constant::EffectType::Player_Slash;
+				}
+			}
+			else if (attackerTagForStart.m_tag == constant::Tag::Enemy)
+			{
+				// 敵は投擲（弾）のときだけエフェクト。地面叩き等の近接はエフェクト無し
+				if (isProjectile)
 				{
 					auto& projectile{ m_componentManager.get<component::ProjectileComponent>(attackerId) };
 					shouldPlayStartEffect = !projectile.m_hasPlayedStartEffect;
 					projectile.m_hasPlayedStartEffect = true;
+					startEffect = core::constant::EffectType::Enemy_Slash;
 				}
 			}
 
 			if (shouldPlayStartEffect)
-			{
-				if (attackerTagForStart.m_tag == constant::Tag::Player)
-					m_eventBus.publish(event::AttackStartEvent{ attackerId, core::constant::EffectType::Player_Slash });
-				else if (attackerTagForStart.m_tag == constant::Tag::Enemy)
-					m_eventBus.publish(event::AttackStartEvent{ attackerId, core::constant::EffectType::Enemy_Slash });
-			}
+				m_eventBus.publish(event::AttackStartEvent{ attackerId, startEffect });
 
 			// ワインドアップ有り：振りが終わる（m_windupDelay秒後）までダメージ判定を遅延させる。
 			// 演出（AttackStartEvent）は今すぐ発行済みなので、アニメの振りとダメージのタイミングが揃う。
