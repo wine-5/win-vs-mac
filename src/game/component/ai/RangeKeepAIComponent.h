@@ -21,5 +21,6 @@ namespace game::component::ai
 		float m_facingYawOffset{ 0.0f };      // 正面向きのyawオフセット（ラジアン）。機体モデルの正面軸のズレを補正する
 		float m_attackAnimTimer{ 0.0f };      // 発射直後の演出（前のめり＋ポップ）の残り時間（秒）
 		core::Vector3 m_baseScale{ 0.0f, 0.0f, 0.0f }; // 予備動作のスケール演出用に保持する基準スケール（0なら未取得）
+		                                               // 索敵範囲外の徘徊は共通の PatrolComponent が担う（このコンポーネントには持たせない）
 	};
 } // namespace game::component::ai

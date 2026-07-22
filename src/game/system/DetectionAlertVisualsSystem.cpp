@@ -44,7 +44,7 @@ namespace
 	constexpr float FALLBACK_HEAD_HEIGHT{ 180.0f };
 
 	// 危険メッセージ（発見時にランダムで1つ選ぶ）
-	constexpr std::array<const char*, 3> ALERT_MESSAGES{ "危険！", "見つかった！", "発見！" };
+	constexpr std::array<const char*, 3> ALERT_MESSAGES{ "危険！", "見つけた！", "発見！" };
 
 	// 左のアプリアイコン画像のリソースID
 	constexpr const char* ALERT_ICON_IMAGE_ID{ "alert-icon" };
