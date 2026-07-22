@@ -31,12 +31,16 @@ namespace core::data
 		int m_weightMelee{ 0 };  // 接近攻撃
 		int m_weightRanged{ 0 }; // 遠方から攻撃
 		int m_weightSummon{ 0 }; // 敵の生成
+		int m_weightNova{ 0 };   // 全方位レインボー・ノヴァ（覚醒限定。phase1は0で候補外）
 
 		// 遠距離（レインボー扇状）
 		int m_rainbowCount{ 0 };          // 1回の発射数
 		float m_rainbowSpreadDeg{ 0.0f }; // 扇の全開き角（度）
 		float m_rainbowSpeed{ 0.0f };     // 弾速（0ならprojectileData.jsonの既定値を使う）
 		float m_rainbowSpinSpeed{ 0.0f }; // ルーレット回転の速さ（1ワールド単位進むごとの回転量[rad]）
+
+		// 全方位ノヴァ（覚醒限定）
+		int m_novaCount{ 0 }; // 360度に均等発射するレインボー弾の数
 
 		// 召喚
 		std::vector<std::string> m_summonTypes{}; // 召喚候補の敵タイプ名（"xcode" / "safari"）

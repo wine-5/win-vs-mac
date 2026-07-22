@@ -383,6 +383,8 @@ namespace infrastructure::repository
 				phase.m_weightRanged = w["ranged"];
 			if (w.contains("summon"))
 				phase.m_weightSummon = w["summon"];
+			if (w.contains("nova"))
+				phase.m_weightNova = w["nova"];
 		}
 
 		if (p.contains("rainbowCount"))
@@ -393,6 +395,8 @@ namespace infrastructure::repository
 			phase.m_rainbowSpeed = p["rainbowSpeed"];
 		if (p.contains("rainbowSpinSpeed"))
 			phase.m_rainbowSpinSpeed = p["rainbowSpinSpeed"];
+		if (p.contains("novaCount"))
+			phase.m_novaCount = p["novaCount"];
 
 		if (p.contains("summonTypes"))
 			for (const auto& t : p["summonTypes"])
