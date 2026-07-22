@@ -4,6 +4,7 @@
 #include "game/component/RenderComponent.h"
 #include "game/component/AimComponent.h"
 #include "game/component/ProjectileComponent.h"
+#include "game/component/VelocityComponent.h"
 #include "game/component/PlayerChargeComponent.h"
 #include "game/system/PlayerChargeVisualsSystem.h"
 #include "game/system/MacAwakenEffectSystem.h"
@@ -203,34 +204,26 @@ namespace game::scene
 			const float distance{ std::sqrt(traveled.x * traveled.x + traveled.y * traveled.y + traveled.z * traveled.z) };
 			const float tumble{ distance * TUMBLE_PER_UNIT };
 
-			// それ以外の弾（タブ等）は従来どおり左右にぐるぐる（Y軸まわり）回す。
-			core::Vector3 rotation{ 0.0f, tumble, 0.0f };
-			core::Vector3 drawPos{ transform.m_position };
-
 			if (projectile.m_spinRollSpeed > 0.0f)
 			{
-				// レインボーは画面に正対して回る「ルーレット（Loading）」にする＝Z軸（画面奥行き）単独で回す。
-				// Y軸タンブルと混ぜると2つのEuler回転が合成されて軸が傾くため、レインボーではYを使わない。
+				// レインボーは飛ぶ方向に依らず常にカメラへ正対させ、面内で回す「ルーレット」。
 				// 回転の速さ（m_spinRollSpeed）はmacData.jsonのrainbowSpinSpeedから渡される。
 				const float roll{ distance * projectile.m_spinRollSpeed };
-				rotation = core::Vector3{ 0.0f, 0.0f, roll };
-
-				// モデル原点が見た目の中心とズレていると原点まわりの回転で円軌道を描く。
-				// 回転後の中心オフセット（スケール適用）を位置から引き、中心まわりのその場回転にする。
-				const float scale{ transform.m_scale.x };
-				const float cx{ projectile.m_spinCenter.x * scale };
-				const float cy{ projectile.m_spinCenter.y * scale };
-				const float cz{ projectile.m_spinCenter.z * scale };
-				const float cosR{ std::cos(roll) };
-				const float sinR{ std::sin(roll) };
-				drawPos = core::Vector3{
-					transform.m_position.x - (cx * cosR - cy * sinR),
-					transform.m_position.y - (cx * sinR + cy * cosR),
-					transform.m_position.z - cz
-				};
+				// 進行方向（velocity）を向いたまま飛ばす。モデルの正面が逆なので反転して渡す（180度逆）
+				core::Vector3 faceDir{ 0.0f, 0.0f, -1.0f };
+				if (m_componentManager.has<component::VelocityComponent>(id))
+				{
+					const auto& vel{ m_componentManager.get<component::VelocityComponent>(id).m_velocity };
+					faceDir = core::Vector3{ -vel.x, -vel.y, -vel.z };
+				}
+				m_renderer.drawSpinningModelFacing(render.m_modelHandle, transform.m_position,
+				    transform.m_scale, projectile.m_spinCenter, faceDir, roll);
+				continue;
 			}
 
-			m_renderer.drawModel(render.m_modelHandle, drawPos, rotation, transform.m_scale);
+			// それ以外の弾（タブ等）は従来どおり左右にぐるぐる（Y軸まわり）回す
+			const core::Vector3 rotation{ 0.0f, tumble, 0.0f };
+			m_renderer.drawModel(render.m_modelHandle, transform.m_position, rotation, transform.m_scale);
 		}
 	}
 } // namespace game::scene

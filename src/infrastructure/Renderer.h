@@ -91,6 +91,19 @@ namespace infrastructure
 		void drawBillboard(int imageHandle, const core::Vector3& position, float size) override;
 
 		/**
+		 * @brief 3Dモデルの正面を指定方向へ向け面内回転して描画する（レインボー弾等の回転体用）
+		 * @param modelHandle モデルハンドル
+		 * @param position 見た目中心を合わせるワールド座標
+		 * @param scale モデルスケール
+		 * @param centerOffset モデルのAABB中心（ローカル・スケール未適用）
+		 * @param faceDir モデルの正面を向ける方向（正規化不要）
+		 * @param spinAngle 面内回転角（ラジアン）
+		 */
+		void drawSpinningModelFacing(int modelHandle, const core::Vector3& position,
+		    const core::Vector3& scale, const core::Vector3& centerOffset,
+		    const core::Vector3& faceDir, float spinAngle) override;
+
+		/**
 		 * @brief ワールド座標をスクリーン座標へ変換する
 		 * @param worldPos ワールド座標
 		 * @return x/yはスクリーン座標、zは深度（0.0〜1.0の範囲内なら画面に映っている）

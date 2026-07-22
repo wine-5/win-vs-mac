@@ -242,6 +242,56 @@ namespace infrastructure
 		DrawBillboard3D(pos, 0.5f, 0.5f, size, 0.0f, imageHandle, TRUE);
 	}
 
+	void Renderer::drawSpinningModelFacing(int modelHandle, const core::Vector3& position,
+	    const core::Vector3& scale, const core::Vector3& centerOffset,
+	    const core::Vector3& faceDir, float spinAngle)
+	{
+		if (modelHandle == -1)
+			return;
+
+		const VECTOR pos{ VGet(position.x, position.y, position.z) };
+
+		// モデルの正面(ローカル+Z)を faceDir へ向ける
+		VECTOR forward{ VGet(faceDir.x, faceDir.y, faceDir.z) };
+		if ((forward.x * forward.x + forward.y * forward.y + forward.z * forward.z) <= 0.0001f)
+			forward = VGet(0.0f, 0.0f, -1.0f);
+		forward = VNorm(forward);
+
+		// 面の基準上方向（forwardがほぼ垂直なら別軸を使い退化を避ける）
+		VECTOR upRef{ (std::abs(forward.y) > 0.99f) ? VGet(0.0f, 0.0f, 1.0f) : VGet(0.0f, 1.0f, 0.0f) };
+		VECTOR right{ VNorm(VCross(upRef, forward)) };
+		VECTOR up{ VCross(forward, right) };
+
+		// forward軸まわりに面内スピンさせる
+		const float c{ std::cos(spinAngle) };
+		const float s{ std::sin(spinAngle) };
+		VECTOR xAxis{ VScale(VAdd(VScale(right, c), VScale(up, s)), scale.x) };
+		VECTOR yAxis{ VScale(VAdd(VScale(right, -s), VScale(up, c)), scale.y) };
+		VECTOR zAxis{ VScale(forward, scale.z) };
+
+		// 見た目中心(centerOffset)をpositionへ合わせる平行移動（原点まわりの円運動を打ち消す）
+		const VECTOR centerWorld{ VAdd(VAdd(VScale(xAxis, centerOffset.x), VScale(yAxis, centerOffset.y)), VScale(zAxis, centerOffset.z)) };
+		const VECTOR translation{ VSub(pos, centerWorld) };
+
+		// ローカル→ワールド行列（DxLibは行ベクトル規約：各行がローカル基底の像）
+		MATRIX m{ MGetIdent() };
+		m.m[0][0] = xAxis.x;
+		m.m[0][1] = xAxis.y;
+		m.m[0][2] = xAxis.z;
+		m.m[1][0] = yAxis.x;
+		m.m[1][1] = yAxis.y;
+		m.m[1][2] = yAxis.z;
+		m.m[2][0] = zAxis.x;
+		m.m[2][1] = zAxis.y;
+		m.m[2][2] = zAxis.z;
+		m.m[3][0] = translation.x;
+		m.m[3][1] = translation.y;
+		m.m[3][2] = translation.z;
+
+		MV1SetMatrix(modelHandle, m);
+		MV1DrawModel(modelHandle);
+	}
+
 	core::Vector3 Renderer::worldToScreen(const core::Vector3& worldPos)
 	{
 		VECTOR screen = ConvWorldPosToScreenPos(VGet(worldPos.x, worldPos.y, worldPos.z));

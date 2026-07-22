@@ -100,6 +100,24 @@ namespace core::iface
 		 */
 		virtual void drawBillboard(int imageHandle, const core::Vector3& position, float size) = 0;
 
+		/**
+		 * @brief 3Dモデルの正面(ローカル+Z)を指定方向へ向け、その面内で回転させて描画する
+		 *
+		 * faceDir（進行方向など）へモデルの正面を向け、faceDir軸まわりに spinAngle だけ回す。
+		 * カメラには追従せず、与えた向きのまま描く（レインボー弾のように投げた方向を保つ回転体用）。
+		 * centerOffset はモデル原点と見た目中心のズレ（AABB中心・スケール未適用）で、
+		 * これを打ち消して見た目中心を position に合わせる（原点まわりの円運動を防ぐ）。
+		 * @param modelHandle モデルハンドル
+		 * @param position 見た目中心を合わせるワールド座標
+		 * @param scale モデルスケール
+		 * @param centerOffset モデルのAABB中心（ローカル・スケール未適用）
+		 * @param faceDir モデルの正面を向ける方向（正規化不要。ゼロなら描画しない）
+		 * @param spinAngle 面内回転角（ラジアン）
+		 */
+		virtual void drawSpinningModelFacing(int modelHandle, const core::Vector3& position,
+		    const core::Vector3& scale, const core::Vector3& centerOffset,
+		    const core::Vector3& faceDir, float spinAngle) = 0;
+
 		// TODO: worldToScreen はワールド→スクリーンの射影変換であり、厳密には3D描画の責務ではない。
 		//       ICameraは「計算しない薄い層」の方針のため置けない。将来のリファクタリングで
 		//       screenToWorld 等とあわせて専用の IViewProjection インターフェースへ分離する。
