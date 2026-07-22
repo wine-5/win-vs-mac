@@ -275,10 +275,33 @@ namespace infrastructure::repository
 		if (j.contains("animations"))
 		{
 			auto& anim = j["animations"];
-			if (anim.contains("idle"))
-				metadata.stringProperties["idleAnim"] = anim["idle"];
-			if (anim.contains("walk"))
-				metadata.stringProperties["walkAnim"] = anim["walk"];
+			if (anim.is_array())
+			{
+				// 新形式：状態ごとのクリップ定義配列（敵をデータで組むための形式）
+				for (const auto& c : anim)
+				{
+					core::data::AnimationClipDef def{};
+					def.state = c["state"].get<std::string>();
+					def.animId = c["id"].get<std::string>();
+					if (c.contains("loop"))
+						def.loop = c["loop"].get<bool>();
+					if (c.contains("onComplete"))
+						def.onComplete = c["onComplete"].get<std::string>();
+					if (c.contains("priority"))
+						def.priority = c["priority"].get<std::string>();
+					if (c.contains("speed"))
+						def.speed = c["speed"].get<float>();
+					metadata.animations.push_back(def);
+				}
+			}
+			else
+			{
+				// 旧形式：{ "idle": ..., "walk": ... }（Player等が使用）
+				if (anim.contains("idle"))
+					metadata.stringProperties["idleAnim"] = anim["idle"];
+				if (anim.contains("walk"))
+					metadata.stringProperties["walkAnim"] = anim["walk"];
+			}
 		}
 
 		if (j.contains("gameplay"))
@@ -315,6 +338,11 @@ namespace infrastructure::repository
 			if (gp.contains("facingYawOffset"))
 				metadata.floatProperties["facingYawOffset"] = gp["facingYawOffset"];
 		}
+
+		// 敵の振る舞いレシピ（積むAI振る舞いの名前リスト）。データの組み合わせで敵を定義するために使う
+		if (j.contains("behaviors"))
+			for (const auto& name : j["behaviors"])
+				metadata.behaviors.push_back(name.get<std::string>());
 
 		if (j.contains("mac"))
 			metadata.mac = parseMac(j["mac"]);

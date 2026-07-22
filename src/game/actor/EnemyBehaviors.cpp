@@ -1,13 +1,18 @@
 #include "game/actor/EnemyBehaviors.h"
 #include "game/data/EnemyData.h"
 #include "game/component/AttackComponent.h"
+#include "game/component/AnimationComponent.h"
+#include "game/component/AnimationClip.h"
 #include "game/component/ai/MeleeChaseAIComponent.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/PatrolComponent.h"
 #include "game/component/ai/MacAIComponent.h"
+#include "game/constant/AnimationState.h"
+#include "core/interface/IResourceManager.h"
 #include "core/interface/ILogger.h"
 #include <numbers>
 #include <random>
+#include <string>
 #include <string_view>
 
 namespace
@@ -23,6 +28,46 @@ namespace
 		static std::mt19937 rng{ std::random_device{}() };
 		static std::uniform_int_distribution<int> dist{ 0, 1 };
 		return dist(rng) == 0 ? 1 : -1;
+	}
+
+	/**
+	 * @brief アニメ状態名の文字列をAnimationStateへ変換する（未知はIdle扱い）
+	 */
+	game::constant::AnimationState toAnimationState(const std::string& name)
+	{
+		using game::constant::AnimationState;
+		if (name == "Walk")
+			return AnimationState::Walk;
+		if (name == "Run")
+			return AnimationState::Run;
+		if (name == "Attack1")
+			return AnimationState::Attack1;
+		if (name == "Attack2")
+			return AnimationState::Attack2;
+		if (name == "Hit")
+			return AnimationState::Hit;
+		if (name == "Dying")
+			return AnimationState::Dying;
+		if (name == "Jump")
+			return AnimationState::Jump;
+		return AnimationState::Idle;
+	}
+
+	/**
+	 * @brief 優先度名の文字列を割り込み優先度の数値へ変換する（未知はlocomotion扱い）
+	 */
+	int toAnimationPriority(const std::string& name)
+	{
+		namespace priority = game::constant::animation_priority;
+		if (name == "dying")
+			return priority::DYING;
+		if (name == "hit")
+			return priority::HIT;
+		if (name == "attack")
+			return priority::ATTACK;
+		if (name == "jump")
+			return priority::JUMP;
+		return priority::LOCOMOTION;
 	}
 } // namespace
 
@@ -90,5 +135,27 @@ namespace game::actor
 			else
 				LOG_E("未知のbehavior名です: {}", name.c_str());
 		}
+	}
+
+	void installEnemyAnimations(core::ecs::ComponentManager& componentManager,
+	    core::ecs::EntityId entityId, const data::EnemyData& enemyData,
+	    core::iface::IResourceManager& resourceManager)
+	{
+		const auto& defs{ enemyData.getAnimations() };
+		if (defs.empty())
+			return; // アニメーションを持たない敵（Safari等）は何もしない
+
+		component::AnimationComponent anim{};
+		for (const auto& def : defs)
+		{
+			component::AnimationClip clip{};
+			clip.m_handle = resourceManager.loadAnimationById(def.animId);
+			clip.m_isLoop = def.loop;
+			clip.m_onComplete = toAnimationState(def.onComplete);
+			clip.m_priority = toAnimationPriority(def.priority);
+			clip.m_speed = def.speed;
+			anim.m_clips[toAnimationState(def.state)] = clip;
+		}
+		componentManager.add<component::AnimationComponent>(entityId, anim);
 	}
 } // namespace game::actor

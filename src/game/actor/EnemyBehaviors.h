@@ -7,6 +7,11 @@ namespace game::data
 	class EnemyData;
 }
 
+namespace core::iface
+{
+	class IResourceManager;
+}
+
 namespace game::actor
 {
 	/**
@@ -28,4 +33,18 @@ namespace game::actor
 	 */
 	void installEnemyBehaviors(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId entityId, const data::EnemyData& enemyData);
+
+	/**
+	 * @brief EnemyDataのanimationsレシピからAnimationComponentを構築して付与する
+	 *
+	 * JSONの "animations" 配列（状態・アニメID・ループ・優先度・速度）を読み、
+	 * AnimationComponentのクリップ表を組み立てる。定義が空の敵（Safari等）は何もしない。
+	 * @param componentManager ComponentManagerの参照
+	 * @param entityId 対象の敵EntityId
+	 * @param enemyData 敵データ（アニメ定義の供給元）
+	 * @param resourceManager アニメIDからハンドルを解決するIResourceManager
+	 */
+	void installEnemyAnimations(core::ecs::ComponentManager& componentManager,
+	    core::ecs::EntityId entityId, const data::EnemyData& enemyData,
+	    core::iface::IResourceManager& resourceManager);
 } // namespace game::actor

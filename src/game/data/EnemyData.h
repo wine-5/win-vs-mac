@@ -1,7 +1,10 @@
 ﻿#pragma once
 #include <string>
+#include <vector>
+#include <optional>
 #include "core/utility/Vector3.h"
 #include "core/data/ModelMetadata.h"
+#include "core/data/MacMetadata.h"
 #include "game/constant/MetadataKeys.h"
 
 namespace game::data
@@ -25,8 +28,11 @@ namespace game::data
             data.m_position = metadata.position;
             data.m_colliderSize = metadata.colliderSize;
             data.m_colliderOffset = metadata.colliderOffset;
+			data.m_behaviors = metadata.behaviors;   // 積むAI振る舞いのレシピ
+			data.m_animations = metadata.animations; // アニメーションクリップ定義
+			data.m_mac = metadata.mac;               // ボス挙動定義（あれば）
 
-            auto idleIt{metadata.stringProperties.find(
+			auto idleIt{metadata.stringProperties.find(
                 std::string(constant::metadata_keys::IDLE_ANIM))};
             if (idleIt != metadata.stringProperties.end())
                 data.m_idleAnimPath = idleIt->second;
@@ -241,27 +247,48 @@ namespace game::data
 			m_position = position;
 		}
 
+		/** @brief 積むAI振る舞いのレシピ（名前リスト）を取得 */
+		[[nodiscard]] const std::vector<std::string>& getBehaviors() const noexcept
+		{
+			return m_behaviors;
+		}
+
+		/** @brief ボス挙動定義を取得（bossを持たない敵ではnullopt） */
+		[[nodiscard]] const std::optional<core::data::MacMetadata>& getMac() const noexcept
+		{
+			return m_mac;
+		}
+
+		/** @brief アニメーションクリップ定義の一覧を取得（アニメ無しの敵では空） */
+		[[nodiscard]] const std::vector<core::data::AnimationClipDef>& getAnimations() const noexcept
+		{
+			return m_animations;
+		}
+
 	private:
-        std::string   m_modelPath;
-        std::string   m_idleAnimPath;
-        std::string   m_walkAnimPath;
-        float         m_moveSpeed{ 0.0f };
-        float         m_detectionRange{ 0.0f };
-        float         m_attackRange{ 0.0f };
-        float         m_maxHp{ 0.0f };
-        float         m_defence{ 0.0f };
-        float         m_attackPower{ 0.0f };
-        float         m_attackCooldown{ 0.0f };
-		float m_attackWindup{ 0.0f };
-		float m_attackAnimSpeed{ 1.0f }; // 攻撃アニメの再生速度倍率（JSON未設定なら等倍）
-		float m_hoverHeight{ 0.0f };
-		float m_preferredDistanceMin{ 0.0f };
-		float m_preferredDistanceMax{ 0.0f };
-		float m_fireCooldown{ 0.0f };
-		float m_facingYawOffset{ 0.0f };
-		core::Vector3 m_colliderSize;
-        core::Vector3 m_colliderOffset;
-        core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
-        core::Vector3 m_position;
-    };
+	  std::string m_modelPath;
+	  std::string m_idleAnimPath;
+	  std::string m_walkAnimPath;
+	  float m_moveSpeed{ 0.0f };
+	  float m_detectionRange{ 0.0f };
+	  float m_attackRange{ 0.0f };
+	  float m_maxHp{ 0.0f };
+	  float m_defence{ 0.0f };
+	  float m_attackPower{ 0.0f };
+	  float m_attackCooldown{ 0.0f };
+	  float m_attackWindup{ 0.0f };
+	  float m_attackAnimSpeed{ 1.0f }; // 攻撃アニメの再生速度倍率（JSON未設定なら等倍）
+	  float m_hoverHeight{ 0.0f };
+	  float m_preferredDistanceMin{ 0.0f };
+	  float m_preferredDistanceMax{ 0.0f };
+	  float m_fireCooldown{ 0.0f };
+	  float m_facingYawOffset{ 0.0f };
+	  core::Vector3 m_colliderSize;
+	  core::Vector3 m_colliderOffset;
+	  core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
+	  core::Vector3 m_position;
+	  std::vector<std::string> m_behaviors{};                   // 積むAI振る舞いのレシピ
+	  std::optional<core::data::MacMetadata> m_mac{};           // ボス挙動定義（あれば）
+	  std::vector<core::data::AnimationClipDef> m_animations{}; // アニメーションクリップ定義
+	};
 } // namespace game::data

@@ -22,5 +22,6 @@
     "preferredDistanceMax": 600.0,
     "fireCooldown": 5.0,
     "facingYawOffset": 90.0
-  }
+  },
+  "behaviors": [ "rangeKeep", "patrol" ]
 }

@@ -19,5 +19,12 @@
     "attackCooldown": 3.0,
     "attackWindup": 1.85,
     "attackAnimSpeed": 0.7
-  }
+  },
+  "behaviors": [ "meleeChase", "patrol" ],
+  "animations": [
+    { "state": "Idle",    "id": "anim_xcode_idle" },
+    { "state": "Walk",    "id": "anim_xcode_walk",        "loop": true,  "onComplete": "Idle",  "priority": "locomotion", "speed": 0.6 },
+    { "state": "Attack1", "id": "anim_xcode_ground_slam", "loop": false, "onComplete": "Idle",  "priority": "attack",     "speed": 0.7 },
+    { "state": "Dying",   "id": "anim_xcode_dying",       "loop": false, "onComplete": "Dying", "priority": "dying" }
+  ]
 }
