@@ -5,7 +5,6 @@
 #include "core/interface/IResourceManager.h"
 #include "game/actor/EnemyBase.h"
 #include "game/data/EnemyData.h"
-#include "game/constant/EnemyType.h"
 #include <memory>
 #include <vector>
 
@@ -36,16 +35,15 @@ namespace game::factory
             core::ecs::ComponentManager& componentManager,
             core::iface::IResourceManager& resourceManager);
 
-        /**
-          * @brief 種類を指定してEnemyオブジェクトを生成する
-          * @param type 敵の種類
-          * @param modelHandle モデルハンドル
-          * @param enemyData Enemyのデータ
-          * @return 生成したEnemyのEntityId
-          */
-        core::ecs::EntityId create(constant::EnemyType type, int modelHandle, const data::EnemyData& enemyData);
+		/**
+		 * @brief Enemyオブジェクトを生成する（中身はenemyDataのレシピが決める）
+		 * @param modelHandle モデルハンドル
+		 * @param enemyData Enemyのデータ（behaviors/animations等のレシピを含む）
+		 * @return 生成したEnemyのEntityId
+		 */
+		core::ecs::EntityId create(int modelHandle, const data::EnemyData& enemyData);
 
-        /**
+		/**
          * @brief 生成した全EnemyのEntityIdを取得する
          * @return EntityIdのvector
          */

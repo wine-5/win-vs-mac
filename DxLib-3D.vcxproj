@@ -146,10 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\game\actor\EnemyBase.cpp" />
-    <ClCompile Include="src\game\actor\MacEnemy.cpp" />
-    <ClCompile Include="src\game\actor\SafariEnemy.cpp" />
     <ClCompile Include="src\game\actor\EnemyBehaviors.cpp" />
-    <ClCompile Include="src\game\actor\XcodeEnemy.cpp" />
     <ClCompile Include="src\game\attack\BaseAttackHandler.cpp" />
     <ClCompile Include="src\game\attack\DefenseHandler.cpp" />
     <ClCompile Include="src\game\factory\EnemyFactory.cpp" />
@@ -292,10 +289,7 @@
     <ClInclude Include="src\core\base\Singleton.h" />
     <ClInclude Include="src\core\data\StageMetadata.h" />
     <ClInclude Include="src\core\data\ProjectileMetadata.h" />
-    <ClInclude Include="src\game\actor\MacEnemy.h" />
-    <ClInclude Include="src\game\actor\SafariEnemy.h" />
     <ClInclude Include="src\game\actor\EnemyBehaviors.h" />
-    <ClInclude Include="src\game\actor\XcodeEnemy.h" />
     <ClInclude Include="src\game\component\ProjectileComponent.h" />
     <ClInclude Include="src\core\constant\BgmType.h" />
     <ClInclude Include="src\core\constant\EffectType.h" />

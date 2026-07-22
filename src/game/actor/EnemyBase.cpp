@@ -1,4 +1,5 @@
 #include "EnemyBase.h"
+#include "game/actor/EnemyBehaviors.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
 #include "game/component/RenderComponent.h"
@@ -31,8 +32,10 @@ namespace game::actor
 	void EnemyBase::initialize()
 	{
 		buildCommonComponents();
-		setupAnimation();
-		setupAI();
+		// アニメ・AI振る舞いはEnemyData（JSONのanimations/behaviors）から組み立てる。
+		// 敵種ごとの分岐は持たず、データの組み合わせだけで敵の中身が決まる
+		installEnemyAnimations(m_componentManager, m_entity.getId(), m_enemyData, m_resourceManager);
+		installEnemyBehaviors(m_componentManager, m_entity.getId(), m_enemyData);
 	}
 
 	core::ecs::EntityId EnemyBase::getId() const noexcept

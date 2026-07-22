@@ -62,7 +62,7 @@ namespace game::factory
 
 		data::EnemyData enemyData{ data::EnemyData::fromMetadata(meta.value()) };
 		enemyData.setPosition(position); // 位置は呼び出し側の指定が正
-		const auto enemyId{ m_factoryManager.getEnemyFactory().create(type, modelHandle, enemyData) };
+		const auto enemyId{ m_factoryManager.getEnemyFactory().create(modelHandle, enemyData) };
 
 		// 追跡対象が設定されていれば反映する（召喚された敵も即プレイヤーを追う）
 		if (m_target.getId() != 0 && m_componentManager.has<component::AIComponent>(enemyId))
