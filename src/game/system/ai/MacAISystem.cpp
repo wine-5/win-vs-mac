@@ -294,6 +294,7 @@ namespace game::system::ai
 			config.m_modelHandle = m_rainbowModelHandle;
 			config.m_spinRollSpeed = phase.m_rainbowSpinSpeed; // レインボーのルーレット回転（速さはJSONで調整）
 			config.m_spinCenter = m_rainbowCenter;             // 原点ズレを打ち消して中心まわりに回す
+			config.m_startEffect = core::constant::EffectType::Mac_Rainbow; // 発射時の演出（ボスのレインボーだけ）
 
 			m_projectileFactory.spawn(origin, fanDir, config, constant::Tag::Enemy);
 		}

@@ -2,6 +2,7 @@
 #include "core/ecs/EntityManager.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/utility/Vector3.h"
+#include "core/constant/EffectType.h"
 #include "game/constant/Tag.h"
 
 namespace game::factory
@@ -24,6 +25,9 @@ namespace game::factory
 
 		// モデルのAABB中心（ローカル・スケール未適用）。原点ズレを打ち消して中心まわりに回すために使う
 		core::Vector3 m_spinCenter{ 0.0f, 0.0f, 0.0f };
+
+		// 発射時に再生する演出エフェクト。Noneならエフェクト無し（既定）
+		core::constant::EffectType m_startEffect{ core::constant::EffectType::None };
 	};
 
 	/**

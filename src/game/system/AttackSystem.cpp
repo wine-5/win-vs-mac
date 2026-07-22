@@ -79,7 +79,9 @@ namespace game::system
 
 			// 攻撃開始時の演出用エフェクト（AttackStartEvent）の発行を絞る：
 			// ・Playerの近接（剣）：Player_Slash を出す。Playerの弾（Window弾）はエフェクト無し
-			// ・Enemyは「物を投げる（弾）」ときだけ Enemy_Slash を出す。地面を叩く近接はエフェクト無し
+			// ・Enemyの弾：弾自身が持つ m_startEffect を出す（None なら無し）。
+			//   これによりボスのレインボー弾だけ演出を出し、Safariのタブ弾は無しにできる。
+			//   地面を叩く近接（弾でない敵攻撃）はエフェクト無し
 			//   （弾はProjectileSystemが毎フレームm_attackRequestedを立て直すため、初回1回のみに絞る）
 			const auto& attackerTagForStart{ m_componentManager.get<component::TagComponent>(attackerId) };
 			const bool isProjectile{ m_componentManager.has<component::ProjectileComponent>(attackerId) };
@@ -98,13 +100,14 @@ namespace game::system
 			}
 			else if (attackerTagForStart.m_tag == constant::Tag::Enemy)
 			{
-				// 敵は投擲（弾）のときだけエフェクト。地面叩き等の近接はエフェクト無し
+				// 敵は投擲（弾）のときだけエフェクト。地面叩き等の近接はエフェクト無し。
+				// 出すエフェクトの種別は弾自身が持つ（Noneならエフェクト無し）
 				if (isProjectile)
 				{
 					auto& projectile{ m_componentManager.get<component::ProjectileComponent>(attackerId) };
-					shouldPlayStartEffect = !projectile.m_hasPlayedStartEffect;
+					startEffect = projectile.m_startEffect;
+					shouldPlayStartEffect = !projectile.m_hasPlayedStartEffect && startEffect != core::constant::EffectType::None;
 					projectile.m_hasPlayedStartEffect = true;
-					startEffect = core::constant::EffectType::Enemy_Slash;
 				}
 			}
 

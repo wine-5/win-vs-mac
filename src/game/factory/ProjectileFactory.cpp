@@ -56,6 +56,7 @@ namespace game::factory
 		projectile.m_spawnPosition = origin;
 		projectile.m_spinRollSpeed = config.m_spinRollSpeed;
 		projectile.m_spinCenter = config.m_spinCenter;
+		projectile.m_startEffect = config.m_startEffect; // Noneならエフェクト無し（Safariのタブ弾）
 		m_componentManager.add<component::ProjectileComponent>(id, projectile);
 
 		// 3Dモデルの弾（Safariのタブ等）はRenderComponentを付与し、InGameViewが回転描画する
