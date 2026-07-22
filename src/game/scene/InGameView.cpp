@@ -8,6 +8,7 @@
 #include "game/system/PlayerChargeVisualsSystem.h"
 #include "game/system/BossAwakenEffectSystem.h"
 #include "game/system/DetectionAlertVisualsSystem.h"
+#include "game/system/AttackTelegraphVisualsSystem.h"
 #include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
 #include <cmath>
@@ -32,6 +33,10 @@ namespace game::scene
 	    const std::vector<core::ecs::EntityId>& enemyIds)
 	{
 		drawModels(playerId, groundId, enemyIds);
+
+		// 攻撃予兆（地面の攻撃範囲サークル）。地面の上・敵の足元に3Dで描く（3D描画フェーズ）
+		if (m_attackTelegraphSystem)
+			m_attackTelegraphSystem->draw();
 
 		// プレイヤー弾の見た目は実OSウィンドウ（ProjectileWindowSystem）が担うため描かない。
 		// 敵のタブ弾など3Dモデルを持つ弾はここで回転描画する
@@ -77,6 +82,11 @@ namespace game::scene
 	void InGameView::setDetectionAlertVisualsSystem(system::DetectionAlertVisualsSystem* system)
 	{
 		m_detectionAlertSystem = system;
+	}
+
+	void InGameView::setAttackTelegraphVisualsSystem(system::AttackTelegraphVisualsSystem* system)
+	{
+		m_attackTelegraphSystem = system;
 	}
 
 	void InGameView::setDebugGizmoView(ui::debug::DebugGizmoView* view)

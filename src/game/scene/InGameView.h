@@ -12,6 +12,7 @@ namespace game::system
 	class PlayerChargeVisualsSystem;
 	class BossAwakenEffectSystem;
 	class DetectionAlertVisualsSystem;
+	class AttackTelegraphVisualsSystem;
 } // namespace game::system
 
 namespace game::ui::debug
@@ -75,6 +76,12 @@ namespace game::scene
 		void setDetectionAlertVisualsSystem(system::DetectionAlertVisualsSystem* system);
 
 		/**
+		 * @brief 攻撃予兆System（地面の攻撃範囲サークルの描画元）を設定する
+		 * @param system AttackTelegraphVisualsSystemのポインタ（所有はSystemManager）
+		 */
+		void setAttackTelegraphVisualsSystem(system::AttackTelegraphVisualsSystem* system);
+
+		/**
 		 * @brief DEBUG: ワールド空間デバッグ可視化Viewを設定する（リリース時に削除）
 		 * @param view DebugGizmoViewのポインタ（所有はInGame）
 		 */
@@ -123,6 +130,9 @@ namespace game::scene
 
 		// 発見演出（頭上の通知バッジ）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::DetectionAlertVisualsSystem* m_detectionAlertSystem{ nullptr };
+
+		// 攻撃予兆（地面の攻撃範囲サークル）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
+		system::AttackTelegraphVisualsSystem* m_attackTelegraphSystem{ nullptr };
 
 		// DEBUG: デバッグ可視化・HUDの描画元（所有はInGame。リリース時に削除）
 		ui::debug::DebugGizmoView* m_debugGizmoView{ nullptr };

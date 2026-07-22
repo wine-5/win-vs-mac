@@ -29,6 +29,7 @@
 #include "game/system/EnemyDeathSystem.h"
 #include "game/system/ai/DetectionSystem.h"
 #include "game/system/DetectionAlertVisualsSystem.h"
+#include "game/system/AttackTelegraphVisualsSystem.h"
 #include "game/system/EffectSystem.h"
 #include "core/interface/IEffectFactory.h"
 #include "game/system/AttackSystem.h"
@@ -319,6 +320,11 @@ namespace game::scene
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
 			m_resourceManager) };
 		m_view.setDetectionAlertVisualsSystem(detectionAlert);
+
+		// 攻撃予兆（地面の攻撃範囲サークル）。描画内容はSystemが持ち、Viewが3D描画フェーズで呼ぶ
+		auto* attackTelegraph{ m_systemManager.registerSystem<game::system::AttackTelegraphVisualsSystem>(
+			m_componentManager, m_renderer) };
+		m_view.setAttackTelegraphVisualsSystem(attackTelegraph);
 	}
 
 	void InGame::setupEvents()
