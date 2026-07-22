@@ -63,9 +63,10 @@ namespace game::system
 		 * @brief 1体分の通知バナーを画面に描画する
 		 * @param centerX バナー中心のスクリーンX
 		 * @param topY バナー上端のスクリーンY
-		 * @param message 表示する危険メッセージ
+		 * @param enemyName ヘッダーに出す敵の種類名（＝アプリ名。"Xcode"等のASCII）
+		 * @param messageUtf8 本文に出す危険メッセージ（UTF-8）
 		 */
-		void drawBanner(int centerX, int topY, const char* message);
+		void drawBanner(int centerX, int topY, const char* enemyName, const char* messageUtf8);
 
 		/**
 		 * @brief 角丸の塗り矩形を描画する（DxLibに角丸矩形が無いため矩形＋円で合成）
@@ -85,8 +86,10 @@ namespace game::system
 		core::iface::IScreen& m_screen;
 		// DxLibはShift-JISで描画するため、日本語メッセージの変換に使う（無ければ変換せず素通し）
 		core::iface::IStringConverter* m_stringConverter{ nullptr };
-		// 左のアプリアイコン画像のハンドル（-1なら未ロード。その場合は角丸四角＋「！」で代替描画）
+		// 左のアプリアイコン画像のハンドル（-1なら未ロード。その場合はアイコンを描かない）
 		int m_iconHandle{ -1 };
+		// 通知バーの背景画像のハンドル（-1なら未ロード。その場合は角丸矩形で代替描画）
+		int m_barHandle{ -1 };
 		std::mt19937 m_rng{ std::random_device{}() };
 	};
 } // namespace game::system

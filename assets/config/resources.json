@@ -39,7 +39,9 @@
   "images": [
     {"id": "lock-bg",           "path": "assets/images/background/LockBG.jpg"},
     {"id": "desktop-bg",        "path": "assets/images/background/DesktopBG.jpg"},
-    {"id": "projectile-window", "path": "assets/images/ingame/projectile_window.png"}
+    {"id": "projectile-window", "path": "assets/images/ingame/projectile_window.png"},
+    {"id": "alert-icon",        "path": "assets/images/ui/ingame/alert_icon.png"},
+    {"id": "alert-bar",         "path": "assets/images/ui/ingame/alert_bar.png"}
   ],
   "bgm": [
     { "type": "Title",      "path": "assets/audio/bgm/bgm_title.mp3",         "volume":0.0, "useFade": true  },

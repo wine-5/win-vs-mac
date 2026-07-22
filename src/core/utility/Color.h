@@ -67,8 +67,8 @@ namespace core::utility
 
 		// ========== 発見演出（通知バナー）用の色 ==========
 
-		static constexpr unsigned int ALERT_BANNER_BG = 0xFFF8F8FA;  // iOS通知バナー風の明るい地
-		static constexpr unsigned int ALERT_ICON_RED = 0xFFFF555C;   // アプリアイコンのコーラルレッド
-		static constexpr unsigned int ALERT_DANGER_RED = 0xFFE02424; // 「！」と危険メッセージの赤
+		static constexpr unsigned int ALERT_BANNER_BG = 0xFFF8F8FA;    // 通知バー背景の代替色（画像未ロード時）
+		static constexpr unsigned int ALERT_DANGER_RED = 0xFFE02424;   // 危険メッセージの赤
+		static constexpr unsigned int ALERT_SUBTEXT_GRAY = 0xFF8A8A90; // 敵の種類名（アプリ名）の薄いグレー
 	};
 } // namespace core::utility
