@@ -1,5 +1,6 @@
 #include "MeleeChaseAISystem.h"
 #include "game/component/ai/MeleeChaseAIComponent.h"
+#include "game/component/ai/PatrolComponent.h"
 #include "game/component/AIComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
@@ -48,13 +49,14 @@ namespace game::system::ai
 				continue;
 
 			auto& melee{ m_componentManager.get<component::ai::MeleeChaseAIComponent>(entityId) };
+			auto& patrol{ m_componentManager.get<component::ai::PatrolComponent>(entityId) };
 			auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
 
 			// 徘徊の基準点（スポーン地点）を初回だけ記録する
-			if (!melee.m_homeInitialized)
+			if (!patrol.m_homeInitialized)
 			{
-				melee.m_homePosition = transform.m_position;
-				melee.m_homeInitialized = true;
+				patrol.m_homePosition = transform.m_position;
+				patrol.m_homeInitialized = true;
 			}
 
 			// プレイヤーとの水平距離・方向を測り、索敵範囲内かどうかで状態を切り替える
@@ -144,15 +146,15 @@ namespace game::system::ai
 	void MeleeChaseAISystem::updatePatrol(core::ecs::EntityId entityId, float deltaTime)
 	{
 		auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
-		auto& melee{ m_componentManager.get<component::ai::MeleeChaseAIComponent>(entityId) };
+		auto& patrol{ m_componentManager.get<component::ai::PatrolComponent>(entityId) };
 		auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
 
 		const bool hasVelocity{ m_componentManager.has<component::VelocityComponent>(entityId) };
 
 		// 立ち止まり中：時間を消化し、その間は停止＋Idle
-		if (melee.m_pauseTimer > 0.0f)
+		if (patrol.m_pauseTimer > 0.0f)
 		{
-			melee.m_pauseTimer -= deltaTime;
+			patrol.m_pauseTimer -= deltaTime;
 			if (hasVelocity)
 			{
 				auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
@@ -164,24 +166,24 @@ namespace game::system::ai
 		}
 
 		// 目的地が無ければスポーン地点まわりから新たに選ぶ
-		if (!melee.m_hasWanderTarget)
+		if (!patrol.m_hasWanderTarget)
 		{
-			melee.m_wanderTarget = pickWanderTarget(melee.m_homePosition);
-			melee.m_hasWanderTarget = true;
+			patrol.m_wanderTarget = pickWanderTarget(patrol.m_homePosition);
+			patrol.m_hasWanderTarget = true;
 		}
 
 		// 目的地への水平距離・方向
 		core::Vector3 toTarget{};
-		toTarget.x = melee.m_wanderTarget.x - transform.m_position.x;
-		toTarget.z = melee.m_wanderTarget.z - transform.m_position.z;
+		toTarget.x = patrol.m_wanderTarget.x - transform.m_position.x;
+		toTarget.z = patrol.m_wanderTarget.z - transform.m_position.z;
 		const float distance{ std::sqrt(toTarget.x * toTarget.x + toTarget.z * toTarget.z) };
 
 		// 到着したら停止して少し立ち止まり、次のフレーム以降で新たな目的地を選ぶ
 		if (distance <= WANDER_REACH_DISTANCE)
 		{
-			melee.m_hasWanderTarget = false;
+			patrol.m_hasWanderTarget = false;
 			std::uniform_real_distribution<float> pauseDist{ PAUSE_MIN, PAUSE_MAX };
-			melee.m_pauseTimer = pauseDist(m_rng);
+			patrol.m_pauseTimer = pauseDist(m_rng);
 			if (hasVelocity)
 			{
 				auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };

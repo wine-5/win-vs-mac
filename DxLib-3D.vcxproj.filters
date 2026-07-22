@@ -932,6 +932,9 @@
     <ClInclude Include="src\game\component\ai\MeleeChaseAIComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\component\ai\PatrolComponent.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="src\game\component\ai\RangeKeepAIComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

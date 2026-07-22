@@ -446,6 +446,7 @@
     <ClInclude Include="src\game\component\AimComponent.h" />
     <ClInclude Include="src\game\component\PlayerChargeComponent.h" />
     <ClInclude Include="src\game\component\ai\MeleeChaseAIComponent.h" />
+    <ClInclude Include="src\game\component\ai\PatrolComponent.h" />
     <ClInclude Include="src\game\component\ai\RangeKeepAIComponent.h" />
     <ClInclude Include="src\game\component\ai\MacAIComponent.h" />
     <ClInclude Include="src\game\component\RenderComponent.h" />

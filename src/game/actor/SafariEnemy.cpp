@@ -1,6 +1,7 @@
 #include "SafariEnemy.h"
 #include "game/component/AIComponent.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
+#include "game/component/ai/PatrolComponent.h"
 #include <numbers>
 #include <random>
 
@@ -41,5 +42,7 @@ namespace game::actor
 		// JSONは度で持つのでラジアンへ変換して保持する
 		rangeKeep.m_facingYawOffset = m_enemyData.getFacingYawOffset() * DEG_TO_RAD;
 		m_componentManager.add<component::ai::RangeKeepAIComponent>(m_entity.getId(), rangeKeep);
+		// 索敵範囲外の徘徊状態は共通のPatrolComponentが持つ
+		m_componentManager.add<component::ai::PatrolComponent>(m_entity.getId(), {});
 	}
 } // namespace game::actor

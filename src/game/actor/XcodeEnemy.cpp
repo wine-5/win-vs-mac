@@ -2,6 +2,7 @@
 #include "game/component/AnimationComponent.h"
 #include "game/component/AIComponent.h"
 #include "game/component/ai/MeleeChaseAIComponent.h"
+#include "game/component/ai/PatrolComponent.h"
 #include "game/constant/AnimationId.h"
 
 namespace game::actor
@@ -29,5 +30,7 @@ namespace game::actor
 		// 攻撃のワインドアップ（アニメの振り終わりにダメージを与える遅延）は
 		// xcodeData.jsonのgameplay.attackWindupで設定する
 		m_componentManager.add<component::ai::MeleeChaseAIComponent>(m_entity.getId(), {});
+		// 索敵範囲外の徘徊状態は共通のPatrolComponentが持つ
+		m_componentManager.add<component::ai::PatrolComponent>(m_entity.getId(), {});
 	}
 } // namespace game::actor
