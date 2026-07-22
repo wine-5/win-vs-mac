@@ -184,6 +184,7 @@
     <ClCompile Include="src\game\system\EnemyDeathSystem.cpp" />
     <ClCompile Include="src\game\system\DetectionAlertVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\AttackTelegraphVisualsSystem.cpp" />
+    <ClCompile Include="src\game\system\TelegraphVisualsSystem.cpp" />
     <ClCompile Include="src\game\ui\FadeTransition.cpp" />
     <ClCompile Include="src\game\ui\Label.cpp" />
     <ClCompile Include="src\infrastructure\AudioManager.cpp" />
@@ -380,6 +381,8 @@
     <ClInclude Include="src\game\system\EnemyDeathSystem.h" />
     <ClInclude Include="src\game\system\DetectionAlertVisualsSystem.h" />
     <ClInclude Include="src\game\system\AttackTelegraphVisualsSystem.h" />
+    <ClInclude Include="src\game\system\TelegraphVisualsSystem.h" />
+    <ClInclude Include="src\game\component\TelegraphComponent.h" />
     <ClInclude Include="src\game\component\DeathComponent.h" />
     <ClInclude Include="src\game\component\AlertComponent.h" />
     <ClInclude Include="src\game\ui\FadeTransition.h" />

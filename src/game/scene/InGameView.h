@@ -13,6 +13,7 @@ namespace game::system
 	class MacAwakenEffectSystem;
 	class DetectionAlertVisualsSystem;
 	class AttackTelegraphVisualsSystem;
+	class TelegraphVisualsSystem;
 } // namespace game::system
 
 namespace game::ui::debug
@@ -82,6 +83,12 @@ namespace game::scene
 		void setAttackTelegraphVisualsSystem(system::AttackTelegraphVisualsSystem* system);
 
 		/**
+		 * @brief 汎用攻撃予兆System（TelegraphComponent駆動：円・扇）を設定する
+		 * @param system TelegraphVisualsSystemのポインタ（所有はSystemManager）
+		 */
+		void setTelegraphVisualsSystem(system::TelegraphVisualsSystem* system);
+
+		/**
 		 * @brief DEBUG: ワールド空間デバッグ可視化Viewを設定する（リリース時に削除）
 		 * @param view DebugGizmoViewのポインタ（所有はInGame）
 		 */
@@ -133,6 +140,7 @@ namespace game::scene
 
 		// 攻撃予兆（地面の攻撃範囲サークル）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::AttackTelegraphVisualsSystem* m_attackTelegraphSystem{ nullptr };
+		system::TelegraphVisualsSystem* m_telegraphSystem{ nullptr };
 
 		// DEBUG: デバッグ可視化・HUDの描画元（所有はInGame。リリース時に削除）
 		ui::debug::DebugGizmoView* m_debugGizmoView{ nullptr };

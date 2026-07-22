@@ -9,6 +9,7 @@
 #include "game/system/MacAwakenEffectSystem.h"
 #include "game/system/DetectionAlertVisualsSystem.h"
 #include "game/system/AttackTelegraphVisualsSystem.h"
+#include "game/system/TelegraphVisualsSystem.h"
 #include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
 #include <cmath>
@@ -37,6 +38,10 @@ namespace game::scene
 		// 攻撃予兆（地面の攻撃範囲サークル）。地面の上・敵の足元に3Dで描く（3D描画フェーズ）
 		if (m_attackTelegraphSystem)
 			m_attackTelegraphSystem->draw();
+
+		// 汎用攻撃予兆（TelegraphComponent駆動：円・扇）。ボスの溜め攻撃などを描く
+		if (m_telegraphSystem)
+			m_telegraphSystem->draw();
 
 		// プレイヤー弾の見た目は実OSウィンドウ（ProjectileWindowSystem）が担うため描かない。
 		// 敵のタブ弾など3Dモデルを持つ弾はここで回転描画する
@@ -87,6 +92,11 @@ namespace game::scene
 	void InGameView::setAttackTelegraphVisualsSystem(system::AttackTelegraphVisualsSystem* system)
 	{
 		m_attackTelegraphSystem = system;
+	}
+
+	void InGameView::setTelegraphVisualsSystem(system::TelegraphVisualsSystem* system)
+	{
+		m_telegraphSystem = system;
 	}
 
 	void InGameView::setDebugGizmoView(ui::debug::DebugGizmoView* view)

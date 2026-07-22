@@ -30,6 +30,7 @@
 #include "game/system/ai/DetectionSystem.h"
 #include "game/system/DetectionAlertVisualsSystem.h"
 #include "game/system/AttackTelegraphVisualsSystem.h"
+#include "game/system/TelegraphVisualsSystem.h"
 #include "game/system/EffectSystem.h"
 #include "core/interface/IEffectFactory.h"
 #include "game/system/AttackSystem.h"
@@ -325,6 +326,11 @@ namespace game::scene
 		auto* attackTelegraph{ m_systemManager.registerSystem<game::system::AttackTelegraphVisualsSystem>(
 			m_componentManager, m_renderer) };
 		m_view.setAttackTelegraphVisualsSystem(attackTelegraph);
+
+		// 汎用の攻撃予兆（TelegraphComponent駆動：円・扇）。ボスの溜め攻撃などが使う
+		auto* telegraph{ m_systemManager.registerSystem<game::system::TelegraphVisualsSystem>(
+			m_componentManager, m_renderer) };
+		m_view.setTelegraphVisualsSystem(telegraph);
 	}
 
 	void InGame::setupEvents()
