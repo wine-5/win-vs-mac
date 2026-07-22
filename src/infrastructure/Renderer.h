@@ -62,6 +62,15 @@ namespace infrastructure
 		void drawDebugCapsule(const core::Vector3& bottom, const core::Vector3& top, float radius, unsigned int color) override;
 
 		/**
+		 * @brief 地面（XZ平面）に円を描く（攻撃範囲の予兆表示などに使う）
+		 * @param center 円の中心（ワールド座標）
+		 * @param radius 半径（ワールド単位）
+		 * @param color 色（ARGB形式：0xAARRGGBB。アルファで半透明度を指定）
+		 * @param filled true=塗りつぶし円、false=輪郭のみ
+		 */
+		void drawGroundCircle(const core::Vector3& center, float radius, unsigned int color, bool filled) override;
+
+		/**
 		 * @brief 常にカメラの方を向く板（ビルボード）として画像を描画する
 		 * @param imageHandle 画像ハンドル（loadImageByIdで取得）
 		 * @param position ワールド座標（板の中心）

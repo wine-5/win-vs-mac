@@ -67,6 +67,18 @@ namespace core::iface
 		virtual void drawDebugCapsule(const core::Vector3& bottom, const core::Vector3& top, float radius, unsigned int color) = 0;
 
 		/**
+		 * @brief 地面（XZ平面）に円を描く（攻撃範囲の予兆表示などに使う）
+		 *
+		 * center.y の高さの水平面に半径 radius の円を描く。
+		 * color の上位8bit（アルファ）を見て半透明合成する。Zバッファへは書き込まない。
+		 * @param center 円の中心（ワールド座標）
+		 * @param radius 半径（ワールド単位）
+		 * @param color 色（ARGB形式：0xAARRGGBB。アルファで半透明度を指定）
+		 * @param filled true=塗りつぶし円、false=輪郭のみ
+		 */
+		virtual void drawGroundCircle(const core::Vector3& center, float radius, unsigned int color, bool filled) = 0;
+
+		/**
 		 * @brief 常にカメラの方を向く板（ビルボード）として画像を描画する
 		 * @param imageHandle 画像ハンドル（loadImageByIdで取得）
 		 * @param position ワールド座標（板の中心）
@@ -74,6 +86,9 @@ namespace core::iface
 		 */
 		virtual void drawBillboard(int imageHandle, const core::Vector3& position, float size) = 0;
 
+		// TODO: worldToScreen はワールド→スクリーンの射影変換であり、厳密には3D描画の責務ではない。
+		//       ICameraは「計算しない薄い層」の方針のため置けない。将来のリファクタリングで
+		//       screenToWorld 等とあわせて専用の IViewProjection インターフェースへ分離する。
 		/**
 		 * @brief ワールド座標をスクリーン座標へ変換する
 		 * @param worldPos ワールド座標

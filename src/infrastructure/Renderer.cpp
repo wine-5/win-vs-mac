@@ -2,6 +2,8 @@
 #include "DxLib.h"
 #include "core/interface/ILogger.h"
 #include <algorithm>
+#include <cmath>
+#include <numbers>
 
 namespace
 {
@@ -145,6 +147,42 @@ namespace infrastructure
 
 		// ワイヤーフレームで描画（塗りつぶしなし）
 		DrawCapsule3D(pos1, pos2, radius, DIV_NUM, color, color, FALSE);
+	}
+
+	void Renderer::drawGroundCircle(const core::Vector3& center, float radius, unsigned int color, bool filled)
+	{
+		if (radius <= 0.0f)
+			return;
+
+		constexpr int SEGMENTS{ 48 };
+		constexpr float TWO_PI{ 2.0f * std::numbers::pi_v<float> };
+
+		// ARGBのアルファを取り出して半透明合成する（3D描画はRGBのみなのでアルファはブレンドで表現）
+		const int alpha{ static_cast<int>((color >> 24) & 0xFF) };
+		const int r{ static_cast<int>((color >> 16) & 0xFF) };
+		const int g{ static_cast<int>((color >> 8) & 0xFF) };
+		const int b{ static_cast<int>(color & 0xFF) };
+		const unsigned int drawColor{ GetColor(r, g, b) };
+
+		// 半透明で重ね描きし、地面や敵を隠さないようZバッファへは書き込まない
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alpha);
+		SetWriteZBuffer3D(FALSE);
+
+		const VECTOR c{ VGet(center.x, center.y, center.z) };
+		VECTOR prev{ VGet(center.x + radius, center.y, center.z) };
+		for (int i{ 1 }; i <= SEGMENTS; ++i)
+		{
+			const float angle{ TWO_PI * i / SEGMENTS };
+			const VECTOR cur{ VGet(center.x + std::cos(angle) * radius, center.y, center.z + std::sin(angle) * radius) };
+			if (filled)
+				DrawTriangle3D(c, prev, cur, drawColor, TRUE);
+			else
+				DrawLine3D(prev, cur, drawColor);
+			prev = cur;
+		}
+
+		SetWriteZBuffer3D(TRUE);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 	}
 
 	void Renderer::drawBillboard(int imageHandle, const core::Vector3& position, float size)
