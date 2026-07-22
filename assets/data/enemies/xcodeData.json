@@ -17,8 +17,7 @@
     "defence": 2.0,
     "attackPower": 25.0,
     "attackCooldown": 3.0,
-    "attackWindup": 1.85,
-    "attackAnimSpeed": 0.7
+    "attackWindup": 1.85
   },
   "behaviors": [ "meleeChase", "patrol" ],
   "animations": [

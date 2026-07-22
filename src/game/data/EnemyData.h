@@ -23,7 +23,6 @@ namespace game::data
         static EnemyData fromMetadata(const core::data::ModelMetadata& metadata)
         {
             EnemyData data;
-            data.m_modelPath = metadata.modelPath;
             data.m_scale = metadata.scale;
             data.m_position = metadata.position;
             data.m_colliderSize = metadata.colliderSize;
@@ -31,16 +30,6 @@ namespace game::data
 			data.m_behaviors = metadata.behaviors;   // 積むAI振る舞いのレシピ
 			data.m_animations = metadata.animations; // アニメーションクリップ定義
 			data.m_mac = metadata.mac;               // ボス挙動定義（あれば）
-
-			auto idleIt{metadata.stringProperties.find(
-                std::string(constant::metadata_keys::IDLE_ANIM))};
-            if (idleIt != metadata.stringProperties.end())
-                data.m_idleAnimPath = idleIt->second;
-
-            auto walkIt{metadata.stringProperties.find(
-                std::string(constant::metadata_keys::WALK_ANIM))};
-            if (walkIt != metadata.stringProperties.end())
-                data.m_walkAnimPath = walkIt->second;
 
             auto moveSpeedIt{metadata.floatProperties.find(
                 std::string(constant::metadata_keys::MOVE_SPEED))};
@@ -82,11 +71,6 @@ namespace game::data
 			if (attackWindupIt != metadata.floatProperties.end())
 				data.m_attackWindup = attackWindupIt->second;
 
-			auto attackAnimSpeedIt{ metadata.floatProperties.find(
-				std::string(constant::metadata_keys::ATTACK_ANIM_SPEED)) };
-			if (attackAnimSpeedIt != metadata.floatProperties.end())
-				data.m_attackAnimSpeed = attackAnimSpeedIt->second;
-
 			auto hoverHeightIt{ metadata.floatProperties.find(
 				std::string(constant::metadata_keys::HOVER_HEIGHT)) };
 			if (hoverHeightIt != metadata.floatProperties.end())
@@ -114,24 +98,6 @@ namespace game::data
 
 			return data;
         }
-
-        /** @brief モデルパスを取得 */
-		[[nodiscard]] const std::string& getModelPath() const noexcept
-		{
-			return m_modelPath;
-		}
-
-		/** @brief Idleアニメーションパスを取得 */
-		[[nodiscard]] const std::string& getIdleAnimPath() const noexcept
-		{
-			return m_idleAnimPath;
-		}
-
-		/** @brief Walkアニメーションパスを取得 */
-		[[nodiscard]] const std::string& getWalkAnimPath() const noexcept
-		{
-			return m_walkAnimPath;
-		}
 
 		/** @brief 移動速度を取得 */
 		[[nodiscard]] float getMoveSpeed() const noexcept
@@ -179,12 +145,6 @@ namespace game::data
 		[[nodiscard]] float getAttackWindup() const noexcept
 		{
 			return m_attackWindup;
-		}
-
-		/** @brief 攻撃アニメーションの再生速度倍率を取得（1.0が等倍、0.5で半分の速さ） */
-		[[nodiscard]] float getAttackAnimSpeed() const noexcept
-		{
-			return m_attackAnimSpeed;
 		}
 
 		/** @brief 浮遊高度を取得（0なら地上型） */
@@ -266,9 +226,6 @@ namespace game::data
 		}
 
 	private:
-	  std::string m_modelPath;
-	  std::string m_idleAnimPath;
-	  std::string m_walkAnimPath;
 	  float m_moveSpeed{ 0.0f };
 	  float m_detectionRange{ 0.0f };
 	  float m_attackRange{ 0.0f };
@@ -277,7 +234,6 @@ namespace game::data
 	  float m_attackPower{ 0.0f };
 	  float m_attackCooldown{ 0.0f };
 	  float m_attackWindup{ 0.0f };
-	  float m_attackAnimSpeed{ 1.0f }; // 攻撃アニメの再生速度倍率（JSON未設定なら等倍）
 	  float m_hoverHeight{ 0.0f };
 	  float m_preferredDistanceMin{ 0.0f };
 	  float m_preferredDistanceMax{ 0.0f };
