@@ -70,5 +70,11 @@ namespace core::utility
 		static constexpr unsigned int ALERT_BANNER_BG = 0xFFF8F8FA;    // 通知バー背景の代替色（画像未ロード時）
 		static constexpr unsigned int ALERT_DANGER_RED = 0xFFE02424;   // 危険メッセージの赤
 		static constexpr unsigned int ALERT_SUBTEXT_GRAY = 0xFF8A8A90; // 敵の種類名（アプリ名）の薄いグレー
+
+		// ========== 攻撃予兆（テレグラフ）用の色（ARGB。アルファで半透明度を指定） ==========
+
+		static constexpr unsigned int TELEGRAPH_BASE = 0x40FF5028; // 危険範囲の下地（薄いオレンジ赤）
+		static constexpr unsigned int TELEGRAPH_FILL = 0x78FF6030; // 満ちていく内側（オレンジ）
+		static constexpr unsigned int TELEGRAPH_RING = 0xC8FF3820; // 外周リング（濃い赤オレンジ）
 	};
 } // namespace core::utility

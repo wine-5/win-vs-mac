@@ -76,6 +76,11 @@ namespace game::data
 			if (attackWindupIt != metadata.floatProperties.end())
 				data.m_attackWindup = attackWindupIt->second;
 
+			auto attackAnimSpeedIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::ATTACK_ANIM_SPEED)) };
+			if (attackAnimSpeedIt != metadata.floatProperties.end())
+				data.m_attackAnimSpeed = attackAnimSpeedIt->second;
+
 			auto hoverHeightIt{ metadata.floatProperties.find(
 				std::string(constant::metadata_keys::HOVER_HEIGHT)) };
 			if (hoverHeightIt != metadata.floatProperties.end())
@@ -170,6 +175,12 @@ namespace game::data
 			return m_attackWindup;
 		}
 
+		/** @brief 攻撃アニメーションの再生速度倍率を取得（1.0が等倍、0.5で半分の速さ） */
+		[[nodiscard]] float getAttackAnimSpeed() const noexcept
+		{
+			return m_attackAnimSpeed;
+		}
+
 		/** @brief 浮遊高度を取得（0なら地上型） */
 		[[nodiscard]] float getHoverHeight() const noexcept
 		{
@@ -242,6 +253,7 @@ namespace game::data
         float         m_attackPower{ 0.0f };
         float         m_attackCooldown{ 0.0f };
 		float m_attackWindup{ 0.0f };
+		float m_attackAnimSpeed{ 1.0f }; // 攻撃アニメの再生速度倍率（JSON未設定なら等倍）
 		float m_hoverHeight{ 0.0f };
 		float m_preferredDistanceMin{ 0.0f };
 		float m_preferredDistanceMax{ 0.0f };

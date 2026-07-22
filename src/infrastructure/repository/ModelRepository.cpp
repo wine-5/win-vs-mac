@@ -302,6 +302,8 @@ namespace infrastructure::repository
 				metadata.floatProperties["attackCooldown"] = gp["attackCooldown"];
 			if (gp.contains("attackWindup"))
 				metadata.floatProperties["attackWindup"] = gp["attackWindup"];
+			if (gp.contains("attackAnimSpeed"))
+				metadata.floatProperties["attackAnimSpeed"] = gp["attackAnimSpeed"];
 			if (gp.contains("hoverHeight"))
 				metadata.floatProperties["hoverHeight"] = gp["hoverHeight"];
 			if (gp.contains("preferredDistanceMin"))

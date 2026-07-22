@@ -17,6 +17,7 @@ namespace game::constant
 		constexpr std::string_view ATTACK_POWER = "attackPower";
 		constexpr std::string_view ATTACK_COOLDOWN = "attackCooldown";
 		constexpr std::string_view ATTACK_WINDUP = "attackWindup";
+		constexpr std::string_view ATTACK_ANIM_SPEED = "attackAnimSpeed";
 		constexpr std::string_view HOVER_HEIGHT = "hoverHeight";
 		constexpr std::string_view PREFERRED_DISTANCE_MIN = "preferredDistanceMin";
 		constexpr std::string_view PREFERRED_DISTANCE_MAX = "preferredDistanceMax";
