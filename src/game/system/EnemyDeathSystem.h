@@ -47,6 +47,7 @@ namespace game::system
 
 	  private:
 		void onEnemyDead(const event::EnemyDeadEvent& e);
+		void onAnimationFinished(const event::AnimationFinishedEvent& e);
 
 		core::ecs::ComponentManager& m_componentManager;
 		core::ecs::EntityManager& m_entityManager;

@@ -16,8 +16,9 @@ namespace
 	constexpr float FADE_DURATION{ 0.8f };
 	// 赤くなりきるまでの時間（秒）。死亡直後から素早く赤熱させる
 	constexpr float RED_BUILD_DURATION{ 0.35f };
-	// 死亡アニメ持ちの敵が「消え始める」までの猶予（秒）。アニメを見せてからフェードに入る
-	constexpr float ANIM_HOLD_DURATION{ 1.2f };
+	// 死亡アニメが完了イベントを発行しない異常時の保険タイムアウト（秒）。
+	// 通常はAnimationFinishedEventでフェード開始するので、これは事故防止用の上限
+	constexpr float ANIM_FALLBACK_TIMEOUT{ 5.0f };
 	// 落下する敵が着地しない場合の保険タイムアウト（秒）。これを超えたら強制的にフェード開始
 	constexpr float FALL_TIMEOUT{ 3.0f };
 	// 落下する敵に死亡時に与える下向き初速。高所の浮遊敵を素早く落とすため終端速度で落とす。
@@ -73,6 +74,19 @@ namespace game::system
 		m_eventBus.subscribe<event::EnemyDeadEvent>(
 		    [this](const event::EnemyDeadEvent& e)
 		    { onEnemyDead(e); });
+
+		// 死亡アニメの再生完了を待ってフェードを始めるため、完了イベントを購読する
+		m_eventBus.subscribe<event::AnimationFinishedEvent>(
+		    [this](const event::AnimationFinishedEvent& e)
+		    { onAnimationFinished(e); });
+	}
+
+	void EnemyDeathSystem::onAnimationFinished(const event::AnimationFinishedEvent& e)
+	{
+		// 死亡待ち中の敵の「死亡アニメ」が完了したら、消失フェードを解禁する
+		if (e.m_state == constant::AnimationState::Dying &&
+		    m_componentManager.has<component::DeathComponent>(e.m_entityId))
+			m_componentManager.get<component::DeathComponent>(e.m_entityId).m_animFinished = true;
 	}
 
 	void EnemyDeathSystem::onEnemyDead(const event::EnemyDeadEvent& e)
@@ -95,13 +109,20 @@ namespace game::system
 		}
 
 		// 死亡アニメーションを持つ敵（Xcode/Mac）は最優先度で再生を要求する。
-		// クリップ未登録の敵（Safari等）はAnimationSystem側で無視されるだけなので分岐不要
+		// このアニメの完了（AnimationFinishedEvent）を待ってからフェードに入る。
+		// 死亡クリップを持たない敵（Safari等）は待つアニメが無いので、その場でアニメ完了扱いにする
+		bool hasDyingClip{ false };
 		if (m_componentManager.has<component::AnimationComponent>(e.m_entityId))
 		{
 			auto& anim{ m_componentManager.get<component::AnimationComponent>(e.m_entityId) };
 			if (anim.m_clips.contains(constant::AnimationState::Dying))
+			{
 				anim.m_requested = constant::AnimationState::Dying;
+				hasDyingClip = true;
+			}
 		}
+		if (!hasDyingClip)
+			m_componentManager.get<component::DeathComponent>(e.m_entityId).m_animFinished = true;
 	}
 
 	void EnemyDeathSystem::update(float deltaTime)
@@ -125,7 +146,8 @@ namespace game::system
 				if (isFallingDeath(m_componentManager, entityId))
 					readyToFade = death.m_hasLanded || death.m_elapsed >= FALL_TIMEOUT;
 				else
-					readyToFade = death.m_elapsed >= ANIM_HOLD_DURATION;
+					// 地上敵は死亡アニメが再生完了してから消え始める（保険で上限も設ける）
+					readyToFade = death.m_animFinished || death.m_elapsed >= ANIM_FALLBACK_TIMEOUT;
 
 				if (readyToFade)
 					death.m_fading = true;

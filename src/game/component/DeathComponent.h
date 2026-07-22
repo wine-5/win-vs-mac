@@ -11,9 +11,10 @@ namespace game::component
 	 */
 	struct DeathComponent
 	{
-		float m_elapsed{ 0.0f };   // 死亡してからの経過秒
-		float m_fadeTimer{ 0.0f }; // 消失フェード開始からの経過秒
-		bool m_fading{ false };    // 消失フェード中か
-		bool m_hasLanded{ false }; // 地面に着地して静止したか（落下する敵用。CollisionSystemが立てる）
+		float m_elapsed{ 0.0f };      // 死亡してからの経過秒
+		float m_fadeTimer{ 0.0f };    // 消失フェード開始からの経過秒
+		bool m_fading{ false };       // 消失フェード中か
+		bool m_hasLanded{ false };    // 地面に着地して静止したか（落下する敵用。CollisionSystemが立てる）
+		bool m_animFinished{ false }; // 死亡アニメが再生完了したか（アニメ持ちの敵用。EnemyDeathSystemが立てる）
 	};
 } // namespace game::component
