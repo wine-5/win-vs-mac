@@ -123,7 +123,7 @@ namespace game::scene
 
 		core::ecs::EntityId m_groundId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
-		core::ecs::EntityId m_bossId{ core::ecs::INVALID_ENTITY_ID };
+		core::ecs::EntityId m_macId{ core::ecs::INVALID_ENTITY_ID };
 
 		std::unique_ptr<game::event::AudioEventListener> m_audioEventListener;
 

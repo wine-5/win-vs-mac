@@ -1,5 +1,5 @@
 #pragma once
-#include "core/data/BossMetadata.h"
+#include "core/data/MacMetadata.h"
 #include <cstddef>
 
 namespace game::component::ai
@@ -7,7 +7,7 @@ namespace game::component::ai
 	/**
 	 * @brief ボスAIの状態機械（FSM）の状態
 	 */
-	enum class BossState
+	enum class MacState
 	{
 		Idle,            // プレイヤー未検知：待機
 		Chase,           // プレイヤーへ接近
@@ -22,15 +22,15 @@ namespace game::component::ai
 	 * @brief ボス型AI用のコンポーネント
 	 *
 	 * 近接・遠距離・召喚を使い分け、HP比率でフェーズ遷移するボス敵用。
-	 * BossAISystemが本コンポーネントの有無で「この敵はボス」と判定し、
+	 * MacAISystemが本コンポーネントの有無で「この敵はボス」と判定し、
 	 * FSMを駆動する。フェーズごとの挙動パラメータはmacData.jsonから読み込む。
 	 */
-	struct BossAIComponent
+	struct MacAIComponent
 	{
-		BossState m_state{ BossState::Idle };
+		MacState m_state{ MacState::Idle };
 
 		// 現在のフェーズ（型安全な識別子。添字ではない）
-		core::data::BossPhase m_currentPhase{ core::data::BossPhase::Normal };
+		core::data::MacPhase m_currentPhase{ core::data::MacPhase::Normal };
 
 		// 次の技を抽選するまでの残り時間（秒）。Chase中に減っていく
 		float m_actionTimer{ 0.0f };
@@ -42,13 +42,13 @@ namespace game::component::ai
 		bool m_phase2Triggered{ false };
 
 		// macData.jsonから読み込んだフェーズ定義一式
-		core::data::BossMetadata m_config{};
+		core::data::MacMetadata m_config{};
 
 		/**
 		 * @brief 現在フェーズのパラメータを取得する
-		 * @return 現在フェーズのBossPhaseData
+		 * @return 現在フェーズのMacPhaseData
 		 */
-		[[nodiscard]] const core::data::BossPhaseData& currentPhase() const
+		[[nodiscard]] const core::data::MacPhaseData& currentPhase() const
 		{
 			return m_config.phase(m_currentPhase);
 		}

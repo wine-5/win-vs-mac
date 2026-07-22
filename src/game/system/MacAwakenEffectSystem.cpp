@@ -1,9 +1,9 @@
-#include "BossAwakenEffectSystem.h"
+#include "MacAwakenEffectSystem.h"
 #include "game/component/CameraEffectComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/InputComponent.h"
 #include "game/event/InGameEvents.h"
-#include "game/constant/BossAwakenTiming.h"
+#include "game/constant/MacAwakenTiming.h"
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
 #include <cmath>
@@ -11,10 +11,10 @@
 
 namespace
 {
-	// 演出タイムライン（秒）は game/constant/BossAwakenTiming.h で BossAISystem と共有する
-	namespace timing = game::constant::boss_awaken;
+	// 演出タイムライン（秒）は game/constant/MacAwakenTiming.h で MacAISystem と共有する
+	namespace timing = game::constant::mac_awaken;
 
-	constexpr float BOSS_LOOK_HEIGHT{ 180.0f }; // ボスの足元でなく胴体〜頭あたりを注視する高さ
+	constexpr float MAC_LOOK_HEIGHT{ 180.0f }; // ボスの足元でなく胴体〜頭あたりを注視する高さ
 
 	constexpr float MAX_SHAKE_STRENGTH{ 22.0f };     // ホールド中の揺れの最大振幅（ワールド単位）
 	constexpr float SHAKE_FREQUENCY{ 38.0f };        // 揺れの振動周波数
@@ -42,7 +42,7 @@ namespace
 
 namespace game::system
 {
-	BossAwakenEffectSystem::BossAwakenEffectSystem(core::ecs::ComponentManager& componentManager,
+	MacAwakenEffectSystem::MacAwakenEffectSystem(core::ecs::ComponentManager& componentManager,
 	    core::base::EventBus& eventBus,
 	    core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
@@ -53,16 +53,16 @@ namespace game::system
 	    , m_playerId{ playerId }
 	{
 		// ボスが覚醒したら演出シーケンスを起動する
-		eventBus.subscribe<event::BossPhaseTransitionEvent>(
-		    [this](const event::BossPhaseTransitionEvent& e)
+		eventBus.subscribe<event::MacPhaseTransitionEvent>(
+		    [this](const event::MacPhaseTransitionEvent& e)
 		    {
-			    m_bossId = e.m_entityId;
+			    m_macId = e.m_entityId;
 			    m_elapsedTime = 0.0f;
 			    m_isPlaying = true;
 		    });
 	}
 
-	void BossAwakenEffectSystem::update(float deltaTime)
+	void MacAwakenEffectSystem::update(float deltaTime)
 	{
 		if (!m_componentManager.has<component::CameraEffectComponent>(m_playerId))
 			return;
@@ -81,7 +81,7 @@ namespace game::system
 		m_elapsedTime += deltaTime;
 
 		// 演出終了：チャンネルを戻し、入力ロックを解除する
-		if (m_elapsedTime >= timing::TOTAL_TIME || !m_componentManager.has<component::TransformComponent>(m_bossId))
+		if (m_elapsedTime >= timing::TOTAL_TIME || !m_componentManager.has<component::TransformComponent>(m_macId))
 		{
 			m_isPlaying = false;
 			effect.m_cinematicBlend = 0.0f;
@@ -97,11 +97,11 @@ namespace game::system
 			m_componentManager.get<component::InputComponent>(m_playerId).m_locked = true;
 
 		// 注視先＝ボスの胴体あたり（毎フレーム追従。演出中にボスは動かないが位置ズレに備える）
-		const auto& bossTransform{ m_componentManager.get<component::TransformComponent>(m_bossId) };
+		const auto& macTransform{ m_componentManager.get<component::TransformComponent>(m_macId) };
 		effect.m_cinematicTarget = core::Vector3{
-			bossTransform.m_position.x,
-			bossTransform.m_position.y + BOSS_LOOK_HEIGHT,
-			bossTransform.m_position.z
+			macTransform.m_position.x,
+			macTransform.m_position.y + MAC_LOOK_HEIGHT,
+			macTransform.m_position.z
 		};
 
 		// --- タイムラインからブレンド量（カメラの寄り具合）を決める ---
@@ -156,7 +156,7 @@ namespace game::system
 		}
 	}
 
-	void BossAwakenEffectSystem::draw()
+	void MacAwakenEffectSystem::draw()
 	{
 		if (m_vignetteAlpha <= 0.0f)
 			return;

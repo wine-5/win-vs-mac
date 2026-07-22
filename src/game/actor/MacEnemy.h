@@ -4,7 +4,7 @@
 namespace game::actor
 {
 	/**
-	 * @brief Boss敵のMac
+	 * @brief ボス敵のMac
 	 *
 	 * ボス型：接近、遠距離などを使い分ける
 	 */

@@ -316,31 +316,31 @@ namespace infrastructure::repository
 				metadata.floatProperties["facingYawOffset"] = gp["facingYawOffset"];
 		}
 
-		if (j.contains("boss"))
-			metadata.boss = parseBoss(j["boss"]);
+		if (j.contains("mac"))
+			metadata.mac = parseMac(j["mac"]);
 
 		return metadata;
 	}
 
-	core::data::BossMetadata ModelRepository::parseBoss(const nlohmann::json& j)
+	core::data::MacMetadata ModelRepository::parseMac(const nlohmann::json& j)
 	{
-		core::data::BossMetadata boss{};
+		core::data::MacMetadata mac{};
 		if (j.contains("phase2HpRatio"))
-			boss.m_phase2HpRatio = j["phase2HpRatio"];
+			mac.m_phase2HpRatio = j["phase2HpRatio"];
 
 		if (j.contains("phase1"))
-			boss.m_phase1 = parseBossPhase(j["phase1"]);
+			mac.m_phase1 = parseMacPhase(j["phase1"]);
 		if (j.contains("phase2"))
 		{
-			boss.m_phase2 = parseBossPhase(j["phase2"]);
-			boss.m_hasPhase2 = true;
+			mac.m_phase2 = parseMacPhase(j["phase2"]);
+			mac.m_hasPhase2 = true;
 		}
-		return boss;
+		return mac;
 	}
 
-	core::data::BossPhaseData ModelRepository::parseBossPhase(const nlohmann::json& p)
+	core::data::MacPhaseData ModelRepository::parseMacPhase(const nlohmann::json& p)
 	{
-		core::data::BossPhaseData phase{};
+		core::data::MacPhaseData phase{};
 		if (p.contains("moveSpeed"))
 			phase.m_moveSpeed = p["moveSpeed"];
 		if (p.contains("actionInterval"))

@@ -15,7 +15,7 @@ namespace game::constant
 		constexpr std::string_view TAB_STORAGE_FULL = "tab_storage_full";
 		constexpr std::string_view TAB_SAFARI_ERROR = "tab_safari_error";
 		constexpr std::string_view TAB_XCODE_BUILDING = "tab_xcode_building";
-		// Boss（Mac）が投げる虹色くるくる
-		constexpr std::string_view BOSS_RAINBOW_WHEEL = "boss_rainbow_wheel";
+		// ボス（Mac）が投げる虹色くるくる
+		constexpr std::string_view MAC_RAINBOW_WHEEL = "mac_rainbow_wheel";
 	} // namespace model_id
 } // namespace game::constant

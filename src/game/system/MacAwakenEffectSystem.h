@@ -12,24 +12,24 @@ namespace game::system
 	/**
 	 * @brief ボス覚醒（フェーズ移行）時のシネマ演出を担うSystem
 	 *
-	 * BossPhaseTransitionEventを購読し、以下のタイムラインを駆動する：
+	 * MacPhaseTransitionEventを購読し、以下のタイムラインを駆動する：
 	 *   ①ズームイン（カメラがボスへ寄る）→ ②ホールド（シェイク＋赤ビネット）→ ③ズームアウト → 再開
 	 * 毎フレーム、CameraEffectComponentのシネマ・シェイクチャンネルを書き込み（driver System）、
 	 * 演出中はプレイヤーのInputComponentをロックして操作を無効化する。
 	 * ビネットのdrawはInGameViewの描画フェーズから呼ばれる。
 	 */
-	class BossAwakenEffectSystem : public core::ecs::ISystem
+	class MacAwakenEffectSystem : public core::ecs::ISystem
 	{
 	  public:
 		/**
 		 * @brief コンストラクタ
 		 * @param componentManager ComponentManagerの参照
-		 * @param eventBus BossPhaseTransitionEvent購読用のEventBus
+		 * @param eventBus MacPhaseTransitionEvent購読用のEventBus
 		 * @param uiRenderer UI描画のインターフェース（赤ビネット用）
 		 * @param screen 画面サイズ取得のインターフェース
 		 * @param playerId カメラ演出・入力ロックの対象（プレイヤー）EntityID
 		 */
-		BossAwakenEffectSystem(core::ecs::ComponentManager& componentManager,
+		MacAwakenEffectSystem(core::ecs::ComponentManager& componentManager,
 		    core::base::EventBus& eventBus,
 		    core::iface::IUIRenderer& uiRenderer,
 		    core::iface::IScreen& screen,
@@ -52,7 +52,7 @@ namespace game::system
 		core::iface::IScreen& m_screen;
 		core::ecs::EntityId m_playerId;
 
-		core::ecs::EntityId m_bossId{ core::ecs::INVALID_ENTITY_ID }; // 演出の注視先（イベントで受け取る）
+		core::ecs::EntityId m_macId{ core::ecs::INVALID_ENTITY_ID }; // 演出の注視先（イベントで受け取る）
 
 		float m_elapsedTime{ 0.0f };   // 演出開始からの経過時間（秒）
 		bool m_isPlaying{ false };     // 演出中かどうか

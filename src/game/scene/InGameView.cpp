@@ -6,7 +6,7 @@
 #include "game/component/ProjectileComponent.h"
 #include "game/component/PlayerChargeComponent.h"
 #include "game/system/PlayerChargeVisualsSystem.h"
-#include "game/system/BossAwakenEffectSystem.h"
+#include "game/system/MacAwakenEffectSystem.h"
 #include "game/system/DetectionAlertVisualsSystem.h"
 #include "game/system/AttackTelegraphVisualsSystem.h"
 #include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
@@ -51,8 +51,8 @@ namespace game::scene
 			m_playerChargeVisualsSystem->draw();
 
 		// ボス覚醒の赤ビネット（画面全体の演出。HUDより奥に描く）
-		if (m_bossAwakenEffectSystem)
-			m_bossAwakenEffectSystem->draw();
+		if (m_macAwakenEffectSystem)
+			m_macAwakenEffectSystem->draw();
 
 		// 敵の発見演出（頭上の通知バッジ）。モデルの手前・HUDより奥に描く
 		if (m_detectionAlertSystem)
@@ -74,9 +74,9 @@ namespace game::scene
 		m_playerChargeVisualsSystem = system;
 	}
 
-	void InGameView::setBossAwakenEffectSystem(system::BossAwakenEffectSystem* system)
+	void InGameView::setMacAwakenEffectSystem(system::MacAwakenEffectSystem* system)
 	{
-		m_bossAwakenEffectSystem = system;
+		m_macAwakenEffectSystem = system;
 	}
 
 	void InGameView::setDetectionAlertVisualsSystem(system::DetectionAlertVisualsSystem* system)

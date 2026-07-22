@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "core/utility/Vector3.h"
-#include "core/data/BossMetadata.h"
+#include "core/data/MacMetadata.h"
 #include <string>
 #include <unordered_map>
 #include <optional>
@@ -24,6 +24,6 @@ namespace core::data
 		std::unordered_map<std::string, float> floatProperties;
 		std::unordered_map<std::string, std::string> stringProperties; // 例: {"idleAnim": "path/to/anim.mv1"}
 
-		std::optional<BossMetadata> boss; // ボスの挙動定義（macData.jsonなどにboss要素がある場合のみ）
+		std::optional<MacMetadata> mac; // ボスの挙動定義（macData.jsonなどにmac要素がある場合のみ）
 	};
 } // namespace core::data

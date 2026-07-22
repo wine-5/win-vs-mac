@@ -5,7 +5,7 @@
 #include "game/component/VelocityComponent.h"
 #include "game/component/ai/MeleeChaseAIComponent.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
-#include "game/component/ai/BossAIComponent.h"
+#include "game/component/ai/MacAIComponent.h"
 #include "game/constant/EnemyType.h"
 #include "game/constant/AnimationState.h"
 #include <algorithm>
@@ -34,7 +34,7 @@ namespace
 	game::constant::EnemyType inferEnemyType(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId)
 	{
 		using game::constant::EnemyType;
-		if (componentManager.has<game::component::ai::BossAIComponent>(entityId))
+		if (componentManager.has<game::component::ai::MacAIComponent>(entityId))
 			return EnemyType::Mac;
 		if (componentManager.has<game::component::ai::RangeKeepAIComponent>(entityId))
 			return EnemyType::Safari;

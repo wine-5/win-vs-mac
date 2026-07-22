@@ -1,4 +1,4 @@
-#include "BossAISystem.h"
+#include "MacAISystem.h"
 #include "game/component/AIComponent.h"
 #include "game/component/VelocityComponent.h"
 #include "game/component/AttackComponent.h"
@@ -7,7 +7,7 @@
 #include "game/constant/AnimationState.h"
 #include "game/constant/Tag.h"
 #include "game/constant/EnemyType.h"
-#include "game/constant/BossAwakenTiming.h"
+#include "game/constant/MacAwakenTiming.h"
 #include "game/event/InGameEvents.h"
 #include <cmath>
 #include <utility>
@@ -23,13 +23,13 @@ namespace
 	constexpr float MELEE_LOCK{ 1.0f };
 	constexpr float RANGED_LOCK{ 1.2f };
 	constexpr float SUMMON_LOCK{ 1.2f };
-	// 覚醒演出の停止時間。演出タイムラインの合計（BossAwakenTiming.h）と共有し、ズレを防ぐ
-	constexpr float PHASE_TRANSITION_LOCK{ game::constant::boss_awaken::TOTAL_TIME };
+	// 覚醒演出の停止時間。演出タイムラインの合計（MacAwakenTiming.h）と共有し、ズレを防ぐ
+	constexpr float PHASE_TRANSITION_LOCK{ game::constant::mac_awaken::TOTAL_TIME };
 } // namespace
 
 namespace game::system::ai
 {
-	BossAISystem::BossAISystem(core::ecs::ComponentManager& componentManager,
+	MacAISystem::MacAISystem(core::ecs::ComponentManager& componentManager,
 	    core::base::EventBus& eventBus,
 	    factory::ProjectileFactory& projectileFactory,
 	    factory::EnemySpawner& enemySpawner,
@@ -48,17 +48,17 @@ namespace game::system::ai
 	{
 	}
 
-	void BossAISystem::update(float deltaTime)
+	void MacAISystem::update(float deltaTime)
 	{
-		using component::ai::BossState;
+		using component::ai::MacState;
 
-		auto entities{ m_componentManager.getAllEntities<component::ai::BossAIComponent>() };
+		auto entities{ m_componentManager.getAllEntities<component::ai::MacAIComponent>() };
 		for (auto entityId : entities)
 		{
-			auto& boss{ m_componentManager.get<component::ai::BossAIComponent>(entityId) };
+			auto& mac{ m_componentManager.get<component::ai::MacAIComponent>(entityId) };
 
-			// フェーズ定義が無い（macData.jsonのboss未設定）なら何もしない
-			if (boss.m_config.m_phase1.m_actionInterval <= 0.0f)
+			// フェーズ定義が無い（macData.jsonのmac未設定）なら何もしない
+			if (mac.m_config.m_phase1.m_actionInterval <= 0.0f)
 				continue;
 
 			auto& health{ m_componentManager.get<component::HealthComponent>(entityId) };
@@ -68,9 +68,9 @@ namespace game::system::ai
 			const bool hasVelocity{ m_componentManager.has<component::VelocityComponent>(entityId) };
 
 			// --- 死亡 ---
-			if (health.m_isDead || boss.m_state == BossState::Dead)
+			if (health.m_isDead || mac.m_state == MacState::Dead)
 			{
-				boss.m_state = BossState::Dead;
+				mac.m_state = MacState::Dead;
 				if (hasVelocity)
 					m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
 				if (m_componentManager.has<component::AnimationComponent>(entityId))
@@ -79,27 +79,27 @@ namespace game::system::ai
 			}
 
 			// アニメ・演出ロックを進める
-			if (boss.m_animLockTimer > 0.0f)
-				boss.m_animLockTimer -= deltaTime;
+			if (mac.m_animLockTimer > 0.0f)
+				mac.m_animLockTimer -= deltaTime;
 
 			// 覚醒演出が終わったら無敵を解除して行動再開する
-			if (boss.m_state == BossState::PhaseTransition && boss.m_animLockTimer <= 0.0f)
+			if (mac.m_state == MacState::PhaseTransition && mac.m_animLockTimer <= 0.0f)
 			{
 				health.m_isInvincible = false;
-				boss.m_state = BossState::Chase;
+				mac.m_state = MacState::Chase;
 			}
 
 			// --- フェーズ移行（1回だけ） ---
-			if (!boss.m_phase2Triggered && boss.m_config.m_hasPhase2)
+			if (!mac.m_phase2Triggered && mac.m_config.m_hasPhase2)
 			{
 				const float hpRatio{ (health.m_maxHp > 0.0f) ? (health.m_currentHp / health.m_maxHp) : 1.0f };
-				if (hpRatio <= boss.m_config.m_phase2HpRatio)
+				if (hpRatio <= mac.m_config.m_phase2HpRatio)
 				{
-					boss.m_phase2Triggered = true;
-					boss.m_currentPhase = core::data::BossPhase::Awakened;
-					boss.m_state = BossState::PhaseTransition;
-					boss.m_animLockTimer = PHASE_TRANSITION_LOCK;
-					boss.m_actionTimer = boss.currentPhase().m_actionInterval;
+					mac.m_phase2Triggered = true;
+					mac.m_currentPhase = core::data::MacPhase::Awakened;
+					mac.m_state = MacState::PhaseTransition;
+					mac.m_animLockTimer = PHASE_TRANSITION_LOCK;
+					mac.m_actionTimer = mac.currentPhase().m_actionInterval;
 					health.m_isInvincible = true; // 覚醒演出中は無敵（演出終了時に解除する）
 					if (hasVelocity)
 						m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
@@ -107,7 +107,7 @@ namespace game::system::ai
 						m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 
 					// 覚醒演出（カメラをボスへ寄せる・シェイク・赤ビネット）のトリガー
-					m_eventBus.publish(event::BossPhaseTransitionEvent{ entityId, core::data::BossPhase::Awakened });
+					m_eventBus.publish(event::MacPhaseTransitionEvent{ entityId, core::data::MacPhase::Awakened });
 					continue;
 				}
 			}
@@ -115,7 +115,7 @@ namespace game::system::ai
 			// --- ターゲット・距離 ---
 			if (!ai.m_isActive || ai.m_targetEntity.getId() == 0)
 			{
-				boss.m_state = BossState::Idle;
+				mac.m_state = MacState::Idle;
 				if (hasVelocity)
 					m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
 				continue;
@@ -139,7 +139,7 @@ namespace game::system::ai
 			// 索敵範囲外なら待機
 			if (distance > ai.m_detectionRange)
 			{
-				boss.m_state = BossState::Idle;
+				mac.m_state = MacState::Idle;
 				if (hasVelocity)
 					m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
 				if (m_componentManager.has<component::AnimationComponent>(entityId))
@@ -148,21 +148,21 @@ namespace game::system::ai
 			}
 
 			// アクション再生中（ロック中）はその場で停止して待つ
-			if (boss.m_animLockTimer > 0.0f)
+			if (mac.m_animLockTimer > 0.0f)
 			{
 				if (hasVelocity)
 					m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
 				continue;
 			}
 
-			const auto& phase{ boss.currentPhase() };
+			const auto& phase{ mac.currentPhase() };
 
 			// アクション抽選までのカウントダウン
-			boss.m_actionTimer -= deltaTime;
-			if (boss.m_actionTimer > 0.0f)
+			mac.m_actionTimer -= deltaTime;
+			if (mac.m_actionTimer > 0.0f)
 			{
 				// --- 追跡（近接レンジ外なら接近、レンジ内なら待機） ---
-				boss.m_state = BossState::Chase;
+				mac.m_state = MacState::Chase;
 				if (distance > phase.m_meleeRange)
 				{
 					if (hasVelocity)
@@ -174,7 +174,7 @@ namespace game::system::ai
 					if (m_componentManager.has<component::AnimationComponent>(entityId))
 					{
 						// Phase2は走り（Run）で覚醒感を出す
-						const auto moveAnim{ (boss.m_currentPhase == core::data::BossPhase::Awakened)
+						const auto moveAnim{ (mac.m_currentPhase == core::data::MacPhase::Awakened)
 							                     ? constant::AnimationState::Run
 							                     : constant::AnimationState::Walk };
 						m_componentManager.get<component::AnimationComponent>(entityId).m_requested = moveAnim;
@@ -197,36 +197,36 @@ namespace game::system::ai
 			const int aliveMinions{ countAliveMinions() };
 			const bool canSummon{ !phase.m_summonTypes.empty() && phase.m_summonCount > 0 && aliveMinions < phase.m_summonMax };
 
-			const BossState action{ chooseAction(phase, distance, canSummon) };
+			const MacState action{ chooseAction(phase, distance, canSummon) };
 			switch (action)
 			{
-			case BossState::Melee:
+			case MacState::Melee:
 				performMelee(entityId);
-				boss.m_state = BossState::Melee;
-				boss.m_animLockTimer = MELEE_LOCK;
+				mac.m_state = MacState::Melee;
+				mac.m_animLockTimer = MELEE_LOCK;
 				break;
-			case BossState::Ranged:
+			case MacState::Ranged:
 				performRanged(entityId, transform, dir, phase);
-				boss.m_state = BossState::Ranged;
-				boss.m_animLockTimer = RANGED_LOCK;
+				mac.m_state = MacState::Ranged;
+				mac.m_animLockTimer = RANGED_LOCK;
 				break;
-			case BossState::Summon:
+			case MacState::Summon:
 				performSummon(transform, phase, phase.m_summonMax - aliveMinions);
-				boss.m_state = BossState::Summon;
-				boss.m_animLockTimer = SUMMON_LOCK;
+				mac.m_state = MacState::Summon;
+				mac.m_animLockTimer = SUMMON_LOCK;
 				break;
 			default:
-				boss.m_state = BossState::Chase; // 候補なし：次フレームで追跡に戻る
+				mac.m_state = MacState::Chase; // 候補なし：次フレームで追跡に戻る
 				break;
 			}
-			boss.m_actionTimer = phase.m_actionInterval;
+			mac.m_actionTimer = phase.m_actionInterval;
 		}
 	}
 
-	component::ai::BossState BossAISystem::chooseAction(const core::data::BossPhaseData& phase,
+	component::ai::MacState MacAISystem::chooseAction(const core::data::MacPhaseData& phase,
 	    float distance, bool canSummon)
 	{
-		using component::ai::BossState;
+		using component::ai::MacState;
 
 		// 近接は近接レンジ内のときだけ候補にする
 		const int wMelee{ (distance <= phase.m_meleeRange) ? phase.m_weightMelee : 0 };
@@ -234,19 +234,19 @@ namespace game::system::ai
 		const int wSummon{ canSummon ? phase.m_weightSummon : 0 };
 		const int total{ wMelee + wRanged + wSummon };
 		if (total <= 0)
-			return BossState::Chase;
+			return MacState::Chase;
 
 		std::uniform_int_distribution<int> dist{ 0, total - 1 };
 		int roll{ dist(m_rng) };
 		if (roll < wMelee)
-			return BossState::Melee;
+			return MacState::Melee;
 		roll -= wMelee;
 		if (roll < wRanged)
-			return BossState::Ranged;
-		return BossState::Summon;
+			return MacState::Ranged;
+		return MacState::Summon;
 	}
 
-	void BossAISystem::performMelee(core::ecs::EntityId entityId)
+	void MacAISystem::performMelee(core::ecs::EntityId entityId)
 	{
 		if (m_componentManager.has<component::AttackComponent>(entityId))
 			m_componentManager.get<component::AttackComponent>(entityId).m_attackRequested = true;
@@ -254,8 +254,8 @@ namespace game::system::ai
 			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack1;
 	}
 
-	void BossAISystem::performRanged(core::ecs::EntityId entityId, const component::TransformComponent& transform,
-	    const core::Vector3& dirToTarget, const core::data::BossPhaseData& phase)
+	void MacAISystem::performRanged(core::ecs::EntityId entityId, const component::TransformComponent& transform,
+	    const core::Vector3& dirToTarget, const core::data::MacPhaseData& phase)
 	{
 		const int count{ phase.m_rainbowCount };
 		if (count <= 0)
@@ -302,8 +302,8 @@ namespace game::system::ai
 			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack2;
 	}
 
-	void BossAISystem::performSummon(const component::TransformComponent& transform,
-	    const core::data::BossPhaseData& phase, int summonSlots)
+	void MacAISystem::performSummon(const component::TransformComponent& transform,
+	    const core::data::MacPhaseData& phase, int summonSlots)
 	{
 		const int n{ std::min(phase.m_summonCount, summonSlots) };
 		if (n <= 0 || phase.m_summonTypes.empty())
@@ -330,14 +330,14 @@ namespace game::system::ai
 		}
 	}
 
-	int BossAISystem::countAliveMinions()
+	int MacAISystem::countAliveMinions()
 	{
 		int count{ 0 };
 		auto entities{ m_componentManager.getAllEntities<component::AIComponent>() };
 		for (auto entityId : entities)
 		{
 			// ボス自身は雑魚数に含めない
-			if (m_componentManager.has<component::ai::BossAIComponent>(entityId))
+			if (m_componentManager.has<component::ai::MacAIComponent>(entityId))
 				continue;
 			if (!m_componentManager.has<component::HealthComponent>(entityId))
 				continue;

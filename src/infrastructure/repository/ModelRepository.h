@@ -90,18 +90,18 @@ namespace infrastructure::repository
 		core::data::ModelMetadata parseJsonFile(const std::string& filePath);
 
 		/**
-		 * @brief JSONの"boss"要素をBossMetadataへ変換する
-		 * @param j boss要素のJSONオブジェクト
-		 * @return 変換したBossMetadata
+		 * @brief JSONの"mac"要素をMacMetadataへ変換する
+		 * @param j mac要素のJSONオブジェクト
+		 * @return 変換したMacMetadata
 		 */
-		core::data::BossMetadata parseBoss(const nlohmann::json& j);
+		core::data::MacMetadata parseMac(const nlohmann::json& j);
 
 		/**
-		 * @brief JSONの1フェーズ要素（phase1/phase2）をBossPhaseDataへ変換する
+		 * @brief JSONの1フェーズ要素（phase1/phase2）をMacPhaseDataへ変換する
 		 * @param p フェーズ要素のJSONオブジェクト
-		 * @return 変換したBossPhaseData
+		 * @return 変換したMacPhaseData
 		 */
-		core::data::BossPhaseData parseBossPhase(const nlohmann::json& p);
+		core::data::MacPhaseData parseMacPhase(const nlohmann::json& p);
 
 		std::unordered_map<std::string, int> m_modelHandles;
 		std::unordered_map<std::string, core::data::ModelMetadata> m_metadata;

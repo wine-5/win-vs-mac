@@ -18,7 +18,7 @@
     "attackPower": 35.0,
     "attackCooldown": 4.0
   },
-  "boss": {
+  "mac": {
     "phase2HpRatio": 0.99,
     "phase1": {
       "moveSpeed": 10.0,

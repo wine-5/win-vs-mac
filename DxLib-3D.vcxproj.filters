@@ -312,7 +312,7 @@
     <ClCompile Include="src\game\system\ChargeZoomSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\BossAwakenEffectSystem.cpp">
+    <ClCompile Include="src\game\system\MacAwakenEffectSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\system\DamageShakeSystem.cpp">
@@ -324,7 +324,7 @@
     <ClCompile Include="src\game\system\ai\RangeKeepAISystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\ai\BossAISystem.cpp">
+    <ClCompile Include="src\game\system\ai\MacAISystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\system\ai\EnemyRangedAttackSystem.cpp">
@@ -491,7 +491,7 @@
     <ClInclude Include="src\infrastructure\Animator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\data\BossMetadata.h">
+    <ClInclude Include="src\core\data\MacMetadata.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\data\ModelMetadata.h">
@@ -866,7 +866,7 @@
     <ClInclude Include="src\game\constant\EnemyType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\constant\BossAwakenTiming.h">
+    <ClInclude Include="src\game\constant\MacAwakenTiming.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\data\ProjectileMetadata.h">
@@ -905,7 +905,7 @@
     <ClInclude Include="src\game\system\ChargeZoomSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\BossAwakenEffectSystem.h">
+    <ClInclude Include="src\game\system\MacAwakenEffectSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\system\DamageShakeSystem.h">
@@ -917,7 +917,7 @@
     <ClInclude Include="src\game\system\ai\RangeKeepAISystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\ai\BossAISystem.h">
+    <ClInclude Include="src\game\system\ai\MacAISystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\system\ai\EnemyRangedAttackSystem.h">
@@ -935,7 +935,7 @@
     <ClInclude Include="src\game\component\ai\RangeKeepAIComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\ai\BossAIComponent.h">
+    <ClInclude Include="src\game\component\ai\MacAIComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

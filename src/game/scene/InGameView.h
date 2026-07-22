@@ -10,7 +10,7 @@
 namespace game::system
 {
 	class PlayerChargeVisualsSystem;
-	class BossAwakenEffectSystem;
+	class MacAwakenEffectSystem;
 	class DetectionAlertVisualsSystem;
 	class AttackTelegraphVisualsSystem;
 } // namespace game::system
@@ -65,9 +65,9 @@ namespace game::scene
 
 		/**
 		 * @brief ボス覚醒演出System（赤ビネットの描画元）を設定する
-		 * @param system BossAwakenEffectSystemのポインタ（所有はSystemManager）
+		 * @param system MacAwakenEffectSystemのポインタ（所有はSystemManager）
 		 */
-		void setBossAwakenEffectSystem(system::BossAwakenEffectSystem* system);
+		void setMacAwakenEffectSystem(system::MacAwakenEffectSystem* system);
 
 		/**
 		 * @brief 発見演出System（頭上の通知バッジの描画元）を設定する
@@ -126,7 +126,7 @@ namespace game::scene
 		system::PlayerChargeVisualsSystem* m_playerChargeVisualsSystem{ nullptr };
 
 		// ボス覚醒演出の赤ビネットの描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
-		system::BossAwakenEffectSystem* m_bossAwakenEffectSystem{ nullptr };
+		system::MacAwakenEffectSystem* m_macAwakenEffectSystem{ nullptr };
 
 		// 発見演出（頭上の通知バッジ）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::DetectionAlertVisualsSystem* m_detectionAlertSystem{ nullptr };

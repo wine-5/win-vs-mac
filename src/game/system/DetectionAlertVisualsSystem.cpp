@@ -2,7 +2,7 @@
 #include "game/component/AlertComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/ColliderComponent.h"
-#include "game/component/ai/BossAIComponent.h"
+#include "game/component/ai/MacAIComponent.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
@@ -62,7 +62,7 @@ namespace
 	 */
 	const char* enemyTypeName(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId)
 	{
-		if (componentManager.has<game::component::ai::BossAIComponent>(entityId))
+		if (componentManager.has<game::component::ai::MacAIComponent>(entityId))
 			return "Mac";
 		if (componentManager.has<game::component::ai::RangeKeepAIComponent>(entityId))
 			return "Safari";

@@ -10,7 +10,7 @@
     {"id": "tab_storage_full",   "path": "assets/model/enemies/safari/TabStorageFull.mv1"},
     {"id": "tab_safari_error",   "path": "assets/model/enemies/safari/TabSafariError.mv1"},
     {"id": "tab_xcode_building", "path": "assets/model/enemies/safari/TabXcodeBuilding.mv1"},
-    {"id": "boss_rainbow_wheel", "path": "assets/model/enemies/mac/RainbowWheel.mv1"}
+    {"id": "mac_rainbow_wheel", "path": "assets/model/enemies/mac/RainbowWheel.mv1"}
   ],
   "animations": [
     {"id": "anim_player_idle",       "path": "assets/animations/player/Player_Idle.mv1"},

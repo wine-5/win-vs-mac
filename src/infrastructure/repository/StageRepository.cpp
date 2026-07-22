@@ -34,9 +34,9 @@ namespace infrastructure::repository
 			m_stageMetadata.m_spawns.push_back(parseSpawn(spawn));
 
 		// DEBUG: デバッグ用に contains() でチェック。
-		// リリース時は必須項目のため直接 j["boss"] を参照する。
-		if (j.contains("boss"))
-			m_stageMetadata.m_boss = parseSpawn(j["boss"]);
+		// リリース時は必須項目のため直接 j["mac"] を参照する。
+		if (j.contains("mac"))
+			m_stageMetadata.m_mac = parseSpawn(j["mac"]);
 	}
 
 	const core::data::StageMetadata& StageRepository::getStageMetadata() const noexcept

@@ -7,7 +7,7 @@ namespace game::component
 	 * @brief AI追従行動を制御するコンポーネント
 	 *
 	 * 行動タイプの判別は各AI専用マーカーコンポーネント
-	 * （MeleeChaseAIComponent / RangeKeepAIComponent / BossAIComponent）の有無で行う
+	 * （MeleeChaseAIComponent / RangeKeepAIComponent / MacAIComponent）の有無で行う
 	 */
 	struct AIComponent
 	{

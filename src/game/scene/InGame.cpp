@@ -44,11 +44,11 @@
 #include "game/system/ai/MeleeChaseAISystem.h"
 #include "game/system/ai/RangeKeepAISystem.h"
 #include "game/system/ai/EnemyRangedAttackSystem.h"
-#include "game/system/ai/BossAISystem.h"
+#include "game/system/ai/MacAISystem.h"
 #include "game/component/AIComponent.h"
 #include "game/component/ai/MeleeChaseAIComponent.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
-#include "game/component/ai/BossAIComponent.h"
+#include "game/component/ai/MacAIComponent.h"
 #include "game/system/CameraSystem.h"
 #include "game/system/DebugCameraSystem.h" // DEBUG: フリーカメラ（リリース時に削除）
 #include "game/component/CameraComponent.h"
@@ -61,7 +61,7 @@
 #include "game/system/PlayerChargeVisualsSystem.h"
 #include "game/system/ChargeZoomSystem.h"
 #include "game/system/DamageShakeSystem.h"
-#include "game/system/BossAwakenEffectSystem.h"
+#include "game/system/MacAwakenEffectSystem.h"
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
 #include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
@@ -192,11 +192,11 @@ namespace game::scene
 		m_enemySpawner.setTargetEntity(core::ecs::Entity(m_playerId));
 		m_enemySpawner.spawnStageEnemies();
 
-		// ボス（Mac）をステージ定義の boss 位置に生成する。撃破判定用にIDを保持する。
-		// テスト時は stageData.json の boss.position を近くにすればすぐ戦える
-		const auto& bossSpawn{ m_resourceManager.getStageMetadata().m_boss };
-		if (!bossSpawn.m_type.empty())
-			m_bossId = m_enemySpawner.spawn(constant::toEnemyType(bossSpawn.m_type), bossSpawn.m_position);
+		// ボス（Mac）をステージ定義の mac 位置に生成する。撃破判定用にIDを保持する。
+		// テスト時は stageData.json の mac.position を近くにすればすぐ戦える
+		const auto& macSpawn{ m_resourceManager.getStageMetadata().m_mac };
+		if (!macSpawn.m_type.empty())
+			m_macId = m_enemySpawner.spawn(constant::toEnemyType(macSpawn.m_type), macSpawn.m_position);
 	}
 
 	void InGame::setupSystems()
@@ -208,12 +208,12 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::DamageShakeSystem>(m_componentManager, m_eventBus, m_playerId);
 		// ボス覚醒演出（ズーム・シェイク・赤ビネット）。CameraSystemより前に走らせて演出チャンネルを書く。
 		// 描画（赤ビネット）はInGameViewの描画フェーズから呼ぶためポインタを渡す
-		auto* bossAwakenEffect{ m_systemManager.registerSystem<game::system::BossAwakenEffectSystem>(
+		auto* macAwakenEffect{ m_systemManager.registerSystem<game::system::MacAwakenEffectSystem>(
 			m_componentManager, m_eventBus,
 			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
 			m_playerId) };
-		m_view.setBossAwakenEffectSystem(bossAwakenEffect);
+		m_view.setMacAwakenEffectSystem(macAwakenEffect);
 		// カメラはMoveSystemより前に更新し、最新のyawで移動方向を計算させる
 		m_systemManager.registerSystem<game::system::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera, m_gameManager);
 		// DEBUG: デバッグモード時のフリーカメラ。CameraSystem直後・MoveSystemより前に走らせる（リリース時に削除）
@@ -268,15 +268,15 @@ namespace game::scene
 
 		// ボス（Mac）のFSM駆動。遠距離はレインボー弾を扇状に、召喚はEnemySpawner経由で行う。
 		// レインボーの当たり判定半径は projectileData.json の radius が 0 ならモデル実寸から自動計算
-		const auto& rainbowMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::BOSS_RAINBOW) };
-		const int rainbowHandle{ m_resourceManager.loadModelById(constant::model_id::BOSS_RAINBOW_WHEEL) };
+		const auto& rainbowMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::MAC_RAINBOW) };
+		const int rainbowHandle{ m_resourceManager.loadModelById(constant::model_id::MAC_RAINBOW_WHEEL) };
 		const float rainbowRadius{ rainbowMeta.m_radius > 0.0f
 			                           ? rainbowMeta.m_radius
 			                           : m_resourceManager.computeBoundingRadius(rainbowHandle, rainbowMeta.m_scale) };
 		// モデル原点が見た目の中心とズレていると回転で円軌道を描くため、中心を求めて逆補正する
 		const core::Vector3 rainbowCenter{ m_resourceManager.computeBoundingCenter(rainbowHandle) };
 
-		m_systemManager.registerSystem<game::system::ai::BossAISystem>(
+		m_systemManager.registerSystem<game::system::ai::MacAISystem>(
 		    m_componentManager, m_eventBus, m_projectileFactory, m_enemySpawner,
 		    rainbowMeta, rainbowHandle, rainbowRadius, rainbowCenter);
 
@@ -358,8 +358,8 @@ namespace game::scene
 						// 種別専用の判定コンポーネント（各SystemがAI行動の分岐に使っているもの）の
 						// 有無で判定する。専用コンポーネントを新設せず既存の設計をそのまま流用する
 						std::string_view enemyTypeName{ "Unknown" };
-						if (m_componentManager.has<component::ai::BossAIComponent>(e.m_entityId))
-							enemyTypeName = "Mac";
+			            if (m_componentManager.has<component::ai::MacAIComponent>(e.m_entityId))
+				            enemyTypeName = "Mac";
 						else if (m_componentManager.has<component::ai::RangeKeepAIComponent>(e.m_entityId))
 							enemyTypeName = "Safari";
 						else if (m_componentManager.has<component::ai::MeleeChaseAIComponent>(e.m_entityId))
@@ -377,7 +377,7 @@ namespace game::scene
 			            m_killCount++;
 
 			            // 勝利条件はボス撃破のみ（ボスは雑魚を絶えず生成するため全滅判定にしない）
-			            if (e.m_entityId == m_bossId)
+			            if (e.m_entityId == m_macId)
 			            {
 							saveResultData(true);
 				            // メニュー操作用にカーソルを戻してからシーンを切り替える

@@ -159,11 +159,11 @@
     <ClCompile Include="src\game\system\PlayerRangedAttackSystem.cpp" />
     <ClCompile Include="src\game\system\PlayerChargeVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\ChargeZoomSystem.cpp" />
-    <ClCompile Include="src\game\system\BossAwakenEffectSystem.cpp" />
+    <ClCompile Include="src\game\system\MacAwakenEffectSystem.cpp" />
     <ClCompile Include="src\game\system\DamageShakeSystem.cpp" />
     <ClCompile Include="src\game\system\ai\MeleeChaseAISystem.cpp" />
     <ClCompile Include="src\game\system\ai\RangeKeepAISystem.cpp" />
-    <ClCompile Include="src\game\system\ai\BossAISystem.cpp" />
+    <ClCompile Include="src\game\system\ai\MacAISystem.cpp" />
     <ClCompile Include="src\game\system\ai\DetectionSystem.cpp" />
     <ClCompile Include="src\game\system\ai\EnemyRangedAttackSystem.cpp" />
     <ClCompile Include="src\game\scene\Bios.cpp" />
@@ -300,7 +300,7 @@
     <ClInclude Include="src\core\constant\JobType.h" />
     <ClInclude Include="src\core\constant\SelectWindowId.h" />
     <ClInclude Include="src\core\constant\SeType.h" />
-    <ClInclude Include="src\core\data\BossMetadata.h" />
+    <ClInclude Include="src\core\data\MacMetadata.h" />
     <ClInclude Include="src\core\data\ModelMetadata.h" />
     <ClInclude Include="src\core\base\EventBus.h" />
     <ClInclude Include="src\core\ecs\ObjectPool.h" />
@@ -338,7 +338,7 @@
     <ClInclude Include="src\game\component\HitEffectComponent.h" />
     <ClInclude Include="src\game\component\TagComponent.h" />
     <ClInclude Include="src\game\constant\EnemyAnimationState.h" />
-    <ClInclude Include="src\game\constant\BossAwakenTiming.h" />
+    <ClInclude Include="src\game\constant\MacAwakenTiming.h" />
     <ClInclude Include="src\game\constant\EnemyType.h" />
     <ClInclude Include="src\game\constant\MetadataKeys.h" />
     <ClInclude Include="src\game\data\EnemyData.h" />
@@ -370,11 +370,11 @@
     <ClInclude Include="src\game\system\CameraSystem.h" />
     <ClInclude Include="src\game\system\DebugCameraSystem.h" />
     <ClInclude Include="src\game\system\ChargeZoomSystem.h" />
-    <ClInclude Include="src\game\system\BossAwakenEffectSystem.h" />
+    <ClInclude Include="src\game\system\MacAwakenEffectSystem.h" />
     <ClInclude Include="src\game\system\DamageShakeSystem.h" />
     <ClInclude Include="src\game\system\ai\MeleeChaseAISystem.h" />
     <ClInclude Include="src\game\system\ai\RangeKeepAISystem.h" />
-    <ClInclude Include="src\game\system\ai\BossAISystem.h" />
+    <ClInclude Include="src\game\system\ai\MacAISystem.h" />
     <ClInclude Include="src\game\system\ai\DetectionSystem.h" />
     <ClInclude Include="src\game\system\ai\EnemyRangedAttackSystem.h" />
     <ClInclude Include="src\game\system\TargetingSystem.h" />
@@ -447,7 +447,7 @@
     <ClInclude Include="src\game\component\PlayerChargeComponent.h" />
     <ClInclude Include="src\game\component\ai\MeleeChaseAIComponent.h" />
     <ClInclude Include="src\game\component\ai\RangeKeepAIComponent.h" />
-    <ClInclude Include="src\game\component\ai\BossAIComponent.h" />
+    <ClInclude Include="src\game\component\ai\MacAIComponent.h" />
     <ClInclude Include="src\game\component\RenderComponent.h" />
     <ClInclude Include="src\game\component\TransformComponent.h" />
     <ClInclude Include="src\game\component\VelocityComponent.h" />

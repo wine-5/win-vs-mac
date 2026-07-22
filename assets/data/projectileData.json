@@ -27,7 +27,7 @@
       "cooldown": 0.0
     },
     {
-      "id": "boss_rainbow",
+      "id": "mac_rainbow",
       "speed": 200.0,
       "damage": 15.0,
       "lifetime": 8.0,

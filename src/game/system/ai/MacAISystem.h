@@ -3,11 +3,11 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/base/EventBus.h"
 #include "core/data/ProjectileMetadata.h"
-#include "core/data/BossMetadata.h"
+#include "core/data/MacMetadata.h"
 #include "core/utility/Vector3.h"
 #include "game/factory/ProjectileFactory.h"
 #include "game/factory/EnemySpawner.h"
-#include "game/component/ai/BossAIComponent.h"
+#include "game/component/ai/MacAIComponent.h"
 #include "game/component/TransformComponent.h"
 #include <random>
 
@@ -16,11 +16,11 @@ namespace game::system::ai
 	/**
 	 * @brief ボス（Mac）のFSM駆動AIシステム
 	 *
-	 * BossAIComponentを持つ敵を状態機械で駆動する。
+	 * MacAIComponentを持つ敵を状態機械で駆動する。
 	 * 近接（SwingAttack）・遠距離（レインボー扇状）・召喚を重み付き抽選で使い分け、
 	 * HP比率でフェーズ移行（覚醒）する。フェーズ別パラメータは macData.json から読み込む。
 	 */
-	class BossAISystem : public core::ecs::ISystem
+	class MacAISystem : public core::ecs::ISystem
 	{
 	  public:
 		/**
@@ -34,7 +34,7 @@ namespace game::system::ai
 		 * @param rainbowRadius レインボー弾の当たり判定半径
 		 * @param rainbowCenter レインボーモデルのAABB中心（回転の原点ズレ補正用）
 		 */
-		BossAISystem(core::ecs::ComponentManager& componentManager,
+		MacAISystem(core::ecs::ComponentManager& componentManager,
 		    core::base::EventBus& eventBus,
 		    factory::ProjectileFactory& projectileFactory,
 		    factory::EnemySpawner& enemySpawner,
@@ -57,7 +57,7 @@ namespace game::system::ai
 		 * @param canSummon 召喚上限に余裕があるか
 		 * @return 抽選された状態（Melee/Ranged/Summon）。候補が無ければChase
 		 */
-		component::ai::BossState chooseAction(const core::data::BossPhaseData& phase,
+		component::ai::MacState chooseAction(const core::data::MacPhaseData& phase,
 		    float distance, bool canSummon);
 
 		/**
@@ -74,7 +74,7 @@ namespace game::system::ai
 		 * @param phase 現在フェーズのパラメータ
 		 */
 		void performRanged(core::ecs::EntityId entityId, const component::TransformComponent& transform,
-		    const core::Vector3& dirToTarget, const core::data::BossPhaseData& phase);
+		    const core::Vector3& dirToTarget, const core::data::MacPhaseData& phase);
 
 		/**
 		 * @brief 雑魚を召喚する（ボス周辺のランダム座標）
@@ -83,7 +83,7 @@ namespace game::system::ai
 		 * @param summonSlots 召喚可能な残り数
 		 */
 		void performSummon(const component::TransformComponent& transform,
-		    const core::data::BossPhaseData& phase, int summonSlots);
+		    const core::data::MacPhaseData& phase, int summonSlots);
 
 		/**
 		 * @brief 現在生存している雑魚（ボス以外の敵）の数を数える

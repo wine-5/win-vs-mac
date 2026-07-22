@@ -9,7 +9,7 @@ namespace core::data
 	 *
 	 * 「今どのフェーズか」を表す型安全な識別子。
 	 */
-	enum class BossPhase
+	enum class MacPhase
 	{
 		Normal,  // 初期フェーズ
 		Awakened // 覚醒フェーズ（HP比率が閾値を下回ると移行）
@@ -18,10 +18,10 @@ namespace core::data
 	/**
 	 * @brief ボスの1フェーズ分の挙動パラメータ
 	 *
-	 * macData.json の "boss.phase1" / "boss.phase2" に対応する。
+	 * macData.json の "mac.phase1" / "mac.phase2" に対応する。
 	 * フェーズ切替（覚醒）で参照するフェーズを丸ごと差し替える。
 	 */
-	struct BossPhaseData
+	struct MacPhaseData
 	{
 		float m_moveSpeed{ 0.0f };      // このフェーズでの移動速度
 		float m_actionInterval{ 0.0f }; // 次の技を抽選するまでの間隔（秒）
@@ -49,26 +49,26 @@ namespace core::data
 	/**
 	 * @brief ボス全体の挙動定義
 	 *
-	 * macData.json の "boss" オブジェクトに対応する。
+	 * macData.json の "mac" オブジェクトに対応する。
 	 * フェーズは名前付きフィールドで保持し、HP比率で Phase1 → Phase2 に切り替える。
-	 * 添字ではなく BossPhase 列挙型で参照するため、範囲外アクセスの危険がない。
+	 * 添字ではなく MacPhase 列挙型で参照するため、範囲外アクセスの危険がない。
 	 */
-	struct BossMetadata
+	struct MacMetadata
 	{
 		float m_phase2HpRatio{ 0.5f }; // このHP比率を下回ると Phase2 に移行する
 		bool m_hasPhase2{ false };     // Phase2が定義されているか（未定義ならフェーズ移行しない）
 
-		BossPhaseData m_phase1{}; // 初期フェーズのパラメータ
-		BossPhaseData m_phase2{}; // 覚醒フェーズのパラメータ
+		MacPhaseData m_phase1{}; // 初期フェーズのパラメータ
+		MacPhaseData m_phase2{}; // 覚醒フェーズのパラメータ
 
 		/**
 		 * @brief 指定フェーズのパラメータを取得する
 		 * @param phase フェーズ識別子
-		 * @return 対応するフェーズのBossPhaseData
+		 * @return 対応するフェーズのMacPhaseData
 		 */
-		[[nodiscard]] const BossPhaseData& phase(BossPhase phase) const noexcept
+		[[nodiscard]] const MacPhaseData& phase(MacPhase phase) const noexcept
 		{
-			return (phase == BossPhase::Awakened) ? m_phase2 : m_phase1;
+			return (phase == MacPhase::Awakened) ? m_phase2 : m_phase1;
 		}
 	};
 } // namespace core::data

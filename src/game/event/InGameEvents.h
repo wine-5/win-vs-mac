@@ -3,7 +3,7 @@
 #include "core/event/IGameEvent.h"
 #include "core/constant/EffectType.h"
 #include "core/constant/SeType.h"
-#include "core/data/BossMetadata.h"
+#include "core/data/MacMetadata.h"
 #include "core/utility/Vector3.h"
 #include "game/constant/AnimationState.h"
 
@@ -145,16 +145,16 @@ namespace game::event
 	 *
 	 * 覚醒演出（カメラのズーム・シェイク・赤ビネット等）のトリガーに使う。
 	 */
-	struct BossPhaseTransitionEvent : public core::event::IGameEvent
+	struct MacPhaseTransitionEvent : public core::event::IGameEvent
 	{
 		/** @brief 移行したボスのEntityId */
 		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
 
 		/** @brief 移行後のフェーズ */
-		core::data::BossPhase m_newPhase{ core::data::BossPhase::Awakened };
+		core::data::MacPhase m_newPhase{ core::data::MacPhase::Awakened };
 
-		BossPhaseTransitionEvent() = default;
-		BossPhaseTransitionEvent(core::ecs::EntityId id, core::data::BossPhase newPhase)
+		MacPhaseTransitionEvent() = default;
+		MacPhaseTransitionEvent(core::ecs::EntityId id, core::data::MacPhase newPhase)
 		    : m_entityId{ id }
 		    , m_newPhase{ newPhase }
 		{
