@@ -15,6 +15,7 @@ namespace game::component::ai
 		Chase,           // プレイヤーへ接近
 		Melee,           // 近接攻撃（アニメ再生中はロック）
 		Ranged,          // 遠距離攻撃（レインボー扇状）
+		Nova,            // 全方位レインボー・ノヴァ（覚醒フェーズ限定の固有技）
 		Summon,          // 雑魚召喚
 		PhaseTransition, // フェーズ移行（覚醒演出中）
 		Dead             // 死亡

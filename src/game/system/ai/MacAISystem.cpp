@@ -24,6 +24,7 @@ namespace
 	constexpr float MELEE_LOCK{ 1.0f };
 	constexpr float RANGED_LOCK{ 1.2f };
 	constexpr float SUMMON_LOCK{ 1.2f };
+	constexpr float NOVA_LOCK{ 1.4f };
 	// 覚醒演出の停止時間。演出タイムラインの合計（MacAwakenTiming.h）と共有し、ズレを防ぐ
 	constexpr float PHASE_TRANSITION_LOCK{ game::constant::mac_awaken::TOTAL_TIME };
 
@@ -31,6 +32,7 @@ namespace
 	constexpr float MELEE_WINDUP{ 0.6f };
 	constexpr float RANGED_WINDUP{ 0.9f };
 	constexpr float SUMMON_WINDUP{ 0.7f };
+	constexpr float NOVA_WINDUP{ 1.1f }; // 全方位ノヴァは大技なので長めに溜める
 	// レインボー扇の予兆として床に出す扇の半径（弾の到達範囲の見せ方）
 	constexpr float RANGED_TELEGRAPH_RANGE{ 800.0f };
 } // namespace
@@ -176,6 +178,10 @@ namespace game::system::ai
 						performRanged(entityId, transform, mac.m_windupAimDir, windupPhase);
 						mac.m_animLockTimer = RANGED_LOCK;
 						break;
+					case MacState::Nova:
+						performNova(entityId, transform, windupPhase);
+						mac.m_animLockTimer = NOVA_LOCK;
+						break;
 					case MacState::Summon:
 						performSummon(transform, windupPhase, windupPhase.m_summonMax - countAliveMinions());
 						mac.m_animLockTimer = SUMMON_LOCK;
@@ -265,6 +271,7 @@ namespace game::system::ai
 			mac.m_windupAimDir = dir;
 			mac.m_windupDuration = (action == MacState::Ranged)   ? RANGED_WINDUP
 			                       : (action == MacState::Summon) ? SUMMON_WINDUP
+			                       : (action == MacState::Nova)   ? NOVA_WINDUP
 			                                                      : MELEE_WINDUP;
 			mac.m_windupTimer = mac.m_windupDuration;
 			mac.m_state = MacState::Windup;
@@ -281,6 +288,12 @@ namespace game::system::ai
 					tel.m_facingRad = std::atan2f(dir.z, dir.x);
 					tel.m_radius = RANGED_TELEGRAPH_RANGE;
 					tel.m_halfAngleRad = phase.m_rainbowSpreadDeg * 0.5f * DEG_TO_RAD;
+				}
+				else if (action == MacState::Nova)
+				{
+					// 全方位ノヴァは全周が危険なので大きな円で予告する
+					tel.m_shape = component::TelegraphShape::Circle;
+					tel.m_radius = RANGED_TELEGRAPH_RANGE;
 				}
 				else // Melee / Summon は円（近接は攻撃レンジ、召喚は召喚半径）
 				{
@@ -300,7 +313,9 @@ namespace game::system::ai
 		const int wMelee{ (distance <= phase.m_meleeRange) ? phase.m_weightMelee : 0 };
 		const int wRanged{ phase.m_weightRanged };
 		const int wSummon{ canSummon ? phase.m_weightSummon : 0 };
-		const int total{ wMelee + wRanged + wSummon };
+		// ノヴァは弾数が設定されているときだけ候補にする（phase1は重み0で候補外）
+		const int wNova{ (phase.m_novaCount > 0) ? phase.m_weightNova : 0 };
+		const int total{ wMelee + wRanged + wSummon + wNova };
 		if (total <= 0)
 			return MacState::Chase;
 
@@ -311,7 +326,10 @@ namespace game::system::ai
 		roll -= wMelee;
 		if (roll < wRanged)
 			return MacState::Ranged;
-		return MacState::Summon;
+		roll -= wRanged;
+		if (roll < wSummon)
+			return MacState::Summon;
+		return MacState::Nova;
 	}
 
 	void MacAISystem::performMelee(core::ecs::EntityId entityId)
@@ -352,19 +370,54 @@ namespace game::system::ai
 				transform.m_position.z + fanDir.z * m_rainbowMeta.m_spawnForward
 			};
 
-			factory::ProjectileConfig config{};
-			// 弾速はフェーズ指定(rainbowSpeed>0)を優先し、未指定ならprojectileData.jsonの既定値
-			config.m_speed = (phase.m_rainbowSpeed > 0.0f) ? phase.m_rainbowSpeed : m_rainbowMeta.m_speed;
-			config.m_damage = m_rainbowMeta.m_damage;
-			config.m_lifetime = m_rainbowMeta.m_lifetime;
-			config.m_radius = m_rainbowRadius;
-			config.m_scale = m_rainbowMeta.m_scale;
-			config.m_modelHandle = m_rainbowModelHandle;
-			config.m_spinRollSpeed = phase.m_rainbowSpinSpeed; // レインボーのルーレット回転（速さはJSONで調整）
-			config.m_spinCenter = m_rainbowCenter;             // 原点ズレを打ち消して中心まわりに回す
-			config.m_startEffect = core::constant::EffectType::Mac_Rainbow; // 発射時の演出（ボスのレインボーだけ）
+			factory::ProjectileConfig config{ makeRainbowConfig(phase) };
+			config.m_startEffect = core::constant::EffectType::Mac_Rainbow; // 発射時の演出（扇撃ち）
 
 			m_projectileFactory.spawn(origin, fanDir, config, constant::Tag::Enemy);
+		}
+
+		if (m_componentManager.has<component::AnimationComponent>(entityId))
+			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack2;
+	}
+
+	factory::ProjectileConfig MacAISystem::makeRainbowConfig(const core::data::MacPhaseData& phase) const
+	{
+		factory::ProjectileConfig config{};
+		// 弾速はフェーズ指定(rainbowSpeed>0)を優先し、未指定ならprojectileData.jsonの既定値
+		config.m_speed = (phase.m_rainbowSpeed > 0.0f) ? phase.m_rainbowSpeed : m_rainbowMeta.m_speed;
+		config.m_damage = m_rainbowMeta.m_damage;
+		config.m_lifetime = m_rainbowMeta.m_lifetime;
+		config.m_radius = m_rainbowRadius;
+		config.m_scale = m_rainbowMeta.m_scale;
+		config.m_modelHandle = m_rainbowModelHandle;
+		config.m_spinRollSpeed = phase.m_rainbowSpinSpeed; // レインボーのルーレット回転（速さはJSONで調整）
+		config.m_spinCenter = m_rainbowCenter;             // 原点ズレを打ち消して中心まわりに回す
+		return config;
+	}
+
+	void MacAISystem::performNova(core::ecs::EntityId entityId, const component::TransformComponent& transform,
+	    const core::data::MacPhaseData& phase)
+	{
+		const int count{ phase.m_novaCount };
+		if (count <= 0)
+			return;
+
+		// 360度に均等な方向へ発射する（水平面）
+		const float step{ 2.0f * PI / static_cast<float>(count) };
+		for (int i{ 0 }; i < count; ++i)
+		{
+			const float angle{ step * static_cast<float>(i) };
+			const core::Vector3 dir{ std::cosf(angle), 0.0f, std::sinf(angle) };
+
+			const core::Vector3 origin{
+				transform.m_position.x + dir.x * m_rainbowMeta.m_spawnForward,
+				transform.m_position.y + m_rainbowMeta.m_spawnHeight,
+				transform.m_position.z + dir.z * m_rainbowMeta.m_spawnForward
+			};
+
+			// ノヴァは弾数が多いので発射マズル演出は付けない（プール枯渇・過剰演出を避ける）
+			factory::ProjectileConfig config{ makeRainbowConfig(phase) };
+			m_projectileFactory.spawn(origin, dir, config, constant::Tag::Enemy);
 		}
 
 		if (m_componentManager.has<component::AnimationComponent>(entityId))

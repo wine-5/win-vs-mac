@@ -77,6 +77,22 @@ namespace game::system::ai
 		    const core::Vector3& dirToTarget, const core::data::MacPhaseData& phase);
 
 		/**
+		 * @brief 全方位レインボー・ノヴァを発射する（覚醒限定。360度へ均等発射＋Attack2アニメ）
+		 * @param entityId ボスのEntityId
+		 * @param transform ボスのTransform
+		 * @param phase 現在フェーズのパラメータ
+		 */
+		void performNova(core::ecs::EntityId entityId, const component::TransformComponent& transform,
+		    const core::data::MacPhaseData& phase);
+
+		/**
+		 * @brief レインボー弾1発分の共通生成パラメータを作る（扇・ノヴァで共有）
+		 * @param phase 現在フェーズのパラメータ
+		 * @return 弾の生成設定（発射方向・原点・startEffectは呼び出し側で設定）
+		 */
+		[[nodiscard]] factory::ProjectileConfig makeRainbowConfig(const core::data::MacPhaseData& phase) const;
+
+		/**
 		 * @brief 雑魚を召喚する（ボス周辺のランダム座標）
 		 * @param transform ボスのTransform
 		 * @param phase 現在フェーズのパラメータ
