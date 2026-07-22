@@ -4,6 +4,7 @@
 #include "game/component/AttackComponent.h"
 #include "game/component/HealthComponent.h"
 #include "game/component/AnimationComponent.h"
+#include "game/component/TelegraphComponent.h"
 #include "game/constant/AnimationState.h"
 #include "game/constant/Tag.h"
 #include "game/constant/EnemyType.h"
@@ -25,6 +26,13 @@ namespace
 	constexpr float SUMMON_LOCK{ 1.2f };
 	// 覚醒演出の停止時間。演出タイムラインの合計（MacAwakenTiming.h）と共有し、ズレを防ぐ
 	constexpr float PHASE_TRANSITION_LOCK{ game::constant::mac_awaken::TOTAL_TIME };
+
+	// 攻撃前の溜め（予兆表示）の長さ（秒）。満ちきると発動する。溜め中ボスは静止し中断しない
+	constexpr float MELEE_WINDUP{ 0.6f };
+	constexpr float RANGED_WINDUP{ 0.9f };
+	constexpr float SUMMON_WINDUP{ 0.7f };
+	// レインボー扇の予兆として床に出す扇の半径（弾の到達範囲の見せ方）
+	constexpr float RANGED_TELEGRAPH_RANGE{ 800.0f };
 } // namespace
 
 namespace game::system::ai
@@ -136,6 +144,53 @@ namespace game::system::ai
 				transform.m_rotation.y = std::atan2f(-dir.x, -dir.z);
 			}
 
+			// --- 溜め（ウィンドアップ）：予兆を出し、満ちたら発動する。溜め中は静止し、途中で中断しない ---
+			if (mac.m_state == MacState::Windup)
+			{
+				if (hasVelocity)
+					m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
+				if (m_componentManager.has<component::AnimationComponent>(entityId))
+					m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
+
+				mac.m_windupTimer -= deltaTime;
+
+				// 予兆の進行度を更新（中心はボス足元、形状・向きは溜め開始時に固定済み）
+				if (m_componentManager.has<component::TelegraphComponent>(entityId))
+				{
+					auto& tel{ m_componentManager.get<component::TelegraphComponent>(entityId) };
+					tel.m_center = transform.m_position;
+					tel.m_progress = std::clamp(1.0f - mac.m_windupTimer / mac.m_windupDuration, 0.0f, 1.0f);
+				}
+
+				// 満ちきったら技を発動し、予兆を消して回収ロックへ入る
+				if (mac.m_windupTimer <= 0.0f)
+				{
+					const auto& windupPhase{ mac.currentPhase() };
+					switch (mac.m_pendingAction)
+					{
+					case MacState::Melee:
+						performMelee(entityId);
+						mac.m_animLockTimer = MELEE_LOCK;
+						break;
+					case MacState::Ranged:
+						performRanged(entityId, transform, mac.m_windupAimDir, windupPhase);
+						mac.m_animLockTimer = RANGED_LOCK;
+						break;
+					case MacState::Summon:
+						performSummon(transform, windupPhase, windupPhase.m_summonMax - countAliveMinions());
+						mac.m_animLockTimer = SUMMON_LOCK;
+						break;
+					default:
+						break;
+					}
+					if (m_componentManager.has<component::TelegraphComponent>(entityId))
+						m_componentManager.get<component::TelegraphComponent>(entityId).m_active = false;
+					mac.m_state = mac.m_pendingAction;
+					mac.m_actionTimer = windupPhase.m_actionInterval;
+				}
+				continue;
+			}
+
 			// 索敵範囲外なら待機
 			if (distance > ai.m_detectionRange)
 			{
@@ -190,7 +245,7 @@ namespace game::system::ai
 				continue;
 			}
 
-			// --- アクション抽選＆実行 ---
+			// --- アクション抽選：技を決めて「溜め」に入る（発動は溜め完了時） ---
 			if (hasVelocity)
 				m_componentManager.get<component::VelocityComponent>(entityId).m_velocity = {};
 
@@ -198,28 +253,41 @@ namespace game::system::ai
 			const bool canSummon{ !phase.m_summonTypes.empty() && phase.m_summonCount > 0 && aliveMinions < phase.m_summonMax };
 
 			const MacState action{ chooseAction(phase, distance, canSummon) };
-			switch (action)
+			if (action == MacState::Chase)
 			{
-			case MacState::Melee:
-				performMelee(entityId);
-				mac.m_state = MacState::Melee;
-				mac.m_animLockTimer = MELEE_LOCK;
-				break;
-			case MacState::Ranged:
-				performRanged(entityId, transform, dir, phase);
-				mac.m_state = MacState::Ranged;
-				mac.m_animLockTimer = RANGED_LOCK;
-				break;
-			case MacState::Summon:
-				performSummon(transform, phase, phase.m_summonMax - aliveMinions);
-				mac.m_state = MacState::Summon;
-				mac.m_animLockTimer = SUMMON_LOCK;
-				break;
-			default:
 				mac.m_state = MacState::Chase; // 候補なし：次フレームで追跡に戻る
-				break;
+				mac.m_actionTimer = phase.m_actionInterval;
+				continue;
 			}
-			mac.m_actionTimer = phase.m_actionInterval;
+
+			// 溜め開始：狙いを固定し、技に応じた予兆（近接=円 / 遠距離=扇 / 召喚=円）を出す
+			mac.m_pendingAction = action;
+			mac.m_windupAimDir = dir;
+			mac.m_windupDuration = (action == MacState::Ranged)   ? RANGED_WINDUP
+			                       : (action == MacState::Summon) ? SUMMON_WINDUP
+			                                                      : MELEE_WINDUP;
+			mac.m_windupTimer = mac.m_windupDuration;
+			mac.m_state = MacState::Windup;
+
+			if (m_componentManager.has<component::TelegraphComponent>(entityId))
+			{
+				auto& tel{ m_componentManager.get<component::TelegraphComponent>(entityId) };
+				tel.m_active = true;
+				tel.m_center = transform.m_position;
+				tel.m_progress = 0.0f;
+				if (action == MacState::Ranged)
+				{
+					tel.m_shape = component::TelegraphShape::Sector;
+					tel.m_facingRad = std::atan2f(dir.z, dir.x);
+					tel.m_radius = RANGED_TELEGRAPH_RANGE;
+					tel.m_halfAngleRad = phase.m_rainbowSpreadDeg * 0.5f * DEG_TO_RAD;
+				}
+				else // Melee / Summon は円（近接は攻撃レンジ、召喚は召喚半径）
+				{
+					tel.m_shape = component::TelegraphShape::Circle;
+					tel.m_radius = (action == MacState::Summon) ? phase.m_summonRadiusMax : phase.m_meleeRange;
+				}
+			}
 		}
 	}
 

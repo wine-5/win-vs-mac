@@ -1,5 +1,6 @@
 #pragma once
 #include "core/data/MacMetadata.h"
+#include "core/utility/Vector3.h"
 #include <cstddef>
 
 namespace game::component::ai
@@ -10,6 +11,7 @@ namespace game::component::ai
 	enum class MacState
 	{
 		Idle,            // プレイヤー未検知：待機
+		Windup,          // 溜め：予兆を出しながら発動を待つ
 		Chase,           // プレイヤーへ接近
 		Melee,           // 近接攻撃（アニメ再生中はロック）
 		Ranged,          // 遠距離攻撃（レインボー扇状）
@@ -37,6 +39,12 @@ namespace game::component::ai
 
 		// 技アニメ・演出の再生ロック残り時間（秒）。>0の間は次の行動へ遷移しない
 		float m_animLockTimer{ 0.0f };
+
+		// --- 溜め（ウィンドアップ）：予兆を出してから技を発動するための状態 ---
+		MacState m_pendingAction{ MacState::Chase };      // 溜め完了時に発動する技
+		float m_windupTimer{ 0.0f };                      // 溜めの残り時間（秒）
+		float m_windupDuration{ 0.0f };                   // 溜めの全体長（進行度計算用）
+		core::Vector3 m_windupAimDir{ 0.0f, 0.0f, 0.0f }; // 溜め開始時に固定した狙い方向（予兆と発射で共有）
 
 		// Phase2への移行を既に行ったか（1回だけ発火させるためのフラグ）
 		bool m_phase2Triggered{ false };
