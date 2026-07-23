@@ -1,4 +1,4 @@
-#include "InGameView.h"
+﻿#include "InGameView.h"
 #include "core/utility/Color.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/RenderComponent.h"
@@ -6,11 +6,11 @@
 #include "game/component/ProjectileComponent.h"
 #include "game/component/VelocityComponent.h"
 #include "game/component/PlayerChargeComponent.h"
-#include "game/system/PlayerChargeVisualsSystem.h"
-#include "game/system/MacAwakenEffectSystem.h"
-#include "game/system/DetectionAlertVisualsSystem.h"
-#include "game/system/AttackTelegraphVisualsSystem.h"
-#include "game/system/TelegraphVisualsSystem.h"
+#include "game/system/visual/PlayerChargeVisualsSystem.h"
+#include "game/system/visual/MacAwakenEffectSystem.h"
+#include "game/system/visual/DetectionAlertVisualsSystem.h"
+#include "game/system/visual/AttackTelegraphVisualsSystem.h"
+#include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
 #include <cmath>
