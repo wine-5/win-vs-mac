@@ -17,66 +17,63 @@
 #include <string>
 #include <string_view>
 
-namespace
-{
-	constexpr float DEG_TO_RAD{ std::numbers::pi_v<float> / 180.0f };
-
-	/**
-	 * @brief ストレイフ（周回）の向きを個体ごとにランダムに決める
-	 * @return 右回り(+1) または 左回り(-1)
-	 */
-	int pickStrafeDirection()
-	{
-		static std::mt19937 rng{ std::random_device{}() };
-		static std::uniform_int_distribution<int> dist{ 0, 1 };
-		return dist(rng) == 0 ? 1 : -1;
-	}
-
-	/**
-	 * @brief アニメ状態名の文字列をAnimationStateへ変換する（未知はIdle扱い）
-	 */
-	game::constant::AnimationState toAnimationState(const std::string& name)
-	{
-		using game::constant::AnimationState;
-		if (name == "Walk")
-			return AnimationState::Walk;
-		if (name == "Run")
-			return AnimationState::Run;
-		if (name == "Attack1")
-			return AnimationState::Attack1;
-		if (name == "Attack2")
-			return AnimationState::Attack2;
-		if (name == "Hit")
-			return AnimationState::Hit;
-		if (name == "Dying")
-			return AnimationState::Dying;
-		if (name == "Jump")
-			return AnimationState::Jump;
-		return AnimationState::Idle;
-	}
-
-	/**
-	 * @brief 優先度名の文字列を割り込み優先度の数値へ変換する（未知はlocomotion扱い）
-	 */
-	int toAnimationPriority(const std::string& name)
-	{
-		namespace priority = game::constant::animation_priority;
-		if (name == "dying")
-			return priority::DYING;
-		if (name == "hit")
-			return priority::HIT;
-		if (name == "attack")
-			return priority::ATTACK;
-		if (name == "jump")
-			return priority::JUMP;
-		return priority::LOCOMOTION;
-	}
-} // namespace
-
 namespace game::actor
 {
 	namespace
 	{
+		constexpr float DEG_TO_RAD{ std::numbers::pi_v<float> / 180.0f };
+
+		/**
+		 * @brief ストレイフ（周回）の向きを個体ごとにランダムに決める
+		 * @return 右回り(+1) または 左回り(-1)
+		 */
+		int pickStrafeDirection()
+		{
+			static std::mt19937 rng{ std::random_device{}() };
+			static std::uniform_int_distribution<int> dist{ 0, 1 };
+			return dist(rng) == 0 ? 1 : -1;
+		}
+
+		/**
+		 * @brief アニメ状態名の文字列をAnimationStateへ変換する（未知はIdle扱い）
+		 */
+		constant::AnimationState toAnimationState(const std::string& name)
+		{
+			using constant::AnimationState;
+			if (name == "Walk")
+				return AnimationState::Walk;
+			if (name == "Run")
+				return AnimationState::Run;
+			if (name == "Attack1")
+				return AnimationState::Attack1;
+			if (name == "Attack2")
+				return AnimationState::Attack2;
+			if (name == "Hit")
+				return AnimationState::Hit;
+			if (name == "Dying")
+				return AnimationState::Dying;
+			if (name == "Jump")
+				return AnimationState::Jump;
+			return AnimationState::Idle;
+		}
+
+		/**
+		 * @brief 優先度名の文字列を割り込み優先度の数値へ変換する（未知はlocomotion扱い）
+		 */
+		int toAnimationPriority(const std::string& name)
+		{
+			namespace priority = constant::animation_priority;
+			if (name == "dying")
+				return priority::DYING;
+			if (name == "hit")
+				return priority::HIT;
+			if (name == "attack")
+				return priority::ATTACK;
+			if (name == "jump")
+				return priority::JUMP;
+			return priority::LOCOMOTION;
+		}
+
 		void installMeleeChase(core::ecs::ComponentManager& cm, core::ecs::EntityId id, const data::EnemyData&)
 		{
 			// MeleeChaseAISystemがこのコンポーネントの有無で近接敵を判定する
