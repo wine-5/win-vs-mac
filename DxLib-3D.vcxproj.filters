@@ -665,12 +665,6 @@
     <ClInclude Include="src\core\event\IGameEvent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\event\ISelectEvent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\event\SelectEvents.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\core\interface\ISelectWindowManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
