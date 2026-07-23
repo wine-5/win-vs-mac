@@ -4,6 +4,8 @@
 #include <optional>
 #include "core/data/ModelMetadata.h"
 #include "core/data/StageMetadata.h"
+#include "core/data/FileExtensionBonus.h"
+#include "core/data/FileExtensionType.h"
 #include "core/data/ProjectileMetadata.h"
 
 namespace core::iface
@@ -61,6 +63,14 @@ namespace core::iface
 		 * @return ステージ配置定義
 		 */
 		[[nodiscard]] virtual const core::data::StageMetadata& getStageMetadata() const noexcept = 0;
+
+		/**
+		 * @brief 拡張子種別に対応するパラメータボーナスを取得する
+		 * @param type ファイル拡張子グループ種別
+		 * @return 対応するボーナス値
+		 */
+		[[nodiscard]] virtual const core::data::FileExtensionBonus& getExtensionBonus(
+		    core::data::FileExtensionType type) const noexcept = 0;
 
 		/**
 		 * @brief 弾IDから弾定義を取得する

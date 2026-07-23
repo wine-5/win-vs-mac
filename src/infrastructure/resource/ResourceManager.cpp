@@ -29,6 +29,7 @@ namespace infrastructure::resource
 		m_animRepo = std::make_unique<repository::AnimationRepository>(config);
 		m_stageRepo = std::make_unique<repository::StageRepository>();
 		m_projectileRepo = std::make_unique<repository::ProjectileRepository>();
+		m_extensionBonusRepo = std::make_unique<repository::ExtensionBonusRepository>();
 	}
 
 	int ResourceManager::loadModelById(const std::string_view modelId)
@@ -59,6 +60,12 @@ namespace infrastructure::resource
 	const core::data::StageMetadata& ResourceManager::getStageMetadata() const noexcept
 	{
 		return m_stageRepo->getStageMetadata();
+	}
+
+	const core::data::FileExtensionBonus& ResourceManager::getExtensionBonus(
+	    core::data::FileExtensionType type) const noexcept
+	{
+		return m_extensionBonusRepo->getBonus(type);
 	}
 
 	const core::data::ProjectileMetadata& ResourceManager::getProjectileMetadata(std::string_view projectileId) const

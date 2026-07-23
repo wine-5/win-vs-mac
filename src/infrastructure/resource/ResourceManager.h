@@ -6,6 +6,7 @@
 #include "infrastructure/resource/repository/ImageRepository.h"
 #include "infrastructure/resource/repository/AnimationRepository.h"
 #include "infrastructure/resource/repository/StageRepository.h"
+#include "infrastructure/resource/repository/ExtensionBonusRepository.h"
 #include "infrastructure/resource/repository/ProjectileRepository.h"
 
 namespace infrastructure::resource
@@ -62,6 +63,14 @@ namespace infrastructure::resource
 		[[nodiscard]] const core::data::StageMetadata& getStageMetadata() const noexcept override;
 
 		/**
+		 * @brief 拡張子種別に対応するパラメータボーナスを取得する
+		 * @param type ファイル拡張子グループ種別
+		 * @return 対応するボーナス値
+		 */
+		[[nodiscard]] const core::data::FileExtensionBonus& getExtensionBonus(
+		    core::data::FileExtensionType type) const noexcept override;
+
+		/**
 		 * @brief 弾IDから弾定義を取得する
 		 * @param projectileId 弾ID（projectileData.json で定義）
 		 * @return 弾定義
@@ -97,6 +106,7 @@ namespace infrastructure::resource
 		std::unique_ptr<repository::ImageRepository> m_imageRepo;
 		std::unique_ptr<repository::AnimationRepository> m_animRepo;
 		std::unique_ptr<repository::StageRepository> m_stageRepo;
+		std::unique_ptr<repository::ExtensionBonusRepository> m_extensionBonusRepo;
 		std::unique_ptr<repository::ProjectileRepository> m_projectileRepo;
 	};
 } // namespace infrastructure::resource
