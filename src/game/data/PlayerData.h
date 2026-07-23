@@ -61,12 +61,6 @@ namespace game::data
 			if (attackCooldownIt != metadata.floatProperties.end())
 				data.m_attackCooldown = attackCooldownIt->second;
 
-			// 基本値を保存（ボーナス計算用）
-			data.m_baseHp = data.m_maxHp;
-			data.m_baseAtk = data.m_attackPower;
-			data.m_baseDef = data.m_defence;
-			data.m_baseSpd = data.m_moveSpeed;
-
 			return data;
 		}
 
@@ -96,8 +90,13 @@ namespace game::data
 
 		/**
 		 * @brief FileExtensionBonus をパラメータに加算する
+		 *
+		 * 方針: 装備スロットごとにこの関数を呼んで実値へ加算していく形を維持する。
+		 * ベース値と修正値を分けて保持する仕組み（StatModifier等）は、実行時に
+		 * 「基礎値＋ボーナス」を分けて見せる必要が出るまで導入しない。
+		 * セレクト画面の内訳表示は Win32SelectWindowManager 側が別途計算しており、
+		 * ここでは最終値だけを持てば足りる。
 		 * @param bonus 拡張子ボーナス値
-		 * TODO: 今後はプレイヤーのパラメータを直接変更する以外に武器の攻撃力を上げるなどにする
 		 */
 		void applyExtensionBonus(const data::FileExtensionBonus& bonus)
 		{
@@ -119,11 +118,5 @@ namespace game::data
 		core::Vector3 m_colliderSize;
 		core::Vector3 m_colliderOffset;
 		core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
-
-		// 基本値（メタデータから取得。拡張子ボーナス適用前の素の値）
-		float m_baseHp{ 0.0f };
-		float m_baseAtk{ 0.0f };
-		float m_baseDef{ 0.0f };
-		float m_baseSpd{ 0.0f };
 	};
 } // namespace game::data
