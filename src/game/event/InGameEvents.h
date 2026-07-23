@@ -54,7 +54,8 @@ namespace game::event
 		/** @brief 再生するエフェクトの種類 */
 		core::constant::EffectType m_effectType{ core::constant::EffectType::None };
 
-		// TODO: ここに音も追加して敵、Playerごとに異なる音を再生するようにする予定
+		// 攻撃開始SE（敵・Playerごとに音を変える）は機能追加のため別ブランチで対応する。
+		// 実装する場合は AttackHitEvent と同じく SeType を持たせ、AudioEventListener で購読する
 
 		AttackStartEvent() = default;
 		AttackStartEvent(core::ecs::EntityId attackerId, core::constant::EffectType effectType)
