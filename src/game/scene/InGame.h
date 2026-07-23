@@ -75,6 +75,12 @@ namespace game::scene
 		  PauseManager& pauseManager);
 
 	  /**
+	   * @brief InGameのデストラクタ
+	   * @note 前方宣言のみのメンバをunique_ptrで保持するため、実装は.cpp側で定義する
+	   */
+	  ~InGame() override;
+
+	  /**
 	   * @brief シーンの更新処理
 	   * @param deltaTime フレーム間の時間差
 	   */

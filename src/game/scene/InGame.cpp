@@ -141,6 +141,8 @@ namespace game::scene
 		m_view.setDebugHUDView(m_debugHUDView.get());
 	}
 
+	InGame::~InGame() = default;
+
 	void InGame::loadResources()
 	{
 		// 先にモデルをロードして自動計算を実行
