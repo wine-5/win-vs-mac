@@ -95,11 +95,12 @@ namespace game::scene
 	    , m_gameManager{ gameManager }
 	    , m_pauseManager{ pauseManager }
 	    , m_fileEquipmentData{ gameManager.getFileEquipmentData() }
+	    , m_effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() }
 	    , m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }
 	    , m_enemySpawner{ m_factoryManager, m_componentManager, m_resourceManager, m_eventBus }
 	    , m_projectileFactory{ m_entityManager, m_componentManager }
-	    , m_playerData{ game::data::PlayerData::fromMetadata(m_resourceManager.getMetadata(constant::model_id::PLAYER).value()) }
-	    , m_effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() }
+	    // 実データは loadResources() で設定する（コライダー自動計算がモデルロード後に確定するため）
+	    , m_playerData{}
 	    , m_view{ m_componentManager, m_renderer,
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
@@ -154,7 +155,6 @@ namespace game::scene
 			LOG("ERROR: Playerのメタデータが見つかりません");
 			throw std::runtime_error("Playerのメタデータの読み込みに失敗しました");
 		}
-		assert(playerMeta.has_value() && "Playerのメタデータが見つかりません");
 		m_playerData = game::data::PlayerData::fromMetadata(playerMeta.value());
 	}
 
