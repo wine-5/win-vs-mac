@@ -18,8 +18,16 @@ namespace infrastructure::resource::repository
 
 	AnimationRepository::~AnimationRepository()
 	{
-		for (auto& [id, handle] : m_handles)
-			MV1DeleteModel(handle);
+		// ここで MV1DeleteModel を呼んではいけない。
+		//
+		// アニメーションは MV1AttachAnim でキャラのモデルへ紐付けられており、
+		// アタッチ先（キャラのモデルや EnemySpawner が持つ複製ハンドル）より先に
+		// アタッチ元を消すと、DxLib_End 内の MV1Terminate が残ったモデルを片付ける際に
+		// 解放済みのアニメーションを detach しようとしてアクセス違反になる。
+		//
+		// これらのハンドルはアプリ終了まで保持し続けるキャッシュであり、
+		// ここで消しても寿命は変わらないため、解放は依存関係を正しく扱える
+		// DxLib_End（MV1Terminate）へ一任する。
 	}
 
 	int AnimationRepository::loadAnimationById(std::string_view animationId)
