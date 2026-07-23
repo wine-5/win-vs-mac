@@ -2,7 +2,7 @@
 #include <unordered_map>
 #include "core/interface/IEffectFactory.h"
 #include "infrastructure/effect/EffectPool.h"
-#include "infrastructure/repository/EffectRepository.h"
+#include "infrastructure/resource/repository/EffectRepository.h"
 
 namespace infrastructure::effect
 {

@@ -2,7 +2,7 @@
 #include <DxLib.h>
 #include <stdexcept>
 
-namespace infrastructure::repository
+namespace infrastructure::resource::repository
 {
 	FontRepository::FontRepository(const nlohmann::json& j)
 	{
@@ -38,4 +38,4 @@ namespace infrastructure::repository
 			fonts.push_back({ item["id"], item["path"], item["name"] });
 		return fonts;
 	}
-} // namespace infrastructure::repository
+} // namespace infrastructure::resource::repository

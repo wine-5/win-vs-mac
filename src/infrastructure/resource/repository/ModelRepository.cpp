@@ -12,7 +12,7 @@ namespace
 	constexpr float HORIZONTAL_SHRINK{ 0.5f };
 } // namespace
 
-namespace infrastructure::repository
+namespace infrastructure::resource::repository
 {
 	ModelRepository::ModelRepository(const nlohmann::json& j)
 	{
@@ -409,4 +409,4 @@ namespace infrastructure::repository
 
 		return phase;
 	}
-} // namespace infrastructure::repository
+} // namespace infrastructure::resource::repository

@@ -36,7 +36,7 @@ namespace
 	}
 } // namespace
 
-namespace infrastructure::repository
+namespace infrastructure::resource::repository
 {
 	ProjectileRepository::ProjectileRepository()
 	{
@@ -59,4 +59,4 @@ namespace infrastructure::repository
 			throw std::runtime_error("弾ID '" + std::string(projectileId) + "' がprojectileData.jsonに存在しません");
 		return it->second;
 	}
-} // namespace infrastructure::repository
+} // namespace infrastructure::resource::repository

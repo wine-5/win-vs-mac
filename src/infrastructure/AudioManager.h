@@ -1,6 +1,6 @@
 #pragma once
 #include "core/interface/IAudioManager.h"
-#include "infrastructure/repository/AudioRepository.h"
+#include "infrastructure/resource/repository/AudioRepository.h"
 
 namespace infrastructure
 {

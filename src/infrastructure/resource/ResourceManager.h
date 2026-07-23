@@ -1,14 +1,14 @@
 ﻿#pragma once
 #include <memory>
 #include "core/interface/IResourceManager.h"
-#include "infrastructure/repository/ModelRepository.h"
-#include "infrastructure/repository/FontRepository.h"
-#include "infrastructure/repository/ImageRepository.h"
-#include "infrastructure/repository/AnimationRepository.h"
-#include "infrastructure/repository/StageRepository.h"
-#include "infrastructure/repository/ProjectileRepository.h"
+#include "infrastructure/resource/repository/ModelRepository.h"
+#include "infrastructure/resource/repository/FontRepository.h"
+#include "infrastructure/resource/repository/ImageRepository.h"
+#include "infrastructure/resource/repository/AnimationRepository.h"
+#include "infrastructure/resource/repository/StageRepository.h"
+#include "infrastructure/resource/repository/ProjectileRepository.h"
 
-namespace infrastructure
+namespace infrastructure::resource
 {
 	/**
 	 * @brief リソース管理の Facade クラス
@@ -99,4 +99,4 @@ namespace infrastructure
 		std::unique_ptr<repository::StageRepository> m_stageRepo;
 		std::unique_ptr<repository::ProjectileRepository> m_projectileRepo;
 	};
-} // namespace infrastructure
+} // namespace infrastructure::resource

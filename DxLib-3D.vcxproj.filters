@@ -39,7 +39,7 @@
     <ClCompile Include="src\infrastructure\graphics\Renderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\ResourceManager.cpp">
+    <ClCompile Include="src\infrastructure\resource\ResourceManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\scene\InGame.cpp">
@@ -183,13 +183,13 @@
     <ClCompile Include="src\game\ui\pause\PauseMenuView.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\ModelRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\ModelRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\ImageRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\ImageRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\FontRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\FontRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\window\WindowBase.cpp">
@@ -222,7 +222,7 @@
     <ClCompile Include="src\game\scene\Bios.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\AnimationRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\AnimationRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\system\WindowsPerformanceProvider.cpp">
@@ -243,10 +243,10 @@
     <ClCompile Include="src\platform\window\loading\LoadingWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\AudioRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\AudioRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\EffectRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\EffectRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\infrastructure\effect\EffectPool.cpp">
@@ -270,10 +270,10 @@
     <ClCompile Include="src\game\actor\EnemyBehaviors.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\ProjectileRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\ProjectileRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\StageRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\StageRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\system\combat\ProjectileReflectSystem.cpp">
@@ -404,7 +404,7 @@
     <ClInclude Include="src\infrastructure\graphics\Renderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\ResourceManager.h">
+    <ClInclude Include="src\infrastructure\resource\ResourceManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\scene\InGame.h">
@@ -698,10 +698,10 @@
     <ClInclude Include="src\game\ui\pause\PauseMenuView.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\ModelRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\ModelRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\FontRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\FontRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\window\WindowBase.h">
@@ -740,7 +740,7 @@
     <ClInclude Include="src\core\interface\IWindowFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\AnimationRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\AnimationRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\constant\AnimationId.h">
@@ -776,7 +776,7 @@
     <ClInclude Include="src\core\interface\IEffectFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\EffectRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\EffectRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\infrastructure\effect\EffectPool.h">
@@ -806,7 +806,7 @@
     <ClInclude Include="src\core\interface\IAudioManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\AudioRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\AudioRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\actor\EnemyBase.h">
@@ -824,7 +824,7 @@
     <ClInclude Include="src\core\data\ProjectileMetadata.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\ProjectileRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\ProjectileRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\constant\ProjectileId.h">
@@ -833,7 +833,7 @@
     <ClInclude Include="src\core\data\StageMetadata.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\StageRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\StageRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\component\combat\ProjectileComponent.h">

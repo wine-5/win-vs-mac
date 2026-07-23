@@ -14,7 +14,7 @@
 #include "platform/window/WindowFactory.h"
 #include "infrastructure/graphics/Screen.h"
 #include "platform/utility/LogUtil.h"
-#include "infrastructure/ResourceManager.h"
+#include "infrastructure/resource/ResourceManager.h"
 #include "infrastructure/graphics/UIRenderer.h"
 #include "infrastructure/InputManager.h"
 #include "infrastructure/graphics/Camera.h"
@@ -42,7 +42,7 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 	// 失敗時は握りつぶさず伝播させる。リソースが欠けたまま起動すると
 	// 「モデルが出ない・音が鳴らない」状態で原因究明が遅れるため（Fail Fast）
 	core::base::ServiceLocator::provide<core::iface::IResourceManager>(
-	    std::make_unique<infrastructure::ResourceManager>());
+	    std::make_unique<infrastructure::resource::ResourceManager>());
 
 	// デバッグ用ロガーを登録
 	core::base::ServiceLocator::provide<core::iface::ILogger>(

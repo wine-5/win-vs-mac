@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include "core/data/ProjectileMetadata.h"
 
-namespace infrastructure::repository
+namespace infrastructure::resource::repository
 {
 	/**
 	 * @brief 弾定義（projectileData.json）の読み込みを担当
@@ -29,4 +29,4 @@ namespace infrastructure::repository
 	  private:
 		std::unordered_map<std::string, core::data::ProjectileMetadata> m_metadata{};
 	};
-} // namespace infrastructure::repository
+} // namespace infrastructure::resource::repository

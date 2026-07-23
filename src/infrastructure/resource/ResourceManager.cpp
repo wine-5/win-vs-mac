@@ -10,7 +10,7 @@ namespace
 	constexpr const char* RESOURCE_CONFIG_PATH{ "assets/config/resources.json" };
 } // namespace
 
-namespace infrastructure
+namespace infrastructure::resource
 {
 	ResourceManager::ResourceManager()
 	{
@@ -85,4 +85,4 @@ namespace infrastructure
 	{
 		return m_modelRepo->computeBoundingCenter(modelHandle);
 	}
-} // namespace infrastructure
+} // namespace infrastructure::resource

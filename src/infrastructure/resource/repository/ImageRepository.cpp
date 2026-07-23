@@ -6,7 +6,7 @@
 #include "core/interface/ILogger.h"
 #include "core/utility/Log.h"
 
-namespace infrastructure::repository
+namespace infrastructure::resource::repository
 {
 	ImageRepository::ImageRepository(const nlohmann::json& j)
 	{
@@ -47,4 +47,4 @@ namespace infrastructure::repository
         m_handles[id] = handle;
         return handle;
     }
-} // namespace infrastructure::repository
+} // namespace infrastructure::resource::repository

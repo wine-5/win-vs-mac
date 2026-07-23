@@ -21,7 +21,7 @@ namespace
 	}
 } // namespace
 
-namespace infrastructure::repository
+namespace infrastructure::resource::repository
 {
 	StageRepository::StageRepository()
 	{
@@ -43,4 +43,4 @@ namespace infrastructure::repository
 	{
 		return m_stageMetadata;
 	}
-} // namespace infrastructure::repository
+} // namespace infrastructure::resource::repository
