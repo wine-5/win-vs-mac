@@ -75,27 +75,27 @@ namespace game::scene
 		m_effectFactory.draw();
 	}
 
-	void InGameView::setPlayerChargeVisualsSystem(system::PlayerChargeVisualsSystem* system)
+	void InGameView::setPlayerChargeVisualsSystem(system::visual::PlayerChargeVisualsSystem* system)
 	{
 		m_playerChargeVisualsSystem = system;
 	}
 
-	void InGameView::setMacAwakenEffectSystem(system::MacAwakenEffectSystem* system)
+	void InGameView::setMacAwakenEffectSystem(system::visual::MacAwakenEffectSystem* system)
 	{
 		m_macAwakenEffectSystem = system;
 	}
 
-	void InGameView::setDetectionAlertVisualsSystem(system::DetectionAlertVisualsSystem* system)
+	void InGameView::setDetectionAlertVisualsSystem(system::visual::DetectionAlertVisualsSystem* system)
 	{
 		m_detectionAlertSystem = system;
 	}
 
-	void InGameView::setAttackTelegraphVisualsSystem(system::AttackTelegraphVisualsSystem* system)
+	void InGameView::setAttackTelegraphVisualsSystem(system::visual::AttackTelegraphVisualsSystem* system)
 	{
 		m_attackTelegraphSystem = system;
 	}
 
-	void InGameView::setTelegraphVisualsSystem(system::TelegraphVisualsSystem* system)
+	void InGameView::setTelegraphVisualsSystem(system::visual::TelegraphVisualsSystem* system)
 	{
 		m_telegraphSystem = system;
 	}

@@ -36,10 +36,10 @@ namespace game
 	class GameManager;  // 前方宣言
 	class PauseManager; // 前方宣言
 
-	namespace system
+	namespace system::camera
 	{
 		class DebugCameraSystem; // DEBUG: 前方宣言（リリース時に削除）
-	} // namespace system
+	} // namespace system::camera
 
 	namespace ui::debug
 	{
@@ -142,7 +142,7 @@ namespace game::scene
 		std::unique_ptr<core::iface::IProjectileWindowManager> m_projectileWindowManager;
 
 		// DEBUG: シーンビュー凍結中に単独更新するための参照（所有はSystemManager。リリース時に削除）
-		system::DebugCameraSystem* m_debugCameraSystem{ nullptr };
+		system::camera::DebugCameraSystem* m_debugCameraSystem{ nullptr };
 
 		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（リリース時にまとめて削除）
 		std::unique_ptr<ui::debug::DebugGizmoView> m_debugGizmoView;

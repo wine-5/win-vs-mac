@@ -197,46 +197,46 @@ namespace game::scene
 	void InGame::setupSystems()
 	{
 		// システム登録
-		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_playerId, m_inputProvider, m_gameManager);
+		m_systemManager.registerSystem<game::system::movement::InputSystem>(m_componentManager, m_playerId, m_inputProvider, m_gameManager);
 		// カメラ演出（Zoom/Shake）はCameraSystemより前に走らせ、合成結果をCameraEffectComponentへ書いておく
-		m_systemManager.registerSystem<game::system::ChargeZoomSystem>(m_componentManager, m_playerId);
-		m_systemManager.registerSystem<game::system::DamageShakeSystem>(m_componentManager, m_eventBus, m_playerId);
+		m_systemManager.registerSystem<game::system::camera::ChargeZoomSystem>(m_componentManager, m_playerId);
+		m_systemManager.registerSystem<game::system::camera::DamageShakeSystem>(m_componentManager, m_eventBus, m_playerId);
 		// ボス覚醒演出（ズーム・シェイク・赤ビネット）。CameraSystemより前に走らせて演出チャンネルを書く。
 		// 描画（赤ビネット）はInGameViewの描画フェーズから呼ぶためポインタを渡す
-		auto* macAwakenEffect{ m_systemManager.registerSystem<game::system::MacAwakenEffectSystem>(
+		auto* macAwakenEffect{ m_systemManager.registerSystem<game::system::visual::MacAwakenEffectSystem>(
 			m_componentManager, m_eventBus,
 			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
 			m_playerId) };
 		m_view.setMacAwakenEffectSystem(macAwakenEffect);
 		// カメラはMoveSystemより前に更新し、最新のyawで移動方向を計算させる
-		m_systemManager.registerSystem<game::system::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera, m_gameManager);
+		m_systemManager.registerSystem<game::system::camera::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera, m_gameManager);
 		// DEBUG: デバッグモード時のフリーカメラ。CameraSystem直後・MoveSystemより前に走らせる（リリース時に削除）
 		// シーンビュー凍結中に単独更新するためポインタも保持する
-		m_debugCameraSystem = m_systemManager.registerSystem<game::system::DebugCameraSystem>(
+		m_debugCameraSystem = m_systemManager.registerSystem<game::system::camera::DebugCameraSystem>(
 		    m_componentManager, m_playerId, m_inputProvider, m_camera, m_gameManager, m_pauseManager);
-		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
+		m_systemManager.registerSystem<game::system::movement::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
 		// 照準の敵捕捉判定（カメラ更新後・描画前に走らせる）
-		m_systemManager.registerSystem<game::system::TargetingSystem>(m_componentManager);
+		m_systemManager.registerSystem<game::system::combat::TargetingSystem>(m_componentManager);
 		// 発射入力→弾生成（生成はPhysicsSystemより前でよい）。弾定義はjsonから取得する
 		const auto& projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
-		m_systemManager.registerSystem<game::system::PlayerRangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory,
+		m_systemManager.registerSystem<game::system::combat::PlayerRangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory,
 		    projectileMeta);
-		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager);
+		m_systemManager.registerSystem<game::system::movement::PhysicsSystem>(m_componentManager);
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
-		m_systemManager.registerSystem<game::system::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);
+		m_systemManager.registerSystem<game::system::combat::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);
 		// 敵弾をプレイヤーのWindow弾で跳ね返す（移動後・ダメージ判定AttackSystemより前に判定する）
-		m_systemManager.registerSystem<game::system::ProjectileReflectSystem>(m_componentManager);
+		m_systemManager.registerSystem<game::system::combat::ProjectileReflectSystem>(m_componentManager);
 
 		// 弾の見た目として実OSウィンドウを追従させる（移動後の位置を射影するためPhysicsSystemより後）
 		auto* windowFactory{ core::base::ServiceLocator::get<core::iface::IWindowFactory>() };
 		if (windowFactory)
 			m_projectileWindowManager = windowFactory->createProjectileWindowManager();
 		if (m_projectileWindowManager)
-			m_systemManager.registerSystem<game::system::ProjectileWindowSystem>(m_componentManager, m_renderer, *m_projectileWindowManager);
-		m_systemManager.registerSystem<game::system::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
+			m_systemManager.registerSystem<game::system::combat::ProjectileWindowSystem>(m_componentManager, m_renderer, *m_projectileWindowManager);
+		m_systemManager.registerSystem<game::system::visual::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
 
-		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
+		m_systemManager.registerSystem<game::system::combat::CollisionSystem>(m_componentManager);
 		// AI行動分割：近接追跡型敵を駆動
 		m_systemManager.registerSystem<game::system::ai::MeleeChaseAISystem>(m_componentManager);
 		// AI行動分割：遠距離維持型敵を駆動
@@ -278,17 +278,17 @@ namespace game::scene
 		// 敵がプレイヤーを発見した瞬間を検知（全敵共通）。発見演出のトリガーになる
 		m_systemManager.registerSystem<game::system::ai::DetectionSystem>(m_componentManager, m_eventBus);
 
-		m_systemManager.registerSystem<game::system::AttackSystem>(
+		m_systemManager.registerSystem<game::system::combat::AttackSystem>(
 		    m_componentManager, m_eventBus, core::constant::SeType::AttackPlayer);
-		m_systemManager.registerSystem<game::system::HitEffectSystem>(m_componentManager, m_eventBus);
+		m_systemManager.registerSystem<game::system::visual::HitEffectSystem>(m_componentManager, m_eventBus);
 		// 死亡した敵の後始末（赤化＋ディゾルブ演出→Entity破棄＋モデルハンドルのプール返却）
-		m_systemManager.registerSystem<game::system::EnemyDeathSystem>(m_componentManager, m_entityManager, m_eventBus, m_enemySpawner, m_renderer);
+		m_systemManager.registerSystem<game::system::combat::EnemyDeathSystem>(m_componentManager, m_entityManager, m_eventBus, m_enemySpawner, m_renderer);
 
-		m_systemManager.registerSystem<game::system::EffectSystem>(m_componentManager, m_eventBus, m_effectFactory);
+		m_systemManager.registerSystem<game::system::visual::EffectSystem>(m_componentManager, m_eventBus, m_effectFactory);
 
 		// プレイヤーの溜め攻撃の画面演出（集中線）。描画内容はSystemが持ち、
 		// InGameViewには描画フェーズで呼び出させるためにポインタを渡す
-		auto* chargeVisuals{ m_systemManager.registerSystem<game::system::PlayerChargeVisualsSystem>(
+		auto* chargeVisuals{ m_systemManager.registerSystem<game::system::visual::PlayerChargeVisualsSystem>(
 			m_componentManager,
 			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
@@ -296,7 +296,7 @@ namespace game::scene
 		m_view.setPlayerChargeVisualsSystem(chargeVisuals);
 
 		// 敵の発見演出（頭上の通知バッジ）。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
-		auto* detectionAlert{ m_systemManager.registerSystem<game::system::DetectionAlertVisualsSystem>(
+		auto* detectionAlert{ m_systemManager.registerSystem<game::system::visual::DetectionAlertVisualsSystem>(
 			m_componentManager,
 			m_eventBus,
 			m_renderer,
@@ -306,12 +306,12 @@ namespace game::scene
 		m_view.setDetectionAlertVisualsSystem(detectionAlert);
 
 		// 攻撃予兆（地面の攻撃範囲サークル）。描画内容はSystemが持ち、Viewが3D描画フェーズで呼ぶ
-		auto* attackTelegraph{ m_systemManager.registerSystem<game::system::AttackTelegraphVisualsSystem>(
+		auto* attackTelegraph{ m_systemManager.registerSystem<game::system::visual::AttackTelegraphVisualsSystem>(
 			m_componentManager, m_renderer) };
 		m_view.setAttackTelegraphVisualsSystem(attackTelegraph);
 
 		// 汎用の攻撃予兆（TelegraphComponent駆動：円・扇）。ボスの溜め攻撃などが使う
-		auto* telegraph{ m_systemManager.registerSystem<game::system::TelegraphVisualsSystem>(
+		auto* telegraph{ m_systemManager.registerSystem<game::system::visual::TelegraphVisualsSystem>(
 			m_componentManager, m_renderer) };
 		m_view.setTelegraphVisualsSystem(telegraph);
 	}
