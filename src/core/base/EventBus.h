@@ -5,6 +5,7 @@
 #include <vector>
 #include <typeindex>
 #include <utility>
+#include "core/base/NonCopyable.h"
 
 namespace core::base
 {
@@ -17,8 +18,11 @@ namespace core::base
 	 *
 	 * 注意：コールバックの中から subscribe / unsubscribe を呼んではいけない。
 	 * publish中の解除自体は安全に扱えるが、購読の追加は次回のpublishからの反映になる。
+	 *
+	 * Subscription が this を握るため、コピー・ムーブされると解除先がずれて壊れる。
+	 * NonCopyable を継承して型レベルで禁止する。
 	 */
-	class EventBus
+	class EventBus : private NonCopyable
 	{
 	public:
 	  /**
