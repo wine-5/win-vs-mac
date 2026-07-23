@@ -3,7 +3,6 @@
 #include "core/interface/ISelectWindowManager.h"
 #include "core/data/FileExtensionType.h"
 #include "game/utility/FileExtensionTypeResolver.h"
-#include "game/utility/ExtensionBonusCalculator.h"
 #include "platform/window/WindowConstants.h"
 #include "DesktopWindow.h"
 #include "FileSelectWindow.h"

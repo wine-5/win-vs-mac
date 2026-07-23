@@ -8,8 +8,12 @@
 #include "platform/window/WebViewWindowBase.h"
 #include "core/data/FileExtensionType.h"
 #include "game/utility/FileExtensionTypeResolver.h"
-#include "game/utility/ExtensionBonusCalculator.h"
 #include <functional>
+
+namespace core::iface
+{
+	class IResourceManager;
+} // namespace core::iface
 
 namespace platform::window::select
 {
@@ -20,30 +24,32 @@ namespace platform::window::select
 	class FileSelectWindow : public platform::window::WebViewWindowBase
 	{
     public:
-        /**
-         * @brief コンストラクタ
-         * @param x ウィンドウの左上角 X 座標
-         * @param y ウィンドウの左上角 Y 座標
-         * @param width ウィンドウの幅
-         * @param height ウィンドウの高さ
-         */
-        FileSelectWindow(int x, int y, int width, int height) noexcept;
+	  /**
+	   * @brief コンストラクタ
+	   * @param x ウィンドウの左上角 X 座標
+	   * @param y ウィンドウの左上角 Y 座標
+	   * @param width ウィンドウの幅
+	   * @param height ウィンドウの高さ
+	   * @param resourceManager 拡張子ボーナスの説明文生成に使うリソース管理インターフェース
+	   */
+	  FileSelectWindow(int x, int y, int width, int height,
+		  core::iface::IResourceManager& resourceManager) noexcept;
 
-        /// @brief デストラクタ
-        virtual ~FileSelectWindow() noexcept = default;
+	  /// @brief デストラクタ
+	  virtual ~FileSelectWindow() noexcept = default;
 
-        /**
-         * @brief ファイルスロット変更時のコールバック設定
-         * @param callback スロットインデックスとファイルパスを受け取るコールバック関数
-         */
-        void setOnFileSlotChanged(std::function<void(int, const std::string&)> callback) noexcept;
+	  /**
+	   * @brief ファイルスロット変更時のコールバック設定
+	   * @param callback スロットインデックスとファイルパスを受け取るコールバック関数
+	   */
+	  void setOnFileSlotChanged(std::function<void(int, const std::string&)> callback) noexcept;
 
-        /**
-         * @brief ファイルパスを取得
-         * @param slot スロットインデックス（0-2）
-         * @return ファイルパス
-         */
-        std::string getFilePath(int slot) const noexcept;
+	  /**
+	   * @brief ファイルパスを取得
+	   * @param slot スロットインデックス（0-2）
+	   * @return ファイルパス
+	   */
+	  std::string getFilePath(int slot) const noexcept;
 
     protected:
         void onCreateControls(HWND hwnd) override;
@@ -69,6 +75,8 @@ namespace platform::window::select
         static constexpr const char* EXT_TYPE_NAME_UNKNOWN{ "Unknown" };
 
         std::array<std::string, SLOT_COUNT> m_filePaths{};
+		core::iface::IResourceManager& m_resourceManager;
+
 		std::array<core::data::FileExtensionType, SLOT_COUNT> m_extensionTypes{
 			core::data::FileExtensionType::Unknown,
 			core::data::FileExtensionType::Unknown,

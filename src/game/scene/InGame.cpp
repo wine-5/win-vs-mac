@@ -69,7 +69,6 @@
 #include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
 #include "core/interface/IWindowFactory.h"
 #include "game/event/InGameEvents.h"
-#include "game/utility/ExtensionBonusCalculator.h"
 
 /* 標準のインクルード */
 #include <cassert>
@@ -248,9 +247,8 @@ namespace game::scene
 		{
 			if (m_fileEquipmentData.hasSelection(i))
 			{
-				const auto bonus{ utility::ExtensionBonusCalculator::calculate(
-					m_fileEquipmentData.getExtensionType(i)) };
-				m_playerData.applyExtensionBonus(bonus);
+				m_playerData.applyExtensionBonus(
+				    m_resourceManager.getExtensionBonus(m_fileEquipmentData.getExtensionType(i)));
 			}
 		}
 

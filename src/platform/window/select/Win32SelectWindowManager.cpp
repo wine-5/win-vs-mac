@@ -63,13 +63,13 @@ namespace platform::window::select
 		int winY{ originY + marginY };
 
         // FileSelectウィンドウ（中央列 全高）
-        m_fileSelectWindow = std::make_unique<FileSelectWindow>(
-            originX + marginX * 2 + colWidth,
-            winY,
-            colWidth,
-            availH
-        );
-        if (!m_fileSelectWindow->create(m_desktopWindow->getHwnd())) return;
+		m_fileSelectWindow = std::make_unique<FileSelectWindow>(
+		    originX + marginX * 2 + colWidth,
+		    winY,
+		    colWidth,
+		    availH,
+		    m_resourceManager);
+		if (!m_fileSelectWindow->create(m_desktopWindow->getHwnd())) return;
         m_fileSelectWindow->setOnFileSlotChanged([this](int slot, const std::string& path) noexcept {
             if (m_onFileSlotChanged) m_onFileSlotChanged(slot, path);
             if (slot >= 0 && slot < FILE_SLOT_COUNT)
@@ -216,8 +216,8 @@ namespace platform::window::select
         {
             if (!m_slotPaths[i].empty())
             {
-                const auto bonus = game::utility::ExtensionBonusCalculator::calculate(m_slotExtTypes[i]);
-                bonusHp  += bonus.hp;
+				const auto& bonus = m_resourceManager.getExtensionBonus(m_slotExtTypes[i]);
+				bonusHp  += bonus.hp;
                 bonusAtk += bonus.atk;
                 bonusDef += bonus.def;
                 bonusSpd += bonus.spd;

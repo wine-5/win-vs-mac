@@ -2,6 +2,7 @@
 #include <commdlg.h>
 #include <sstream>
 #include "FileSelectWindow.h"
+#include "core/interface/IResourceManager.h"
 #include "platform/window/WindowConstants.h"
 #include "core/interface/ILogger.h"
 #include "thirdparty/nlohmann/json.hpp"
@@ -11,8 +12,10 @@
 
 namespace platform::window::select
 {
-	FileSelectWindow::FileSelectWindow(int x, int y, int width, int height) noexcept
+	FileSelectWindow::FileSelectWindow(int x, int y, int width, int height,
+	    core::iface::IResourceManager& resourceManager) noexcept
 	    : WebViewWindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height)
+	    , m_resourceManager{ resourceManager }
 	{
 	}
 
@@ -153,7 +156,7 @@ namespace platform::window::select
 
 	void FileSelectWindow::sendBonusInfo() noexcept
 	{
-		// ExtensionBonusCalculator の定数から説明文を生成（C++ が正とする）
+		// extensionBonus.json の値から説明文を生成する（C++ が正とする）
 		struct Entry
 		{
 			const char* m_key;
@@ -178,7 +181,7 @@ namespace platform::window::select
 
 		auto describe = [&](core::data::FileExtensionType t) -> std::string
 		{
-			auto b = game::utility::ExtensionBonusCalculator::calculate(t);
+			const auto& b = m_resourceManager.getExtensionBonus(t);
 			std::string result{};
 			auto append = [&](const char* label, float val) {
 				if (val == 0.0f) return;
