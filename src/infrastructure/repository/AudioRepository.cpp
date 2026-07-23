@@ -91,12 +91,6 @@ namespace infrastructure::repository
 			{ "HitEnemy",        core::constant::SeType::HitEnemy        },
 			{ "HitPlayer",       core::constant::SeType::HitPlayer       },
 			{ "DeadEnemy",       core::constant::SeType::DeadEnemy       },
-			{ "DeadPlayer",      core::constant::SeType::DeadPlayer      },
-			{ "Skill",           core::constant::SeType::Skill           },
-			{ "UiClick",         core::constant::SeType::UiClick         },
-			{ "UiHover",         core::constant::SeType::UiHover         },
-			{ "FileSelect",      core::constant::SeType::FileSelect      },
-			{ "SceneTransition", core::constant::SeType::SceneTransition },
 		};
 
 		for (const auto& entry : json["se"])

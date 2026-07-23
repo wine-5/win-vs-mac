@@ -16,14 +16,6 @@ namespace core::constant
         HitEnemy,        // 敵がダメージを受けた（TODO: もしかしたらPlayerの職業ごとに音を変更する可能性あり）
         HitPlayer,       // プレイヤーがダメージを受けた
         DeadEnemy,       // 敵が倒れた
-        DeadPlayer,      // プレイヤーが倒れた
-        Skill,           // スキル発動
-                         
-        // UI関連        
-        UiClick,         // UI クリック
-        UiHover,         // UI ホバー
-        FileSelect,      // ファイル選択
-        SceneTransition, // シーン遷移
 
         // 今後追加したら AudioRepository の typeMap にも追加を忘れないように
     };
