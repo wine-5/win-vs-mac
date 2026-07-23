@@ -1,6 +1,7 @@
 ﻿#include "ModelRepository.h"
 #include <DxLib.h>
 #include <fstream>
+#include <string_view>
 #include <stdexcept>
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
@@ -243,6 +244,15 @@ namespace infrastructure::resource::repository
 			throw std::runtime_error("ファイルを開けませんでした: " + filePath);
 
 		nlohmann::json j = nlohmann::json::parse(file);
+
+		// 必須キーは存在チェックしてからアクセスする。
+		// nlohmann の汎用例外だと「どのファイルのどのキーか」が分からず調査に時間がかかるため
+		for (const auto* required : { "id", "category", "model", "collider" })
+		{
+			if (!j.contains(required))
+				throw std::runtime_error(filePath + ": 必須キー '" + std::string{ required } + "' がありません");
+		}
+
 		core::data::ModelMetadata metadata;
 		metadata.id = j["id"];
 		metadata.category = j["category"];
@@ -305,35 +315,22 @@ namespace infrastructure::resource::repository
 
 		if (j.contains("gameplay"))
 		{
-			auto& gp = j["gameplay"];
-			if (gp.contains("moveSpeed"))
-				metadata.floatProperties["moveSpeed"] = gp["moveSpeed"];
-			if (gp.contains("dashMultiplier"))
-				metadata.floatProperties["dashMultiplier"] = gp["dashMultiplier"];
-			if (gp.contains("detectionRange"))
-				metadata.floatProperties["detectionRange"] = gp["detectionRange"];
-			if (gp.contains("attackRange"))
-				metadata.floatProperties["attackRange"] = gp["attackRange"];
-			if (gp.contains("maxHp"))
-				metadata.floatProperties["maxHp"] = gp["maxHp"];
-			if (gp.contains("defence"))
-				metadata.floatProperties["defence"] = gp["defence"];
-			if (gp.contains("attackPower"))
-				metadata.floatProperties["attackPower"] = gp["attackPower"];
-			if (gp.contains("attackCooldown"))
-				metadata.floatProperties["attackCooldown"] = gp["attackCooldown"];
-			if (gp.contains("attackWindup"))
-				metadata.floatProperties["attackWindup"] = gp["attackWindup"];
-			if (gp.contains("hoverHeight"))
-				metadata.floatProperties["hoverHeight"] = gp["hoverHeight"];
-			if (gp.contains("preferredDistanceMin"))
-				metadata.floatProperties["preferredDistanceMin"] = gp["preferredDistanceMin"];
-			if (gp.contains("preferredDistanceMax"))
-				metadata.floatProperties["preferredDistanceMax"] = gp["preferredDistanceMax"];
-			if (gp.contains("fireCooldown"))
-				metadata.floatProperties["fireCooldown"] = gp["fireCooldown"];
-			if (gp.contains("facingYawOffset"))
-				metadata.floatProperties["facingYawOffset"] = gp["facingYawOffset"];
+			// gameplay配下は「キー名がそのまま floatProperties のキーになる」だけなので、
+			// キーを1箇所の配列で持ち、存在するものだけ取り込む
+			static constexpr std::string_view FLOAT_KEYS[]{
+				"moveSpeed", "dashMultiplier", "detectionRange", "attackRange",
+				"maxHp", "defence", "attackPower", "attackCooldown", "attackWindup",
+				"hoverHeight", "preferredDistanceMin", "preferredDistanceMax",
+				"fireCooldown", "facingYawOffset"
+			};
+
+			const auto& gp = j["gameplay"];
+			for (const auto key : FLOAT_KEYS)
+			{
+				const std::string name{ key };
+				if (gp.contains(name))
+					metadata.floatProperties[name] = gp[name];
+			}
 		}
 
 		// 敵の振る舞いレシピ（積むAI振る舞いの名前リスト）。データの組み合わせで敵を定義するために使う
