@@ -1,3 +1,10 @@
+# 注意: 下の Checks は YAML のブロックスカラーであり、この中に # を書いても
+# コメントにはならずチェック名として解釈される。説明はこの位置に書くこと。
+#
+# -modernize-use-designated-initializers を無効にしている理由:
+#   BiosLine や AnimationClip のように「1行1レコードで列を揃えた表」として
+#   読ませている初期化が多く、designator を付けると縦に伸びて逆に読みにくくなるため。
+#   個々の箇所で明確化したい場合に任意で使うのは妨げない。
 Checks: >
   readability-identifier-naming,
   modernize-*,
@@ -7,6 +14,7 @@ Checks: >
   -modernize-concat-nested-namespaces,
   -modernize-use-nodiscard,
   -modernize-use-equals-default,
+  -modernize-use-designated-initializers,
   modernize-use-default-member-init
 
 CheckOptions:
