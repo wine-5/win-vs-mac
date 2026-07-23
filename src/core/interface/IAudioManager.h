@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "core/constant/BgmType.h"
 #include "core/constant/SeType.h"
 
@@ -34,7 +34,8 @@ namespace core::iface
 
 		/**
 		 * @brief フェード処理など毎フレームの更新処理
+		 * @param deltaTime フレーム間の時間差（秒）
 		 */
-		virtual void update() = 0;
+		virtual void update(float deltaTime) = 0;
 	};
 } // namespace core::iface

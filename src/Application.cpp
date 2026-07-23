@@ -46,7 +46,7 @@ void Application::run()
 
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio)
-			audio->update();
+			audio->update(DELTA_TIME);
 
 		// シーンをまたぐポーズメニュー（Esc）の開閉・操作を処理する
 		updatePauseMenu();
