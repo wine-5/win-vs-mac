@@ -19,15 +19,6 @@ namespace core::constant
         // デフォルトのフォントサイズ比率
         constexpr float DEFAULT_FONT_SIZE_RATIO = FONT_SIZE_NORMAL_RATIO;
 
-        // 後方互換性のためのピクセル値定数（デフォルト値用）
-        constexpr int FONT_SIZE_EXTRA_SMALL = 20;
-        constexpr int FONT_SIZE_SMALL = 28;
-        constexpr int FONT_SIZE_NORMAL = 35;
-        constexpr int FONT_SIZE_LARGE = 56;
-        constexpr int FONT_SIZE_TITLE = 84;
-        constexpr int FONT_SIZE_CLOCK = 126;
-        constexpr int DEFAULT_FONT_SIZE = FONT_SIZE_NORMAL;
-
         // ブレンドモード（DxLib の DX_BLENDMODE_ * と対応）
         constexpr int BLEND_MODE_NONE = 0;
         constexpr int BLEND_MODE_ALPHA = 1;
