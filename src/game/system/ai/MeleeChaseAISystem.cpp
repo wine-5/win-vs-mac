@@ -1,4 +1,4 @@
-#include "MeleeChaseAISystem.h"
+﻿#include "MeleeChaseAISystem.h"
 #include "game/component/ai/MeleeChaseAIComponent.h"
 #include "game/component/ai/PatrolComponent.h"
 #include "game/component/AIComponent.h"
@@ -119,19 +119,16 @@ namespace game::system::ai
 		if (distanceToPlayer > 0.0f)
 			transform.m_rotation.y = std::atan2f(-dirToPlayer.x, -dirToPlayer.z);
 
-		// 攻撃クールダウンを更新
-		if (ai.m_currentAttackCooldown > 0.0f)
-			ai.m_currentAttackCooldown -= deltaTime;
-
-		// 攻撃：レンジ内かつクールダウン完了で攻撃を要求する
+		// 攻撃：レンジ内なら毎フレーム要求だけ出す。
+		// 実際に撃つ間隔はAttackComponentのクールダウンでAttackSystemが管理する
 		bool attacking{ false };
-		if (inAttackRange && ai.m_currentAttackCooldown <= 0.0f &&
-		    m_componentManager.has<component::AttackComponent>(entityId))
+		if (auto* attack{ m_componentManager.tryGet<component::AttackComponent>(entityId) })
 		{
-			auto& attack{ m_componentManager.get<component::AttackComponent>(entityId) };
-			attack.m_attackRequested = true;
-			ai.m_currentAttackCooldown = ai.m_attackCooldown;
-			attacking = true;
+			if (inAttackRange)
+				attack->m_attackRequested = true;
+
+			// 攻撃アニメはAttackSystemが実際に攻撃を開始したフレームだけ要求する
+			attacking = attack->m_justFired;
 		}
 
 		// アニメ要求：攻撃時はAttack1、レンジ内待機はIdle、接近中はWalk

@@ -1,4 +1,4 @@
-#include "AttackSystem.h"
+﻿#include "AttackSystem.h"
 #include "game/component/AttackComponent.h"
 #include "game/component/HealthComponent.h"
 #include "game/component/InputComponent.h"
@@ -32,6 +32,9 @@ namespace game::system
 		for (auto attackerId : attackers)
 		{
 			auto &attack{m_componentManager.get<component::AttackComponent>(attackerId)};
+
+			// 「このフレームで攻撃を開始したか」は毎フレーム作り直す
+			attack.m_justFired = false;
 
 			// クールダウンを更新
 			if (attack.m_currentCooldown > 0.0f)
@@ -76,6 +79,7 @@ namespace game::system
 				continue;
 
 			attack.m_attackRequested = false;
+			attack.m_justFired = true;
 
 			// 攻撃開始時の演出用エフェクト（AttackStartEvent）の発行を絞る：
 			// ・Playerの近接（剣）：Player_Slash を出す。Playerの弾（Window弾）はエフェクト無し

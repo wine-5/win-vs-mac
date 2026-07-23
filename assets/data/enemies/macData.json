@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "enemy_mac",
   "category": "enemy",
   "model": {
@@ -15,7 +15,7 @@
     "maxHp": 500.0,
     "defence": 15.0,
     "attackPower": 35.0,
-    "attackCooldown": 4.0
+    "attackCooldown": 0.0
   },
   "behaviors": [ "boss" ],
   "animations": [

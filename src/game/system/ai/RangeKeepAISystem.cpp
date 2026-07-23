@@ -1,4 +1,4 @@
-#include "RangeKeepAISystem.h"
+﻿#include "RangeKeepAISystem.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/PatrolComponent.h"
 #include "game/component/AIComponent.h"
@@ -188,20 +188,10 @@ namespace game::system::ai
 				                       : constant::AnimationState::Idle;
 			}
 
-			// 攻撃のクールダウンを更新
-			if (ai.m_currentAttackCooldown > 0.0f)
-				ai.m_currentAttackCooldown -= deltaTime;
-
-			// 攻撃判定：索敵範囲内かつクールダウンが完了なら攻撃（レンジ判定なし）
-			if (m_componentManager.has<component::AttackComponent>(entityId))
-			{
-				auto& attack{ m_componentManager.get<component::AttackComponent>(entityId) };
-				if (ai.m_currentAttackCooldown <= 0.0f)
-				{
-					attack.m_attackRequested = true;
-					ai.m_currentAttackCooldown = ai.m_attackCooldown;
-				}
-			}
+			// 攻撃判定：索敵範囲内なら毎フレーム要求だけ出す（レンジ判定なし）。
+			// 実際に撃つ間隔はAttackComponentのクールダウンでAttackSystemが管理する
+			if (auto* attack{ m_componentManager.tryGet<component::AttackComponent>(entityId) })
+				attack->m_attackRequested = true;
 		}
 	}
 	void RangeKeepAISystem::updatePatrol(core::ecs::EntityId entityId, component::ai::RangeKeepAIComponent& rangeKeep,

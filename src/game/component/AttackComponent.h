@@ -19,5 +19,10 @@ namespace game::component
 		float m_windupDelay{ 0.0f };
 		float m_windupTimer{ 0.0f };
 		bool m_windupPending{ false };
+
+		// このフレームでAttackSystemが実際に攻撃を開始したか。
+		// 攻撃間隔の管理はAttackSystem側に一本化しているため、AI Systemが
+		// 「攻撃した瞬間」を知りたい場合（攻撃アニメの要求など）はこれを見る
+		bool m_justFired{ false };
 	};
 } // namespace game::component

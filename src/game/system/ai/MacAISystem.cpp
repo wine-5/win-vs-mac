@@ -334,6 +334,8 @@ namespace game::system::ai
 		return MacState::Nova;
 	}
 
+	// 攻撃間隔はこのFSM（フェーズごとのアクション抽選とロック時間）が唯一の管理者。
+	// そのため macData.json の attackCooldown は 0 にして AttackSystem 側のゲートを効かせない
 	void MacAISystem::performMelee(core::ecs::EntityId entityId)
 	{
 		if (m_componentManager.has<component::AttackComponent>(entityId))

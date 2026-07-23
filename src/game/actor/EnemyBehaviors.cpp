@@ -106,11 +106,6 @@ namespace game::actor
 
 		void installBoss(core::ecs::ComponentManager& cm, core::ecs::EntityId id, const data::EnemyData& enemyData)
 		{
-			// 近接攻撃の発生タイミングはMacAISystemのFSMが管理するため、
-			// AttackComponent側のクールダウンによる二重ゲートを無効化する
-			if (cm.has<component::AttackComponent>(id))
-				cm.get<component::AttackComponent>(id).m_attackCooldown = 0.0f;
-
 			component::ai::MacAIComponent mac{};
 			if (enemyData.getMac().has_value())
 				mac.m_config = enemyData.getMac().value();
