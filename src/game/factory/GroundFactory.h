@@ -35,25 +35,6 @@ namespace game::factory
 		 */
 		core::ecs::EntityId create(int modelHandle, const data::GroundData& groundData);
 
-		/**
-		 * @brief 指定EntityIdのGroundを取得する
-		 * @param id EntityId
-		 * @return Groundオブジェクトのポインタ（見つからない場合nullptr）
-		 */
-		stage::Ground* getGroundById(core::ecs::EntityId id) const;
-
-		/**
-		 * @brief 全てのGroundを取得する
-		 * @return 全Groundのポインタ配列
-		 */
-		std::vector<stage::Ground*> getAllGrounds() const;
-
-		/**
-		 * @brief 生成したGroundの数を取得する
-		 * @return Groundの総数
-		 */
-		size_t getCount() const;
-
 	private:
 		core::ecs::EntityManager& m_entityManager;
 		core::ecs::ComponentManager& m_componentManager;

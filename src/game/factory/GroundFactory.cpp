@@ -26,28 +26,4 @@ namespace game::factory
 		return id;
 	}
 
-	stage::Ground* GroundFactory::getGroundById(core::ecs::EntityId id) const
-	{
-		for (const auto& ground : m_grounds)
-		{
-			if (ground->getId() == id)
-				return ground.get();
-		}
-		return nullptr;
-	}
-
-	std::vector<stage::Ground*> GroundFactory::getAllGrounds() const
-	{
-		std::vector<stage::Ground*> grounds;
-		for (const auto& ground : m_grounds)
-		{
-			grounds.push_back(ground.get());
-		}
-		return grounds;
-	}
-
-	size_t GroundFactory::getCount() const
-	{
-		return m_grounds.size();
-	}
 } // namespace game::factory

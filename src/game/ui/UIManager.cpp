@@ -22,9 +22,4 @@ namespace game::ui
 			element->draw(uiRenderer);
 		}
 	}
-
-	void UIManager::clear()
-	{
-		m_elements.clear();
-	}
 } // namespace game::ui
