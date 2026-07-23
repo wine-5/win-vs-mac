@@ -11,6 +11,7 @@
 #include "game/attack/BaseAttackHandler.h"
 #include "game/attack/DefenseHandler.h"
 #include "core/interface/ILogger.h"
+#include "core/utility/Log.h"
 #include "game/event/InGameEvents.h"
 
 namespace game::system
@@ -190,7 +191,7 @@ namespace game::system
 			health.m_currentHp -= chain.m_damage;
 
 			// 被ダメージのログ（攻撃者・被ダメ者・ダメージ量）
-			// LOG("ダメージ発生: 攻撃者={} 被ダメ者={} ダメージ={:.1f}",
+			// core::log::info("ダメージ発生: 攻撃者={} 被ダメ者={} ダメージ={:.1f}",
 			//     static_cast<unsigned int>(attackerId),
 			//     static_cast<unsigned int>(targetId),
 			//     chain.m_damage);

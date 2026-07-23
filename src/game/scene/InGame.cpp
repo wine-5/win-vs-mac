@@ -2,6 +2,7 @@
 
 /* core層 */
 #include "core/interface/ILogger.h"
+#include "core/utility/Log.h"
 #include "core/interface/IEffectFactory.h"
 #include "core/interface/IAudioManager.h"
 #include "core/interface/IUIRenderer.h"
@@ -153,7 +154,7 @@ namespace game::scene
 		auto playerMeta{ m_resourceManager.getMetadata(constant::model_id::PLAYER) };
 		if (!playerMeta.has_value())
 		{
-			LOG("ERROR: Playerのメタデータが見つかりません");
+			core::log::info("ERROR: Playerのメタデータが見つかりません");
 			throw std::runtime_error("Playerのメタデータの読み込みに失敗しました");
 		}
 		m_playerData = game::data::PlayerData::fromMetadata(playerMeta.value());
@@ -346,7 +347,7 @@ namespace game::scene
 						std::string_view enemyTypeName{ "Unknown" };
 			            if (const auto* type{ m_componentManager.tryGet<component::EnemyTypeComponent>(e.m_entityId) })
 				            enemyTypeName = constant::toEnemyTypeName(type->m_type);
-						LOG("敵を撃破: {} (EntityId={})", enemyTypeName, e.m_entityId);
+			            core::log::info("敵を撃破: {} (EntityId={})", enemyTypeName, e.m_entityId);
 
 			            // モデルはここで非表示にしない。EnemyDeathSystemが赤化＋ディゾルブ演出を
 			            // 進めながら表示し続け、演出完了時にEntityごと破棄する
@@ -380,9 +381,9 @@ namespace game::scene
 		{
 			m_gameManager.toggleDebugMode();
 			if (m_gameManager.isDebugMode())
-				LOG("DEBUG: デバッグモードON");
+				core::log::info("DEBUG: デバッグモードON");
 			else
-				LOG("DEBUG: デバッグモードOFF");
+				core::log::info("DEBUG: デバッグモードOFF");
 		}
 
 		// DEBUG: F2キーでシーンビュー（時間停止＋フリーカメラ）のON/OFFを切り替える（リリース時に削除）
@@ -390,9 +391,9 @@ namespace game::scene
 		{
 			m_pauseManager.toggle(PauseReason::DebugSceneView);
 			if (m_pauseManager.isPausedBy(PauseReason::DebugSceneView))
-				LOG("DEBUG: シーンビューON（時間停止）");
+				core::log::info("DEBUG: シーンビューON（時間停止）");
 			else
-				LOG("DEBUG: シーンビューOFF");
+				core::log::info("DEBUG: シーンビューOFF");
 		}
 
 		// DEBUG: シーンビュー凍結中はゲームロジックを止め、フリーカメラだけを更新する（リリース時に削除）
@@ -412,7 +413,7 @@ namespace game::scene
 		{
 			const auto& transform{ m_componentManager.get<component::TransformComponent>(m_playerId) };
 			m_effectFactory.play(core::constant::EffectType::Enemy_HitWindow, transform.m_position);
-			LOG("エフェクトが再生");
+			core::log::info("エフェクトが再生");
 		}
 
 		// フレーム最後に入力状態を更新

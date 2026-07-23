@@ -1,4 +1,4 @@
-#include "game/actor/EnemyBehaviors.h"
+﻿#include "game/actor/EnemyBehaviors.h"
 #include "game/data/EnemyData.h"
 #include "game/component/AttackComponent.h"
 #include "game/component/AnimationComponent.h"
@@ -11,6 +11,7 @@
 #include "game/constant/AnimationState.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/ILogger.h"
+#include "core/utility/Log.h"
 #include <numbers>
 #include <random>
 #include <string>
@@ -110,7 +111,7 @@ namespace game::actor
 			if (enemyData.getMac().has_value())
 				mac.m_config = enemyData.getMac().value();
 			else
-				LOG_E("boss振る舞いが指定されましたが、mac定義（macData.jsonのmac要素）が見つかりません");
+				core::log::error("boss振る舞いが指定されましたが、mac定義（macData.jsonのmac要素）が見つかりません");
 			cm.add<component::ai::MacAIComponent>(id, mac);
 
 			// 攻撃の予兆（溜め中に地面へ危険範囲を表示）用。MacAISystemが溜め中に書き込む
@@ -132,7 +133,7 @@ namespace game::actor
 			else if (name == "boss")
 				installBoss(componentManager, entityId, enemyData);
 			else
-				LOG_E("未知のbehavior名です: {}", name.c_str());
+				core::log::error("未知のbehavior名です: {}", name.c_str());
 		}
 	}
 

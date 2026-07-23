@@ -4,6 +4,7 @@
 #include "thirdparty/nlohmann/json.hpp"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
+#include "core/utility/Log.h"
 
 namespace infrastructure::repository
 {
@@ -32,14 +33,14 @@ namespace infrastructure::repository
         auto pathIt{ m_paths.find(id) };
         if (pathIt == m_paths.end())
         {
-			LOG_E("画像ID '{}' が見つかりません", id.c_str());
+			core::log::error("画像ID '{}' が見つかりません", id.c_str());
 			return -1;
         }
 
         const int handle{ LoadGraph(pathIt->second.c_str()) };
         if (handle == -1)
         {
-			LOG_E("画像の読み込みに失敗しました: {}", pathIt->second.c_str());
+			core::log::error("画像の読み込みに失敗しました: {}", pathIt->second.c_str());
 			return -1;
         }
 

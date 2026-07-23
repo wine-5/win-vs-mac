@@ -8,6 +8,7 @@
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IStringConverter.h"
 #include "core/interface/ILogger.h"
+#include "core/utility/Log.h"
 #include <algorithm>
 #include <array>
 #include <string>
@@ -87,12 +88,12 @@ namespace game::system
 		// 左のアプリアイコン画像を読み込む。失敗時はアイコンを描かず、ここでエラーを記録する
 		m_iconHandle = resourceManager.loadImageById(ALERT_ICON_IMAGE_ID);
 		if (m_iconHandle == -1)
-			LOG_E("発見演出のアイコン画像 '{}' の読み込みに失敗しました", ALERT_ICON_IMAGE_ID);
+			core::log::error("発見演出のアイコン画像 '{}' の読み込みに失敗しました", ALERT_ICON_IMAGE_ID);
 
 		// 通知バーの背景画像を読み込む。失敗時は角丸矩形で代替する
 		m_barHandle = resourceManager.loadImageById(ALERT_BAR_IMAGE_ID);
 		if (m_barHandle == -1)
-			LOG_E("発見演出の背景バー画像 '{}' の読み込みに失敗しました", ALERT_BAR_IMAGE_ID);
+			core::log::error("発見演出の背景バー画像 '{}' の読み込みに失敗しました", ALERT_BAR_IMAGE_ID);
 
 		m_subscriptions.push_back(m_eventBus.subscribe<event::EnemyAlertedEvent>(
 		    [this](const event::EnemyAlertedEvent& e)

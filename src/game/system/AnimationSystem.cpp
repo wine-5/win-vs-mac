@@ -1,8 +1,9 @@
-#include "AnimationSystem.h"
+﻿#include "AnimationSystem.h"
 #include "game/component/RenderComponent.h"
 #include "game/event/InGameEvents.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
+#include "core/utility/Log.h"
 
 namespace
 {
@@ -80,7 +81,7 @@ namespace game::system
 		auto requestedIt{ anim.m_clips.find(anim.m_requested) };
 		if (requestedIt == anim.m_clips.end())
 		{
-			LOG_E("[Anim] entity={} 未登録の状態 {} が要求されました",
+			core::log::error("[Anim] entity={} 未登録の状態 {} が要求されました",
 			    entityId, constant::toString(anim.m_requested));
 			anim.m_requested = anim.m_current;
 			return;
@@ -113,7 +114,7 @@ namespace game::system
 		auto it{ anim.m_clips.find(newState) };
 		if (it == anim.m_clips.end() || it->second.m_handle == -1)
 		{
-			LOG_E("[Anim] entity={} {} のクリップが未登録またはハンドル無効です",
+			core::log::error("[Anim] entity={} {} のクリップが未登録またはハンドル無効です",
 			    entityId, constant::toString(newState));
 			return;
 		}

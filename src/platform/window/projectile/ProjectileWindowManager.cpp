@@ -1,5 +1,6 @@
-#include "platform/window/projectile/ProjectileWindowManager.h"
+﻿#include "platform/window/projectile/ProjectileWindowManager.h"
 #include "core/interface/ILogger.h"
+#include "core/utility/Log.h"
 #include <string>
 
 #include <objidl.h>
@@ -25,14 +26,14 @@ namespace platform::window::projectile
 		Gdiplus::GdiplusStartupInput startupInput{};
 		if (Gdiplus::GdiplusStartup(&m_gdiplusToken, &startupInput, nullptr) != Gdiplus::Ok)
 		{
-			LOG_E("GDI+の初期化に失敗しました（弾ウィンドウのロゴが描画されません）");
+			core::log::error("GDI+の初期化に失敗しました（弾ウィンドウのロゴが描画されません）");
 			return;
 		}
 
 		auto image{ std::make_unique<Gdiplus::Image>(LOGO_IMAGE_PATH) };
 		if (image->GetLastStatus() != Gdiplus::Ok)
 		{
-			LOG_E("弾ウィンドウのロゴ画像の読み込みに失敗しました: assets/images/ingame/projectile_window.png");
+			core::log::error("弾ウィンドウのロゴ画像の読み込みに失敗しました: assets/images/ingame/projectile_window.png");
 			return;
 		}
 		m_logoImage = std::move(image);
@@ -41,7 +42,7 @@ namespace platform::window::projectile
 		m_titleIcon = static_cast<HICON>(LoadImageW(
 		    nullptr, TITLE_ICON_PATH, IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE));
 		if (m_titleIcon == nullptr)
-			LOG_E("弾ウィンドウのアイコン読み込みに失敗しました: assets/images/ui/icons/projectile_window.ico");
+			core::log::error("弾ウィンドウのアイコン読み込みに失敗しました: assets/images/ui/icons/projectile_window.ico");
 	}
 
 	ProjectileWindowManager::~ProjectileWindowManager()

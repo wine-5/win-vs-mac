@@ -1,6 +1,7 @@
 ﻿#include "Renderer.h"
 #include "DxLib.h"
 #include "core/interface/ILogger.h"
+#include "core/utility/Log.h"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -19,7 +20,7 @@ namespace infrastructure
 	{
 		if (modelHandle == -1)
 		{
-			LOG_E("モデルが読み込まれていません");
+			core::log::error("モデルが読み込まれていません");
 			return;
 		}
 

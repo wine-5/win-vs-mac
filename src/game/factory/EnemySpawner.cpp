@@ -2,6 +2,7 @@
 #include "game/component/EnemyTypeComponent.h"
 #include "FactoryManager.h"
 #include "core/interface/ILogger.h"
+#include "core/utility/Log.h"
 #include "game/component/AIComponent.h"
 #include "game/constant/ModelId.h"
 #include "game/event/InGameEvents.h"
@@ -57,7 +58,7 @@ namespace game::factory
 		auto meta{ m_resourceManager.getMetadata(modelId) };
 		if (!meta.has_value())
 		{
-			LOG("ERROR: 敵メタデータが見つかりません: {}", std::string(modelId).c_str());
+			core::log::info("ERROR: 敵メタデータが見つかりません: {}", std::string(modelId).c_str());
 			throw std::runtime_error("敵メタデータの読み込みに失敗しました");
 		}
 

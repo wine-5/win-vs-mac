@@ -4,6 +4,7 @@
 #include "thirdparty/nlohmann/json.hpp"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
+#include "core/utility/Log.h"
 
 namespace infrastructure::repository
 {
@@ -32,14 +33,14 @@ namespace infrastructure::repository
 		auto pathIt{ m_paths.find(id) };
 		if (pathIt == m_paths.end())
 		{
-			LOG_E("アニメーションID '{}' が見つかりません", id.c_str());
+			core::log::error("アニメーションID '{}' が見つかりません", id.c_str());
 			return -1;
 		}
 
 		const int handle{ MV1LoadModel(pathIt->second.c_str()) };
 		if (handle == -1)
 		{
-			LOG_E("アニメーションの読み込みに失敗しました: {}", pathIt->second.c_str());
+			core::log::error("アニメーションの読み込みに失敗しました: {}", pathIt->second.c_str());
 			return -1;
 		}
 
