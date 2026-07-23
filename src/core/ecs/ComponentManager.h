@@ -40,6 +40,20 @@ namespace core::ecs
 		}
 
 		/**
+		 * @brief EntityのComponentを取得する（持っていなければnullptr）
+		 *
+		 * has()→get() と2回ハッシュ検索する代わりに1回で済ませたい場面で使う。
+		 * @tparam T Componentの型
+		 * @param id EntityID
+		 * @return Componentのポインタ（持っていない場合nullptr）
+		 */
+		template <typename T>
+		[[nodiscard]] T* tryGet(EntityId id)
+		{
+			return getComponentArray<T>()->tryGet(id);
+		}
+
+		/**
 		 * @brief EntityのComponentを削除する
 		 * @tparam T Componentの型
 		 * @param id EntityID

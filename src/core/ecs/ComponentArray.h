@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <cassert>
 #include <unordered_map>
 #include <vector>
 #include "Entity.h"
@@ -25,12 +26,30 @@ namespace core::ecs
 
 		/**
 		 * @brief EntityのComponentを取得する
+		 *
+		 * 持っていないEntityを指定した場合はプログラムの誤りなのでassertで検出する。
+		 * 有無が不定な場面では tryGet() を使うこと。
 		 * @param id EntityID
 		 * @return Componentの参照
 		 */
 		T& get(EntityId id)
 		{
-			return m_component[id];
+			auto it{ m_component.find(id) };
+			assert(it != m_component.end() && "ComponentArray::get(): Entityが該当Componentを持っていません");
+			return it->second;
+		}
+
+		/**
+		 * @brief EntityのComponentを取得する（持っていなければnullptr）
+		 *
+		 * has()→get() の二連ハッシュ検索を1回にまとめる用途にも使う。
+		 * @param id EntityID
+		 * @return Componentのポインタ（持っていない場合nullptr）
+		 */
+		[[nodiscard]] T* tryGet(EntityId id)
+		{
+			auto it{ m_component.find(id) };
+			return it != m_component.end() ? &it->second : nullptr;
 		}
 
 		/**
