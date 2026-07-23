@@ -29,14 +29,14 @@ namespace core::iface
 		 * @param modelId モデルID
 		 * @return メタデータ（存在しない場合nullopt）
 		 */
-		virtual std::optional<core::data::ModelMetadata> getMetadata(const std::string_view modelId) const = 0;
+		[[nodiscard]] virtual std::optional<core::data::ModelMetadata> getMetadata(const std::string_view modelId) const = 0;
 
 		/**
 		 * @brief フォントIDからフォント名を取得する
 		 * @param fontId フォントID
 		 * @return フォントファミリー名（存在しない場合nullopt）
 		 */
-		virtual std::optional<std::string> getFontName(const std::string_view fontId) const = 0;
+		[[nodiscard]] virtual std::optional<std::string> getFontName(const std::string_view fontId) const = 0;
 
 		/**
 		 * @brief 画像IDから画像を読み込みハンドルを返す（キャッシュ付き）
@@ -56,7 +56,7 @@ namespace core::iface
 		 * @brief ステージの配置定義を取得する
 		 * @return ステージ配置定義
 		 */
-		[[nodiscard]] virtual const core::data::StageMetadata& getStageMetadata() const = 0;
+		[[nodiscard]] virtual const core::data::StageMetadata& getStageMetadata() const noexcept = 0;
 
 		/**
 		 * @brief 弾IDから弾定義を取得する
@@ -73,7 +73,7 @@ namespace core::iface
 		 * @param modelHandle 複製元のモデルハンドル
 		 * @return 複製したモデルハンドル、失敗時は-1
 		 */
-		virtual int duplicateModel(int modelHandle) = 0;
+		[[nodiscard]] virtual int duplicateModel(int modelHandle) = 0;
 
 		/**
 		 * @brief モデルにアタッチされている全アニメーションをデタッチする
@@ -94,7 +94,7 @@ namespace core::iface
 		 * @param scale 適用するスケール
 		 * @return 水平方向の外接半径。失敗時は 0.0f
 		 */
-		[[nodiscard]] virtual float computeBoundingRadius(int modelHandle, float scale) const = 0;
+		[[nodiscard]] virtual float computeBoundingRadius(int modelHandle, float scale) const noexcept = 0;
 
 		/**
 		 * @brief モデルのAABB中心（ローカル座標・スケール未適用）を計算する
@@ -104,6 +104,6 @@ namespace core::iface
 		 * @param modelHandle モデルハンドル
 		 * @return AABB中心のローカル座標。失敗時はゼロベクトル
 		 */
-		[[nodiscard]] virtual core::Vector3 computeBoundingCenter(int modelHandle) const = 0;
+		[[nodiscard]] virtual core::Vector3 computeBoundingCenter(int modelHandle) const noexcept = 0;
 	};
 } // namespace core::iface

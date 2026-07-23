@@ -32,14 +32,14 @@ namespace infrastructure
 		 * @param modelId モデルID
 		 * @return メタデータ（存在しない場合nullopt）
 		 */
-		std::optional<core::data::ModelMetadata> getMetadata(const std::string_view modelId) const override;
+		[[nodiscard]] std::optional<core::data::ModelMetadata> getMetadata(const std::string_view modelId) const override;
 
 		/**
 		 * @brief フォントIDからフォント名を取得する
 		 * @param fontId フォントID
 		 * @return フォントファミリー名（存在しない場合nullopt）
 		 */
-		std::optional<std::string> getFontName(const std::string_view fontId) const override;
+		[[nodiscard]] std::optional<std::string> getFontName(const std::string_view fontId) const override;
 
 		/**
 		 * @brief 画像IDから画像を読み込みハンドルを返す（キャッシュ付き）
@@ -59,7 +59,7 @@ namespace infrastructure
 		 * @brief ステージの配置定義を取得する
 		 * @return ステージ配置定義
 		 */
-		[[nodiscard]] const core::data::StageMetadata& getStageMetadata() const override;
+		[[nodiscard]] const core::data::StageMetadata& getStageMetadata() const noexcept override;
 
 		/**
 		 * @brief 弾IDから弾定義を取得する
@@ -73,7 +73,7 @@ namespace infrastructure
 		 * @param modelHandle 複製元のモデルハンドル
 		 * @return 複製したモデルハンドル、失敗時は-1
 		 */
-		int duplicateModel(int modelHandle) override;
+		[[nodiscard]] int duplicateModel(int modelHandle) override;
 
 		/**
 		 * @brief モデルにアタッチされている全アニメーションをデタッチする
@@ -87,9 +87,9 @@ namespace infrastructure
 		 * @param scale 適用するスケール
 		 * @return 水平方向の外接半径。失敗時は 0.0f
 		 */
-		[[nodiscard]] float computeBoundingRadius(int modelHandle, float scale) const override;
+		[[nodiscard]] float computeBoundingRadius(int modelHandle, float scale) const noexcept override;
 
-		[[nodiscard]] core::Vector3 computeBoundingCenter(int modelHandle) const override;
+		[[nodiscard]] core::Vector3 computeBoundingCenter(int modelHandle) const noexcept override;
 
 	  private:
 		std::unique_ptr<repository::ModelRepository> m_modelRepo;
