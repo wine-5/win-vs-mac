@@ -52,26 +52,6 @@ namespace core::base
 		}
 
 		/**
-		 * @brief 既存のサービスインスタンスを登録する（所有権は持たない）
-		 * @tparam TInterface インターフェース型（キーとして使用）
-		 * @tparam TImpl 実装型のポインタ
-		 * @param service 既存のサービスインスタンスへのポインタ
-		 *
-		 * 注：ServiceLocatorは所有権を持たず、参照するだけ。
-		 * インスタンスのライフサイクルは登録元が管理する。
-		 */
-		template<typename TInterface, typename TImpl>
-		static void provideExisting(TImpl* service)
-		{
-			auto key{std::type_index(typeid(TInterface))};
-			// デリータを空にして、削除時にインスタンスを破棄しない
-			m_services[key] = std::shared_ptr<void>(
-				static_cast<void*>(static_cast<TInterface*>(service)),
-				[](void*) {}  // 削除しない（インスタンスの所有権を持たないため）
-			);
-		}
-
-		/**
 		 * @brief 全てのサービスをクリアする
 		 */
 		static void clear()
