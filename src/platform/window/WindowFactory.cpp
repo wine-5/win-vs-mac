@@ -58,13 +58,11 @@ namespace platform::window
 
     std::unique_ptr<core::iface::ISelectWindowManager> WindowFactory::createSelectWindowManager(
         std::function<void()> onGameStart,
-        std::function<void(core::constant::JobType)> onJobSelect,
         std::function<void(int, const std::string&)> onFileSlotChanged,
         core::iface::IResourceManager& resourceManager)
     {
         return std::make_unique<select::Win32SelectWindowManager>(
             std::move(onGameStart),
-            std::move(onJobSelect),
             std::move(onFileSlotChanged),
             resourceManager,
             m_screen);

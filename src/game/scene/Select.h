@@ -5,7 +5,6 @@
 #include "core/interface/IScreen.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/ISelectWindowManager.h"
-#include "core/constant/JobType.h"
 #include <memory>
 
 namespace game::scene
@@ -54,12 +53,6 @@ namespace game::scene
 		 * @brief ゲーム開始通知（Windowからのコールバック用）
 		 */
 		void notifyGameStart() noexcept;
-
-		/**
-		 * @brief 職業選択通知（Windowからのコールバック用）
-		 * @param jobType 選択された職業タイプ
-		 */
-		void notifyJobSelected(core::constant::JobType jobType) noexcept;
 
 	  private:
 		enum class State

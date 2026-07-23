@@ -82,11 +82,6 @@ namespace game::scene
 			auto windowManager = windowFactory->createSelectWindowManager(
 			    [selectPtr = m_selectScene.get()]()
 			    { selectPtr->notifyGameStart(); },
-			    [this, selectPtr = m_selectScene.get()](core::constant::JobType jt)
-			    {
-				    m_gameManager.getJobSelectionData().setSelectedJobType(jt);
-				    selectPtr->notifyJobSelected(jt);
-			    },
 			    [this](int slot, const std::string& path)
 			    {
 				    m_gameManager.getFileEquipmentData().setFilePath(slot, path);

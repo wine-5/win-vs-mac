@@ -8,7 +8,6 @@
 #include "core/interface/IScreen.h"
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
-#include "core/constant/JobType.h"
 #include "core/constant/SeType.h"
 #include "core/data/ResultData.h"
 /* game層 */

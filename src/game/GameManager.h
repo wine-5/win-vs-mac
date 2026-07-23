@@ -1,6 +1,5 @@
 #pragma once
 #include "game/data/FileEquipmentData.h"
-#include "game/data/JobSelectionData.h"
 #include "core/base/NonCopyable.h"
 #include "core/data/ResultData.h"
 
@@ -21,15 +20,6 @@ namespace game
         [[nodiscard]] data::FileEquipmentData& getFileEquipmentData() noexcept
         {
             return m_fileEquipmentData;
-        }
-
-        /**
-         * @brief JobSelectionData への参照を返す
-         * @return JobSelectionData の参照
-         */
-        [[nodiscard]] data::JobSelectionData& getJobSelectionData() noexcept
-        {
-            return m_jobSelectionData;
         }
 
         /**
@@ -79,7 +69,6 @@ namespace game
     private:
 
         data::FileEquipmentData m_fileEquipmentData{};
-        data::JobSelectionData m_jobSelectionData{};
         core::data::ResultData m_resultData{};
 
 		// DEBUG: デバッグモードの状態（リリース時に削除）

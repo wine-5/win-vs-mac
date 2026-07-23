@@ -89,18 +89,9 @@ namespace game::scene
 
 	void Select::notifyGameStart() noexcept
 	{
-		if (!m_windowManager || !m_windowManager->isJobSelected())
-		{
-			m_windowManager->showWarningMessage("職業を選択してからスタートしてください。");
+		if (!m_windowManager)
 			return;
-		}
 		startFadeOut();
-	}
-
-	void Select::notifyJobSelected(core::constant::JobType jobType) noexcept
-	{
-		if (m_windowManager)
-			m_windowManager->updateParameterWindowForJob(jobType);
 	}
 
 } // namespace game::scene
