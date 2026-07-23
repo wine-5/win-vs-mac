@@ -90,31 +90,14 @@ namespace game::system::camera
 			constexpr float CINEMATIC_DISTANCE{ 420.0f }; // 注視先からカメラまでの距離（寄りの強さ）
 
 			// カメラ位置→注視先の方向（正規化）。ゼロ距離なら方向は作れないため寄りをスキップする
-			core::Vector3 toTarget{
-				cinematicTarget.x - cameraPos.x,
-				cinematicTarget.y - cameraPos.y,
-				cinematicTarget.z - cameraPos.z
-			};
-			const float toTargetLen{ std::sqrt(toTarget.x * toTarget.x + toTarget.y * toTarget.y + toTarget.z * toTarget.z) };
-			if (toTargetLen > 0.0f)
+			const core::Vector3 toTarget{ cinematicTarget - cameraPos };
+			if (toTarget.lengthSq() > 0.0f)
 			{
-				toTarget.x /= toTargetLen;
-				toTarget.y /= toTargetLen;
-				toTarget.z /= toTargetLen;
-
 				// 寄り切ったときのカメラ位置＝注視先の手前（今のカメラ方向から寄る）
-				const core::Vector3 closePos{
-					cinematicTarget.x - toTarget.x * CINEMATIC_DISTANCE,
-					cinematicTarget.y - toTarget.y * CINEMATIC_DISTANCE,
-					cinematicTarget.z - toTarget.z * CINEMATIC_DISTANCE
-				};
+				const core::Vector3 closePos{ cinematicTarget - toTarget.normalized() * CINEMATIC_DISTANCE };
 
-				cameraPos.x += (closePos.x - cameraPos.x) * cinematicBlend;
-				cameraPos.y += (closePos.y - cameraPos.y) * cinematicBlend;
-				cameraPos.z += (closePos.z - cameraPos.z) * cinematicBlend;
-				lookTarget.x += (cinematicTarget.x - lookTarget.x) * cinematicBlend;
-				lookTarget.y += (cinematicTarget.y - lookTarget.y) * cinematicBlend;
-				lookTarget.z += (cinematicTarget.z - lookTarget.z) * cinematicBlend;
+				cameraPos += (closePos - cameraPos) * cinematicBlend;
+				lookTarget += (cinematicTarget - lookTarget) * cinematicBlend;
 			}
 		}
 

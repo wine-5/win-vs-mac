@@ -93,12 +93,8 @@ namespace game::system::ai
 			auto& targetTransform{ m_componentManager.get<component::movement::TransformComponent>(ai.m_targetEntity.getId()) };
 
 			// ターゲットへの方向ベクトルを計算（3D全軸）
-			core::Vector3 direction{};
-			direction.x = targetTransform.m_position.x - transform.m_position.x;
-			direction.y = targetTransform.m_position.y - transform.m_position.y;
-			direction.z = targetTransform.m_position.z - transform.m_position.z;
-
-			float distance{ std::sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z) };
+			core::Vector3 direction{ targetTransform.m_position - transform.m_position };
+			float distance{ direction.length() };
 
 			// 索敵範囲外なら攻撃・追跡はせず、ホーム周辺をふらつく徘徊に切り替える（その場で固まらせない）
 			if (distance > ai.m_detectionRange)
@@ -109,20 +105,14 @@ namespace game::system::ai
 
 			// 方向ベクトルを正規化
 			if (distance > 0.0f)
-			{
-				direction.x /= distance;
-				direction.y /= distance;
-				direction.z /= distance;
-			}
+				direction = direction.normalized();
 
 			// 距離維持ロジック：推奨距離の帯に入るよう前後方向（ラジアル成分）を決める
 			core::Vector3 moveDirection{ 0.0f, 0.0f, 0.0f };
 			if (distance < rangeKeep.m_preferredDistanceMin)
 			{
 				// 近すぎたら後退
-				moveDirection.x = -direction.x;
-				moveDirection.y = -direction.y;
-				moveDirection.z = -direction.z;
+				moveDirection = -direction;
 			}
 			else if (distance > rangeKeep.m_preferredDistanceMax)
 			{

@@ -1,4 +1,4 @@
-#include "EnemyRangedAttackSystem.h"
+﻿#include "EnemyRangedAttackSystem.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/AIComponent.h"
 #include "game/component/movement/TransformComponent.h"
@@ -72,12 +72,12 @@ namespace game::system::ai
 			if (ai.m_isActive && ai.m_targetEntity.getId() != 0)
 			{
 				const auto& targetTransform{ m_componentManager.get<component::movement::TransformComponent>(ai.m_targetEntity.getId()) };
-				direction = {
-					targetTransform.m_position.x - transform.m_position.x,
-					(targetTransform.m_position.y + AIM_TARGET_HEIGHT) - transform.m_position.y,
-					targetTransform.m_position.z - transform.m_position.z
-				};
-				distance = std::sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+				direction = core::Vector3{
+					targetTransform.m_position.x,
+					targetTransform.m_position.y + AIM_TARGET_HEIGHT,
+					targetTransform.m_position.z
+				} - transform.m_position;
+				distance = direction.length();
 				inRange = (distance <= ai.m_detectionRange);
 			}
 
@@ -88,13 +88,7 @@ namespace game::system::ai
 			if (!inRange || rangeKeep.m_currentFireCooldown > 0.0f)
 				continue;
 
-			// 方向ベクトルを正規化
-			if (distance > 0.0f)
-			{
-				direction.x /= distance;
-				direction.y /= distance;
-				direction.z /= distance;
-			}
+			direction = direction.normalized();
 
 			// 発射源より少し前方から出す（発射者自身への即着弾を避ける）
 			core::Vector3 origin{

@@ -196,12 +196,7 @@ namespace game::scene
 			const auto& projectile{ m_componentManager.get<component::combat::ProjectileComponent>(id) };
 
 			// 発射地点からの移動距離に応じてタンブルさせる（状態を持たず距離から導出する）
-			const core::Vector3 traveled{
-				transform.m_position.x - projectile.m_spawnPosition.x,
-				transform.m_position.y - projectile.m_spawnPosition.y,
-				transform.m_position.z - projectile.m_spawnPosition.z
-			};
-			const float distance{ std::sqrt(traveled.x * traveled.x + traveled.y * traveled.y + traveled.z * traveled.z) };
+			const float distance{ (transform.m_position - projectile.m_spawnPosition).length() };
 			const float tumble{ distance * TUMBLE_PER_UNIT };
 
 			if (projectile.m_spinRollSpeed > 0.0f)
