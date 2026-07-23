@@ -80,6 +80,85 @@
 #include <string_view>
 #include <utility>
 
+namespace
+{
+	/**
+	 * @brief 弾の当たり判定半径を決める
+	 *
+	 * projectileData.json の radius が 0 ならモデル実寸から自動計算し、0以外ならその値を使う。
+	 * @param resourceManager リソース管理インターフェース
+	 * @param meta 弾のメタデータ
+	 * @param modelHandle 弾のモデルハンドル
+	 * @return 当たり判定半径
+	 */
+	float resolveProjectileRadius(core::iface::IResourceManager& resourceManager,
+	    const core::data::ProjectileMetadata& meta, int modelHandle)
+	{
+		return meta.m_radius > 0.0f
+		           ? meta.m_radius
+		           : resourceManager.computeBoundingRadius(modelHandle, meta.m_scale);
+	}
+
+	/** @brief Safariが投げるタブ弾の見た目一式 */
+	struct TabProjectileSetup
+	{
+		core::data::ProjectileMetadata m_meta{};
+		std::vector<game::system::ai::RangedProjectileVisual> m_visuals{};
+	};
+
+	/**
+	 * @brief タブ弾（3種ランダム）のモデルと当たり判定半径を解決する
+	 * @param resourceManager リソース管理インターフェース
+	 * @return 解決済みのメタデータと見た目一覧
+	 */
+	TabProjectileSetup buildTabProjectileSetup(core::iface::IResourceManager& resourceManager)
+	{
+		using namespace game::constant;
+
+		TabProjectileSetup setup{};
+		setup.m_meta = resourceManager.getProjectileMetadata(projectile_id::ENEMY_SAFARI_TAB);
+
+		constexpr std::array<std::string_view, 3> TAB_MODEL_IDS{
+			model_id::TAB_STORAGE_FULL,
+			model_id::TAB_SAFARI_ERROR,
+			model_id::TAB_XCODE_BUILDING
+		};
+
+		setup.m_visuals.reserve(TAB_MODEL_IDS.size());
+		for (const auto modelId : TAB_MODEL_IDS)
+		{
+			const int handle{ resourceManager.loadModelById(modelId) };
+			setup.m_visuals.push_back({ handle, resolveProjectileRadius(resourceManager, setup.m_meta, handle) });
+		}
+		return setup;
+	}
+
+	/** @brief ボスが投げるレインボー弾の見た目一式 */
+	struct RainbowSetup
+	{
+		core::data::ProjectileMetadata m_meta{};
+		int m_handle{ -1 };
+		float m_radius{ 0.0f };
+		core::Vector3 m_center{};
+	};
+
+	/**
+	 * @brief レインボー弾のモデル・半径・見た目中心を解決する
+	 * @param resourceManager リソース管理インターフェース
+	 * @return 解決済みの設定
+	 */
+	RainbowSetup buildRainbowSetup(core::iface::IResourceManager& resourceManager)
+	{
+		RainbowSetup setup{};
+		setup.m_meta = resourceManager.getProjectileMetadata(game::constant::projectile_id::MAC_RAINBOW);
+		setup.m_handle = resourceManager.loadModelById(game::constant::model_id::MAC_RAINBOW_WHEEL);
+		setup.m_radius = resolveProjectileRadius(resourceManager, setup.m_meta, setup.m_handle);
+		// モデル原点が見た目の中心とズレていると回転で円軌道を描くため、中心を求めて逆補正する
+		setup.m_center = resourceManager.computeBoundingCenter(setup.m_handle);
+		return setup;
+	}
+} // namespace
+
 namespace game::scene
 {
 	InGame::InGame(core::iface::ICamera& camera,
@@ -241,39 +320,16 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::ai::MeleeChaseAISystem>(m_componentManager);
 		// AI行動分割：遠距離維持型敵を駆動
 		m_systemManager.registerSystem<game::system::ai::RangeKeepAISystem>(m_componentManager);
-		// 遠距離維持型敵の弾発射（Safariのタブ投擲）。見た目は3種のタブモデルからランダムに選ぶ。
-		// 当たり判定半径は projectileData.json の radius が 0 ならモデル実寸から自動計算、0以外なら手動指定
-		const auto& tabProjectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::ENEMY_SAFARI_TAB) };
-		const std::array<std::string_view, 3> tabModelIds{
-			constant::model_id::TAB_STORAGE_FULL,
-			constant::model_id::TAB_SAFARI_ERROR,
-			constant::model_id::TAB_XCODE_BUILDING
-		};
-		std::vector<game::system::ai::RangedProjectileVisual> tabVisuals{};
-		for (const auto tabModelId : tabModelIds)
-		{
-			const int handle{ m_resourceManager.loadModelById(tabModelId) };
-			const float radius{ tabProjectileMeta.m_radius > 0.0f
-				                    ? tabProjectileMeta.m_radius
-				                    : m_resourceManager.computeBoundingRadius(handle, tabProjectileMeta.m_scale) };
-			tabVisuals.push_back({ handle, radius });
-		}
+		// 遠距離維持型敵の弾発射（Safariのタブ投擲）。見た目は3種のタブモデルからランダムに選ぶ
+		auto tabSetup{ buildTabProjectileSetup(m_resourceManager) };
 		m_systemManager.registerSystem<game::system::ai::EnemyRangedAttackSystem>(
-		    m_componentManager, m_projectileFactory, tabProjectileMeta, std::move(tabVisuals));
+		    m_componentManager, m_projectileFactory, tabSetup.m_meta, std::move(tabSetup.m_visuals));
 
-		// ボス（Mac）のFSM駆動。遠距離はレインボー弾を扇状に、召喚はEnemySpawner経由で行う。
-		// レインボーの当たり判定半径は projectileData.json の radius が 0 ならモデル実寸から自動計算
-		const auto& rainbowMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::MAC_RAINBOW) };
-		const int rainbowHandle{ m_resourceManager.loadModelById(constant::model_id::MAC_RAINBOW_WHEEL) };
-		const float rainbowRadius{ rainbowMeta.m_radius > 0.0f
-			                           ? rainbowMeta.m_radius
-			                           : m_resourceManager.computeBoundingRadius(rainbowHandle, rainbowMeta.m_scale) };
-		// モデル原点が見た目の中心とズレていると回転で円軌道を描くため、中心を求めて逆補正する
-		const core::Vector3 rainbowCenter{ m_resourceManager.computeBoundingCenter(rainbowHandle) };
-
+		// ボス（Mac）のFSM駆動。遠距離はレインボー弾を扇状に、召喚はEnemySpawner経由で行う
+		const auto rainbow{ buildRainbowSetup(m_resourceManager) };
 		m_systemManager.registerSystem<game::system::ai::MacAISystem>(
 		    m_componentManager, m_eventBus, m_projectileFactory, m_enemySpawner,
-		    rainbowMeta, rainbowHandle, rainbowRadius, rainbowCenter);
+		    rainbow.m_meta, rainbow.m_handle, rainbow.m_radius, rainbow.m_center);
 
 		// 敵がプレイヤーを発見した瞬間を検知（全敵共通）。発見演出のトリガーになる
 		m_systemManager.registerSystem<game::system::ai::DetectionSystem>(m_componentManager, m_eventBus);
