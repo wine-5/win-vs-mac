@@ -1,0 +1,10 @@
+{
+  "bonuses": {
+    "executable": { "atk": 10.0 },
+    "document":   { "spd": 1.5 },
+    "image":      { "def": 8.0 },
+    "audio":      { "hp": 20.0 },
+    "archive":    { "atk": 3.0, "spd": 0.5, "def": 3.0, "hp": 5.0, "attackRange": 0.5 },
+    "unknown":    { "attackRange": 20.0 }
+  }
+}

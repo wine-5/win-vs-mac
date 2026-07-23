@@ -218,6 +218,7 @@
     <ClCompile Include="src\game\system\movement\MoveSystem.cpp" />
     <ClCompile Include="src\game\system\movement\PhysicsSystem.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageRepository.cpp" />
+    <ClCompile Include="src\infrastructure\resource\repository\ExtensionBonusRepository.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\ProjectileRepository.cpp" />
     <ClCompile Include="src\infrastructure\graphics\UIRenderer.cpp" />
     <ClCompile Include="src\Main.cpp" />
@@ -375,7 +376,6 @@
     <ClInclude Include="src\game\component\combat\DeathComponent.h" />
     <ClInclude Include="src\game\component\ai\AlertComponent.h" />
     <ClInclude Include="src\game\ui\FadeTransition.h" />
-    <ClInclude Include="src\game\utility\ExtensionBonusCalculator.h" />
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
     <ClInclude Include="src\infrastructure\AudioManager.h" />
     <ClInclude Include="src\infrastructure\effect\EffectFactory.h" />
@@ -386,6 +386,7 @@
     <ClInclude Include="src\infrastructure\resource\repository\ModelRepository.h" />
     <ClInclude Include="src\infrastructure\resource\repository\AnimationRepository.h" />
     <ClInclude Include="src\infrastructure\resource\repository\StageRepository.h" />
+    <ClInclude Include="src\infrastructure\resource\repository\ExtensionBonusRepository.h" />
     <ClInclude Include="src\infrastructure\resource\repository\ProjectileRepository.h" />
     <ClInclude Include="src\game\constant\ProjectileId.h" />
     <ClInclude Include="src\infrastructure\graphics\Screen.h" />
