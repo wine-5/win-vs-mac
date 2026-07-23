@@ -1,9 +1,6 @@
 #include <windows.h>
 #include "ResultWindow.h"
 #include "thirdparty/nlohmann/json.hpp"
-#include "core/base/ServiceLocator.h"
-#include "game/scene/SceneManager.h"
-#include "game/scene/SceneType.h"
 
 namespace platform::window::result
 {
