@@ -163,15 +163,6 @@ namespace game::scene
 	{
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
 
-		// 職業パラメータをPlayerDataに反映
-		const auto& jobSelectionData{ m_gameManager.getJobSelectionData() };
-		if (jobSelectionData.hasJobSelected())
-		{
-			const auto jobType{ jobSelectionData.getSelectedJobType() };
-			const auto jobInfo{ m_resourceManager.getJobInfo(jobType) };
-			m_playerData.applyJobParameters(jobInfo.m_hp, jobInfo.m_atk, jobInfo.m_def, jobInfo.m_spd);
-		}
-
 		// 拡張子ボーナスをPlayerDataに反映
 		for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
 		{
@@ -286,19 +277,8 @@ namespace game::scene
 		// 敵がプレイヤーを発見した瞬間を検知（全敵共通）。発見演出のトリガーになる
 		m_systemManager.registerSystem<game::system::ai::DetectionSystem>(m_componentManager, m_eventBus);
 
-		// ジョブに応じた攻撃SEタイプを決定してAttackSystemに渡す
-		core::constant::SeType playerAttackSeType{ core::constant::SeType::None };
-		const auto& jobData{ m_gameManager.getJobSelectionData() };
-		if (jobData.hasJobSelected())
-		{
-			switch (jobData.getSelectedJobType())
-			{
-			case core::constant::JobType::Warrior: playerAttackSeType = core::constant::SeType::AttackWarrior; break;
-			case core::constant::JobType::Mage:    playerAttackSeType = core::constant::SeType::AttackFire;    break;
-			case core::constant::JobType::Ninja:   playerAttackSeType = core::constant::SeType::AttackNinja;   break;
-			}
-		}
-		m_systemManager.registerSystem<game::system::AttackSystem>(m_componentManager, m_eventBus, playerAttackSeType);
+		m_systemManager.registerSystem<game::system::AttackSystem>(
+		    m_componentManager, m_eventBus, core::constant::SeType::AttackPlayer);
 		m_systemManager.registerSystem<game::system::HitEffectSystem>(m_componentManager, m_eventBus);
 		// 死亡した敵の後始末（赤化＋ディゾルブ演出→Entity破棄＋モデルハンドルのプール返却）
 		m_systemManager.registerSystem<game::system::EnemyDeathSystem>(m_componentManager, m_entityManager, m_eventBus, m_enemySpawner, m_renderer);

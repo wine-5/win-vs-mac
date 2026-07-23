@@ -108,28 +108,6 @@ namespace game::data
 			m_attackRange += bonus.attackRange;
 		}
 
-		/**
-		 * @brief 職業パラメータを加算値として適用する
-		 * @param hp 職業HP値
-		 * @param atk 職業攻撃力
-		 * @param def 職業防御力
-		 * @param spd 職業移動速度
-		 */
-		void applyJobParameters(float hp, float atk, float def, float spd) noexcept
-		{
-			// 職業パラメータを加算値として保存
-			m_jobHpAddition = hp - m_baseHp;
-			m_jobAtkAddition = atk - m_baseAtk;
-			m_jobDefAddition = def - m_baseDef;
-			m_jobSpdAddition = spd - m_baseSpd;
-
-			// 実際の値を更新
-			m_maxHp = m_baseHp + m_jobHpAddition;
-			m_attackPower = m_baseAtk + m_jobAtkAddition;
-			m_defence = m_baseDef + m_jobDefAddition;
-			m_moveSpeed = m_baseSpd + m_jobSpdAddition;
-		}
-
 	private:
 		float         m_moveSpeed{ 0.0f };
 		float m_dashMultiplier{ 1.0f }; // JSON未設定時はダッシュしても等速
@@ -142,16 +120,10 @@ namespace game::data
 		core::Vector3 m_colliderOffset;
 		core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
 
-		// 基本値（メタデータから取得）
+		// 基本値（メタデータから取得。拡張子ボーナス適用前の素の値）
 		float m_baseHp{ 0.0f };
 		float m_baseAtk{ 0.0f };
 		float m_baseDef{ 0.0f };
 		float m_baseSpd{ 0.0f };
-
-		// 加算値（職業選択で加算）
-		float m_jobHpAddition{ 0.0f };
-		float m_jobAtkAddition{ 0.0f };
-		float m_jobDefAddition{ 0.0f };
-		float m_jobSpdAddition{ 0.0f };
 	};
 } // namespace game::data
