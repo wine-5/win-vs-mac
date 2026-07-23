@@ -260,7 +260,7 @@ namespace game::scene
 		// プレイヤー専用コンポーネント（CameraComponent、AimComponent、PlayerChargeComponent）
 		// は Player.cpp のコンストラクタで初期化済
 
-		m_groundId = initializer.initializeGround();
+		initializer.initializeGround();
 
 		// 生成される敵の追跡対象をプレイヤーに設定してからスポーンする
 		m_enemySpawner.setTargetEntity(core::ecs::Entity(m_playerId));
@@ -480,7 +480,7 @@ namespace game::scene
 	{
 		// 描画は InGameView へ委譲する。ボスが召喚する雑魚も実行時に増えるため、
 		// スポーン時のスナップショットではなく EnemyFactory が持つ最新の敵一覧を渡す
-		m_view.draw(m_playerId, m_groundId, m_factoryManager.getEnemyFactory().getEnemyIds());
+		m_view.draw(m_playerId);
 	}
 
 	void InGame::saveResultData	(bool isVictory) noexcept

@@ -4,6 +4,8 @@
 #include "game/component/visual/RenderComponent.h"
 #include "game/component/combat/AimComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
+#include "game/component/combat/DeathComponent.h"
+#include "game/component/ai/AIComponent.h"
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
 #include "game/system/visual/PlayerChargeVisualsSystem.h"
@@ -30,11 +32,9 @@ namespace game::scene
 	{
 	}
 
-	void InGameView::draw(core::ecs::EntityId playerId,
-	    core::ecs::EntityId groundId,
-	    const std::vector<core::ecs::EntityId>& enemyIds)
+	void InGameView::draw(core::ecs::EntityId playerId)
 	{
-		drawModels(playerId, groundId, enemyIds);
+		drawModels();
 
 		// 攻撃予兆（地面の攻撃範囲サークル）。地面の上・敵の足元に3Dで描く（3D描画フェーズ）
 		if (m_attackTelegraphSystem)
@@ -68,8 +68,10 @@ namespace game::scene
 		drawReticle(playerId);
 
 		// DEBUG: デバッグHUD（FPS等の統計・カメラ状態ラベル）（リリース時に削除）
+		// 敵数はAIComponentを持つEntity数から数える（IDリストを引き回さない）
 		if (m_debugHUDView)
-			m_debugHUDView->draw(static_cast<int>(enemyIds.size()));
+			m_debugHUDView->draw(
+			    static_cast<int>(m_componentManager.getAllEntities<component::ai::AIComponent>().size()));
 
 		// Effekseerエフェクトの描画（3Dモデル描画後・UI手前に呼び出す）
 		m_effectFactory.draw();
@@ -110,26 +112,35 @@ namespace game::scene
 		m_debugHUDView = view;
 	}
 
-	void InGameView::drawModels(core::ecs::EntityId playerId,
-	    core::ecs::EntityId groundId,
-	    const std::vector<core::ecs::EntityId>& enemyIds)
+	void InGameView::drawModels()
 	{
-		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(playerId) };
-		const auto& render{ m_componentManager.get<component::visual::RenderComponent>(playerId) };
-		const auto& groundTransform{ m_componentManager.get<component::movement::TransformComponent>(groundId) };
-		const auto& groundRender{ m_componentManager.get<component::visual::RenderComponent>(groundId) };
+		// RenderComponentを持つEntityを一律に描く。
+		// プレイヤー・地面・敵をIDで名指ししないため、描画対象が増えてもここは変わらない。
+		//
+		// ただし2パスに分けている。死亡ディゾルブ中の敵は半透明合成で描かれ、
+		// 半透明はZバッファがあっても描画順に依存するため、不透明を全て描いた後に回す。
+		const auto entities{ m_componentManager.getAllEntities<component::visual::RenderComponent>() };
 
-		if (render.m_isVisible)
-			m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
-
-		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
-
-		for (auto enemyId : enemyIds)
+		for (const bool dissolvingPass : { false, true })
 		{
-			const auto& enemyRender{ m_componentManager.get<component::visual::RenderComponent>(enemyId) };
-			const auto& enemyTransform{ m_componentManager.get<component::movement::TransformComponent>(enemyId) };
-			if (enemyRender.m_isVisible)
-				m_renderer.drawModel(enemyRender.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
+			for (const auto entityId : entities)
+			{
+				const auto& render{ m_componentManager.get<component::visual::RenderComponent>(entityId) };
+				if (!render.m_isVisible || render.m_modelHandle == -1)
+					continue;
+
+				// 弾は回転・向きの扱いが特殊なため drawProjectileModels が専用に描く
+				if (m_componentManager.has<component::combat::ProjectileComponent>(entityId))
+					continue;
+
+				// 死亡演出中（＝半透明）かどうかで描くパスを振り分ける
+				const bool isDissolving{ m_componentManager.has<component::combat::DeathComponent>(entityId) };
+				if (isDissolving != dissolvingPass)
+					continue;
+
+				const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
+				m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
+			}
 		}
 	}
 

@@ -50,13 +50,12 @@ namespace game::scene
 
 		/**
 		 * @brief インゲームを描画する
+		 *
+		 * モデルはRenderComponentの全走査で描くため、描画対象のIDは受け取らない。
+		 * playerIdはレティクル（照準状態の表示）にのみ使う
 		 * @param playerId プレイヤーのEntityID
-		 * @param groundId 地面のEntityID
-		 * @param enemyIds 敵のEntityID一覧
 		 */
-		void draw(core::ecs::EntityId playerId,
-		    core::ecs::EntityId groundId,
-		    const std::vector<core::ecs::EntityId>& enemyIds);
+		void draw(core::ecs::EntityId playerId);
 
 		/**
 		 * @brief 溜め攻撃の演出System（集中線の描画元）を設定する
@@ -102,11 +101,12 @@ namespace game::scene
 
 	  private:
 		/**
-		 * @brief プレイヤー・地面・敵のモデルを描画する
+		 * @brief RenderComponentを持つ全Entityのモデルを描画する
+		 *
+		 * 弾は drawProjectileModels が専用に描くため対象外。
+		 * 半透明（死亡ディゾルブ中）は不透明の後に描く
 		 */
-		void drawModels(core::ecs::EntityId playerId,
-		    core::ecs::EntityId groundId,
-		    const std::vector<core::ecs::EntityId>& enemyIds);
+		void drawModels();
 
 		/**
 		 * @brief 画面中央に照準レティクル（クロスヘア）を描画する

@@ -132,7 +132,6 @@ namespace game::scene
 		game::data::PlayerData m_playerData;
 		InGameView m_view;
 
-		core::ecs::EntityId m_groundId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_macId{ core::ecs::INVALID_ENTITY_ID };
 
