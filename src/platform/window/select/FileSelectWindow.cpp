@@ -1,4 +1,4 @@
-#include <windows.h>
+﻿#include <windows.h>
 #include <commdlg.h>
 #include <sstream>
 #include "FileSelectWindow.h"
@@ -92,19 +92,7 @@ namespace platform::window::select
 		{
 			m_filePaths[slotIndex] = szFile;
 
-			// Determine extension type
-			std::string path{ szFile };
-			auto dotPos = path.rfind('.');
-			if (dotPos != std::string::npos)
-			{
-				std::string ext{ path.substr(dotPos) };
-				std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-				m_extensionTypes[slotIndex] = game::utility::FileExtensionTypeResolver::toFileExtensionType(ext);
-			}
-			else
-			{
-				m_extensionTypes[slotIndex] = game::data::FileExtensionType::Unknown;
-			}
+			m_extensionTypes[slotIndex] = game::utility::FileExtensionTypeResolver::fromPath(m_filePaths[slotIndex]);
 
 			if (m_onFileSlotChanged)
 				m_onFileSlotChanged(slotIndex, m_filePaths[slotIndex]);

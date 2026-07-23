@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include <string_view>
 #include <algorithm>
@@ -30,15 +30,7 @@ namespace game::data
 			m_filePaths[slotIndex] = path;
 			m_hasSelection[slotIndex] = true;
 
-			const auto dotPos = path.rfind('.');  // 後ろから.を探す
-			if (dotPos != std::string_view::npos) // 見つかった場合
-			{
-				std::string ext{path.substr(dotPos)};
-				std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-				m_extensionTypes[slotIndex] = utility::FileExtensionTypeResolver::toFileExtensionType(ext);
-			}
-			else
-				m_extensionTypes[slotIndex] = FileExtensionType::Unknown;
+			m_extensionTypes[slotIndex] = utility::FileExtensionTypeResolver::fromPath(path);
 		}
 
 		/**

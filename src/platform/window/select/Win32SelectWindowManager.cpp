@@ -73,22 +73,8 @@ namespace platform::window::select
             if (slot >= 0 && slot < FILE_SLOT_COUNT)
             {
                 m_slotPaths[slot] = path;
-                if (!path.empty())
-                {
-                    std::string ext{ path };
-                    auto dotPos = ext.rfind('.');
-                    if (dotPos != std::string::npos)
-                    {
-                        ext = ext.substr(dotPos);
-                        std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-                        m_slotExtTypes[slot] = game::utility::FileExtensionTypeResolver::toFileExtensionType(ext);
-                    }
-                    else
-                        m_slotExtTypes[slot] = game::data::FileExtensionType::Unknown;
-                }
-                else
-                    m_slotExtTypes[slot] = game::data::FileExtensionType::Unknown;
-            }
+				m_slotExtTypes[slot] = game::utility::FileExtensionTypeResolver::fromPath(path);
+			}
 			updateParameterWindow();
         });
         m_fileSelectWindow->setOnMinimize([this]() noexcept {
