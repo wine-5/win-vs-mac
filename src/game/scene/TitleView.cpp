@@ -81,7 +81,7 @@ namespace game::scene
 
 	void TitleView::pushHistory(std::array<float, HISTORY_SIZE>& buf, float value)
 	{
-		std::rotate(buf.begin(), buf.begin() + 1, buf.end());
+		std::ranges::rotate(buf, buf.begin() + 1);
 		buf.back() = value;
 	}
 
