@@ -55,7 +55,7 @@ namespace infrastructure::effect
 		[[nodiscard]] int getActiveEffectCount() const noexcept override;
 
 	  private:
-		repository::EffectRepository m_repository{};
+		resource::repository::EffectRepository m_repository{};
 		std::unordered_map<core::constant::EffectType, EffectPool> m_pools{};
 
 		// stop() でどのプールに返却するかを逆引きするためのマップ

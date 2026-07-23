@@ -19,7 +19,7 @@ namespace infrastructure
 		auto it{ configs.find(type) };
 		if (it == configs.end()) return;
 
-		const repository::BgmConfig& config{ it->second };
+		const resource::repository::BgmConfig& config{ it->second };
 		const bool useFade{ fade && config.m_useFade };
 
 		if (m_currentBgmHandle != -1)
@@ -82,7 +82,7 @@ namespace infrastructure
 		auto it{ configs.find(type) };
 		if (it == configs.end()) return;
 
-		const repository::SeConfig& config{ it->second };
+		const resource::repository::SeConfig& config{ it->second };
 		ChangeVolumeSoundMem(static_cast<int>(config.m_volume * 255), config.m_handle);
 		PlaySoundMem(config.m_handle, DX_PLAYTYPE_BACK);
 	}
