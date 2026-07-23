@@ -491,9 +491,6 @@
     <ClInclude Include="src\game\data\GroundData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\factory\IFactory.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\game\factory\PlayerFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

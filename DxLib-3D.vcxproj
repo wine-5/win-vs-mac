@@ -408,7 +408,6 @@
     <ClInclude Include="src\game\factory\FactoryInitializer.h" />
     <ClInclude Include="src\game\factory\FactoryManager.h" />
     <ClInclude Include="src\game\factory\GroundFactory.h" />
-    <ClInclude Include="src\game\factory\IFactory.h" />
     <ClInclude Include="src\game\factory\PlayerFactory.h" />
     <ClInclude Include="src\game\scene\SceneManager.h" />
     <ClInclude Include="src\game\scene\SceneType.h" />

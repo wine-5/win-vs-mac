@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "IFactory.h"
 #include "core/ecs/EntityManager.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/interface/IResourceManager.h"
@@ -21,8 +20,8 @@ namespace game::factory
 	 * ゲーム文脈を組み立てて本クラスを呼び出す高レベルな役割は EnemySpawner が担う。
 	 * （生成の「オーケストレーション」と「インスタンス化」を意図的に分離している）
 	 */
-	class EnemyFactory : public IFactory
-    {
+	class EnemyFactory
+	{
     public:
         /**
          * @brief EnemyFactoryのコンストラクタ
