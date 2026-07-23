@@ -83,14 +83,11 @@ namespace infrastructure::repository
 	{
 		if (!json.contains("se")) return;
 
-		const std::unordered_map<std::string, core::constant::SeType> typeMap
-		{
-			{ "AttackWarrior",   core::constant::SeType::AttackWarrior   },
-			{ "AttackFire",      core::constant::SeType::AttackFire      },
-			{ "AttackNinja",     core::constant::SeType::AttackNinja     },
-			{ "HitEnemy",        core::constant::SeType::HitEnemy        },
-			{ "HitPlayer",       core::constant::SeType::HitPlayer       },
-			{ "DeadEnemy",       core::constant::SeType::DeadEnemy       },
+		const std::unordered_map<std::string, core::constant::SeType> typeMap{
+			{ "AttackPlayer", core::constant::SeType::AttackPlayer },
+			{ "HitEnemy", core::constant::SeType::HitEnemy },
+			{ "HitPlayer", core::constant::SeType::HitPlayer },
+			{ "DeadEnemy", core::constant::SeType::DeadEnemy },
 		};
 
 		for (const auto& entry : json["se"])
