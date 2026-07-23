@@ -15,23 +15,11 @@
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
 
-namespace
-{
-	constexpr const char* MAIN_FONT_NAME = "x12y16pxMaruMonica";
-}
-
 namespace game::scene
 {
 	SceneFactory::SceneFactory(GameManager& gameManager, PauseManager& pauseManager)
 	    : m_gameManager{ gameManager }
 	    , m_pauseManager{ pauseManager }
-	    , m_inGameScene{}
-	    , m_titleScene{}
-	    , m_lockscreenScene{}
-	    , m_selectScene{}
-	    , m_loadingScene{}
-	    , m_resultScene{}
-	    , m_biosScene{}
 	{
 	}
 

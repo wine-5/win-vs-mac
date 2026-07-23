@@ -64,12 +64,12 @@ namespace game::scene
 	  PauseManager& m_pauseManager;
 
 	  // シーンインスタンスの管理
-	  std::unique_ptr<InGame> m_inGameScene;
-	  std::unique_ptr<Title> m_titleScene;
-	  std::unique_ptr<Lockscreen> m_lockscreenScene;
-	  std::unique_ptr<Select> m_selectScene;
-	  std::unique_ptr<Loading> m_loadingScene;
-	  std::unique_ptr<Result> m_resultScene;
-	  std::unique_ptr<Bios> m_biosScene;
-    };
+	  std::unique_ptr<InGame> m_inGameScene{};
+	  std::unique_ptr<Title> m_titleScene{};
+	  std::unique_ptr<Lockscreen> m_lockscreenScene{};
+	  std::unique_ptr<Select> m_selectScene{};
+	  std::unique_ptr<Loading> m_loadingScene{};
+	  std::unique_ptr<Result> m_resultScene{};
+	  std::unique_ptr<Bios> m_biosScene{};
+	};
 } // namespace game::scene
