@@ -22,6 +22,10 @@ namespace platform::window::projectile
 	    , m_graphWidth{ graphWidth > 0 ? graphWidth : 1 }
 	    , m_graphHeight{ graphHeight > 0 ? graphHeight : 1 }
 	{
+		// acquireFreeSlot が &m_slots.back() を返すため、増設で再確保が起きると
+		// 既存スロットへのポインタが無効化される。上限ぶん先に確保して根絶する
+		m_slots.reserve(core::iface::MAX_PROJECTILE_WINDOWS);
+
 		// GDI+を初期化してロゴ画像を一度だけ読み込む（全ウィンドウで共有する）
 		Gdiplus::GdiplusStartupInput startupInput{};
 		if (Gdiplus::GdiplusStartup(&m_gdiplusToken, &startupInput, nullptr) != Gdiplus::Ok)

@@ -68,11 +68,14 @@ namespace platform::window
     {
         if (m_hwnd == nullptr) return;
 
-        // PostQuitMessage は呼ばない（DxLib のメインループが止まるため）
-        if (::DestroyWindow(m_hwnd))
-            m_hwnd = nullptr;
+		// PostQuitMessage は呼ばない（DxLib のメインループが止まるため）
+		// DestroyWindow が失敗した場合はウィンドウが残っているため、
+		// クラス登録も解除せずハンドルも保持したままにして状態の食い違いを避ける
+		if (!::DestroyWindow(m_hwnd))
+			return;
 
-        UnregisterClassW(m_className.c_str(), GetModuleHandleW(nullptr));
+		m_hwnd = nullptr;
+		UnregisterClassW(m_className.c_str(), GetModuleHandleW(nullptr));
     }
 
     void WindowBase::show() noexcept
