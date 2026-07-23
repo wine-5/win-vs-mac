@@ -1,6 +1,6 @@
 #pragma once
 
-namespace game::component
+namespace game::component::combat
 {
 	/**
 	 * @brief 死亡してから後始末されるまでの、死亡ライフサイクルの状態を持つコンポーネント
@@ -18,4 +18,4 @@ namespace game::component
 		bool m_hasTouchedGround{ false }; // 一度でも地面に触れたか（落下死の揺れを止める判定用。初回接地で立つ。CollisionSystemが立てる）
 		bool m_animFinished{ false };     // 死亡アニメが再生完了したか（アニメ持ちの敵用。EnemyDeathSystemが立てる）
 	};
-} // namespace game::component
+} // namespace game::component::combat

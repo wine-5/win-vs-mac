@@ -1,5 +1,5 @@
 ﻿#include "PlayerChargeVisualsSystem.h"
-#include "game/component/PlayerChargeComponent.h"
+#include "game/component/combat/PlayerChargeComponent.h"
 #include "core/utility/Color.h"
 #include <cmath>
 #include <numbers>
@@ -41,10 +41,10 @@ namespace game::system::visual
 
 	void PlayerChargeVisualsSystem::update(float deltaTime)
 	{
-		if (!m_componentManager.has<component::PlayerChargeComponent>(m_playerId))
+		if (!m_componentManager.has<component::combat::PlayerChargeComponent>(m_playerId))
 			return;
 
-		const auto& charge{ m_componentManager.get<component::PlayerChargeComponent>(m_playerId) };
+		const auto& charge{ m_componentManager.get<component::combat::PlayerChargeComponent>(m_playerId) };
 
 		// 溜め中だけ演出時間を進め、離したらリセットする（次の溜めは同じ見た目から始まる）
 		if (charge.m_isCharging)
@@ -55,10 +55,10 @@ namespace game::system::visual
 
 	void PlayerChargeVisualsSystem::draw()
 	{
-		if (!m_componentManager.has<component::PlayerChargeComponent>(m_playerId))
+		if (!m_componentManager.has<component::combat::PlayerChargeComponent>(m_playerId))
 			return;
 
-		const auto& charge{ m_componentManager.get<component::PlayerChargeComponent>(m_playerId) };
+		const auto& charge{ m_componentManager.get<component::combat::PlayerChargeComponent>(m_playerId) };
 		if (!charge.m_isCharging || charge.m_chargeRate <= 0.0f)
 			return;
 

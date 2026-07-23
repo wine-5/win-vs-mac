@@ -1,5 +1,5 @@
 ﻿#include "TelegraphVisualsSystem.h"
-#include "game/component/TelegraphComponent.h"
+#include "game/component/combat/TelegraphComponent.h"
 #include "core/utility/Color.h"
 
 namespace
@@ -26,10 +26,10 @@ namespace game::system::visual
 	{
 		using core::utility::Color;
 
-		auto entities{ m_componentManager.getAllEntities<component::TelegraphComponent>() };
+		auto entities{ m_componentManager.getAllEntities<component::combat::TelegraphComponent>() };
 		for (auto entityId : entities)
 		{
-			const auto& tel{ m_componentManager.get<component::TelegraphComponent>(entityId) };
+			const auto& tel{ m_componentManager.get<component::combat::TelegraphComponent>(entityId) };
 			if (!tel.m_active || tel.m_radius <= 0.0f)
 				continue;
 
@@ -37,7 +37,7 @@ namespace game::system::visual
 			center.y += GROUND_LIFT;
 
 			// 危険範囲の下地 → 中心から満ちていく内側 → 外周リング、の順で重ねる
-			if (tel.m_shape == component::TelegraphShape::Sector)
+			if (tel.m_shape == component::combat::TelegraphShape::Sector)
 			{
 				m_renderer.drawGroundSector(center, tel.m_facingRad, tel.m_radius, tel.m_halfAngleRad, Color::TELEGRAPH_BASE, true);
 				m_renderer.drawGroundSector(center, tel.m_facingRad, tel.m_radius * tel.m_progress, tel.m_halfAngleRad, Color::TELEGRAPH_FILL, true);

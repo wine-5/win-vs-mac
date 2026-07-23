@@ -4,7 +4,7 @@
 #include "game/component/AIComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
-#include "game/component/AttackComponent.h"
+#include "game/component/combat/AttackComponent.h"
 #include "game/component/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
 #include <cmath>
@@ -95,8 +95,8 @@ namespace game::system::ai
 
 		// 攻撃レンジ内かどうかを判定
 		bool inAttackRange{ false };
-		if (m_componentManager.has<component::AttackComponent>(entityId))
-			inAttackRange = distanceToPlayer <= m_componentManager.get<component::AttackComponent>(entityId).m_attackRange;
+		if (m_componentManager.has<component::combat::AttackComponent>(entityId))
+			inAttackRange = distanceToPlayer <= m_componentManager.get<component::combat::AttackComponent>(entityId).m_attackRange;
 
 		// 移動：攻撃レンジ内では止まり、外なら接近する
 		// （従来はレンジ内でも速度を与え続け、プレイヤーへ押し込んでいた）
@@ -122,7 +122,7 @@ namespace game::system::ai
 		// 攻撃：レンジ内なら毎フレーム要求だけ出す。
 		// 実際に撃つ間隔はAttackComponentのクールダウンでAttackSystemが管理する
 		bool attacking{ false };
-		if (auto* attack{ m_componentManager.tryGet<component::AttackComponent>(entityId) })
+		if (auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(entityId) })
 		{
 			if (inAttackRange)
 				attack->m_attackRequested = true;

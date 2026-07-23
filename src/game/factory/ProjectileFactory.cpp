@@ -1,9 +1,9 @@
 #include "ProjectileFactory.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
-#include "game/component/AttackComponent.h"
+#include "game/component/combat/AttackComponent.h"
 #include "game/component/TagComponent.h"
-#include "game/component/ProjectileComponent.h"
+#include "game/component/combat/ProjectileComponent.h"
 #include "game/component/RenderComponent.h"
 
 namespace game::factory
@@ -38,12 +38,12 @@ namespace game::factory
 
 		// 当たり判定攻撃は AttackComponent + AttackSystem を流用する
 		// attackRange＝接触半径、attackPower＝ダメージ、cooldown0＋requested維持で常時ヒット判定
-		component::AttackComponent attack{};
+		component::combat::AttackComponent attack{};
 		attack.m_attackPower = config.m_damage;
 		attack.m_attackRange = config.m_radius;
 		attack.m_attackCooldown = 0.0f;
 		attack.m_attackRequested = true;
-		m_componentManager.add<component::AttackComponent>(id, attack);
+		m_componentManager.add<component::combat::AttackComponent>(id, attack);
 
 		// 発射者の陣営（AttackSystemが同陣営を弾く＝誤爆防止）
 		component::TagComponent tag{};
@@ -51,13 +51,13 @@ namespace game::factory
 		m_componentManager.add<component::TagComponent>(id, tag);
 
 		// 弾固有のデータ（残り寿命・発射位置・見た目）。これがあることでProjectileSystem/PhysicsSystemが弾として扱う
-		component::ProjectileComponent projectile{};
+		component::combat::ProjectileComponent projectile{};
 		projectile.m_remainingLifetime = config.m_lifetime;
 		projectile.m_spawnPosition = origin;
 		projectile.m_spinRollSpeed = config.m_spinRollSpeed;
 		projectile.m_spinCenter = config.m_spinCenter;
 		projectile.m_startEffect = config.m_startEffect; // Noneならエフェクト無し（Safariのタブ弾）
-		m_componentManager.add<component::ProjectileComponent>(id, projectile);
+		m_componentManager.add<component::combat::ProjectileComponent>(id, projectile);
 
 		// 3Dモデルの弾（Safariのタブ等）はRenderComponentを付与し、InGameViewが回転描画する
 		if (config.m_modelHandle != -1)

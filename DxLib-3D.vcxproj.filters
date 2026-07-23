@@ -374,7 +374,7 @@
     <ClInclude Include="src\game\component\CameraComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\AimComponent.h">
+    <ClInclude Include="src\game\component\combat\AimComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\component\TransformComponent.h">
@@ -449,7 +449,7 @@
     <ClInclude Include="src\game\component\AnimationComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\ColliderComponent.h">
+    <ClInclude Include="src\game\component\combat\ColliderComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\constant\Tag.h">
@@ -548,7 +548,7 @@
     <ClInclude Include="src\game\scene\Result.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\HealthComponent.h">
+    <ClInclude Include="src\game\component\combat\HealthComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\component\AIComponent.h">
@@ -557,7 +557,7 @@
     <ClInclude Include="src\game\component\EnemyTypeComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\AttackComponent.h">
+    <ClInclude Include="src\game\component\combat\AttackComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\constant\EnemyAnimationState.h">
@@ -623,10 +623,10 @@
     <ClInclude Include="src\game\system\visual\TelegraphVisualsSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\TelegraphComponent.h">
+    <ClInclude Include="src\game\component\combat\TelegraphComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\DeathComponent.h">
+    <ClInclude Include="src\game\component\combat\DeathComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\component\AlertComponent.h">
@@ -836,7 +836,7 @@
     <ClInclude Include="src\infrastructure\repository\StageRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\ProjectileComponent.h">
+    <ClInclude Include="src\game\component\combat\ProjectileComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\system\combat\ProjectileReflectSystem.h">
@@ -878,7 +878,7 @@
     <ClInclude Include="src\game\component\CameraEffectComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\PlayerChargeComponent.h">
+    <ClInclude Include="src\game\component\combat\PlayerChargeComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\component\ai\MeleeChaseAIComponent.h">

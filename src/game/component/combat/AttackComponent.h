@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace game::component
+namespace game::component::combat
 {
 	/**
 	 * @brief 攻撃を持つコンポーネント
@@ -25,4 +25,4 @@ namespace game::component
 		// 「攻撃した瞬間」を知りたい場合（攻撃アニメの要求など）はこれを見る
 		bool m_justFired{ false };
 	};
-} // namespace game::component
+} // namespace game::component::combat

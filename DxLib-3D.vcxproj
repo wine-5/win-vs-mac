@@ -286,7 +286,7 @@
     <ClInclude Include="src\core\data\StageMetadata.h" />
     <ClInclude Include="src\core\data\ProjectileMetadata.h" />
     <ClInclude Include="src\game\actor\EnemyBehaviors.h" />
-    <ClInclude Include="src\game\component\ProjectileComponent.h" />
+    <ClInclude Include="src\game\component\combat\ProjectileComponent.h" />
     <ClInclude Include="src\core\constant\BgmType.h" />
     <ClInclude Include="src\core\constant\EffectType.h" />
     <ClInclude Include="src\core\constant\SeType.h" />
@@ -322,9 +322,9 @@
     <ClInclude Include="src\game\attack\IDamageHandler.h" />
     <ClInclude Include="src\game\component\AIComponent.h" />
     <ClInclude Include="src\game\component\EnemyTypeComponent.h" />
-    <ClInclude Include="src\game\component\AttackComponent.h" />
+    <ClInclude Include="src\game\component\combat\AttackComponent.h" />
     <ClInclude Include="src\game\component\EffectComponent.h" />
-    <ClInclude Include="src\game\component\HealthComponent.h" />
+    <ClInclude Include="src\game\component\combat\HealthComponent.h" />
     <ClInclude Include="src\game\component\HitEffectComponent.h" />
     <ClInclude Include="src\game\component\TagComponent.h" />
     <ClInclude Include="src\game\constant\EnemyAnimationState.h" />
@@ -371,8 +371,8 @@
     <ClInclude Include="src\game\system\visual\DetectionAlertVisualsSystem.h" />
     <ClInclude Include="src\game\system\visual\AttackTelegraphVisualsSystem.h" />
     <ClInclude Include="src\game\system\visual\TelegraphVisualsSystem.h" />
-    <ClInclude Include="src\game\component\TelegraphComponent.h" />
-    <ClInclude Include="src\game\component\DeathComponent.h" />
+    <ClInclude Include="src\game\component\combat\TelegraphComponent.h" />
+    <ClInclude Include="src\game\component\combat\DeathComponent.h" />
     <ClInclude Include="src\game\component\AlertComponent.h" />
     <ClInclude Include="src\game\ui\FadeTransition.h" />
     <ClInclude Include="src\game\utility\ExtensionBonusCalculator.h" />
@@ -394,7 +394,7 @@
     <ClInclude Include="src\core\utility\Log.h" />
     <ClInclude Include="src\core\utility\Vector3.h" />
     <ClInclude Include="src\game\component\AnimationComponent.h" />
-    <ClInclude Include="src\game\component\ColliderComponent.h" />
+    <ClInclude Include="src\game\component\combat\ColliderComponent.h" />
     <ClInclude Include="src\game\constant\Tag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
     <ClInclude Include="src\game\constant\AnimationId.h" />
@@ -428,8 +428,8 @@
     <ClInclude Include="src\game\component\InputComponent.h" />
     <ClInclude Include="src\game\component\CameraComponent.h" />
     <ClInclude Include="src\game\component\CameraEffectComponent.h" />
-    <ClInclude Include="src\game\component\AimComponent.h" />
-    <ClInclude Include="src\game\component\PlayerChargeComponent.h" />
+    <ClInclude Include="src\game\component\combat\AimComponent.h" />
+    <ClInclude Include="src\game\component\combat\PlayerChargeComponent.h" />
     <ClInclude Include="src\game\component\ai\MeleeChaseAIComponent.h" />
     <ClInclude Include="src\game\component\ai\PatrolComponent.h" />
     <ClInclude Include="src\game\component\ai\RangeKeepAIComponent.h" />

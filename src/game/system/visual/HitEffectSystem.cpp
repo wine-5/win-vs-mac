@@ -1,7 +1,7 @@
 ﻿#include "HitEffectSystem.h"
 #include "game/component/HitEffectComponent.h"
 #include "game/component/RenderComponent.h"
-#include "game/component/HealthComponent.h"
+#include "game/component/combat/HealthComponent.h"
 
 namespace game::system::visual
 {
@@ -24,8 +24,8 @@ namespace game::system::visual
 		// AttackSystemはEnemyDeadEvent（→非表示化）の直後にAttackHitEventを発行するため、
 		// ここで無条件に演出を開始すると、演出終了時にrender.m_isVisible=trueへ
 		// 強制的に戻され、死亡したはずのモデルが復活して見えてしまう。
-		if (m_componentManager.has<component::HealthComponent>(e.m_targetId) &&
-		    m_componentManager.get<component::HealthComponent>(e.m_targetId).m_isDead)
+		if (m_componentManager.has<component::combat::HealthComponent>(e.m_targetId) &&
+		    m_componentManager.get<component::combat::HealthComponent>(e.m_targetId).m_isDead)
 			return;
 
 		auto& effect{ m_componentManager.get<component::HitEffectComponent>(e.m_targetId) };
@@ -46,8 +46,8 @@ namespace game::system::visual
 
 			// 演出が進行中に対象が死亡した場合は、即座に打ち切って非表示のままにする
 			// （後段の再表示処理でrender.m_isVisible=trueに戻さないようにするため）
-			if (m_componentManager.has<component::HealthComponent>(entityId) &&
-			    m_componentManager.get<component::HealthComponent>(entityId).m_isDead)
+			if (m_componentManager.has<component::combat::HealthComponent>(entityId) &&
+			    m_componentManager.get<component::combat::HealthComponent>(entityId).m_isDead)
 			{
 				effect.m_isActive = false;
 				continue;

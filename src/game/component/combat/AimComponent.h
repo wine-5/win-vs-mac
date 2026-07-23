@@ -1,7 +1,7 @@
 #pragma once
 #include "core/ecs/Entity.h"
 
-namespace game::component
+namespace game::component::combat
 {
 	/**
 	 * @brief 照準（レティクル）の捕捉状態を持つコンポーネント
@@ -14,4 +14,4 @@ namespace game::component
 		bool m_hasTarget{ false };                                      // カメラ前方に敵を捉えているか
 		core::ecs::EntityId m_targetId{ core::ecs::INVALID_ENTITY_ID }; // 捉えている敵のEntityId
 	};
-} // namespace game::component
+} // namespace game::component::combat

@@ -2,7 +2,7 @@
 #include "core/utility/Vector3.h"
 #include "core/constant/EffectType.h"
 
-namespace game::component
+namespace game::component::combat
 {
 	/**
 	 * @brief 投射物（弾）に固有の実行時状態を持つコンポーネント
@@ -31,4 +31,4 @@ namespace game::component
 		// m_attackRequestedを立て直すため、AttackSystem側でこれを見て初回の1回だけに絞る
 		bool m_hasPlayedStartEffect{ false };
 	};
-} // namespace game::component
+} // namespace game::component::combat

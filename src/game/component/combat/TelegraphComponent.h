@@ -1,7 +1,7 @@
 #pragma once
 #include "core/utility/Vector3.h"
 
-namespace game::component
+namespace game::component::combat
 {
 	/**
 	 * @brief 攻撃予兆（テレグラフ）の形状
@@ -30,4 +30,4 @@ namespace game::component
 		float m_halfAngleRad{ 0.0f };                     // 扇の片側の開き角（Sector用。全開き角の半分）
 		float m_progress{ 0.0f };                         // 危険の切迫度（0→1。満ちきると発動）
 	};
-} // namespace game::component
+} // namespace game::component::combat

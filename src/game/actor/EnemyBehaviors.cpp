@@ -1,13 +1,13 @@
 ﻿#include "game/actor/EnemyBehaviors.h"
 #include "game/data/EnemyData.h"
-#include "game/component/AttackComponent.h"
+#include "game/component/combat/AttackComponent.h"
 #include "game/component/AnimationComponent.h"
 #include "game/component/AnimationClip.h"
 #include "game/component/ai/MeleeChaseAIComponent.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/PatrolComponent.h"
 #include "game/component/ai/MacAIComponent.h"
-#include "game/component/TelegraphComponent.h"
+#include "game/component/combat/TelegraphComponent.h"
 #include "game/constant/AnimationState.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/ILogger.h"
@@ -115,7 +115,7 @@ namespace game::actor
 			cm.add<component::ai::MacAIComponent>(id, mac);
 
 			// 攻撃の予兆（溜め中に地面へ危険範囲を表示）用。MacAISystemが溜め中に書き込む
-			cm.add<component::TelegraphComponent>(id, {});
+			cm.add<component::combat::TelegraphComponent>(id, {});
 		}
 	} // namespace
 

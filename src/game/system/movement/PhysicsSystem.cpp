@@ -2,7 +2,7 @@
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
 #include "game/component/InputComponent.h"
-#include "game/component/ProjectileComponent.h"
+#include "game/component/combat/ProjectileComponent.h"
 
 namespace game::system::movement
 {
@@ -21,7 +21,7 @@ namespace game::system::movement
 			auto& velocity = m_componentManager.get<component::VelocityComponent>(entityId);
 
 			// 弾は直進させたいので、ジャンプ・重力の対象外にする
-			if (!m_componentManager.has<component::ProjectileComponent>(entityId))
+			if (!m_componentManager.has<component::combat::ProjectileComponent>(entityId))
 			{
 				if (m_componentManager.has<component::InputComponent>(entityId))
 				{

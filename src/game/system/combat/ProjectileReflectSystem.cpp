@@ -1,8 +1,8 @@
 ﻿#include "ProjectileReflectSystem.h"
-#include "game/component/ProjectileComponent.h"
+#include "game/component/combat/ProjectileComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
-#include "game/component/AttackComponent.h"
+#include "game/component/combat/AttackComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/constant/Tag.h"
 #include <cmath>
@@ -21,7 +21,7 @@ namespace game::system::combat
 		std::vector<core::ecs::EntityId> enemyProjectiles{};
 		std::vector<core::ecs::EntityId> playerProjectiles{};
 
-		for (auto id : m_componentManager.getAllEntities<component::ProjectileComponent>())
+		for (auto id : m_componentManager.getAllEntities<component::combat::ProjectileComponent>())
 		{
 			if (!m_componentManager.has<component::TagComponent>(id))
 				continue;
@@ -39,15 +39,15 @@ namespace game::system::combat
 		{
 			const auto& enemyTransform{ m_componentManager.get<component::TransformComponent>(enemyId) };
 			// 接触半径は当たり判定（AttackComponent.m_attackRange）を流用する
-			const float enemyRadius{ m_componentManager.has<component::AttackComponent>(enemyId)
-				                         ? m_componentManager.get<component::AttackComponent>(enemyId).m_attackRange
+			const float enemyRadius{ m_componentManager.has<component::combat::AttackComponent>(enemyId)
+				                         ? m_componentManager.get<component::combat::AttackComponent>(enemyId).m_attackRange
 				                         : 0.0f };
 
 			for (auto playerId : playerProjectiles)
 			{
 				const auto& playerTransform{ m_componentManager.get<component::TransformComponent>(playerId) };
-				const float playerRadius{ m_componentManager.has<component::AttackComponent>(playerId)
-					                          ? m_componentManager.get<component::AttackComponent>(playerId).m_attackRange
+				const float playerRadius{ m_componentManager.has<component::combat::AttackComponent>(playerId)
+					                          ? m_componentManager.get<component::combat::AttackComponent>(playerId).m_attackRange
 					                          : 0.0f };
 
 				const float dx{ enemyTransform.m_position.x - playerTransform.m_position.x };

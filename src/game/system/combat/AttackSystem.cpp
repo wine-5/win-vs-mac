@@ -1,10 +1,10 @@
 ﻿#include "AttackSystem.h"
-#include "game/component/AttackComponent.h"
-#include "game/component/HealthComponent.h"
+#include "game/component/combat/AttackComponent.h"
+#include "game/component/combat/HealthComponent.h"
 #include "game/component/InputComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/TagComponent.h"
-#include "game/component/ProjectileComponent.h"
+#include "game/component/combat/ProjectileComponent.h"
 #include "game/component/HitEffectComponent.h"
 #include "game/constant/Tag.h"
 #include "game/attack/DamageChain.h"
@@ -28,11 +28,11 @@ namespace game::system::combat
 
 	void AttackSystem::update(float deltaTime)
 	{
-		auto attackers{m_componentManager.getAllEntities<component::AttackComponent>()};
+		auto attackers{ m_componentManager.getAllEntities<component::combat::AttackComponent>() };
 
 		for (auto attackerId : attackers)
 		{
-			auto &attack{m_componentManager.get<component::AttackComponent>(attackerId)};
+			auto& attack{ m_componentManager.get<component::combat::AttackComponent>(attackerId) };
 
 			// 「このフレームで攻撃を開始したか」は毎フレーム作り直す
 			attack.m_justFired = false;
@@ -51,8 +51,8 @@ namespace game::system::combat
 					attack.m_windupPending = false;
 
 					// 溜め中に攻撃者が倒された場合は、振り終わりのダメージを不発にする
-					const bool attackerDead{ m_componentManager.has<component::HealthComponent>(attackerId) &&
-						                     m_componentManager.get<component::HealthComponent>(attackerId).m_isDead };
+					const bool attackerDead{ m_componentManager.has<component::combat::HealthComponent>(attackerId) &&
+						                     m_componentManager.get<component::combat::HealthComponent>(attackerId).m_isDead };
 					if (!attackerDead)
 						resolveAttack(attackerId, attack);
 					attack.m_currentCooldown = attack.m_attackCooldown;
@@ -89,7 +89,7 @@ namespace game::system::combat
 			//   地面を叩く近接（弾でない敵攻撃）はエフェクト無し
 			//   （弾はProjectileSystemが毎フレームm_attackRequestedを立て直すため、初回1回のみに絞る）
 			const auto& attackerTagForStart{ m_componentManager.get<component::TagComponent>(attackerId) };
-			const bool isProjectile{ m_componentManager.has<component::ProjectileComponent>(attackerId) };
+			const bool isProjectile{ m_componentManager.has<component::combat::ProjectileComponent>(attackerId) };
 
 			bool shouldPlayStartEffect{ false };
 			core::constant::EffectType startEffect{ core::constant::EffectType::None };
@@ -109,7 +109,7 @@ namespace game::system::combat
 				// 出すエフェクトの種別は弾自身が持つ（Noneならエフェクト無し）
 				if (isProjectile)
 				{
-					auto& projectile{ m_componentManager.get<component::ProjectileComponent>(attackerId) };
+					auto& projectile{ m_componentManager.get<component::combat::ProjectileComponent>(attackerId) };
 					startEffect = projectile.m_startEffect;
 					shouldPlayStartEffect = !projectile.m_hasPlayedStartEffect && startEffect != core::constant::EffectType::None;
 					projectile.m_hasPlayedStartEffect = true;
@@ -136,9 +136,9 @@ namespace game::system::combat
 		}
 	}
 
-	void AttackSystem::resolveAttack(core::ecs::EntityId attackerId, component::AttackComponent& attack)
+	void AttackSystem::resolveAttack(core::ecs::EntityId attackerId, component::combat::AttackComponent& attack)
 	{
-		auto targets{ m_componentManager.getAllEntities<component::HealthComponent>() };
+		auto targets{ m_componentManager.getAllEntities<component::combat::HealthComponent>() };
 		for (auto targetId : targets)
 		{
 			if (targetId == attackerId)
@@ -154,11 +154,11 @@ namespace game::system::combat
 				continue;
 
 			// 死亡済み（後始末待ち）のEntityは攻撃対象にしない
-			if (m_componentManager.get<component::HealthComponent>(targetId).m_isDead)
+			if (m_componentManager.get<component::combat::HealthComponent>(targetId).m_isDead)
 				continue;
 
 			// 無敵中（ボス覚醒演出など）はダメージを与えない
-			if (m_componentManager.get<component::HealthComponent>(targetId).m_isInvincible)
+			if (m_componentManager.get<component::combat::HealthComponent>(targetId).m_isInvincible)
 				continue;
 
 			// プレイヤーは被弾後の点滅（HitEffect）中は無敵＝連続ヒット防止。
@@ -187,7 +187,7 @@ namespace game::system::combat
 			m_damageChain->handle(chain);
 
 			// HPを減らす
-			auto& health{ m_componentManager.get<component::HealthComponent>(targetId) };
+			auto& health{ m_componentManager.get<component::combat::HealthComponent>(targetId) };
 			health.m_currentHp -= chain.m_damage;
 
 			// 被ダメージのログ（攻撃者・被ダメ者・ダメージ量）
@@ -218,7 +218,7 @@ namespace game::system::combat
 
 			// 攻撃者がProjectileComponentを持つ（=弾＝Window投撃などの遠距離攻撃）ならEnemy_HitWindow、
 			// そうでなければ（=本体による近接攻撃）Enemy_HitSwordを再生する
-			hitEvent.m_effectType = m_componentManager.has<component::ProjectileComponent>(attackerId)
+			hitEvent.m_effectType = m_componentManager.has<component::combat::ProjectileComponent>(attackerId)
 			                            ? core::constant::EffectType::Enemy_HitWindow
 			                            : core::constant::EffectType::Enemy_HitSword;
 

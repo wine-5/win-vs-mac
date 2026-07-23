@@ -1,5 +1,5 @@
 #include "BaseAttackHandler.h"
-#include "game/component/AttackComponent.h"
+#include "game/component/combat/AttackComponent.h"
 
 namespace game::attack
 {
@@ -16,7 +16,7 @@ namespace game::attack
 
 	void BaseAttackHandler::handle(DamageChain& chain)
 	{
-		auto& attack{ m_componentManager.get<component::AttackComponent>(chain.m_attackId) };
+		auto& attack{ m_componentManager.get<component::combat::AttackComponent>(chain.m_attackId) };
 		chain.m_damage = attack.m_attackPower;
 
 		if (m_next)

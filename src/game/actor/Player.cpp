@@ -4,16 +4,16 @@
 #include "game/component/InputComponent.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/AnimationComponent.h"
-#include "game/component/ColliderComponent.h"
+#include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
-#include "game/component/HealthComponent.h"
-#include "game/component/AttackComponent.h"
+#include "game/component/combat/HealthComponent.h"
+#include "game/component/combat/AttackComponent.h"
 #include "game/component/HitEffectComponent.h"
 #include "game/component/EffectComponent.h"
-#include "game/component/PlayerChargeComponent.h"
+#include "game/component/combat/PlayerChargeComponent.h"
 #include "game/component/CameraComponent.h"
 #include "game/component/CameraEffectComponent.h"
-#include "game/component/AimComponent.h"
+#include "game/component/combat/AimComponent.h"
 #include "game/constant/Tag.h"
 #include "game/constant/AnimationId.h"
 
@@ -52,26 +52,26 @@ namespace game::actor
 		componentManager.add<component::HitEffectComponent>(m_entity.getId(), {});
 		componentManager.add<component::EffectComponent>(m_entity.getId(), {});
 
-		component::HealthComponent health{};
+		component::combat::HealthComponent health{};
 		health.m_maxHp = playerData.getMaxHp();
 		health.m_currentHp = playerData.getMaxHp();
 		health.m_defence = playerData.getDefence();
-		componentManager.add<component::HealthComponent>(m_entity.getId(), health);
+		componentManager.add<component::combat::HealthComponent>(m_entity.getId(), health);
 
-		component::AttackComponent attack{};
+		component::combat::AttackComponent attack{};
 		attack.m_attackPower = playerData.getAttackPower();
 		attack.m_attackRange = playerData.getAttackRange();
 		attack.m_attackCooldown = playerData.getAttackCooldown();
-		componentManager.add<component::AttackComponent>(m_entity.getId(), attack);
-		component::ColliderComponent collider;
+		componentManager.add<component::combat::AttackComponent>(m_entity.getId(), attack);
+		component::combat::ColliderComponent collider;
 		collider.m_size = playerData.getColliderSize();
 		collider.m_offset = playerData.getColliderOffset();
-		componentManager.add<component::ColliderComponent>(m_entity.getId(), collider);
+		componentManager.add<component::combat::ColliderComponent>(m_entity.getId(), collider);
 
-		componentManager.add<component::PlayerChargeComponent>(m_entity.getId(), {});
+		componentManager.add<component::combat::PlayerChargeComponent>(m_entity.getId(), {});
 		componentManager.add<component::CameraComponent>(m_entity.getId(), {});
 		componentManager.add<component::CameraEffectComponent>(m_entity.getId(), {});
-		componentManager.add<component::AimComponent>(m_entity.getId(), {});
+		componentManager.add<component::combat::AimComponent>(m_entity.getId(), {});
 
 		component::TagComponent tag{};
 		tag.m_tag = constant::Tag::Player;

@@ -1,10 +1,10 @@
 #include "MacAISystem.h"
 #include "game/component/AIComponent.h"
 #include "game/component/VelocityComponent.h"
-#include "game/component/AttackComponent.h"
-#include "game/component/HealthComponent.h"
+#include "game/component/combat/AttackComponent.h"
+#include "game/component/combat/HealthComponent.h"
 #include "game/component/AnimationComponent.h"
-#include "game/component/TelegraphComponent.h"
+#include "game/component/combat/TelegraphComponent.h"
 #include "game/constant/AnimationState.h"
 #include "game/constant/Tag.h"
 #include "game/constant/EnemyType.h"
@@ -71,7 +71,7 @@ namespace game::system::ai
 			if (mac.m_config.m_phase1.m_actionInterval <= 0.0f)
 				continue;
 
-			auto& health{ m_componentManager.get<component::HealthComponent>(entityId) };
+			auto& health{ m_componentManager.get<component::combat::HealthComponent>(entityId) };
 			auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
 			auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
 
@@ -157,9 +157,9 @@ namespace game::system::ai
 				mac.m_windupTimer -= deltaTime;
 
 				// 予兆の進行度を更新（中心はボス足元、形状・向きは溜め開始時に固定済み）
-				if (m_componentManager.has<component::TelegraphComponent>(entityId))
+				if (m_componentManager.has<component::combat::TelegraphComponent>(entityId))
 				{
-					auto& tel{ m_componentManager.get<component::TelegraphComponent>(entityId) };
+					auto& tel{ m_componentManager.get<component::combat::TelegraphComponent>(entityId) };
 					// 予兆はボスの高さではなく足元の地面（Y=0）に描く
 					tel.m_center = core::Vector3{ transform.m_position.x, 0.0f, transform.m_position.z };
 					tel.m_progress = std::clamp(1.0f - mac.m_windupTimer / mac.m_windupDuration, 0.0f, 1.0f);
@@ -190,8 +190,8 @@ namespace game::system::ai
 					default:
 						break;
 					}
-					if (m_componentManager.has<component::TelegraphComponent>(entityId))
-						m_componentManager.get<component::TelegraphComponent>(entityId).m_active = false;
+					if (m_componentManager.has<component::combat::TelegraphComponent>(entityId))
+						m_componentManager.get<component::combat::TelegraphComponent>(entityId).m_active = false;
 					mac.m_state = mac.m_pendingAction;
 					mac.m_actionTimer = windupPhase.m_actionInterval;
 				}
@@ -277,16 +277,16 @@ namespace game::system::ai
 			mac.m_windupTimer = mac.m_windupDuration;
 			mac.m_state = MacState::Windup;
 
-			if (m_componentManager.has<component::TelegraphComponent>(entityId))
+			if (m_componentManager.has<component::combat::TelegraphComponent>(entityId))
 			{
-				auto& tel{ m_componentManager.get<component::TelegraphComponent>(entityId) };
+				auto& tel{ m_componentManager.get<component::combat::TelegraphComponent>(entityId) };
 				tel.m_active = true;
 				// 予兆はボスの高さではなく足元の地面（Y=0）に描く
 				tel.m_center = core::Vector3{ transform.m_position.x, 0.0f, transform.m_position.z };
 				tel.m_progress = 0.0f;
 				if (action == MacState::Ranged)
 				{
-					tel.m_shape = component::TelegraphShape::Sector;
+					tel.m_shape = component::combat::TelegraphShape::Sector;
 					tel.m_facingRad = std::atan2f(dir.z, dir.x);
 					tel.m_radius = RANGED_TELEGRAPH_RANGE;
 					tel.m_halfAngleRad = phase.m_rainbowSpreadDeg * 0.5f * DEG_TO_RAD;
@@ -294,12 +294,12 @@ namespace game::system::ai
 				else if (action == MacState::Nova)
 				{
 					// 全方位ノヴァは全周が危険なので大きな円で予告する
-					tel.m_shape = component::TelegraphShape::Circle;
+					tel.m_shape = component::combat::TelegraphShape::Circle;
 					tel.m_radius = RANGED_TELEGRAPH_RANGE;
 				}
 				else // Melee / Summon は円（近接は攻撃レンジ、召喚は召喚半径）
 				{
-					tel.m_shape = component::TelegraphShape::Circle;
+					tel.m_shape = component::combat::TelegraphShape::Circle;
 					tel.m_radius = (action == MacState::Summon) ? phase.m_summonRadiusMax : phase.m_meleeRange;
 				}
 			}
@@ -338,8 +338,8 @@ namespace game::system::ai
 	// そのため macData.json の attackCooldown は 0 にして AttackSystem 側のゲートを効かせない
 	void MacAISystem::performMelee(core::ecs::EntityId entityId)
 	{
-		if (m_componentManager.has<component::AttackComponent>(entityId))
-			m_componentManager.get<component::AttackComponent>(entityId).m_attackRequested = true;
+		if (m_componentManager.has<component::combat::AttackComponent>(entityId))
+			m_componentManager.get<component::combat::AttackComponent>(entityId).m_attackRequested = true;
 		if (m_componentManager.has<component::AnimationComponent>(entityId))
 			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack1;
 	}
@@ -465,9 +465,9 @@ namespace game::system::ai
 			// ボス自身は雑魚数に含めない
 			if (m_componentManager.has<component::ai::MacAIComponent>(entityId))
 				continue;
-			if (!m_componentManager.has<component::HealthComponent>(entityId))
+			if (!m_componentManager.has<component::combat::HealthComponent>(entityId))
 				continue;
-			if (!m_componentManager.get<component::HealthComponent>(entityId).m_isDead)
+			if (!m_componentManager.get<component::combat::HealthComponent>(entityId).m_isDead)
 				++count;
 		}
 		return count;

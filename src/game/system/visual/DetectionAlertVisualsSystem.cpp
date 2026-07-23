@@ -2,7 +2,7 @@
 #include "game/component/EnemyTypeComponent.h"
 #include "game/component/AlertComponent.h"
 #include "game/component/TransformComponent.h"
-#include "game/component/ColliderComponent.h"
+#include "game/component/combat/ColliderComponent.h"
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
 #include "core/base/ServiceLocator.h"
@@ -147,8 +147,8 @@ namespace game::system::visual
 
 			// 頭上のワールド座標を求める（原点は足元。コライダー高さぶん上へ）
 			float headHeight{ FALLBACK_HEAD_HEIGHT };
-			if (m_componentManager.has<component::ColliderComponent>(entityId))
-				headHeight = m_componentManager.get<component::ColliderComponent>(entityId).m_size.y;
+			if (m_componentManager.has<component::combat::ColliderComponent>(entityId))
+				headHeight = m_componentManager.get<component::combat::ColliderComponent>(entityId).m_size.y;
 
 			core::Vector3 headWorld{ transform.m_position };
 			headWorld.y += headHeight + HEAD_MARGIN;

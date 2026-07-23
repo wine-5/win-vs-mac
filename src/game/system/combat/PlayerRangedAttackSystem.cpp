@@ -2,7 +2,7 @@
 #include "game/component/InputComponent.h"
 #include "game/component/CameraComponent.h"
 #include "game/component/TransformComponent.h"
-#include "game/component/PlayerChargeComponent.h"
+#include "game/component/combat/PlayerChargeComponent.h"
 #include "game/constant/Tag.h"
 #include <utility>
 
@@ -31,10 +31,10 @@ namespace game::system::combat
 		const auto& input{ m_componentManager.get<component::InputComponent>(m_playerId) };
 
 		// プレイヤーのPlayerChargeComponentがあれば更新する
-		bool hasChargeComponent{ m_componentManager.has<component::PlayerChargeComponent>(m_playerId) };
+		bool hasChargeComponent{ m_componentManager.has<component::combat::PlayerChargeComponent>(m_playerId) };
 		if (hasChargeComponent)
 		{
-			auto& playerCharge{ m_componentManager.get<component::PlayerChargeComponent>(m_playerId) };
+			auto& playerCharge{ m_componentManager.get<component::combat::PlayerChargeComponent>(m_playerId) };
 			playerCharge.m_isCharging = m_isCharging;
 			if (m_metadata.m_chargeMaxTime > 0.0f)
 				playerCharge.m_chargeRate = m_chargeTime / m_metadata.m_chargeMaxTime;

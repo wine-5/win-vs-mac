@@ -5,7 +5,7 @@
 #include "core/constant/SeType.h"
 #include "game/attack/IDamageHandler.h"
 
-namespace game::component
+namespace game::component::combat
 {
 	struct AttackComponent;
 }
@@ -40,7 +40,7 @@ namespace game::system::combat
 	   * @param attackerId 攻撃者のEntityId
 	   * @param attack 攻撃者のAttackComponent
 	   */
-	  void resolveAttack(core::ecs::EntityId attackerId, component::AttackComponent& attack);
+	  void resolveAttack(core::ecs::EntityId attackerId, component::combat::AttackComponent& attack);
 
 	  core::ecs::ComponentManager& m_componentManager;
 	  core::base::EventBus& m_eventBus;

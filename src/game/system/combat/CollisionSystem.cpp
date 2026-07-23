@@ -1,9 +1,9 @@
 ﻿#include "CollisionSystem.h"
 #include "game/component/TransformComponent.h"
-#include "game/component/ColliderComponent.h"
+#include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/VelocityComponent.h"
-#include "game/component/DeathComponent.h"
+#include "game/component/combat/DeathComponent.h"
 #include "game/constant/Tag.h"
 #include <cmath>
 
@@ -24,7 +24,7 @@ namespace game::system::combat
 
 	void CollisionSystem::update(float deltaTime)
 	{
-		auto entities{ m_componentManager.getAllEntities<component::ColliderComponent>() };
+		auto entities{ m_componentManager.getAllEntities<component::combat::ColliderComponent>() };
 
 		for (size_t i = 0; i < entities.size(); i++)
 		{
@@ -40,8 +40,8 @@ namespace game::system::combat
 	{
 		auto& transformA = m_componentManager.get<component::TransformComponent>(a);
 		auto& transformB = m_componentManager.get<component::TransformComponent>(b);
-		auto& colliderA = m_componentManager.get<component::ColliderComponent>(a);
-		auto& colliderB = m_componentManager.get<component::ColliderComponent>(b);
+		auto& colliderA = m_componentManager.get<component::combat::ColliderComponent>(a);
+		auto& colliderB = m_componentManager.get<component::combat::ColliderComponent>(b);
 
 		// 各軸の中心座標
 		core::Vector3 centerA{ transformA.m_position + colliderA.m_offset };
@@ -96,8 +96,8 @@ namespace game::system::combat
 
 		auto& riderTransform = m_componentManager.get<component::TransformComponent>(riderId);
 		auto& groundTransform = m_componentManager.get<component::TransformComponent>(groundId);
-		auto& riderCollider = m_componentManager.get<component::ColliderComponent>(riderId);
-		auto& groundCollider = m_componentManager.get<component::ColliderComponent>(groundId);
+		auto& riderCollider = m_componentManager.get<component::combat::ColliderComponent>(riderId);
+		auto& groundCollider = m_componentManager.get<component::combat::ColliderComponent>(groundId);
 		auto& riderVelocity = m_componentManager.get<component::VelocityComponent>(riderId);
 
 		// 各コライダーの中心とAABBの境界を計算
@@ -116,7 +116,7 @@ namespace game::system::combat
 		// 死亡中の敵は地面で反発してバウンドする（Safariの落下演出）。
 		// 落下速度が閾値を下回ったら跳ねるのをやめて静止させ、着地済みとして記録する。
 		// この着地フラグを見てEnemyDeathSystemがバウンド完了後に消失フェードを始める
-		auto* death{ m_componentManager.tryGet<component::DeathComponent>(riderId) };
+		auto* death{ m_componentManager.tryGet<component::combat::DeathComponent>(riderId) };
 
 		// 初回接地の時点で「地面に触れた」と記録する。EnemyDeathSystemはこれを見て
 		// バウンド完了を待たずに落下死のガタガタ揺れを止める

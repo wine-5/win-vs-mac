@@ -1,5 +1,5 @@
 ﻿#pragma once
-namespace game::component
+namespace game::component::combat
 {
 	/**
 	 * @brief 体力を持つコンポーネント
@@ -15,4 +15,4 @@ namespace game::component
 		// trueの間はダメージを受けない（ボス覚醒演出中など）。AttackSystemが参照する
 		bool m_isInvincible{ false };
 	};
-} // namespace game::component
+} // namespace game::component::combat

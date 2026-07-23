@@ -1,6 +1,6 @@
 ﻿#include "ProjectileSystem.h"
-#include "game/component/ProjectileComponent.h"
-#include "game/component/AttackComponent.h"
+#include "game/component/combat/ProjectileComponent.h"
+#include "game/component/combat/AttackComponent.h"
 #include "game/event/InGameEvents.h"
 #include <algorithm>
 
@@ -15,14 +15,14 @@ namespace game::system::combat
 		m_subscriptions.push_back(m_eventBus.subscribe<event::AttackHitEvent>(
 		    [this](const event::AttackHitEvent& e)
 		    {
-			    if (m_componentManager.has<component::ProjectileComponent>(e.m_attackerId))
+			    if (m_componentManager.has<component::combat::ProjectileComponent>(e.m_attackerId))
 				    m_pendingDestroy.push_back(e.m_attackerId);
 		    }));
 	}
 
 	void ProjectileSystem::update(float deltaTime)
 	{
-		auto projectiles{ m_componentManager.getAllEntities<component::ProjectileComponent>() };
+		auto projectiles{ m_componentManager.getAllEntities<component::combat::ProjectileComponent>() };
 		for (auto id : projectiles)
 		{
 			// 既にヒット等で破棄予約済みの弾は再ヒット判定させない。
@@ -34,7 +34,7 @@ namespace game::system::combat
 			if (std::ranges::find(m_pendingDestroy, id) != m_pendingDestroy.end())
 				continue;
 
-			auto& projectile{ m_componentManager.get<component::ProjectileComponent>(id) };
+			auto& projectile{ m_componentManager.get<component::combat::ProjectileComponent>(id) };
 			projectile.m_remainingLifetime -= deltaTime;
 			if (projectile.m_remainingLifetime <= 0.0f)
 			{
@@ -43,14 +43,14 @@ namespace game::system::combat
 			}
 
 			// AttackSystemに毎フレーム拾わせ続ける（接触したらヒット扱いになる）
-			if (m_componentManager.has<component::AttackComponent>(id))
-				m_componentManager.get<component::AttackComponent>(id).m_attackRequested = true;
+			if (m_componentManager.has<component::combat::AttackComponent>(id))
+				m_componentManager.get<component::combat::AttackComponent>(id).m_attackRequested = true;
 		}
 
 		// 破棄予約をまとめて処理する（多重破棄を防ぐため存在チェックしてから消す）
 		for (auto id : m_pendingDestroy)
 		{
-			if (!m_componentManager.has<component::ProjectileComponent>(id))
+			if (!m_componentManager.has<component::combat::ProjectileComponent>(id))
 				continue;
 			m_componentManager.removeAll(id);
 			m_entityManager.destroy(core::ecs::Entity(id));

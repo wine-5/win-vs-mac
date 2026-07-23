@@ -4,7 +4,7 @@
 #include "game/component/AIComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
-#include "game/component/AttackComponent.h"
+#include "game/component/combat/AttackComponent.h"
 #include "game/component/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
 #include <cmath>
@@ -190,7 +190,7 @@ namespace game::system::ai
 
 			// 攻撃判定：索敵範囲内なら毎フレーム要求だけ出す（レンジ判定なし）。
 			// 実際に撃つ間隔はAttackComponentのクールダウンでAttackSystemが管理する
-			if (auto* attack{ m_componentManager.tryGet<component::AttackComponent>(entityId) })
+			if (auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(entityId) })
 				attack->m_attackRequested = true;
 		}
 	}

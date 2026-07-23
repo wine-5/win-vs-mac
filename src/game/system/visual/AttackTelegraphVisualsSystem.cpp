@@ -1,7 +1,7 @@
 ﻿#include "AttackTelegraphVisualsSystem.h"
-#include "game/component/AttackComponent.h"
+#include "game/component/combat/AttackComponent.h"
 #include "game/component/TransformComponent.h"
-#include "game/component/ProjectileComponent.h"
+#include "game/component/combat/ProjectileComponent.h"
 #include "core/utility/Color.h"
 #include <algorithm>
 
@@ -29,15 +29,15 @@ namespace game::system::visual
 	{
 		using core::utility::Color;
 
-		auto attackers{ m_componentManager.getAllEntities<component::AttackComponent>() };
+		auto attackers{ m_componentManager.getAllEntities<component::combat::AttackComponent>() };
 		for (auto attackerId : attackers)
 		{
-			const auto& attack{ m_componentManager.get<component::AttackComponent>(attackerId) };
+			const auto& attack{ m_componentManager.get<component::combat::AttackComponent>(attackerId) };
 
 			// ワインドアップ中の近接攻撃だけを対象にする（弾は地面予兆を出さない）
 			if (!attack.m_windupPending || attack.m_windupDelay <= 0.0f)
 				continue;
-			if (m_componentManager.has<component::ProjectileComponent>(attackerId))
+			if (m_componentManager.has<component::combat::ProjectileComponent>(attackerId))
 				continue;
 			if (!m_componentManager.has<component::TransformComponent>(attackerId))
 				continue;

@@ -1,6 +1,6 @@
 ﻿#include "EnemyDeathSystem.h"
 #include "game/component/EnemyTypeComponent.h"
-#include "game/component/DeathComponent.h"
+#include "game/component/combat/DeathComponent.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/AnimationComponent.h"
 #include "game/component/VelocityComponent.h"
@@ -75,16 +75,16 @@ namespace game::system::combat
 	{
 		// 死亡待ち中の敵の「死亡アニメ」が完了したら、消失フェードを解禁する
 		if (e.m_state == constant::AnimationState::Dying &&
-		    m_componentManager.has<component::DeathComponent>(e.m_entityId))
-			m_componentManager.get<component::DeathComponent>(e.m_entityId).m_animFinished = true;
+		    m_componentManager.has<component::combat::DeathComponent>(e.m_entityId))
+			m_componentManager.get<component::combat::DeathComponent>(e.m_entityId).m_animFinished = true;
 	}
 
 	void EnemyDeathSystem::onEnemyDead(const event::EnemyDeadEvent& e)
 	{
-		if (m_componentManager.has<component::DeathComponent>(e.m_entityId))
+		if (m_componentManager.has<component::combat::DeathComponent>(e.m_entityId))
 			return;
 
-		m_componentManager.add<component::DeathComponent>(e.m_entityId, component::DeathComponent{});
+		m_componentManager.add<component::combat::DeathComponent>(e.m_entityId, component::combat::DeathComponent{});
 
 		// 死体が横滑り・横飛びしないよう水平速度を止める。垂直は残し、重力で落下させる。
 		if (m_componentManager.has<component::VelocityComponent>(e.m_entityId))
@@ -112,15 +112,15 @@ namespace game::system::combat
 			}
 		}
 		if (!hasDyingClip)
-			m_componentManager.get<component::DeathComponent>(e.m_entityId).m_animFinished = true;
+			m_componentManager.get<component::combat::DeathComponent>(e.m_entityId).m_animFinished = true;
 	}
 
 	void EnemyDeathSystem::update(float deltaTime)
 	{
-		auto entities{ m_componentManager.getAllEntities<component::DeathComponent>() };
+		auto entities{ m_componentManager.getAllEntities<component::combat::DeathComponent>() };
 		for (auto entityId : entities)
 		{
-			auto& death{ m_componentManager.get<component::DeathComponent>(entityId) };
+			auto& death{ m_componentManager.get<component::combat::DeathComponent>(entityId) };
 			death.m_elapsed += deltaTime;
 
 			// 落下する敵（Safari）は着地するまで左右にガタガタ揺れながら故障したように落ちる。

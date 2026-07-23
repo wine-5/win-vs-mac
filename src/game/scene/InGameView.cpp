@@ -2,10 +2,10 @@
 #include "core/utility/Color.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/RenderComponent.h"
-#include "game/component/AimComponent.h"
-#include "game/component/ProjectileComponent.h"
+#include "game/component/combat/AimComponent.h"
+#include "game/component/combat/ProjectileComponent.h"
 #include "game/component/VelocityComponent.h"
-#include "game/component/PlayerChargeComponent.h"
+#include "game/component/combat/PlayerChargeComponent.h"
 #include "game/system/visual/PlayerChargeVisualsSystem.h"
 #include "game/system/visual/MacAwakenEffectSystem.h"
 #include "game/system/visual/DetectionAlertVisualsSystem.h"
@@ -138,13 +138,13 @@ namespace game::scene
 		// 敵を捕捉していれば赤、最大溜め完了ならWindowsロゴの水色、通常は黒
 		// （捕捉＝発射判断に直結する情報なので最優先で表示する）
 		bool onTarget{ false };
-		if (m_componentManager.has<component::AimComponent>(playerId))
-			onTarget = m_componentManager.get<component::AimComponent>(playerId).m_hasTarget;
+		if (m_componentManager.has<component::combat::AimComponent>(playerId))
+			onTarget = m_componentManager.get<component::combat::AimComponent>(playerId).m_hasTarget;
 
 		bool isMaxCharged{ false };
-		if (m_componentManager.has<component::PlayerChargeComponent>(playerId))
+		if (m_componentManager.has<component::combat::PlayerChargeComponent>(playerId))
 		{
-			const auto& charge{ m_componentManager.get<component::PlayerChargeComponent>(playerId) };
+			const auto& charge{ m_componentManager.get<component::combat::PlayerChargeComponent>(playerId) };
 			isMaxCharged = charge.m_isCharging && charge.m_chargeRate >= 1.0f;
 		}
 
@@ -182,7 +182,7 @@ namespace game::scene
 		// 発射地点からの移動距離に掛ける係数（1ワールド単位あたりのタンブル回転量[rad]）
 		constexpr float TUMBLE_PER_UNIT{ 0.015f };
 
-		auto projectiles{ m_componentManager.getAllEntities<component::ProjectileComponent>() };
+		auto projectiles{ m_componentManager.getAllEntities<component::combat::ProjectileComponent>() };
 		for (auto id : projectiles)
 		{
 			if (!m_componentManager.has<component::RenderComponent>(id))
@@ -193,7 +193,7 @@ namespace game::scene
 				continue;
 
 			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
-			const auto& projectile{ m_componentManager.get<component::ProjectileComponent>(id) };
+			const auto& projectile{ m_componentManager.get<component::combat::ProjectileComponent>(id) };
 
 			// 発射地点からの移動距離に応じてタンブルさせる（状態を持たず距離から導出する）
 			const core::Vector3 traveled{

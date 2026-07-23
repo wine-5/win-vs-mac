@@ -1,8 +1,8 @@
 ﻿#include "TargetingSystem.h"
-#include "game/component/AimComponent.h"
+#include "game/component/combat/AimComponent.h"
 #include "game/component/CameraComponent.h"
 #include "game/component/TransformComponent.h"
-#include "game/component/HealthComponent.h"
+#include "game/component/combat/HealthComponent.h"
 #include "game/component/TagComponent.h"
 #include <cmath>
 
@@ -23,7 +23,7 @@ namespace game::system::combat
 	void TargetingSystem::update(float deltaTime)
 	{
 		// AimComponent＋CameraComponentを持つ主体（カメラで照準するもの）を走査する
-		auto aimers{ m_componentManager.getAllEntities<component::AimComponent>() };
+		auto aimers{ m_componentManager.getAllEntities<component::combat::AimComponent>() };
 		for (auto aimerId : aimers)
 		{
 			if (!m_componentManager.has<component::CameraComponent>(aimerId) ||
@@ -31,7 +31,7 @@ namespace game::system::combat
 			    !m_componentManager.has<component::TagComponent>(aimerId))
 				continue;
 
-			auto& aim{ m_componentManager.get<component::AimComponent>(aimerId) };
+			auto& aim{ m_componentManager.get<component::combat::AimComponent>(aimerId) };
 			const auto& camera{ m_componentManager.get<component::CameraComponent>(aimerId) };
 			const auto& aimerTransform{ m_componentManager.get<component::TransformComponent>(aimerId) };
 			const auto aimerTag{ m_componentManager.get<component::TagComponent>(aimerId).m_tag };
@@ -46,7 +46,7 @@ namespace game::system::combat
 			float bestDot{ ON_TARGET_COS };
 			core::ecs::EntityId bestTarget{ core::ecs::INVALID_ENTITY_ID };
 
-			auto candidates{ m_componentManager.getAllEntities<component::HealthComponent>() };
+			auto candidates{ m_componentManager.getAllEntities<component::combat::HealthComponent>() };
 			for (auto targetId : candidates)
 			{
 				if (targetId == aimerId)
@@ -58,7 +58,7 @@ namespace game::system::combat
 				    m_componentManager.get<component::TagComponent>(targetId).m_tag == aimerTag)
 					continue;
 				// 死亡した対象は狙わない
-				if (m_componentManager.get<component::HealthComponent>(targetId).m_isDead)
+				if (m_componentManager.get<component::combat::HealthComponent>(targetId).m_isDead)
 					continue;
 
 				const auto& targetTransform{ m_componentManager.get<component::TransformComponent>(targetId) };

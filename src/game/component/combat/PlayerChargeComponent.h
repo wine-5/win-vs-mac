@@ -1,6 +1,6 @@
 #pragma once
 
-namespace game::component
+namespace game::component::combat
 {
 	/**
 	 * @brief プレイヤーの溜め攻撃の視覚演出を担当するコンポーネント
@@ -13,4 +13,4 @@ namespace game::component
 		bool m_isCharging{};  // 溜め中かどうか
 		float m_chargeRate{}; // 溜め率（0.0 ~ 1.0）
 	};
-} // namespace game::component
+} // namespace game::component::combat
