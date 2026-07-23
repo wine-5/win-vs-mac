@@ -23,10 +23,5 @@ namespace game::component
 		// 前フレームでプレイヤーを索敵範囲内に捉えていたか。
 		// DetectionSystemが「未索敵→索敵」の切り替わり（発見の瞬間）を検知するのに使う
 		bool m_wasAware{ false };
-
-		// 距離維持型用のパラメータ
-		float m_preferredDistanceMin{0.0f}; // これより近づかれたら後退する
-		float m_preferredDistanceMax{0.0f}; // これより遠ければ接近する
-		float m_hoverHeight{0.0f}; // 浮遊高度(0なら地上)
 	};
 } // namespace game::component
