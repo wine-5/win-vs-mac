@@ -39,19 +39,10 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 	);
 
 	// ResourceManager を生成して登録（Facade パターン：内部でリポジトリが管理）
-	try
-	{
-		auto resourceManager = std::make_unique<infrastructure::ResourceManager>();
-
-		core::base::ServiceLocator::provide<core::iface::IResourceManager>(
-			std::move(resourceManager)
-		);
-	}
-	catch (const std::exception& e)
-	{
-		LOG_E("ResourceManager の初期化に失敗しました: {}", e.what());
-		return;
-	}
+	// 失敗時は握りつぶさず伝播させる。リソースが欠けたまま起動すると
+	// 「モデルが出ない・音が鳴らない」状態で原因究明が遅れるため（Fail Fast）
+	core::base::ServiceLocator::provide<core::iface::IResourceManager>(
+	    std::make_unique<infrastructure::ResourceManager>());
 
 	// デバッグ用ロガーを登録
 	core::base::ServiceLocator::provide<core::iface::ILogger>(
