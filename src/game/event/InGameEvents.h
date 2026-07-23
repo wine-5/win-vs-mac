@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "core/ecs/Entity.h"
-#include "core/event/IGameEvent.h"
+#include "core/interface/IGameEvent.h"
 #include "core/constant/EffectType.h"
 #include "core/constant/SeType.h"
 #include "core/data/MacMetadata.h"

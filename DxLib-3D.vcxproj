@@ -335,7 +335,7 @@
     <ClInclude Include="src\game\data\FileEquipmentData.h" />
     <ClInclude Include="src\game\data\FileExtensionBonus.h" />
     <ClInclude Include="src\game\data\FileExtensionType.h" />
-    <ClInclude Include="src\core\event\IGameEvent.h" />
+    <ClInclude Include="src\core\interface\IGameEvent.h" />
     <ClInclude Include="src\game\factory\EnemyFactory.h" />
     <ClInclude Include="src\game\factory\EnemySpawner.h" />
     <ClInclude Include="src\game\factory\ProjectileFactory.h" />
