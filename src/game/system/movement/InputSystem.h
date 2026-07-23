@@ -9,7 +9,7 @@ namespace game
 	class GameManager; // DEBUG: デバッグモード参照用の前方宣言（リリース時に削除）
 } // namespace game
 
-namespace game::system
+namespace game::system::movement
 {
 	/**
 	 * @brief キーボード入力をInputComponentに反映するSystem
@@ -45,4 +45,4 @@ namespace game::system
 		core::iface::IInputProvider& m_inputProvider;
 		GameManager& m_gameManager; // DEBUG: デバッグモード状態の参照（リリース時に削除）
 	};
-} // namespace game::system
+} // namespace game::system::movement

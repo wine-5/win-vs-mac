@@ -4,7 +4,7 @@
 #include "game/component/InputComponent.h"
 #include "game/GameManager.h"
 
-namespace game::system
+namespace game::system::movement
 {
 	InputSystem::InputSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId, core::iface::IInputProvider& inputProvider, GameManager& gameManager)
 	    : m_componentManager{ componentManager }
@@ -90,4 +90,4 @@ namespace game::system
 		if (m_inputProvider.isPadButtonDown(core::input::GamePadCode::ButtonB))
 			input.m_jumpPressed = true;
 	}
-} // namespace game::system
+} // namespace game::system::movement

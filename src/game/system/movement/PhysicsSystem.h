@@ -3,7 +3,7 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 
-namespace game::system
+namespace game::system::movement
 {
 	/**
 	 * @brief 速度を元に位置を更新・重力・ジャンプを処理するSystem
@@ -33,4 +33,4 @@ namespace game::system
 		float m_jumpForce{DEFAULT_JUMP_FORCE};
 		float m_maxFallSpeed{DEFAULT_MAX_FALL_SPEED};
 	};
-} // namespace game::system
+} // namespace game::system::movement

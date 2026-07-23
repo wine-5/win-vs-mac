@@ -3,7 +3,7 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 
-namespace game::system
+namespace game::system::movement
 {
 	/**
 	 * @brief 入力を元に速度を計算するSystem
@@ -32,4 +32,4 @@ namespace game::system
 		float m_moveSpeed{0.0f};
 		float m_dashMultiplier{ 1.0f };
 	};
-} // namespace game::system
+} // namespace game::system::movement

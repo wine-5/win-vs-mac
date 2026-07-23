@@ -4,7 +4,7 @@
 #include "game/component/InputComponent.h"
 #include "game/component/ProjectileComponent.h"
 
-namespace game::system
+namespace game::system::movement
 {
 	PhysicsSystem::PhysicsSystem(core::ecs::ComponentManager& componentManager)
 		: m_componentManager{ componentManager }
@@ -43,4 +43,4 @@ namespace game::system
 			transform.m_position.z += velocity.m_velocity.z * deltaTime;
 		}
 	}
-} // namespace game::system
+} // namespace game::system::movement
