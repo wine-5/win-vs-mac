@@ -31,7 +31,7 @@ Application::Application(int screenWidth, int screenHeight)
 
 	// 初期シーンを設定する
 	// DEBUG: リリース時はBIOSからスタートすること
-	m_sceneManager->changeScene(game::scene::SceneType::InGame);
+	m_sceneManager->changeScene(game::scene::SceneType::Bios);
 }
 
 void Application::run()
