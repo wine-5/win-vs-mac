@@ -2,8 +2,8 @@
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/PatrolComponent.h"
 #include "game/component/ai/AIComponent.h"
-#include "game/component/TransformComponent.h"
-#include "game/component/VelocityComponent.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
@@ -80,7 +80,7 @@ namespace game::system::ai
 			if (ai.m_targetEntity.getId() == 0)
 				continue;
 
-			auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+			auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 
 			// 徘徊の基準点（スポーン地点）を初回だけ記録する（共通のPatrolComponentが保持する）
 			auto& patrol{ m_componentManager.get<component::ai::PatrolComponent>(entityId) };
@@ -90,7 +90,7 @@ namespace game::system::ai
 				patrol.m_homeInitialized = true;
 			}
 
-			auto& targetTransform{ m_componentManager.get<component::TransformComponent>(ai.m_targetEntity.getId()) };
+			auto& targetTransform{ m_componentManager.get<component::movement::TransformComponent>(ai.m_targetEntity.getId()) };
 
 			// ターゲットへの方向ベクトルを計算（3D全軸）
 			core::Vector3 direction{};
@@ -147,9 +147,9 @@ namespace game::system::ai
 			}
 
 			// 移動速度を設定（水平と垂直を分ける場合もあるが、ここでは統一）
-			if (m_componentManager.has<component::VelocityComponent>(entityId))
+			if (m_componentManager.has<component::movement::VelocityComponent>(entityId))
 			{
-				auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+				auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 				velocity.m_velocity.x = moveDirection.x * ai.m_moveSpeed;
 				velocity.m_velocity.y = moveDirection.y * ai.m_moveSpeed;
 				velocity.m_velocity.z = moveDirection.z * ai.m_moveSpeed;
@@ -162,9 +162,9 @@ namespace game::system::ai
 				// （重力があれば、重力で下がるので、その分を補正）
 				const float target{ hoverTargetHeight(rangeKeep.m_hoverHeight, m_elapsedTime, swayPhase, rangeKeep.m_attackAnimTimer) };
 				const float heightDiff{ target - transform.m_position.y };
-				if (m_componentManager.has<component::VelocityComponent>(entityId))
+				if (m_componentManager.has<component::movement::VelocityComponent>(entityId))
 				{
-					auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+					auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 					velocity.m_velocity.y += heightDiff * HOVER_RESTORE_SPEED * deltaTime;
 				}
 			}
@@ -195,14 +195,14 @@ namespace game::system::ai
 		}
 	}
 	void RangeKeepAISystem::updatePatrol(core::ecs::EntityId entityId, component::ai::RangeKeepAIComponent& rangeKeep,
-	    component::TransformComponent& transform, float deltaTime)
+	    component::movement::TransformComponent& transform, float deltaTime)
 	{
 		auto& patrol{ m_componentManager.get<component::ai::PatrolComponent>(entityId) };
-		const bool hasVelocity{ m_componentManager.has<component::VelocityComponent>(entityId) };
+		const bool hasVelocity{ m_componentManager.has<component::movement::VelocityComponent>(entityId) };
 		const float swayPhase{ static_cast<float>(entityId) * 1.7f };
 
 		// ホバー高度（アイドル揺らぎ込み）を垂直速度へ反映する。徘徊の移動中も待機中も浮遊は保つ
-		auto applyHover{ [&](component::VelocityComponent& velocity)
+		auto applyHover{ [&](component::movement::VelocityComponent& velocity)
 			{
 			    if (rangeKeep.m_hoverHeight > 0.0f)
 			    {
@@ -215,7 +215,7 @@ namespace game::system::ai
 
 		if (!hasVelocity)
 			return;
-		auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+		auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 
 		// 到着後の待機中：水平は止めつつホバーは維持する
 		if (patrol.m_pauseTimer > 0.0f)

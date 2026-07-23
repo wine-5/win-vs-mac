@@ -1,6 +1,6 @@
 ﻿#include "DebugGizmoView.h"
 #include "core/utility/Color.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/ai/AIComponent.h"
@@ -79,7 +79,7 @@ namespace game::ui::debug
 		auto colliderEntities{ m_componentManager.getAllEntities<component::combat::ColliderComponent>() };
 		for (auto id : colliderEntities)
 		{
-			auto& colliderTf{ m_componentManager.get<component::TransformComponent>(id) };
+			auto& colliderTf{ m_componentManager.get<component::movement::TransformComponent>(id) };
 			auto& collider{ m_componentManager.get<component::combat::ColliderComponent>(id) };
 			core::Vector3 colliderCenter{ colliderTf.m_position + collider.m_offset };
 			m_renderer.drawCollider(colliderCenter, collider.m_size, core::utility::Color::BLUE);
@@ -92,7 +92,7 @@ namespace game::ui::debug
 		auto attackers{ m_componentManager.getAllEntities<component::combat::AttackComponent>() };
 		for (auto id : attackers)
 		{
-			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
+			auto& atkTransform{ m_componentManager.get<component::movement::TransformComponent>(id) };
 			auto& atk{ m_componentManager.get<component::combat::AttackComponent>(id) };
 
 			// 浮遊型（Safari）はスポーン時に確定した敵種で判定する
@@ -123,7 +123,7 @@ namespace game::ui::debug
 			if (!m_componentManager.has<component::ai::AIComponent>(id))
 				continue;
 
-			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
+			auto& atkTransform{ m_componentManager.get<component::movement::TransformComponent>(id) };
 			auto& ai{ m_componentManager.get<component::ai::AIComponent>(id) };
 
 			// 浮遊型（Safari）はスポーン時に確定した敵種で判定する
@@ -150,7 +150,7 @@ namespace game::ui::debug
 			if (!m_componentManager.has<component::combat::AttackComponent>(id))
 				continue;
 
-			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
+			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(id) };
 			const auto& atk{ m_componentManager.get<component::combat::AttackComponent>(id) };
 
 			m_renderer.drawDebugSphere(transform.m_position, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));

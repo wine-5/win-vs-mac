@@ -1,7 +1,7 @@
 ﻿#include "InputSystem.h"
 #include "core/input/KeyCode.h"
 #include "core/input/GamePadCode.h"
-#include "game/component/InputComponent.h"
+#include "game/component/movement/InputComponent.h"
 #include "game/GameManager.h"
 
 namespace game::system::movement
@@ -16,7 +16,7 @@ namespace game::system::movement
 
 	void InputSystem::update(float deltaTime)
 	{
-		auto& input = m_componentManager.get<component::InputComponent>(m_entityId);
+		auto& input = m_componentManager.get<component::movement::InputComponent>(m_entityId);
 
 		// キーを離したときに前フレームの値が残らないように初期化
 		input.m_moveX = INPUT_NEUTRAL;

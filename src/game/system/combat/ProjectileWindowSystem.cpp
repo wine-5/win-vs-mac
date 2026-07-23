@@ -1,6 +1,6 @@
 ﻿#include "ProjectileWindowSystem.h"
 #include "game/component/combat/ProjectileComponent.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/constant/Tag.h"
@@ -36,7 +36,7 @@ namespace game::system::combat
 		auto projectiles{ m_componentManager.getAllEntities<component::combat::ProjectileComponent>() };
 		for (auto id : projectiles)
 		{
-			if (!m_componentManager.has<component::TransformComponent>(id))
+			if (!m_componentManager.has<component::movement::TransformComponent>(id))
 				continue;
 
 			// 実OSウィンドウはプレイヤーの弾だけ。敵のタブ弾は3Dモデルで描くので対象外
@@ -44,7 +44,7 @@ namespace game::system::combat
 			    m_componentManager.get<component::TagComponent>(id).m_tag != constant::Tag::Player)
 				continue;
 
-			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
+			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(id) };
 			const auto& projectile{ m_componentManager.get<component::combat::ProjectileComponent>(id) };
 
 			// 発射位置から十分離れるまでは出さない（発射者を覆わないようにする）

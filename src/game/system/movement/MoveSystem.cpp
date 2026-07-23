@@ -1,7 +1,7 @@
 ﻿#include "MoveSystem.h"
-#include "game/component/InputComponent.h"
-#include "game/component/VelocityComponent.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/InputComponent.h"
+#include "game/component/movement/VelocityComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/component/AnimationComponent.h"
 #include "game/component/CameraComponent.h"
 #include <cmath>
@@ -15,9 +15,9 @@ namespace game::system::movement
 
 	void MoveSystem::update(float deltaTime)
 	{
-		auto& input = m_componentManager.get<component::InputComponent>(m_entityId);
-		auto& velocity = m_componentManager.get<component::VelocityComponent>(m_entityId);
-		auto& transform = m_componentManager.get<component::TransformComponent>(m_entityId);
+		auto& input = m_componentManager.get<component::movement::InputComponent>(m_entityId);
+		auto& velocity = m_componentManager.get<component::movement::VelocityComponent>(m_entityId);
+		auto& transform = m_componentManager.get<component::movement::TransformComponent>(m_entityId);
 
 		// カメラのyawを基準に、入力をカメラ相対のワールド方向へ変換する
 		float cameraYaw{ 0.0f };

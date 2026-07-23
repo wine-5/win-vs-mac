@@ -425,7 +425,7 @@
     <ClInclude Include="src\game\actor\Player.h" />
     <ClInclude Include="src\core\ecs\ComponentArray.h" />
     <ClInclude Include="src\core\ecs\ComponentManager.h" />
-    <ClInclude Include="src\game\component\InputComponent.h" />
+    <ClInclude Include="src\game\component\movement\InputComponent.h" />
     <ClInclude Include="src\game\component\CameraComponent.h" />
     <ClInclude Include="src\game\component\CameraEffectComponent.h" />
     <ClInclude Include="src\game\component\combat\AimComponent.h" />
@@ -435,8 +435,8 @@
     <ClInclude Include="src\game\component\ai\RangeKeepAIComponent.h" />
     <ClInclude Include="src\game\component\ai\MacAIComponent.h" />
     <ClInclude Include="src\game\component\RenderComponent.h" />
-    <ClInclude Include="src\game\component\TransformComponent.h" />
-    <ClInclude Include="src\game\component\VelocityComponent.h" />
+    <ClInclude Include="src\game\component\movement\TransformComponent.h" />
+    <ClInclude Include="src\game\component\movement\VelocityComponent.h" />
     <ClInclude Include="src\core\ecs\Entity.h" />
     <ClInclude Include="src\core\ecs\EntityManager.h" />
     <ClInclude Include="src\core\ecs\IComponent.h" />

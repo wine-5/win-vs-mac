@@ -1,7 +1,7 @@
 #include "EnemyBase.h"
 #include "game/actor/EnemyBehaviors.h"
-#include "game/component/TransformComponent.h"
-#include "game/component/VelocityComponent.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/movement/VelocityComponent.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/ai/AIComponent.h"
@@ -45,12 +45,12 @@ namespace game::actor
 
 	void EnemyBase::buildCommonComponents()
 	{
-		component::TransformComponent transform{};
+		component::movement::TransformComponent transform{};
 		transform.m_position = m_enemyData.getPosition();
 		transform.m_scale = m_enemyData.getScale();
-		m_componentManager.add<component::TransformComponent>(m_entity.getId(), transform);
+		m_componentManager.add<component::movement::TransformComponent>(m_entity.getId(), transform);
 
-		m_componentManager.add<component::VelocityComponent>(m_entity.getId(), {});
+		m_componentManager.add<component::movement::VelocityComponent>(m_entity.getId(), {});
 		m_componentManager.add<component::RenderComponent>(m_entity.getId(), component::RenderComponent{ .m_modelHandle = m_modelHandle });
 		m_componentManager.add<component::HitEffectComponent>(m_entity.getId(), {});
 		m_componentManager.add<component::EffectComponent>(m_entity.getId(), {});

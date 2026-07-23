@@ -1,7 +1,7 @@
 ﻿#include "PlayerRangedAttackSystem.h"
-#include "game/component/InputComponent.h"
+#include "game/component/movement/InputComponent.h"
 #include "game/component/CameraComponent.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
 #include "game/constant/Tag.h"
 #include <utility>
@@ -24,11 +24,11 @@ namespace game::system::combat
 		if (m_cooldownTimer > 0.0f)
 			m_cooldownTimer -= deltaTime;
 
-		if (!m_componentManager.has<component::InputComponent>(m_playerId) ||
+		if (!m_componentManager.has<component::movement::InputComponent>(m_playerId) ||
 		    !m_componentManager.has<component::CameraComponent>(m_playerId))
 			return;
 
-		const auto& input{ m_componentManager.get<component::InputComponent>(m_playerId) };
+		const auto& input{ m_componentManager.get<component::movement::InputComponent>(m_playerId) };
 
 		// プレイヤーのPlayerChargeComponentがあれば更新する
 		bool hasChargeComponent{ m_componentManager.has<component::combat::PlayerChargeComponent>(m_playerId) };
@@ -78,7 +78,7 @@ namespace game::system::combat
 	void PlayerRangedAttackSystem::fire(float chargeRate)
 	{
 		const auto& camera{ m_componentManager.get<component::CameraComponent>(m_playerId) };
-		const auto& transform{ m_componentManager.get<component::TransformComponent>(m_playerId) };
+		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_playerId) };
 
 		// 溜め率に応じて倍率を線形補間する（0で等倍、1で最大倍率）
 		const float damageMultiplier{ 1.0f + (m_metadata.m_chargeDamageMultiplier - 1.0f) * chargeRate };

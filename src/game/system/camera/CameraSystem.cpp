@@ -1,6 +1,6 @@
 ﻿#include "CameraSystem.h"
 #include "game/component/CameraComponent.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/component/CameraEffectComponent.h"
 #include "game/GameManager.h"
 #include <cmath>
@@ -31,7 +31,7 @@ namespace game::system::camera
 			return;
 
 		auto& camera{ m_componentManager.get<component::CameraComponent>(m_targetEntityId) };
-		auto& transform{ m_componentManager.get<component::TransformComponent>(m_targetEntityId) };
+		auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_targetEntityId) };
 
 		// マウス移動量で yaw/pitch を更新する
 		int deltaX{}, deltaY{};

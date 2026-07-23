@@ -1,7 +1,7 @@
 ﻿#include "DetectionAlertVisualsSystem.h"
 #include "game/component/EnemyTypeComponent.h"
 #include "game/component/ai/AlertComponent.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
@@ -139,11 +139,11 @@ namespace game::system::visual
 		auto entities{ m_componentManager.getAllEntities<component::ai::AlertComponent>() };
 		for (auto entityId : entities)
 		{
-			if (!m_componentManager.has<component::TransformComponent>(entityId))
+			if (!m_componentManager.has<component::movement::TransformComponent>(entityId))
 				continue;
 
 			const auto& alert{ m_componentManager.get<component::ai::AlertComponent>(entityId) };
-			const auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 
 			// 頭上のワールド座標を求める（原点は足元。コライダー高さぶん上へ）
 			float headHeight{ FALLBACK_HEAD_HEIGHT };

@@ -1,6 +1,6 @@
 #include "ProjectileFactory.h"
-#include "game/component/TransformComponent.h"
-#include "game/component/VelocityComponent.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
@@ -22,19 +22,19 @@ namespace game::factory
 		const core::ecs::Entity entity{ m_entityManager.create() };
 		const core::ecs::EntityId id{ entity.getId() };
 
-		component::TransformComponent transform{};
+		component::movement::TransformComponent transform{};
 		transform.m_position = origin;
 		transform.m_scale = { config.m_scale, config.m_scale, config.m_scale };
-		m_componentManager.add<component::TransformComponent>(id, transform);
+		m_componentManager.add<component::movement::TransformComponent>(id, transform);
 
 		// 速度＝方向×速さ。PhysicsSystemが位置を更新する（弾は重力を受けない）
-		component::VelocityComponent velocity{};
+		component::movement::VelocityComponent velocity{};
 		velocity.m_velocity = {
 			direction.x * config.m_speed,
 			direction.y * config.m_speed,
 			direction.z * config.m_speed
 		};
-		m_componentManager.add<component::VelocityComponent>(id, velocity);
+		m_componentManager.add<component::movement::VelocityComponent>(id, velocity);
 
 		// 当たり判定攻撃は AttackComponent + AttackSystem を流用する
 		// attackRange＝接触半径、attackPower＝ダメージ、cooldown0＋requested維持で常時ヒット判定

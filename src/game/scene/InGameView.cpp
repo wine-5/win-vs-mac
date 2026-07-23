@@ -1,10 +1,10 @@
 ﻿#include "InGameView.h"
 #include "core/utility/Color.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/combat/AimComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
-#include "game/component/VelocityComponent.h"
+#include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
 #include "game/system/visual/PlayerChargeVisualsSystem.h"
 #include "game/system/visual/MacAwakenEffectSystem.h"
@@ -114,9 +114,9 @@ namespace game::scene
 	    core::ecs::EntityId groundId,
 	    const std::vector<core::ecs::EntityId>& enemyIds)
 	{
-		const auto& transform{ m_componentManager.get<component::TransformComponent>(playerId) };
+		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(playerId) };
 		const auto& render{ m_componentManager.get<component::RenderComponent>(playerId) };
-		const auto& groundTransform{ m_componentManager.get<component::TransformComponent>(groundId) };
+		const auto& groundTransform{ m_componentManager.get<component::movement::TransformComponent>(groundId) };
 		const auto& groundRender{ m_componentManager.get<component::RenderComponent>(groundId) };
 
 		if (render.m_isVisible)
@@ -127,7 +127,7 @@ namespace game::scene
 		for (auto enemyId : enemyIds)
 		{
 			const auto& enemyRender{ m_componentManager.get<component::RenderComponent>(enemyId) };
-			const auto& enemyTransform{ m_componentManager.get<component::TransformComponent>(enemyId) };
+			const auto& enemyTransform{ m_componentManager.get<component::movement::TransformComponent>(enemyId) };
 			if (enemyRender.m_isVisible)
 				m_renderer.drawModel(enemyRender.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
 		}
@@ -192,7 +192,7 @@ namespace game::scene
 			if (!render.m_isVisible || render.m_modelHandle == -1)
 				continue;
 
-			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
+			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(id) };
 			const auto& projectile{ m_componentManager.get<component::combat::ProjectileComponent>(id) };
 
 			// 発射地点からの移動距離に応じてタンブルさせる（状態を持たず距離から導出する）
@@ -211,9 +211,9 @@ namespace game::scene
 				const float roll{ distance * projectile.m_spinRollSpeed };
 				// 進行方向（velocity）を向いたまま飛ばす。モデルの正面が逆なので反転して渡す（180度逆）
 				core::Vector3 faceDir{ 0.0f, 0.0f, -1.0f };
-				if (m_componentManager.has<component::VelocityComponent>(id))
+				if (m_componentManager.has<component::movement::VelocityComponent>(id))
 				{
-					const auto& vel{ m_componentManager.get<component::VelocityComponent>(id).m_velocity };
+					const auto& vel{ m_componentManager.get<component::movement::VelocityComponent>(id).m_velocity };
 					faceDir = core::Vector3{ -vel.x, -vel.y, -vel.z };
 				}
 				m_renderer.drawSpinningModelFacing(render.m_modelHandle, transform.m_position,

@@ -1,7 +1,7 @@
 ﻿#include "MacAwakenEffectSystem.h"
 #include "game/component/CameraEffectComponent.h"
-#include "game/component/TransformComponent.h"
-#include "game/component/InputComponent.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/movement/InputComponent.h"
 #include "game/event/InGameEvents.h"
 #include "game/constant/MacAwakenTiming.h"
 #include "core/utility/Color.h"
@@ -81,23 +81,23 @@ namespace game::system::visual
 		m_elapsedTime += deltaTime;
 
 		// 演出終了：チャンネルを戻し、入力ロックを解除する
-		if (m_elapsedTime >= timing::TOTAL_TIME || !m_componentManager.has<component::TransformComponent>(m_macId))
+		if (m_elapsedTime >= timing::TOTAL_TIME || !m_componentManager.has<component::movement::TransformComponent>(m_macId))
 		{
 			m_isPlaying = false;
 			effect.m_cinematicBlend = 0.0f;
 			effect.m_awakenShakeOffset = core::Vector3{ 0.0f, 0.0f, 0.0f };
 			m_vignetteAlpha = 0.0f;
-			if (m_componentManager.has<component::InputComponent>(m_playerId))
-				m_componentManager.get<component::InputComponent>(m_playerId).m_locked = false;
+			if (m_componentManager.has<component::movement::InputComponent>(m_playerId))
+				m_componentManager.get<component::movement::InputComponent>(m_playerId).m_locked = false;
 			return;
 		}
 
 		// 演出中はプレイヤーの操作を受け付けない
-		if (m_componentManager.has<component::InputComponent>(m_playerId))
-			m_componentManager.get<component::InputComponent>(m_playerId).m_locked = true;
+		if (m_componentManager.has<component::movement::InputComponent>(m_playerId))
+			m_componentManager.get<component::movement::InputComponent>(m_playerId).m_locked = true;
 
 		// 注視先＝ボスの胴体あたり（毎フレーム追従。演出中にボスは動かないが位置ズレに備える）
-		const auto& macTransform{ m_componentManager.get<component::TransformComponent>(m_macId) };
+		const auto& macTransform{ m_componentManager.get<component::movement::TransformComponent>(m_macId) };
 		effect.m_cinematicTarget = core::Vector3{
 			macTransform.m_position.x,
 			macTransform.m_position.y + MAC_LOOK_HEIGHT,

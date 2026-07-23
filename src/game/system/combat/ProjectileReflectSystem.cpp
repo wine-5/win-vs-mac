@@ -1,7 +1,7 @@
 ﻿#include "ProjectileReflectSystem.h"
 #include "game/component/combat/ProjectileComponent.h"
-#include "game/component/TransformComponent.h"
-#include "game/component/VelocityComponent.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/constant/Tag.h"
@@ -37,7 +37,7 @@ namespace game::system::combat
 
 		for (auto enemyId : enemyProjectiles)
 		{
-			const auto& enemyTransform{ m_componentManager.get<component::TransformComponent>(enemyId) };
+			const auto& enemyTransform{ m_componentManager.get<component::movement::TransformComponent>(enemyId) };
 			// 接触半径は当たり判定（AttackComponent.m_attackRange）を流用する
 			const float enemyRadius{ m_componentManager.has<component::combat::AttackComponent>(enemyId)
 				                         ? m_componentManager.get<component::combat::AttackComponent>(enemyId).m_attackRange
@@ -45,7 +45,7 @@ namespace game::system::combat
 
 			for (auto playerId : playerProjectiles)
 			{
-				const auto& playerTransform{ m_componentManager.get<component::TransformComponent>(playerId) };
+				const auto& playerTransform{ m_componentManager.get<component::movement::TransformComponent>(playerId) };
 				const float playerRadius{ m_componentManager.has<component::combat::AttackComponent>(playerId)
 					                          ? m_componentManager.get<component::combat::AttackComponent>(playerId).m_attackRange
 					                          : 0.0f };
@@ -60,9 +60,9 @@ namespace game::system::combat
 					continue;
 
 				// 跳ね返し：速度を反転して逆方向へ、陣営をPlayerへ変更して敵に当たるようにする
-				if (m_componentManager.has<component::VelocityComponent>(enemyId))
+				if (m_componentManager.has<component::movement::VelocityComponent>(enemyId))
 				{
-					auto& velocity{ m_componentManager.get<component::VelocityComponent>(enemyId) };
+					auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(enemyId) };
 					velocity.m_velocity.x = -velocity.m_velocity.x;
 					velocity.m_velocity.y = -velocity.m_velocity.y;
 					velocity.m_velocity.z = -velocity.m_velocity.z;

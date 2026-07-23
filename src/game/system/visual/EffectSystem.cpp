@@ -1,7 +1,7 @@
 ﻿#include "game/system/visual/EffectSystem.h"
 #include "core/base/ServiceLocator.h"
 #include "game/component/EffectComponent.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 
 namespace game::system::visual
 {
@@ -68,12 +68,12 @@ namespace game::system::visual
 	void EffectSystem::onAttackHit(const game::event::AttackHitEvent& event)
 	{
 		// ターゲットがTransformComponentを持っていなければそもそも再生ができない
-		if (!m_componentManager.has<component::TransformComponent>(event.m_targetId))
+		if (!m_componentManager.has<component::movement::TransformComponent>(event.m_targetId))
 		{
 			return;
 		}
 
-		const auto& transform{ m_componentManager.get<component::TransformComponent>(event.m_targetId) };
+		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(event.m_targetId) };
 
 		// エフェクトを再生してハンドルを取得する
 		int handle{ m_effectFactory.play(event.m_effectType, transform.m_position) };
@@ -98,12 +98,12 @@ namespace game::system::visual
 	void EffectSystem::onAttackStart(const game::event::AttackStartEvent& event)
 	{
 		// 攻撃者自身の位置でエフェクトを再生する（斬撃などの演出用）
-		if (!m_componentManager.has<component::TransformComponent>(event.m_attackerId))
+		if (!m_componentManager.has<component::movement::TransformComponent>(event.m_attackerId))
 		{
 			return;
 		}
 
-		const auto& transform{ m_componentManager.get<component::TransformComponent>(event.m_attackerId) };
+		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(event.m_attackerId) };
 
 		int handle{ m_effectFactory.play(event.m_effectType, transform.m_position) };
 		if (handle == -1)
@@ -126,10 +126,10 @@ namespace game::system::visual
 	void EffectSystem::onEnemyDead(const game::event::EnemyDeadEvent& event)
 	{
 		// 死亡した敵の位置で撃破エフェクトを再生する（Tキーのデバッグテストと同じEnemy_HitWindowを使用）
-		if (!m_componentManager.has<component::TransformComponent>(event.m_entityId))
+		if (!m_componentManager.has<component::movement::TransformComponent>(event.m_entityId))
 			return;
 
-		const auto& transform{ m_componentManager.get<component::TransformComponent>(event.m_entityId) };
+		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(event.m_entityId) };
 
 		int handle{ m_effectFactory.play(core::constant::EffectType::Enemy_HitWindow, transform.m_position) };
 		if (handle == -1)

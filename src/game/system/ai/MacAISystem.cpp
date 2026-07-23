@@ -1,6 +1,6 @@
 #include "MacAISystem.h"
 #include "game/component/ai/AIComponent.h"
-#include "game/component/VelocityComponent.h"
+#include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/AnimationComponent.h"
@@ -72,10 +72,10 @@ namespace game::system::ai
 				continue;
 
 			auto& health{ m_componentManager.get<component::combat::HealthComponent>(entityId) };
-			auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+			auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 			auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 
-			const bool hasVelocity{ m_componentManager.has<component::VelocityComponent>(entityId) };
+			const bool hasVelocity{ m_componentManager.has<component::movement::VelocityComponent>(entityId) };
 
 			// --- 死亡 ---
 			if (health.m_isDead || mac.m_state == MacState::Dead)
@@ -131,7 +131,7 @@ namespace game::system::ai
 				continue;
 			}
 
-			const auto& targetTransform{ m_componentManager.get<component::TransformComponent>(ai.m_targetEntity.getId()) };
+			const auto& targetTransform{ m_componentManager.get<component::movement::TransformComponent>(ai.m_targetEntity.getId()) };
 			core::Vector3 dir{
 				targetTransform.m_position.x - transform.m_position.x,
 				0.0f,
@@ -229,7 +229,7 @@ namespace game::system::ai
 				{
 					if (hasVelocity)
 					{
-						auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+						auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 						velocity.m_velocity.x = dir.x * phase.m_moveSpeed;
 						velocity.m_velocity.z = dir.z * phase.m_moveSpeed;
 					}
@@ -344,7 +344,7 @@ namespace game::system::ai
 			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack1;
 	}
 
-	void MacAISystem::performRanged(core::ecs::EntityId entityId, const component::TransformComponent& transform,
+	void MacAISystem::performRanged(core::ecs::EntityId entityId, const component::movement::TransformComponent& transform,
 	    const core::Vector3& dirToTarget, const core::data::MacPhaseData& phase)
 	{
 		const int count{ phase.m_rainbowCount };
@@ -399,7 +399,7 @@ namespace game::system::ai
 		return config;
 	}
 
-	void MacAISystem::performNova(core::ecs::EntityId entityId, const component::TransformComponent& transform,
+	void MacAISystem::performNova(core::ecs::EntityId entityId, const component::movement::TransformComponent& transform,
 	    const core::data::MacPhaseData& phase)
 	{
 		const int count{ phase.m_novaCount };
@@ -428,7 +428,7 @@ namespace game::system::ai
 			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack2;
 	}
 
-	void MacAISystem::performSummon(const component::TransformComponent& transform,
+	void MacAISystem::performSummon(const component::movement::TransformComponent& transform,
 	    const core::data::MacPhaseData& phase, int summonSlots)
 	{
 		const int n{ std::min(phase.m_summonCount, summonSlots) };
@@ -474,9 +474,9 @@ namespace game::system::ai
 	}
 	void MacAISystem::stopHorizontalVelocity(core::ecs::EntityId entityId)
 	{
-		if (!m_componentManager.has<component::VelocityComponent>(entityId))
+		if (!m_componentManager.has<component::movement::VelocityComponent>(entityId))
 			return;
-		auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+		auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 		velocity.m_velocity.x = 0.0f;
 		velocity.m_velocity.z = 0.0f;
 		// Y（重力ぶんの落下速度）は残す＝ボスが地面に着地・接地し続けるようにする

@@ -1,8 +1,8 @@
 ﻿#include "CollisionSystem.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
-#include "game/component/VelocityComponent.h"
+#include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/DeathComponent.h"
 #include "game/constant/Tag.h"
 #include <cmath>
@@ -38,8 +38,8 @@ namespace game::system::combat
 
 	bool CollisionSystem::isColliding(core::ecs::EntityId a, core::ecs::EntityId b) const
 	{
-		auto& transformA = m_componentManager.get<component::TransformComponent>(a);
-		auto& transformB = m_componentManager.get<component::TransformComponent>(b);
+		auto& transformA = m_componentManager.get<component::movement::TransformComponent>(a);
+		auto& transformB = m_componentManager.get<component::movement::TransformComponent>(b);
 		auto& colliderA = m_componentManager.get<component::combat::ColliderComponent>(a);
 		auto& colliderB = m_componentManager.get<component::combat::ColliderComponent>(b);
 
@@ -94,11 +94,11 @@ namespace game::system::combat
 			return;
 		}
 
-		auto& riderTransform = m_componentManager.get<component::TransformComponent>(riderId);
-		auto& groundTransform = m_componentManager.get<component::TransformComponent>(groundId);
+		auto& riderTransform = m_componentManager.get<component::movement::TransformComponent>(riderId);
+		auto& groundTransform = m_componentManager.get<component::movement::TransformComponent>(groundId);
 		auto& riderCollider = m_componentManager.get<component::combat::ColliderComponent>(riderId);
 		auto& groundCollider = m_componentManager.get<component::combat::ColliderComponent>(groundId);
-		auto& riderVelocity = m_componentManager.get<component::VelocityComponent>(riderId);
+		auto& riderVelocity = m_componentManager.get<component::movement::VelocityComponent>(riderId);
 
 		// 各コライダーの中心とAABBの境界を計算
 		const core::Vector3 riderCenter{ riderTransform.m_position + riderCollider.m_offset };

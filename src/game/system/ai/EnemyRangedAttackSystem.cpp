@@ -1,7 +1,7 @@
 #include "EnemyRangedAttackSystem.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/AIComponent.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/constant/Tag.h"
 #include <cmath>
 #include <utility>
@@ -59,7 +59,7 @@ namespace game::system::ai
 			if (rangeKeep.m_fireCooldown <= 0.0f)
 				continue;
 
-			auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+			auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 
 			// 予備動作のスケール演出用に基準スケールを一度だけ取得する
 			if (rangeKeep.m_baseScale.x == 0.0f && rangeKeep.m_baseScale.y == 0.0f && rangeKeep.m_baseScale.z == 0.0f)
@@ -71,7 +71,7 @@ namespace game::system::ai
 			float distance{ 0.0f };
 			if (ai.m_isActive && ai.m_targetEntity.getId() != 0)
 			{
-				const auto& targetTransform{ m_componentManager.get<component::TransformComponent>(ai.m_targetEntity.getId()) };
+				const auto& targetTransform{ m_componentManager.get<component::movement::TransformComponent>(ai.m_targetEntity.getId()) };
 				direction = {
 					targetTransform.m_position.x - transform.m_position.x,
 					(targetTransform.m_position.y + AIM_TARGET_HEIGHT) - transform.m_position.y,
@@ -120,7 +120,7 @@ namespace game::system::ai
 		}
 	}
 
-	void EnemyRangedAttackSystem::applyAttackAnimation(component::TransformComponent& transform,
+	void EnemyRangedAttackSystem::applyAttackAnimation(component::movement::TransformComponent& transform,
 	    component::ai::RangeKeepAIComponent& rangeKeep, bool inRange)
 	{
 		float scaleFactor{ 1.0f }; // 基準スケールに対する倍率

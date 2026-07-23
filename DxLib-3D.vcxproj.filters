@@ -368,7 +368,7 @@
     <ClInclude Include="src\game\event\InGameEvents.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\InputComponent.h">
+    <ClInclude Include="src\game\component\movement\InputComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\component\CameraComponent.h">
@@ -377,10 +377,10 @@
     <ClInclude Include="src\game\component\combat\AimComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\TransformComponent.h">
+    <ClInclude Include="src\game\component\movement\TransformComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\VelocityComponent.h">
+    <ClInclude Include="src\game\component\movement\VelocityComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\system\movement\InputSystem.h">

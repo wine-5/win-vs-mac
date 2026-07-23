@@ -1,7 +1,7 @@
 ﻿#include "TargetingSystem.h"
 #include "game/component/combat/AimComponent.h"
 #include "game/component/CameraComponent.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/TagComponent.h"
 #include <cmath>
@@ -27,13 +27,13 @@ namespace game::system::combat
 		for (auto aimerId : aimers)
 		{
 			if (!m_componentManager.has<component::CameraComponent>(aimerId) ||
-			    !m_componentManager.has<component::TransformComponent>(aimerId) ||
+			    !m_componentManager.has<component::movement::TransformComponent>(aimerId) ||
 			    !m_componentManager.has<component::TagComponent>(aimerId))
 				continue;
 
 			auto& aim{ m_componentManager.get<component::combat::AimComponent>(aimerId) };
 			const auto& camera{ m_componentManager.get<component::CameraComponent>(aimerId) };
-			const auto& aimerTransform{ m_componentManager.get<component::TransformComponent>(aimerId) };
+			const auto& aimerTransform{ m_componentManager.get<component::movement::TransformComponent>(aimerId) };
 			const auto aimerTag{ m_componentManager.get<component::TagComponent>(aimerId).m_tag };
 
 			const core::Vector3 origin{
@@ -51,7 +51,7 @@ namespace game::system::combat
 			{
 				if (targetId == aimerId)
 					continue;
-				if (!m_componentManager.has<component::TransformComponent>(targetId))
+				if (!m_componentManager.has<component::movement::TransformComponent>(targetId))
 					continue;
 				// 同じ陣営は狙わない
 				if (m_componentManager.has<component::TagComponent>(targetId) &&
@@ -61,7 +61,7 @@ namespace game::system::combat
 				if (m_componentManager.get<component::combat::HealthComponent>(targetId).m_isDead)
 					continue;
 
-				const auto& targetTransform{ m_componentManager.get<component::TransformComponent>(targetId) };
+				const auto& targetTransform{ m_componentManager.get<component::movement::TransformComponent>(targetId) };
 				const core::Vector3 toTarget{
 					targetTransform.m_position.x - origin.x,
 					targetTransform.m_position.y + TARGET_AIM_HEIGHT - origin.y,

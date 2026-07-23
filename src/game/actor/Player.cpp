@@ -1,7 +1,7 @@
 ﻿#include "Player.h"
-#include "game/component/TransformComponent.h"
-#include "game/component/VelocityComponent.h"
-#include "game/component/InputComponent.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/movement/VelocityComponent.h"
+#include "game/component/movement/InputComponent.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/AnimationComponent.h"
 #include "game/component/combat/ColliderComponent.h"
@@ -26,11 +26,11 @@ namespace game::actor
 		const data::PlayerData& playerData)
 		: m_entity{entityManager.create()}
 	{
-		component::TransformComponent transform{};
+		component::movement::TransformComponent transform{};
 		transform.m_scale = playerData.getScale();
-		componentManager.add<component::TransformComponent>(m_entity.getId(), transform);
-		componentManager.add<component::VelocityComponent>(m_entity.getId(), {});
-		componentManager.add<component::InputComponent>(m_entity.getId(), {});
+		componentManager.add<component::movement::TransformComponent>(m_entity.getId(), transform);
+		componentManager.add<component::movement::VelocityComponent>(m_entity.getId(), {});
+		componentManager.add<component::movement::InputComponent>(m_entity.getId(), {});
 
 		// アニメーションクリップの登録（状態→クリップの対応表）
 		using constant::AnimationState;

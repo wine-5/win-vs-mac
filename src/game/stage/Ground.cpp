@@ -1,5 +1,5 @@
 ﻿#include "Ground.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
@@ -14,12 +14,12 @@ namespace game::stage
 		const game::data::GroundData& groundData)
 		: m_entity{entityManager.create()}
 	{
-		component::TransformComponent transform;
+		component::movement::TransformComponent transform;
 		transform.m_position = groundData.getPosition();
 		transform.m_rotation = groundData.getRotation();
 		transform.m_scale = groundData.getScale();
 
-		componentManager.add<component::TransformComponent>(m_entity.getId(), transform);
+		componentManager.add<component::movement::TransformComponent>(m_entity.getId(), transform);
 		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
 
 		component::combat::ColliderComponent collider;

@@ -2,7 +2,7 @@
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
 #include "game/component/CameraComponent.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include <cmath>
 #include <algorithm>
 
@@ -107,11 +107,11 @@ namespace game::system::camera
 	void DebugCameraSystem::initializeFromOrbitCamera()
 	{
 		if (!m_componentManager.has<component::CameraComponent>(m_targetEntityId) ||
-		    !m_componentManager.has<component::TransformComponent>(m_targetEntityId))
+		    !m_componentManager.has<component::movement::TransformComponent>(m_targetEntityId))
 			return;
 
 		const auto& camera{ m_componentManager.get<component::CameraComponent>(m_targetEntityId) };
-		const auto& transform{ m_componentManager.get<component::TransformComponent>(m_targetEntityId) };
+		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_targetEntityId) };
 
 		// 通常カメラ（CameraSystem）と同じ計算で現在のカメラ位置・向きを再現する
 		m_yaw = camera.m_yaw;

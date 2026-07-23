@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace game::component
+namespace game::component::movement
 {
 	/**
 	 * @brief プレイヤーの入力状態を持つコンポーネント
@@ -17,4 +17,4 @@ namespace game::component
 		// trueの間は全入力を無効化する（ボス覚醒などのシネマ演出中）。演出Systemが書く
 		bool m_locked{ false };
 	};
-} // namespace game::component
+} // namespace game::component::movement

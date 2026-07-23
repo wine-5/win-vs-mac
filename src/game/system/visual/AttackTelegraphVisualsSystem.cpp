@@ -1,6 +1,6 @@
 ﻿#include "AttackTelegraphVisualsSystem.h"
 #include "game/component/combat/AttackComponent.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
 #include "core/utility/Color.h"
 #include <algorithm>
@@ -39,10 +39,10 @@ namespace game::system::visual
 				continue;
 			if (m_componentManager.has<component::combat::ProjectileComponent>(attackerId))
 				continue;
-			if (!m_componentManager.has<component::TransformComponent>(attackerId))
+			if (!m_componentManager.has<component::movement::TransformComponent>(attackerId))
 				continue;
 
-			const auto& transform{ m_componentManager.get<component::TransformComponent>(attackerId) };
+			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(attackerId) };
 			core::Vector3 center{ transform.m_position };
 			center.y += GROUND_LIFT;
 

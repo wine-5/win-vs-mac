@@ -1,8 +1,8 @@
 ﻿#include "AttackSystem.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/HealthComponent.h"
-#include "game/component/InputComponent.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/InputComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
 #include "game/component/HitEffectComponent.h"
@@ -68,10 +68,10 @@ namespace game::system::combat
 			if (attack.m_attackRange <= 0.0f)
 				continue;
 
-			if (m_componentManager.has<component::InputComponent>(attackerId))
+			if (m_componentManager.has<component::movement::InputComponent>(attackerId))
 			{
 
-				auto &input{m_componentManager.get<component::InputComponent>(attackerId)};
+				auto& input{ m_componentManager.get<component::movement::InputComponent>(attackerId) };
 				if (input.m_attackPressed)
 					attack.m_attackRequested = true;
 			}
@@ -150,7 +150,7 @@ namespace game::system::combat
 			if (attackerTagCheck.m_tag == targetTagCheck.m_tag)
 				continue;
 
-			if (!m_componentManager.has<component::TransformComponent>(targetId))
+			if (!m_componentManager.has<component::movement::TransformComponent>(targetId))
 				continue;
 
 			// 死亡済み（後始末待ち）のEntityは攻撃対象にしない
@@ -169,8 +169,8 @@ namespace game::system::combat
 				continue;
 
 			// AttackComponentを持つEntityの攻撃範囲チェック
-			auto& attackerTransform{ m_componentManager.get<component::TransformComponent>(attackerId) };
-			auto& targetTransform{ m_componentManager.get<component::TransformComponent>(targetId) };
+			auto& attackerTransform{ m_componentManager.get<component::movement::TransformComponent>(attackerId) };
+			auto& targetTransform{ m_componentManager.get<component::movement::TransformComponent>(targetId) };
 
 			float dx{ attackerTransform.m_position.x - targetTransform.m_position.x };
 			float dz{ attackerTransform.m_position.z - targetTransform.m_position.z };

@@ -2,8 +2,8 @@
 #include "game/component/ai/MeleeChaseAIComponent.h"
 #include "game/component/ai/PatrolComponent.h"
 #include "game/component/ai/AIComponent.h"
-#include "game/component/TransformComponent.h"
-#include "game/component/VelocityComponent.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
@@ -50,7 +50,7 @@ namespace game::system::ai
 
 			auto& melee{ m_componentManager.get<component::ai::MeleeChaseAIComponent>(entityId) };
 			auto& patrol{ m_componentManager.get<component::ai::PatrolComponent>(entityId) };
-			auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+			auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 
 			// 徘徊の基準点（スポーン地点）を初回だけ記録する
 			if (!patrol.m_homeInitialized)
@@ -65,7 +65,7 @@ namespace game::system::ai
 			float distanceToPlayer{ 0.0f };
 			if (ai.m_targetEntity.getId() != 0)
 			{
-				auto& targetTransform{ m_componentManager.get<component::TransformComponent>(ai.m_targetEntity.getId()) };
+				auto& targetTransform{ m_componentManager.get<component::movement::TransformComponent>(ai.m_targetEntity.getId()) };
 				dirToPlayer.x = targetTransform.m_position.x - transform.m_position.x;
 				dirToPlayer.z = targetTransform.m_position.z - transform.m_position.z;
 				distanceToPlayer = std::sqrt(dirToPlayer.x * dirToPlayer.x + dirToPlayer.z * dirToPlayer.z);
@@ -91,7 +91,7 @@ namespace game::system::ai
 	    const core::Vector3& dirToPlayer, float deltaTime)
 	{
 		auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
-		auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+		auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 
 		// 攻撃レンジ内かどうかを判定
 		bool inAttackRange{ false };
@@ -100,9 +100,9 @@ namespace game::system::ai
 
 		// 移動：攻撃レンジ内では止まり、外なら接近する
 		// （従来はレンジ内でも速度を与え続け、プレイヤーへ押し込んでいた）
-		if (m_componentManager.has<component::VelocityComponent>(entityId))
+		if (m_componentManager.has<component::movement::VelocityComponent>(entityId))
 		{
-			auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+			auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 			if (inAttackRange)
 			{
 				velocity.m_velocity.x = 0.0f;
@@ -144,9 +144,9 @@ namespace game::system::ai
 	{
 		auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 		auto& patrol{ m_componentManager.get<component::ai::PatrolComponent>(entityId) };
-		auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+		auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 
-		const bool hasVelocity{ m_componentManager.has<component::VelocityComponent>(entityId) };
+		const bool hasVelocity{ m_componentManager.has<component::movement::VelocityComponent>(entityId) };
 
 		// 立ち止まり中：時間を消化し、その間は停止＋Idle
 		if (patrol.m_pauseTimer > 0.0f)
@@ -154,7 +154,7 @@ namespace game::system::ai
 			patrol.m_pauseTimer -= deltaTime;
 			if (hasVelocity)
 			{
-				auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+				auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 				velocity.m_velocity.x = 0.0f;
 				velocity.m_velocity.z = 0.0f;
 			}
@@ -183,7 +183,7 @@ namespace game::system::ai
 			patrol.m_pauseTimer = pauseDist(m_rng);
 			if (hasVelocity)
 			{
-				auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+				auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 				velocity.m_velocity.x = 0.0f;
 				velocity.m_velocity.z = 0.0f;
 			}
@@ -197,7 +197,7 @@ namespace game::system::ai
 		const float patrolSpeed{ ai.m_moveSpeed * PATROL_SPEED_FACTOR };
 		if (hasVelocity)
 		{
-			auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+			auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 			velocity.m_velocity.x = toTarget.x * patrolSpeed;
 			velocity.m_velocity.z = toTarget.z * patrolSpeed;
 		}
