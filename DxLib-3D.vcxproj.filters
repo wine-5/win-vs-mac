@@ -704,6 +704,9 @@
     <ClInclude Include="src\platform\window\WindowBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\platform\window\WebViewWindowBase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="src\platform\window\result\ResultWindow.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

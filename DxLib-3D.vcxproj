@@ -453,6 +453,7 @@
     <ClInclude Include="src\platform\window\select\RulesWindow.h" />
     <ClInclude Include="src\platform\window\select\Win32SelectWindowManager.h" />
     <ClInclude Include="src\platform\window\WindowBase.h" />
+    <ClInclude Include="src\platform\window\WebViewWindowBase.h" />
     <ClInclude Include="src\platform\window\WindowConstants.h" />
     <ClInclude Include="src\platform\window\WindowFactory.h" />
     <ClInclude Include="src\platform\window\result\ResultWindow.h" />
