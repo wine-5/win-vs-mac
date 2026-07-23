@@ -1,5 +1,5 @@
 ﻿#include "DamageShakeSystem.h"
-#include "game/component/CameraEffectComponent.h"
+#include "game/component/camera/CameraEffectComponent.h"
 #include "game/event/InGameEvents.h"
 #include <cmath>
 #include <algorithm>
@@ -44,10 +44,10 @@ namespace game::system::camera
 
 	void DamageShakeSystem::update(float deltaTime)
 	{
-		if (!m_componentManager.has<component::CameraEffectComponent>(m_playerId))
+		if (!m_componentManager.has<component::camera::CameraEffectComponent>(m_playerId))
 			return;
 
-		auto& effect{ m_componentManager.get<component::CameraEffectComponent>(m_playerId) };
+		auto& effect{ m_componentManager.get<component::camera::CameraEffectComponent>(m_playerId) };
 
 		if (m_remainingTime <= 0.0f)
 		{

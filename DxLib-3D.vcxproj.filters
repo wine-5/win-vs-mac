@@ -371,7 +371,7 @@
     <ClInclude Include="src\game\component\movement\InputComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\CameraComponent.h">
+    <ClInclude Include="src\game\component\camera\CameraComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\component\combat\AimComponent.h">
@@ -875,7 +875,7 @@
     <ClInclude Include="src\game\system\ai\EnemyRangedAttackSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\CameraEffectComponent.h">
+    <ClInclude Include="src\game\component\camera\CameraEffectComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\component\combat\PlayerChargeComponent.h">

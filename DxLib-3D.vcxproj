@@ -426,8 +426,8 @@
     <ClInclude Include="src\core\ecs\ComponentArray.h" />
     <ClInclude Include="src\core\ecs\ComponentManager.h" />
     <ClInclude Include="src\game\component\movement\InputComponent.h" />
-    <ClInclude Include="src\game\component\CameraComponent.h" />
-    <ClInclude Include="src\game\component\CameraEffectComponent.h" />
+    <ClInclude Include="src\game\component\camera\CameraComponent.h" />
+    <ClInclude Include="src\game\component\camera\CameraEffectComponent.h" />
     <ClInclude Include="src\game\component\combat\AimComponent.h" />
     <ClInclude Include="src\game\component\combat\PlayerChargeComponent.h" />
     <ClInclude Include="src\game\component\ai\MeleeChaseAIComponent.h" />

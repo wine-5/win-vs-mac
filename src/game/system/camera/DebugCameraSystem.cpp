@@ -1,7 +1,7 @@
 ﻿#include "DebugCameraSystem.h"
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
-#include "game/component/CameraComponent.h"
+#include "game/component/camera/CameraComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include <cmath>
 #include <algorithm>
@@ -91,8 +91,8 @@ namespace game::system::camera
 		m_position.y += moveUp * step;
 
 		// Playerの移動基準yawをカメラの向きに合わせる（矢印キー移動をカメラ視点基準にする）
-		if (m_componentManager.has<component::CameraComponent>(m_targetEntityId))
-			m_componentManager.get<component::CameraComponent>(m_targetEntityId).m_yaw = m_yaw;
+		if (m_componentManager.has<component::camera::CameraComponent>(m_targetEntityId))
+			m_componentManager.get<component::camera::CameraComponent>(m_targetEntityId).m_yaw = m_yaw;
 
 		// 視線方向（pitchを含む3D前方向）から注視点を求めてカメラへ渡す
 		const core::Vector3 lookForward{ sinYaw * cosPitch, -sinPitch, cosYaw * cosPitch };
@@ -106,11 +106,11 @@ namespace game::system::camera
 
 	void DebugCameraSystem::initializeFromOrbitCamera()
 	{
-		if (!m_componentManager.has<component::CameraComponent>(m_targetEntityId) ||
+		if (!m_componentManager.has<component::camera::CameraComponent>(m_targetEntityId) ||
 		    !m_componentManager.has<component::movement::TransformComponent>(m_targetEntityId))
 			return;
 
-		const auto& camera{ m_componentManager.get<component::CameraComponent>(m_targetEntityId) };
+		const auto& camera{ m_componentManager.get<component::camera::CameraComponent>(m_targetEntityId) };
 		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_targetEntityId) };
 
 		// 通常カメラ（CameraSystem）と同じ計算で現在のカメラ位置・向きを再現する

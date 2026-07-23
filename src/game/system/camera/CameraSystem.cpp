@@ -1,7 +1,7 @@
 ﻿#include "CameraSystem.h"
-#include "game/component/CameraComponent.h"
+#include "game/component/camera/CameraComponent.h"
 #include "game/component/movement/TransformComponent.h"
-#include "game/component/CameraEffectComponent.h"
+#include "game/component/camera/CameraEffectComponent.h"
 #include "game/GameManager.h"
 #include <cmath>
 #include <algorithm>
@@ -27,10 +27,10 @@ namespace game::system::camera
 		if (m_gameManager.isDebugMode())
 			return;
 
-		if (!m_componentManager.has<component::CameraComponent>(m_targetEntityId))
+		if (!m_componentManager.has<component::camera::CameraComponent>(m_targetEntityId))
 			return;
 
-		auto& camera{ m_componentManager.get<component::CameraComponent>(m_targetEntityId) };
+		auto& camera{ m_componentManager.get<component::camera::CameraComponent>(m_targetEntityId) };
 		auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_targetEntityId) };
 
 		// マウス移動量で yaw/pitch を更新する
@@ -48,9 +48,9 @@ namespace game::system::camera
 		core::Vector3 shakeOffset{ 0.0f, 0.0f, 0.0f };
 		float cinematicBlend{ 0.0f };
 		core::Vector3 cinematicTarget{ 0.0f, 0.0f, 0.0f };
-		if (m_componentManager.has<component::CameraEffectComponent>(m_targetEntityId))
+		if (m_componentManager.has<component::camera::CameraEffectComponent>(m_targetEntityId))
 		{
-			const auto& effect{ m_componentManager.get<component::CameraEffectComponent>(m_targetEntityId) };
+			const auto& effect{ m_componentManager.get<component::camera::CameraEffectComponent>(m_targetEntityId) };
 			fovScale = effect.m_fovScale;
 			distanceScale = effect.m_distanceScale;
 			// 揺れは通常演出（被弾）とボス覚醒演出を加算する

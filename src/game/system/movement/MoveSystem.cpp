@@ -3,7 +3,7 @@
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/AnimationComponent.h"
-#include "game/component/CameraComponent.h"
+#include "game/component/camera/CameraComponent.h"
 #include <cmath>
 
 namespace game::system::movement
@@ -21,8 +21,8 @@ namespace game::system::movement
 
 		// カメラのyawを基準に、入力をカメラ相対のワールド方向へ変換する
 		float cameraYaw{ 0.0f };
-		if (m_componentManager.has<component::CameraComponent>(m_entityId))
-			cameraYaw = m_componentManager.get<component::CameraComponent>(m_entityId).m_yaw;
+		if (m_componentManager.has<component::camera::CameraComponent>(m_entityId))
+			cameraYaw = m_componentManager.get<component::camera::CameraComponent>(m_entityId).m_yaw;
 
 		const float sinYaw{ std::sin(cameraYaw) };
 		const float cosYaw{ std::cos(cameraYaw) };

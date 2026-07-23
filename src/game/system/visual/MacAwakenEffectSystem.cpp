@@ -1,5 +1,5 @@
 ﻿#include "MacAwakenEffectSystem.h"
-#include "game/component/CameraEffectComponent.h"
+#include "game/component/camera/CameraEffectComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/movement/InputComponent.h"
 #include "game/event/InGameEvents.h"
@@ -64,10 +64,10 @@ namespace game::system::visual
 
 	void MacAwakenEffectSystem::update(float deltaTime)
 	{
-		if (!m_componentManager.has<component::CameraEffectComponent>(m_playerId))
+		if (!m_componentManager.has<component::camera::CameraEffectComponent>(m_playerId))
 			return;
 
-		auto& effect{ m_componentManager.get<component::CameraEffectComponent>(m_playerId) };
+		auto& effect{ m_componentManager.get<component::camera::CameraEffectComponent>(m_playerId) };
 
 		// 演出中でなければ全チャンネルを無効値へ戻して終了
 		if (!m_isPlaying)

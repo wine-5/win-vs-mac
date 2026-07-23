@@ -1,7 +1,7 @@
 #pragma once
 #include "core/utility/Vector3.h"
 
-namespace game::component
+namespace game::component::camera
 {
 	/**
 	 * @brief 3人称オービットカメラの状態を持つコンポーネント
@@ -27,4 +27,4 @@ namespace game::component
 		// レティクルの敵捕捉判定・投射の発射方向に流用する。
 		core::Vector3 m_forward{ 0.0f, 0.0f, 1.0f };
 	};
-} // namespace game::component
+} // namespace game::component::camera

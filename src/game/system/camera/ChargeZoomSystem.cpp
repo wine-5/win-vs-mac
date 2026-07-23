@@ -1,6 +1,6 @@
 ﻿#include "ChargeZoomSystem.h"
 #include "game/component/combat/PlayerChargeComponent.h"
-#include "game/component/CameraEffectComponent.h"
+#include "game/component/camera/CameraEffectComponent.h"
 
 namespace
 {
@@ -20,11 +20,11 @@ namespace game::system::camera
 	void ChargeZoomSystem::update(float deltaTime)
 	{
 		if (!m_componentManager.has<component::combat::PlayerChargeComponent>(m_playerId) ||
-		    !m_componentManager.has<component::CameraEffectComponent>(m_playerId))
+		    !m_componentManager.has<component::camera::CameraEffectComponent>(m_playerId))
 			return;
 
 		const auto& charge{ m_componentManager.get<component::combat::PlayerChargeComponent>(m_playerId) };
-		auto& effect{ m_componentManager.get<component::CameraEffectComponent>(m_playerId) };
+		auto& effect{ m_componentManager.get<component::camera::CameraEffectComponent>(m_playerId) };
 
 		// 溜め中は溜め率に応じてFOVを絞る。離していれば通常（1.0）へ戻す。
 		const float targetScale{ charge.m_isCharging

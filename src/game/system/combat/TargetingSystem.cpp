@@ -1,6 +1,6 @@
 ﻿#include "TargetingSystem.h"
 #include "game/component/combat/AimComponent.h"
-#include "game/component/CameraComponent.h"
+#include "game/component/camera/CameraComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/TagComponent.h"
@@ -26,13 +26,13 @@ namespace game::system::combat
 		auto aimers{ m_componentManager.getAllEntities<component::combat::AimComponent>() };
 		for (auto aimerId : aimers)
 		{
-			if (!m_componentManager.has<component::CameraComponent>(aimerId) ||
+			if (!m_componentManager.has<component::camera::CameraComponent>(aimerId) ||
 			    !m_componentManager.has<component::movement::TransformComponent>(aimerId) ||
 			    !m_componentManager.has<component::TagComponent>(aimerId))
 				continue;
 
 			auto& aim{ m_componentManager.get<component::combat::AimComponent>(aimerId) };
-			const auto& camera{ m_componentManager.get<component::CameraComponent>(aimerId) };
+			const auto& camera{ m_componentManager.get<component::camera::CameraComponent>(aimerId) };
 			const auto& aimerTransform{ m_componentManager.get<component::movement::TransformComponent>(aimerId) };
 			const auto aimerTag{ m_componentManager.get<component::TagComponent>(aimerId).m_tag };
 

@@ -1,6 +1,6 @@
 ﻿#include "PlayerRangedAttackSystem.h"
 #include "game/component/movement/InputComponent.h"
-#include "game/component/CameraComponent.h"
+#include "game/component/camera/CameraComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
 #include "game/constant/Tag.h"
@@ -25,7 +25,7 @@ namespace game::system::combat
 			m_cooldownTimer -= deltaTime;
 
 		if (!m_componentManager.has<component::movement::InputComponent>(m_playerId) ||
-		    !m_componentManager.has<component::CameraComponent>(m_playerId))
+		    !m_componentManager.has<component::camera::CameraComponent>(m_playerId))
 			return;
 
 		const auto& input{ m_componentManager.get<component::movement::InputComponent>(m_playerId) };
@@ -77,7 +77,7 @@ namespace game::system::combat
 
 	void PlayerRangedAttackSystem::fire(float chargeRate)
 	{
-		const auto& camera{ m_componentManager.get<component::CameraComponent>(m_playerId) };
+		const auto& camera{ m_componentManager.get<component::camera::CameraComponent>(m_playerId) };
 		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_playerId) };
 
 		// 溜め率に応じて倍率を線形補間する（0で等倍、1で最大倍率）

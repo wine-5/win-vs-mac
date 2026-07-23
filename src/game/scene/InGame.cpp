@@ -53,7 +53,7 @@
 #include "game/component/ai/MacAIComponent.h"
 #include "game/system/camera/CameraSystem.h"
 #include "game/system/camera/DebugCameraSystem.h" // DEBUG: フリーカメラ（リリース時に削除）
-#include "game/component/CameraComponent.h"
+#include "game/component/camera/CameraComponent.h"
 #include "game/system/combat/TargetingSystem.h"
 #include "game/component/combat/AimComponent.h"
 #include "game/system/combat/ProjectileSystem.h"

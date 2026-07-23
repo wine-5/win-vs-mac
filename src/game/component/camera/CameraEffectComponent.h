@@ -1,7 +1,7 @@
 #pragma once
 #include "core/utility/Vector3.h"
 
-namespace game::component
+namespace game::component::camera
 {
 	/**
 	 * @brief カメラ演出の合成状態を持つコンポーネント（Blackboard）
@@ -34,4 +34,4 @@ namespace game::component
 		// シネマ演出の注視先（ワールド座標）。m_cinematicBlend > 0 のときだけ使われる。
 		core::Vector3 m_cinematicTarget{ 0.0f, 0.0f, 0.0f };
 	};
-} // namespace game::component
+} // namespace game::component::camera
