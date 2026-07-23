@@ -66,108 +66,72 @@ namespace game::system
 
 	void CollisionSystem::resolveCollision(core::ecs::EntityId a, core::ecs::EntityId b)
 	{
-		auto& colliderA = m_componentManager.get<component::ColliderComponent>(a);
-		auto& colliderB = m_componentManager.get<component::ColliderComponent>(b);
+		const auto& tagA{ m_componentManager.get<component::TagComponent>(a) };
+		const auto& tagB{ m_componentManager.get<component::TagComponent>(b) };
 
-		// TagがPlayerとGroundの組み合わせを特定する
-		core::ecs::EntityId playerId{ core::ecs::INVALID_ENTITY_ID };
+		// 地面に乗る側（Player / Enemy）と地面を特定する。
+		// PlayerとEnemyで押し返しの計算は同一なので、DeathComponentの有無だけで分岐すればよい
+		const auto isRider{ [](constant::Tag tag) noexcept
+			{
+			    return tag == constant::Tag::Player || tag == constant::Tag::Enemy;
+			} };
+
+		core::ecs::EntityId riderId{ core::ecs::INVALID_ENTITY_ID };
 		core::ecs::EntityId groundId{ core::ecs::INVALID_ENTITY_ID };
 
-		auto& tagA{ m_componentManager.get<component::TagComponent>(a) };
-		auto& tagB{ m_componentManager.get<component::TagComponent>(b) };
-
-		if (tagA.m_tag == constant::Tag::Player && tagB.m_tag == constant::Tag::Ground)
+		if (isRider(tagA.m_tag) && tagB.m_tag == constant::Tag::Ground)
 		{
-			playerId = a;
+			riderId = a;
 			groundId = b;
 		}
-		else if (tagA.m_tag == constant::Tag::Ground && tagB.m_tag == constant::Tag::Player)
+		else if (tagA.m_tag == constant::Tag::Ground && isRider(tagB.m_tag))
 		{
-			playerId = b;
+			riderId = b;
 			groundId = a;
 		}
-
-		// Player vs Ground の押し返し処理
-		if (playerId != core::ecs::INVALID_ENTITY_ID && groundId != core::ecs::INVALID_ENTITY_ID)
+		else
 		{
-			auto& playerTransform = m_componentManager.get<component::TransformComponent>(playerId);
-			auto& groundTransform = m_componentManager.get<component::TransformComponent>(groundId);
-			auto& playerCollider = m_componentManager.get<component::ColliderComponent>(playerId);
-			auto& groundCollider = m_componentManager.get<component::ColliderComponent>(groundId);
-			auto& playerVelocity = m_componentManager.get<component::VelocityComponent>(playerId);
-
-			// 各コライダーの中心とAABBの境界を計算
-			core::Vector3 playerCenter{ playerTransform.m_position + playerCollider.m_offset };
-			core::Vector3 groundCenter{ groundTransform.m_position + groundCollider.m_offset };
-
-			float playerBottom{ playerCenter.y - playerCollider.m_size.y / 2.0f };
-			float groundTop{ groundCenter.y + groundCollider.m_size.y / 2.0f };
-
-			// Playerが地面より下、または地面に近い場合に補正
-			if (playerBottom <= groundTop)
-			{
-				// Playerの下端を地面の上端に合わせる
-				float correction{ groundTop - playerBottom };
-				playerTransform.m_position.y += correction;
-
-				// 下方向の速度をリセット（地面に着地）
-				if (playerVelocity.m_velocity.y < 0.0f)
-					playerVelocity.m_velocity.y = 0.0f;
-			}
+			return;
 		}
 
-		// Enemy vs Ground の組み合わせを特定する
-		core::ecs::EntityId enemyId{ core::ecs::INVALID_ENTITY_ID };
-		groundId = core::ecs::INVALID_ENTITY_ID;
+		auto& riderTransform = m_componentManager.get<component::TransformComponent>(riderId);
+		auto& groundTransform = m_componentManager.get<component::TransformComponent>(groundId);
+		auto& riderCollider = m_componentManager.get<component::ColliderComponent>(riderId);
+		auto& groundCollider = m_componentManager.get<component::ColliderComponent>(groundId);
+		auto& riderVelocity = m_componentManager.get<component::VelocityComponent>(riderId);
 
-		if (tagA.m_tag == constant::Tag::Enemy && tagB.m_tag == constant::Tag::Ground)
+		// 各コライダーの中心とAABBの境界を計算
+		const core::Vector3 riderCenter{ riderTransform.m_position + riderCollider.m_offset };
+		const core::Vector3 groundCenter{ groundTransform.m_position + groundCollider.m_offset };
+
+		const float riderBottom{ riderCenter.y - riderCollider.m_size.y / 2.0f };
+		const float groundTop{ groundCenter.y + groundCollider.m_size.y / 2.0f };
+
+		// 地面より下、または地面に近い場合に補正して下端を地面の上端へ合わせる
+		if (riderBottom > groundTop)
+			return;
+
+		riderTransform.m_position.y += groundTop - riderBottom;
+
+		// 死亡中の敵は地面で反発してバウンドする（Safariの落下演出）。
+		// 落下速度が閾値を下回ったら跳ねるのをやめて静止させ、着地済みとして記録する。
+		// この着地フラグを見てEnemyDeathSystemがバウンド完了後に消失フェードを始める
+		auto* death{ m_componentManager.tryGet<component::DeathComponent>(riderId) };
+
+		// 初回接地の時点で「地面に触れた」と記録する。EnemyDeathSystemはこれを見て
+		// バウンド完了を待たずに落下死のガタガタ揺れを止める
+		if (death != nullptr)
+			death->m_hasTouchedGround = true;
+
+		if (death != nullptr && riderVelocity.m_velocity.y < -DEATH_BOUNCE_MIN_SPEED)
 		{
-			enemyId = a;
-			groundId = b;
+			riderVelocity.m_velocity.y = -riderVelocity.m_velocity.y * DEATH_BOUNCE_RESTITUTION;
 		}
-		else if (tagA.m_tag == constant::Tag::Ground && tagB.m_tag == constant::Tag::Enemy)
+		else if (riderVelocity.m_velocity.y < 0.0f)
 		{
-			enemyId = b;
-			groundId = a;
-		}
-
-		// Enemy vs Ground の押し返し処理
-		if (enemyId != core::ecs::INVALID_ENTITY_ID && groundId != core::ecs::INVALID_ENTITY_ID)
-		{
-			auto& enemyTransform = m_componentManager.get<component::TransformComponent>(enemyId);
-			auto& groundTransform = m_componentManager.get<component::TransformComponent>(groundId);
-			auto& enemyCollider = m_componentManager.get<component::ColliderComponent>(enemyId);
-			auto& groundCollider = m_componentManager.get<component::ColliderComponent>(groundId);
-			auto& enemyVelocity = m_componentManager.get<component::VelocityComponent>(enemyId);
-
-			core::Vector3 enemyCenter{ enemyTransform.m_position + enemyCollider.m_offset };
-			core::Vector3 groundCenter{ groundTransform.m_position + groundCollider.m_offset };
-
-			float enemyBottom{ enemyCenter.y - enemyCollider.m_size.y / 2.0f };
-			float groundTop{ groundCenter.y + groundCollider.m_size.y / 2.0f };
-
-			if (enemyBottom <= groundTop)
-			{
-				float correction{ groundTop - enemyBottom };
-				enemyTransform.m_position.y += correction;
-
-				// 死亡中の敵は地面で反発してバウンドする（Safariの落下演出）。
-				// 落下速度が閾値を下回ったら跳ねるのをやめて静止させ、着地済みとして記録する。
-				// この着地フラグを見てEnemyDeathSystemがバウンド完了後に消失フェードを始める
-				const bool isDying{ m_componentManager.has<component::DeathComponent>(enemyId) };
-				// 初回接地の時点で「地面に触れた」と記録する。EnemyDeathSystemはこれを見て
-				// バウンド完了を待たずに落下死のガタガタ揺れを止める
-				if (isDying)
-					m_componentManager.get<component::DeathComponent>(enemyId).m_hasTouchedGround = true;
-				if (isDying && enemyVelocity.m_velocity.y < -DEATH_BOUNCE_MIN_SPEED)
-					enemyVelocity.m_velocity.y = -enemyVelocity.m_velocity.y * DEATH_BOUNCE_RESTITUTION;
-				else if (enemyVelocity.m_velocity.y < 0.0f)
-				{
-					enemyVelocity.m_velocity.y = 0.0f;
-					if (isDying)
-						m_componentManager.get<component::DeathComponent>(enemyId).m_hasLanded = true;
-				}
-			}
+			riderVelocity.m_velocity.y = 0.0f;
+			if (death != nullptr)
+				death->m_hasLanded = true;
 		}
 	}
 } // namespace game::system
