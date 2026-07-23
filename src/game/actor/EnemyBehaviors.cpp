@@ -1,8 +1,8 @@
 ﻿#include "game/actor/EnemyBehaviors.h"
 #include "game/data/EnemyData.h"
 #include "game/component/combat/AttackComponent.h"
-#include "game/component/AnimationComponent.h"
-#include "game/component/AnimationClip.h"
+#include "game/component/visual/AnimationComponent.h"
+#include "game/component/visual/AnimationClip.h"
 #include "game/component/ai/MeleeChaseAIComponent.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/PatrolComponent.h"
@@ -145,10 +145,10 @@ namespace game::actor
 		if (defs.empty())
 			return; // アニメーションを持たない敵（Safari等）は何もしない
 
-		component::AnimationComponent anim{};
+		component::visual::AnimationComponent anim{};
 		for (const auto& def : defs)
 		{
-			component::AnimationClip clip{};
+			component::visual::AnimationClip clip{};
 			clip.m_handle = resourceManager.loadAnimationById(def.animId);
 			clip.m_isLoop = def.loop;
 			clip.m_onComplete = toAnimationState(def.onComplete);
@@ -156,6 +156,6 @@ namespace game::actor
 			clip.m_speed = def.speed;
 			anim.m_clips[toAnimationState(def.state)] = clip;
 		}
-		componentManager.add<component::AnimationComponent>(entityId, anim);
+		componentManager.add<component::visual::AnimationComponent>(entityId, anim);
 	}
 } // namespace game::actor

@@ -2,7 +2,7 @@
 #include <vector>
 #include "core/constant/EffectType.h"
 
-namespace game::component
+namespace game::component::visual
 {
 	/**
 	 * @brief エフェクト再生状態を管理するコンポーネント
@@ -18,4 +18,4 @@ namespace game::component
 
 		std::vector<Slot> m_slots{};
 	};
-} // namespace game::component
+} // namespace game::component::visual

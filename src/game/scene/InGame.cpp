@@ -20,9 +20,9 @@
 #include "game/actor/Player.h"
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
-#include "game/component/RenderComponent.h"
+#include "game/component/visual/RenderComponent.h"
 #include "game/component/combat/HealthComponent.h"
-#include "game/component/HitEffectComponent.h"
+#include "game/component/visual/HitEffectComponent.h"
 #include "game/system/visual/AnimationSystem.h"
 #include "game/system/combat/CollisionSystem.h"
 #include "game/system/visual/HitEffectSystem.h"
@@ -327,9 +327,9 @@ namespace game::scene
 		// プレイヤー死亡イベントの購読
 		m_subscriptions.push_back(m_eventBus.subscribe<event::PlayerDeadEvent>([this](const event::PlayerDeadEvent&)
 		    {
-						if (m_componentManager.has<component::RenderComponent>(m_playerId))
+						if (m_componentManager.has<component::visual::RenderComponent>(m_playerId))
 						{
-							auto& render{ m_componentManager.get<component::RenderComponent>(m_playerId) };
+							auto& render{ m_componentManager.get<component::visual::RenderComponent>(m_playerId) };
 							render.m_isVisible = false;
 						}
 

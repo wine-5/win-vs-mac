@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-namespace game::component
+namespace game::component::visual
 {
 	/**
 	 * @brief 描画情報を持つコンポーネント
@@ -10,4 +10,4 @@ namespace game::component
 		int  m_modelHandle{-1}; // -1は未ロード
 		bool m_isVisible{true};
 	};
-} // namespace game::component
+} // namespace game::component::visual

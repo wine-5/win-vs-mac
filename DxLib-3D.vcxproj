@@ -323,9 +323,9 @@
     <ClInclude Include="src\game\component\ai\AIComponent.h" />
     <ClInclude Include="src\game\component\EnemyTypeComponent.h" />
     <ClInclude Include="src\game\component\combat\AttackComponent.h" />
-    <ClInclude Include="src\game\component\EffectComponent.h" />
+    <ClInclude Include="src\game\component\visual\EffectComponent.h" />
     <ClInclude Include="src\game\component\combat\HealthComponent.h" />
-    <ClInclude Include="src\game\component\HitEffectComponent.h" />
+    <ClInclude Include="src\game\component\visual\HitEffectComponent.h" />
     <ClInclude Include="src\game\component\TagComponent.h" />
     <ClInclude Include="src\game\constant\EnemyAnimationState.h" />
     <ClInclude Include="src\game\constant\MacAwakenTiming.h" />
@@ -393,7 +393,7 @@
     <ClInclude Include="src\core\utility\Color.h" />
     <ClInclude Include="src\core\utility\Log.h" />
     <ClInclude Include="src\core\utility\Vector3.h" />
-    <ClInclude Include="src\game\component\AnimationComponent.h" />
+    <ClInclude Include="src\game\component\visual\AnimationComponent.h" />
     <ClInclude Include="src\game\component\combat\ColliderComponent.h" />
     <ClInclude Include="src\game\constant\Tag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
@@ -434,7 +434,7 @@
     <ClInclude Include="src\game\component\ai\PatrolComponent.h" />
     <ClInclude Include="src\game\component\ai\RangeKeepAIComponent.h" />
     <ClInclude Include="src\game\component\ai\MacAIComponent.h" />
-    <ClInclude Include="src\game\component\RenderComponent.h" />
+    <ClInclude Include="src\game\component\visual\RenderComponent.h" />
     <ClInclude Include="src\game\component\movement\TransformComponent.h" />
     <ClInclude Include="src\game\component\movement\VelocityComponent.h" />
     <ClInclude Include="src\core\ecs\Entity.h" />

@@ -4,7 +4,7 @@
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
-#include "game/component/RenderComponent.h"
+#include "game/component/visual/RenderComponent.h"
 
 namespace game::factory
 {
@@ -61,7 +61,7 @@ namespace game::factory
 
 		// 3Dモデルの弾（Safariのタブ等）はRenderComponentを付与し、InGameViewが回転描画する
 		if (config.m_modelHandle != -1)
-			m_componentManager.add<component::RenderComponent>(id, { config.m_modelHandle, true });
+			m_componentManager.add<component::visual::RenderComponent>(id, { config.m_modelHandle, true });
 
 		return id;
 	}

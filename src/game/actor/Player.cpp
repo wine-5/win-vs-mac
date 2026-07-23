@@ -2,14 +2,14 @@
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/movement/InputComponent.h"
-#include "game/component/RenderComponent.h"
-#include "game/component/AnimationComponent.h"
+#include "game/component/visual/RenderComponent.h"
+#include "game/component/visual/AnimationComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/combat/AttackComponent.h"
-#include "game/component/HitEffectComponent.h"
-#include "game/component/EffectComponent.h"
+#include "game/component/visual/HitEffectComponent.h"
+#include "game/component/visual/EffectComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
 #include "game/component/camera/CameraComponent.h"
 #include "game/component/camera/CameraEffectComponent.h"
@@ -38,7 +38,7 @@ namespace game::actor
 		namespace priority = constant::animation_priority;
 		constexpr float WALK_ANIM_SPEED{ 0.6f }; // 歩行アニメの再生速度（見た目の調整値）
 
-		component::AnimationComponent anim{};
+		component::visual::AnimationComponent anim{};
 		anim.m_clips[AnimationState::Idle]    = { resourceManager.loadAnimationById(anim_id::PLAYER_IDLE),  true };
 		anim.m_clips[AnimationState::Walk] = { resourceManager.loadAnimationById(anim_id::PLAYER_WALK), true, AnimationState::Idle, priority::LOCOMOTION, WALK_ANIM_SPEED };
 		anim.m_clips[AnimationState::Run]     = { resourceManager.loadAnimationById(anim_id::PLAYER_RUN),   true };
@@ -47,10 +47,10 @@ namespace game::actor
 		anim.m_clips[AnimationState::Hit]     = { resourceManager.loadAnimationById(anim_id::PLAYER_HIT),   false, AnimationState::Idle,  priority::HIT };
 		anim.m_clips[AnimationState::Dying]   = { resourceManager.loadAnimationById(anim_id::PLAYER_DYING), false, AnimationState::Dying, priority::DYING };
 		anim.m_clips[AnimationState::Jump]    = { resourceManager.loadAnimationById(anim_id::PLAYER_JUMP),  false, AnimationState::Idle,  priority::JUMP };
-		componentManager.add<component::AnimationComponent>(m_entity.getId(), anim);
-		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
-		componentManager.add<component::HitEffectComponent>(m_entity.getId(), {});
-		componentManager.add<component::EffectComponent>(m_entity.getId(), {});
+		componentManager.add<component::visual::AnimationComponent>(m_entity.getId(), anim);
+		componentManager.add<component::visual::RenderComponent>(m_entity.getId(), { modelHandle });
+		componentManager.add<component::visual::HitEffectComponent>(m_entity.getId(), {});
+		componentManager.add<component::visual::EffectComponent>(m_entity.getId(), {});
 
 		component::combat::HealthComponent health{};
 		health.m_maxHp = playerData.getMaxHp();

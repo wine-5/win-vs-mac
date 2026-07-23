@@ -2,7 +2,7 @@
 #include "game/component/movement/InputComponent.h"
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/movement/TransformComponent.h"
-#include "game/component/AnimationComponent.h"
+#include "game/component/visual/AnimationComponent.h"
 #include "game/component/camera/CameraComponent.h"
 #include <cmath>
 
@@ -54,9 +54,9 @@ namespace game::system::movement
 			transform.m_rotation.y = atan2f(-worldX, -worldZ);
 
 		// 移動状態に応じたアニメーションを要求する
-		if (m_componentManager.has<component::AnimationComponent>(m_entityId))
+		if (m_componentManager.has<component::visual::AnimationComponent>(m_entityId))
 		{
-			auto& anim = m_componentManager.get<component::AnimationComponent>(m_entityId);
+			auto& anim = m_componentManager.get<component::visual::AnimationComponent>(m_entityId);
 			anim.m_requested = isMoving
 				? constant::AnimationState::Walk
 				: constant::AnimationState::Idle;

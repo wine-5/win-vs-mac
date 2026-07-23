@@ -5,7 +5,7 @@
 #include "core/ecs/Entity.h"
 #include "core/base/EventBus.h"
 #include "core/interface/IAnimator.h"
-#include "game/component/AnimationComponent.h"
+#include "game/component/visual/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
 
 namespace game::system::visual
@@ -43,24 +43,24 @@ namespace game::system::visual
 		 * @param anim 対象のAnimationComponent
 		 * @param modelHandle 描画モデルハンドル
 		 */
-		void tryChangeState(core::ecs::EntityId entityId,
-			component::AnimationComponent& anim,
-			int modelHandle);
+	  void tryChangeState(core::ecs::EntityId entityId,
+		  component::visual::AnimationComponent& anim,
+		  int modelHandle);
 
-		/**
-		 * @brief アニメーションを切り替える（優先度判定なしの強制遷移）
-		 * @param entityId 対象EntityのID（ログ用）
-		 * @param anim 対象のAnimationComponent
-		 * @param modelHandle 描画モデルハンドル
-		 * @param newState 遷移先の状態
-		 */
-		void changeAnimation(core::ecs::EntityId entityId,
-			component::AnimationComponent& anim,
-			int modelHandle,
-			constant::AnimationState newState);
+	  /**
+	   * @brief アニメーションを切り替える（優先度判定なしの強制遷移）
+	   * @param entityId 対象EntityのID（ログ用）
+	   * @param anim 対象のAnimationComponent
+	   * @param modelHandle 描画モデルハンドル
+	   * @param newState 遷移先の状態
+	   */
+	  void changeAnimation(core::ecs::EntityId entityId,
+		  component::visual::AnimationComponent& anim,
+		  int modelHandle,
+		  constant::AnimationState newState);
 
-		core::ecs::ComponentManager& m_componentManager;
-		core::iface::IAnimator& m_animator;
-		core::base::EventBus& m_eventBus;
+	  core::ecs::ComponentManager& m_componentManager;
+	  core::iface::IAnimator& m_animator;
+	  core::base::EventBus& m_eventBus;
 	};
 } // namespace game::system::visual

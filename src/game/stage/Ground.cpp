@@ -1,6 +1,6 @@
 ﻿#include "Ground.h"
 #include "game/component/movement/TransformComponent.h"
-#include "game/component/RenderComponent.h"
+#include "game/component/visual/RenderComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/constant/Tag.h"
@@ -20,7 +20,7 @@ namespace game::stage
 		transform.m_scale = groundData.getScale();
 
 		componentManager.add<component::movement::TransformComponent>(m_entity.getId(), transform);
-		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
+		componentManager.add<component::visual::RenderComponent>(m_entity.getId(), { modelHandle });
 
 		component::combat::ColliderComponent collider;
 		collider.m_size = groundData.getColliderSize();

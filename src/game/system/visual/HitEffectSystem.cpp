@@ -1,6 +1,6 @@
 ﻿#include "HitEffectSystem.h"
-#include "game/component/HitEffectComponent.h"
-#include "game/component/RenderComponent.h"
+#include "game/component/visual/HitEffectComponent.h"
+#include "game/component/visual/RenderComponent.h"
 #include "game/component/combat/HealthComponent.h"
 
 namespace game::system::visual
@@ -17,8 +17,8 @@ namespace game::system::visual
 
     void HitEffectSystem::onAttackHit(const game::event::AttackHitEvent& e)
     {
-        if (!m_componentManager.has<component::HitEffectComponent>(e.m_targetId))
-            return;
+		if (!m_componentManager.has<component::visual::HitEffectComponent>(e.m_targetId))
+			return;
 
 		// 致命傷（このヒットで死亡した）の場合は点滅演出を開始しない。
 		// AttackSystemはEnemyDeadEvent（→非表示化）の直後にAttackHitEventを発行するため、
@@ -28,20 +28,20 @@ namespace game::system::visual
 		    m_componentManager.get<component::combat::HealthComponent>(e.m_targetId).m_isDead)
 			return;
 
-		auto& effect{ m_componentManager.get<component::HitEffectComponent>(e.m_targetId) };
-        effect.m_isActive      = true;
+		auto& effect{ m_componentManager.get<component::visual::HitEffectComponent>(e.m_targetId) };
+		effect.m_isActive      = true;
         effect.m_durationTimer = effect.m_duration;
         effect.m_blinkTimer    = effect.m_blinkInterval;
     }
 
     void HitEffectSystem::update(float deltaTime)
     {
-        auto entities{ m_componentManager.getAllEntities<component::HitEffectComponent>() };
-        for (auto entityId : entities)
+		auto entities{ m_componentManager.getAllEntities<component::visual::HitEffectComponent>() };
+		for (auto entityId : entities)
         {
-            auto& effect{ m_componentManager.get<component::HitEffectComponent>(entityId) };
+			auto& effect{ m_componentManager.get<component::visual::HitEffectComponent>(entityId) };
 
-            if (!effect.m_isActive)
+			if (!effect.m_isActive)
                 continue;
 
 			// 演出が進行中に対象が死亡した場合は、即座に打ち切って非表示のままにする
@@ -58,10 +58,10 @@ namespace game::system::visual
             if (effect.m_blinkTimer <= 0.0f)
             {
                 effect.m_blinkTimer = effect.m_blinkInterval;
-                if (m_componentManager.has<component::RenderComponent>(entityId))
-                {
-                    auto& render{ m_componentManager.get<component::RenderComponent>(entityId) };
-                    render.m_isVisible = !render.m_isVisible;
+				if (m_componentManager.has<component::visual::RenderComponent>(entityId))
+				{
+					auto& render{ m_componentManager.get<component::visual::RenderComponent>(entityId) };
+					render.m_isVisible = !render.m_isVisible;
                 }
             }
 
@@ -72,10 +72,10 @@ namespace game::system::visual
             if (effect.m_durationTimer <= 0.0f)
             {
                 effect.m_isActive = false;
-                if (m_componentManager.has<component::RenderComponent>(entityId))
-                {
-                    auto& render{ m_componentManager.get<component::RenderComponent>(entityId) };
-                    render.m_isVisible = true;
+				if (m_componentManager.has<component::visual::RenderComponent>(entityId))
+				{
+					auto& render{ m_componentManager.get<component::visual::RenderComponent>(entityId) };
+					render.m_isVisible = true;
                 }
                 continue;
             }

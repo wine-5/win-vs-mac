@@ -416,7 +416,7 @@
     <ClInclude Include="src\game\scene\IScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\RenderComponent.h">
+    <ClInclude Include="src\game\component\visual\RenderComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\utility\LogUtil.h">
@@ -446,7 +446,7 @@
     <ClInclude Include="src\core\input\KeyCode.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\AnimationComponent.h">
+    <ClInclude Include="src\game\component\visual\AnimationComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\component\combat\ColliderComponent.h">
@@ -602,7 +602,7 @@
     <ClInclude Include="src\game\component\TagComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\HitEffectComponent.h">
+    <ClInclude Include="src\game\component\visual\HitEffectComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\system\visual\HitEffectSystem.h">
@@ -788,7 +788,7 @@
     <ClInclude Include="src\infrastructure\EffectFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\EffectComponent.h">
+    <ClInclude Include="src\game\component\visual\EffectComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\system\visual\EffectSystem.h">

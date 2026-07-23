@@ -5,7 +5,7 @@
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/AttackComponent.h"
-#include "game/component/AnimationComponent.h"
+#include "game/component/visual/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
 #include <cmath>
 #include <algorithm>
@@ -180,9 +180,9 @@ namespace game::system::ai
 			}
 
 			// アニメーション要求：移動中は Walk、停止時は Idle
-			if (m_componentManager.has<component::AnimationComponent>(entityId))
+			if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
 			{
-				auto& anim{ m_componentManager.get<component::AnimationComponent>(entityId) };
+				auto& anim{ m_componentManager.get<component::visual::AnimationComponent>(entityId) };
 				anim.m_requested = (std::sqrt(moveDirection.x * moveDirection.x + moveDirection.z * moveDirection.z) > 0.01f)
 				                       ? constant::AnimationState::Walk
 				                       : constant::AnimationState::Idle;
@@ -264,8 +264,8 @@ namespace game::system::ai
 		transform.m_rotation.y = std::atan2f(-normalizedX, -normalizedZ) + rangeKeep.m_facingYawOffset;
 
 		// アニメを持つ距離維持型が将来出た場合に備えて移動中はWalkを要求する（Safariはアニメ無しで無害）
-		if (m_componentManager.has<component::AnimationComponent>(entityId))
-			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Walk;
+		if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+			m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Walk;
 	}
 
 	core::Vector3 RangeKeepAISystem::pickWanderTarget(const core::Vector3& home)

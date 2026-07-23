@@ -3,7 +3,7 @@
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/HealthComponent.h"
-#include "game/component/AnimationComponent.h"
+#include "game/component/visual/AnimationComponent.h"
 #include "game/component/combat/TelegraphComponent.h"
 #include "game/constant/AnimationState.h"
 #include "game/constant/Tag.h"
@@ -83,8 +83,8 @@ namespace game::system::ai
 				mac.m_state = MacState::Dead;
 				if (hasVelocity)
 					stopHorizontalVelocity(entityId);
-				if (m_componentManager.has<component::AnimationComponent>(entityId))
-					m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Dying;
+				if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+					m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Dying;
 				continue;
 			}
 
@@ -113,8 +113,8 @@ namespace game::system::ai
 					health.m_isInvincible = true; // 覚醒演出中は無敵（演出終了時に解除する）
 					if (hasVelocity)
 						stopHorizontalVelocity(entityId);
-					if (m_componentManager.has<component::AnimationComponent>(entityId))
-						m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
+					if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+						m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 
 					// 覚醒演出（カメラをボスへ寄せる・シェイク・赤ビネット）のトリガー
 					m_eventBus.publish(event::MacPhaseTransitionEvent{ entityId, core::data::MacPhase::Awakened });
@@ -151,8 +151,8 @@ namespace game::system::ai
 			{
 				if (hasVelocity)
 					stopHorizontalVelocity(entityId);
-				if (m_componentManager.has<component::AnimationComponent>(entityId))
-					m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
+				if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+					m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 
 				mac.m_windupTimer -= deltaTime;
 
@@ -204,8 +204,8 @@ namespace game::system::ai
 				mac.m_state = MacState::Idle;
 				if (hasVelocity)
 					stopHorizontalVelocity(entityId);
-				if (m_componentManager.has<component::AnimationComponent>(entityId))
-					m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
+				if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+					m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 				continue;
 			}
 
@@ -233,21 +233,21 @@ namespace game::system::ai
 						velocity.m_velocity.x = dir.x * phase.m_moveSpeed;
 						velocity.m_velocity.z = dir.z * phase.m_moveSpeed;
 					}
-					if (m_componentManager.has<component::AnimationComponent>(entityId))
+					if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
 					{
 						// Phase2は走り（Run）で覚醒感を出す
 						const auto moveAnim{ (mac.m_currentPhase == core::data::MacPhase::Awakened)
 							                     ? constant::AnimationState::Run
 							                     : constant::AnimationState::Walk };
-						m_componentManager.get<component::AnimationComponent>(entityId).m_requested = moveAnim;
+						m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = moveAnim;
 					}
 				}
 				else
 				{
 					if (hasVelocity)
 						stopHorizontalVelocity(entityId);
-					if (m_componentManager.has<component::AnimationComponent>(entityId))
-						m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
+					if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+						m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 				}
 				continue;
 			}
@@ -340,8 +340,8 @@ namespace game::system::ai
 	{
 		if (m_componentManager.has<component::combat::AttackComponent>(entityId))
 			m_componentManager.get<component::combat::AttackComponent>(entityId).m_attackRequested = true;
-		if (m_componentManager.has<component::AnimationComponent>(entityId))
-			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack1;
+		if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+			m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack1;
 	}
 
 	void MacAISystem::performRanged(core::ecs::EntityId entityId, const component::movement::TransformComponent& transform,
@@ -380,8 +380,8 @@ namespace game::system::ai
 			m_projectileFactory.spawn(origin, fanDir, config, constant::Tag::Enemy);
 		}
 
-		if (m_componentManager.has<component::AnimationComponent>(entityId))
-			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack2;
+		if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+			m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack2;
 	}
 
 	factory::ProjectileConfig MacAISystem::makeRainbowConfig(const core::data::MacPhaseData& phase) const
@@ -424,8 +424,8 @@ namespace game::system::ai
 			m_projectileFactory.spawn(origin, dir, config, constant::Tag::Enemy);
 		}
 
-		if (m_componentManager.has<component::AnimationComponent>(entityId))
-			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack2;
+		if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+			m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack2;
 	}
 
 	void MacAISystem::performSummon(const component::movement::TransformComponent& transform,

@@ -1,5 +1,5 @@
 ﻿#include "AnimationSystem.h"
-#include "game/component/RenderComponent.h"
+#include "game/component/visual/RenderComponent.h"
 #include "game/event/InGameEvents.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
@@ -23,14 +23,14 @@ namespace game::system::visual
 
 	void AnimationSystem::update(float deltaTime)
 	{
-		auto entities{ m_componentManager.getAllEntities<component::AnimationComponent>() };
+		auto entities{ m_componentManager.getAllEntities<component::visual::AnimationComponent>() };
 		for (auto entityId : entities)
 		{
-			auto& anim = m_componentManager.get<component::AnimationComponent>(entityId);
+			auto& anim = m_componentManager.get<component::visual::AnimationComponent>(entityId);
 			if (anim.m_clips.empty())
 				continue;
 
-			auto& render = m_componentManager.get<component::RenderComponent>(entityId);
+			auto& render = m_componentManager.get<component::visual::RenderComponent>(entityId);
 
 			// 初回はcurrent状態のクリップをアタッチする
 			if (anim.m_animIndex == -1)
@@ -75,8 +75,8 @@ namespace game::system::visual
 	}
 
 	void AnimationSystem::tryChangeState(core::ecs::EntityId entityId,
-		component::AnimationComponent& anim,
-		int modelHandle)
+	    component::visual::AnimationComponent& anim,
+	    int modelHandle)
 	{
 		auto requestedIt{ anim.m_clips.find(anim.m_requested) };
 		if (requestedIt == anim.m_clips.end())
@@ -107,9 +107,9 @@ namespace game::system::visual
 	}
 
 	void AnimationSystem::changeAnimation(core::ecs::EntityId entityId,
-		component::AnimationComponent& anim,
-		int modelHandle,
-		constant::AnimationState newState)
+	    component::visual::AnimationComponent& anim,
+	    int modelHandle,
+	    constant::AnimationState newState)
 	{
 		auto it{ anim.m_clips.find(newState) };
 		if (it == anim.m_clips.end() || it->second.m_handle == -1)

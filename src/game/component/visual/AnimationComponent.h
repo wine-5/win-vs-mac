@@ -1,9 +1,9 @@
 #pragma once
 #include <unordered_map>
-#include "game/component/AnimationClip.h"
+#include "game/component/visual/AnimationClip.h"
 #include "game/constant/AnimationState.h"
 
-namespace game::component
+namespace game::component::visual
 {
     /**
      * @brief アニメーション情報を持つコンポーネント
@@ -21,4 +21,4 @@ namespace game::component
         float m_animTotalTime{ 0.0f };
         bool  m_isCompleted{ false }; // 非ループ再生が終端に達したか
     };
-} // namespace game::component
+} // namespace game::component::visual

@@ -1,6 +1,6 @@
 ﻿#include "game/system/visual/EffectSystem.h"
 #include "core/base/ServiceLocator.h"
-#include "game/component/EffectComponent.h"
+#include "game/component/visual/EffectComponent.h"
 #include "game/component/movement/TransformComponent.h"
 
 namespace game::system::visual
@@ -52,16 +52,13 @@ namespace game::system::visual
 		// エフェクトの自動終了チェックの処理を委譲する
 		m_effectFactory.update();
 
-
-		auto entities{ m_componentManager.getAllEntities<component::EffectComponent>() };
+		auto entities{ m_componentManager.getAllEntities<component::visual::EffectComponent>() };
 		for (auto entityId : entities)
 		{
-			auto& effect{ m_componentManager.get<component::EffectComponent>(entityId) };
+			auto& effect{ m_componentManager.get<component::visual::EffectComponent>(entityId) };
 
-			std::erase_if(effect.m_slots, [this](const component::EffectComponent::Slot& slot)
-				{
-					return !m_effectFactory.isPlaying(slot.m_handle);
-				});
+			std::erase_if(effect.m_slots, [this](const component::visual::EffectComponent::Slot& slot)
+			    { return !m_effectFactory.isPlaying(slot.m_handle); });
 		}
 	}
 
@@ -82,14 +79,14 @@ namespace game::system::visual
 			return;
 		}
 
-		if (!m_componentManager.has<component::EffectComponent>(event.m_targetId))
+		if (!m_componentManager.has<component::visual::EffectComponent>(event.m_targetId))
 		{
 			return;
 		}
 
 		// スロットに記録する
-		auto& effect{ m_componentManager.get<component::EffectComponent>(event.m_targetId) };
-		component::EffectComponent::Slot slot{};
+		auto& effect{ m_componentManager.get<component::visual::EffectComponent>(event.m_targetId) };
+		component::visual::EffectComponent::Slot slot{};
 		slot.m_type   = event.m_effectType;
 		slot.m_handle = handle;
 		effect.m_slots.push_back(slot);
@@ -111,13 +108,13 @@ namespace game::system::visual
 			return;
 		}
 
-		if (!m_componentManager.has<component::EffectComponent>(event.m_attackerId))
+		if (!m_componentManager.has<component::visual::EffectComponent>(event.m_attackerId))
 		{
 			return;
 		}
 
-		auto& effect{ m_componentManager.get<component::EffectComponent>(event.m_attackerId) };
-		component::EffectComponent::Slot slot{};
+		auto& effect{ m_componentManager.get<component::visual::EffectComponent>(event.m_attackerId) };
+		component::visual::EffectComponent::Slot slot{};
 		slot.m_type = event.m_effectType;
 		slot.m_handle = handle;
 		effect.m_slots.push_back(slot);
@@ -135,11 +132,11 @@ namespace game::system::visual
 		if (handle == -1)
 			return;
 
-		if (!m_componentManager.has<component::EffectComponent>(event.m_entityId))
+		if (!m_componentManager.has<component::visual::EffectComponent>(event.m_entityId))
 			return;
 
-		auto& effect{ m_componentManager.get<component::EffectComponent>(event.m_entityId) };
-		component::EffectComponent::Slot slot{};
+		auto& effect{ m_componentManager.get<component::visual::EffectComponent>(event.m_entityId) };
+		component::visual::EffectComponent::Slot slot{};
 		slot.m_type = core::constant::EffectType::Enemy_HitWindow;
 		slot.m_handle = handle;
 		effect.m_slots.push_back(slot);
@@ -155,13 +152,13 @@ namespace game::system::visual
 			return;
 		}
 
-		if (!m_componentManager.has<component::EffectComponent>(event.m_entityId))
+		if (!m_componentManager.has<component::visual::EffectComponent>(event.m_entityId))
 		{
 			return;
 		}
 
-		auto& effect{ m_componentManager.get<component::EffectComponent>(event.m_entityId) };
-		component::EffectComponent::Slot slot{};
+		auto& effect{ m_componentManager.get<component::visual::EffectComponent>(event.m_entityId) };
+		component::visual::EffectComponent::Slot slot{};
 		slot.m_type = core::constant::EffectType::Enemy_Spawn;
 		slot.m_handle = handle;
 		effect.m_slots.push_back(slot);

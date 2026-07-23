@@ -1,8 +1,8 @@
 ﻿#include "EnemyDeathSystem.h"
 #include "game/component/EnemyTypeComponent.h"
 #include "game/component/combat/DeathComponent.h"
-#include "game/component/RenderComponent.h"
-#include "game/component/AnimationComponent.h"
+#include "game/component/visual/RenderComponent.h"
+#include "game/component/visual/AnimationComponent.h"
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/constant/EnemyType.h"
@@ -102,9 +102,9 @@ namespace game::system::combat
 		// このアニメの完了（AnimationFinishedEvent）を待ってからフェードに入る。
 		// 死亡クリップを持たない敵（Safari等）は待つアニメが無いので、その場でアニメ完了扱いにする
 		bool hasDyingClip{ false };
-		if (m_componentManager.has<component::AnimationComponent>(e.m_entityId))
+		if (m_componentManager.has<component::visual::AnimationComponent>(e.m_entityId))
 		{
-			auto& anim{ m_componentManager.get<component::AnimationComponent>(e.m_entityId) };
+			auto& anim{ m_componentManager.get<component::visual::AnimationComponent>(e.m_entityId) };
 			if (anim.m_clips.contains(constant::AnimationState::Dying))
 			{
 				anim.m_requested = constant::AnimationState::Dying;
@@ -153,8 +153,8 @@ namespace game::system::combat
 				}
 			}
 
-			const int modelHandle{ m_componentManager.has<component::RenderComponent>(entityId)
-				                       ? m_componentManager.get<component::RenderComponent>(entityId).m_modelHandle
+			const int modelHandle{ m_componentManager.has<component::visual::RenderComponent>(entityId)
+				                       ? m_componentManager.get<component::visual::RenderComponent>(entityId).m_modelHandle
 				                       : -1 };
 
 			// フェーズ1：まだ消え始めていなければ「消え始めてよいか」を判定する。

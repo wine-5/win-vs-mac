@@ -2,14 +2,14 @@
 #include "game/actor/EnemyBehaviors.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/movement/VelocityComponent.h"
-#include "game/component/RenderComponent.h"
+#include "game/component/visual/RenderComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/ai/AIComponent.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/TagComponent.h"
-#include "game/component/HitEffectComponent.h"
-#include "game/component/EffectComponent.h"
+#include "game/component/visual/HitEffectComponent.h"
+#include "game/component/visual/EffectComponent.h"
 #include "game/constant/Tag.h"
 #include <utility>
 
@@ -51,9 +51,9 @@ namespace game::actor
 		m_componentManager.add<component::movement::TransformComponent>(m_entity.getId(), transform);
 
 		m_componentManager.add<component::movement::VelocityComponent>(m_entity.getId(), {});
-		m_componentManager.add<component::RenderComponent>(m_entity.getId(), component::RenderComponent{ .m_modelHandle = m_modelHandle });
-		m_componentManager.add<component::HitEffectComponent>(m_entity.getId(), {});
-		m_componentManager.add<component::EffectComponent>(m_entity.getId(), {});
+		m_componentManager.add<component::visual::RenderComponent>(m_entity.getId(), component::visual::RenderComponent{ .m_modelHandle = m_modelHandle });
+		m_componentManager.add<component::visual::HitEffectComponent>(m_entity.getId(), {});
+		m_componentManager.add<component::visual::EffectComponent>(m_entity.getId(), {});
 
 		component::combat::HealthComponent health{};
 		health.m_maxHp = m_enemyData.getMaxHp();

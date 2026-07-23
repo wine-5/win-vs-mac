@@ -5,7 +5,7 @@
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/AttackComponent.h"
-#include "game/component/AnimationComponent.h"
+#include "game/component/visual/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
 #include <cmath>
 #include <algorithm>
@@ -220,7 +220,7 @@ namespace game::system::ai
 
 	void MeleeChaseAISystem::requestAnimation(core::ecs::EntityId entityId, constant::AnimationState state)
 	{
-		if (m_componentManager.has<component::AnimationComponent>(entityId))
-			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = state;
+		if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+			m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = state;
 	}
 } // namespace game::system::ai

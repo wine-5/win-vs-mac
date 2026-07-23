@@ -5,7 +5,7 @@
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
-#include "game/component/HitEffectComponent.h"
+#include "game/component/visual/HitEffectComponent.h"
 #include "game/constant/Tag.h"
 #include "game/attack/DamageChain.h"
 #include "game/attack/BaseAttackHandler.h"
@@ -164,8 +164,8 @@ namespace game::system::combat
 			// プレイヤーは被弾後の点滅（HitEffect）中は無敵＝連続ヒット防止。
 			// 無敵時間はHitEffectComponent.m_duration（1秒）に自動で同期する
 			if (targetTagCheck.m_tag == constant::Tag::Player &&
-			    m_componentManager.has<component::HitEffectComponent>(targetId) &&
-			    m_componentManager.get<component::HitEffectComponent>(targetId).m_isActive)
+			    m_componentManager.has<component::visual::HitEffectComponent>(targetId) &&
+			    m_componentManager.get<component::visual::HitEffectComponent>(targetId).m_isActive)
 				continue;
 
 			// AttackComponentを持つEntityの攻撃範囲チェック

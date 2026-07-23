@@ -1,7 +1,7 @@
 ﻿#include "InGameView.h"
 #include "core/utility/Color.h"
 #include "game/component/movement/TransformComponent.h"
-#include "game/component/RenderComponent.h"
+#include "game/component/visual/RenderComponent.h"
 #include "game/component/combat/AimComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
 #include "game/component/movement/VelocityComponent.h"
@@ -115,9 +115,9 @@ namespace game::scene
 	    const std::vector<core::ecs::EntityId>& enemyIds)
 	{
 		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(playerId) };
-		const auto& render{ m_componentManager.get<component::RenderComponent>(playerId) };
+		const auto& render{ m_componentManager.get<component::visual::RenderComponent>(playerId) };
 		const auto& groundTransform{ m_componentManager.get<component::movement::TransformComponent>(groundId) };
-		const auto& groundRender{ m_componentManager.get<component::RenderComponent>(groundId) };
+		const auto& groundRender{ m_componentManager.get<component::visual::RenderComponent>(groundId) };
 
 		if (render.m_isVisible)
 			m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
@@ -126,7 +126,7 @@ namespace game::scene
 
 		for (auto enemyId : enemyIds)
 		{
-			const auto& enemyRender{ m_componentManager.get<component::RenderComponent>(enemyId) };
+			const auto& enemyRender{ m_componentManager.get<component::visual::RenderComponent>(enemyId) };
 			const auto& enemyTransform{ m_componentManager.get<component::movement::TransformComponent>(enemyId) };
 			if (enemyRender.m_isVisible)
 				m_renderer.drawModel(enemyRender.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
@@ -185,10 +185,10 @@ namespace game::scene
 		auto projectiles{ m_componentManager.getAllEntities<component::combat::ProjectileComponent>() };
 		for (auto id : projectiles)
 		{
-			if (!m_componentManager.has<component::RenderComponent>(id))
+			if (!m_componentManager.has<component::visual::RenderComponent>(id))
 				continue;
 
-			const auto& render{ m_componentManager.get<component::RenderComponent>(id) };
+			const auto& render{ m_componentManager.get<component::visual::RenderComponent>(id) };
 			if (!render.m_isVisible || render.m_modelHandle == -1)
 				continue;
 

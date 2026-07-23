@@ -18,7 +18,7 @@
 #include "core/interface/IProjectileWindowManager.h"
 #include "game/factory/FactoryManager.h"
 #include "game/factory/EnemySpawner.h"
-#include "game/component/RenderComponent.h"
+#include "game/component/visual/RenderComponent.h"
 #include "game/data/PlayerData.h"
 #include "game/data/FileEquipmentData.h"
 #include "game/event/AudioEventListener.h"

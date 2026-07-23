@@ -1,6 +1,6 @@
 #pragma once
 
-namespace game::component
+namespace game::component::visual
 {
     /**
      * @brief ダメージヒット時の点滅演出を制御するコンポーネント
@@ -15,4 +15,4 @@ namespace game::component
         float m_blinkTimer{ 0.0f };      // 次のトグルまでの残り時間
         bool  m_isActive{ false };       // 点滅中かどうか
     };
-} // namespace game::component
+} // namespace game::component::visual
