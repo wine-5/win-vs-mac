@@ -3,7 +3,7 @@
 #include "game/component/TransformComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/combat/AttackComponent.h"
-#include "game/component/AIComponent.h"
+#include "game/component/ai/AIComponent.h"
 #include "game/component/EnemyTypeComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
 
@@ -120,11 +120,11 @@ namespace game::ui::debug
 		auto attackers{ m_componentManager.getAllEntities<component::combat::AttackComponent>() };
 		for (auto id : attackers)
 		{
-			if (!m_componentManager.has<component::AIComponent>(id))
+			if (!m_componentManager.has<component::ai::AIComponent>(id))
 				continue;
 
 			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
-			auto& ai{ m_componentManager.get<component::AIComponent>(id) };
+			auto& ai{ m_componentManager.get<component::ai::AIComponent>(id) };
 
 			// 浮遊型（Safari）はスポーン時に確定した敵種で判定する
 			const bool isFlying{ isFlyingEnemyImpl(m_componentManager, id) };

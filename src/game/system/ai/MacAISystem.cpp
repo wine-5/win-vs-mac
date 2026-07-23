@@ -1,5 +1,5 @@
 #include "MacAISystem.h"
-#include "game/component/AIComponent.h"
+#include "game/component/ai/AIComponent.h"
 #include "game/component/VelocityComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/HealthComponent.h"
@@ -73,7 +73,7 @@ namespace game::system::ai
 
 			auto& health{ m_componentManager.get<component::combat::HealthComponent>(entityId) };
 			auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
-			auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+			auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 
 			const bool hasVelocity{ m_componentManager.has<component::VelocityComponent>(entityId) };
 
@@ -459,7 +459,7 @@ namespace game::system::ai
 	int MacAISystem::countAliveMinions()
 	{
 		int count{ 0 };
-		auto entities{ m_componentManager.getAllEntities<component::AIComponent>() };
+		auto entities{ m_componentManager.getAllEntities<component::ai::AIComponent>() };
 		for (auto entityId : entities)
 		{
 			// ボス自身は雑魚数に含めない

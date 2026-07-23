@@ -551,7 +551,7 @@
     <ClInclude Include="src\game\component\combat\HealthComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\AIComponent.h">
+    <ClInclude Include="src\game\component\ai\AIComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\component\EnemyTypeComponent.h">
@@ -629,7 +629,7 @@
     <ClInclude Include="src\game\component\combat\DeathComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\AlertComponent.h">
+    <ClInclude Include="src\game\component\ai\AlertComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\data\FileEquipmentData.h">

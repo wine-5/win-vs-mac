@@ -1,7 +1,7 @@
 ﻿#include "MeleeChaseAISystem.h"
 #include "game/component/ai/MeleeChaseAIComponent.h"
 #include "game/component/ai/PatrolComponent.h"
-#include "game/component/AIComponent.h"
+#include "game/component/ai/AIComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
 #include "game/component/combat/AttackComponent.h"
@@ -39,10 +39,10 @@ namespace game::system::ai
 
 		for (auto entityId : entities)
 		{
-			if (!m_componentManager.has<component::AIComponent>(entityId))
+			if (!m_componentManager.has<component::ai::AIComponent>(entityId))
 				continue;
 
-			auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+			auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 
 			// AIが無効なら処理をスキップ（死亡後など）
 			if (!ai.m_isActive)
@@ -90,7 +90,7 @@ namespace game::system::ai
 	void MeleeChaseAISystem::updateChase(core::ecs::EntityId entityId, float distanceToPlayer,
 	    const core::Vector3& dirToPlayer, float deltaTime)
 	{
-		auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+		auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 		auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
 
 		// 攻撃レンジ内かどうかを判定
@@ -142,7 +142,7 @@ namespace game::system::ai
 
 	void MeleeChaseAISystem::updatePatrol(core::ecs::EntityId entityId, float deltaTime)
 	{
-		auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+		auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 		auto& patrol{ m_componentManager.get<component::ai::PatrolComponent>(entityId) };
 		auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
 

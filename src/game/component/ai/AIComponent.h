@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "core/ecs/Entity.h"
 
-namespace game::component
+namespace game::component::ai
 {
 	/**
 	 * @brief AI追従行動を制御するコンポーネント
@@ -22,4 +22,4 @@ namespace game::component
 		// DetectionSystemが「未索敵→索敵」の切り替わり（発見の瞬間）を検知するのに使う
 		bool m_wasAware{ false };
 	};
-} // namespace game::component
+} // namespace game::component::ai

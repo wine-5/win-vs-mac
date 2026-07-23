@@ -1,6 +1,6 @@
 #include "EnemyRangedAttackSystem.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
-#include "game/component/AIComponent.h"
+#include "game/component/ai/AIComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/constant/Tag.h"
 #include <cmath>
@@ -43,10 +43,10 @@ namespace game::system::ai
 
 		for (auto entityId : entities)
 		{
-			if (!m_componentManager.has<component::AIComponent>(entityId))
+			if (!m_componentManager.has<component::ai::AIComponent>(entityId))
 				continue;
 
-			auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+			auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 			auto& rangeKeep{ m_componentManager.get<component::ai::RangeKeepAIComponent>(entityId) };
 
 			// 各種タイマーを進める

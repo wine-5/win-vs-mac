@@ -1,5 +1,5 @@
 #include "DetectionSystem.h"
-#include "game/component/AIComponent.h"
+#include "game/component/ai/AIComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/event/InGameEvents.h"
 #include <cmath>
@@ -15,11 +15,11 @@ namespace game::system::ai
 	void DetectionSystem::update(float /*deltaTime*/)
 	{
 		// AIComponentを持つ＝敵。種類を問わず一律に索敵の切り替わりを見る
-		auto entities{ m_componentManager.getAllEntities<component::AIComponent>() };
+		auto entities{ m_componentManager.getAllEntities<component::ai::AIComponent>() };
 
 		for (auto entityId : entities)
 		{
-			auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+			auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 
 			// 死亡・停止中の敵は発見判定しない
 			if (!ai.m_isActive)

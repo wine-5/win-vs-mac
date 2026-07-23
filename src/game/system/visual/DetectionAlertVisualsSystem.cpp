@@ -1,6 +1,6 @@
 ﻿#include "DetectionAlertVisualsSystem.h"
 #include "game/component/EnemyTypeComponent.h"
-#include "game/component/AlertComponent.h"
+#include "game/component/ai/AlertComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "core/utility/Color.h"
@@ -106,28 +106,28 @@ namespace game::system::visual
 		const int messageIndex{ static_cast<int>(dist(m_rng)) };
 
 		// 既に表示中なら時間を延ばしつつ文言も引き直す。無ければ付与する
-		if (m_componentManager.has<component::AlertComponent>(e.m_entityId))
+		if (m_componentManager.has<component::ai::AlertComponent>(e.m_entityId))
 		{
-			auto& alert{ m_componentManager.get<component::AlertComponent>(e.m_entityId) };
+			auto& alert{ m_componentManager.get<component::ai::AlertComponent>(e.m_entityId) };
 			alert.m_timer = ALERT_DURATION;
 			alert.m_messageIndex = messageIndex;
 		}
 		else
 		{
-			m_componentManager.add<component::AlertComponent>(e.m_entityId, { ALERT_DURATION, messageIndex });
+			m_componentManager.add<component::ai::AlertComponent>(e.m_entityId, { ALERT_DURATION, messageIndex });
 		}
 	}
 
 	void DetectionAlertVisualsSystem::update(float deltaTime)
 	{
 		// getAllEntitiesはスナップショットを返すため、ループ中の削除は安全
-		auto entities{ m_componentManager.getAllEntities<component::AlertComponent>() };
+		auto entities{ m_componentManager.getAllEntities<component::ai::AlertComponent>() };
 		for (auto entityId : entities)
 		{
-			auto& alert{ m_componentManager.get<component::AlertComponent>(entityId) };
+			auto& alert{ m_componentManager.get<component::ai::AlertComponent>(entityId) };
 			alert.m_timer -= deltaTime;
 			if (alert.m_timer <= 0.0f)
-				m_componentManager.remove<component::AlertComponent>(entityId);
+				m_componentManager.remove<component::ai::AlertComponent>(entityId);
 		}
 	}
 
@@ -136,13 +136,13 @@ namespace game::system::visual
 		const float screenH{ static_cast<float>(m_screen.getHeight()) };
 		const float bannerH{ screenH * BANNER_HEIGHT_RATIO };
 
-		auto entities{ m_componentManager.getAllEntities<component::AlertComponent>() };
+		auto entities{ m_componentManager.getAllEntities<component::ai::AlertComponent>() };
 		for (auto entityId : entities)
 		{
 			if (!m_componentManager.has<component::TransformComponent>(entityId))
 				continue;
 
-			const auto& alert{ m_componentManager.get<component::AlertComponent>(entityId) };
+			const auto& alert{ m_componentManager.get<component::ai::AlertComponent>(entityId) };
 			const auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
 
 			// 頭上のワールド座標を求める（原点は足元。コライダー高さぶん上へ）

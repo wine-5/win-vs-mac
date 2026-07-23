@@ -320,7 +320,7 @@
     <ClInclude Include="src\game\attack\DamageChain.h" />
     <ClInclude Include="src\game\attack\DefenseHandler.h" />
     <ClInclude Include="src\game\attack\IDamageHandler.h" />
-    <ClInclude Include="src\game\component\AIComponent.h" />
+    <ClInclude Include="src\game\component\ai\AIComponent.h" />
     <ClInclude Include="src\game\component\EnemyTypeComponent.h" />
     <ClInclude Include="src\game\component\combat\AttackComponent.h" />
     <ClInclude Include="src\game\component\EffectComponent.h" />
@@ -373,7 +373,7 @@
     <ClInclude Include="src\game\system\visual\TelegraphVisualsSystem.h" />
     <ClInclude Include="src\game\component\combat\TelegraphComponent.h" />
     <ClInclude Include="src\game\component\combat\DeathComponent.h" />
-    <ClInclude Include="src\game\component\AlertComponent.h" />
+    <ClInclude Include="src\game\component\ai\AlertComponent.h" />
     <ClInclude Include="src\game\ui\FadeTransition.h" />
     <ClInclude Include="src\game\utility\ExtensionBonusCalculator.h" />
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />

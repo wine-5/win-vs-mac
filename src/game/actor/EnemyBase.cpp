@@ -4,7 +4,7 @@
 #include "game/component/VelocityComponent.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/combat/ColliderComponent.h"
-#include "game/component/AIComponent.h"
+#include "game/component/ai/AIComponent.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/TagComponent.h"
@@ -77,9 +77,9 @@ namespace game::actor
 		tag.m_tag = constant::Tag::Enemy;
 		m_componentManager.add<component::TagComponent>(m_entity.getId(), tag);
 
-		component::AIComponent ai{};
+		component::ai::AIComponent ai{};
 		ai.m_moveSpeed = m_enemyData.getMoveSpeed();
 		ai.m_detectionRange = m_enemyData.getDetectionRange();
-		m_componentManager.add<component::AIComponent>(m_entity.getId(), ai);
+		m_componentManager.add<component::ai::AIComponent>(m_entity.getId(), ai);
 	}
 } // namespace game::actor

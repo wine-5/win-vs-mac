@@ -1,6 +1,6 @@
 #pragma once
 
-namespace game::component
+namespace game::component::ai
 {
 	/**
 	 * @brief 発見演出（通知バッジ）の表示状態を持つコンポーネント
@@ -13,4 +13,4 @@ namespace game::component
 		float m_timer{ 0.0f };   // バナー表示の残り時間（秒）
 		int m_messageIndex{ 0 }; // 表示する危険メッセージの番号（発見時に抽選し、表示中は固定）
 	};
-} // namespace game::component
+} // namespace game::component::ai

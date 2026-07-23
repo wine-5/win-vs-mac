@@ -1,7 +1,7 @@
 ﻿#include "RangeKeepAISystem.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/PatrolComponent.h"
-#include "game/component/AIComponent.h"
+#include "game/component/ai/AIComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
 #include "game/component/combat/AttackComponent.h"
@@ -63,13 +63,13 @@ namespace game::system::ai
 
 		for (auto entityId : entities)
 		{
-			if (!m_componentManager.has<component::AIComponent>(entityId))
+			if (!m_componentManager.has<component::ai::AIComponent>(entityId))
 				continue;
 
 			// 個体ごとに揺らぎの位相をずらし、複数体が同じタイミングで上下しないようにする
 			const float swayPhase{ static_cast<float>(entityId) * 1.7f };
 
-			auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+			auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 			auto& rangeKeep{ m_componentManager.get<component::ai::RangeKeepAIComponent>(entityId) };
 
 			// AIが無効なら処理をスキップ
@@ -257,7 +257,7 @@ namespace game::system::ai
 		// 目的地へゆっくり移動し、その方向を向く（機体正面軸のズレは facingYawOffset で補正）
 		const float normalizedX{ toTarget.x / distance };
 		const float normalizedZ{ toTarget.z / distance };
-		const float patrolSpeed{ m_componentManager.get<component::AIComponent>(entityId).m_moveSpeed * PATROL_SPEED_FACTOR };
+		const float patrolSpeed{ m_componentManager.get<component::ai::AIComponent>(entityId).m_moveSpeed * PATROL_SPEED_FACTOR };
 		velocity.m_velocity.x = normalizedX * patrolSpeed;
 		velocity.m_velocity.z = normalizedZ * patrolSpeed;
 		applyHover(velocity);

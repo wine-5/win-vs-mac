@@ -3,7 +3,7 @@
 #include "FactoryManager.h"
 #include "core/interface/ILogger.h"
 #include "core/utility/Log.h"
-#include "game/component/AIComponent.h"
+#include "game/component/ai/AIComponent.h"
 #include "game/constant/ModelId.h"
 #include "game/event/InGameEvents.h"
 #include <stdexcept>
@@ -70,9 +70,9 @@ namespace game::factory
 		m_componentManager.add<component::EnemyTypeComponent>(enemyId, { type });
 
 		// 追跡対象が設定されていれば反映する（召喚された敵も即プレイヤーを追う）
-		if (m_target.getId() != 0 && m_componentManager.has<component::AIComponent>(enemyId))
+		if (m_target.getId() != 0 && m_componentManager.has<component::ai::AIComponent>(enemyId))
 		{
-			auto& ai = m_componentManager.get<component::AIComponent>(enemyId);
+			auto& ai = m_componentManager.get<component::ai::AIComponent>(enemyId);
 			ai.m_targetEntity = m_target;
 		}
 

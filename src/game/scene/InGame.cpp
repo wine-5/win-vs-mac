@@ -47,7 +47,7 @@
 #include "game/system/ai/RangeKeepAISystem.h"
 #include "game/system/ai/EnemyRangedAttackSystem.h"
 #include "game/system/ai/MacAISystem.h"
-#include "game/component/AIComponent.h"
+#include "game/component/ai/AIComponent.h"
 #include "game/component/ai/MeleeChaseAIComponent.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/MacAIComponent.h"
@@ -354,8 +354,8 @@ namespace game::scene
 
 			            // AIを停止する。これをしないと死亡後も移動や弾発射が続き、
 			            // 「まだSafariがタブをPlayerに投げてくる」状態になる
-			            if (m_componentManager.has<component::AIComponent>(e.m_entityId))
-				            m_componentManager.get<component::AIComponent>(e.m_entityId).m_isActive = false;
+			            if (m_componentManager.has<component::ai::AIComponent>(e.m_entityId))
+				            m_componentManager.get<component::ai::AIComponent>(e.m_entityId).m_isActive = false;
 
 			            m_killCount++;
 
