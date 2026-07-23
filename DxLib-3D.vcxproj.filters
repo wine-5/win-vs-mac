@@ -515,6 +515,9 @@
     <ClInclude Include="src\core\utility\Color.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\core\utility\Log.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="src\core\constant\UI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

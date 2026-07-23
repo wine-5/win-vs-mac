@@ -391,6 +391,7 @@
     <ClInclude Include="src\infrastructure\Screen.h" />
     <ClInclude Include="src\core\base\ServiceLocator.h" />
     <ClInclude Include="src\core\utility\Color.h" />
+    <ClInclude Include="src\core\utility\Log.h" />
     <ClInclude Include="src\core\utility\Vector3.h" />
     <ClInclude Include="src\game\component\AnimationComponent.h" />
     <ClInclude Include="src\game\component\ColliderComponent.h" />
