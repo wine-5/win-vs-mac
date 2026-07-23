@@ -44,12 +44,6 @@ namespace game::scene
 		void update(const core::iface::PerformanceSnapshot& snap);
 
 		/**
-		 * @brief スプラッシュ画面を描画する
-		 * @param dotCount 末尾に表示するドットの数（0〜3）
-		 */
-		void drawSplash(int dotCount) const;
-
-		/**
 		 * @brief タイトル画面を描画する
 		 */
 		void drawTitle() const;

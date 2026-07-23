@@ -27,7 +27,7 @@ namespace game::scene
 			[this]() { goToSelect(); },
 			[this]() { exitApp(); });
 
-		// Loading 画面で起動演出済みのため、Splash をスキップしてタイトルをフェードインで表示
+		// Loading 画面で起動演出済みのため、タイトルはフェードインから開始する
 		m_view->setButtonsVisible(true);
 		m_fade = std::make_unique<ui::FadeTransition>(
 			m_uiRenderer, m_screen, FADE_DURATION, true);
@@ -51,33 +51,6 @@ namespace game::scene
 
 		switch (m_state)
 		{
-		case State::Splash:
-			m_splashTimer += deltaTime;
-			m_dotTimer += deltaTime;
-			if (m_dotTimer >= DOT_INTERVAL)
-			{
-				m_dotTimer -= DOT_INTERVAL;
-				m_dotCount = (m_dotCount + 1) % (MAX_DOTS + 1);
-			}
-			if (m_splashTimer >= SPLASH_DURATION)
-			{
-				m_fade = std::make_unique<ui::FadeTransition>(
-					m_uiRenderer, m_screen, FADE_DURATION, false);
-				m_state = State::SplashFadeOut;
-			}
-			break;
-
-		case State::SplashFadeOut:
-			m_fade->update(deltaTime);
-			if (m_fade->isFinished())
-			{
-				m_view->setButtonsVisible(true);
-				m_fade = std::make_unique<ui::FadeTransition>(
-					m_uiRenderer, m_screen, FADE_DURATION, true);
-				m_state = State::TitleFadeIn;
-			}
-			break;
-
 		case State::TitleFadeIn:
 		{
 			const auto snap{ m_perfProvider->getSnapshot() };
@@ -111,21 +84,9 @@ namespace game::scene
 
 	void Title::draw()
 	{
-		switch (m_state)
-		{	
-		case State::Splash:
-		case State::SplashFadeOut:
-			m_view->drawSplash(m_dotCount);
-			if (m_fade) m_fade->draw(m_uiRenderer, m_screen);
-			break;
-
-		case State::TitleFadeIn:
-		case State::Idle:
-		case State::FadingOut:
-			m_view->drawTitle();
-			if (m_fade) m_fade->draw(m_uiRenderer, m_screen);
-			break;
-		}
+		m_view->drawTitle();
+		if (m_fade)
+			m_fade->draw(m_uiRenderer, m_screen);
 	}
 
 	void Title::goToSelect()
