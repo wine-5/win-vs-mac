@@ -61,14 +61,14 @@ namespace game::system
 	    , m_enemySpawner{ enemySpawner }
 	    , m_renderer{ renderer }
 	{
-		m_eventBus.subscribe<event::EnemyDeadEvent>(
+		m_subscriptions.push_back(m_eventBus.subscribe<event::EnemyDeadEvent>(
 		    [this](const event::EnemyDeadEvent& e)
-		    { onEnemyDead(e); });
+		    { onEnemyDead(e); }));
 
 		// 死亡アニメの再生完了を待ってフェードを始めるため、完了イベントを購読する
-		m_eventBus.subscribe<event::AnimationFinishedEvent>(
+		m_subscriptions.push_back(m_eventBus.subscribe<event::AnimationFinishedEvent>(
 		    [this](const event::AnimationFinishedEvent& e)
-		    { onAnimationFinished(e); });
+		    { onAnimationFinished(e); }));
 	}
 
 	void EnemyDeathSystem::onAnimationFinished(const event::AnimationFinishedEvent& e)

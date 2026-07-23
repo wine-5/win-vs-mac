@@ -1,4 +1,4 @@
-#include "MacAwakenEffectSystem.h"
+﻿#include "MacAwakenEffectSystem.h"
 #include "game/component/CameraEffectComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/InputComponent.h"
@@ -53,13 +53,13 @@ namespace game::system
 	    , m_playerId{ playerId }
 	{
 		// ボスが覚醒したら演出シーケンスを起動する
-		eventBus.subscribe<event::MacPhaseTransitionEvent>(
+		m_subscriptions.push_back(eventBus.subscribe<event::MacPhaseTransitionEvent>(
 		    [this](const event::MacPhaseTransitionEvent& e)
 		    {
 			    m_macId = e.m_entityId;
 			    m_elapsedTime = 0.0f;
 			    m_isPlaying = true;
-		    });
+		    }));
 	}
 
 	void MacAwakenEffectSystem::update(float deltaTime)

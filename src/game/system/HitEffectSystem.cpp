@@ -1,4 +1,4 @@
-#include "HitEffectSystem.h"
+﻿#include "HitEffectSystem.h"
 #include "game/component/HitEffectComponent.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/HealthComponent.h"
@@ -10,9 +10,10 @@ namespace game::system
         : m_componentManager{ componentManager }
         , m_eventBus{ eventBus }
     {
-        m_eventBus.subscribe<game::event::AttackHitEvent>(
-            [this](const game::event::AttackHitEvent& e) { onAttackHit(e); });
-    }
+		m_subscriptions.push_back(m_eventBus.subscribe<game::event::AttackHitEvent>(
+		    [this](const game::event::AttackHitEvent& e)
+		    { onAttackHit(e); }));
+	}
 
     void HitEffectSystem::onAttackHit(const game::event::AttackHitEvent& e)
     {

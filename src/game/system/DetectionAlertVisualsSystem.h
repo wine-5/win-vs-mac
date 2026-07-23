@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/base/EventBus.h"
@@ -8,6 +8,7 @@
 #include "core/interface/IResourceManager.h"
 #include "game/event/InGameEvents.h"
 #include <random>
+#include <vector>
 
 namespace core::iface
 {
@@ -91,5 +92,8 @@ namespace game::system
 		// 通知バーの背景画像のハンドル（-1なら未ロード。その場合は角丸矩形で代替描画）
 		int m_barHandle{ -1 };
 		std::mt19937 m_rng{ std::random_device{}() };
+
+		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
+		std::vector<core::base::EventBus::Subscription> m_subscriptions{};
 	};
 } // namespace game::system

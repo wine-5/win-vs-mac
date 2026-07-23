@@ -1,9 +1,10 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/ISystem.h"
 #include "core/base/EventBus.h"
 #include "core/interface/IEffectFactory.h"
 #include "game/event/InGameEvents.h"
+#include <vector>
 
 namespace game::system
 {
@@ -37,5 +38,8 @@ namespace game::system
 	  core::ecs::ComponentManager& m_componentManager;
 	  core::base::EventBus& m_eventBus;
 	  core::iface::IEffectFactory& m_effectFactory;
-    };
+
+	  // EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
+	  std::vector<core::base::EventBus::Subscription> m_subscriptions{};
+	};
 } // namespace game::system

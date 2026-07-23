@@ -318,15 +318,14 @@ namespace game::scene
 	void InGame::setupEvents()
 	{
 		// Hitイベントの購読
-		m_eventBus.subscribe<event::AttackHitEvent>([this](const event::AttackHitEvent& e)
-			{
+		m_subscriptions.push_back(m_eventBus.subscribe<event::AttackHitEvent>([this](const event::AttackHitEvent& e)
+		    {
 				// 被ダメージ追跡（プレイヤーが攻撃を受けた場合）
 				if (e.m_targetId == m_playerId)
-					m_totalDamageTaken += e.m_damage;
-			});
-			// プレイヤー死亡イベントの購読
-				m_eventBus.subscribe<event::PlayerDeadEvent>([this](const event::PlayerDeadEvent&)
-					{
+					m_totalDamageTaken += e.m_damage; }));
+		// プレイヤー死亡イベントの購読
+		m_subscriptions.push_back(m_eventBus.subscribe<event::PlayerDeadEvent>([this](const event::PlayerDeadEvent&)
+		    {
 						if (m_componentManager.has<component::RenderComponent>(m_playerId))
 						{
 							auto& render{ m_componentManager.get<component::RenderComponent>(m_playerId) };
@@ -337,11 +336,11 @@ namespace game::scene
 			            // メニュー操作用にカーソルを戻してからシーンを切り替える
 			            m_inputProvider.setMouseCursorVisible(true);
 			            auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
-						sceneManager->changeScene(game::scene::SceneType::Result); });
+						sceneManager->changeScene(game::scene::SceneType::Result); }));
 
-				// 敵の死亡イベントの購読
-		        m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
-		            {
+		// 敵の死亡イベントの購読
+		m_subscriptions.push_back(m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
+		    {
 						// 倒した敵の種類をログに出す（動作確認用）。
 						// 敵種はスポーン時に確定した EnemyTypeComponent を唯一の情報源にする
 						std::string_view enemyTypeName{ "Unknown" };
@@ -367,7 +366,7 @@ namespace game::scene
 				            m_inputProvider.setMouseCursorVisible(true);
 				            auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 							sceneManager->changeScene(game::scene::SceneType::Result);
-						} });
+						} }));
 	}
 
 	void InGame::update(float deltaTime)

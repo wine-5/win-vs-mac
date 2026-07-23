@@ -104,12 +104,17 @@ namespace game::scene
 		 */
 		void saveResultData(bool isVictory) noexcept;
 
+		// 各クラスにイベントバスの参照を渡したいため先にメンバ変数として宣言しておく。
+		//
+		// 【重要】購読者（SystemManagerが持つ各System・m_audioEventListener）より
+		// 必ず前に宣言すること。メンバの破棄は宣言の逆順で行われるため、
+		// これより後に宣言すると購読者のSubscriptionが解除される時点で
+		// EventBusが破棄済みになり、解放後アクセスになる
+		core::base::EventBus m_eventBus;
+
 		core::ecs::EntityManager 	m_entityManager;
 		core::ecs::ComponentManager m_componentManager;
 		core::ecs::SystemManager 	m_systemManager;
-
-		// 各クラスにイベントバスの参照を渡したいため先にメンバ変数として宣言しておく
-		core::base::EventBus m_eventBus;
 
 		core::iface::ICamera          &m_camera;
 		core::iface::IRenderer        &m_renderer;
@@ -147,5 +152,8 @@ namespace game::scene
 		float m_elapsedTime{0.0f};
 		int   m_killCount{0};
 		float m_totalDamageTaken{0.0f};
+
+		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
+		std::vector<core::base::EventBus::Subscription> m_subscriptions{};
 	};
 } // namespace game::scene

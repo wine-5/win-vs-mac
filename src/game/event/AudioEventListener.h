@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 #include "core/base/EventBus.h"
 #include "core/ecs/Entity.h"
 #include "game/event/InGameEvents.h"
+#include <vector>
 
 namespace game::event
 {
@@ -25,5 +26,8 @@ namespace game::event
 
 		core::base::EventBus&  m_eventBus;
 		core::ecs::EntityId    m_playerId{};
+
+		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
+		std::vector<core::base::EventBus::Subscription> m_subscriptions{};
 	};
 } // namespace game::event

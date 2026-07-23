@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 #include "core/base/EventBus.h"
+#include <vector>
 
 namespace game::system
 {
@@ -41,5 +42,8 @@ namespace game::system
 		float m_duration{ 0.0f };      // 揺れ開始時の総時間（減衰カーブ計算用）
 		float m_strength{ 0.0f };      // 揺れの振幅（ワールド単位）
 		float m_seed{ 0.0f };          // 揺れの位相（起動ごとに変えて毎回違う揺れにする）
+
+		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
+		std::vector<core::base::EventBus::Subscription> m_subscriptions{};
 	};
 } // namespace game::system

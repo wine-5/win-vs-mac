@@ -1,4 +1,4 @@
-#include "game/system/EffectSystem.h"
+﻿#include "game/system/EffectSystem.h"
 #include "core/base/ServiceLocator.h"
 #include "game/component/EffectComponent.h"
 #include "game/component/TransformComponent.h"
@@ -18,32 +18,32 @@ namespace game::system
 	void EffectSystem::setupEventSubscriptions()
 	{
 		// AttackHitEventを購読する
-		m_eventBus.subscribe<game::event::AttackHitEvent>(
-			[this](const game::event::AttackHitEvent& e) {
+		m_subscriptions.push_back(m_eventBus.subscribe<game::event::AttackHitEvent>(
+		    [this](const game::event::AttackHitEvent& e)
+		    {
 				onAttackHit(e);
-			}
-		);
+		    }));
 
 		// AttackStartEventを購読する
-		m_eventBus.subscribe<game::event::AttackStartEvent>(
+		m_subscriptions.push_back(m_eventBus.subscribe<game::event::AttackStartEvent>(
 		    [this](const game::event::AttackStartEvent& e)
 		    {
 			    onAttackStart(e);
-		    });
+		    }));
 
 		// EnemyDeadEventを購読する
-		m_eventBus.subscribe<game::event::EnemyDeadEvent>(
+		m_subscriptions.push_back(m_eventBus.subscribe<game::event::EnemyDeadEvent>(
 		    [this](const game::event::EnemyDeadEvent& e)
 		    {
 			    onEnemyDead(e);
-		    });
+		    }));
 
 		// EnemySpawnedEventを購読する
-		m_eventBus.subscribe<game::event::EnemySpawnedEvent>(
+		m_subscriptions.push_back(m_eventBus.subscribe<game::event::EnemySpawnedEvent>(
 		    [this](const game::event::EnemySpawnedEvent& e)
 		    {
 			    onEnemySpawned(e);
-		    });
+		    }));
 	}
 
 

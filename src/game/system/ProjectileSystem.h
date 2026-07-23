@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <vector>
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
@@ -42,5 +42,8 @@ namespace game::system
 
 		// 破棄予約（ヒットまたは寿命切れ）。イテレーション中の即時破棄を避けるため一旦貯める
 		std::vector<core::ecs::EntityId> m_pendingDestroy{};
+
+		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
+		std::vector<core::base::EventBus::Subscription> m_subscriptions{};
 	};
 } // namespace game::system

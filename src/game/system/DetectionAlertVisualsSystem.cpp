@@ -94,9 +94,9 @@ namespace game::system
 		if (m_barHandle == -1)
 			LOG_E("発見演出の背景バー画像 '{}' の読み込みに失敗しました", ALERT_BAR_IMAGE_ID);
 
-		m_eventBus.subscribe<event::EnemyAlertedEvent>(
+		m_subscriptions.push_back(m_eventBus.subscribe<event::EnemyAlertedEvent>(
 		    [this](const event::EnemyAlertedEvent& e)
-		    { onEnemyAlerted(e); });
+		    { onEnemyAlerted(e); }));
 	}
 
 	void DetectionAlertVisualsSystem::onEnemyAlerted(const event::EnemyAlertedEvent& e)

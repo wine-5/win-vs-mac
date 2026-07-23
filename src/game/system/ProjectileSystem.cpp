@@ -1,4 +1,4 @@
-#include "ProjectileSystem.h"
+﻿#include "ProjectileSystem.h"
 #include "game/component/ProjectileComponent.h"
 #include "game/component/AttackComponent.h"
 #include "game/event/InGameEvents.h"
@@ -12,12 +12,12 @@ namespace game::system
 	    : m_componentManager{ componentManager }, m_entityManager{ entityManager }, m_eventBus{ eventBus }
 	{
 		// 攻撃がヒットしたとき、攻撃者が弾なら破棄予約する（destroy-on-hit）
-		m_eventBus.subscribe<event::AttackHitEvent>(
+		m_subscriptions.push_back(m_eventBus.subscribe<event::AttackHitEvent>(
 		    [this](const event::AttackHitEvent& e)
 		    {
 			    if (m_componentManager.has<component::ProjectileComponent>(e.m_attackerId))
 				    m_pendingDestroy.push_back(e.m_attackerId);
-		    });
+		    }));
 	}
 
 	void ProjectileSystem::update(float deltaTime)

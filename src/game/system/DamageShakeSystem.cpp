@@ -1,4 +1,4 @@
-#include "DamageShakeSystem.h"
+﻿#include "DamageShakeSystem.h"
 #include "game/component/CameraEffectComponent.h"
 #include "game/event/InGameEvents.h"
 #include <cmath>
@@ -24,7 +24,7 @@ namespace game::system
 	    , m_playerId{ playerId }
 	{
 		// プレイヤーが被弾したら揺れを起動する
-		eventBus.subscribe<event::AttackHitEvent>(
+		m_subscriptions.push_back(eventBus.subscribe<event::AttackHitEvent>(
 		    [this](const event::AttackHitEvent& e)
 		    {
 			    if (e.m_targetId != m_playerId)
@@ -39,7 +39,7 @@ namespace game::system
 			    m_duration = SHAKE_DURATION;
 			    m_remainingTime = SHAKE_DURATION;
 			    m_seed += 1.0f; // 起動ごとに位相をずらし、毎回違う揺れにする
-		    });
+		    }));
 	}
 
 	void DamageShakeSystem::update(float deltaTime)

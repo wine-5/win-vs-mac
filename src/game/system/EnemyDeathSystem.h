@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/EntityManager.h"
@@ -6,6 +6,7 @@
 #include "core/interface/IRenderer.h"
 #include "game/factory/EnemySpawner.h"
 #include "game/event/InGameEvents.h"
+#include <vector>
 
 namespace game::system
 {
@@ -54,5 +55,8 @@ namespace game::system
 		core::base::EventBus& m_eventBus;
 		game::factory::EnemySpawner& m_enemySpawner;
 		core::iface::IRenderer& m_renderer;
+
+		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
+		std::vector<core::base::EventBus::Subscription> m_subscriptions{};
 	};
 } // namespace game::system
