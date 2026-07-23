@@ -5,9 +5,9 @@
 
 namespace platform::window::select
 {
-    DifficultyWindow::DifficultyWindow(int x, int y, int width, int height) noexcept
-        : WindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height)
-    {
+	DifficultyWindow::DifficultyWindow(int x, int y, int width, int height) noexcept
+	    : WebViewWindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height)
+	{
     }
 
     std::string DifficultyWindow::getSelectedDifficulty() const noexcept
@@ -27,24 +27,11 @@ namespace platform::window::select
     LRESULT DifficultyWindow::onMessage(
         HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
     {
-        if (msg == WM_SIZE)
-        {
-            if (wParam == SIZE_MINIMIZED)
-                m_webView.setVisible(false);
-            else
-                m_webView.resize(LOWORD(lParam), HIWORD(lParam));
-            return 0;
-        }
-        if (msg == WM_SHOWWINDOW)
-            m_webView.setVisible(wParam != 0);
-        if (msg == WM_ACTIVATEAPP && wParam != 0)
-        {
-            RECT rc{};
-            GetClientRect(hwnd, &rc);
-            if (rc.right > 0 && rc.bottom > 0)
-                m_webView.resize(rc.right, rc.bottom);
-        }
-        return WindowBase::onMessage(hwnd, msg, wParam, lParam);
+		// サイズ追従・可視追従は WebViewWindowBase に集約している
+		if (const auto handled{ handleWebViewMessage(hwnd, msg, wParam, lParam) })
+			return *handled;
+
+		return WindowBase::onMessage(hwnd, msg, wParam, lParam);
     }
 
     void DifficultyWindow::handleMessage(const std::string& json) noexcept

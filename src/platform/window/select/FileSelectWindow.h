@@ -1,12 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include <windows.h>
 #include <string>
 #include <array>
 #include <algorithm>
 #include "platform/window/WindowConstants.h"
-#include "platform/window/WindowBase.h"
-#include "platform/webview/WebView2Host.h"
+#include "platform/window/WebViewWindowBase.h"
 #include "game/data/FileExtensionType.h"
 #include "game/utility/FileExtensionTypeResolver.h"
 #include "game/utility/ExtensionBonusCalculator.h"
@@ -18,8 +17,8 @@ namespace platform::window::select
      * @class FileSelectWindow
      * @brief ファイルスロット選択ウィンドウ
      */
-    class FileSelectWindow : public WindowBase
-    {
+	class FileSelectWindow : public platform::window::WebViewWindowBase
+	{
     public:
         /**
          * @brief コンストラクタ
@@ -69,7 +68,6 @@ namespace platform::window::select
         static constexpr const char* EXT_TYPE_NAME_ARCHIVE{ "Archive" };
         static constexpr const char* EXT_TYPE_NAME_UNKNOWN{ "Unknown" };
 
-        platform::webview::WebView2Host m_webView{};
         std::array<std::string, SLOT_COUNT> m_filePaths{};
         std::array<game::data::FileExtensionType, SLOT_COUNT> m_extensionTypes{
             game::data::FileExtensionType::Unknown,

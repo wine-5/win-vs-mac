@@ -1,10 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include <windows.h>
 #include <string>
 #include "platform/window/WindowConstants.h"
-#include "platform/window/WindowBase.h"
-#include "platform/webview/WebView2Host.h"
+#include "platform/window/WebViewWindowBase.h"
 
 namespace platform::window::select
 {
@@ -12,8 +11,8 @@ namespace platform::window::select
      * @class ParameterWindow
      * @brief ステータス表示ウィンドウ
      */
-    class ParameterWindow : public WindowBase
-    {
+	class ParameterWindow : public platform::window::WebViewWindowBase
+	{
     public:
         /**
          * @brief コンストラクタ
@@ -55,6 +54,5 @@ namespace platform::window::select
         static constexpr const wchar_t* WINDOW_TITLE{ L"パラメータ" };
         static constexpr const wchar_t* PARAMETER_HTML_URL{ L"https://game.web/select/param/param.html" };
 
-        platform::webview::WebView2Host m_webView{};
     };
 } // namespace platform::window::select

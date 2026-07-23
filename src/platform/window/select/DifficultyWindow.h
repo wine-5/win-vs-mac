@@ -1,8 +1,7 @@
 ﻿#pragma once
 
 #include "platform/window/WindowConstants.h"
-#include "platform/window/WindowBase.h"
-#include "platform/webview/WebView2Host.h"
+#include "platform/window/WebViewWindowBase.h"
 #include <string>
 #include <functional>
 
@@ -12,8 +11,8 @@ namespace platform::window::select
      * @class DifficultyWindow
      * @brief 難易度選択ウィンドウ
      */
-    class DifficultyWindow : public WindowBase
-    {
+	class DifficultyWindow : public platform::window::WebViewWindowBase
+	{
     public:
         /**
          * @brief コンストラクタ
@@ -62,7 +61,6 @@ namespace platform::window::select
         };
         static constexpr const wchar_t* HARD_WARNING_TITLE{ L"警告 - Win vs Mac.exe" };
 
-        platform::webview::WebView2Host m_webView{};
         std::string m_selectedDifficulty{ DIFFICULTY_NORMAL };
 
         void handleMessage(const std::string& json) noexcept;

@@ -9,7 +9,7 @@
 namespace platform::window::select
 {
 	FileSelectWindow::FileSelectWindow(int x, int y, int width, int height) noexcept
-		: WindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height)
+	    : WebViewWindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height)
 	{
 	}
 
@@ -35,23 +35,10 @@ namespace platform::window::select
 
 	LRESULT FileSelectWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 	{
-		if (msg == WM_SIZE)
-		{
-			if (wParam == SIZE_MINIMIZED)
-				m_webView.setVisible(false);
-			else
-				m_webView.resize(LOWORD(lParam), HIWORD(lParam));
-			return 0;
-		}
-		if (msg == WM_SHOWWINDOW)
-			m_webView.setVisible(wParam != 0);
-		if (msg == WM_ACTIVATEAPP && wParam != 0)
-		{
-			RECT rc{};
-			GetClientRect(hwnd, &rc);
-			if (rc.right > 0 && rc.bottom > 0)
-				m_webView.resize(rc.right, rc.bottom);
-		}
+		// サイズ追従・可視追従は WebViewWindowBase に集約している
+		if (const auto handled{ handleWebViewMessage(hwnd, msg, wParam, lParam) })
+			return *handled;
+
 		return WindowBase::onMessage(hwnd, msg, wParam, lParam);
 	}
 

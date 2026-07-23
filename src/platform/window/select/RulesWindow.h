@@ -1,7 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "platform/window/WindowBase.h"
-#include "platform/webview/WebView2Host.h"
+#include "platform/window/WebViewWindowBase.h"
 
 namespace platform::window::select
 {
@@ -9,8 +8,8 @@ namespace platform::window::select
      * @class RulesWindow
      * @brief ルール説明ウィンドウ（メモ帳風）
      */
-    class RulesWindow : public WindowBase
-    {
+	class RulesWindow : public platform::window::WebViewWindowBase
+	{
     public:
         /**
          * @brief コンストラクタ
@@ -35,6 +34,5 @@ namespace platform::window::select
         static constexpr const wchar_t* WINDOW_TITLE{ L"ルール説明.txt - メモ帳" };
         static constexpr const wchar_t* RULES_HTML_URL{ L"https://game.web/select/rules/rules.html" };
 
-        platform::webview::WebView2Host m_webView{};
     };
 } // namespace platform::window::select
