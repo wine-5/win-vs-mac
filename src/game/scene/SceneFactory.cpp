@@ -50,9 +50,10 @@ namespace game::scene
 			auto* inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
 			auto* uiRenderer = core::base::ServiceLocator::get<core::iface::IUIRenderer>();
 			m_titleScene = std::make_unique<Title>(
-				*inputProvider,
-				*uiRenderer,
-				*screen);
+			    *inputProvider,
+			    *uiRenderer,
+			    *screen,
+			    m_gameManager);
 			return m_titleScene.get();
 		}
 

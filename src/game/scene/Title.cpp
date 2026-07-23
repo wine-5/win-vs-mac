@@ -4,7 +4,7 @@
 #include "SceneType.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IResourceManager.h"
-#include <cstdlib>
+#include "game/GameManager.h"
 #include "core/interface/IPerformanceDataProvider.h"
 #include "core/interface/IAudioManager.h"
 #include "core/constant/BgmType.h"
@@ -12,11 +12,13 @@
 namespace game::scene
 {
 	Title::Title(core::iface::IInputProvider& inputProvider,
-		core::iface::IUIRenderer& uiRenderer,
-		core::iface::IScreen& screen)
-		: m_inputProvider{ inputProvider }
-		, m_uiRenderer{ uiRenderer }
-		, m_screen{ screen }
+	    core::iface::IUIRenderer& uiRenderer,
+	    core::iface::IScreen& screen,
+	    GameManager& gameManager)
+	    : m_inputProvider{ inputProvider }
+	    , m_uiRenderer{ uiRenderer }
+	    , m_screen{ screen }
+	    , m_gameManager{ gameManager }
 	{
 		auto* res{ core::base::ServiceLocator::get<core::iface::IResourceManager>() };
 		std::string mainFontName{ res->getFontName("main").value_or("") };
@@ -100,6 +102,7 @@ namespace game::scene
 	void Title::exitApp()
 	{
 		if (m_state != State::Idle) return;
-		std::exit(0);
+		// デストラクタとDxLib_Endを通すため、Applicationのループ終了要求として伝える
+		m_gameManager.requestQuit();
 	}
 } // namespace game::scene

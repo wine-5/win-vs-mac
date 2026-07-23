@@ -11,6 +11,11 @@ namespace core::iface
 	class IPerformanceDataProvider;
 }
 
+namespace game
+{
+	class GameManager;
+}
+
 namespace game::scene
 {
 	class TitleView;
@@ -21,31 +26,33 @@ namespace game::scene
 	class Title : public IScene
 	{
 	public:
-		/**
-		 * @brief Titleのコンストラクタ
-		 * @param inputProvider 入力インターフェース
-		 * @param uiRenderer UI描画インターフェース
-		 * @param screen 画面情報インターフェース
-		 */
-		Title(core::iface::IInputProvider& inputProvider,
-			core::iface::IUIRenderer& uiRenderer,
-			core::iface::IScreen& screen);
+	  /**
+	   * @brief Titleのコンストラクタ
+	   * @param inputProvider 入力インターフェース
+	   * @param uiRenderer UI描画インターフェース
+	   * @param screen 画面情報インターフェース
+	   * @param gameManager ゲーム全体の状態（終了要求の伝達に使用）
+	   */
+	  Title(core::iface::IInputProvider& inputProvider,
+		  core::iface::IUIRenderer& uiRenderer,
+		  core::iface::IScreen& screen,
+		  GameManager& gameManager);
 
-		/**
-		 * @brief Titleのデストラクタ
-		 */
-		~Title() noexcept;
+	  /**
+	   * @brief Titleのデストラクタ
+	   */
+	  ~Title() noexcept;
 
-		/**
-		 * @brief シーンの更新処理
-		 * @param deltaTime フレーム間の時間差
-		 */
-		void update(float deltaTime) override;
+	  /**
+	   * @brief シーンの更新処理
+	   * @param deltaTime フレーム間の時間差
+	   */
+	  void update(float deltaTime) override;
 
-		/**
-		 * @brief シーンの描画処理
-		 */
-		void draw() override;
+	  /**
+	   * @brief シーンの描画処理
+	   */
+	  void draw() override;
 
 	private:
 		enum class State
@@ -61,6 +68,7 @@ namespace game::scene
 		core::iface::IInputProvider&           m_inputProvider;
 		core::iface::IUIRenderer&              m_uiRenderer;
 		core::iface::IScreen&                  m_screen;
+		GameManager& m_gameManager;
 		core::iface::IPerformanceDataProvider* m_perfProvider{};
 
 		std::unique_ptr<TitleView>          m_view{};
