@@ -26,6 +26,10 @@ namespace core::iface
 
 		/**
 		 * @brief modelIDからメタデータを取得する
+		 *
+		 * @note コライダーサイズが全成分0のモデルは loadModelById() の中で実寸から
+		 *       自動計算され、その結果が書き戻される。そのため本メソッドを
+		 *       loadModelById() より先に呼ぶと、自動計算前の0が返る点に注意すること。
 		 * @param modelId モデルID
 		 * @return メタデータ（存在しない場合nullopt）
 		 */

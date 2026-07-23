@@ -110,9 +110,10 @@ namespace core::iface
 		    const core::Vector3& scale, const core::Vector3& centerOffset,
 		    const core::Vector3& faceDir, float spinAngle) = 0;
 
-		// TODO: worldToScreen はワールド→スクリーンの射影変換であり、厳密には3D描画の責務ではない。
-		//       ICameraは「計算しない薄い層」の方針のため置けない。将来のリファクタリングで
-		//       screenToWorld 等とあわせて専用の IViewProjection インターフェースへ分離する。
+		// 補足: worldToScreen は射影変換であり、厳密には3D描画の責務ではない。
+		//       ただし現状の利用は順変換の2箇所のみで、メソッド1本のために
+		//       IViewProjection を新設しても抽象が増えるだけで得るものが少ない。
+		//       screenToWorld（クリック→ワールド）等の逆変換が必要になった時点で分離する。
 		/**
 		 * @brief ワールド座標をスクリーン座標へ変換する
 		 * @param worldPos ワールド座標
