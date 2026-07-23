@@ -26,10 +26,10 @@ namespace game::scene
 
 	IScene* SceneFactory::createScene(SceneType sceneType)
 	{
-		// TODO: 現在は全て軽量なシーンであるためシーンが作られるたびに生成をしているが、
-		// 本来であればreset()関数をInGameなどの状態をゲームループするたびにリセットする必要がある
-		// オブジェクトに持たせる必要があり、逆にリセットが不要なシーンに関しては
-		// if文で重複して何度も生成されないようにするべき
+		// 方針: シーンは遷移のたびに作り直す（インスタンスをキャッシュしない）。
+		// 作り直し方式には「状態のリセット漏れが構造的に起き得ない」という利点があり、
+		// キャッシュを導入すると全シーンにreset()を実装・保守する義務が新たに発生する。
+		// 生成が重くなった場合はシーンの再利用ではなく、ResourceManager側のキャッシュで対処する。
 		auto* screen = core::base::ServiceLocator::get<core::iface::IScreen>();
 
 		switch (sceneType)
