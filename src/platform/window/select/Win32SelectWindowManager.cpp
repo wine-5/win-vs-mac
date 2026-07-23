@@ -9,6 +9,8 @@
 #include "thirdparty/nlohmann/json.hpp"
 #include <shellapi.h>
 #include <windows.h>
+#include "core/utility/Log.h"
+#include <exception>
 
 namespace platform::window::select
 {
@@ -290,8 +292,15 @@ namespace platform::window::select
                     ShellExecuteW(nullptr, L"open", APP_NOTEPAD_PATH, nullptr, nullptr, SW_SHOW);
             }
         }
-        catch (...) {}
-    }
+		catch (const std::exception& e)
+		{
+			core::log::error("Win32SelectWindowManager::handleDesktopMessage: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("Win32SelectWindowManager::handleDesktopMessage: 不明な例外が発生しました");
+		}
+	}
 
     void Win32SelectWindowManager::notifyWindowState(
         const std::string& name, bool visible) noexcept
@@ -305,8 +314,15 @@ namespace platform::window::select
             j[platform::window::WindowConstants::JSON_KEY_VISIBLE] = visible;
             m_desktopWindow->postMessage(j.dump());
         }
-        catch (...) {}
-    }
+		catch (const std::exception& e)
+		{
+			core::log::error("Win32SelectWindowManager::notifyWindowState: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("Win32SelectWindowManager::notifyWindowState: 不明な例外が発生しました");
+		}
+	}
 
     void Win32SelectWindowManager::showWarningMessage(const std::string& message) noexcept
     {

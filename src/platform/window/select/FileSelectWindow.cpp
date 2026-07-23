@@ -5,6 +5,8 @@
 #include "platform/window/WindowConstants.h"
 #include "core/interface/ILogger.h"
 #include "thirdparty/nlohmann/json.hpp"
+#include "core/utility/Log.h"
+#include <exception>
 
 namespace platform::window::select
 {
@@ -59,7 +61,14 @@ namespace platform::window::select
 				sendBonusInfo();
 			}
 		}
-		catch (...) {}
+		catch (const std::exception& e)
+		{
+			core::log::error("FileSelectWindow::handleMessage: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("FileSelectWindow::handleMessage: 不明な例外が発生しました");
+		}
 	}
 
 	void FileSelectWindow::openFileDialog(int slotIndex)
@@ -130,7 +139,14 @@ namespace platform::window::select
 			}
 			m_webView.postMessage(resp.dump());
 		}
-		catch (...) {}
+		catch (const std::exception& e)
+		{
+			core::log::error("FileSelectWindow::sendSlotsRefresh: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("FileSelectWindow::sendSlotsRefresh: 不明な例外が発生しました");
+		}
 	}
 
 	void FileSelectWindow::sendBonusInfo() noexcept
@@ -181,6 +197,13 @@ namespace platform::window::select
 				resp[platform::window::WindowConstants::JSON_KEY_DESCRIPTIONS][e.m_key] = describe(e.m_type);
 			m_webView.postMessage(resp.dump());
 		}
-		catch (...) {}
+		catch (const std::exception& e)
+		{
+			core::log::error("FileSelectWindow::sendBonusInfo: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("FileSelectWindow::sendBonusInfo: 不明な例外が発生しました");
+		}
 	}
 } // namespace platform::window::select

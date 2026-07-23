@@ -2,6 +2,8 @@
 #include "DifficultyWindow.h"
 #include "platform/window/WindowConstants.h"
 #include "thirdparty/nlohmann/json.hpp"
+#include "core/utility/Log.h"
+#include <exception>
 
 namespace platform::window::select
 {
@@ -64,6 +66,13 @@ namespace platform::window::select
                 }
             }
         }
-        catch (...) {}
-    }
+		catch (const std::exception& e)
+		{
+			core::log::error("DifficultyWindow::handleMessage: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("DifficultyWindow::handleMessage: 不明な例外が発生しました");
+		}
+	}
 } // namespace platform::window::select

@@ -1,6 +1,8 @@
 ﻿#include <windows.h>
 #include "ResultWindow.h"
 #include "thirdparty/nlohmann/json.hpp"
+#include "core/utility/Log.h"
+#include <exception>
 
 namespace platform::window::result
 {
@@ -119,8 +121,15 @@ namespace platform::window::result
                     m_onTitle();
             }
         }
-        catch (...) {}
-    }
+		catch (const std::exception& e)
+		{
+			core::log::error("ResultWindow::handleMessage: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("ResultWindow::handleMessage: 不明な例外が発生しました");
+		}
+	}
 
     void ResultWindow::sendResultData(const core::data::ResultData& data) noexcept
     {
@@ -137,6 +146,13 @@ namespace platform::window::result
             std::string jsonStr = j.dump();
             m_webView.postMessage(jsonStr);
         }
-        catch (...) { }
-    }
+		catch (const std::exception& e)
+		{
+			core::log::error("ResultWindow::sendResultData: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("ResultWindow::sendResultData: 不明な例外が発生しました");
+		}
+	}
 } // namespace platform::window::result

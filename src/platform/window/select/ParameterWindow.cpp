@@ -2,6 +2,8 @@
 #include "ParameterWindow.h"
 #include "platform/window/WindowConstants.h"
 #include "thirdparty/nlohmann/json.hpp"
+#include "core/utility/Log.h"
+#include <exception>
 
 namespace platform::window::select
 {
@@ -32,8 +34,15 @@ namespace platform::window::select
             j[platform::window::WindowConstants::JSON_KEY_SLOT]     = equippedSlots;
             m_webView.postMessage(j.dump());
         }
-        catch (...) {}
-    }
+		catch (const std::exception& e)
+		{
+			core::log::error("ParameterWindow::refresh: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("ParameterWindow::refresh: 不明な例外が発生しました");
+		}
+	}
 
     void ParameterWindow::onCreateControls(HWND hwnd)
     {
