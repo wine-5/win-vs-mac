@@ -137,13 +137,13 @@ namespace platform::window::select
 	{
 		// ExtensionBonusCalculator の定数から説明文を生成（C++ が正とする）
 		struct Entry { const char* m_key; game::data::FileExtensionType m_type; };
-		constexpr Entry entries[] = {
+		constexpr Entry ENTRIES[] = {
 			{ EXT_TYPE_NAME_EXECUTABLE, game::data::FileExtensionType::Executable },
-			{ EXT_TYPE_NAME_DOCUMENT,   game::data::FileExtensionType::Document   },
-			{ EXT_TYPE_NAME_IMAGE,      game::data::FileExtensionType::Image      },
-			{ EXT_TYPE_NAME_AUDIO,      game::data::FileExtensionType::Audio      },
-			{ EXT_TYPE_NAME_ARCHIVE,    game::data::FileExtensionType::Archive    },
-			{ EXT_TYPE_NAME_UNKNOWN,    game::data::FileExtensionType::Unknown    },
+			{ EXT_TYPE_NAME_DOCUMENT, game::data::FileExtensionType::Document },
+			{ EXT_TYPE_NAME_IMAGE, game::data::FileExtensionType::Image },
+			{ EXT_TYPE_NAME_AUDIO, game::data::FileExtensionType::Audio },
+			{ EXT_TYPE_NAME_ARCHIVE, game::data::FileExtensionType::Archive },
+			{ EXT_TYPE_NAME_UNKNOWN, game::data::FileExtensionType::Unknown },
 		};
 
 		auto fmt = [](float v) -> std::string {
@@ -177,7 +177,7 @@ namespace platform::window::select
 			nlohmann::json resp;
 			resp[platform::window::WindowConstants::JSON_KEY_TYPE]  = platform::window::WindowConstants::MESSAGE_TYPE_BONUS_INFO;
 			resp[platform::window::WindowConstants::JSON_KEY_DESCRIPTIONS] = nlohmann::json::object();
-			for (const auto& e : entries)
+			for (const auto& e : ENTRIES)
 				resp[platform::window::WindowConstants::JSON_KEY_DESCRIPTIONS][e.m_key] = describe(e.m_type);
 			m_webView.postMessage(resp.dump());
 		}
