@@ -27,10 +27,10 @@ namespace infrastructure
 		void playBgm(core::constant::BgmType type, bool fade = true) override;
 
 		/**
-		 * @brief 現在再生中の BGM を停止する
+		 * @brief 現在再生中の BGM を停止する（デストラクタからの内部利用）
 		 * @param fade true の場合フェードアウトを使用する（デフォルト: true）
 		 */
-		void stopBgm(bool fade = true) override;
+		void stopBgm(bool fade = true);
 
 		/**
 		 * @brief SE を再生する
