@@ -23,11 +23,11 @@ namespace core::base
 		{
 			auto key{ std::type_index(typeid(TEvent)) };
 			m_listeners[key].push_back(
-				[callback](const std::any& e)
-				{
-					callback(std::any_cast<TEvent>(e));
-				}
-			);
+			    [callback = std::move(callback)](const std::any& e)
+			    {
+				    // 値ではなくconst参照でキャストする（リスナー毎のイベント完全コピーを避ける）
+				    callback(std::any_cast<const TEvent&>(e));
+			    });
 		}
 
 		/**
