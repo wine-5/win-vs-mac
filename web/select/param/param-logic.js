@@ -4,7 +4,7 @@ const BAR_CAP = 150;
 
 const ParamLogic = (function () {
     const state = {
-        job: null, skill: null, slot: null,
+        slot: null,
         baseHp: 0, baseAtk: 0, baseDef: 0, baseSpd: 0,
         bonusHp: 0, bonusAtk: 0, bonusDef: 0, bonusSpd: 0,
     };
@@ -21,8 +21,6 @@ const ParamLogic = (function () {
     }
 
     function updateState(data) {
-        if (data.job != null) state.job = data.job;
-        if (data.skill != null) state.skill = data.skill;
         if (data.slot != null) state.slot = data.slot;
         if (data.baseHp != null) state.baseHp = data.baseHp;
         if (data.baseAtk != null) state.baseAtk = data.baseAtk;

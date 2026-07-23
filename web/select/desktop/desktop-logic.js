@@ -5,7 +5,7 @@
  * ウィンドウ状態の管理と C++ ↔ JS メッセージングを担う
  */
 const DesktopLogic = (function () {
-    const winStates = { job: true, file: true, param: true, diff: true, rules: false };
+    const winStates = { file: true, param: true, diff: true, rules: false };
 
     let onWindowChangeCallback = null;
 
