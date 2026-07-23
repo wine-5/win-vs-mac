@@ -90,16 +90,6 @@ namespace platform::window
             ::ShowWindow(m_hwnd, SW_HIDE);
     }
 
-    void WindowBase::bringToFront() noexcept
-    {
-        if (m_hwnd == nullptr) return;
-
-        ::SetForegroundWindow(m_hwnd);
-        // SWP_NOMOVE | SWP_NOSIZE で位置・サイズを変えずに Z オーダーだけ最前面に変更する
-        SetWindowPos(m_hwnd, HWND_TOP, 0, 0, 0, 0,
-            SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
-    }
-
     [[nodiscard]] HWND WindowBase::getHwnd() const noexcept
     {
         return m_hwnd;

@@ -43,7 +43,6 @@ namespace platform::window::select
         void createAllWindows() override;
         void destroyAllWindows() override;
         void pumpMessages() override;
-        void bringToFront(core::constant::SelectWindowId id) override;
 
         void updateParameterWindowForJob(core::constant::JobType jobType) noexcept;
         bool isJobSelected() const noexcept override { return m_jobSelected; }

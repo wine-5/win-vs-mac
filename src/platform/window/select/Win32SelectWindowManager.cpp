@@ -2,7 +2,6 @@
 #include "platform/window/WindowConstants.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
-#include "core/constant/SelectWindowId.h"
 #include "core/constant/JobType.h"
 #include "platform/utility/StringConverter.h"
 #include "thirdparty/nlohmann/json.hpp"
@@ -216,24 +215,6 @@ namespace platform::window::select
 
             ::TranslateMessage(&msg);
             ::DispatchMessageW(&msg);
-        }
-    }
-
-    void Win32SelectWindowManager::bringToFront(core::constant::SelectWindowId id)
-    {
-        switch (id)
-        {
-        case core::constant::SelectWindowId::Job:
-            if (m_jobWindow) m_jobWindow->bringToFront();
-            break;
-        case core::constant::SelectWindowId::FileSelect:
-            if (m_fileSelectWindow) m_fileSelectWindow->bringToFront();
-            break;
-        case core::constant::SelectWindowId::Parameter:
-            if (m_parameterWindow) m_parameterWindow->bringToFront();
-            break;
-        default:
-            break;
         }
     }
 
