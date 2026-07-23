@@ -1,11 +1,26 @@
-#include "DebugGizmoView.h"
+﻿#include "DebugGizmoView.h"
 #include "core/utility/Color.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/ColliderComponent.h"
 #include "game/component/AttackComponent.h"
 #include "game/component/AIComponent.h"
-#include "game/component/ai/RangeKeepAIComponent.h"
+#include "game/component/EnemyTypeComponent.h"
 #include "game/component/ProjectileComponent.h"
+
+namespace
+{
+	/**
+	 * @brief 浮遊する敵（Safari）かを判定する
+	 * @param componentManager ComponentManagerの参照
+	 * @param id 判定対象のEntityId
+	 * @return 浮遊型ならtrue
+	 */
+	bool isFlyingEnemyImpl(core::ecs::ComponentManager& componentManager, core::ecs::EntityId id)
+	{
+		const auto* type{ componentManager.tryGet<game::component::EnemyTypeComponent>(id) };
+		return type != nullptr && type->m_type == game::constant::EnemyType::Safari;
+	}
+} // namespace
 
 namespace game::ui::debug
 {
@@ -80,8 +95,8 @@ namespace game::ui::debug
 			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
 			auto& atk{ m_componentManager.get<component::AttackComponent>(id) };
 
-			// 浮遊型（Safari）はRangeKeepAIComponentのマーカーで判定する
-			const bool isFlying{ m_componentManager.has<component::ai::RangeKeepAIComponent>(id) };
+			// 浮遊型（Safari）はスポーン時に確定した敵種で判定する
+			const bool isFlying{ isFlyingEnemyImpl(m_componentManager, id) };
 
 			if (!isFlying && m_componentManager.has<component::ColliderComponent>(id))
 			{
@@ -111,8 +126,8 @@ namespace game::ui::debug
 			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
 			auto& ai{ m_componentManager.get<component::AIComponent>(id) };
 
-			// 浮遊型（Safari）はRangeKeepAIComponentのマーカーで判定する
-			const bool isFlying{ m_componentManager.has<component::ai::RangeKeepAIComponent>(id) };
+			// 浮遊型（Safari）はスポーン時に確定した敵種で判定する
+			const bool isFlying{ isFlyingEnemyImpl(m_componentManager, id) };
 			if (!isFlying && m_componentManager.has<component::ColliderComponent>(id))
 			{
 				auto& collider{ m_componentManager.get<component::ColliderComponent>(id) };

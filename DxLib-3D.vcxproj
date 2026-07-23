@@ -321,6 +321,7 @@
     <ClInclude Include="src\game\attack\DefenseHandler.h" />
     <ClInclude Include="src\game\attack\IDamageHandler.h" />
     <ClInclude Include="src\game\component\AIComponent.h" />
+    <ClInclude Include="src\game\component\EnemyTypeComponent.h" />
     <ClInclude Include="src\game\component\AttackComponent.h" />
     <ClInclude Include="src\game\component\EffectComponent.h" />
     <ClInclude Include="src\game\component\HealthComponent.h" />

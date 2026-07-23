@@ -29,4 +29,20 @@ namespace game::constant
 		if (typeName == "mac")    return EnemyType::Mac;
 		throw std::runtime_error("未知の敵タイプです: " + std::string(typeName));
 	}
+
+	/**
+	 * @brief EnemyTypeを表示用の名前へ変換する
+	 * @param type 敵の種類
+	 * @return 表示名
+	 */
+	constexpr const char* toEnemyTypeName(EnemyType type) noexcept
+	{
+		switch (type)
+		{
+		case EnemyType::Xcode: return "Xcode";
+		case EnemyType::Safari: return "Safari";
+		case EnemyType::Mac: return "Mac";
+		}
+		return "Unknown";
+	}
 } // namespace game::constant

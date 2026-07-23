@@ -1,12 +1,10 @@
-#include "EnemyDeathSystem.h"
+﻿#include "EnemyDeathSystem.h"
+#include "game/component/EnemyTypeComponent.h"
 #include "game/component/DeathComponent.h"
 #include "game/component/RenderComponent.h"
 #include "game/component/AnimationComponent.h"
 #include "game/component/VelocityComponent.h"
 #include "game/component/TransformComponent.h"
-#include "game/component/ai/MeleeChaseAIComponent.h"
-#include "game/component/ai/RangeKeepAIComponent.h"
-#include "game/component/ai/MacAIComponent.h"
 #include "game/constant/EnemyType.h"
 #include "game/constant/AnimationState.h"
 #include <algorithm>
@@ -34,25 +32,9 @@ namespace
 	constexpr float DEATH_SHAKE_LATERAL{ 45.0f }; // 横方向の小刻みなガタつき（水平速度）[単位/秒]
 
 	/**
-	 * @brief AI専用マーカーコンポーネントの有無からEnemyTypeを判定する
-	 * @param componentManager ComponentManagerの参照
-	 * @param entityId 判定対象のEntityId
-	 * @return 対応するEnemyType
-	 */
-	game::constant::EnemyType inferEnemyType(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId)
-	{
-		using game::constant::EnemyType;
-		if (componentManager.has<game::component::ai::MacAIComponent>(entityId))
-			return EnemyType::Mac;
-		if (componentManager.has<game::component::ai::RangeKeepAIComponent>(entityId))
-			return EnemyType::Safari;
-		return EnemyType::Xcode;
-	}
-
-	/**
 	 * @brief 落下して着地する死に方をする敵か（浮遊敵）を判定する
 	 *
-	 * 浮遊高度を持つ距離維持型（Safari）は死亡すると落下・バウンドしてから消える。
+	 * 浮遊する Safari は死亡すると落下・バウンドしてから消える。
 	 * 地上敵（Xcode/Mac）は死亡アニメを見せてから消える
 	 * @param componentManager ComponentManagerの参照
 	 * @param entityId 判定対象のEntityId
@@ -60,9 +42,9 @@ namespace
 	 */
 	bool isFallingDeath(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId)
 	{
-		using game::component::ai::RangeKeepAIComponent;
-		return componentManager.has<RangeKeepAIComponent>(entityId) &&
-		       componentManager.get<RangeKeepAIComponent>(entityId).m_hoverHeight > 0.0f;
+		using game::component::EnemyTypeComponent;
+		const auto* type{ componentManager.tryGet<EnemyTypeComponent>(entityId) };
+		return type != nullptr && type->m_type == game::constant::EnemyType::Safari;
 	}
 } // namespace
 
@@ -204,7 +186,7 @@ namespace game::system
 			// フェード完了後にEntity・モデルハンドルを完全に後始末する
 			if (death.m_fading && death.m_fadeTimer >= FADE_DURATION)
 			{
-				const auto type{ inferEnemyType(m_componentManager, entityId) };
+				const auto type{ m_componentManager.get<component::EnemyTypeComponent>(entityId).m_type };
 
 				// プールへ返却する前に見た目を元に戻す（次にこのハンドルを使う敵が赤いまま出現しないように）
 				m_renderer.resetModelAppearance(modelHandle);

@@ -39,6 +39,7 @@
 #include "game/constant/AnimationId.h"
 #include "game/constant/ProjectileId.h"
 #include "game/constant/EnemyType.h"
+#include "game/component/EnemyTypeComponent.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
 #include "game/system/ai/MeleeChaseAISystem.h"
@@ -342,16 +343,11 @@ namespace game::scene
 		        m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
 		            {
 						// 倒した敵の種類をログに出す（動作確認用）。
-						// 種別専用の判定コンポーネント（各SystemがAI行動の分岐に使っているもの）の
-						// 有無で判定する。専用コンポーネントを新設せず既存の設計をそのまま流用する
+						// 敵種はスポーン時に確定した EnemyTypeComponent を唯一の情報源にする
 						std::string_view enemyTypeName{ "Unknown" };
-			            if (m_componentManager.has<component::ai::MacAIComponent>(e.m_entityId))
-				            enemyTypeName = "Mac";
-						else if (m_componentManager.has<component::ai::RangeKeepAIComponent>(e.m_entityId))
-							enemyTypeName = "Safari";
-						else if (m_componentManager.has<component::ai::MeleeChaseAIComponent>(e.m_entityId))
-							enemyTypeName = "Xcode";
-						LOG("敵を撃破: {} (EntityId={})", enemyTypeName, static_cast<unsigned int>(e.m_entityId));
+			            if (const auto* type{ m_componentManager.tryGet<component::EnemyTypeComponent>(e.m_entityId) })
+				            enemyTypeName = constant::toEnemyTypeName(type->m_type);
+						LOG("敵を撃破: {} (EntityId={})", enemyTypeName, e.m_entityId);
 
 			            // モデルはここで非表示にしない。EnemyDeathSystemが赤化＋ディゾルブ演出を
 			            // 進めながら表示し続け、演出完了時にEntityごと破棄する

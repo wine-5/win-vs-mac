@@ -1,4 +1,5 @@
-#include "EnemySpawner.h"
+﻿#include "EnemySpawner.h"
+#include "game/component/EnemyTypeComponent.h"
 #include "FactoryManager.h"
 #include "core/interface/ILogger.h"
 #include "game/component/AIComponent.h"
@@ -63,6 +64,9 @@ namespace game::factory
 		data::EnemyData enemyData{ data::EnemyData::fromMetadata(meta.value()) };
 		enemyData.setPosition(position); // 位置は呼び出し側の指定が正
 		const auto enemyId{ m_factoryManager.getEnemyFactory().create(modelHandle, enemyData) };
+
+		// 敵種はスポーン時にしか分からないのでコンポーネントとして持たせる（推測させない）
+		m_componentManager.add<component::EnemyTypeComponent>(enemyId, { type });
 
 		// 追跡対象が設定されていれば反映する（召喚された敵も即プレイヤーを追う）
 		if (m_target.getId() != 0 && m_componentManager.has<component::AIComponent>(enemyId))
