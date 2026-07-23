@@ -3,7 +3,7 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 
-namespace game::system
+namespace game::system::combat
 {
     /**
      * @brief ColliderComponentを持つ全エンティティ間の衝突検出と押し返しを行うSystem
@@ -41,4 +41,4 @@ namespace game::system
 
 		core::ecs::ComponentManager& m_componentManager;
     };
-} // namespace game::system
+} // namespace game::system::combat

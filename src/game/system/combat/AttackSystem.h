@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/base/EventBus.h"
@@ -10,7 +10,7 @@ namespace game::component
 	struct AttackComponent;
 }
 
-namespace game::system
+namespace game::system::combat
 {
 	/**
 	 * @brief AttackComponentを持つEntityの攻撃処理・ダメージ計算を行うSystem
@@ -47,4 +47,4 @@ namespace game::system
 	  core::constant::SeType m_playerAttackSeType{ core::constant::SeType::None };
 	  std::unique_ptr<attack::IDamageHandler> m_damageChain;
 	};
-} // namespace game::system
+} // namespace game::system::combat

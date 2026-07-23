@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 #include "core/data/ProjectileMetadata.h"
 #include "game/factory/ProjectileFactory.h"
 
-namespace game::system
+namespace game::system::combat
 {
 	/**
 	 * @brief プレイヤーの遠距離攻撃（Window投擲）の発射を担うSystem
@@ -51,4 +51,4 @@ namespace game::system
 		float m_chargeTime{ 0.0f }; // 現在の溜め時間（秒）
 		bool m_isCharging{ false }; // 溜め中かどうか
 	};
-} // namespace game::system
+} // namespace game::system::combat

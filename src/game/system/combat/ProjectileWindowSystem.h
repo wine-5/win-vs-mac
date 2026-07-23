@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/interface/IRenderer.h"
 #include "core/interface/IProjectileWindowManager.h"
 
-namespace game::system
+namespace game::system::combat
 {
 	/**
 	 * @brief 弾の位置に実OSウィンドウを追従させるSystem
@@ -37,4 +37,4 @@ namespace game::system
 		core::iface::IRenderer& m_renderer;
 		core::iface::IProjectileWindowManager& m_windowManager;
 	};
-} // namespace game::system
+} // namespace game::system::combat

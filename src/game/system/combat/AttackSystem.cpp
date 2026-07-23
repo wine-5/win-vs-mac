@@ -14,7 +14,7 @@
 #include "core/utility/Log.h"
 #include "game/event/InGameEvents.h"
 
-namespace game::system
+namespace game::system::combat
 {
 	AttackSystem::AttackSystem(core::ecs::ComponentManager &componentManager, core::base::EventBus &eventBus,
 		core::constant::SeType playerAttackSeType)
@@ -230,4 +230,4 @@ namespace game::system
 			m_eventBus.publish(hitEvent);
 		}
 	}
-} // namespace game::system
+} // namespace game::system::combat

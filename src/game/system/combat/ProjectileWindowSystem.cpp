@@ -1,4 +1,4 @@
-#include "ProjectileWindowSystem.h"
+﻿#include "ProjectileWindowSystem.h"
 #include "game/component/ProjectileComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/AttackComponent.h"
@@ -18,7 +18,7 @@ namespace
 	constexpr float WINDOW_APPEAR_DISTANCE{ 120.0f };
 } // namespace
 
-namespace game::system
+namespace game::system::combat
 {
 	ProjectileWindowSystem::ProjectileWindowSystem(core::ecs::ComponentManager& componentManager,
 	    core::iface::IRenderer& renderer,
@@ -91,4 +91,4 @@ namespace game::system
 		// 空リストなら全ウィンドウがフェードアウトして隠れる
 		m_windowManager.updateWindows(infos, deltaTime);
 	}
-} // namespace game::system
+} // namespace game::system::combat

@@ -8,7 +8,7 @@
 #include "game/event/InGameEvents.h"
 #include <vector>
 
-namespace game::system
+namespace game::system::combat
 {
 	/**
 	 * @brief 敵の死亡後、赤化＋ディゾルブ演出を経てEntity・モデルハンドルを完全に後始末するSystem
@@ -59,4 +59,4 @@ namespace game::system
 		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
 		std::vector<core::base::EventBus::Subscription> m_subscriptions{};
 	};
-} // namespace game::system
+} // namespace game::system::combat

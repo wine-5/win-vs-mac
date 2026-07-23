@@ -1,4 +1,4 @@
-#include "PlayerRangedAttackSystem.h"
+﻿#include "PlayerRangedAttackSystem.h"
 #include "game/component/InputComponent.h"
 #include "game/component/CameraComponent.h"
 #include "game/component/TransformComponent.h"
@@ -6,7 +6,7 @@
 #include "game/constant/Tag.h"
 #include <utility>
 
-namespace game::system
+namespace game::system::combat
 {
 	PlayerRangedAttackSystem::PlayerRangedAttackSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId playerId,
@@ -101,4 +101,4 @@ namespace game::system
 
 		m_projectileFactory.spawn(origin, direction, config, constant::Tag::Player);
 	}
-} // namespace game::system
+} // namespace game::system::combat

@@ -1,4 +1,4 @@
-#include "ProjectileReflectSystem.h"
+﻿#include "ProjectileReflectSystem.h"
 #include "game/component/ProjectileComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
@@ -8,7 +8,7 @@
 #include <cmath>
 #include <vector>
 
-namespace game::system
+namespace game::system::combat
 {
 	ProjectileReflectSystem::ProjectileReflectSystem(core::ecs::ComponentManager& componentManager)
 	    : m_componentManager{ componentManager }
@@ -75,4 +75,4 @@ namespace game::system
 			}
 		}
 	}
-} // namespace game::system
+} // namespace game::system::combat

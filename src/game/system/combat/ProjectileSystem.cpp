@@ -4,7 +4,7 @@
 #include "game/event/InGameEvents.h"
 #include <algorithm>
 
-namespace game::system
+namespace game::system::combat
 {
 	ProjectileSystem::ProjectileSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityManager& entityManager,
@@ -57,4 +57,4 @@ namespace game::system
 		}
 		m_pendingDestroy.clear();
 	}
-} // namespace game::system
+} // namespace game::system::combat

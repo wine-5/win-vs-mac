@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 
-namespace game::system
+namespace game::system::combat
 {
 	/**
 	 * @brief カメラ前方（レティクル中心）の敵捕捉を判定するSystem
@@ -30,4 +30,4 @@ namespace game::system
 	  private:
 		core::ecs::ComponentManager& m_componentManager;
 	};
-} // namespace game::system
+} // namespace game::system::combat

@@ -6,7 +6,7 @@
 #include "core/ecs/Entity.h"
 #include "core/base/EventBus.h"
 
-namespace game::system
+namespace game::system::combat
 {
 	/**
 	 * @brief 弾の寿命管理・ヒット時の破棄を担うSystem
@@ -46,4 +46,4 @@ namespace game::system
 		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
 		std::vector<core::base::EventBus::Subscription> m_subscriptions{};
 	};
-} // namespace game::system
+} // namespace game::system::combat

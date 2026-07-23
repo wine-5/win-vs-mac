@@ -1,4 +1,4 @@
-#include "TargetingSystem.h"
+﻿#include "TargetingSystem.h"
 #include "game/component/AimComponent.h"
 #include "game/component/CameraComponent.h"
 #include "game/component/TransformComponent.h"
@@ -13,7 +13,7 @@ namespace
 	constexpr float ON_TARGET_COS{ 0.99f };     // 視線とのなす角のしきい値（約8度以内で捕捉）
 } // namespace
 
-namespace game::system
+namespace game::system::combat
 {
 	TargetingSystem::TargetingSystem(core::ecs::ComponentManager& componentManager)
 	    : m_componentManager{ componentManager }
@@ -88,4 +88,4 @@ namespace game::system
 			aim.m_targetId = bestTarget;
 		}
 	}
-} // namespace game::system
+} // namespace game::system::combat

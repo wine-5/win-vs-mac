@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 
-namespace game::system
+namespace game::system::combat
 {
 	/**
 	 * @brief 敵の投擲物をプレイヤーのWindow弾で跳ね返すSystem
@@ -30,4 +30,4 @@ namespace game::system
 	  private:
 		core::ecs::ComponentManager& m_componentManager;
 	};
-} // namespace game::system
+} // namespace game::system::combat

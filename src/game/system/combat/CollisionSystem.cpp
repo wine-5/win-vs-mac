@@ -15,7 +15,7 @@ namespace
 	constexpr float DEATH_BOUNCE_MIN_SPEED{ 20.0f };
 } // namespace
 
-namespace game::system
+namespace game::system::combat
 {
 	CollisionSystem::CollisionSystem(core::ecs::ComponentManager& componentManager)
 	    : m_componentManager{ componentManager }
@@ -134,4 +134,4 @@ namespace game::system
 				death->m_hasLanded = true;
 		}
 	}
-} // namespace game::system
+} // namespace game::system::combat

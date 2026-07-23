@@ -48,7 +48,7 @@ namespace
 	}
 } // namespace
 
-namespace game::system
+namespace game::system::combat
 {
 	EnemyDeathSystem::EnemyDeathSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityManager& entityManager,
@@ -196,4 +196,4 @@ namespace game::system
 			}
 		}
 	}
-} // namespace game::system
+} // namespace game::system::combat
