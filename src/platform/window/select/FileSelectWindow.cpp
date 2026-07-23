@@ -7,6 +7,7 @@
 #include "thirdparty/nlohmann/json.hpp"
 #include "core/utility/Log.h"
 #include <exception>
+#include <utility>
 
 namespace platform::window::select
 {
@@ -17,7 +18,7 @@ namespace platform::window::select
 
 	void FileSelectWindow::setOnFileSlotChanged(std::function<void(int, const std::string&)> callback) noexcept
 	{
-		m_onFileSlotChanged = callback;
+		m_onFileSlotChanged = std::move(callback);
 	}
 
 	std::string FileSelectWindow::getFilePath(int slot) const noexcept

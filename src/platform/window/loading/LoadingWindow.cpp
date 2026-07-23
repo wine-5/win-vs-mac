@@ -1,5 +1,6 @@
 ﻿#include "LoadingWindow.h"
 #include "thirdparty/nlohmann/json.hpp"
+#include <utility>
 
 namespace platform::window::loading
 {
@@ -15,7 +16,7 @@ namespace platform::window::loading
 
 	void LoadingWindow::setOnLoadingComplete(std::function<void()> callback) noexcept
 	{
-		m_onLoadingComplete = callback;
+		m_onLoadingComplete = std::move(callback);
 	}
 
 	void LoadingWindow::pumpMessages() noexcept

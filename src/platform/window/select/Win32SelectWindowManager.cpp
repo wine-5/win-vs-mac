@@ -11,20 +11,20 @@
 #include <windows.h>
 #include "core/utility/Log.h"
 #include <exception>
+#include <utility>
 
 namespace platform::window::select
 {
-    Win32SelectWindowManager::Win32SelectWindowManager(
-        std::function<void()> onGameStart,
-        std::function<void(int, const std::string&)> onFileSlotChanged,
-        core::iface::IResourceManager& resourceManager,
-        core::iface::IScreen& screen
-    ) noexcept
-        : m_onGameStart{onGameStart},
-        m_onFileSlotChanged{onFileSlotChanged},
-        m_resourceManager{resourceManager},
-        m_screen{screen}
-    {
+	Win32SelectWindowManager::Win32SelectWindowManager(
+	    std::function<void()> onGameStart,
+	    std::function<void(int, const std::string&)> onFileSlotChanged,
+	    core::iface::IResourceManager& resourceManager,
+	    core::iface::IScreen& screen) noexcept
+	    : m_onGameStart{ std::move(onGameStart) }
+	    , m_onFileSlotChanged{ std::move(onFileSlotChanged) }
+	    , m_resourceManager{ resourceManager }
+	    , m_screen{ screen }
+	{
     }
 
     void Win32SelectWindowManager::createAllWindows()
