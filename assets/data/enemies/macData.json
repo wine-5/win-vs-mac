@@ -28,6 +28,17 @@
   ],
   "mac": {
     "phase2HpRatio": 0.99,
+    "actions": {
+      "meleeWindup": 0.6,
+      "rangedWindup": 0.9,
+      "summonWindup": 0.7,
+      "novaWindup": 1.1,
+      "meleeLock": 1.0,
+      "rangedLock": 1.2,
+      "summonLock": 1.2,
+      "novaLock": 1.4,
+      "rangedTelegraphRange": 800.0
+    },
     "phase1": {
       "moveSpeed": 10.0,
       "actionInterval": 4.0,

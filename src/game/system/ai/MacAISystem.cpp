@@ -18,21 +18,12 @@
 namespace
 {
 
-	// 各アクションの再生ロック時間（秒）。この間は次の行動を抽選しない（アニメ・演出の尺）
-	constexpr float MELEE_LOCK{ 1.0f };
-	constexpr float RANGED_LOCK{ 1.2f };
-	constexpr float SUMMON_LOCK{ 1.2f };
-	constexpr float NOVA_LOCK{ 1.4f };
-	// 覚醒演出の停止時間。演出タイムラインの合計（MacAwakenTiming.h）と共有し、ズレを防ぐ
+	// 覚醒演出の停止時間。演出タイムラインの合計（MacAwakenTiming.h）から導出する値なので
+	// データ化せずここに置く（演出の尺とズレると覚醒中に動き出してしまう）
 	constexpr float PHASE_TRANSITION_LOCK{ game::constant::mac_awaken::TOTAL_TIME };
 
-	// 攻撃前の溜め（予兆表示）の長さ（秒）。満ちきると発動する。溜め中ボスは静止し中断しない
-	constexpr float MELEE_WINDUP{ 0.6f };
-	constexpr float RANGED_WINDUP{ 0.9f };
-	constexpr float SUMMON_WINDUP{ 0.7f };
-	constexpr float NOVA_WINDUP{ 1.1f }; // 全方位ノヴァは大技なので長めに溜める
-	// レインボー扇の予兆として床に出す扇の半径（弾の到達範囲の見せ方）
-	constexpr float RANGED_TELEGRAPH_RANGE{ 800.0f };
+	// 各アクションの溜め・硬直の長さと予兆の半径は macData.json の "mac.actions" から読む
+	// （MacActionTiming）。戦闘のテンポ調整で頻繁に触るためソースに持たせない
 } // namespace
 
 namespace game::system::ai
@@ -171,19 +162,19 @@ namespace game::system::ai
 					{
 					case MacState::Melee:
 						performMelee(entityId);
-						mac.m_animLockTimer = MELEE_LOCK;
+						mac.m_animLockTimer = mac.m_config.m_actions.m_meleeLock;
 						break;
 					case MacState::Ranged:
 						performRanged(entityId, transform, mac.m_windupAimDir, windupPhase);
-						mac.m_animLockTimer = RANGED_LOCK;
+						mac.m_animLockTimer = mac.m_config.m_actions.m_rangedLock;
 						break;
 					case MacState::Nova:
 						performNova(entityId, transform, windupPhase);
-						mac.m_animLockTimer = NOVA_LOCK;
+						mac.m_animLockTimer = mac.m_config.m_actions.m_novaLock;
 						break;
 					case MacState::Summon:
 						performSummon(transform, windupPhase, windupPhase.m_summonMax - countAliveMinions());
-						mac.m_animLockTimer = SUMMON_LOCK;
+						mac.m_animLockTimer = mac.m_config.m_actions.m_summonLock;
 						break;
 					default:
 						break;
@@ -268,10 +259,11 @@ namespace game::system::ai
 			// 溜め開始：狙いを固定し、技に応じた予兆（近接=円 / 遠距離=扇 / 召喚=円）を出す
 			mac.m_pendingAction = action;
 			mac.m_windupAimDir = dir;
-			mac.m_windupDuration = (action == MacState::Ranged)   ? RANGED_WINDUP
-			                       : (action == MacState::Summon) ? SUMMON_WINDUP
-			                       : (action == MacState::Nova)   ? NOVA_WINDUP
-			                                                      : MELEE_WINDUP;
+			const auto& actions{ mac.m_config.m_actions };
+			mac.m_windupDuration = (action == MacState::Ranged)   ? actions.m_rangedWindup
+			                       : (action == MacState::Summon) ? actions.m_summonWindup
+			                       : (action == MacState::Nova)   ? actions.m_novaWindup
+			                                                      : actions.m_meleeWindup;
 			mac.m_windupTimer = mac.m_windupDuration;
 			mac.m_state = MacState::Windup;
 
@@ -286,14 +278,14 @@ namespace game::system::ai
 				{
 					tel.m_shape = component::combat::TelegraphShape::Sector;
 					tel.m_facingRad = std::atan2f(dir.z, dir.x);
-					tel.m_radius = RANGED_TELEGRAPH_RANGE;
+					tel.m_radius = mac.m_config.m_actions.m_rangedTelegraphRange;
 					tel.m_halfAngleRad = phase.m_rainbowSpreadDeg * 0.5f * core::utility::DEG_TO_RAD;
 				}
 				else if (action == MacState::Nova)
 				{
 					// 全方位ノヴァは全周が危険なので大きな円で予告する
 					tel.m_shape = component::combat::TelegraphShape::Circle;
-					tel.m_radius = RANGED_TELEGRAPH_RANGE;
+					tel.m_radius = mac.m_config.m_actions.m_rangedTelegraphRange;
 				}
 				else // Melee / Summon は円（近接は攻撃レンジ、召喚は召喚半径）
 				{
