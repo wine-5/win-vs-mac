@@ -1,4 +1,4 @@
-#include "MacAISystem.h"
+﻿#include "MacAISystem.h"
 #include "game/component/ai/AIComponent.h"
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/AttackComponent.h"
@@ -13,12 +13,10 @@
 #include <cmath>
 #include <utility>
 #include <algorithm>
-#include <numbers>
+#include "core/utility/MathConstants.h"
 
 namespace
 {
-	constexpr float PI{ std::numbers::pi_v<float> };
-	constexpr float DEG_TO_RAD{ PI / 180.0f };
 
 	// 各アクションの再生ロック時間（秒）。この間は次の行動を抽選しない（アニメ・演出の尺）
 	constexpr float MELEE_LOCK{ 1.0f };
@@ -289,7 +287,7 @@ namespace game::system::ai
 					tel.m_shape = component::combat::TelegraphShape::Sector;
 					tel.m_facingRad = std::atan2f(dir.z, dir.x);
 					tel.m_radius = RANGED_TELEGRAPH_RANGE;
-					tel.m_halfAngleRad = phase.m_rainbowSpreadDeg * 0.5f * DEG_TO_RAD;
+					tel.m_halfAngleRad = phase.m_rainbowSpreadDeg * 0.5f * core::utility::DEG_TO_RAD;
 				}
 				else if (action == MacState::Nova)
 				{
@@ -351,7 +349,7 @@ namespace game::system::ai
 		if (count <= 0)
 			return;
 
-		const float spreadRad{ phase.m_rainbowSpreadDeg * DEG_TO_RAD };
+		const float spreadRad{ phase.m_rainbowSpreadDeg * core::utility::DEG_TO_RAD };
 
 		for (int i{ 0 }; i < count; ++i)
 		{
@@ -407,7 +405,7 @@ namespace game::system::ai
 			return;
 
 		// 360度に均等な方向へ発射する（水平面）
-		const float step{ 2.0f * PI / static_cast<float>(count) };
+		const float step{ core::utility::TWO_PI / static_cast<float>(count) };
 		for (int i{ 0 }; i < count; ++i)
 		{
 			const float angle{ step * static_cast<float>(i) };
@@ -436,7 +434,7 @@ namespace game::system::ai
 			return;
 
 		std::uniform_int_distribution<std::size_t> typeDist{ 0, phase.m_summonTypes.size() - 1 };
-		std::uniform_real_distribution<float> angleDist{ 0.0f, 2.0f * PI };
+		std::uniform_real_distribution<float> angleDist{ 0.0f, core::utility::TWO_PI };
 		std::uniform_real_distribution<float> radiusDist{ phase.m_summonRadiusMin, phase.m_summonRadiusMax };
 
 		for (int i{ 0 }; i < n; ++i)

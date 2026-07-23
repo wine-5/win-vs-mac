@@ -4,7 +4,7 @@
 #include "core/utility/Log.h"
 #include <algorithm>
 #include <cmath>
-#include <numbers>
+#include "core/utility/MathConstants.h"
 
 namespace
 {
@@ -156,7 +156,6 @@ namespace infrastructure::graphics
 			return;
 
 		constexpr int SEGMENTS{ 48 };
-		constexpr float TWO_PI{ 2.0f * std::numbers::pi_v<float> };
 
 		// ARGBのアルファを取り出して半透明合成する（3D描画はRGBのみなのでアルファはブレンドで表現）
 		const int alpha{ static_cast<int>((color >> 24) & 0xFF) };
@@ -173,7 +172,7 @@ namespace infrastructure::graphics
 		VECTOR prev{ VGet(center.x + radius, center.y, center.z) };
 		for (int i{ 1 }; i <= SEGMENTS; ++i)
 		{
-			const float angle{ TWO_PI * i / SEGMENTS };
+			const float angle{ core::utility::TWO_PI * i / SEGMENTS };
 			const VECTOR cur{ VGet(center.x + std::cos(angle) * radius, center.y, center.z + std::sin(angle) * radius) };
 			if (filled)
 				DrawTriangle3D(c, prev, cur, drawColor, TRUE);

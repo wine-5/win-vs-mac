@@ -12,17 +12,15 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/ILogger.h"
 #include "core/utility/Log.h"
-#include <numbers>
 #include <random>
 #include <string>
 #include <string_view>
+#include "core/utility/MathConstants.h"
 
 namespace game::actor
 {
 	namespace
 	{
-		constexpr float DEG_TO_RAD{ std::numbers::pi_v<float> / 180.0f };
-
 		/**
 		 * @brief ストレイフ（周回）の向きを個体ごとにランダムに決める
 		 * @return 右回り(+1) または 左回り(-1)
@@ -90,7 +88,7 @@ namespace game::actor
 			rangeKeep.m_hoverHeight = enemyData.getHoverHeight();
 			rangeKeep.m_fireCooldown = enemyData.getFireCooldown();
 			// JSONは度で持つのでラジアンへ変換して保持する
-			rangeKeep.m_facingYawOffset = enemyData.getFacingYawOffset() * DEG_TO_RAD;
+			rangeKeep.m_facingYawOffset = enemyData.getFacingYawOffset() * core::utility::DEG_TO_RAD;
 			// 周回の向きを個体ごとにランダムに固定する（複数体が散開して包囲する隊形になる）
 			rangeKeep.m_strafeDirection = pickStrafeDirection();
 			cm.add<component::ai::RangeKeepAIComponent>(id, rangeKeep);

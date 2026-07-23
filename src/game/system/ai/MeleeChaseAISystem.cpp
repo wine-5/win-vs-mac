@@ -9,7 +9,7 @@
 #include "game/constant/AnimationState.h"
 #include <cmath>
 #include <algorithm>
-#include <numbers>
+#include "core/utility/MathConstants.h"
 
 namespace
 {
@@ -207,7 +207,7 @@ namespace game::system::ai
 
 	core::Vector3 MeleeChaseAISystem::pickWanderTarget(const core::Vector3& home)
 	{
-		std::uniform_real_distribution<float> angleDist{ 0.0f, 2.0f * std::numbers::pi_v<float> };
+		std::uniform_real_distribution<float> angleDist{ 0.0f, core::utility::TWO_PI };
 		std::uniform_real_distribution<float> radiusDist{ WANDER_RADIUS_MIN, WANDER_RADIUS_MAX };
 		const float angle{ angleDist(m_rng) };
 		const float radius{ radiusDist(m_rng) };
