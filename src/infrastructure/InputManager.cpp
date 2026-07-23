@@ -10,7 +10,6 @@ namespace infrastructure
 		{ core::input::KeyCode::A, KEY_INPUT_A },
 		{ core::input::KeyCode::S, KEY_INPUT_S },
 		{ core::input::KeyCode::D, KEY_INPUT_D },
-		{ core::input::KeyCode::R, KEY_INPUT_R },
 		{ core::input::KeyCode::T, KEY_INPUT_T },
 		{ core::input::KeyCode::F1, KEY_INPUT_F1 }, // DEBUG: デバッグモード切り替え（リリース時に削除）
 		{ core::input::KeyCode::F2, KEY_INPUT_F2 }, // DEBUG: シーンビュー切り替え（リリース時に削除）
@@ -24,7 +23,6 @@ namespace infrastructure
 		{ core::input::KeyCode::Right, KEY_INPUT_RIGHT },
 
 		{ core::input::KeyCode::Shift, KEY_INPUT_LSHIFT },
-		{ core::input::KeyCode::Tab, KEY_INPUT_TAB },
 	};
 
 	InputManager::InputManager()
