@@ -638,10 +638,10 @@
     <ClInclude Include="src\game\data\FileEquipmentData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\data\FileExtensionBonus.h">
+    <ClInclude Include="src\core\data\FileExtensionBonus.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\data\FileExtensionType.h">
+    <ClInclude Include="src\core\data\FileExtensionType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\GameManager.h">

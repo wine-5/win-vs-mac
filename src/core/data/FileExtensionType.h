@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-namespace game::data
+namespace core::data
 {
     /**
     * @brief ファイル拡張子のグループ種別
@@ -14,4 +14,4 @@ namespace game::data
         Archive,    // .zip .7z .rar   → 全パラメータ小+
         Unknown     // それ以外        → attackRange+
     };
-} // namespace game::data
+} // namespace core::data

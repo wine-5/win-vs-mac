@@ -100,14 +100,15 @@ namespace platform::window::select
 
 	void FileSelectWindow::sendSlotsRefresh() noexcept
 	{
-		auto toName = [this](game::data::FileExtensionType t) -> const char* {
+		auto toName = [this](core::data::FileExtensionType t) -> const char*
+		{
 			switch (t)
 			{
-			case game::data::FileExtensionType::Executable: return EXT_TYPE_NAME_EXECUTABLE;
-			case game::data::FileExtensionType::Document:   return EXT_TYPE_NAME_DOCUMENT;
-			case game::data::FileExtensionType::Image:      return EXT_TYPE_NAME_IMAGE;
-			case game::data::FileExtensionType::Audio:      return EXT_TYPE_NAME_AUDIO;
-			case game::data::FileExtensionType::Archive:    return EXT_TYPE_NAME_ARCHIVE;
+			case core::data::FileExtensionType::Executable: return EXT_TYPE_NAME_EXECUTABLE;
+			case core::data::FileExtensionType::Document: return EXT_TYPE_NAME_DOCUMENT;
+			case core::data::FileExtensionType::Image: return EXT_TYPE_NAME_IMAGE;
+			case core::data::FileExtensionType::Audio: return EXT_TYPE_NAME_AUDIO;
+			case core::data::FileExtensionType::Archive: return EXT_TYPE_NAME_ARCHIVE;
 			default:                                        return EXT_TYPE_NAME_UNKNOWN;
 			}
 		};
@@ -153,14 +154,18 @@ namespace platform::window::select
 	void FileSelectWindow::sendBonusInfo() noexcept
 	{
 		// ExtensionBonusCalculator の定数から説明文を生成（C++ が正とする）
-		struct Entry { const char* m_key; game::data::FileExtensionType m_type; };
+		struct Entry
+		{
+			const char* m_key;
+			core::data::FileExtensionType m_type;
+		};
 		constexpr Entry ENTRIES[] = {
-			{ EXT_TYPE_NAME_EXECUTABLE, game::data::FileExtensionType::Executable },
-			{ EXT_TYPE_NAME_DOCUMENT, game::data::FileExtensionType::Document },
-			{ EXT_TYPE_NAME_IMAGE, game::data::FileExtensionType::Image },
-			{ EXT_TYPE_NAME_AUDIO, game::data::FileExtensionType::Audio },
-			{ EXT_TYPE_NAME_ARCHIVE, game::data::FileExtensionType::Archive },
-			{ EXT_TYPE_NAME_UNKNOWN, game::data::FileExtensionType::Unknown },
+			{ EXT_TYPE_NAME_EXECUTABLE, core::data::FileExtensionType::Executable },
+			{ EXT_TYPE_NAME_DOCUMENT, core::data::FileExtensionType::Document },
+			{ EXT_TYPE_NAME_IMAGE, core::data::FileExtensionType::Image },
+			{ EXT_TYPE_NAME_AUDIO, core::data::FileExtensionType::Audio },
+			{ EXT_TYPE_NAME_ARCHIVE, core::data::FileExtensionType::Archive },
+			{ EXT_TYPE_NAME_UNKNOWN, core::data::FileExtensionType::Unknown },
 		};
 
 		auto fmt = [](float v) -> std::string {
@@ -171,7 +176,8 @@ namespace platform::window::select
 			return oss.str();
 		};
 
-		auto describe = [&](game::data::FileExtensionType t) -> std::string {
+		auto describe = [&](core::data::FileExtensionType t) -> std::string
+		{
 			auto b = game::utility::ExtensionBonusCalculator::calculate(t);
 			std::string result{};
 			auto append = [&](const char* label, float val) {

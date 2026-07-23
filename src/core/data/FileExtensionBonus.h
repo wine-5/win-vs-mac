@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-namespace game::data
+namespace core::data
 { /**
    * @brief 拡張子によるパラメータボーナス値を保持する構造体
    */
@@ -12,4 +12,4 @@ namespace game::data
 		float hp{0.0f};
 		float attackRange{0.0f};
 	};
-} // namespace game::data
+} // namespace core::data

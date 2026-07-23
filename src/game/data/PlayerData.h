@@ -3,7 +3,7 @@
 #include "core/utility/Vector3.h"
 #include "core/data/ModelMetadata.h"
 #include "game/constant/MetadataKeys.h"
-#include "game/data/FileExtensionBonus.h"
+#include "core/data/FileExtensionBonus.h"
 
 namespace game::data
 {
@@ -98,7 +98,7 @@ namespace game::data
 		 * ここでは最終値だけを持てば足りる。
 		 * @param bonus 拡張子ボーナス値
 		 */
-		void applyExtensionBonus(const data::FileExtensionBonus& bonus)
+		void applyExtensionBonus(const core::data::FileExtensionBonus& bonus)
 		{
 			m_attackPower += bonus.atk;
 			m_moveSpeed += bonus.spd;

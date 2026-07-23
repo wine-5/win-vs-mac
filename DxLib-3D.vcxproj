@@ -333,8 +333,8 @@
     <ClInclude Include="src\game\constant\MetadataKeys.h" />
     <ClInclude Include="src\game\data\EnemyData.h" />
     <ClInclude Include="src\game\data\FileEquipmentData.h" />
-    <ClInclude Include="src\game\data\FileExtensionBonus.h" />
-    <ClInclude Include="src\game\data\FileExtensionType.h" />
+    <ClInclude Include="src\core\data\FileExtensionBonus.h" />
+    <ClInclude Include="src\core\data\FileExtensionType.h" />
     <ClInclude Include="src\core\interface\IGameEvent.h" />
     <ClInclude Include="src\game\factory\EnemyFactory.h" />
     <ClInclude Include="src\game\factory\EnemySpawner.h" />

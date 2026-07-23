@@ -3,7 +3,7 @@
 #include <string_view>
 #include <algorithm>
 #include <array>
-#include "game/data/FileExtensionType.h"
+#include "core/data/FileExtensionType.h"
 #include "game/utility/FileExtensionTypeResolver.h"
 
 namespace game::data
@@ -42,7 +42,7 @@ namespace game::data
 			if (slotIndex < 0 || slotIndex >= MAX_SLOTS)
 				return;
 			m_filePaths[slotIndex] = {};
-			m_extensionTypes[slotIndex] = FileExtensionType::Unknown;
+			m_extensionTypes[slotIndex] = core::data::FileExtensionType::Unknown;
 			m_hasSelection[slotIndex] = false;
 		}
 
@@ -68,14 +68,18 @@ namespace game::data
 		}
 
 		/** @brief 指定スロットの拡張子種別を取得 */
-		[[nodiscard]] FileExtensionType getExtensionType(int slotIndex) const noexcept
+		[[nodiscard]] core::data::FileExtensionType getExtensionType(int slotIndex) const noexcept
 		{
 			return m_extensionTypes[slotIndex];
 		}
 
 	private:
 		std::array<std::string, MAX_SLOTS> m_filePaths{};
-		std::array<FileExtensionType, MAX_SLOTS> m_extensionTypes{FileExtensionType::Unknown, FileExtensionType::Unknown, FileExtensionType::Unknown};
+		std::array<core::data::FileExtensionType, MAX_SLOTS> m_extensionTypes{
+			core::data::FileExtensionType::Unknown,
+			core::data::FileExtensionType::Unknown,
+			core::data::FileExtensionType::Unknown
+		};
 		std::array<bool, MAX_SLOTS> m_hasSelection{false, false, false};
 	};
 } // namespace game::data

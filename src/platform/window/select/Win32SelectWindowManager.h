@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "core/interface/ISelectWindowManager.h"
-#include "game/data/FileExtensionType.h"
+#include "core/data/FileExtensionType.h"
 #include "game/utility/FileExtensionTypeResolver.h"
 #include "game/utility/ExtensionBonusCalculator.h"
 #include "platform/window/WindowConstants.h"
@@ -101,13 +101,13 @@ namespace platform::window::select
         bool m_rulesVisible{false};
 
         std::array<std::string, 3> m_slotPaths{};
-        std::array<game::data::FileExtensionType, 3> m_slotExtTypes{
-            game::data::FileExtensionType::Unknown,
-            game::data::FileExtensionType::Unknown,
-            game::data::FileExtensionType::Unknown
-        };
+		std::array<core::data::FileExtensionType, 3> m_slotExtTypes{
+			core::data::FileExtensionType::Unknown,
+			core::data::FileExtensionType::Unknown,
+			core::data::FileExtensionType::Unknown
+		};
 
-        std::function<void()> m_onGameStart{};
+		std::function<void()> m_onGameStart{};
         std::function<void(int, const std::string&)> m_onFileSlotChanged{};
 
         core::iface::IResourceManager& m_resourceManager;

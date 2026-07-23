@@ -1,6 +1,6 @@
-#pragma once
-#include "game/data/FileExtensionType.h"
-#include "game/data/FileExtensionBonus.h"
+﻿#pragma once
+#include "core/data/FileExtensionType.h"
+#include "core/data/FileExtensionBonus.h"
 
 namespace game::utility
 {
@@ -29,24 +29,24 @@ namespace game::utility
 		 * @param type ファイル拡張子グループ種別
 		 * @return 対応するボーナス値
 		 */
-		[[nodiscard]] static constexpr data::FileExtensionBonus calculate(data::FileExtensionType type) noexcept
-		{
-			switch (type)
-			{
-			case data::FileExtensionType::Executable:
-				return { .atk = EXECUTABLE_ATK };
-			case data::FileExtensionType::Document:
-				return { .spd = DOCUMENT_SPD };
-			case data::FileExtensionType::Image:
-				return { .def = IMAGE_DEF };
-			case data::FileExtensionType::Audio:
-				return { .hp = AUDIO_HP };
-			case data::FileExtensionType::Archive:
-				return { .atk = ARCHIVE_ATK, .spd = ARCHIVE_SPD, .def = ARCHIVE_DEF, .hp = ARCHIVE_HP, .attackRange = ARCHIVE_RANGE };
-			case data::FileExtensionType::Unknown:
-			default:
-				return { .attackRange = UNKNOWN_RANGE };
-			}
+	  [[nodiscard]] static constexpr core::data::FileExtensionBonus calculate(core::data::FileExtensionType type) noexcept
+	  {
+		  switch (type)
+		  {
+		  case core::data::FileExtensionType::Executable:
+			  return { .atk = EXECUTABLE_ATK };
+		  case core::data::FileExtensionType::Document:
+			  return { .spd = DOCUMENT_SPD };
+		  case core::data::FileExtensionType::Image:
+			  return { .def = IMAGE_DEF };
+		  case core::data::FileExtensionType::Audio:
+			  return { .hp = AUDIO_HP };
+		  case core::data::FileExtensionType::Archive:
+			  return { .atk = ARCHIVE_ATK, .spd = ARCHIVE_SPD, .def = ARCHIVE_DEF, .hp = ARCHIVE_HP, .attackRange = ARCHIVE_RANGE };
+		  case core::data::FileExtensionType::Unknown:
+		  default:
+			  return { .attackRange = UNKNOWN_RANGE };
+		  }
 		}
 	};
 } // namespace game::utility
