@@ -93,14 +93,6 @@ namespace core::iface
 		    float halfAngleRad, unsigned int color, bool filled) = 0;
 
 		/**
-		 * @brief 常にカメラの方を向く板（ビルボード）として画像を描画する
-		 * @param imageHandle 画像ハンドル（loadImageByIdで取得）
-		 * @param position ワールド座標（板の中心）
-		 * @param size 描画サイズ（ワールド単位・一辺の長さ）
-		 */
-		virtual void drawBillboard(int imageHandle, const core::Vector3& position, float size) = 0;
-
-		/**
 		 * @brief 3Dモデルの正面(ローカル+Z)を指定方向へ向け、その面内で回転させて描画する
 		 *
 		 * faceDir（進行方向など）へモデルの正面を向け、faceDir軸まわりに spinAngle だけ回す。

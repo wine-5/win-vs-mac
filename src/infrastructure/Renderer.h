@@ -83,14 +83,6 @@ namespace infrastructure
 		    float halfAngleRad, unsigned int color, bool filled) override;
 
 		/**
-		 * @brief 常にカメラの方を向く板（ビルボード）として画像を描画する
-		 * @param imageHandle 画像ハンドル（loadImageByIdで取得）
-		 * @param position ワールド座標（板の中心）
-		 * @param size 描画サイズ（ワールド単位・一辺の長さ）
-		 */
-		void drawBillboard(int imageHandle, const core::Vector3& position, float size) override;
-
-		/**
 		 * @brief 3Dモデルの正面を指定方向へ向け面内回転して描画する（レインボー弾等の回転体用）
 		 * @param modelHandle モデルハンドル
 		 * @param position 見た目中心を合わせるワールド座標

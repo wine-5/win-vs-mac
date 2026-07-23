@@ -232,16 +232,6 @@ namespace infrastructure
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 	}
 
-	void Renderer::drawBillboard(int imageHandle, const core::Vector3& position, float size)
-	{
-		if (imageHandle == -1)
-			return;
-
-		VECTOR pos = VGet(position.x, position.y, position.z);
-		// 中心(0.5, 0.5)基準・回転なし・透過有効で描画する
-		DrawBillboard3D(pos, 0.5f, 0.5f, size, 0.0f, imageHandle, TRUE);
-	}
-
 	void Renderer::drawSpinningModelFacing(int modelHandle, const core::Vector3& position,
 	    const core::Vector3& scale, const core::Vector3& centerOffset,
 	    const core::Vector3& faceDir, float spinAngle)
