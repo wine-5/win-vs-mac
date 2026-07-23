@@ -12,8 +12,6 @@ namespace game::event
 	class AudioEventListener
 	{
 	public:
-		AudioEventListener() = default;
-
 		/**
 		 * @brief コンストラクタ。EventBus に購読を登録する
 		 * @param eventBus EventBusの参照
