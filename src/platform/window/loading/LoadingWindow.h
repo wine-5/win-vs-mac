@@ -13,8 +13,8 @@ namespace platform::window::loading
 	 * @brief ローディングウィンドウ
 	 */
 	class LoadingWindow
-	    : public platform::window::WebViewWindowBase,
-	      public core::iface::IWindow
+	    : public platform::window::WebViewWindowBase
+	    , public core::iface::IWindow
 	{
 	  public:
 		/**

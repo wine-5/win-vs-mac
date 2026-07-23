@@ -16,11 +16,11 @@ namespace platform::window::result
      * @brief リザルト画面を表示する WebView2 ウィンドウ
      */
 	class ResultWindow
-	    : public platform::window::WebViewWindowBase,
-	      public core::iface::IResultWindowManager,
-	      public core::iface::IWindow
+	    : public platform::window::WebViewWindowBase
+	    , public core::iface::IResultWindowManager
+	    , public core::iface::IWindow
 	{
-    public:
+	  public:
         /**
          * @brief コンストラクタ
          * @param screen 画面情報インターフェース（位置計算・オーナーHWND取得に使用）
@@ -68,5 +68,5 @@ namespace platform::window::result
 
         void handleMessage(const std::string& json) noexcept;
         void sendResultData(const core::data::ResultData& data) noexcept;
-    };
+	};
 } // namespace platform::window::result
