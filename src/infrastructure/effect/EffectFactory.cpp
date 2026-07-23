@@ -1,7 +1,7 @@
-#include "infrastructure/EffectFactory.h"
+#include "infrastructure/effect/EffectFactory.h"
 #include "thirdparty/effekseer/EffekseerForDXLib.h"
 
-namespace infrastructure
+namespace infrastructure::effect
 {
 	EffectFactory::~EffectFactory()
 	{
@@ -100,4 +100,4 @@ namespace infrastructure
 		return total;
 	}
 
-} // namespace infrastructure
+} // namespace infrastructure::effect

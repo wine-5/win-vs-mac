@@ -249,13 +249,13 @@
     <ClCompile Include="src\infrastructure\repository\EffectRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\EffectPool.cpp">
+    <ClCompile Include="src\infrastructure\effect\EffectPool.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\infrastructure\AudioManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\EffectFactory.cpp">
+    <ClCompile Include="src\infrastructure\effect\EffectFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\system\visual\EffectSystem.cpp">
@@ -779,13 +779,13 @@
     <ClInclude Include="src\infrastructure\repository\EffectRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\EffectPool.h">
+    <ClInclude Include="src\infrastructure\effect\EffectPool.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\infrastructure\AudioManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\EffectFactory.h">
+    <ClInclude Include="src\infrastructure\effect\EffectFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\component\visual\EffectComponent.h">

@@ -28,7 +28,7 @@
 #include "core/interface/IAudioManager.h"
 #include "core/interface/IEffectFactory.h"
 #include "infrastructure/AudioManager.h"
-#include "infrastructure/EffectFactory.h"
+#include "infrastructure/effect/EffectFactory.h"
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
     game::GameManager& gameManager, game::PauseManager& pauseManager)
@@ -91,7 +91,7 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 	);
 
 	// EffectFactory登録
-	auto effectFactory{ std::make_unique<infrastructure::EffectFactory>() };
+	auto effectFactory{ std::make_unique<infrastructure::effect::EffectFactory>() };
 	effectFactory->initialize();
 	core::base::ServiceLocator::provide<core::iface::IEffectFactory>(
 		std::move(effectFactory)

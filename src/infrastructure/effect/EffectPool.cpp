@@ -1,7 +1,7 @@
-#include "infrastructure/EffectPool.h"
+#include "infrastructure/effect/EffectPool.h"
 #include "thirdparty/effekseer/EffekseerForDXLib.h"
 
-namespace infrastructure
+namespace infrastructure::effect
 {
 	void EffectPool::initialize(int resourceHandle, int poolSize, float yOffset, float scale)
 	{
@@ -100,4 +100,4 @@ namespace infrastructure
 		}
 		return false;
 	}
-} // namespace infrastructure
+} // namespace infrastructure::effect

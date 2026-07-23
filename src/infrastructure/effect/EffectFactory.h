@@ -1,10 +1,10 @@
 #pragma once
 #include <unordered_map>
 #include "core/interface/IEffectFactory.h"
-#include "infrastructure/EffectPool.h"
+#include "infrastructure/effect/EffectPool.h"
 #include "infrastructure/repository/EffectRepository.h"
 
-namespace infrastructure
+namespace infrastructure::effect
 {
 	/**
 	 * @brief IEffectFactory の実装クラス
@@ -61,4 +61,4 @@ namespace infrastructure
 		// stop() でどのプールに返却するかを逆引きするためのマップ
 		std::unordered_map<int, core::constant::EffectType> m_handleToType{};
 	};
-} // namespace infrastructure
+} // namespace infrastructure::effect

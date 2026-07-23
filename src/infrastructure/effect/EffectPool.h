@@ -3,7 +3,7 @@
 #include "core/ecs/ObjectPool.h"
 #include "core/utility/Vector3.h"
 
-namespace infrastructure
+namespace infrastructure::effect
 {
 	struct EffectSlot
 	{
@@ -64,4 +64,4 @@ namespace infrastructure
 		core::base::ObjectPool<EffectSlot> m_pool{};
 		std::vector<EffectSlot*> m_activeSlots{};
 	};
-} // namespace infrastructure
+} // namespace infrastructure::effect

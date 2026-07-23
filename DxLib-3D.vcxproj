@@ -186,8 +186,8 @@
     <ClCompile Include="src\game\system\visual\TelegraphVisualsSystem.cpp" />
     <ClCompile Include="src\game\ui\FadeTransition.cpp" />
     <ClCompile Include="src\infrastructure\AudioManager.cpp" />
-    <ClCompile Include="src\infrastructure\EffectFactory.cpp" />
-    <ClCompile Include="src\infrastructure\EffectPool.cpp" />
+    <ClCompile Include="src\infrastructure\effect\EffectFactory.cpp" />
+    <ClCompile Include="src\infrastructure\effect\EffectPool.cpp" />
     <ClCompile Include="src\infrastructure\repository\AudioRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\EffectRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\FontRepository.cpp" />
@@ -378,8 +378,8 @@
     <ClInclude Include="src\game\utility\ExtensionBonusCalculator.h" />
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
     <ClInclude Include="src\infrastructure\AudioManager.h" />
-    <ClInclude Include="src\infrastructure\EffectFactory.h" />
-    <ClInclude Include="src\infrastructure\EffectPool.h" />
+    <ClInclude Include="src\infrastructure\effect\EffectFactory.h" />
+    <ClInclude Include="src\infrastructure\effect\EffectPool.h" />
     <ClInclude Include="src\infrastructure\repository\AudioRepository.h" />
     <ClInclude Include="src\infrastructure\repository\EffectRepository.h" />
     <ClInclude Include="src\infrastructure\repository\FontRepository.h" />
