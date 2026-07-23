@@ -48,8 +48,8 @@ namespace game::scene
             core::utility::Color::argb(0x80, 0x00, 0x00, 0x00), true);
 
         if (m_fade)
-            m_fade->draw(m_uiRenderer, m_screen);
-    }
+			m_fade->draw();
+	}
 
     void Loading::notifyLoadingComplete() noexcept
     {

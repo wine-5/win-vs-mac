@@ -65,6 +65,7 @@ namespace game::scene
 	void Lockscreen::draw()
 	{
 		m_lockscreenView->draw(static_cast<int>(m_offsetY));
-		if (m_fade) m_fade->draw(m_uiRenderer, m_screen);
+		if (m_fade)
+			m_fade->draw();
 	}
 } // namespace game::scene

@@ -65,7 +65,7 @@ namespace game::scene
 	void Select::draw()
 	{
 		if (m_fade)
-			m_fade->draw(m_uiRenderer, m_screen);
+			m_fade->draw();
 	}
 
 	void Select::startFadeOut()

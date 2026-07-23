@@ -88,7 +88,7 @@ namespace game::scene
 	{
 		m_view->drawTitle();
 		if (m_fade)
-			m_fade->draw(m_uiRenderer, m_screen);
+			m_fade->draw();
 	}
 
 	void Title::goToSelect()
