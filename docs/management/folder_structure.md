@@ -7,6 +7,16 @@
 
 ---
 
+## 分割ルール
+
+1. **1クラスしか入らない区分はフォルダを作らない**（`.h` / `.cpp` のペアは1クラスと数える）
+2. **2クラス以上になった時点でフォルダへ切り出す**
+
+階層だけ増えて中身が1つ、という状態を作らないための基準。
+将来クラスが増えて2つ以上になった時点で、あらためてフォルダ化する。
+
+---
+
 ## 現状のファイル数（多い順）
 
 | ディレクトリ | ファイル数 | クラス数 | 判定 |
@@ -126,19 +136,19 @@ System を分けた後に同じ軸を適用するのが自然。
 infrastructure/
 ├── graphics/   Renderer, UIRenderer, Camera, Screen, Animator
 ├── effect/     EffectFactory, EffectPool
-├── audio/      AudioManager
-├── input/      InputManager
 ├── resource/   ResourceManager
 │   └── repository/   （既存の8 Repository をこの下へ移動）
-└── utility/    （既存）
+├── AudioManager.h / .cpp   ← 1クラスのため直下のまま
+└── InputManager.h / .cpp   ← 1クラスのため直下のまま
 ```
 
 `repository/` を `resource/` 配下に入れることで「リソース読み込み一式」が1箇所にまとまる。
 
 ### ④オーバーエンジニアリング判断
 
-**やるべき**。`audio/` `input/` が1クラスずつになるのは許容する。
-これは実装が増える余地のある区分であり、かつ `core/interface` 側の分割軸と一致するため。
+**やるべき**。ただし `audio/` `input/` は作らない。
+どちらも1クラスしかなく、分割ルール1に反するため直下に置く。
+入力・音声のクラスが2つ以上に増えた時点でフォルダ化する。
 
 ---
 
