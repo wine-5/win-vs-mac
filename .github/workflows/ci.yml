@@ -27,7 +27,16 @@ jobs:
           msbuild DxLib-3D.sln `
             /p:Configuration=Debug `
             /p:Platform=x64 `
-            /m
+            /m `
+            /fl /flp:"logfile=build_output.txt;verbosity=minimal"
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: build_output.txt
+          if-no-files-found: warn
 
   lint:
     runs-on: ubuntu-latest
@@ -158,6 +167,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: lint-output
+        continue-on-error: true
+
+      - name: Download build log
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
         continue-on-error: true
 
       - name: Notify Discord
