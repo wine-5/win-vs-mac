@@ -221,7 +221,7 @@
     <ClCompile Include="src\infrastructure\repository\ProjectileRepository.cpp" />
     <ClCompile Include="src\infrastructure\UIRenderer.cpp" />
     <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\infrastructure\utility\LogUtil.cpp" />
+    <ClCompile Include="src\platform\utility\LogUtil.cpp" />
     <ClCompile Include="src\platform\system\WindowsPerformanceProvider.cpp" />
     <ClCompile Include="src\platform\utility\StringConverter.cpp" />
     <ClCompile Include="src\platform\webview\WebView2Host.cpp" />
@@ -447,7 +447,7 @@
     <ClInclude Include="src\game\system\PhysicsSystem.h" />
     <ClInclude Include="src\game\event\InGameEvents.h" />
     <ClInclude Include="src\infrastructure\UIRenderer.h" />
-    <ClInclude Include="src\infrastructure\utility\LogUtil.h" />
+    <ClInclude Include="src\platform\utility\LogUtil.h" />
     <ClInclude Include="src\platform\system\WindowsPerformanceProvider.h" />
     <ClInclude Include="src\platform\utility\StringConverter.h" />
     <ClInclude Include="src\platform\window\select\FileSelectWindow.h" />

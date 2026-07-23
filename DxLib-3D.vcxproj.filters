@@ -48,7 +48,7 @@
     <ClCompile Include="src\game\scene\InGameView.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\utility\LogUtil.cpp">
+    <ClCompile Include="src\platform\utility\LogUtil.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\ServiceLocatorInitializer.cpp">
@@ -419,7 +419,7 @@
     <ClInclude Include="src\game\component\RenderComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\utility\LogUtil.h">
+    <ClInclude Include="src\platform\utility\LogUtil.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\interface\IResourceManager.h">

@@ -13,7 +13,7 @@
 #include "platform/utility/StringConverter.h"
 #include "platform/window/WindowFactory.h"
 #include "infrastructure/Screen.h"
-#include "infrastructure/utility/LogUtil.h"
+#include "platform/utility/LogUtil.h"
 #include "infrastructure/ResourceManager.h"
 #include "infrastructure/UIRenderer.h"
 #include "infrastructure/InputManager.h"
@@ -46,8 +46,7 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 
 	// デバッグ用ロガーを登録
 	core::base::ServiceLocator::provide<core::iface::ILogger>(
-		std::make_unique<infrastructure::utility::LogUtil>()
-	);
+	    std::make_unique<platform::utility::LogUtil>());
 
 	// Screen登録（SetGraphMode()で設定した画面サイズを渡す）
 	auto screen = std::make_unique<infrastructure::Screen>(screenWidth, screenHeight);
