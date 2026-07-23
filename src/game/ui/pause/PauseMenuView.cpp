@@ -1,9 +1,10 @@
-#include "PauseMenuView.h"
+﻿#include "PauseMenuView.h"
 #include "PauseMenuController.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IStringConverter.h"
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
+#include <utility>
 
 namespace
 {
@@ -51,7 +52,8 @@ namespace game::ui::pause
 
 		// 項目リストを中央に描く（選択中は金色＋左に▶マーク）
 		const int itemFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::FONT_SIZE_LARGE_RATIO) };
-		for (int i{ 0 }; i < static_cast<int>(items.size()); ++i)
+		// selectedIndex と比較するため i は int のまま、符号違いの比較は cmp_less で安全に行う
+		for (int i{ 0 }; std::cmp_less(i, items.size()); ++i)
 		{
 			const bool isSelected{ i == selectedIndex };
 			const unsigned int color{ isSelected ? SELECTED_COLOR : UNSELECTED_COLOR };
