@@ -171,7 +171,6 @@
     <ClCompile Include="src\game\scene\Result.cpp" />
     <ClCompile Include="src\game\scene\SceneFactory.cpp" />
     <ClCompile Include="src\game\scene\Select.cpp" />
-    <ClCompile Include="src\game\scene\SelectView.cpp" />
     <ClCompile Include="src\game\scene\Title.cpp" />
     <ClCompile Include="src\game\scene\TitleView.cpp" />
     <ClCompile Include="src\game\system\AttackSystem.cpp" />
@@ -186,7 +185,6 @@
     <ClCompile Include="src\game\system\AttackTelegraphVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\TelegraphVisualsSystem.cpp" />
     <ClCompile Include="src\game\ui\FadeTransition.cpp" />
-    <ClCompile Include="src\game\ui\Label.cpp" />
     <ClCompile Include="src\infrastructure\AudioManager.cpp" />
     <ClCompile Include="src\infrastructure\EffectFactory.cpp" />
     <ClCompile Include="src\infrastructure\EffectPool.cpp" />
@@ -226,7 +224,6 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\infrastructure\utility\LogUtil.cpp" />
     <ClCompile Include="src\platform\system\WindowsPerformanceProvider.cpp" />
-    <ClCompile Include="src\platform\WindowsDataProvider.cpp" />
     <ClCompile Include="src\platform\utility\StringConverter.cpp" />
     <ClCompile Include="src\platform\webview\WebView2Host.cpp" />
     <ClCompile Include="src\platform\window\select\JobWindow.cpp" />
@@ -295,7 +292,6 @@
     <ClInclude Include="src\core\constant\BgmType.h" />
     <ClInclude Include="src\core\constant\EffectType.h" />
     <ClInclude Include="src\core\constant\JobType.h" />
-    <ClInclude Include="src\core\constant\SelectWindowId.h" />
     <ClInclude Include="src\core\constant\SeType.h" />
     <ClInclude Include="src\core\data\MacMetadata.h" />
     <ClInclude Include="src\core\data\ModelMetadata.h" />
@@ -305,7 +301,6 @@
     <ClInclude Include="src\core\interface\IAnimator.h" />
     <ClInclude Include="src\core\interface\IAudioManager.h" />
     <ClInclude Include="src\core\interface\IEffectFactory.h" />
-    <ClInclude Include="src\core\interface\IFileProvider.h" />
     <ClInclude Include="src\core\interface\IInputProvider.h" />
     <ClInclude Include="src\core\interface\IPerformanceDataProvider.h" />
     <ClInclude Include="src\core\interface\IRenderer.h" />
@@ -360,7 +355,6 @@
     <ClInclude Include="src\game\scene\Result.h" />
     <ClInclude Include="src\game\scene\SceneFactory.h" />
     <ClInclude Include="src\game\scene\Select.h" />
-    <ClInclude Include="src\game\scene\SelectView.h" />
     <ClInclude Include="src\game\scene\Title.h" />
     <ClInclude Include="src\game\scene\TitleView.h" />
     <ClInclude Include="src\game\system\AttackSystem.h" />
@@ -386,7 +380,6 @@
     <ClInclude Include="src\game\component\DeathComponent.h" />
     <ClInclude Include="src\game\component\AlertComponent.h" />
     <ClInclude Include="src\game\ui\FadeTransition.h" />
-    <ClInclude Include="src\game\ui\Label.h" />
     <ClInclude Include="src\game\utility\ExtensionBonusCalculator.h" />
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
     <ClInclude Include="src\infrastructure\AudioManager.h" />
@@ -422,7 +415,6 @@
     <ClInclude Include="src\game\ui\Button.h" />
     <ClInclude Include="src\game\ui\IUIElement.h" />
     <ClInclude Include="src\game\ui\UIManager.h" />
-    <ClInclude Include="src\infrastructure\constant\JsonKeys.h" />
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
     <ClInclude Include="src\game\data\PlayerData.h" />
     <ClInclude Include="src\game\stage\Ground.h" />
@@ -463,7 +455,6 @@
     <ClInclude Include="src\infrastructure\UIRenderer.h" />
     <ClInclude Include="src\infrastructure\utility\LogUtil.h" />
     <ClInclude Include="src\platform\system\WindowsPerformanceProvider.h" />
-    <ClInclude Include="src\platform\WindowsDataProvider.h" />
     <ClInclude Include="src\platform\utility\StringConverter.h" />
     <ClInclude Include="src\platform\window\select\JobWindow.h" />
     <ClInclude Include="src\platform\window\select\FileSelectWindow.h" />

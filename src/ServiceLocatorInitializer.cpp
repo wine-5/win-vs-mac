@@ -2,7 +2,6 @@
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
 #include "core/interface/IScreen.h"
-#include "core/interface/IFileProvider.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IStringConverter.h"
 #include "core/interface/IWindowFactory.h"
@@ -11,7 +10,6 @@
 #include "core/interface/ICamera.h"
 #include "core/interface/IRenderer.h"
 #include "core/interface/IAnimator.h"
-#include "platform/WindowsDataProvider.h"
 #include "platform/utility/StringConverter.h"
 #include "platform/window/WindowFactory.h"
 #include "infrastructure/Screen.h"
@@ -35,11 +33,6 @@
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
     game::GameManager& gameManager, game::PauseManager& pauseManager)
 {
-	// ファイルプロバイダを登録
-	core::base::ServiceLocator::provide<core::iface::IFileProvider>(
-		std::make_unique<platform::WindowsDataProvider>()
-	);
-
 	// 文字列変換プロバイダを登録
 	core::base::ServiceLocator::provide<core::iface::IStringConverter>(
 		std::make_unique<platform::utility::StringConverter>()
@@ -49,7 +42,6 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 	try
 	{
 		auto resourceManager = std::make_unique<infrastructure::ResourceManager>();
-		auto* resourceManagerPtr = resourceManager.get();
 
 		core::base::ServiceLocator::provide<core::iface::IResourceManager>(
 			std::move(resourceManager)

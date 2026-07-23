@@ -8,7 +8,6 @@
 #include "Result.h"
 #include "SceneManager.h"
 #include "core/base/ServiceLocator.h"
-#include "core/interface/IFileProvider.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IWindowFactory.h"
 #include "core/interface/ISelectWindowManager.h"
@@ -70,18 +69,13 @@ namespace game::scene
 
 		case SceneType::Select:
 		{
-			auto* inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
 			auto* uiRenderer = core::base::ServiceLocator::get<core::iface::IUIRenderer>();
-			auto* fileProvider = core::base::ServiceLocator::get<core::iface::IFileProvider>();
 			auto* resourceManager = core::base::ServiceLocator::get<core::iface::IResourceManager>();
 
 			m_selectScene = std::make_unique<Select>(
-			    *inputProvider,
 			    *uiRenderer,
 			    *screen,
-			    *fileProvider,
 			    *resourceManager,
-			    m_gameManager.getFileEquipmentData(),
 			    nullptr);
 
 			auto* windowFactory = core::base::ServiceLocator::get<core::iface::IWindowFactory>();
