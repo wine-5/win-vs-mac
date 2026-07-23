@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "platform/window/WindowConstants.h"
 #include "platform/window/WindowBase.h"
@@ -27,11 +27,11 @@ namespace platform::window::select
         /// @brief デストラクタ
         virtual ~DifficultyWindow() noexcept = default;
 
-        /**
-         * @brief 現在選択されている難易度を取得する
-         * @return 難易度文字列 ("EASY" | "NORMAL" | "HARD")
-         */
-        [[nodiscard]] std::string getSelectedDifficulty() const noexcept;
+		/**
+		 * @brief 現在選択されている難易度を取得する
+		 * @return 難易度文字列 ("NORMAL" | "HARD")
+		 */
+		[[nodiscard]] std::string getSelectedDifficulty() const noexcept;
 
     protected:
         void onCreateControls(HWND hwnd) override;
@@ -50,7 +50,6 @@ namespace platform::window::select
         static constexpr const char* MESSAGE_TYPE_HARD_CONFIRMED{ "hardConfirmed" };
 
         // 難易度値
-        static constexpr const char* DIFFICULTY_EASY{ "EASY" };
         static constexpr const char* DIFFICULTY_NORMAL{ "NORMAL" };
         static constexpr const char* DIFFICULTY_HARD{ "HARD" };
 

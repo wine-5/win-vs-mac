@@ -57,8 +57,8 @@ namespace platform::window::select
             if (type == MESSAGE_TYPE_DIFFICULTY_CHANGED)
             {
                 const std::string diff{ j.value("difficulty", DIFFICULTY_NORMAL) };
-                if (diff == DIFFICULTY_EASY || diff == DIFFICULTY_NORMAL || diff == DIFFICULTY_HARD)
-                    m_selectedDifficulty = diff;
+				if (diff == DIFFICULTY_NORMAL || diff == DIFFICULTY_HARD)
+					m_selectedDifficulty = diff;
             }
             else if (type == MESSAGE_TYPE_CONFIRM_HARD)
             {
