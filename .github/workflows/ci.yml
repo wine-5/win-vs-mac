@@ -166,6 +166,7 @@ jobs:
         run: |
           BUILD_STATUS="${{ needs.build.result }}"
           LINT_STATUS="${{ needs.lint.result }}"
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
           if [ "$BUILD_STATUS" = "success" ] && [ "$LINT_STATUS" = "success" ]; then
             MESSAGE="✅ ビルド・コードチェック成功 (C++命名規則・初期化・アーキテクチャ・JS命名規則)"
@@ -214,14 +215,15 @@ jobs:
               echo "⚠️ combined_lint.txt not found or empty" >&2
             fi
             
-            MESSAGE="❌ **失敗**\nビルド: \`${BUILD_STATUS}\`\nコードチェック: \`${LINT_STATUS}\`${LINT_DETAILS}"
+            MESSAGE="❌ **失敗**\nビルド: \`${BUILD_STATUS}\`\nコードチェック: \`${LINT_STATUS}\`${LINT_DETAILS}\n\n🔗 [GitHub Actions のログを開く](${RUN_URL})"
             COLOR=15158332
           fi
 
           PAYLOAD=$(jq -n \
             --arg msg "$MESSAGE" \
+            --arg url "$RUN_URL" \
             --argjson color "$COLOR" \
-            '{embeds: [{title: "CI結果", description: $msg, color: $color}]}')
+            '{embeds: [{title: "CI結果", url: $url, description: $msg, color: $color}]}')
 
           curl -H "Content-Type: application/json" \
             -d "$PAYLOAD" \
