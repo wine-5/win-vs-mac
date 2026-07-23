@@ -254,12 +254,15 @@ namespace infrastructure::repository
 		metadata.scale.x = j["model"]["scale"][0];
 		metadata.scale.y = j["model"]["scale"][1];
 		metadata.scale.z = j["model"]["scale"][2];
-		metadata.colliderSize.x   = j["collider"]["size"][0];
-		metadata.colliderSize.y   = j["collider"]["size"][1];
-		metadata.colliderSize.z   = j["collider"]["size"][2];
-		metadata.colliderOffset.x = j["collider"]["offset"][0];
-		metadata.colliderOffset.y = j["collider"]["offset"][1];
-		metadata.colliderOffset.z = j["collider"]["offset"][2];
+		metadata.colliderSize.x = j["collider"]["size"][0];
+		metadata.colliderSize.y = j["collider"]["size"][1];
+		metadata.colliderSize.z = j["collider"]["size"][2];
+
+		// コライダーのoffsetはJSONで持たず自動導出する（手で size と整合を取る事故を防ぐ）。
+		// ・sizeを明示指定した場合：中心を高さの半分に置く＝モデル原点（足元）が地面に接する
+		// ・sizeが全0の場合：loadModelById がモデルのAABBから size/offset をまとめて自動計算する
+		if (metadata.colliderSize.y != 0.0f)
+			metadata.colliderOffset = core::Vector3{ 0.0f, metadata.colliderSize.y * 0.5f, 0.0f };
 
 		if (j.contains("transform"))
 		{
