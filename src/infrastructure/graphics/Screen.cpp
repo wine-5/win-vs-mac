@@ -1,7 +1,7 @@
 ﻿#include "Screen.h"
 #include "DxLib.h"
 
-namespace infrastructure
+namespace infrastructure::graphics
 {
 	Screen::Screen(int width, int height)
 		: m_width{width}
@@ -30,4 +30,4 @@ namespace infrastructure
 		SetBackgroundColor(r, g, b);
 	}
 
-} // namespace infrastructure
+} // namespace infrastructure::graphics

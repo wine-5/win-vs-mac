@@ -5,7 +5,7 @@
 #include <vector>
 #include <array>
 
-namespace infrastructure
+namespace infrastructure::graphics
 {
 	/**
 	 * @brief 3D描画を担当するクラス
@@ -113,4 +113,4 @@ namespace infrastructure
 		// modelHandle -> マテリアルごとの元の色。プールで使い回すハンドルの復元に使う
 		std::unordered_map<int, std::vector<MaterialColors>> m_originalColors;
 	};
-} // namespace infrastructure
+} // namespace infrastructure::graphics

@@ -194,7 +194,7 @@
     <ClCompile Include="src\infrastructure\repository\ModelRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\AnimationRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\ImageRepository.cpp" />
-    <ClCompile Include="src\infrastructure\Screen.cpp" />
+    <ClCompile Include="src\infrastructure\graphics\Screen.cpp" />
     <ClCompile Include="src\core\base\ServiceLocator.cpp" />
     <ClCompile Include="src\game\factory\FactoryInitializer.cpp" />
     <ClCompile Include="src\game\factory\FactoryManager.cpp" />
@@ -206,10 +206,10 @@
     <ClCompile Include="src\game\system\combat\CollisionSystem.cpp" />
     <ClCompile Include="src\game\ui\Button.cpp" />
     <ClCompile Include="src\game\ui\UIManager.cpp" />
-    <ClCompile Include="src\infrastructure\Animator.cpp" />
-    <ClCompile Include="src\infrastructure\Camera.cpp" />
+    <ClCompile Include="src\infrastructure\graphics\Animator.cpp" />
+    <ClCompile Include="src\infrastructure\graphics\Camera.cpp" />
     <ClCompile Include="src\infrastructure\InputManager.cpp" />
-    <ClCompile Include="src\infrastructure\Renderer.cpp" />
+    <ClCompile Include="src\infrastructure\graphics\Renderer.cpp" />
     <ClCompile Include="src\infrastructure\ResourceManager.cpp" />
     <ClCompile Include="src\game\scene\InGame.cpp" />
     <ClCompile Include="src\game\scene\InGameView.cpp" />
@@ -219,7 +219,7 @@
     <ClCompile Include="src\game\system\movement\PhysicsSystem.cpp" />
     <ClCompile Include="src\infrastructure\repository\StageRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\ProjectileRepository.cpp" />
-    <ClCompile Include="src\infrastructure\UIRenderer.cpp" />
+    <ClCompile Include="src\infrastructure\graphics\UIRenderer.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\platform\utility\LogUtil.cpp" />
     <ClCompile Include="src\platform\system\WindowsPerformanceProvider.cpp" />
@@ -388,7 +388,7 @@
     <ClInclude Include="src\infrastructure\repository\StageRepository.h" />
     <ClInclude Include="src\infrastructure\repository\ProjectileRepository.h" />
     <ClInclude Include="src\game\constant\ProjectileId.h" />
-    <ClInclude Include="src\infrastructure\Screen.h" />
+    <ClInclude Include="src\infrastructure\graphics\Screen.h" />
     <ClInclude Include="src\core\base\ServiceLocator.h" />
     <ClInclude Include="src\core\utility\Color.h" />
     <ClInclude Include="src\core\utility\Log.h" />
@@ -414,10 +414,10 @@
     <ClInclude Include="src\game\stage\Ground.h" />
     <ClInclude Include="src\game\system\visual\AnimationSystem.h" />
     <ClInclude Include="src\game\system\combat\CollisionSystem.h" />
-    <ClInclude Include="src\infrastructure\Animator.h" />
-    <ClInclude Include="src\infrastructure\Camera.h" />
+    <ClInclude Include="src\infrastructure\graphics\Animator.h" />
+    <ClInclude Include="src\infrastructure\graphics\Camera.h" />
     <ClInclude Include="src\infrastructure\InputManager.h" />
-    <ClInclude Include="src\infrastructure\Renderer.h" />
+    <ClInclude Include="src\infrastructure\graphics\Renderer.h" />
     <ClInclude Include="src\infrastructure\ResourceManager.h" />
     <ClInclude Include="src\game\scene\InGame.h" />
     <ClInclude Include="src\game\scene\InGameView.h" />
@@ -446,7 +446,7 @@
     <ClInclude Include="src\game\system\movement\MoveSystem.h" />
     <ClInclude Include="src\game\system\movement\PhysicsSystem.h" />
     <ClInclude Include="src\game\event\InGameEvents.h" />
-    <ClInclude Include="src\infrastructure\UIRenderer.h" />
+    <ClInclude Include="src\infrastructure\graphics\UIRenderer.h" />
     <ClInclude Include="src\platform\utility\LogUtil.h" />
     <ClInclude Include="src\platform\system\WindowsPerformanceProvider.h" />
     <ClInclude Include="src\platform\utility\StringConverter.h" />

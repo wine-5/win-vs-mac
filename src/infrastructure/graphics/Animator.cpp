@@ -1,7 +1,7 @@
 ﻿#include "Animator.h"
 #include <DxLib.h>
 
-namespace infrastructure
+namespace infrastructure::graphics
 {
 	void Animator::changeAnimation(int modelHandle, int& animIndex, int animHandle, float& totalTime)
 	{
@@ -17,4 +17,4 @@ namespace infrastructure
 	{
 		MV1SetAttachAnimTime(modelHandle, animIndex, time);
 	}
-} // namespace infrastructure
+} // namespace infrastructure::graphics

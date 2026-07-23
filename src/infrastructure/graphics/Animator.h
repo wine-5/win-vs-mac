@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "core/interface/IAnimator.h"
 
-namespace infrastructure
+namespace infrastructure::graphics
 {
 	/**
 	 * @brief アニメーション制御を担当するクラス
@@ -26,4 +26,4 @@ namespace infrastructure
 		 */
 		void updateAnimTime(int modelHandle, int animIndex, float time)override;
 	};
-} // namespace infrastructure
+} // namespace infrastructure::graphics

@@ -33,10 +33,10 @@
     <ClCompile Include="src\game\actor\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\Camera.cpp">
+    <ClCompile Include="src\infrastructure\graphics\Camera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\Renderer.cpp">
+    <ClCompile Include="src\infrastructure\graphics\Renderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\infrastructure\ResourceManager.cpp">
@@ -66,7 +66,7 @@
     <ClCompile Include="src\game\system\combat\CollisionSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\Animator.cpp">
+    <ClCompile Include="src\infrastructure\graphics\Animator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\factory\PlayerFactory.cpp">
@@ -87,7 +87,7 @@
     <ClCompile Include="src\game\scene\Title.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\Screen.cpp">
+    <ClCompile Include="src\infrastructure\graphics\Screen.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\scene\SceneManager.cpp">
@@ -99,7 +99,7 @@
     <ClCompile Include="src\game\ui\UIManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\UIRenderer.cpp">
+    <ClCompile Include="src\infrastructure\graphics\UIRenderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\scene\Select.cpp">
@@ -398,10 +398,10 @@
     <ClInclude Include="src\core\utility\Vector3.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\Camera.h">
+    <ClInclude Include="src\infrastructure\graphics\Camera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\Renderer.h">
+    <ClInclude Include="src\infrastructure\graphics\Renderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\infrastructure\ResourceManager.h">
@@ -470,7 +470,7 @@
     <ClInclude Include="src\game\system\combat\CollisionSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\Animator.h">
+    <ClInclude Include="src\infrastructure\graphics\Animator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\data\MacMetadata.h">
@@ -509,7 +509,7 @@
     <ClInclude Include="src\game\scene\Title.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\Screen.h">
+    <ClInclude Include="src\infrastructure\graphics\Screen.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\utility\Color.h">
@@ -536,7 +536,7 @@
     <ClInclude Include="src\game\ui\UIManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\UIRenderer.h">
+    <ClInclude Include="src\infrastructure\graphics\UIRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\scene\Select.h">

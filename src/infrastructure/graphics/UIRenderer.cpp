@@ -2,7 +2,7 @@
 #include "DxLib.h"
 #include <cstring>
 
-namespace infrastructure
+namespace infrastructure::graphics
 {
 	UIRenderer::UIRenderer(std::string defaultFontName)
 		: m_defaultFontName{std::move(defaultFontName)}, m_currentFontName{m_defaultFontName}
@@ -84,4 +84,4 @@ namespace infrastructure
 		// （アルファを持たないJPG等は不透明のままなので影響なし）
 		DrawExtendGraph(x, y, x + width, y + height, handle, TRUE);
 	}
-} // namespace infrastructure
+} // namespace infrastructure::graphics

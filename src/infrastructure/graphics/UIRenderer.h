@@ -4,7 +4,7 @@
 #include <map>
 #include <utility>
 
-namespace infrastructure
+namespace infrastructure::graphics
 {
     /**
      * @brief UI描画を担当するクラス（DxLib実装）
@@ -112,4 +112,4 @@ namespace infrastructure
         // キャッシュは内部実装の詳細であり論理的な const 性を損なわないため mutable としている
         mutable std::map<std::pair<std::string, int>, int> m_fontHandles{};
     };
-} // namespace infrastructure
+} // namespace infrastructure::graphics

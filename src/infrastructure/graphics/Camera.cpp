@@ -1,7 +1,7 @@
 #include "Camera.h"
 #include <DxLib.h>
 
-namespace infrastructure
+namespace infrastructure::graphics
 {
 	void Camera::setLookAt(const core::Vector3& position, const core::Vector3& target)
 	{
@@ -14,4 +14,4 @@ namespace infrastructure
 	{
 		SetupCamera_Perspective(fovRad);
 	}
-} // namespace infrastructure
+} // namespace infrastructure::graphics

@@ -2,7 +2,7 @@
 #include "core/utility/Vector3.h"
 #include "core/interface/ICamera.h"
 
-namespace infrastructure
+namespace infrastructure::graphics
 {
 	/**
 	 * @brief DxLibのカメラを操作する装置クラス
@@ -24,4 +24,4 @@ namespace infrastructure
 	   */
 	  void setFieldOfView(float fovRad) override;
 	};
-} // namespace infrastructure
+} // namespace infrastructure::graphics

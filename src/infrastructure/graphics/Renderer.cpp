@@ -14,7 +14,7 @@ namespace
 	constexpr float DISSOLVE_RED_B{ 0.08f };
 } // namespace
 
-namespace infrastructure
+namespace infrastructure::graphics
 {
 	void Renderer::drawModel(int modelHandle, const core::Vector3& position, const core::Vector3& rotation, const core::Vector3& scale)
 	{
@@ -288,4 +288,4 @@ namespace infrastructure
 		VECTOR screen = ConvWorldPosToScreenPos(VGet(worldPos.x, worldPos.y, worldPos.z));
 		return { screen.x, screen.y, screen.z };
 	}
-} // namespace infrastructure
+} // namespace infrastructure::graphics

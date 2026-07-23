@@ -1,8 +1,8 @@
-﻿// src/infrastructure/Screen.h
+﻿// src/infrastructure/graphics/Screen.h
 #pragma once
 #include "core/interface/IScreen.h"
 
-namespace infrastructure
+namespace infrastructure::graphics
 {
     /**
      * @brief 画面情報を提供するクラス
@@ -48,4 +48,4 @@ namespace infrastructure
         int m_width;
         int m_height;
     };
-} // namespace infrastructure
+} // namespace infrastructure::graphics
