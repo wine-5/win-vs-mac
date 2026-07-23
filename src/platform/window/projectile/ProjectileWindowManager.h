@@ -10,7 +10,7 @@ namespace Gdiplus
 	class Image;
 }
 
-namespace platform::window
+namespace platform::window::projectile
 {
 	/**
 	 * @brief 弾追従ウィンドウのプール管理と座標変換を担うマネージャ
@@ -78,4 +78,4 @@ namespace platform::window
 		std::unique_ptr<Gdiplus::Image> m_logoImage{}; // 全ウィンドウで共有するロゴ画像
 		HICON m_titleIcon{ nullptr };                  // 全ウィンドウで共有するタイトルアイコン
 	};
-} // namespace platform::window
+} // namespace platform::window::projectile

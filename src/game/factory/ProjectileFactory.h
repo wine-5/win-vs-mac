@@ -2,6 +2,7 @@
 #include "core/ecs/EntityManager.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/utility/Vector3.h"
+#include "core/constant/EffectType.h"
 #include "game/constant/Tag.h"
 
 namespace game::factory
@@ -16,7 +17,17 @@ namespace game::factory
 		float m_lifetime{ 0.0f }; // 寿命
 		float m_radius{ 0.0f };   // 大きさの半径（AttackComponent.m_attackRange に入る＝当たり判定）
 		float m_scale{ 1.0f };    // 見た目スケール（0だと描画されないため1.0を既定にする）
-		int m_imageHandle{ -1 };  // ビルボード描画用の画像ハンドル（-1なら仮スフィア）
+		int m_modelHandle{ -1 };  // 3Dモデル描画用のハンドル（-1ならモデル描画なし）
+
+		// 0より大きければルーレット回転（画面正対のZ軸スピン）で描画する。
+		// 値は1ワールド単位進むごとの回転量[rad]（レインボーの演出用）
+		float m_spinRollSpeed{ 0.0f };
+
+		// モデルのAABB中心（ローカル・スケール未適用）。原点ズレを打ち消して中心まわりに回すために使う
+		core::Vector3 m_spinCenter{ 0.0f, 0.0f, 0.0f };
+
+		// 発射時に再生する演出エフェクト。Noneならエフェクト無し（既定）
+		core::constant::EffectType m_startEffect{ core::constant::EffectType::None };
 	};
 
 	/**

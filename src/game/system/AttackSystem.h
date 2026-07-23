@@ -5,6 +5,11 @@
 #include "core/constant/SeType.h"
 #include "game/attack/IDamageHandler.h"
 
+namespace game::component
+{
+	struct AttackComponent;
+}
+
 namespace game::system
 {
 	/**
@@ -30,9 +35,16 @@ namespace game::system
 		void update(float deltaTime) override;
 
 	private:
-		core::ecs::ComponentManager& m_componentManager;
-		core::base::EventBus& m_eventBus;
-		core::constant::SeType m_playerAttackSeType{ core::constant::SeType::None };
-		std::unique_ptr<attack::IDamageHandler> m_damageChain;
+	  /**
+	   * @brief 攻撃範囲内の対象にダメージを解決し、ヒット/死亡イベントを発行する
+	   * @param attackerId 攻撃者のEntityId
+	   * @param attack 攻撃者のAttackComponent
+	   */
+	  void resolveAttack(core::ecs::EntityId attackerId, component::AttackComponent& attack);
+
+	  core::ecs::ComponentManager& m_componentManager;
+	  core::base::EventBus& m_eventBus;
+	  core::constant::SeType m_playerAttackSeType{ core::constant::SeType::None };
+	  std::unique_ptr<attack::IDamageHandler> m_damageChain;
 	};
 } // namespace game::system

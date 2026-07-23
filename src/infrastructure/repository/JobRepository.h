@@ -3,7 +3,7 @@
 #include "core/data/JobInfo.h"
 #include "core/constant/JobType.h"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	/**
 	 * @brief ジョブ/職業データを管理するリポジトリクラス
@@ -33,4 +33,4 @@ namespace infrastructure
 	private:
 		std::array<core::data::JobInfo, core::constant::JOB_COUNT> m_jobTable;
 	};
-} // namespace infrastructure
+} // namespace infrastructure::repository

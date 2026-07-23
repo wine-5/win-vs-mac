@@ -80,8 +80,8 @@ namespace game::system
 		auto requestedIt{ anim.m_clips.find(anim.m_requested) };
 		if (requestedIt == anim.m_clips.end())
 		{
-			LOG_E("[Anim] entity=%d 未登録の状態 %s が要求されました",
-				entityId, constant::toString(anim.m_requested));
+			LOG_E("[Anim] entity={} 未登録の状態 {} が要求されました",
+			    entityId, constant::toString(anim.m_requested));
 			anim.m_requested = anim.m_current;
 			return;
 		}
@@ -113,8 +113,8 @@ namespace game::system
 		auto it{ anim.m_clips.find(newState) };
 		if (it == anim.m_clips.end() || it->second.m_handle == -1)
 		{
-			LOG_E("[Anim] entity=%d %s のクリップが未登録またはハンドル無効です",
-				entityId, constant::toString(newState));
+			LOG_E("[Anim] entity={} {} のクリップが未登録またはハンドル無効です",
+			    entityId, constant::toString(newState));
 			return;
 		}
 

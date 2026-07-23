@@ -4,7 +4,7 @@
 #include "thirdparty/effekseer/EffekseerForDXLib.h"
 #include "core/interface/ILogger.h"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	EffectRepository::~EffectRepository()
 	{
@@ -17,9 +17,9 @@ namespace infrastructure
 
 	void EffectRepository::initialize()
 	{
-		std::ifstream file{ "assets/config/resources.json" };
+		std::ifstream file{ "assets/data/effectData.json" };
 		if (!file.is_open())
-			throw std::runtime_error{ "resoures.jsonを開けませんでした" };
+			throw std::runtime_error{ "assets/data/effectData.jsonを開けませんでした" };
 
 		nlohmann::json json{};
 		file >> json;
@@ -36,9 +36,12 @@ namespace infrastructure
 	{
 		if (!json.contains("effects")) return;
 
-		const std::unordered_map<std::string, core::constant::EffectType> typeMap
-		{
-			{ "Hit", core::constant::EffectType::Hit },
+		const std::unordered_map<std::string, core::constant::EffectType> typeMap{
+			{ "Enemy_HitSword", core::constant::EffectType::Enemy_HitSword },
+			{ "Enemy_HitWindow", core::constant::EffectType::Enemy_HitWindow },
+			{ "Enemy_Spawn", core::constant::EffectType::Enemy_Spawn },
+			{ "Player_Slash", core::constant::EffectType::Player_Slash },
+			{ "Mac_Rainbow", core::constant::EffectType::Mac_Rainbow },
 		};
 
 		for (const auto& entry : json["effects"])
@@ -64,4 +67,4 @@ namespace infrastructure
 			m_configs[it->second] = config;
 		}
 	}
-} // namespace infrastructure
+} // namespace infrastructure::repository

@@ -1,7 +1,7 @@
 #pragma once
 #include "core/data/StageMetadata.h"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	/**
 	 * @brief ステージ配置定義（stageData.json）の読み込みを担当
@@ -25,4 +25,4 @@ namespace infrastructure
 	private:
 		core::data::StageMetadata m_stageMetadata{};
 	};
-} // namespace infrastructure
+} // namespace infrastructure::repository

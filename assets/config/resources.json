@@ -6,6 +6,12 @@
     {"id": "enemy_safari", "path": "assets/data/enemies/safariData.json"},
     {"id": "enemy_mac",    "path": "assets/data/enemies/macData.json"}
   ],
+  "rawModels": [
+    {"id": "tab_storage_full",   "path": "assets/model/enemies/safari/TabStorageFull.mv1"},
+    {"id": "tab_safari_error",   "path": "assets/model/enemies/safari/TabSafariError.mv1"},
+    {"id": "tab_xcode_building", "path": "assets/model/enemies/safari/TabXcodeBuilding.mv1"},
+    {"id": "mac_rainbow_wheel", "path": "assets/model/enemies/mac/RainbowWheel.mv1"}
+  ],
   "animations": [
     {"id": "anim_player_idle",       "path": "assets/animations/player/Player_Idle.mv1"},
     {"id": "anim_player_walk",       "path": "assets/animations/player/Player_Walking.mv1"},
@@ -33,16 +39,9 @@
   "images": [
     {"id": "lock-bg",           "path": "assets/images/background/LockBG.jpg"},
     {"id": "desktop-bg",        "path": "assets/images/background/DesktopBG.jpg"},
-    {"id": "projectile-window", "path": "assets/images/ingame/projectile_window.png"}
-  ],
-  "effects": [
-    {
-      "type": "Hit",
-      "path": "assets/effects/slash.efk",
-      "poolSize": 10,
-      "yOffset": 75.0,
-      "scale": 10.0
-    }
+    {"id": "projectile-window", "path": "assets/images/ingame/projectile_window.png"},
+    {"id": "alert-icon",        "path": "assets/images/ui/ingame/alert_icon.png"},
+    {"id": "alert-bar",         "path": "assets/images/ui/ingame/alert_bar.png"}
   ],
   "bgm": [
     { "type": "Title",      "path": "assets/audio/bgm/bgm_title.mp3",         "volume":0.0, "useFade": true  },

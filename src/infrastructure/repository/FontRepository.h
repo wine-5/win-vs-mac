@@ -6,7 +6,7 @@
 #include <vector>
 #include "thirdparty/nlohmann/json.hpp"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	/**
 	 * @brief フォントリソースを管理するリポジトリクラス
@@ -54,4 +54,4 @@ namespace infrastructure
 		std::unordered_map<std::string, std::string> m_fontNames;
 		std::unordered_map<std::string, std::string> m_fontPaths;
 	};
-} // namespace infrastructure
+} // namespace infrastructure::repository

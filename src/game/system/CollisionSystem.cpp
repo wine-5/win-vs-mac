@@ -3,19 +3,28 @@
 #include "game/component/ColliderComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/VelocityComponent.h"
+#include "game/component/DeathComponent.h"
 #include "game/constant/Tag.h"
 #include <cmath>
+
+namespace
+{
+	// 死亡中の敵が地面で反発する際の反発係数（1回のバウンドで垂直速度がこの割合になる）
+	constexpr float DEATH_BOUNCE_RESTITUTION{ 0.5f };
+	// これより落下速度が遅くなったらバウンドをやめて地面で静止させる
+	constexpr float DEATH_BOUNCE_MIN_SPEED{ 20.0f };
+} // namespace
 
 namespace game::system
 {
 	CollisionSystem::CollisionSystem(core::ecs::ComponentManager& componentManager)
-		: m_componentManager{ componentManager }
+	    : m_componentManager{ componentManager }
 	{
 	}
 
 	void CollisionSystem::update(float deltaTime)
 	{
-		auto entities{m_componentManager.getAllEntities<component::ColliderComponent>()};
+		auto entities{ m_componentManager.getAllEntities<component::ColliderComponent>() };
 
 		for (size_t i = 0; i < entities.size(); i++)
 		{
@@ -35,22 +44,22 @@ namespace game::system
 		auto& colliderB = m_componentManager.get<component::ColliderComponent>(b);
 
 		// 各軸の中心座標
-		core::Vector3 centerA{transformA.m_position + colliderA.m_offset};
-		core::Vector3 centerB{transformB.m_position + colliderB.m_offset};
+		core::Vector3 centerA{ transformA.m_position + colliderA.m_offset };
+		core::Vector3 centerB{ transformB.m_position + colliderB.m_offset };
 
 		// 各軸の距離と必要な距離
-		float distX{std::abs(centerA.x - centerB.x)};
-		float distY{std::abs(centerA.y - centerB.y)};
-		float distZ{std::abs(centerA.z - centerB.z)};
+		float distX{ std::abs(centerA.x - centerB.x) };
+		float distY{ std::abs(centerA.y - centerB.y) };
+		float distZ{ std::abs(centerA.z - centerB.z) };
 
-		float requiredX{(colliderA.m_size.x + colliderB.m_size.x) / 2.0f};
-		float requiredY{(colliderA.m_size.y + colliderB.m_size.y) / 2.0f};
-		float requiredZ{(colliderA.m_size.z + colliderB.m_size.z) / 2.0f};
+		float requiredX{ (colliderA.m_size.x + colliderB.m_size.x) / 2.0f };
+		float requiredY{ (colliderA.m_size.y + colliderB.m_size.y) / 2.0f };
+		float requiredZ{ (colliderA.m_size.z + colliderB.m_size.z) / 2.0f };
 
 		// 各軸の重なりをチェック
-		bool overlapX{distX <= requiredX};
-		bool overlapY{distY <= requiredY};
-		bool overlapZ{distZ <= requiredZ};
+		bool overlapX{ distX <= requiredX };
+		bool overlapY{ distY <= requiredY };
+		bool overlapZ{ distZ <= requiredZ };
 
 		return overlapX && overlapY && overlapZ;
 	}
@@ -61,8 +70,8 @@ namespace game::system
 		auto& colliderB = m_componentManager.get<component::ColliderComponent>(b);
 
 		// TagがPlayerとGroundの組み合わせを特定する
-		core::ecs::EntityId playerId{core::ecs::INVALID_ENTITY_ID};
-		core::ecs::EntityId groundId{core::ecs::INVALID_ENTITY_ID};
+		core::ecs::EntityId playerId{ core::ecs::INVALID_ENTITY_ID };
+		core::ecs::EntityId groundId{ core::ecs::INVALID_ENTITY_ID };
 
 		auto& tagA{ m_componentManager.get<component::TagComponent>(a) };
 		auto& tagB{ m_componentManager.get<component::TagComponent>(b) };
@@ -88,25 +97,23 @@ namespace game::system
 			auto& playerVelocity = m_componentManager.get<component::VelocityComponent>(playerId);
 
 			// 各コライダーの中心とAABBの境界を計算
-			core::Vector3 playerCenter{playerTransform.m_position + playerCollider.m_offset};
-			core::Vector3 groundCenter{groundTransform.m_position + groundCollider.m_offset};
+			core::Vector3 playerCenter{ playerTransform.m_position + playerCollider.m_offset };
+			core::Vector3 groundCenter{ groundTransform.m_position + groundCollider.m_offset };
 
-			float playerBottom{playerCenter.y - playerCollider.m_size.y / 2.0f};
-			float groundTop{groundCenter.y + groundCollider.m_size.y / 2.0f};
+			float playerBottom{ playerCenter.y - playerCollider.m_size.y / 2.0f };
+			float groundTop{ groundCenter.y + groundCollider.m_size.y / 2.0f };
 
 			// Playerが地面より下、または地面に近い場合に補正
 			if (playerBottom <= groundTop)
 			{
 				// Playerの下端を地面の上端に合わせる
-				float correction{groundTop - playerBottom};
+				float correction{ groundTop - playerBottom };
 				playerTransform.m_position.y += correction;
 
 				// 下方向の速度をリセット（地面に着地）
 				if (playerVelocity.m_velocity.y < 0.0f)
 					playerVelocity.m_velocity.y = 0.0f;
 			}
-
-
 		}
 
 		// Enemy vs Ground の組み合わせを特定する
@@ -133,19 +140,33 @@ namespace game::system
 			auto& groundCollider = m_componentManager.get<component::ColliderComponent>(groundId);
 			auto& enemyVelocity = m_componentManager.get<component::VelocityComponent>(enemyId);
 
-			core::Vector3 enemyCenter{enemyTransform.m_position + enemyCollider.m_offset};
-			core::Vector3 groundCenter{groundTransform.m_position + groundCollider.m_offset};
+			core::Vector3 enemyCenter{ enemyTransform.m_position + enemyCollider.m_offset };
+			core::Vector3 groundCenter{ groundTransform.m_position + groundCollider.m_offset };
 
-			float enemyBottom{enemyCenter.y - enemyCollider.m_size.y / 2.0f};
-			float groundTop{groundCenter.y + groundCollider.m_size.y / 2.0f};
+			float enemyBottom{ enemyCenter.y - enemyCollider.m_size.y / 2.0f };
+			float groundTop{ groundCenter.y + groundCollider.m_size.y / 2.0f };
 
 			if (enemyBottom <= groundTop)
 			{
-				float correction{groundTop - enemyBottom};
+				float correction{ groundTop - enemyBottom };
 				enemyTransform.m_position.y += correction;
 
-				if (enemyVelocity.m_velocity.y < 0.0f)
+				// 死亡中の敵は地面で反発してバウンドする（Safariの落下演出）。
+				// 落下速度が閾値を下回ったら跳ねるのをやめて静止させ、着地済みとして記録する。
+				// この着地フラグを見てEnemyDeathSystemがバウンド完了後に消失フェードを始める
+				const bool isDying{ m_componentManager.has<component::DeathComponent>(enemyId) };
+				// 初回接地の時点で「地面に触れた」と記録する。EnemyDeathSystemはこれを見て
+				// バウンド完了を待たずに落下死のガタガタ揺れを止める
+				if (isDying)
+					m_componentManager.get<component::DeathComponent>(enemyId).m_hasTouchedGround = true;
+				if (isDying && enemyVelocity.m_velocity.y < -DEATH_BOUNCE_MIN_SPEED)
+					enemyVelocity.m_velocity.y = -enemyVelocity.m_velocity.y * DEATH_BOUNCE_RESTITUTION;
+				else if (enemyVelocity.m_velocity.y < 0.0f)
+				{
 					enemyVelocity.m_velocity.y = 0.0f;
+					if (isDying)
+						m_componentManager.get<component::DeathComponent>(enemyId).m_hasLanded = true;
+				}
 			}
 		}
 	}

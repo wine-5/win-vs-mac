@@ -13,22 +13,13 @@
 #include "core/interface/IWindowFactory.h"
 #include "core/interface/ISelectWindowManager.h"
 #include "game/GameManager.h"
-
-namespace
-{
-	constexpr const char* MAIN_FONT_NAME = "x12y16pxMaruMonica";
-}
+#include "game/PauseManager.h"
 
 namespace game::scene
 {
-	SceneFactory::SceneFactory()
-		: m_inGameScene{}
-		, m_titleScene{}
-		, m_lockscreenScene{}
-		, m_selectScene{}
-		, m_loadingScene{}
-		, m_resultScene{}
-		, m_biosScene{}
+	SceneFactory::SceneFactory(GameManager& gameManager, PauseManager& pauseManager)
+	    : m_gameManager{ gameManager }
+	    , m_pauseManager{ pauseManager }
 	{
 	}
 
@@ -85,26 +76,28 @@ namespace game::scene
 			auto* resourceManager = core::base::ServiceLocator::get<core::iface::IResourceManager>();
 
 			m_selectScene = std::make_unique<Select>(
-				*inputProvider,
-				*uiRenderer,
-				*screen,
-				*fileProvider,
-				*resourceManager,
-				game::GameManager::getInstance().getFileEquipmentData(),
-				nullptr);
+			    *inputProvider,
+			    *uiRenderer,
+			    *screen,
+			    *fileProvider,
+			    *resourceManager,
+			    m_gameManager.getFileEquipmentData(),
+			    nullptr);
 
 			auto* windowFactory = core::base::ServiceLocator::get<core::iface::IWindowFactory>();
 			auto windowManager = windowFactory->createSelectWindowManager(
-				[selectPtr = m_selectScene.get()]() { selectPtr->notifyGameStart(); },
-				[selectPtr = m_selectScene.get()](core::constant::JobType jt) {
-					game::GameManager::getInstance().getJobSelectionData().setSelectedJobType(jt);
-					selectPtr->notifyJobSelected(jt);
-				},
-				[fileProvider](int slot, const std::string& path) {
-					game::GameManager::getInstance().getFileEquipmentData().setFilePath(slot, path);
-				},
-				*resourceManager
-			);
+			    [selectPtr = m_selectScene.get()]()
+			    { selectPtr->notifyGameStart(); },
+			    [this, selectPtr = m_selectScene.get()](core::constant::JobType jt)
+			    {
+				    m_gameManager.getJobSelectionData().setSelectedJobType(jt);
+				    selectPtr->notifyJobSelected(jt);
+			    },
+			    [this](int slot, const std::string& path)
+			    {
+				    m_gameManager.getFileEquipmentData().setFilePath(slot, path);
+			    },
+			    *resourceManager);
 
 			m_selectScene->setWindowManager(std::move(windowManager));
 			return m_selectScene.get();
@@ -137,12 +130,13 @@ namespace game::scene
 			auto* inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
 
 			m_inGameScene = std::make_unique<InGame>(
-				*camera,
-				*renderer,
-				*animator,
-				*resourceManager,
-				*inputProvider,
-				game::GameManager::getInstance().getFileEquipmentData());
+			    *camera,
+			    *renderer,
+			    *animator,
+			    *resourceManager,
+			    *inputProvider,
+			    m_gameManager,
+			    m_pauseManager);
 			return m_inGameScene.get();
 		}
 
@@ -164,9 +158,10 @@ namespace game::scene
 				});
 
 			m_resultScene = std::make_unique<Result>(
-				*uiRenderer,
-				*screen,
-				std::move(resultWindow));
+			    *uiRenderer,
+			    *screen,
+			    std::move(resultWindow),
+			    m_gameManager);
 
 			return m_resultScene.get();
 		}

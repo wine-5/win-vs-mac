@@ -6,17 +6,16 @@
     "scale": [ 165, 165, 165 ]
   },
   "collider": {
-    "size": [ 50.5, 150.7, 50.5 ],
-    "offset": [ 0, 75, 0 ]
+    "size": [ 50.5, 150.7, 50.5 ]
   },
   "animations": {
     "idle": "assets/animations/player/Player_Idle.mv1",
     "walk": "assets/animations/player/Player_Walking.mv1"
   },
   "gameplay": {
-    "moveSpeed": 20.0,
-    "dashMultiplier": 10.0,
-    "maxHp": 100.0,
+    "moveSpeed": 50.0,
+    "dashMultiplier": 2.0,
+    "maxHp": 100000.0,
     "defence": 10.0,
     "attackPower": 30.0,
     "attackRange": 200.0,

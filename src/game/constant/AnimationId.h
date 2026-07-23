@@ -16,18 +16,7 @@ namespace game::constant
         constexpr std::string_view PLAYER_DYING = "anim_player_dying";
         constexpr std::string_view PLAYER_JUMP  = "anim_player_jump";
 
-        // Mac（ボス）
-        constexpr std::string_view MAC_IDLE         = "anim_mac_idle";
-        constexpr std::string_view MAC_WALK         = "anim_mac_walk";
-        constexpr std::string_view MAC_RUN          = "anim_mac_run";
-        constexpr std::string_view MAC_SWING_ATTACK = "anim_mac_swing_attack";
-        constexpr std::string_view MAC_MAGIC_ATTACK = "anim_mac_magic_attack";
-        constexpr std::string_view MAC_DYING        = "anim_mac_dying";
-
-        // Xcode（雑魚）
-        constexpr std::string_view XCODE_IDLE        = "anim_xcode_idle";
-        constexpr std::string_view XCODE_WALK        = "anim_xcode_walk";
-        constexpr std::string_view XCODE_GROUND_SLAM = "anim_xcode_ground_slam";
-        constexpr std::string_view XCODE_DYING       = "anim_xcode_dying";
+		// 敵（Xcode/Mac）のアニメIDは各enemy JSONの animations 配列に文字列で持つため、
+		// ここには定数を置かない（Playerのみコード内でIDを参照する）
 	} // namespace animation_id
 } // namespace game::constant

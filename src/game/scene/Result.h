@@ -6,6 +6,11 @@
 #include "core/interface/IResultWindowManager.h"
 #include <memory>
 
+namespace game
+{
+	class GameManager; // 前方宣言
+} // namespace game
+
 namespace game::scene
 {
     /**
@@ -14,31 +19,33 @@ namespace game::scene
     class Result : public IScene
     {
     public:
-        /**
-         * @brief Resultのコンストラクタ
-         * @param uiRenderer UI描画インターフェース
-         * @param screen 画面情報インターフェース
-         * @param resultWindow リザルトウィンドウ
-         */
-        Result(core::iface::IUIRenderer& uiRenderer,
-            core::iface::IScreen& screen,
-            std::unique_ptr<core::iface::IWindow> resultWindow);
+	  /**
+	   * @brief Resultのコンストラクタ
+	   * @param uiRenderer UI描画インターフェース
+	   * @param screen 画面情報インターフェース
+	   * @param resultWindow リザルトウィンドウ
+	   * @param gameManager リザルトデータの取得元
+	   */
+	  Result(core::iface::IUIRenderer& uiRenderer,
+		  core::iface::IScreen& screen,
+		  std::unique_ptr<core::iface::IWindow> resultWindow,
+		  GameManager& gameManager);
 
-        /**
-         * @brief Resultのデストラクタ
-         */
-        ~Result() noexcept;
+	  /**
+	   * @brief Resultのデストラクタ
+	   */
+	  ~Result() noexcept;
 
-        /**
-         * @brief シーンの更新処理
-         * @param deltaTime フレーム間の時間差
-         */
-        void update(float deltaTime) override;
+	  /**
+	   * @brief シーンの更新処理
+	   * @param deltaTime フレーム間の時間差
+	   */
+	  void update(float deltaTime) override;
 
-        /**
-         * @brief シーンの描画処理
-         */
-        void draw() override;
+	  /**
+	   * @brief シーンの描画処理
+	   */
+	  void draw() override;
 
     private:
         core::iface::IUIRenderer&              m_uiRenderer;

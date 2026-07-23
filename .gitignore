@@ -35,8 +35,10 @@ build/
 out/
 bin/
 obj/
-Debug/
-Release/
+# ルート直下限定（先頭の/がないと "src/game/ui/debug/" のようなネストした
+# debug フォルダまで大文字小文字を区別せず巻き込んでしまうため）
+/Debug/
+/Release/
 x64/
 x86/
 Win32/

@@ -1,6 +1,8 @@
 #include "WindowsPerformanceProvider.h"
 #include <Windows.h>
 #include <winioctl.h>
+#include <Psapi.h>                // DEBUG: GetProcessMemoryInfo用（リリース時に削除）
+#pragma comment(lib, "Psapi.lib") // DEBUG: リリース時に削除
 
 namespace platform::system
 {
@@ -41,7 +43,7 @@ namespace platform::system
 
 	core::iface::PerformanceSnapshot WindowsPerformanceProvider::getSnapshot() const noexcept
 	{
-		return { m_cpuUsage,m_memoryUsage,m_diskActivity };
+		return { m_cpuUsage, m_memoryUsage, m_diskActivity, m_processCpuUsage, m_processMemoryUsageMB };
 	}
 
 	void WindowsPerformanceProvider::updateCpu()
@@ -60,15 +62,46 @@ namespace platform::system
 
 		// 前回取得時からの差分を計算
 		const int64_t deltaIdle{ idle - m_prevIdleTime };
-		const int64_t deltaTotal{ (kernel - m_prevKernelTime) + (user - m_prevUserTime) };
+		const int64_t systemKernelDelta{ kernel - m_prevKernelTime };
+		const int64_t systemUserDelta{ user - m_prevUserTime };
+		const int64_t deltaTotal{ systemKernelDelta + systemUserDelta };
 
 		if (deltaTotal > 0)
 			m_cpuUsage = 1.0f - static_cast<float>(deltaIdle) / static_cast<float>(deltaTotal);
+
+		// DEBUG: 自プロセスのCPU使用率も同じ経過時間を分母にして計算する（リリース時に削除）
+		updateProcessCpu(systemKernelDelta, systemUserDelta);
 
 		// 今回の値を次回の差分計算のために保存
 		m_prevIdleTime   = idle;
 		m_prevKernelTime = kernel;
 		m_prevUserTime   = user;
+	}
+
+	void WindowsPerformanceProvider::updateProcessCpu(int64_t systemKernelDelta, int64_t systemUserDelta)
+	{
+		FILETIME creationTime{}, exitTime{}, kernelTime{}, userTime{};
+		if (!GetProcessTimes(GetCurrentProcess(), &creationTime, &exitTime, &kernelTime, &userTime))
+			return;
+
+		auto toInt64 = [](const FILETIME& ft) -> int64_t
+		{
+			return (static_cast<int64_t>(ft.dwHighDateTime) << 32) | ft.dwLowDateTime;
+		};
+
+		const int64_t kernel{ toInt64(kernelTime) };
+		const int64_t user{ toInt64(userTime) };
+
+		const int64_t processDelta{ (kernel - m_prevProcessKernelTime) + (user - m_prevProcessUserTime) };
+		const int64_t systemTotalDelta{ systemKernelDelta + systemUserDelta };
+
+		// システム全体のCPU時間増分に対する、このプロセスのCPU時間増分の割合
+		// （タスクマネージャーのCPU使用率のうち、このプロセスが占める割合に相当）
+		if (systemTotalDelta > 0)
+			m_processCpuUsage = static_cast<float>(processDelta) / static_cast<float>(systemTotalDelta);
+
+		m_prevProcessKernelTime = kernel;
+		m_prevProcessUserTime = user;
 	}
 
 	void WindowsPerformanceProvider::updateMemory()
@@ -79,6 +112,20 @@ namespace platform::system
 		if (!GlobalMemoryStatusEx(&ms)) return;
 
 		m_memoryUsage = static_cast<float>(ms.dwMemoryLoad) / 100.0f; // 現在のメモリ消費率を0.0～1.0に正規化して渡す
+
+		// DEBUG: 自プロセスのメモリ使用量も取得する（リリース時に削除）
+		updateProcessMemory();
+	}
+
+	void WindowsPerformanceProvider::updateProcessMemory()
+	{
+		PROCESS_MEMORY_COUNTERS pmc{};
+		pmc.cb = sizeof(pmc);
+		if (!GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc)))
+			return;
+
+		constexpr float BYTES_PER_MB{ 1024.0f * 1024.0f };
+		m_processMemoryUsageMB = static_cast<float>(pmc.WorkingSetSize) / BYTES_PER_MB;
 	}
 
 	void WindowsPerformanceProvider::updateDisk()

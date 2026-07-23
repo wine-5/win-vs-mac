@@ -1,4 +1,5 @@
 #include "EnemyBase.h"
+#include "game/actor/EnemyBehaviors.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/VelocityComponent.h"
 #include "game/component/RenderComponent.h"
@@ -16,21 +17,26 @@ namespace game::actor
 {
 
 	EnemyBase::EnemyBase(core::ecs::EntityManager& entityManager,
-	                     core::ecs::ComponentManager& componentManager,
-	                     core::iface::IResourceManager& resourceManager,
-	                     int modelHandle,
-	                     data::EnemyData enemyData)
-	    : m_entity{ entityManager.create() }, m_componentManager{ componentManager }, m_resourceManager{ resourceManager }, m_modelHandle{ modelHandle }, m_enemyData{ std::move(enemyData) }
+	    core::ecs::ComponentManager& componentManager,
+	    core::iface::IResourceManager& resourceManager,
+	    int modelHandle,
+	    data::EnemyData enemyData)
+	    : m_entity{ entityManager.create() }
+	    , m_componentManager{ componentManager }
+	    , m_resourceManager{ resourceManager }
+	    , m_modelHandle{ modelHandle }
+	    , m_enemyData{ std::move(enemyData) }
 	{
 	}
 
 	void EnemyBase::initialize()
 	{
 		buildCommonComponents();
-		setupAnimation();
-		setupAI();
+		// アニメ・AI振る舞いはEnemyData（JSONのanimations/behaviors）から組み立てる。
+		// 敵種ごとの分岐は持たず、データの組み合わせだけで敵の中身が決まる
+		installEnemyAnimations(m_componentManager, m_entity.getId(), m_enemyData, m_resourceManager);
+		installEnemyBehaviors(m_componentManager, m_entity.getId(), m_enemyData);
 	}
-
 
 	core::ecs::EntityId EnemyBase::getId() const noexcept
 	{
@@ -59,6 +65,7 @@ namespace game::actor
 		attack.m_attackPower = m_enemyData.getAttackPower();
 		attack.m_attackRange = m_enemyData.getAttackRange();
 		attack.m_attackCooldown = m_enemyData.getAttackCooldown();
+		attack.m_windupDelay = m_enemyData.getAttackWindup();
 		m_componentManager.add<component::AttackComponent>(m_entity.getId(), attack);
 
 		component::ColliderComponent collider{};

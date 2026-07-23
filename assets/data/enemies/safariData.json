@@ -6,16 +6,21 @@
     "scale": [ 1.65, 1.65, 1.65 ]
   },
   "collider": {
-    "size": [ 0, 0, 0 ],
-    "offset": [ 0, 0, 0 ]
+    "size": [ 0, 0, 0 ]
   },
   "gameplay": {
     "moveSpeed": 10.0,
-    "detectionRange": 600.0,
+    "detectionRange": 1200.0,
     "attackRange": 350.0,
     "maxHp": 30.0,
     "defence": 0.0,
     "attackPower": 10.0,
-    "attackCooldown": 4.0
-  }
+    "attackCooldown": 4.0,
+    "hoverHeight": 300.0,
+    "preferredDistanceMin": 400.0,
+    "preferredDistanceMax": 600.0,
+    "fireCooldown": 5.0,
+    "facingYawOffset": 90.0
+  },
+  "behaviors": [ "rangeKeep", "patrol" ]
 }

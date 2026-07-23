@@ -24,10 +24,18 @@ namespace game::system
         void update(float deltaTime) override;
 
     private:
-        void onAttackHit(const game::event::AttackHitEvent& event);
+        /**
+         * @brief コンストラクタから呼び出す、各イベントの購読設定
+         */
+	  void setupEventSubscriptions();
 
-        core::ecs::ComponentManager& m_componentManager;
-        core::base::EventBus&        m_eventBus;
-        core::iface::IEffectFactory& m_effectFactory;
+	  void onAttackHit(const game::event::AttackHitEvent& event);
+	  void onAttackStart(const game::event::AttackStartEvent& event);
+	  void onEnemyDead(const game::event::EnemyDeadEvent& event);
+	  void onEnemySpawned(const game::event::EnemySpawnedEvent& event);
+
+	  core::ecs::ComponentManager& m_componentManager;
+	  core::base::EventBus& m_eventBus;
+	  core::iface::IEffectFactory& m_effectFactory;
     };
 } // namespace game::system

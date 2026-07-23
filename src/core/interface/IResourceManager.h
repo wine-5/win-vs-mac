@@ -83,5 +83,36 @@ namespace core::iface
 		 * @return 複製したモデルハンドル、失敗時は-1
 		 */
 		virtual int duplicateModel(int modelHandle) = 0;
+
+		/**
+		 * @brief モデルにアタッチされている全アニメーションをデタッチする
+		 *
+		 * 敵の死亡後にモデルハンドルをプールへ返却し使い回す際、
+		 * 前の持ち主がアタッチしたアニメーションが残ったままだと
+		 * 新しい持ち主のアニメーションと二重アタッチになるため、
+		 * 返却前に呼んでクリーンな状態に戻す
+		 * @param modelHandle 対象のモデルハンドル
+		 */
+		virtual void detachAllAnimations(int modelHandle) = 0;
+
+		/**
+		 * @brief モデルの水平方向の外接半径を計算する（弾などの当たり判定サイズ自動取得用）
+		 *
+		 * モデルのバウンディングボックス（X/Z の大きい方）の半分に scale を掛けて返す。
+		 * @param modelHandle モデルハンドル
+		 * @param scale 適用するスケール
+		 * @return 水平方向の外接半径。失敗時は 0.0f
+		 */
+		[[nodiscard]] virtual float computeBoundingRadius(int modelHandle, float scale) const = 0;
+
+		/**
+		 * @brief モデルのAABB中心（ローカル座標・スケール未適用）を計算する
+		 *
+		 * モデル原点が見た目の中心とズレていると、原点まわりの回転で円軌道を描く。
+		 * その逆補正（中心まわりの回転）に使う。
+		 * @param modelHandle モデルハンドル
+		 * @return AABB中心のローカル座標。失敗時はゼロベクトル
+		 */
+		[[nodiscard]] virtual core::Vector3 computeBoundingCenter(int modelHandle) const = 0;
 	};
 } // namespace core::iface

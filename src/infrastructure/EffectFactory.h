@@ -51,8 +51,11 @@ namespace infrastructure
 		 */
 		void draw() override;
 
-	private:
-		EffectRepository m_repository{};
+		// DEBUG: 負荷の原因特定用（リリース時に削除）
+		[[nodiscard]] int getActiveEffectCount() const noexcept override;
+
+	  private:
+		repository::EffectRepository m_repository{};
 		std::unordered_map<core::constant::EffectType, EffectPool> m_pools{};
 
 		// stop() でどのプールに返却するかを逆引きするためのマップ

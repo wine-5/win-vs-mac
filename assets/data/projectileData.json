@@ -14,6 +14,28 @@
       "chargeMaxTime": 1.5,
       "chargeDamageMultiplier": 3.0,
       "chargeSizeMultiplier": 5.0
+    },
+    {
+      "id": "enemy_safari_tab",
+      "speed": 350.0,
+      "damage": 8.0,
+      "lifetime": 8.0,
+      "radius": 0.0,
+      "scale": 1.0,
+      "spawnForward": 40.0,
+      "spawnHeight": 0.0,
+      "cooldown": 0.0
+    },
+    {
+      "id": "mac_rainbow",
+      "speed": 200.0,
+      "damage": 15.0,
+      "lifetime": 8.0,
+      "radius": 0.0,
+      "scale": 1.0,
+      "spawnForward": 120.0,
+      "spawnHeight": 150.0,
+      "cooldown": 0.0
     }
   ]
 }

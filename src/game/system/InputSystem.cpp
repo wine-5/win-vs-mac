@@ -2,13 +2,15 @@
 #include "core/input/KeyCode.h"
 #include "core/input/GamePadCode.h"
 #include "game/component/InputComponent.h"
+#include "game/GameManager.h"
 
 namespace game::system
 {
-	InputSystem::InputSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId ,core::iface::IInputProvider& inputProvider)
-		: m_componentManager{componentManager}
-		, m_entityId{entityId}
-		, m_inputProvider{inputProvider}
+	InputSystem::InputSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId, core::iface::IInputProvider& inputProvider, GameManager& gameManager)
+	    : m_componentManager{ componentManager }
+	    , m_entityId{ entityId }
+	    , m_inputProvider{ inputProvider }
+	    , m_gameManager{ gameManager }
 	{
 	}
 
@@ -24,22 +26,32 @@ namespace game::system
 		input.m_dashPressed = false;
 		input.m_rangedAttackPressed = false;
 
+		// シネマ演出中（ボス覚醒など）は全入力を受け付けない（上の初期化でニュートラルを維持）
+		if (input.m_locked)
+			return;
+
+		// DEBUG: デバッグモード中はWASD/Space/Shift/マウスをフリーカメラが使うため、
+		// Playerの移動は矢印キーのみで行う（リリース時に削除）
+		const bool debugMode{ m_gameManager.isDebugMode() };
+		const bool allowWasd{ !debugMode };
+
 		// -------------------------------------------------------
 		// PCでの操作の入力
 		// -------------------------------------------------------
 
-		// キー入力
-		if (m_inputProvider.isKeyDown(core::input::KeyCode::D) || m_inputProvider.isKeyDown(core::input::KeyCode::Right))
+		// キー入力（矢印キーは常時有効、WASDはデバッグ中のみ無効）
+		if ((allowWasd && m_inputProvider.isKeyDown(core::input::KeyCode::D)) || m_inputProvider.isKeyDown(core::input::KeyCode::Right))
 			input.m_moveX = INPUT_POSITIVE;
-		if (m_inputProvider.isKeyDown(core::input::KeyCode::A) || m_inputProvider.isKeyDown(core::input::KeyCode::Left))
+		if ((allowWasd && m_inputProvider.isKeyDown(core::input::KeyCode::A)) || m_inputProvider.isKeyDown(core::input::KeyCode::Left))
 			input.m_moveX = INPUT_NEGATIVE;
-		if (m_inputProvider.isKeyDown(core::input::KeyCode::W) || m_inputProvider.isKeyDown(core::input::KeyCode::Up))
+		if ((allowWasd && m_inputProvider.isKeyDown(core::input::KeyCode::W)) || m_inputProvider.isKeyDown(core::input::KeyCode::Up))
 			input.m_moveZ = INPUT_POSITIVE;
-		if (m_inputProvider.isKeyDown(core::input::KeyCode::S) || m_inputProvider.isKeyDown(core::input::KeyCode::Down))
+		if ((allowWasd && m_inputProvider.isKeyDown(core::input::KeyCode::S)) || m_inputProvider.isKeyDown(core::input::KeyCode::Down))
 			input.m_moveZ = INPUT_NEGATIVE;
-		if (m_inputProvider.isKeyDown(core::input::KeyCode::Space))
+		// Space（ジャンプ）/Shift（ダッシュ）/マウス攻撃はデバッグ中はカメラ操作に使うため無効化する
+		if (allowWasd && m_inputProvider.isKeyDown(core::input::KeyCode::Space))
 			input.m_jumpPressed = true;
-		if (m_inputProvider.isKeyDown(core::input::KeyCode::Shift))
+		if (allowWasd && m_inputProvider.isKeyDown(core::input::KeyCode::Shift))
 			input.m_dashPressed = true;
 
 		// マウスの入力

@@ -6,7 +6,7 @@
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	AnimationRepository::AnimationRepository()
 	{
@@ -38,18 +38,18 @@ namespace infrastructure
 		auto pathIt{ m_paths.find(id) };
 		if (pathIt == m_paths.end())
 		{
-			LOG_E("アニメーションID '%s' が見つかりません", id.c_str());
+			LOG_E("アニメーションID '{}' が見つかりません", id.c_str());
 			return -1;
 		}
 
 		const int handle{ MV1LoadModel(pathIt->second.c_str()) };
 		if (handle == -1)
 		{
-			LOG_E("アニメーションの読み込みに失敗しました: %s", pathIt->second.c_str());
+			LOG_E("アニメーションの読み込みに失敗しました: {}", pathIt->second.c_str());
 			return -1;
 		}
 
 		m_handles[id] = handle;
 		return handle;
 	}
-} // namespace infrastructure
+} // namespace infrastructure::repository

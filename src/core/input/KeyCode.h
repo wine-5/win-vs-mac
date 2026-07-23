@@ -11,11 +11,15 @@ namespace core::input
         A,
         S,
         D,
-        R, // デバック用
-        Space,
-        Escape, // TODO:将来的にPauseにする予定
+		R,  // DEBUG: デバッグ用（現在未使用）
+		T,  // DEBUG: テストエフェクト再生
+		F1, // DEBUG: デバッグモードのON/OFF切り替え
+		F2, // DEBUG: シーンビュー（時間停止＋フリーカメラ）のON/OFF切り替え
+		Space,
+		Enter,  // 決定（ポーズメニュー等）
+		Escape, // ポーズメニューの開閉（Biosではスキップ）
 
-        Up,
+		Up,
         Down,
         Left,
         Right,

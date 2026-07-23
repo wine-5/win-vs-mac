@@ -7,5 +7,7 @@ namespace game::constant
 	namespace projectile_id
 	{
 		constexpr std::string_view PLAYER_WINDOW = "player_window";
+		constexpr std::string_view ENEMY_SAFARI_TAB = "enemy_safari_tab";
+		constexpr std::string_view MAC_RAINBOW = "mac_rainbow";
 	} // namespace projectile_id
 } // namespace game::constant

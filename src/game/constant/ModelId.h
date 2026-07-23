@@ -11,5 +11,11 @@ namespace game::constant
         constexpr std::string_view ENEMY_XCODE = "enemy_xcode";
         constexpr std::string_view ENEMY_SAFARI = "enemy_safari";
         constexpr std::string_view ENEMY_MAC = "enemy_mac";
+		// Safariが投げるブラウザタブ弾（3種ランダム）
+		constexpr std::string_view TAB_STORAGE_FULL = "tab_storage_full";
+		constexpr std::string_view TAB_SAFARI_ERROR = "tab_safari_error";
+		constexpr std::string_view TAB_XCODE_BUILDING = "tab_xcode_building";
+		// ボス（Mac）が投げる虹色くるくる
+		constexpr std::string_view MAC_RAINBOW_WHEEL = "mac_rainbow_wheel";
 	} // namespace model_id
 } // namespace game::constant

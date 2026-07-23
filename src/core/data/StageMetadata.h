@@ -23,6 +23,6 @@ namespace core::data
 	struct StageMetadata
 	{
 		std::vector<SpawnMetadata> m_spawns{};
-		SpawnMetadata m_boss{};
+		SpawnMetadata m_mac{};
 	};
 } // namespace core::data

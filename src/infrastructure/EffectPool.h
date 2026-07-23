@@ -48,6 +48,15 @@ namespace infrastructure
 		 */
 		bool isActive(int playHandle) const;
 
+		// DEBUG: 負荷の原因特定用（リリース時に削除）
+		/**
+		 * @brief 現在再生中のスロット数を返す
+		 */
+		[[nodiscard]] int getActiveCount() const noexcept
+		{
+			return static_cast<int>(m_activeSlots.size());
+		}
+
 	private:
 		int   m_resourceHandle{ -1 };
 		float m_yOffset{ 0.0f };

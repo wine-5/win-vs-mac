@@ -7,7 +7,7 @@
 #include "core/data/ModelMetadata.h"
 #include "thirdparty/nlohmann/json.hpp"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	/**
 	 * @brief 3Dモデルリソースを管理するリポジトリクラス
@@ -52,7 +52,33 @@ namespace infrastructure
 		 */
 		int duplicateModel(int modelHandle);
 
-	private:
+		/**
+		 * @brief モデルにアタッチされている全アニメーションをデタッチする
+		 * @param modelHandle 対象のモデルハンドル
+		 */
+		void detachAllAnimations(int modelHandle);
+
+		/**
+		 * @brief モデルの水平方向の外接半径を計算する（弾などの当たり判定サイズ自動取得用）
+		 *
+		 * 参照メッシュのAABB（X/Zの大きい方）の半分に scale を掛けて返す。
+		 * @param modelHandle モデルハンドル
+		 * @param scale 適用するスケール
+		 * @return 水平方向の外接半径。失敗時は 0.0f
+		 */
+		[[nodiscard]] float computeBoundingRadius(int modelHandle, float scale) const;
+
+		/**
+		 * @brief モデルのAABB中心（ローカル座標・スケール未適用）を計算する
+		 *
+		 * モデル原点が見た目の中心とズレていると、原点まわりの回転で
+		 * 円軌道を描いてしまう。その逆補正（中心まわりの回転）に使う。
+		 * @param modelHandle モデルハンドル
+		 * @return AABB中心のローカル座標。失敗時はゼロベクトル
+		 */
+		[[nodiscard]] core::Vector3 computeBoundingCenter(int modelHandle) const;
+
+	  private:
 		struct ResourceDefinition
 		{
 			std::string m_id;
@@ -63,8 +89,22 @@ namespace infrastructure
 		std::vector<ResourceDefinition> loadRawModelList(const nlohmann::json& json);
 		core::data::ModelMetadata parseJsonFile(const std::string& filePath);
 
+		/**
+		 * @brief JSONの"mac"要素をMacMetadataへ変換する
+		 * @param j mac要素のJSONオブジェクト
+		 * @return 変換したMacMetadata
+		 */
+		core::data::MacMetadata parseMac(const nlohmann::json& j);
+
+		/**
+		 * @brief JSONの1フェーズ要素（phase1/phase2）をMacPhaseDataへ変換する
+		 * @param p フェーズ要素のJSONオブジェクト
+		 * @return 変換したMacPhaseData
+		 */
+		core::data::MacPhaseData parseMacPhase(const nlohmann::json& p);
+
 		std::unordered_map<std::string, int> m_modelHandles;
 		std::unordered_map<std::string, core::data::ModelMetadata> m_metadata;
 		std::unordered_map<std::string, std::string> m_rawModelPaths;
 	};
-} // namespace infrastructure
+} // namespace infrastructure::repository

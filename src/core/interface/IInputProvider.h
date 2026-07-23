@@ -16,7 +16,18 @@ namespace core::iface
 		// ========== キーボード入力 ==========
 
 		/**
+		 * @brief フレームの最初に呼び出し、このフレームで使うキー状態を確定させる（スナップショット取得）
+		 * @details 呼び出し後、次にこれが呼ばれるまでの間、isKeyDown/isKeyPressedは常に
+		 * 同じ値を返す。これが無いと、フレーム内の複数箇所（Application・各Scene・各System）
+		 * でキー入力をチェックした際に、その間にキーの状態が変化してしまい、
+		 * isKeyPressedのエッジ検出が1フレーム分ズレて取りこぼされることがある
+		 * （例：Escでポーズを開こうとしても、押した瞬間が別のチェック処理と重なると反応しない）。
+		 */
+		virtual void captureFrameInput() = 0;
+
+		/**
 		 * @brief 指定したキーが押されているか判定する
+		 * @details 直近の captureFrameInput() 時点のスナップショットを参照する
 		 * @param keycode キーコード
 		 * @return 押されている場合true
 		 */

@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include "core/utility/Vector3.h"
 #include "core/interface/IRenderer.h"
+#include <unordered_map>
+#include <vector>
+#include <array>
 
 namespace infrastructure
 {
@@ -18,7 +21,21 @@ namespace infrastructure
 		 * @param scale スケール
 		 */
 		void drawModel(int modelHandle, const core::Vector3& position, const core::Vector3& rotation, const core::Vector3& scale) override;
-		
+
+		/**
+		 * @brief 敵撃破時の赤化＋ディゾルブ（消失）演出をモデルに適用する
+		 * @param modelHandle 対象のモデルハンドル
+		 * @param redProgress 赤化の進行度（0.0=元の色 〜 1.0=赤）
+		 * @param alpha 不透明度（1.0=不透明 〜 0.0=完全に消失）
+		 */
+		void applyDeathDissolve(int modelHandle, float redProgress, float alpha) override;
+
+		/**
+		 * @brief applyDeathDissolveで変更した見た目を元に戻す
+		 * @param modelHandle 対象のモデルハンドル
+		 */
+		void resetModelAppearance(int modelHandle) override;
+
 		/**
 		 * @brief デバッグ用にコライダーを可視化する
 		 * @param center 中心座標
@@ -45,6 +62,27 @@ namespace infrastructure
 		void drawDebugCapsule(const core::Vector3& bottom, const core::Vector3& top, float radius, unsigned int color) override;
 
 		/**
+		 * @brief 地面（XZ平面）に円を描く（攻撃範囲の予兆表示などに使う）
+		 * @param center 円の中心（ワールド座標）
+		 * @param radius 半径（ワールド単位）
+		 * @param color 色（ARGB形式：0xAARRGGBB。アルファで半透明度を指定）
+		 * @param filled true=塗りつぶし円、false=輪郭のみ
+		 */
+		void drawGroundCircle(const core::Vector3& center, float radius, unsigned int color, bool filled) override;
+
+		/**
+		 * @brief 地面（XZ平面）に扇形を描く（扇状攻撃の予兆表示などに使う）
+		 * @param center 扇の要（ワールド座標）
+		 * @param facingRad 扇の中心方向（ラジアン。XZ平面で+X軸からの角度、atan2(dz,dx)）
+		 * @param radius 半径（ワールド単位）
+		 * @param halfAngleRad 中心方向からの片側の開き角（ラジアン。全開き角の半分）
+		 * @param color 色（ARGB形式：0xAARRGGBB。アルファで半透明度を指定）
+		 * @param filled true=塗りつぶし、false=輪郭のみ
+		 */
+		void drawGroundSector(const core::Vector3& center, float facingRad, float radius,
+		    float halfAngleRad, unsigned int color, bool filled) override;
+
+		/**
 		 * @brief 常にカメラの方を向く板（ビルボード）として画像を描画する
 		 * @param imageHandle 画像ハンドル（loadImageByIdで取得）
 		 * @param position ワールド座標（板の中心）
@@ -53,10 +91,34 @@ namespace infrastructure
 		void drawBillboard(int imageHandle, const core::Vector3& position, float size) override;
 
 		/**
+		 * @brief 3Dモデルの正面を指定方向へ向け面内回転して描画する（レインボー弾等の回転体用）
+		 * @param modelHandle モデルハンドル
+		 * @param position 見た目中心を合わせるワールド座標
+		 * @param scale モデルスケール
+		 * @param centerOffset モデルのAABB中心（ローカル・スケール未適用）
+		 * @param faceDir モデルの正面を向ける方向（正規化不要）
+		 * @param spinAngle 面内回転角（ラジアン）
+		 */
+		void drawSpinningModelFacing(int modelHandle, const core::Vector3& position,
+		    const core::Vector3& scale, const core::Vector3& centerOffset,
+		    const core::Vector3& faceDir, float spinAngle) override;
+
+		/**
 		 * @brief ワールド座標をスクリーン座標へ変換する
 		 * @param worldPos ワールド座標
 		 * @return x/yはスクリーン座標、zは深度（0.0〜1.0の範囲内なら画面に映っている）
 		 */
 		core::Vector3 worldToScreen(const core::Vector3& worldPos) override;
+
+	  private:
+		// applyDeathDissolveで初回に保存する、マテリアルの元のディフューズ色とエミッシブ色
+		struct MaterialColors
+		{
+			std::array<float, 4> m_dif{};
+			std::array<float, 4> m_emi{};
+		};
+
+		// modelHandle -> マテリアルごとの元の色。プールで使い回すハンドルの復元に使う
+		std::unordered_map<int, std::vector<MaterialColors>> m_originalColors;
 	};
 } // namespace infrastructure

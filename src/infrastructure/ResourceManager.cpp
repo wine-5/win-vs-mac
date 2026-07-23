@@ -9,17 +9,17 @@ namespace infrastructure
 	{
 		try
 		{
-			m_modelRepo = std::make_unique<ModelRepository>();
-			m_fontRepo = std::make_unique<FontRepository>();
-			m_jobRepo = std::make_unique<JobRepository>();
-			m_imageRepo = std::make_unique<ImageRepository>();
-			m_animRepo = std::make_unique<AnimationRepository>();
-			m_stageRepo = std::make_unique<StageRepository>();
-			m_projectileRepo = std::make_unique<ProjectileRepository>();
+			m_modelRepo = std::make_unique<repository::ModelRepository>();
+			m_fontRepo = std::make_unique<repository::FontRepository>();
+			m_jobRepo = std::make_unique<repository::JobRepository>();
+			m_imageRepo = std::make_unique<repository::ImageRepository>();
+			m_animRepo = std::make_unique<repository::AnimationRepository>();
+			m_stageRepo = std::make_unique<repository::StageRepository>();
+			m_projectileRepo = std::make_unique<repository::ProjectileRepository>();
 		}
 		catch (const std::exception& e)
 		{
-			LOG_E("リポジトリ初期化に失敗しました: %s", e.what());
+			LOG_E("リポジトリ初期化に失敗しました: {}", e.what());
 		}
 	}
 
@@ -84,5 +84,25 @@ namespace infrastructure
 		if (!m_modelRepo)
 			return -1;
 		return m_modelRepo->duplicateModel(modelHandle);
+	}
+
+	void ResourceManager::detachAllAnimations(int modelHandle)
+	{
+		if (m_modelRepo)
+			m_modelRepo->detachAllAnimations(modelHandle);
+	}
+
+	float ResourceManager::computeBoundingRadius(int modelHandle, float scale) const
+	{
+		if (!m_modelRepo)
+			return 0.0f;
+		return m_modelRepo->computeBoundingRadius(modelHandle, scale);
+	}
+
+	core::Vector3 ResourceManager::computeBoundingCenter(int modelHandle) const
+	{
+		if (!m_modelRepo)
+			return core::Vector3{};
+		return m_modelRepo->computeBoundingCenter(modelHandle);
 	}
 } // namespace infrastructure

@@ -11,7 +11,7 @@ namespace
 	constexpr float HORIZONTAL_SHRINK{ 0.5f };
 } // namespace
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	ModelRepository::ModelRepository()
 	{
@@ -41,7 +41,7 @@ namespace infrastructure
 
 				int handle{ MV1LoadModel(rawIt->second.c_str()) };
 				if (handle == -1)
-					LOG_E("モデルの読み込みに失敗しました: %s", rawIt->second.c_str());
+					LOG_E("モデルの読み込みに失敗しました: {}", rawIt->second.c_str());
 				else
 					m_modelHandles[id] = handle;
 				return handle;
@@ -51,7 +51,7 @@ namespace infrastructure
 		auto metaIt{ m_metadata.find(id) };
 		if (metaIt == m_metadata.end())
 		{
-			LOG_E("モデルID '%s' が見つかりません", id.c_str());
+			LOG_E("モデルID '{}' が見つかりません", id.c_str());
 			return -1;
 		}
 
@@ -63,7 +63,7 @@ namespace infrastructure
 		int handle{ MV1LoadModel(metadata.modelPath.c_str()) };
 		if (handle == -1)
 		{
-			LOG_E("モデルの読み込みに失敗しました: %s", metadata.modelPath.c_str());
+			LOG_E("モデルの読み込みに失敗しました: {}", metadata.modelPath.c_str());
 			return -1;
 		}
 
@@ -71,8 +71,8 @@ namespace infrastructure
 		MV1SetScale(handle, scale);
 
 		if (metadata.colliderSize.x == 0.0f &&
-			metadata.colliderSize.y == 0.0f &&
-			metadata.colliderSize.z == 0.0f)
+		    metadata.colliderSize.y == 0.0f &&
+		    metadata.colliderSize.z == 0.0f)
 		{
 			auto& mutableMeta = m_metadata[id];
 
@@ -95,21 +95,21 @@ namespace infrastructure
 					vMax.z = (p.z > vMax.z) ? p.z : vMax.z;
 				}
 
+				// 地面などのステージモデルは実寸のまま、キャラは腕幅を絞るため水平方向を縮小する
+				const float horizontalScale{ (mutableMeta.category == "stage") ? 1.0f : HORIZONTAL_SHRINK };
+
 				// 参照メッシュはスケール適用済みなのでそのままワールド寸法になる
-				mutableMeta.colliderSize.x = (vMax.x - vMin.x) * HORIZONTAL_SHRINK;
+				mutableMeta.colliderSize.x = (vMax.x - vMin.x) * horizontalScale;
 				mutableMeta.colliderSize.y = vMax.y - vMin.y;
-				mutableMeta.colliderSize.z = (vMax.z - vMin.z) * HORIZONTAL_SHRINK;
+				mutableMeta.colliderSize.z = (vMax.z - vMin.z) * horizontalScale;
 
 				// コライダー中心も自動計算する（足元原点モデルなら高さの半分が中心になる）
 				mutableMeta.colliderOffset.x = (vMax.x + vMin.x) * 0.5f;
 				mutableMeta.colliderOffset.y = (vMax.y + vMin.y) * 0.5f;
 				mutableMeta.colliderOffset.z = (vMax.z + vMin.z) * 0.5f;
-
 			}
 			else
-			{
-				LOG_E("'%s' のコライダー自動計算に失敗しました（頂点が取得できません）", id.c_str());
-			}
+				LOG_E("'{}' のコライダー自動計算に失敗しました（頂点が取得できません）", id.c_str());
 
 			MV1TerminateReferenceMesh(handle, -1, TRUE);
 		}
@@ -125,8 +125,89 @@ namespace infrastructure
 
 		int duplicated{ MV1DuplicateModel(modelHandle) };
 		if (duplicated == -1)
-			LOG_E("モデルハンドルの複製に失敗しました: %d", modelHandle);
+			LOG_E("モデルハンドルの複製に失敗しました: {}", modelHandle);
 		return duplicated;
+	}
+
+	void ModelRepository::detachAllAnimations(int modelHandle)
+	{
+		if (modelHandle == -1)
+			return;
+
+		// DxLibにアタッチ数を取得するAPIがないため、想定しうるアタッチ枠を
+		// 高いインデックスから走査する（デタッチによるインデックス詰めの影響を避けるため降順）
+		constexpr int MAX_ATTACH_SLOTS{ 16 };
+		for (int i{ MAX_ATTACH_SLOTS - 1 }; i >= 0; --i)
+		{
+			if (MV1GetAttachAnim(modelHandle, i) != -1)
+				MV1DetachAnim(modelHandle, i);
+		}
+	}
+
+	float ModelRepository::computeBoundingRadius(int modelHandle, float scale) const
+	{
+		if (modelHandle == -1)
+			return 0.0f;
+
+		// 参照メッシュからAABBを求める（水平方向の大きい辺の半分を半径とする）
+		MV1SetupReferenceMesh(modelHandle, -1, TRUE);
+		const MV1_REF_POLYGONLIST refPoly{ MV1GetReferenceMesh(modelHandle, -1, TRUE) };
+
+		float radius{ 0.0f };
+		if (refPoly.VertexNum > 0)
+		{
+			VECTOR vMin{ refPoly.Vertexs[0].Position };
+			VECTOR vMax{ refPoly.Vertexs[0].Position };
+			for (int i{ 1 }; i < refPoly.VertexNum; ++i)
+			{
+				const VECTOR& p{ refPoly.Vertexs[i].Position };
+				vMin.x = (p.x < vMin.x) ? p.x : vMin.x;
+				vMin.z = (p.z < vMin.z) ? p.z : vMin.z;
+				vMax.x = (p.x > vMax.x) ? p.x : vMax.x;
+				vMax.z = (p.z > vMax.z) ? p.z : vMax.z;
+			}
+			const float sizeX{ vMax.x - vMin.x };
+			const float sizeZ{ vMax.z - vMin.z };
+			radius = 0.5f * ((sizeX > sizeZ) ? sizeX : sizeZ) * scale;
+		}
+
+		MV1TerminateReferenceMesh(modelHandle, -1, TRUE);
+		return radius;
+	}
+
+	core::Vector3 ModelRepository::computeBoundingCenter(int modelHandle) const
+	{
+		if (modelHandle == -1)
+			return core::Vector3{};
+
+		// 参照メッシュからAABBを求め、その中心（ローカル座標）を返す
+		MV1SetupReferenceMesh(modelHandle, -1, TRUE);
+		const MV1_REF_POLYGONLIST refPoly{ MV1GetReferenceMesh(modelHandle, -1, TRUE) };
+
+		core::Vector3 center{};
+		if (refPoly.VertexNum > 0)
+		{
+			VECTOR vMin{ refPoly.Vertexs[0].Position };
+			VECTOR vMax{ refPoly.Vertexs[0].Position };
+			for (int i{ 1 }; i < refPoly.VertexNum; ++i)
+			{
+				const VECTOR& p{ refPoly.Vertexs[i].Position };
+				vMin.x = (p.x < vMin.x) ? p.x : vMin.x;
+				vMin.y = (p.y < vMin.y) ? p.y : vMin.y;
+				vMin.z = (p.z < vMin.z) ? p.z : vMin.z;
+				vMax.x = (p.x > vMax.x) ? p.x : vMax.x;
+				vMax.y = (p.y > vMax.y) ? p.y : vMax.y;
+				vMax.z = (p.z > vMax.z) ? p.z : vMax.z;
+			}
+			center = core::Vector3{
+				(vMax.x + vMin.x) * 0.5f,
+				(vMax.y + vMin.y) * 0.5f,
+				(vMax.z + vMin.z) * 0.5f
+			};
+		}
+
+		MV1TerminateReferenceMesh(modelHandle, -1, TRUE);
+		return center;
 	}
 
 	std::optional<core::data::ModelMetadata> ModelRepository::getMetadata(std::string_view modelId) const
@@ -167,18 +248,21 @@ namespace infrastructure
 
 		nlohmann::json j = nlohmann::json::parse(file);
 		core::data::ModelMetadata metadata;
-		metadata.id        = j["id"];
-		metadata.category  = j["category"];
+		metadata.id = j["id"];
+		metadata.category = j["category"];
 		metadata.modelPath = j["model"]["path"];
-		metadata.scale.x   = j["model"]["scale"][0];
-		metadata.scale.y   = j["model"]["scale"][1];
-		metadata.scale.z   = j["model"]["scale"][2];
-		metadata.colliderSize.x   = j["collider"]["size"][0];
-		metadata.colliderSize.y   = j["collider"]["size"][1];
-		metadata.colliderSize.z   = j["collider"]["size"][2];
-		metadata.colliderOffset.x = j["collider"]["offset"][0];
-		metadata.colliderOffset.y = j["collider"]["offset"][1];
-		metadata.colliderOffset.z = j["collider"]["offset"][2];
+		metadata.scale.x = j["model"]["scale"][0];
+		metadata.scale.y = j["model"]["scale"][1];
+		metadata.scale.z = j["model"]["scale"][2];
+		metadata.colliderSize.x = j["collider"]["size"][0];
+		metadata.colliderSize.y = j["collider"]["size"][1];
+		metadata.colliderSize.z = j["collider"]["size"][2];
+
+		// コライダーのoffsetはJSONで持たず自動導出する（手で size と整合を取る事故を防ぐ）。
+		// ・sizeを明示指定した場合：中心を高さの半分に置く＝モデル原点（足元）が地面に接する
+		// ・sizeが全0の場合：loadModelById がモデルのAABBから size/offset をまとめて自動計算する
+		if (metadata.colliderSize.y != 0.0f)
+			metadata.colliderOffset = core::Vector3{ 0.0f, metadata.colliderSize.y * 0.5f, 0.0f };
 
 		if (j.contains("transform"))
 		{
@@ -194,24 +278,139 @@ namespace infrastructure
 		if (j.contains("animations"))
 		{
 			auto& anim = j["animations"];
-			if (anim.contains("idle")) metadata.stringProperties["idleAnim"] = anim["idle"];
-			if (anim.contains("walk")) metadata.stringProperties["walkAnim"] = anim["walk"];
+			if (anim.is_array())
+			{
+				// 新形式：状態ごとのクリップ定義配列（敵をデータで組むための形式）
+				for (const auto& c : anim)
+				{
+					core::data::AnimationClipDef def{};
+					def.state = c["state"].get<std::string>();
+					def.animId = c["id"].get<std::string>();
+					if (c.contains("loop"))
+						def.loop = c["loop"].get<bool>();
+					if (c.contains("onComplete"))
+						def.onComplete = c["onComplete"].get<std::string>();
+					if (c.contains("priority"))
+						def.priority = c["priority"].get<std::string>();
+					if (c.contains("speed"))
+						def.speed = c["speed"].get<float>();
+					metadata.animations.push_back(def);
+				}
+			}
+			else
+			{
+				// 旧形式：{ "idle": ..., "walk": ... }（Player等が使用）
+				if (anim.contains("idle"))
+					metadata.stringProperties["idleAnim"] = anim["idle"];
+				if (anim.contains("walk"))
+					metadata.stringProperties["walkAnim"] = anim["walk"];
+			}
 		}
 
 		if (j.contains("gameplay"))
 		{
 			auto& gp = j["gameplay"];
-			if (gp.contains("moveSpeed"))      metadata.floatProperties["moveSpeed"]      = gp["moveSpeed"];
+			if (gp.contains("moveSpeed"))
+				metadata.floatProperties["moveSpeed"] = gp["moveSpeed"];
 			if (gp.contains("dashMultiplier"))
 				metadata.floatProperties["dashMultiplier"] = gp["dashMultiplier"];
-			if (gp.contains("detectionRange")) metadata.floatProperties["detectionRange"] = gp["detectionRange"];
-			if (gp.contains("attackRange"))    metadata.floatProperties["attackRange"]    = gp["attackRange"];
-			if (gp.contains("maxHp"))          metadata.floatProperties["maxHp"]          = gp["maxHp"];
-			if (gp.contains("defence"))        metadata.floatProperties["defence"]        = gp["defence"];
-			if (gp.contains("attackPower"))    metadata.floatProperties["attackPower"]    = gp["attackPower"];
-			if (gp.contains("attackCooldown")) metadata.floatProperties["attackCooldown"] = gp["attackCooldown"];
+			if (gp.contains("detectionRange"))
+				metadata.floatProperties["detectionRange"] = gp["detectionRange"];
+			if (gp.contains("attackRange"))
+				metadata.floatProperties["attackRange"] = gp["attackRange"];
+			if (gp.contains("maxHp"))
+				metadata.floatProperties["maxHp"] = gp["maxHp"];
+			if (gp.contains("defence"))
+				metadata.floatProperties["defence"] = gp["defence"];
+			if (gp.contains("attackPower"))
+				metadata.floatProperties["attackPower"] = gp["attackPower"];
+			if (gp.contains("attackCooldown"))
+				metadata.floatProperties["attackCooldown"] = gp["attackCooldown"];
+			if (gp.contains("attackWindup"))
+				metadata.floatProperties["attackWindup"] = gp["attackWindup"];
+			if (gp.contains("hoverHeight"))
+				metadata.floatProperties["hoverHeight"] = gp["hoverHeight"];
+			if (gp.contains("preferredDistanceMin"))
+				metadata.floatProperties["preferredDistanceMin"] = gp["preferredDistanceMin"];
+			if (gp.contains("preferredDistanceMax"))
+				metadata.floatProperties["preferredDistanceMax"] = gp["preferredDistanceMax"];
+			if (gp.contains("fireCooldown"))
+				metadata.floatProperties["fireCooldown"] = gp["fireCooldown"];
+			if (gp.contains("facingYawOffset"))
+				metadata.floatProperties["facingYawOffset"] = gp["facingYawOffset"];
 		}
+
+		// 敵の振る舞いレシピ（積むAI振る舞いの名前リスト）。データの組み合わせで敵を定義するために使う
+		if (j.contains("behaviors"))
+			for (const auto& name : j["behaviors"])
+				metadata.behaviors.push_back(name.get<std::string>());
+
+		if (j.contains("mac"))
+			metadata.mac = parseMac(j["mac"]);
 
 		return metadata;
 	}
-} // namespace infrastructure
+
+	core::data::MacMetadata ModelRepository::parseMac(const nlohmann::json& j)
+	{
+		core::data::MacMetadata mac{};
+		if (j.contains("phase2HpRatio"))
+			mac.m_phase2HpRatio = j["phase2HpRatio"];
+
+		if (j.contains("phase1"))
+			mac.m_phase1 = parseMacPhase(j["phase1"]);
+		if (j.contains("phase2"))
+		{
+			mac.m_phase2 = parseMacPhase(j["phase2"]);
+			mac.m_hasPhase2 = true;
+		}
+		return mac;
+	}
+
+	core::data::MacPhaseData ModelRepository::parseMacPhase(const nlohmann::json& p)
+	{
+		core::data::MacPhaseData phase{};
+		if (p.contains("moveSpeed"))
+			phase.m_moveSpeed = p["moveSpeed"];
+		if (p.contains("actionInterval"))
+			phase.m_actionInterval = p["actionInterval"];
+		if (p.contains("meleeRange"))
+			phase.m_meleeRange = p["meleeRange"];
+
+		if (p.contains("weights"))
+		{
+			const auto& w = p["weights"];
+			if (w.contains("melee"))
+				phase.m_weightMelee = w["melee"];
+			if (w.contains("ranged"))
+				phase.m_weightRanged = w["ranged"];
+			if (w.contains("summon"))
+				phase.m_weightSummon = w["summon"];
+			if (w.contains("nova"))
+				phase.m_weightNova = w["nova"];
+		}
+
+		if (p.contains("rainbowCount"))
+			phase.m_rainbowCount = p["rainbowCount"];
+		if (p.contains("rainbowSpreadDeg"))
+			phase.m_rainbowSpreadDeg = p["rainbowSpreadDeg"];
+		if (p.contains("rainbowSpeed"))
+			phase.m_rainbowSpeed = p["rainbowSpeed"];
+		if (p.contains("rainbowSpinSpeed"))
+			phase.m_rainbowSpinSpeed = p["rainbowSpinSpeed"];
+		if (p.contains("novaCount"))
+			phase.m_novaCount = p["novaCount"];
+
+		if (p.contains("summonTypes"))
+			for (const auto& t : p["summonTypes"])
+				phase.m_summonTypes.push_back(t.get<std::string>());
+		if (p.contains("summonCount"))
+			phase.m_summonCount = p["summonCount"];
+		if (p.contains("summonMax"))
+			phase.m_summonMax = p["summonMax"];
+		if (p.contains("summonRadiusMin")) phase.m_summonRadiusMin = p["summonRadiusMin"];
+		if (p.contains("summonRadiusMax")) phase.m_summonRadiusMax = p["summonRadiusMax"];
+
+		return phase;
+	}
+} // namespace infrastructure::repository

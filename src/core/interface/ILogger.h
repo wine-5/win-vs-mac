@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include <cstdarg>
+#include <format>
 #include "core/base/ServiceLocator.h"
 
 namespace core::iface
@@ -38,24 +38,13 @@ namespace core::iface
     };
 } // namespace core::iface
 
-// ログ出力用マクロ（使用を簡潔にする）
+// ログ出力用マクロ（std::formatベースで型安全。書式は "{}" プレースホルダを使う）
+// 書式と引数の不一致はコンパイルエラーになる（consteval な format 文字列チェック）
 #define LOG(...) \
-    do { \
-        char _buf[1024]; \
-        snprintf(_buf, sizeof(_buf), __VA_ARGS__); \
-        core::base::ServiceLocator::get<core::iface::ILogger>()->log(_buf); \
-    } while(0)
+	core::base::ServiceLocator::get<core::iface::ILogger>()->log(std::format(__VA_ARGS__).c_str())
 
 #define LOG_W(...) \
-    do { \
-        char _buf[1024]; \
-        snprintf(_buf, sizeof(_buf), __VA_ARGS__); \
-        core::base::ServiceLocator::get<core::iface::ILogger>()->warning(_buf); \
-    } while(0)
+	core::base::ServiceLocator::get<core::iface::ILogger>()->warning(std::format(__VA_ARGS__).c_str())
 
 #define LOG_E(...) \
-    do { \
-        char _buf[1024]; \
-        snprintf(_buf, sizeof(_buf), __VA_ARGS__); \
-        core::base::ServiceLocator::get<core::iface::ILogger>()->error(_buf); \
-    } while(0)
+	core::base::ServiceLocator::get<core::iface::ILogger>()->error(std::format(__VA_ARGS__).c_str())

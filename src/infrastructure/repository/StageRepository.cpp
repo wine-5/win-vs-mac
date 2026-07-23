@@ -21,7 +21,7 @@ namespace
 	}
 } // namespace
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	StageRepository::StageRepository()
 	{
@@ -30,14 +30,17 @@ namespace infrastructure
 			throw std::runtime_error("assets/data/stageData.jsonを開けませんでした");
 
 		const nlohmann::json j = nlohmann::json::parse(file);
-		for(const auto& spawn : j["spawns"])
+		for (const auto& spawn : j["spawns"])
 			m_stageMetadata.m_spawns.push_back(parseSpawn(spawn));
 
-		m_stageMetadata.m_boss = parseSpawn(j["boss"]);
+		// DEBUG: デバッグ用に contains() でチェック。
+		// リリース時は必須項目のため直接 j["mac"] を参照する。
+		if (j.contains("mac"))
+			m_stageMetadata.m_mac = parseSpawn(j["mac"]);
 	}
 
 	const core::data::StageMetadata& StageRepository::getStageMetadata() const noexcept
 	{
 		return m_stageMetadata;
 	}
-} // namespace infrastructure
+} // namespace infrastructure::repository

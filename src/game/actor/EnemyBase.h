@@ -8,12 +8,11 @@
 namespace game::actor
 {
 	/**
-	 * @brief 敵の共通セットアップを担う基底クラス
+	 * @brief データ駆動の汎用Enemy。敵は「モデル＋behaviors＋animationsの組み合わせ」で定義する
 	 *
-	 * 責務はスポーン時のコンポーネント構築までに限定する。
-	 * 毎フレームの行動ロジックはSystem側（AISystem等）が担当する。
-	 * コンストラクタ内から仮想関数を呼んでも派生クラスに届かないため、
-	 * 生成後に initialize() を呼ぶ2段階初期化とする
+	 * 敵種ごとの派生クラスは廃止し、生成に必要な差分はすべてEnemyData（JSON由来）が持つ。
+	 * initialize()で共通コンポーネントを構築し、アニメ・AI振る舞いをレシピから積む。
+	 * 責務はスポーン時のコンポーネント構築までに限定し、毎フレームの行動はSystem側が担う。
 	 */
 	class EnemyBase
 	{
@@ -48,29 +47,16 @@ namespace game::actor
 	   */
 	  [[nodiscard]] core::ecs::EntityId getId() const noexcept;
 
-	protected:
-		/**
-		 * @brief アニメーションクリップを登録する（派生クラスが実装）
-		 *
-		 * アニメーションを持たない敵（Safari等）は空実装でよい
-		 */
-		virtual void setupAnimation() = 0;
-
-		/**
-		 * @brief AIの行動タイプ・パラメータを設定する（派生クラスが実装）
-		 */
-		virtual void setupAI() = 0;
-
-		core::ecs::Entity m_entity;
-		core::ecs::ComponentManager& m_componentManager;
-		core::iface::IResourceManager& m_resourceManager;
-		int m_modelHandle{ -1 };
-		data::EnemyData m_enemyData;
-
 	private:
-		/**
-		 * @brief 全敵種共通のコンポーネントを構築する
-		 */
-		void buildCommonComponents();
+	  /**
+	   * @brief 全敵種共通のコンポーネントを構築する
+	   */
+	  void buildCommonComponents();
+
+	  core::ecs::Entity m_entity;
+	  core::ecs::ComponentManager& m_componentManager;
+	  core::iface::IResourceManager& m_resourceManager;
+	  int m_modelHandle{ -1 };
+	  data::EnemyData m_enemyData;
 	};
 } // namespace game::actor

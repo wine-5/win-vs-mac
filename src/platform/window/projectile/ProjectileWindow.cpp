@@ -16,12 +16,15 @@ namespace
 	// これよりロゴ領域が小さくなったらタイトルバーを外すしきい値（ピクセル）
 	constexpr int CHROME_MIN_SIZE{ 96 };
 	// サイズをこの単位に量子化する（毎フレーム1px単位でリサイズ・再描画されるのを防ぐ）
-	constexpr int SIZE_QUANTIZATION{ 4 };
+	// 弾は移動中ずっとサイズが変化し続けるため、小さい単位だと量子化してもほぼ毎フレーム
+	// 境界を跨いでInvalidateRect（→WM_PAINT→GDI+のDrawImage）が発生し重くなる。
+	// 大きめの単位にして再描画の発生頻度自体を大きく下げる。
+	constexpr int SIZE_QUANTIZATION{ 32 };
 	// フェードアウトにかける時間（秒）
 	constexpr float FADE_OUT_DURATION{ 0.2f };
 } // namespace
 
-namespace platform::window
+namespace platform::window::projectile
 {
 	ProjectileWindow::ProjectileWindow(const wchar_t* className) noexcept
 		: WindowBase(className, L"WindowsAttack", 0, 0, 64, 64)
@@ -213,11 +216,11 @@ namespace platform::window
 		if (m_logoImage != nullptr)
 		{
 			Gdiplus::Graphics graphics(hdc);
-			// 高品質補間は毎フレームの拡縮には重いため通常のバイリニアを使う
-			graphics.SetInterpolationMode(Gdiplus::InterpolationModeBilinear);
+			// 最近傍法（最も軽い補間）にする。バイリニアは画質はよいが、頻繁な再描画では負荷が大きい
+			graphics.SetInterpolationMode(Gdiplus::InterpolationModeNearestNeighbor);
 			graphics.DrawImage(m_logoImage, 0, 0, width, height);
 		}
 
 		EndPaint(hwnd, &ps);
 	}
-} // namespace platform::window
+} // namespace platform::window::projectile

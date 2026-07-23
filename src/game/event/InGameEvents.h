@@ -3,6 +3,8 @@
 #include "core/event/IGameEvent.h"
 #include "core/constant/EffectType.h"
 #include "core/constant/SeType.h"
+#include "core/data/MacMetadata.h"
+#include "core/utility/Vector3.h"
 #include "game/constant/AnimationState.h"
 
 namespace game::event
@@ -22,20 +24,42 @@ namespace game::event
 		float m_damage{ 0.0f };
 
 		/** @brief 再生するエフェクトの種類 */
-		core::constant::EffectType m_effectType{ core::constant::EffectType::Hit };
+		core::constant::EffectType m_effectType{ core::constant::EffectType::Enemy_HitSword };
 
 		/** @brief 再生するSEの種類 */
 		core::constant::SeType m_seType{ core::constant::SeType::None };
 
 		AttackHitEvent() = default;
 		AttackHitEvent(core::ecs::EntityId atkId, core::ecs::EntityId tgtId, float dmg,
-			core::constant::EffectType effectType = core::constant::EffectType::Hit,
-			core::constant::SeType seType = core::constant::SeType::None)
-			: m_attackerId{ atkId }
-			, m_targetId{ tgtId }
-			, m_damage{ dmg }
-			, m_effectType{effectType}
-			, m_seType{seType}
+		    core::constant::EffectType effectType = core::constant::EffectType::Enemy_HitSword,
+		    core::constant::SeType seType = core::constant::SeType::None)
+		    : m_attackerId{ atkId }
+		    , m_targetId{ tgtId }
+		    , m_damage{ dmg }
+		    , m_effectType{ effectType }
+		    , m_seType{ seType }
+		{
+		}
+	};
+
+	/**
+	 * @brief 攻撃を開始した（振り始めた）ときに発行されるイベント
+	 * ヒットの有無に関わらず、攻撃モーションの再生に合わせたエフェクト（斬撃など）を出すために使用する
+	 */
+	struct AttackStartEvent : public core::event::IGameEvent
+	{
+		/** @brief 攻撃者のEntityId */
+		core::ecs::EntityId m_attackerId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief 再生するエフェクトの種類 */
+		core::constant::EffectType m_effectType{ core::constant::EffectType::None };
+
+		// TODO: ここに音も追加して敵、Playerごとに異なる音を再生するようにする予定
+
+		AttackStartEvent() = default;
+		AttackStartEvent(core::ecs::EntityId attackerId, core::constant::EffectType effectType)
+		    : m_attackerId{ attackerId }
+		    , m_effectType{ effectType }
 		{
 		}
 	};
@@ -77,5 +101,63 @@ namespace game::event
 
 		EnemyDeadEvent() = default;
 		EnemyDeadEvent(core::ecs::EntityId id) : m_entityId(id) {}
+	};
+
+	/**
+	 * @brief 敵がスポーンしたときに発行されるイベント（初期配置・ボスの召喚の両方で発行）
+	 */
+	struct EnemySpawnedEvent : public core::event::IGameEvent
+	{
+		/** @brief スポーンした敵のEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief スポーン位置 */
+		core::Vector3 m_position{};
+
+		EnemySpawnedEvent() = default;
+		EnemySpawnedEvent(core::ecs::EntityId id, core::Vector3 position)
+		    : m_entityId{ id }
+		    , m_position{ position }
+		{
+		}
+	};
+
+	/**
+	 * @brief 敵がプレイヤーを発見した（未索敵→索敵に切り替わった）瞬間に発行されるイベント
+	 *
+	 * DetectionSystemが敵の種類に依らず一律に検知して発行する。
+	 * 発見演出（通知バッジ表示など）のトリガーに使う
+	 */
+	struct EnemyAlertedEvent : public core::event::IGameEvent
+	{
+		/** @brief 発見した敵のEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		EnemyAlertedEvent() = default;
+		explicit EnemyAlertedEvent(core::ecs::EntityId id)
+		    : m_entityId{ id }
+		{
+		}
+	};
+
+	/**
+	 * @brief ボスがフェーズ移行（覚醒）した瞬間に発行されるイベント
+	 *
+	 * 覚醒演出（カメラのズーム・シェイク・赤ビネット等）のトリガーに使う。
+	 */
+	struct MacPhaseTransitionEvent : public core::event::IGameEvent
+	{
+		/** @brief 移行したボスのEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief 移行後のフェーズ */
+		core::data::MacPhase m_newPhase{ core::data::MacPhase::Awakened };
+
+		MacPhaseTransitionEvent() = default;
+		MacPhaseTransitionEvent(core::ecs::EntityId id, core::data::MacPhase newPhase)
+		    : m_entityId{ id }
+		    , m_newPhase{ newPhase }
+		{
+		}
 	};
 } // namespace game::event

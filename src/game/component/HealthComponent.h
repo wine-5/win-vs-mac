@@ -11,5 +11,8 @@ namespace game::component
 		float m_currentHp{ 0.0f };
 		float m_defence{ 0.0f };
 		bool  m_isDead{ false };
+
+		// trueの間はダメージを受けない（ボス覚醒演出中など）。AttackSystemが参照する
+		bool m_isInvincible{ false };
 	};
 } // namespace game::component

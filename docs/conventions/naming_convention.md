@@ -47,6 +47,11 @@
 - すべて小文字
 - 階層は `::` で表現する
   - 例: `namespace game`, `namespace game::player`, `namespace game::enemy`
+- **フォルダ構成と名前空間の階層は一致させる**
+  - 例: `src/game/component/ai/` → `namespace game::component::ai`
+  - 例: `src/infrastructure/repository/` → `namespace infrastructure::repository`
+- **例外**: `src/core/interface/` は `namespace core::iface` とする
+  - `interface` はWindowsヘッダーのマクロ（`#define interface struct`）と衝突するため、名前空間のみ略記。フォルダ名は `interface` のまま維持する
 
 ## マクロ
 - 基本的には使用禁止

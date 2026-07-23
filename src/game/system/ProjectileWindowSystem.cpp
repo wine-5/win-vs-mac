@@ -2,6 +2,8 @@
 #include "game/component/ProjectileComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/AttackComponent.h"
+#include "game/component/TagComponent.h"
+#include "game/constant/Tag.h"
 #include <cmath>
 
 namespace
@@ -35,6 +37,11 @@ namespace game::system
 		for (auto id : projectiles)
 		{
 			if (!m_componentManager.has<component::TransformComponent>(id))
+				continue;
+
+			// 実OSウィンドウはプレイヤーの弾だけ。敵のタブ弾は3Dモデルで描くので対象外
+			if (m_componentManager.has<component::TagComponent>(id) &&
+			    m_componentManager.get<component::TagComponent>(id).m_tag != constant::Tag::Player)
 				continue;
 
 			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };

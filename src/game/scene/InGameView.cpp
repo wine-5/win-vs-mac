@@ -2,24 +2,31 @@
 #include "core/utility/Color.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/RenderComponent.h"
-#include "game/component/ColliderComponent.h"
-#include "game/component/AttackComponent.h"
-#include "game/component/AIComponent.h"
 #include "game/component/AimComponent.h"
 #include "game/component/ProjectileComponent.h"
+#include "game/component/VelocityComponent.h"
 #include "game/component/PlayerChargeComponent.h"
 #include "game/system/PlayerChargeVisualsSystem.h"
+#include "game/system/MacAwakenEffectSystem.h"
+#include "game/system/DetectionAlertVisualsSystem.h"
+#include "game/system/AttackTelegraphVisualsSystem.h"
+#include "game/system/TelegraphVisualsSystem.h"
+#include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
+#include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
+#include <cmath>
 
 namespace game::scene
 {
 	InGameView::InGameView(core::ecs::ComponentManager& componentManager,
 	    core::iface::IRenderer& renderer,
 	    core::iface::IUIRenderer& uiRenderer,
-	    core::iface::IScreen& screen)
+	    core::iface::IScreen& screen,
+	    core::iface::IEffectFactory& effectFactory)
 	    : m_componentManager{ componentManager }
 	    , m_renderer{ renderer }
 	    , m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
+	    , m_effectFactory{ effectFactory }
 	{
 	}
 
@@ -29,19 +36,43 @@ namespace game::scene
 	{
 		drawModels(playerId, groundId, enemyIds);
 
-		// プレイヤー弾の見た目は実OSウィンドウ（ProjectileWindowSystem）が担うため、
-		// ゲーム内ビルボードは描かない（敵弾のビルボード実装時に再有効化する）
-		// drawProjectiles();
+		// 攻撃予兆（地面の攻撃範囲サークル）。地面の上・敵の足元に3Dで描く（3D描画フェーズ）
+		if (m_attackTelegraphSystem)
+			m_attackTelegraphSystem->draw();
 
-		// DEBUG: デバッグ可視化（テスト後に呼び出しごと削除）
-		drawDebugVisuals();
+		// 汎用攻撃予兆（TelegraphComponent駆動：円・扇）。ボスの溜め攻撃などを描く
+		if (m_telegraphSystem)
+			m_telegraphSystem->draw();
+
+		// プレイヤー弾の見た目は実OSウィンドウ（ProjectileWindowSystem）が担うため描かない。
+		// 敵のタブ弾など3Dモデルを持つ弾はここで回転描画する
+		drawProjectileModels();
+
+		// DEBUG: 当たり判定等のワールド空間デバッグ可視化（リリース時に削除）
+		if (m_debugGizmoView)
+			m_debugGizmoView->draw();
 
 		// プレイヤーの溜め攻撃の演出（集中線）。描画内容はSystemが持ち、Viewは描画順だけを決める
 		if (m_playerChargeVisualsSystem)
 			m_playerChargeVisualsSystem->draw();
 
+		// ボス覚醒の赤ビネット（画面全体の演出。HUDより奥に描く）
+		if (m_macAwakenEffectSystem)
+			m_macAwakenEffectSystem->draw();
+
+		// 敵の発見演出（頭上の通知バッジ）。モデルの手前・HUDより奥に描く
+		if (m_detectionAlertSystem)
+			m_detectionAlertSystem->draw();
+
 		// 照準レティクル（HUD）は最前面に描く
 		drawReticle(playerId);
+
+		// DEBUG: デバッグHUD（FPS等の統計・カメラ状態ラベル）（リリース時に削除）
+		if (m_debugHUDView)
+			m_debugHUDView->draw(static_cast<int>(enemyIds.size()));
+
+		// Effekseerエフェクトの描画（3Dモデル描画後・UI手前に呼び出す）
+		m_effectFactory.draw();
 	}
 
 	void InGameView::setPlayerChargeVisualsSystem(system::PlayerChargeVisualsSystem* system)
@@ -49,29 +80,34 @@ namespace game::scene
 		m_playerChargeVisualsSystem = system;
 	}
 
-	void InGameView::setDebugVisualsEnabled(bool enabled)
+	void InGameView::setMacAwakenEffectSystem(system::MacAwakenEffectSystem* system)
 	{
-		m_isDebugVisualsEnabled = enabled;
+		m_macAwakenEffectSystem = system;
 	}
 
-	void InGameView::setDebugColliderEnabled(bool enabled)
+	void InGameView::setDetectionAlertVisualsSystem(system::DetectionAlertVisualsSystem* system)
 	{
-		m_isDebugColliderEnabled = enabled;
+		m_detectionAlertSystem = system;
 	}
 
-	void InGameView::setDebugAttackRangeEnabled(bool enabled)
+	void InGameView::setAttackTelegraphVisualsSystem(system::AttackTelegraphVisualsSystem* system)
 	{
-		m_isDebugAttackRangeEnabled = enabled;
+		m_attackTelegraphSystem = system;
 	}
 
-	void InGameView::setDebugDetectionRangeEnabled(bool enabled)
+	void InGameView::setTelegraphVisualsSystem(system::TelegraphVisualsSystem* system)
 	{
-		m_isDebugDetectionRangeEnabled = enabled;
+		m_telegraphSystem = system;
 	}
 
-	void InGameView::setDebugProjectileRangeEnabled(bool enabled)
+	void InGameView::setDebugGizmoView(ui::debug::DebugGizmoView* view)
 	{
-		m_isDebugProjectileRangeEnabled = enabled;
+		m_debugGizmoView = view;
+	}
+
+	void InGameView::setDebugHUDView(ui::debug::DebugHUDView* view)
+	{
+		m_debugHUDView = view;
 	}
 
 	void InGameView::drawModels(core::ecs::EntityId playerId,
@@ -141,135 +177,53 @@ namespace game::scene
 		m_uiRenderer.drawCircle(centerX, centerY, DOT_RADIUS, color, true, 1);
 	}
 
-	void InGameView::drawProjectiles()
+	void InGameView::drawProjectileModels()
 	{
+		// 発射地点からの移動距離に掛ける係数（1ワールド単位あたりのタンブル回転量[rad]）
+		constexpr float TUMBLE_PER_UNIT{ 0.015f };
+
 		auto projectiles{ m_componentManager.getAllEntities<component::ProjectileComponent>() };
 		for (auto id : projectiles)
 		{
+			if (!m_componentManager.has<component::RenderComponent>(id))
+				continue;
+
+			const auto& render{ m_componentManager.get<component::RenderComponent>(id) };
+			if (!render.m_isVisible || render.m_modelHandle == -1)
+				continue;
+
+			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
 			const auto& projectile{ m_componentManager.get<component::ProjectileComponent>(id) };
-			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
-			float radius{ 40.0f };
-			if (m_componentManager.has<component::AttackComponent>(id))
-				radius = m_componentManager.get<component::AttackComponent>(id).m_attackRange;
 
-			if (projectile.m_imageHandle != -1)
+			// 発射地点からの移動距離に応じてタンブルさせる（状態を持たず距離から導出する）
+			const core::Vector3 traveled{
+				transform.m_position.x - projectile.m_spawnPosition.x,
+				transform.m_position.y - projectile.m_spawnPosition.y,
+				transform.m_position.z - projectile.m_spawnPosition.z
+			};
+			const float distance{ std::sqrt(traveled.x * traveled.x + traveled.y * traveled.y + traveled.z * traveled.z) };
+			const float tumble{ distance * TUMBLE_PER_UNIT };
+
+			if (projectile.m_spinRollSpeed > 0.0f)
 			{
-				// 常にカメラを向くビルボードとして描画する（一辺＝直径×スケール）
-				const float size{ radius * 2.0f * transform.m_scale.x };
-				m_renderer.drawBillboard(projectile.m_imageHandle, transform.m_position, size);
-			}
-			else
-			{
-				// 画像未設定時の仮描画：ティールのスフィア
-				m_renderer.drawDebugSphere(transform.m_position, radius, core::utility::Color::rgb(0, 255, 180));
-			}
-		}
-	}
-
-	void InGameView::drawDebugVisuals()
-	{
-		if (!m_isDebugVisualsEnabled)
-			return;
-
-		if (m_isDebugColliderEnabled)
-			drawDebugColliders();
-
-		if (m_isDebugAttackRangeEnabled)
-			drawDebugAttackRanges();
-
-		if (m_isDebugDetectionRangeEnabled)
-			drawDebugDetectionRanges();
-
-		if (m_isDebugProjectileRangeEnabled)
-			drawDebugProjectileRanges();
-	}
-
-	void InGameView::drawDebugColliders()
-	{
-		auto colliderEntities{ m_componentManager.getAllEntities<component::ColliderComponent>() };
-		for (auto id : colliderEntities)
-		{
-			auto& colliderTf{ m_componentManager.get<component::TransformComponent>(id) };
-			auto& collider{ m_componentManager.get<component::ColliderComponent>(id) };
-			core::Vector3 colliderCenter{ colliderTf.m_position + collider.m_offset };
-			m_renderer.drawCollider(colliderCenter, collider.m_size, core::utility::Color::BLUE);
-		}
-	}
-
-	void InGameView::drawDebugAttackRanges()
-	{
-		// 人型（プレイヤー・Xcode・Mac）はカプセル、浮遊型ドローン（Safari）は球で描く
-		auto attackers{ m_componentManager.getAllEntities<component::AttackComponent>() };
-		for (auto id : attackers)
-		{
-			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
-			auto& atk{ m_componentManager.get<component::AttackComponent>(id) };
-
-			bool isFlying{ false };
-			if (m_componentManager.has<component::AIComponent>(id))
-			{
-				auto& ai{ m_componentManager.get<component::AIComponent>(id) };
-				isFlying = (ai.m_behavior == constant::AIBehavior::RangeKeepDistance);
-			}
-
-			if (!isFlying && m_componentManager.has<component::ColliderComponent>(id))
-			{
-				auto& collider{ m_componentManager.get<component::ColliderComponent>(id) };
-				core::Vector3 center{ atkTransform.m_position + collider.m_offset };
-				float halfHeight{ collider.m_size.y * 0.5f };
-				core::Vector3 bottom{ center.x, center.y - halfHeight, center.z };
-				core::Vector3 top{ center.x, center.y + halfHeight, center.z };
-				m_renderer.drawDebugCapsule(bottom, top, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
-			}
-			else
-			{
-				m_renderer.drawDebugSphere(atkTransform.m_position, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
-			}
-		}
-	}
-
-	void InGameView::drawDebugDetectionRanges()
-	{
-		// 人型（プレイヤー・Xcode・Mac）はカプセル、浮遊型ドローン（Safari）は球で描く
-		auto attackers{ m_componentManager.getAllEntities<component::AttackComponent>() };
-		for (auto id : attackers)
-		{
-			if (!m_componentManager.has<component::AIComponent>(id))
+				// レインボーは飛ぶ方向に依らず常にカメラへ正対させ、面内で回す「ルーレット」。
+				// 回転の速さ（m_spinRollSpeed）はmacData.jsonのrainbowSpinSpeedから渡される。
+				const float roll{ distance * projectile.m_spinRollSpeed };
+				// 進行方向（velocity）を向いたまま飛ばす。モデルの正面が逆なので反転して渡す（180度逆）
+				core::Vector3 faceDir{ 0.0f, 0.0f, -1.0f };
+				if (m_componentManager.has<component::VelocityComponent>(id))
+				{
+					const auto& vel{ m_componentManager.get<component::VelocityComponent>(id).m_velocity };
+					faceDir = core::Vector3{ -vel.x, -vel.y, -vel.z };
+				}
+				m_renderer.drawSpinningModelFacing(render.m_modelHandle, transform.m_position,
+				    transform.m_scale, projectile.m_spinCenter, faceDir, roll);
 				continue;
-
-			auto& atkTransform{ m_componentManager.get<component::TransformComponent>(id) };
-			auto& ai{ m_componentManager.get<component::AIComponent>(id) };
-
-			const bool isFlying{ ai.m_behavior == constant::AIBehavior::RangeKeepDistance };
-			if (!isFlying && m_componentManager.has<component::ColliderComponent>(id))
-			{
-				auto& collider{ m_componentManager.get<component::ColliderComponent>(id) };
-				core::Vector3 center{ atkTransform.m_position + collider.m_offset };
-				float halfHeight{ collider.m_size.y * 0.5f };
-				core::Vector3 bottom{ center.x, center.y - halfHeight, center.z };
-				core::Vector3 top{ center.x, center.y + halfHeight, center.z };
-				m_renderer.drawDebugCapsule(bottom, top, ai.m_detectionRange, core::utility::Color::rgb(255, 255, 0));
 			}
-			else
-			{
-				m_renderer.drawDebugSphere(atkTransform.m_position, ai.m_detectionRange, core::utility::Color::rgb(255, 255, 0));
-			}
+
+			// それ以外の弾（タブ等）は従来どおり左右にぐるぐる（Y軸まわり）回す
+			const core::Vector3 rotation{ 0.0f, tumble, 0.0f };
+			m_renderer.drawModel(render.m_modelHandle, transform.m_position, rotation, transform.m_scale);
 		}
 	}
-
-	void InGameView::drawDebugProjectileRanges()
-	{
-		auto projectiles{ m_componentManager.getAllEntities<component::ProjectileComponent>() };
-		for (auto id : projectiles)
-		{
-			if (!m_componentManager.has<component::AttackComponent>(id))
-				continue;
-
-			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
-			const auto& atk{ m_componentManager.get<component::AttackComponent>(id) };
-
-			m_renderer.drawDebugSphere(transform.m_position, atk.m_attackRange, core::utility::Color::rgb(255, 0, 0));
-		}
-	}
-
 } // namespace game::scene

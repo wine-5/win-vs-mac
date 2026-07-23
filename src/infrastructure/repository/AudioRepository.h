@@ -5,7 +5,7 @@
 #include "core/constant/SeType.h"
 #include "thirdparty/nlohmann/json.hpp"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	/**
 	 * @brief BGM リソースの設定情報
@@ -62,4 +62,4 @@ namespace infrastructure
 		std::unordered_map<core::constant::BgmType, BgmConfig> m_bgmConfigs{};
 		std::unordered_map<core::constant::SeType, SeConfig>  m_seConfigs{};
 	};
-} // namespace infrastructure
+} // namespace infrastructure::repository

@@ -5,7 +5,7 @@
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IStringConverter.h"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	JobRepository::JobRepository()
 	{
@@ -37,4 +37,4 @@ namespace infrastructure
 	{
 		return m_jobTable[static_cast<int>(jobType)];
 	}
-} // namespace infrastructure
+} // namespace infrastructure::repository

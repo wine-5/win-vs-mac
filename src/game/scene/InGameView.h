@@ -5,11 +5,22 @@
 #include "core/interface/IRenderer.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "core/interface/IEffectFactory.h"
 
 namespace game::system
 {
 	class PlayerChargeVisualsSystem;
+	class MacAwakenEffectSystem;
+	class DetectionAlertVisualsSystem;
+	class AttackTelegraphVisualsSystem;
+	class TelegraphVisualsSystem;
 } // namespace game::system
+
+namespace game::ui::debug
+{
+	class DebugGizmoView; // DEBUG: 前方宣言（リリース時に削除）
+	class DebugHUDView;   // DEBUG: 前方宣言（リリース時に削除）
+} // namespace game::ui::debug
 
 namespace game::scene
 {
@@ -17,7 +28,7 @@ namespace game::scene
 	 * @brief インゲームの描画を担当するView
 	 *
 	 * InGame（Scene/コントローラ）から描画の責務を分離する。
-	 * モデル描画・照準レティクル（HUD）・デバッグ可視化をまとめて担う。
+	 * モデル描画・照準レティクル（HUD）を担う。
 	 * 状態は持たず、描画に必要なEntityIdを都度受け取って ComponentManager から読み出す。
 	 */
 	class InGameView
@@ -29,11 +40,13 @@ namespace game::scene
 		 * @param renderer 3D描画のインターフェース
 		 * @param uiRenderer UI描画のインターフェース
 		 * @param screen 画面サイズ取得のインターフェース
+		 * @param effectFactory エフェクト（Effekseer）描画のインターフェース
 		 */
 		InGameView(core::ecs::ComponentManager& componentManager,
 		    core::iface::IRenderer& renderer,
 		    core::iface::IUIRenderer& uiRenderer,
-		    core::iface::IScreen& screen);
+		    core::iface::IScreen& screen,
+		    core::iface::IEffectFactory& effectFactory);
 
 		/**
 		 * @brief インゲームを描画する
@@ -46,40 +59,46 @@ namespace game::scene
 		    const std::vector<core::ecs::EntityId>& enemyIds);
 
 		/**
-		 * @brief デバッグ可視化の全体ON/OFFを切り替える
-		 * @param enabled trueで描画、falseで非描画
-		 */
-		void setDebugVisualsEnabled(bool enabled);
-
-		/**
-		 * @brief 当たり判定（Collider）のデバッグ描画ON/OFFを切り替える
-		 * @param enabled trueで描画、falseで非描画
-		 */
-		void setDebugColliderEnabled(bool enabled);
-
-		/**
-		 * @brief 攻撃範囲のデバッグ描画ON/OFFを切り替える
-		 * @param enabled trueで描画、falseで非描画
-		 */
-		void setDebugAttackRangeEnabled(bool enabled);
-
-		/**
-		 * @brief 索敵範囲のデバッグ描画ON/OFFを切り替える
-		 * @param enabled trueで描画、falseで非描画
-		 */
-		void setDebugDetectionRangeEnabled(bool enabled);
-
-		/**
-		 * @brief 弾（Projectile）の攻撃範囲のデバッグ描画ON/OFFを切り替える
-		 * @param enabled trueで描画、falseで非描画
-		 */
-		void setDebugProjectileRangeEnabled(bool enabled);
-
-		/**
 		 * @brief 溜め攻撃の演出System（集中線の描画元）を設定する
 		 * @param system PlayerChargeVisualsSystemのポインタ（所有はSystemManager）
 		 */
 		void setPlayerChargeVisualsSystem(system::PlayerChargeVisualsSystem* system);
+
+		/**
+		 * @brief ボス覚醒演出System（赤ビネットの描画元）を設定する
+		 * @param system MacAwakenEffectSystemのポインタ（所有はSystemManager）
+		 */
+		void setMacAwakenEffectSystem(system::MacAwakenEffectSystem* system);
+
+		/**
+		 * @brief 発見演出System（頭上の通知バッジの描画元）を設定する
+		 * @param system DetectionAlertVisualsSystemのポインタ（所有はSystemManager）
+		 */
+		void setDetectionAlertVisualsSystem(system::DetectionAlertVisualsSystem* system);
+
+		/**
+		 * @brief 攻撃予兆System（地面の攻撃範囲サークルの描画元）を設定する
+		 * @param system AttackTelegraphVisualsSystemのポインタ（所有はSystemManager）
+		 */
+		void setAttackTelegraphVisualsSystem(system::AttackTelegraphVisualsSystem* system);
+
+		/**
+		 * @brief 汎用攻撃予兆System（TelegraphComponent駆動：円・扇）を設定する
+		 * @param system TelegraphVisualsSystemのポインタ（所有はSystemManager）
+		 */
+		void setTelegraphVisualsSystem(system::TelegraphVisualsSystem* system);
+
+		/**
+		 * @brief DEBUG: ワールド空間デバッグ可視化Viewを設定する（リリース時に削除）
+		 * @param view DebugGizmoViewのポインタ（所有はInGame）
+		 */
+		void setDebugGizmoView(ui::debug::DebugGizmoView* view);
+
+		/**
+		 * @brief DEBUG: デバッグHUD（FPS等の統計・カメラ状態ラベル）Viewを設定する（リリース時に削除）
+		 * @param view DebugHUDViewのポインタ（所有はInGame）
+		 */
+		void setDebugHUDView(ui::debug::DebugHUDView* view);
 
 	  private:
 		/**
@@ -96,48 +115,35 @@ namespace game::scene
 		void drawReticle(core::ecs::EntityId playerId);
 
 		/**
-		 * @brief 弾（投射物）を描画する（仮：スフィア。後でビルボード/モデルに差し替え）
+		 * @brief モデルを持つ弾（Safariのタブ等）を回転させながら描画する
+		 *
+		 * RenderComponentを持つ弾を対象に、進行方向へyawを向けつつ
+		 * 発射地点からの移動距離に応じてタンブル（宙返り）回転させる。
 		 */
-		void drawProjectiles();
-
-		/**
-		 * @brief DEBUG: 当たり判定（青）・攻撃範囲（赤）・索敵範囲（黄）を可視化する（テスト後に削除）
-		 */
-		void drawDebugVisuals();
-
-		/**
-		 * @brief DEBUG: 当たり判定（青）を可視化する
-		 */
-		void drawDebugColliders();
-
-		/**
-		 * @brief DEBUG: 攻撃範囲（赤）を可視化する
-		 */
-		void drawDebugAttackRanges();
-
-		/**
-		 * @brief DEBUG: 索敵範囲（黄）を可視化する
-		 */
-		void drawDebugDetectionRanges();
-
-		/**
-		 * @brief DEBUG: 弾（Projectile）の攻撃範囲（赤）を可視化する
-		 */
-		void drawDebugProjectileRanges();
+		void drawProjectileModels();
 
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IRenderer& m_renderer;
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
+		core::iface::IEffectFactory& m_effectFactory;
 
 		// 溜め攻撃の集中線の描画元（描画内容はSystemが持ち、Viewは描画順だけを管理する）
 		// 所有はSystemManagerにあり、InGameがsetupSystemsで設定する
 		system::PlayerChargeVisualsSystem* m_playerChargeVisualsSystem{ nullptr };
 
-		bool m_isDebugVisualsEnabled{ true };
-		bool m_isDebugColliderEnabled{ true };
-		bool m_isDebugAttackRangeEnabled{ false };
-		bool m_isDebugDetectionRangeEnabled{ false };
-		bool m_isDebugProjectileRangeEnabled{ false };
+		// ボス覚醒演出の赤ビネットの描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
+		system::MacAwakenEffectSystem* m_macAwakenEffectSystem{ nullptr };
+
+		// 発見演出（頭上の通知バッジ）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
+		system::DetectionAlertVisualsSystem* m_detectionAlertSystem{ nullptr };
+
+		// 攻撃予兆（地面の攻撃範囲サークル）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
+		system::AttackTelegraphVisualsSystem* m_attackTelegraphSystem{ nullptr };
+		system::TelegraphVisualsSystem* m_telegraphSystem{ nullptr };
+
+		// DEBUG: デバッグ可視化・HUDの描画元（所有はInGame。リリース時に削除）
+		ui::debug::DebugGizmoView* m_debugGizmoView{ nullptr };
+		ui::debug::DebugHUDView* m_debugHUDView{ nullptr };
 	};
 } // namespace game::scene

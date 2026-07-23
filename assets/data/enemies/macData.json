@@ -3,19 +3,61 @@
   "category": "enemy",
   "model": {
     "path": "assets/model/enemies/mac/Mac.mv1",
-    "scale": [ 200, 200, 200 ]
+    "scale": [ 300, 300, 300 ]
   },
   "collider": {
-    "size": [ 0, 0, 0 ],
-    "offset": [ 0, 0, 0 ]
+    "size": [ 150, 260, 150 ]
   },
   "gameplay": {
     "moveSpeed": 10.0,
-    "detectionRange": 700.0,
+    "detectionRange": 3000.0,
     "attackRange": 180.0,
     "maxHp": 500.0,
     "defence": 15.0,
     "attackPower": 35.0,
     "attackCooldown": 4.0
+  },
+  "behaviors": [ "boss" ],
+  "animations": [
+    { "state": "Idle",    "id": "anim_mac_idle" },
+    { "state": "Walk",    "id": "anim_mac_walk",         "loop": true,  "onComplete": "Idle",  "priority": "locomotion", "speed": 0.6 },
+    { "state": "Run",     "id": "anim_mac_run",          "loop": true,  "onComplete": "Idle",  "priority": "locomotion", "speed": 0.8 },
+    { "state": "Attack1", "id": "anim_mac_swing_attack", "loop": false, "onComplete": "Idle",  "priority": "attack" },
+    { "state": "Attack2", "id": "anim_mac_magic_attack", "loop": false, "onComplete": "Idle",  "priority": "attack" },
+    { "state": "Dying",   "id": "anim_mac_dying",        "loop": false, "onComplete": "Dying", "priority": "dying" }
+  ],
+  "mac": {
+    "phase2HpRatio": 0.99,
+    "phase1": {
+      "moveSpeed": 10.0,
+      "actionInterval": 4.0,
+      "meleeRange": 180.0,
+      "weights": { "melee": 0, "ranged": 2, "summon": 0 },
+      "rainbowCount": 3,
+      "rainbowSpreadDeg": 40.0,
+      "rainbowSpeed": 50.0,
+      "rainbowSpinSpeed": 0.10,
+      "summonTypes": [ "xcode", "safari" ],
+      "summonCount": 1,
+      "summonMax": 4,
+      "summonRadiusMin": 200.0,
+      "summonRadiusMax": 400.0
+    },
+    "phase2": {
+      "moveSpeed": 16.0,
+      "actionInterval": 2.0,
+      "meleeRange": 180.0,
+      "weights": { "melee": 2, "ranged": 3, "summon": 3, "nova": 2 },
+      "rainbowCount": 6,
+      "rainbowSpreadDeg": 70.0,
+      "rainbowSpeed": 100.0,
+      "rainbowSpinSpeed": 0.15,
+      "novaCount": 16,
+      "summonTypes": [ "xcode", "safari" ],
+      "summonCount": 2,
+      "summonMax": 6,
+      "summonRadiusMin": 200.0,
+      "summonRadiusMax": 400.0
+    }
   }
 }

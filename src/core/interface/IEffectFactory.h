@@ -48,5 +48,12 @@ namespace core::iface
          * @brief 再生中のエフェクトをすべて描画する
          */
         virtual void draw() = 0;
-    };
+
+		// DEBUG: 負荷の原因特定用（リリース時に削除）
+		/**
+		 * @brief 現在同時再生中のエフェクト数を返す（全種別の合計）
+		 * @return 同時再生中のエフェクト数
+		 */
+		[[nodiscard]] virtual int getActiveEffectCount() const noexcept = 0;
+	};
 } // namespace core::iface

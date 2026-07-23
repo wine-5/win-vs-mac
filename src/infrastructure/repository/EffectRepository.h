@@ -4,7 +4,7 @@
 #include "core/constant/EffectType.h"
 #include "thirdparty/nlohmann/json.hpp"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
     /**
      * @brief Effekseer エフェクトリソースの設定情報
@@ -17,23 +17,23 @@ namespace infrastructure
         float m_scale   { 0.0f }; // エフェクトの再生スケール（必ず resources.json から設定する）
     };
 
-    /**
-     * @brief Effekseer エフェクトリソースを管理するリポジトリクラス
-     *
-     * @details resources.json からエフェクトファイルパスと設定を読み込み、
-     * LoadEffekseerEffect() でハンドルを取得・キャッシュする
-     */
-    class EffectRepository
+	/**
+	 * @brief Effekseer エフェクトリソースを管理するリポジトリクラス
+	 *
+	 * @details assets/data/effectData.json からエフェクトファイルパスと設定を読み込み、
+	 * LoadEffekseerEffect() でハンドルを取得・キャッシュする
+	 */
+	class EffectRepository
     {
     public:
         EffectRepository() = default;
         ~EffectRepository();
 
-        /**
-         * @brief Effekseer 初期化後に呼び出す。resources.json からエフェクトを読み込む
-         * @throw std::runtime_error ファイルが見つからないか、JSONパースに失敗した場合
-         */
-        void initialize();
+		/**
+		 * @brief Effekseer 初期化後に呼び出す。assets/data/effectData.json からエフェクトを読み込む
+		 * @throw std::runtime_error ファイルが見つからないか、JSONパースに失敗した場合
+		 */
+		void initialize();
 
         /**
          * @brief 全エフェクト設定を返す
@@ -46,4 +46,4 @@ namespace infrastructure
 
         std::unordered_map<core::constant::EffectType, EffectConfig> m_configs;
     };
-} // namespace infrastructure
+} // namespace infrastructure::repository

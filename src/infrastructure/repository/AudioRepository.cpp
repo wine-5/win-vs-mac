@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include "DxLib.h"
 
-namespace infrastructure
+namespace infrastructure::repository
 {
 	AudioRepository::~AudioRepository()
 	{
@@ -120,4 +120,4 @@ namespace infrastructure
 			m_seConfigs[it->second] = config;
 		}
 	}
-} // namespace infrastructure
+} // namespace infrastructure::repository

@@ -4,6 +4,7 @@
 #include "game/component/AttackComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/ProjectileComponent.h"
+#include "game/component/RenderComponent.h"
 
 namespace game::factory
 {
@@ -53,8 +54,14 @@ namespace game::factory
 		component::ProjectileComponent projectile{};
 		projectile.m_remainingLifetime = config.m_lifetime;
 		projectile.m_spawnPosition = origin;
-		projectile.m_imageHandle = config.m_imageHandle;
+		projectile.m_spinRollSpeed = config.m_spinRollSpeed;
+		projectile.m_spinCenter = config.m_spinCenter;
+		projectile.m_startEffect = config.m_startEffect; // Noneならエフェクト無し（Safariのタブ弾）
 		m_componentManager.add<component::ProjectileComponent>(id, projectile);
+
+		// 3Dモデルの弾（Safariのタブ等）はRenderComponentを付与し、InGameViewが回転描画する
+		if (config.m_modelHandle != -1)
+			m_componentManager.add<component::RenderComponent>(id, { config.m_modelHandle, true });
 
 		return id;
 	}
