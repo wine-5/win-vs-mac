@@ -27,7 +27,7 @@
 #include "platform/system/WindowsPerformanceProvider.h"
 #include "core/interface/IAudioManager.h"
 #include "core/interface/IEffectFactory.h"
-#include "infrastructure/audio/AudioManager.h"
+#include "infrastructure/AudioManager.h"
 #include "infrastructure/effect/EffectFactory.h"
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
