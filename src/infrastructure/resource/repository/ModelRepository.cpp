@@ -357,6 +357,26 @@ namespace infrastructure::resource::repository
 			mac.m_phase2 = parseMacPhase(j["phase2"]);
 			mac.m_hasPhase2 = true;
 		}
+
+		// アクションの尺。未設定のキーは MacActionTiming の既定値のまま使う
+		if (j.contains("actions"))
+		{
+			const auto& a = j["actions"];
+			const auto read{ [&a](const char* key, float& out)
+				{
+				    if (a.contains(key))
+					    out = a[key];
+				} };
+			read("meleeWindup", mac.m_actions.m_meleeWindup);
+			read("rangedWindup", mac.m_actions.m_rangedWindup);
+			read("summonWindup", mac.m_actions.m_summonWindup);
+			read("novaWindup", mac.m_actions.m_novaWindup);
+			read("meleeLock", mac.m_actions.m_meleeLock);
+			read("rangedLock", mac.m_actions.m_rangedLock);
+			read("summonLock", mac.m_actions.m_summonLock);
+			read("novaLock", mac.m_actions.m_novaLock);
+			read("rangedTelegraphRange", mac.m_actions.m_rangedTelegraphRange);
+		}
 		return mac;
 	}
 

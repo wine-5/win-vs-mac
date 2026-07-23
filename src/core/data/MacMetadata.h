@@ -51,6 +51,31 @@ namespace core::data
 	};
 
 	/**
+	 * @brief ボスの各アクションの尺（溜め時間・硬直時間）
+	 *
+	 * macData.json の "mac.actions" に対応する。
+	 * 戦闘のテンポを決める値で調整頻度が高いため、ソースではなくデータで持つ。
+	 * 既定値は未設定のJSONでも従来どおり動くよう、従来のハードコード値に合わせている。
+	 */
+	struct MacActionTiming
+	{
+		// 溜め（予兆表示）の長さ（秒）。満ちきると技が発動する。溜め中ボスは静止し中断しない
+		float m_meleeWindup{ 0.6f };
+		float m_rangedWindup{ 0.9f };
+		float m_summonWindup{ 0.7f };
+		float m_novaWindup{ 1.1f }; // 全方位ノヴァは大技なので長めに溜める
+
+		// 技を出した後のロック時間（秒）。この間は次の行動を抽選しない（アニメ・演出の尺）
+		float m_meleeLock{ 1.0f };
+		float m_rangedLock{ 1.2f };
+		float m_summonLock{ 1.2f };
+		float m_novaLock{ 1.4f };
+
+		// レインボー扇の予兆として床に出す扇の半径（弾の到達範囲の見せ方）
+		float m_rangedTelegraphRange{ 800.0f };
+	};
+
+	/**
 	 * @brief ボス全体の挙動定義
 	 *
 	 * macData.json の "mac" オブジェクトに対応する。
@@ -64,6 +89,9 @@ namespace core::data
 
 		MacPhaseData m_phase1{}; // 初期フェーズのパラメータ
 		MacPhaseData m_phase2{}; // 覚醒フェーズのパラメータ
+
+		// 各アクションの尺。フェーズ共通（フェーズごとに変えたくなったらMacPhaseDataへ移す）
+		MacActionTiming m_actions{};
 
 		/**
 		 * @brief 指定フェーズのパラメータを取得する
