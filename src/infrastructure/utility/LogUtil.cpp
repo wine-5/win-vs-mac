@@ -83,12 +83,4 @@ namespace infrastructure::utility
         }
 #endif
     }
-
-    void LogUtil::clear()
-    {
-#ifdef _DEBUG
-        // コンソールは自動クリアしない（履歴を残す）
-        // 必要ならsystem("cls")を使用
-#endif
-    }
 } // namespace infrastructure::utility

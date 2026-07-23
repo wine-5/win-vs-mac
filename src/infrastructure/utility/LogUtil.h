@@ -39,11 +39,6 @@ namespace infrastructure::utility
          */
         void error(const char* message) override;
         
-        /**
-         * @brief ログをクリアする
-         */
-        void clear() override;
-
     private:
         HANDLE m_consoleHandle;  // コンソールのハンドル
         

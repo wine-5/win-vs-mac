@@ -30,11 +30,6 @@ namespace core::iface
          * @param message エラーメッセージ
          */
         virtual void error(const char* message) = 0;
-        
-        /**
-         * @brief ログをクリアする
-         */
-        virtual void clear() = 0;
     };
 } // namespace core::iface
 
