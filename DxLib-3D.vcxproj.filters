@@ -344,7 +344,7 @@
     <ClInclude Include="src\core\ecs\ComponentManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\ecs\IComponent.h">
+    <ClInclude Include="src\core\ecs\IComponentArray.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\ecs\ComponentArray.h">

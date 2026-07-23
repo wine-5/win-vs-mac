@@ -439,7 +439,7 @@
     <ClInclude Include="src\game\component\movement\VelocityComponent.h" />
     <ClInclude Include="src\core\ecs\Entity.h" />
     <ClInclude Include="src\core\ecs\EntityManager.h" />
-    <ClInclude Include="src\core\ecs\IComponent.h" />
+    <ClInclude Include="src\core\ecs\IComponentArray.h" />
     <ClInclude Include="src\core\ecs\ISystem.h" />
     <ClInclude Include="src\core\ecs\SystemManager.h" />
     <ClInclude Include="src\game\system\movement\InputSystem.h" />

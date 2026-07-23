@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 #include "Entity.h"
-#include "IComponent.h"
+#include "IComponentArray.h"
 #include "ComponentArray.h"
 
 namespace core::ecs
@@ -109,6 +109,6 @@ namespace core::ecs
 			return static_cast<ComponentArray<T>*>(m_componentArrays[type].get());
 		}
 
-		std::unordered_map<std::type_index, std::unique_ptr<IComponent>> m_componentArrays;
+		std::unordered_map<std::type_index, std::unique_ptr<IComponentArray>> m_componentArrays;
 	};
 } // namespace core::ecs

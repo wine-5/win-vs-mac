@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <vector>
 #include "Entity.h"
-#include "IComponent.h"
+#include "IComponentArray.h"
 
 namespace core::ecs
 {
@@ -20,7 +20,7 @@ namespace core::ecs
 	 * packed array へ差し替えられる。
 	 */
 	template <typename T>
-	class ComponentArray : public IComponent
+	class ComponentArray : public IComponentArray
 	{
 	public:
 		/**
