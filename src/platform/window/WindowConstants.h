@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace platform::window
 {
@@ -14,7 +14,6 @@ namespace platform::window
         static constexpr const char* JSON_KEY_WINDOW{ "window" };
         static constexpr const char* JSON_KEY_APP{ "app" };
         static constexpr const char* JSON_KEY_VISIBLE{ "visible" };
-        static constexpr const char* JSON_KEY_JOB{ "job" };
         static constexpr const char* JSON_KEY_STATS{ "stats" };
         static constexpr const char* JSON_KEY_ID{ "id" };
         static constexpr const char* JSON_KEY_HP{ "hp" };
@@ -24,7 +23,6 @@ namespace platform::window
         static constexpr const char* JSON_KEY_SLOT{ "slot" };
 
         // JSONキー（ParameterWindow）
-        static constexpr const char* JSON_KEY_SKILL{ "skill" };
         static constexpr const char* JSON_KEY_BASE_HP{ "baseHp" };
         static constexpr const char* JSON_KEY_BASE_ATK{ "baseAtk" };
         static constexpr const char* JSON_KEY_BASE_DEF{ "baseDef" };
@@ -47,11 +45,6 @@ namespace platform::window
         static constexpr const char* MESSAGE_TYPE_TOGGLE_WINDOW{ "toggleWindow" };
         static constexpr const char* MESSAGE_TYPE_LAUNCH_APP{ "launchApp" };
         static constexpr const char* MESSAGE_TYPE_WINDOW_STATE_CHANGED{ "windowStateChanged" };
-
-        // JSONメッセージタイプ（JobWindow）
-        static constexpr const char* MESSAGE_TYPE_JOB_SELECTED{ "jobSelected" };
-        static constexpr const char* MESSAGE_TYPE_REQUEST_JOB_STATS{ "requestJobStats" };
-        static constexpr const char* MESSAGE_TYPE_JOB_STATS{ "jobStats" };
 
         // JSONメッセージタイプ（FileSelectWindow）
         static constexpr const char* MESSAGE_TYPE_SLOT_SELECTED{ "slotSelected" };

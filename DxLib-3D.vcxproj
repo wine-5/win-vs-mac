@@ -191,7 +191,6 @@
     <ClCompile Include="src\infrastructure\repository\AudioRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\EffectRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\FontRepository.cpp" />
-    <ClCompile Include="src\infrastructure\repository\JobRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\ModelRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\AnimationRepository.cpp" />
     <ClCompile Include="src\infrastructure\repository\ImageRepository.cpp" />
@@ -226,7 +225,6 @@
     <ClCompile Include="src\platform\system\WindowsPerformanceProvider.cpp" />
     <ClCompile Include="src\platform\utility\StringConverter.cpp" />
     <ClCompile Include="src\platform\webview\WebView2Host.cpp" />
-    <ClCompile Include="src\platform\window\select\JobWindow.cpp" />
     <ClCompile Include="src\platform\window\select\FileSelectWindow.cpp" />
     <ClCompile Include="src\platform\window\select\DesktopWindow.cpp" />
     <ClCompile Include="src\platform\window\select\DifficultyWindow.cpp" />
@@ -291,7 +289,6 @@
     <ClInclude Include="src\game\component\ProjectileComponent.h" />
     <ClInclude Include="src\core\constant\BgmType.h" />
     <ClInclude Include="src\core\constant\EffectType.h" />
-    <ClInclude Include="src\core\constant\JobType.h" />
     <ClInclude Include="src\core\constant\SeType.h" />
     <ClInclude Include="src\core\data\MacMetadata.h" />
     <ClInclude Include="src\core\data\ModelMetadata.h" />
@@ -335,7 +332,6 @@
     <ClInclude Include="src\game\constant\MetadataKeys.h" />
     <ClInclude Include="src\game\data\EnemyData.h" />
     <ClInclude Include="src\game\data\FileEquipmentData.h" />
-    <ClInclude Include="src\game\data\JobSelectionData.h" />
     <ClInclude Include="src\game\data\FileExtensionBonus.h" />
     <ClInclude Include="src\game\data\FileExtensionType.h" />
     <ClInclude Include="src\core\event\IGameEvent.h" />
@@ -386,7 +382,6 @@
     <ClInclude Include="src\infrastructure\repository\AudioRepository.h" />
     <ClInclude Include="src\infrastructure\repository\EffectRepository.h" />
     <ClInclude Include="src\infrastructure\repository\FontRepository.h" />
-    <ClInclude Include="src\infrastructure\repository\JobRepository.h" />
     <ClInclude Include="src\infrastructure\repository\ModelRepository.h" />
     <ClInclude Include="src\infrastructure\repository\AnimationRepository.h" />
     <ClInclude Include="src\infrastructure\repository\StageRepository.h" />
@@ -453,7 +448,6 @@
     <ClInclude Include="src\infrastructure\utility\LogUtil.h" />
     <ClInclude Include="src\platform\system\WindowsPerformanceProvider.h" />
     <ClInclude Include="src\platform\utility\StringConverter.h" />
-    <ClInclude Include="src\platform\window\select\JobWindow.h" />
     <ClInclude Include="src\platform\window\select\FileSelectWindow.h" />
     <ClInclude Include="src\platform\window\select\RulesWindow.h" />
     <ClInclude Include="src\platform\window\select\Win32SelectWindowManager.h" />

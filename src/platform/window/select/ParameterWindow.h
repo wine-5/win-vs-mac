@@ -37,15 +37,11 @@ namespace platform::window::select
          * @param bonusAtk ファイル装備ボーナス ATK
          * @param bonusDef ファイル装備ボーナス DEF
          * @param bonusSpd ファイル装備ボーナス SPD
-         * @param jobNameSjis 職業名（Shift-JIS）
-         * @param skillNameSjis スキル名（Shift-JIS）
          * @param equippedSlots 装備中スロット数
          */
         void refresh(
             float baseHp, float baseAtk, float baseDef, float baseSpd,
             float bonusHp, float bonusAtk, float bonusDef, float bonusSpd,
-            const std::string& jobNameSjis,
-            const std::string& skillNameSjis,
             int equippedSlots) noexcept;
 
     protected:
@@ -58,10 +54,6 @@ namespace platform::window::select
         static constexpr const wchar_t* WINDOW_CLASS_NAME{ L"ParameterWindowClass" };
         static constexpr const wchar_t* WINDOW_TITLE{ L"パラメータ" };
         static constexpr const wchar_t* PARAMETER_HTML_URL{ L"https://game.web/select/param/param.html" };
-
-        // 文字コード定数
-        static constexpr int SJIS_CODE_PAGE{ 932 };
-        static constexpr int UTF8_CODE_PAGE{ CP_UTF8 };
 
         platform::webview::WebView2Host m_webView{};
     };

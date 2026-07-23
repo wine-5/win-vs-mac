@@ -1,8 +1,10 @@
 ﻿#include "Win32SelectWindowManager.h"
+#include "core/data/ModelMetadata.h"
+#include "game/constant/ModelId.h"
+#include "game/constant/MetadataKeys.h"
 #include "platform/window/WindowConstants.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
-#include "core/constant/JobType.h"
 #include "platform/utility/StringConverter.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include <shellapi.h>
@@ -12,13 +14,11 @@ namespace platform::window::select
 {
     Win32SelectWindowManager::Win32SelectWindowManager(
         std::function<void()> onGameStart,
-        std::function<void(core::constant::JobType)> onJobSelect,
         std::function<void(int, const std::string&)> onFileSlotChanged,
         core::iface::IResourceManager& resourceManager,
         core::iface::IScreen& screen
     ) noexcept
         : m_onGameStart{onGameStart},
-        m_onJobSelect{onJobSelect},
         m_onFileSlotChanged{onFileSlotChanged},
         m_resourceManager{resourceManager},
         m_screen{screen}
@@ -47,39 +47,18 @@ namespace platform::window::select
         if (!m_desktopWindow->create(originX, originY, screenWidth, screenHeight)) return;
         m_desktopWindow->show();
 
-        // --- レイアウト定数 ---
-        // 左列: Job(上) + File(下)  /  中央列: HTML難易度パネル  /  右列: Parameter
-        int marginX{ screenWidth  * MARGIN_PERCENT / 100 };
+		// --- レイアウト定数 ---
+		// 左列: 上はデスクトップアイコンを見せるため空け、下に難易度パネル
+		// 中央列: File  /  右列: Parameter
+		int marginX{ screenWidth  * MARGIN_PERCENT / 100 };
         int marginY{ screenHeight * MARGIN_PERCENT / 100 };
         int colWidth{ (screenWidth  - marginX * COLUMN_COUNT) / COLUMN_COUNT };
         int availH{    screenHeight - TASKBAR_HEIGHT - marginY * 2 };
-        int jobH{   availH * JOB_HEIGHT_RATIO / JOB_HEIGHT_RATIO_BASE };
-        int fileH{  availH - jobH - GAP_Y };
+		// 左列の上側はデスクトップアイコンを見せるために空ける。難易度パネルはその下に置く
+		int iconAreaH{ availH * ICON_AREA_RATIO / ICON_AREA_RATIO_BASE };
+		int diffH{ availH - iconAreaH - GAP_Y };
 
-        int winY{ originY + marginY };
-
-        // Job ウィンドウ（左列 上）
-        m_jobWindow = std::make_unique<JobWindow>(
-            originX + marginX,
-            winY,
-            colWidth,
-            jobH
-        );
-        if (!m_jobWindow->create(m_desktopWindow->getHwnd())) return;
-        m_jobWindow->setOnJobSelect([this](core::constant::JobType jobType) noexcept {
-            m_jobSelected = true;
-            if (m_onJobSelect) m_onJobSelect(jobType);
-            updateParameterWindowForJob(jobType);
-        });
-        m_jobWindow->setOnMinimize([this]() noexcept {
-            m_jobWindow->hide();
-            m_jobVisible = false;
-            notifyWindowState(WINDOW_NAME_JOB, false);
-        });
-        m_jobWindow->setOnClose([this]() noexcept {
-            m_jobVisible = false;
-            notifyWindowState(WINDOW_NAME_JOB, false);
-        });
+		int winY{ originY + marginY };
 
         // FileSelectウィンドウ（中央列 全高）
         m_fileSelectWindow = std::make_unique<FileSelectWindow>(
@@ -110,7 +89,7 @@ namespace platform::window::select
                 else
                     m_slotExtTypes[slot] = game::data::FileExtensionType::Unknown;
             }
-            updateParameterWindowForJob(m_currentJobType);
+			updateParameterWindow();
         });
         m_fileSelectWindow->setOnMinimize([this]() noexcept {
             m_fileSelectWindow->hide();
@@ -140,14 +119,13 @@ namespace platform::window::select
             notifyWindowState(WINDOW_NAME_PARAM, false);
         });
 
-        // DifficultyWindow（左列下 / Jobの下）
-        m_difficultyWindow = std::make_unique<DifficultyWindow>(
-            originX + marginX,
-            winY + jobH + GAP_Y,
-            colWidth,
-            fileH
-        );
-        if (!m_difficultyWindow->create(m_desktopWindow->getHwnd())) return;
+		// DifficultyWindow（左列下。上側はデスクトップアイコンのため空けている）
+		m_difficultyWindow = std::make_unique<DifficultyWindow>(
+		    originX + marginX,
+		    winY + iconAreaH + GAP_Y,
+		    colWidth,
+		    diffH);
+		if (!m_difficultyWindow->create(m_desktopWindow->getHwnd())) return;
         m_difficultyWindow->setOnMinimize([this]() noexcept {
             m_difficultyWindow->hide();
             m_diffVisible = false;
@@ -176,13 +154,11 @@ namespace platform::window::select
             notifyWindowState(WINDOW_NAME_RULES, false);
         });
 
-        m_jobWindow->setAlpha(WINDOW_ALPHA);
         m_fileSelectWindow->setAlpha(WINDOW_ALPHA);
         m_parameterWindow->setAlpha(WINDOW_ALPHA);
         m_difficultyWindow->setAlpha(WINDOW_ALPHA);
         m_rulesWindow->setAlpha(WINDOW_ALPHA);
 
-        m_jobWindow->show();
         m_fileSelectWindow->show();
         m_parameterWindow->show();
         m_difficultyWindow->show();
@@ -190,14 +166,12 @@ namespace platform::window::select
 
     void Win32SelectWindowManager::destroyAllWindows()
     {
-        if (m_jobWindow)        m_jobWindow->destroy();
         if (m_fileSelectWindow) m_fileSelectWindow->destroy();
         if (m_parameterWindow)  m_parameterWindow->destroy();
         if (m_difficultyWindow) m_difficultyWindow->destroy();
         if (m_rulesWindow)      m_rulesWindow->destroy();
         if (m_desktopWindow)    m_desktopWindow->destroy();
 
-        m_jobWindow.reset();
         m_fileSelectWindow.reset();
         m_parameterWindow.reset();
         m_difficultyWindow.reset();
@@ -218,16 +192,38 @@ namespace platform::window::select
         }
     }
 
-    void Win32SelectWindowManager::updateParameterWindowForJob(
-        core::constant::JobType jobType) noexcept
-    {
-        m_currentJobType = jobType;
+	int Win32SelectWindowManager::countEquippedSlots() const noexcept
+	{
+		int count{};
+		for (int i = 0; i < FILE_SLOT_COUNT; ++i)
+		{
+			if (!m_slotPaths[i].empty())
+				++count;
+		}
+		return count;
+	}
+
+	void Win32SelectWindowManager::updateParameterWindow() noexcept
+	{
         if (!m_parameterWindow) return;
 
-        const core::data::JobInfo jobInfo{ m_resourceManager.getJobInfo(jobType) };
+		// 基礎ステータスは playerData.json のメタデータを唯一の情報源とする
+		float baseHp{}, baseAtk{}, baseDef{}, baseSpd{};
+		if (const auto meta{ m_resourceManager.getMetadata(game::constant::model_id::PLAYER) })
+		{
+			const auto& props{ meta->floatProperties };
+			const auto read{ [&props](std::string_view key, float& out) noexcept
+				{
+				    if (const auto it{ props.find(std::string{ key }) }; it != props.end())
+					    out = it->second;
+				} };
+			read(game::constant::metadata_keys::MAX_HP, baseHp);
+			read(game::constant::metadata_keys::ATTACK_POWER, baseAtk);
+			read(game::constant::metadata_keys::DEFENCE, baseDef);
+			read(game::constant::metadata_keys::MOVE_SPEED, baseSpd);
+		}
 
-        float bonusHp{}, bonusAtk{}, bonusDef{}, bonusSpd{};
-        int equippedCount{};
+		float bonusHp{}, bonusAtk{}, bonusDef{}, bonusSpd{};
         for (int i = 0; i < FILE_SLOT_COUNT; ++i)
         {
             if (!m_slotPaths[i].empty())
@@ -237,17 +233,14 @@ namespace platform::window::select
                 bonusAtk += bonus.atk;
                 bonusDef += bonus.def;
                 bonusSpd += bonus.spd;
-                ++equippedCount;
             }
         }
 
-        m_parameterWindow->refresh(
-            jobInfo.m_hp,  jobInfo.m_atk,  jobInfo.m_def,  jobInfo.m_spd,
-            bonusHp, bonusAtk, bonusDef, bonusSpd,
-            jobInfo.m_name, jobInfo.m_skillName,
-            equippedCount
-        );
-    }
+		m_parameterWindow->refresh(
+		    baseHp, baseAtk, baseDef, baseSpd,
+		    bonusHp, bonusAtk, bonusDef, bonusSpd,
+		    countEquippedSlots());
+	}
 
     void Win32SelectWindowManager::handleDesktopMessage(const std::string& json) noexcept
     {
@@ -258,16 +251,13 @@ namespace platform::window::select
 
             if (type == platform::window::WindowConstants::MESSAGE_TYPE_START_GAME)
             {
-                // 職業が選択されているか確認
-                if (!m_jobSelected)
-                {
-                    showWarningMessage("職業を選択してからスタートしてください。");
-                    return;
-                }
-                // ゲーム開始前に全サブウィンドウを非表示にしてからコールバックを実行
+				// ファイル装備は任意。ただし埋まっていないスロットがある場合は確認を挟む
+				if (countEquippedSlots() < FILE_SLOT_COUNT && !confirmStartWithEmptySlots())
+					return;
+
+				// ゲーム開始前に全サブウィンドウを非表示にしてからコールバックを実行
                 if (m_desktopWindow && m_desktopWindow->getHwnd())
                     ShowWindow(m_desktopWindow->getHwnd(), SW_HIDE);
-                if (m_jobWindow)        m_jobWindow->hide();
                 if (m_fileSelectWindow) m_fileSelectWindow->hide();
                 if (m_parameterWindow)  m_parameterWindow->hide();
                 if (m_difficultyWindow) m_difficultyWindow->hide();
@@ -276,14 +266,8 @@ namespace platform::window::select
             else if (type == platform::window::WindowConstants::MESSAGE_TYPE_TOGGLE_WINDOW)
             {
                 const std::string name{ j.value(platform::window::WindowConstants::JSON_KEY_WINDOW, "") };
-                if (name == WINDOW_NAME_JOB && m_jobWindow)
-                {
-                    m_jobVisible = !m_jobVisible;
-                    m_jobVisible ? m_jobWindow->show() : m_jobWindow->hide();
-                    notifyWindowState(WINDOW_NAME_JOB, m_jobVisible);
-                }
-                else if (name == WINDOW_NAME_FILE && m_fileSelectWindow)
-                {
+				if (name == WINDOW_NAME_FILE && m_fileSelectWindow)
+				{
                     m_fileVisible = !m_fileVisible;
                     m_fileVisible ? m_fileSelectWindow->show() : m_fileSelectWindow->hide();
                     notifyWindowState(WINDOW_NAME_FILE, m_fileVisible);
@@ -346,4 +330,17 @@ namespace platform::window::select
         std::wstring wMessage = converter.utf8ToWide(message);
         MessageBoxW(parentHwnd, wMessage.c_str(), L"警告", MB_OK | MB_ICONWARNING);
     }
+
+	bool Win32SelectWindowManager::confirmStartWithEmptySlots() noexcept
+	{
+		HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
+
+		platform::utility::StringConverter converter;
+		const std::wstring message{ converter.utf8ToWide(
+			"装備ファイルが3つ選択されていません。\n"
+			"ボーナスを受け取らずにこのまま開始しますか？") };
+
+		return MessageBoxW(parentHwnd, message.c_str(), L"確認",
+		           MB_OKCANCEL | MB_ICONWARNING | MB_DEFBUTTON2) == IDOK;
+	}
 } // namespace platform::window::select

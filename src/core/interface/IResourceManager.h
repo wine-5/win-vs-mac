@@ -3,10 +3,8 @@
 #include <string_view>
 #include <optional>
 #include "core/data/ModelMetadata.h"
-#include "core/data/JobInfo.h"
 #include "core/data/StageMetadata.h"
 #include "core/data/ProjectileMetadata.h"
-#include "core/constant/JobType.h"
 
 namespace core::iface
 {
@@ -39,13 +37,6 @@ namespace core::iface
 		 * @return フォントファミリー名（存在しない場合nullopt）
 		 */
 		virtual std::optional<std::string> getFontName(const std::string_view fontId) const = 0;
-
-		/**
-		 * @brief ジョブタイプからジョブ情報を取得する
-		 * @param jobType ジョブタイプ
-		 * @return ジョブ情報
-		 */
-		[[nodiscard]] virtual core::data::JobInfo getJobInfo(core::constant::JobType jobType) const = 0;
 
 		/**
 		 * @brief 画像IDから画像を読み込みハンドルを返す（キャッシュ付き）

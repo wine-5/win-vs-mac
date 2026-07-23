@@ -11,7 +11,6 @@ namespace infrastructure
 		{
 			m_modelRepo = std::make_unique<repository::ModelRepository>();
 			m_fontRepo = std::make_unique<repository::FontRepository>();
-			m_jobRepo = std::make_unique<repository::JobRepository>();
 			m_imageRepo = std::make_unique<repository::ImageRepository>();
 			m_animRepo = std::make_unique<repository::AnimationRepository>();
 			m_stageRepo = std::make_unique<repository::StageRepository>();
@@ -42,13 +41,6 @@ namespace infrastructure
 		if (!m_fontRepo)
 			return std::nullopt;
 		return m_fontRepo->getFontName(fontId);
-	}
-
-	core::data::JobInfo ResourceManager::getJobInfo(core::constant::JobType jobType) const
-	{
-		if (!m_jobRepo)
-			throw std::runtime_error("JobRepository が初期化されていません");
-		return m_jobRepo->getJobInfo(jobType);
 	}
 
 	int ResourceManager::loadImageById(std::string_view imageId)

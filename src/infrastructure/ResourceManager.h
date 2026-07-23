@@ -3,7 +3,6 @@
 #include "core/interface/IResourceManager.h"
 #include "infrastructure/repository/ModelRepository.h"
 #include "infrastructure/repository/FontRepository.h"
-#include "infrastructure/repository/JobRepository.h"
 #include "infrastructure/repository/ImageRepository.h"
 #include "infrastructure/repository/AnimationRepository.h"
 #include "infrastructure/repository/StageRepository.h"
@@ -41,13 +40,6 @@ namespace infrastructure
 		 * @return フォントファミリー名（存在しない場合nullopt）
 		 */
 		std::optional<std::string> getFontName(const std::string_view fontId) const override;
-
-		/**
-		 * @brief ジョブタイプからジョブ情報を取得する
-		 * @param jobType ジョブタイプ
-		 * @return ジョブ情報
-		 */
-		[[nodiscard]] core::data::JobInfo getJobInfo(core::constant::JobType jobType) const override;
 
 		/**
 		 * @brief 画像IDから画像を読み込みハンドルを返す（キャッシュ付き）
@@ -102,7 +94,6 @@ namespace infrastructure
 	  private:
 		std::unique_ptr<repository::ModelRepository> m_modelRepo;
 		std::unique_ptr<repository::FontRepository> m_fontRepo;
-		std::unique_ptr<repository::JobRepository> m_jobRepo;
 		std::unique_ptr<repository::ImageRepository> m_imageRepo;
 		std::unique_ptr<repository::AnimationRepository> m_animRepo;
 		std::unique_ptr<repository::StageRepository> m_stageRepo;

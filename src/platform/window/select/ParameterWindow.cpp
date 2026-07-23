@@ -13,32 +13,14 @@ namespace platform::window::select
     void ParameterWindow::refresh(
         float baseHp, float baseAtk, float baseDef, float baseSpd,
         float bonusHp, float bonusAtk, float bonusDef, float bonusSpd,
-        const std::string& jobNameSjis,
-        const std::string& skillNameSjis,
         int equippedSlots) noexcept
     {
         if (!m_webView.isReady()) return;
-
-        auto sjisToUtf8 = [this](const std::string& sjis) -> std::string
-        {
-            if (sjis.empty()) return {};
-            int wlen = MultiByteToWideChar(SJIS_CODE_PAGE, 0, sjis.c_str(), -1, nullptr, 0);
-            if (wlen <= 0) return {};
-            std::wstring wide(wlen - 1, L'\0');
-            MultiByteToWideChar(SJIS_CODE_PAGE, 0, sjis.c_str(), -1, wide.data(), wlen);
-            int ulen{ WideCharToMultiByte(UTF8_CODE_PAGE, 0, wide.c_str(), -1, nullptr, 0, nullptr, nullptr) };
-            if (ulen <= 0) return {};
-            std::string utf8(ulen - 1, '\0');
-            WideCharToMultiByte(UTF8_CODE_PAGE, 0, wide.c_str(), -1, utf8.data(), ulen, nullptr, nullptr);
-            return utf8;
-        };
 
         try
         {
             nlohmann::json j;
             j[platform::window::WindowConstants::JSON_KEY_TYPE]     = platform::window::WindowConstants::MESSAGE_TYPE_REFRESH;
-            j[platform::window::WindowConstants::JSON_KEY_JOB]      = sjisToUtf8(jobNameSjis);
-            j[platform::window::WindowConstants::JSON_KEY_SKILL]    = sjisToUtf8(skillNameSjis);
             j[platform::window::WindowConstants::JSON_KEY_BASE_HP]   = baseHp;
             j[platform::window::WindowConstants::JSON_KEY_BASE_ATK]  = baseAtk;
             j[platform::window::WindowConstants::JSON_KEY_BASE_DEF]  = baseDef;
