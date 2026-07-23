@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
@@ -14,7 +14,7 @@ namespace game
 	class PauseManager; // 前方宣言
 } // namespace game
 
-namespace game::system
+namespace game::system::camera
 {
 	/**
 	 * @brief デバッグ用のフリーカメラを制御するSystem（マイクラのクリエイティブ視点相当）
@@ -66,4 +66,4 @@ namespace game::system
 		float m_pitch{ 0.35f };                       // 垂直回転（ラジアン）
 		bool m_wasDebugMode{ false };                 // 前フレームのデバッグモード状態（立ち上がり検出用）
 	};
-} // namespace game::system
+} // namespace game::system::camera

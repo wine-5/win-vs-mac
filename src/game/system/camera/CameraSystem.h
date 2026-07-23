@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
@@ -10,7 +10,7 @@ namespace game
 	class GameManager; // DEBUG: デバッグモード参照用の前方宣言（リリース時に削除）
 } // namespace game
 
-namespace game::system
+namespace game::system::camera
 {
 	/**
 	 * @brief マウス入力から3人称カメラを制御するSystem
@@ -48,4 +48,4 @@ namespace game::system
 		core::iface::ICamera& m_camera;
 		GameManager& m_gameManager; // DEBUG: デバッグモード状態の参照（リリース時に削除）
 	};
-} // namespace game::system
+} // namespace game::system::camera

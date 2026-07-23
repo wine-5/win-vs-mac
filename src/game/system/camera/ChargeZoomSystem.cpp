@@ -1,4 +1,4 @@
-#include "ChargeZoomSystem.h"
+﻿#include "ChargeZoomSystem.h"
 #include "game/component/PlayerChargeComponent.h"
 #include "game/component/CameraEffectComponent.h"
 
@@ -8,7 +8,7 @@ namespace
 	constexpr float ZOOM_LERP_SPEED{ 6.0f }; // 目標FOV倍率への追従速度（大きいほど機敏）
 } // namespace
 
-namespace game::system
+namespace game::system::camera
 {
 	ChargeZoomSystem::ChargeZoomSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId playerId)
@@ -36,4 +36,4 @@ namespace game::system
 		const float lerpRate{ t < 1.0f ? t : 1.0f };
 		effect.m_fovScale += (targetScale - effect.m_fovScale) * lerpRate;
 	}
-} // namespace game::system
+} // namespace game::system::camera

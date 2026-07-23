@@ -15,7 +15,7 @@ namespace
 	constexpr float SHAKE_Y_FREQUENCY_RATIO{ 1.3f }; // Y軸をX軸と別周波数にする比（円状でなく不規則な揺れにする）
 } // namespace
 
-namespace game::system
+namespace game::system::camera
 {
 	DamageShakeSystem::DamageShakeSystem(core::ecs::ComponentManager& componentManager,
 	    core::base::EventBus& eventBus,
@@ -71,4 +71,4 @@ namespace game::system
 			0.0f
 		};
 	}
-} // namespace game::system
+} // namespace game::system::camera

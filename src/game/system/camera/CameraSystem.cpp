@@ -1,4 +1,4 @@
-#include "CameraSystem.h"
+﻿#include "CameraSystem.h"
 #include "game/component/CameraComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/CameraEffectComponent.h"
@@ -6,7 +6,7 @@
 #include <cmath>
 #include <algorithm>
 
-namespace game::system
+namespace game::system::camera
 {
 	CameraSystem::CameraSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId targetEntityId,
@@ -135,4 +135,4 @@ namespace game::system
 		// FOVにZoom倍率を掛けて視野角を確定する（絞るほど望遠で寄って見える）
 		m_camera.setFieldOfView(camera.m_fov * fovScale);
 	}
-} // namespace game::system
+} // namespace game::system::camera

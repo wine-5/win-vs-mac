@@ -1,4 +1,4 @@
-#include "DebugCameraSystem.h"
+﻿#include "DebugCameraSystem.h"
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
 #include "game/component/CameraComponent.h"
@@ -8,7 +8,7 @@
 
 // DEBUG: このファイルはデバッグ用のフリーカメラ機能。リリース時にまとめて削除する。
 
-namespace game::system
+namespace game::system::camera
 {
 	namespace
 	{
@@ -134,4 +134,4 @@ namespace game::system
 			lookTarget.z - cosYaw * cosPitch * camera.m_distance
 		};
 	}
-} // namespace game::system
+} // namespace game::system::camera

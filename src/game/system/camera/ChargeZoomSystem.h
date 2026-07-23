@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 
-namespace game::system
+namespace game::system::camera
 {
 	/**
 	 * @brief 溜め攻撃中にFOVを絞ってプレイヤーへ寄っていく演出を担うSystem
@@ -33,4 +33,4 @@ namespace game::system
 		core::ecs::ComponentManager& m_componentManager;
 		core::ecs::EntityId m_playerId;
 	};
-} // namespace game::system
+} // namespace game::system::camera

@@ -5,7 +5,7 @@
 #include "core/base/EventBus.h"
 #include <vector>
 
-namespace game::system
+namespace game::system::camera
 {
 	/**
 	 * @brief プレイヤー被弾時にカメラを揺らす演出を担うSystem
@@ -46,4 +46,4 @@ namespace game::system
 		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
 		std::vector<core::base::EventBus::Subscription> m_subscriptions{};
 	};
-} // namespace game::system
+} // namespace game::system::camera
