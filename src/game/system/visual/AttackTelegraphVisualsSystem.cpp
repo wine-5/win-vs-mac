@@ -1,4 +1,4 @@
-#include "AttackTelegraphVisualsSystem.h"
+﻿#include "AttackTelegraphVisualsSystem.h"
 #include "game/component/AttackComponent.h"
 #include "game/component/TransformComponent.h"
 #include "game/component/ProjectileComponent.h"
@@ -11,7 +11,7 @@ namespace
 	constexpr float GROUND_LIFT{ 2.0f };
 } // namespace
 
-namespace game::system
+namespace game::system::visual
 {
 	AttackTelegraphVisualsSystem::AttackTelegraphVisualsSystem(core::ecs::ComponentManager& componentManager,
 	    core::iface::IRenderer& renderer)
@@ -56,4 +56,4 @@ namespace game::system
 			m_renderer.drawGroundCircle(center, radius, Color::TELEGRAPH_RING, false);
 		}
 	}
-} // namespace game::system
+} // namespace game::system::visual

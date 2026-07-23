@@ -5,7 +5,7 @@
 #include "game/event/InGameEvents.h"
 #include <vector>
 
-namespace game::system
+namespace game::system::visual
 {
     /**
      * @brief ダメージヒット時の点滅演出を管理するシステム
@@ -36,4 +36,4 @@ namespace game::system
 		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
 		std::vector<core::base::EventBus::Subscription> m_subscriptions{};
 	};
-} // namespace game::system
+} // namespace game::system::visual

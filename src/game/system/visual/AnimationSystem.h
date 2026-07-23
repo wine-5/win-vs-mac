@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <unordered_map>
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
@@ -8,7 +8,7 @@
 #include "game/component/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
 
-namespace game::system
+namespace game::system::visual
 {
 	/**
 	 * @brief 全エンティティのアニメーション切り替え・再生を一元管理するSystem
@@ -63,4 +63,4 @@ namespace game::system
 		core::iface::IAnimator& m_animator;
 		core::base::EventBus& m_eventBus;
 	};
-} // namespace game::system
+} // namespace game::system::visual

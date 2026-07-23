@@ -1,4 +1,4 @@
-#include "PlayerChargeVisualsSystem.h"
+﻿#include "PlayerChargeVisualsSystem.h"
 #include "game/component/PlayerChargeComponent.h"
 #include "core/utility/Color.h"
 #include <cmath>
@@ -26,7 +26,7 @@ namespace
 	}
 } // namespace
 
-namespace game::system
+namespace game::system::visual
 {
 	PlayerChargeVisualsSystem::PlayerChargeVisualsSystem(core::ecs::ComponentManager& componentManager,
 	    core::iface::IUIRenderer& uiRenderer,
@@ -112,4 +112,4 @@ namespace game::system
 			m_uiRenderer.drawTriangle(apexX, apexY, base1X, base1Y, base2X, base2Y, lineColor, true);
 		}
 	}
-} // namespace game::system
+} // namespace game::system::visual

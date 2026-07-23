@@ -40,7 +40,7 @@ namespace
 	}
 } // namespace
 
-namespace game::system
+namespace game::system::visual
 {
 	MacAwakenEffectSystem::MacAwakenEffectSystem(core::ecs::ComponentManager& componentManager,
 	    core::base::EventBus& eventBus,
@@ -187,4 +187,4 @@ namespace game::system
 
 		m_uiRenderer.resetBlendMode();
 	}
-} // namespace game::system
+} // namespace game::system::visual

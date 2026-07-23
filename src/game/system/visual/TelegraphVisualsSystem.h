@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/interface/IRenderer.h"
 
-namespace game::system
+namespace game::system::visual
 {
 	/**
 	 * @brief TelegraphComponentを持つ敵の攻撃予兆（円・扇）を地面に描くSystem
@@ -39,4 +39,4 @@ namespace game::system
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IRenderer& m_renderer;
 	};
-} // namespace game::system
+} // namespace game::system::visual

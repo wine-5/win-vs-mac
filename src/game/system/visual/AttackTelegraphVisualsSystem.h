@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/interface/IRenderer.h"
 
-namespace game::system
+namespace game::system::visual
 {
 	/**
 	 * @brief 敵の溜め攻撃（GroundSlam等）の予兆を地面に表示するSystem
@@ -40,4 +40,4 @@ namespace game::system
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IRenderer& m_renderer;
 	};
-} // namespace game::system
+} // namespace game::system::visual

@@ -3,7 +3,7 @@
 #include "game/component/RenderComponent.h"
 #include "game/component/HealthComponent.h"
 
-namespace game::system
+namespace game::system::visual
 {
     HitEffectSystem::HitEffectSystem(core::ecs::ComponentManager& componentManager,
         core::base::EventBus& eventBus)
@@ -81,4 +81,4 @@ namespace game::system
             }
         }
     }
-} // namespace game::system
+} // namespace game::system::visual

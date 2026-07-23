@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 
-namespace game::system
+namespace game::system::visual
 {
 	/**
 	 * @brief プレイヤーの溜め攻撃の画面演出（集中線）を担当するSystem
@@ -49,4 +49,4 @@ namespace game::system
 
 		float m_animationTime{ 0.0f }; // 溜め中に蓄積する演出用時間（集中線のちらつきに使う）
 	};
-} // namespace game::system
+} // namespace game::system::visual

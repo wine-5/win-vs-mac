@@ -68,7 +68,7 @@ namespace
 	}
 } // namespace
 
-namespace game::system
+namespace game::system::visual
 {
 	DetectionAlertVisualsSystem::DetectionAlertVisualsSystem(core::ecs::ComponentManager& componentManager,
 	    core::base::EventBus& eventBus,
@@ -250,4 +250,4 @@ namespace game::system
 			m_uiRenderer.drawCircle(x + width - radius, y + height - radius, radius, color, true, 0);
 		}
 	}
-} // namespace game::system
+} // namespace game::system::visual

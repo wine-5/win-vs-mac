@@ -3,7 +3,7 @@
 #include "game/component/EffectComponent.h"
 #include "game/component/TransformComponent.h"
 
-namespace game::system
+namespace game::system::visual
 {
 	EffectSystem::EffectSystem(core::ecs::ComponentManager& componentManager,
 		core::base::EventBus& eventBus,
@@ -166,4 +166,4 @@ namespace game::system
 		slot.m_handle = handle;
 		effect.m_slots.push_back(slot);
 	}
-} // namespace game::system
+} // namespace game::system::visual

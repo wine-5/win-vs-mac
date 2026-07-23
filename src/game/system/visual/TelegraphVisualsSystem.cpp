@@ -1,4 +1,4 @@
-#include "TelegraphVisualsSystem.h"
+﻿#include "TelegraphVisualsSystem.h"
 #include "game/component/TelegraphComponent.h"
 #include "core/utility/Color.h"
 
@@ -8,7 +8,7 @@ namespace
 	constexpr float GROUND_LIFT{ 2.0f };
 } // namespace
 
-namespace game::system
+namespace game::system::visual
 {
 	TelegraphVisualsSystem::TelegraphVisualsSystem(core::ecs::ComponentManager& componentManager,
 	    core::iface::IRenderer& renderer)
@@ -51,4 +51,4 @@ namespace game::system
 			}
 		}
 	}
-} // namespace game::system
+} // namespace game::system::visual

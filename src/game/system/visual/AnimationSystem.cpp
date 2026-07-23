@@ -10,7 +10,7 @@ namespace
 	constexpr float ANIMATION_FPS = 30.0f;
 }
 
-namespace game::system
+namespace game::system::visual
 {
 	AnimationSystem::AnimationSystem(core::ecs::ComponentManager& componentManager,
 		core::iface::IAnimator& animator,
@@ -125,4 +125,4 @@ namespace game::system
 		anim.m_requested = newState;
 		anim.m_isCompleted = false;
 	}
-} // namespace game::system
+} // namespace game::system::visual
