@@ -21,21 +21,9 @@ namespace game::data
 		static PlayerData fromMetadata(const core::data::ModelMetadata& metadata)
 		{
 			PlayerData data;
-			data.m_modelPath = metadata.modelPath;
 			data.m_scale = metadata.scale;
 			data.m_colliderSize = metadata.colliderSize;
 			data.m_colliderOffset = metadata.colliderOffset;
-
-			// アニメーションパス（stringProperties から取得）
-			auto idleIt{ metadata.stringProperties.find(
-				std::string(constant::metadata_keys::IDLE_ANIM)) };
-			if (idleIt != metadata.stringProperties.end())
-				data.m_idleAnimPath = idleIt->second;
-
-			auto walkIt{ metadata.stringProperties.find(
-				std::string(constant::metadata_keys::WALK_ANIM)) };
-			if (walkIt != metadata.stringProperties.end())
-				data.m_walkAnimPath = walkIt->second;
 
 			// moveSpeed（floatProperties から取得）
 			auto moveSpeedIt{ metadata.floatProperties.find(
@@ -82,12 +70,6 @@ namespace game::data
 			return data;
 		}
 
-		/** @brief モデルパスを取得 */
-		[[nodiscard]] const std::string& getModelPath()    const noexcept { return m_modelPath; }
-		/** @brief Idleアニメーションパスを取得 */
-		[[nodiscard]] const std::string& getIdleAnimPath() const noexcept { return m_idleAnimPath; }
-		/** @brief Walkアニメーションパスを取得 */
-		[[nodiscard]] const std::string& getWalkAnimPath() const noexcept { return m_walkAnimPath; }
 		/** @brief 移動速度を取得 */
 		[[nodiscard]] float              getMoveSpeed()      const noexcept { return m_moveSpeed; }
 		/** @brief ダッシュ速度倍率を取得 */
@@ -149,9 +131,6 @@ namespace game::data
 		}
 
 	private:
-		std::string   m_modelPath;
-		std::string   m_idleAnimPath;
-		std::string   m_walkAnimPath;
 		float         m_moveSpeed{ 0.0f };
 		float m_dashMultiplier{ 1.0f }; // JSON未設定時はダッシュしても等速
 		float         m_maxHp{ 0.0f };
