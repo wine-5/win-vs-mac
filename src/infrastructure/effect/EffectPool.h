@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 #include <vector>
-#include "core/ecs/ObjectPool.h"
+#include "core/base/ObjectPool.h"
 #include "core/utility/Vector3.h"
 
 namespace infrastructure::effect
