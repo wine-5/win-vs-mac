@@ -1,17 +1,11 @@
 ﻿#include "FontRepository.h"
 #include <DxLib.h>
-#include <fstream>
 #include <stdexcept>
 
 namespace infrastructure::repository
 {
-	FontRepository::FontRepository()
+	FontRepository::FontRepository(const nlohmann::json& j)
 	{
-		std::ifstream file("assets/config/resources.json");
-		if (!file.is_open())
-			throw std::runtime_error("assets/config/resources.json を開けませんでした");
-
-		const nlohmann::json j = nlohmann::json::parse(file);
 		for (const auto& font : loadFontList(j))
 		{
 			AddFontResourceEx(font.m_path.c_str(), FR_PRIVATE, nullptr);

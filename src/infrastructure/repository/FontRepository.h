@@ -24,22 +24,22 @@ namespace infrastructure::repository
 		 * DxLibに登録する
 		 * @throw std::runtime_error ファイルが見つからないか、JSONパースに失敗した場合
 		 */
-		FontRepository();
+	  FontRepository(const nlohmann::json& j);
 
-		/**
-		 * @brief デストラクタ
-		 *
-		 * デストラクト時に登録済みフォントをRemoveFontResourceExでクリーンアップする
-		 */
-		~FontRepository();
+	  /**
+	   * @brief デストラクタ
+	   *
+	   * デストラクト時に登録済みフォントをRemoveFontResourceExでクリーンアップする
+	   */
+	  ~FontRepository();
 
-		/**
-		 * @brief フォントIDからフォント名を取得する
-		 *
-		 * @param fontId フォント識別子
-		 * @return フォントファミリー名（存在しない場合nullopt）
-		 */
-		std::optional<std::string> getFontName(std::string_view fontId) const;
+	  /**
+	   * @brief フォントIDからフォント名を取得する
+	   *
+	   * @param fontId フォント識別子
+	   * @return フォントファミリー名（存在しない場合nullopt）
+	   */
+	  std::optional<std::string> getFontName(std::string_view fontId) const;
 
 	private:
 		struct FontDefinition

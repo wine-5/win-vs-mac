@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include "thirdparty/nlohmann/json.hpp"
 
 namespace infrastructure::repository
 {
@@ -20,17 +21,17 @@ namespace infrastructure::repository
 		 * resources.json の "animations" セクションを読み込む
 		 * @throw std::runtime_error ファイルが見つからないか JSON パースに失敗した場合
 		 */
-		AnimationRepository();
+	  AnimationRepository(const nlohmann::json& j);
 
-		/// @brief デストラクタ（ロード済みハンドルを解放）
-		~AnimationRepository();
+	  /// @brief デストラクタ（ロード済みハンドルを解放）
+	  ~AnimationRepository();
 
-		/**
-		 * @brief ID でアニメーションモデルを読み込みハンドルを返す（キャッシュ付き）
-		 * @param animationId アニメーション ID
-		 * @return DxLib モデルハンドル、失敗時は -1
-		 */
-		int loadAnimationById(std::string_view animationId);
+	  /**
+	   * @brief ID でアニメーションモデルを読み込みハンドルを返す（キャッシュ付き）
+	   * @param animationId アニメーション ID
+	   * @return DxLib モデルハンドル、失敗時は -1
+	   */
+	  int loadAnimationById(std::string_view animationId);
 
 	private:
 		std::unordered_map<std::string, std::string> m_paths{};

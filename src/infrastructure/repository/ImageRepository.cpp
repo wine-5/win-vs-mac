@@ -1,6 +1,5 @@
-#include "ImageRepository.h"
+﻿#include "ImageRepository.h"
 #include <DxLib.h>
-#include <fstream>
 #include <stdexcept>
 #include "thirdparty/nlohmann/json.hpp"
 #include "core/base/ServiceLocator.h"
@@ -8,13 +7,8 @@
 
 namespace infrastructure::repository
 {
-    ImageRepository::ImageRepository()
-    {
-        std::ifstream file("assets/config/resources.json");
-        if (!file.is_open())
-            throw std::runtime_error("assets/config/resources.json を開けませんでした");
-
-        const nlohmann::json j = nlohmann::json::parse(file);
+	ImageRepository::ImageRepository(const nlohmann::json& j)
+	{
         if (!j.contains("images")) return;
 
         for (const auto& item : j["images"])

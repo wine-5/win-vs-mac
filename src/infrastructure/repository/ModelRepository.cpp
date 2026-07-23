@@ -13,13 +13,8 @@ namespace
 
 namespace infrastructure::repository
 {
-	ModelRepository::ModelRepository()
+	ModelRepository::ModelRepository(const nlohmann::json& j)
 	{
-		std::ifstream file("assets/config/resources.json");
-		if (!file.is_open())
-			throw std::runtime_error("assets/config/resources.json を開けませんでした");
-
-		const nlohmann::json j = nlohmann::json::parse(file);
 		for (const auto& res : loadResourceList(j))
 			m_metadata[res.m_id] = parseJsonFile(res.m_path);
 		for (const auto& res : loadRawModelList(j))
@@ -144,7 +139,7 @@ namespace infrastructure::repository
 		}
 	}
 
-	float ModelRepository::computeBoundingRadius(int modelHandle, float scale) const
+	float ModelRepository::computeBoundingRadius(int modelHandle, float scale) const noexcept
 	{
 		if (modelHandle == -1)
 			return 0.0f;
@@ -175,7 +170,7 @@ namespace infrastructure::repository
 		return radius;
 	}
 
-	core::Vector3 ModelRepository::computeBoundingCenter(int modelHandle) const
+	core::Vector3 ModelRepository::computeBoundingCenter(int modelHandle) const noexcept
 	{
 		if (modelHandle == -1)
 			return core::Vector3{};
