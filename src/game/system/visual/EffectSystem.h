@@ -35,6 +35,18 @@ namespace game::system::visual
 	  void onEnemyDead(const game::event::EnemyDeadEvent& event);
 	  void onEnemySpawned(const game::event::EnemySpawnedEvent& event);
 
+	  /**
+	   * @brief エフェクトを再生し、寿命追跡用のスロットへ記録する
+	   *
+	   * 4つのイベントハンドラで共通する「再生 → 失敗なら中断 → スロットへ記録」をまとめたもの。
+	   * ハンドラ側は再生位置の求め方だけを持つ。
+	   * @param entityId スロットを持つEntityのID
+	   * @param type 再生するエフェクトの種類
+	   * @param position 再生位置（ワールド座標）
+	   */
+	  void playAndTrack(core::ecs::EntityId entityId,
+		  core::constant::EffectType type, const core::Vector3& position);
+
 	  core::ecs::ComponentManager& m_componentManager;
 	  core::base::EventBus& m_eventBus;
 	  core::iface::IEffectFactory& m_effectFactory;
