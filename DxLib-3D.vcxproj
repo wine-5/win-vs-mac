@@ -218,6 +218,7 @@
     <ClCompile Include="src\game\system\movement\MoveSystem.cpp" />
     <ClCompile Include="src\game\system\movement\PhysicsSystem.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageRepository.cpp" />
+    <ClCompile Include="src\infrastructure\resource\repository\StageCatalogRepository.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\ExtensionBonusRepository.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\ProjectileRepository.cpp" />
     <ClCompile Include="src\infrastructure\graphics\UIRenderer.cpp" />
@@ -285,6 +286,7 @@
   <ItemGroup>
     <ClInclude Include="src\core\base\Singleton.h" />
     <ClInclude Include="src\core\data\StageMetadata.h" />
+    <ClInclude Include="src\core\data\PropDefinition.h" />
     <ClInclude Include="src\core\data\ProjectileMetadata.h" />
     <ClInclude Include="src\game\actor\EnemyBehaviors.h" />
     <ClInclude Include="src\game\component\combat\ProjectileComponent.h" />
@@ -386,6 +388,7 @@
     <ClInclude Include="src\infrastructure\resource\repository\ModelRepository.h" />
     <ClInclude Include="src\infrastructure\resource\repository\AnimationRepository.h" />
     <ClInclude Include="src\infrastructure\resource\repository\StageRepository.h" />
+    <ClInclude Include="src\infrastructure\resource\repository\StageCatalogRepository.h" />
     <ClInclude Include="src\infrastructure\resource\repository\ExtensionBonusRepository.h" />
     <ClInclude Include="src\infrastructure\resource\repository\ProjectileRepository.h" />
     <ClInclude Include="src\game\constant\ProjectileId.h" />

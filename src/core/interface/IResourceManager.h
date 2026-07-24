@@ -4,6 +4,7 @@
 #include <optional>
 #include "core/data/ModelMetadata.h"
 #include "core/data/StageMetadata.h"
+#include "core/data/PropDefinition.h"
 #include "core/data/FileExtensionBonus.h"
 #include "core/data/FileExtensionType.h"
 #include "core/data/ProjectileMetadata.h"
@@ -63,6 +64,15 @@ namespace core::iface
 		 * @return ステージ配置定義
 		 */
 		[[nodiscard]] virtual const core::data::StageMetadata& getStageMetadata() const noexcept = 0;
+
+		/**
+		 * @brief 配置物の種類IDから種類定義を取得する
+		 *
+		 * PropMetadata.m_type からモデルパス・素材実寸・コライダー種別を解決するのに使う。
+		 * @param type 種類ID（stageCatalog.jsonのprops[].id）
+		 * @return 配置物の種類定義（存在しない場合はthrow）
+		 */
+		[[nodiscard]] virtual const core::data::PropDefinition& getPropDefinition(std::string_view type) const = 0;
 
 		/**
 		 * @brief 拡張子種別に対応するパラメータボーナスを取得する
