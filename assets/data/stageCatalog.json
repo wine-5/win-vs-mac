@@ -18,7 +18,9 @@
       ],
       "texture": "assets/model/stage/FloorFolder.png",
       "textureTile": 600,
-      "slideAccel": 0.0
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
     },
     {
       "id": "path_corridor",
@@ -38,7 +40,9 @@
       ],
       "texture": "assets/model/stage/PathCorridor.png",
       "textureTile": 800,
-      "slideAccel": 900.0
+      "slideAccel": 900.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
     },
     {
       "id": "wall_window",
@@ -58,7 +62,9 @@
       ],
       "texture": "assets/model/stage/WallWindow.png",
       "textureTile": 900,
-      "slideAccel": 0.0
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
     },
     {
       "id": "pillar_folder",
@@ -78,7 +84,9 @@
       ],
       "texture": "assets/model/stage/PillarFolder.png",
       "textureTile": 500,
-      "slideAccel": 0.0
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
     },
     {
       "id": "block_file",
@@ -98,7 +106,9 @@
       ],
       "texture": "assets/model/stage/BlockFile.png",
       "textureTile": 0,
-      "slideAccel": 0.0
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
     },
     {
       "id": "floor_apple",
@@ -118,7 +128,9 @@
       ],
       "texture": "assets/model/stage/FloorApple.png",
       "textureTile": 0,
-      "slideAccel": 0.0
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
     },
     {
       "id": "wall_data",
@@ -138,7 +150,9 @@
         40
       ],
       "textureTile": 0,
-      "slideAccel": 0.0
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": -0.12
     }
   ],
   "enemies": [

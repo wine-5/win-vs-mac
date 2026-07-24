@@ -23,6 +23,10 @@ namespace
 			def.m_textureTile = j["textureTile"];
 		if (j.contains("slideAccel"))
 			def.m_slideAccel = j["slideAccel"];
+		if (j.contains("scrollU"))
+			def.m_scrollU = j["scrollU"];
+		if (j.contains("scrollV"))
+			def.m_scrollV = j["scrollV"];
 		return def;
 	}
 } // namespace

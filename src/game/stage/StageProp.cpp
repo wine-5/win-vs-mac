@@ -23,6 +23,8 @@ namespace game::stage
 		render.m_modelHandle = params.m_modelHandle;
 		render.m_uvScaleU = params.m_uvScaleU;
 		render.m_uvScaleV = params.m_uvScaleV;
+		render.m_scrollSpeedU = params.m_scrollSpeedU;
+		render.m_scrollSpeedV = params.m_scrollSpeedV;
 		componentManager.add<component::visual::RenderComponent>(m_entity.getId(), render);
 
 		// 塞ぐ障害物はAABBで押し返し、歩ける面は傾きを考慮した接地計算に回す。

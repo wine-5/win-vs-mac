@@ -149,11 +149,14 @@ namespace game::scene
 					continue;
 
 				const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
-				// 同じモデルをサイズ違いで使い回すため、繰り返し回数は描画のたびに設定する。
-				// 繰り返さないモデル（キャラクター等）には触らない。スキニングされたモデルへ
+				// 同じモデルをサイズ違い・流し方違いで使い回すため、貼り方は描画のたびに設定する。
+				// 触らないモデル（キャラクター等）はそのまま。スキニングされたモデルへ
 				// テクスチャ座標変換を掛けると不正なフレーム指定になり得るため
-				if (render.m_uvScaleU != 1.0f || render.m_uvScaleV != 1.0f)
-					m_renderer.setTextureTiling(render.m_modelHandle, render.m_uvScaleU, render.m_uvScaleV);
+				const bool needsUv{ render.m_uvScaleU != 1.0f || render.m_uvScaleV != 1.0f ||
+					                render.m_scrollOffsetU != 0.0f || render.m_scrollOffsetV != 0.0f };
+				if (needsUv)
+					m_renderer.setTextureScroll(render.m_modelHandle, render.m_uvScaleU, render.m_uvScaleV,
+					    render.m_scrollOffsetU, render.m_scrollOffsetV);
 				m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
 			}
 		}

@@ -37,6 +37,7 @@
 #include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/system/visual/EffectSystem.h"
 #include "game/system/visual/LightSystem.h"
+#include "game/system/visual/TextureScrollSystem.h"
 #include "game/constant/PropId.h"
 #include "core/interface/IEffectFactory.h"
 #include "game/system/combat/AttackSystem.h"
@@ -397,6 +398,9 @@ namespace game::scene
 		m_view.setPlayerDeathSystem(playerDeath);
 
 		m_systemManager.registerSystem<game::system::visual::EffectSystem>(m_componentManager, m_eventBus, m_effectFactory);
+
+		// 壁などの模様を流す（貼り方をずらすだけなので描画状態に影響しない）
+		m_systemManager.registerSystem<game::system::visual::TextureScrollSystem>(m_componentManager);
 
 		// LightComponentを持つエンティティの点光源を生成・追従させる（プレイヤーの携行灯など）
 		if (auto* lighting{ core::base::ServiceLocator::get<core::iface::ILighting>() })

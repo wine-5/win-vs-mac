@@ -79,6 +79,9 @@ namespace game::factory
 			params.m_rotation = rotation;
 			params.m_scale = scale;
 
+			params.m_scrollSpeedU = def.m_scrollU;
+			params.m_scrollSpeedV = def.m_scrollV;
+
 			const auto collision{ constant::toPropCollision(def.m_collider) };
 			params.m_collision = collision;
 

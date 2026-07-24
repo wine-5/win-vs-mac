@@ -27,6 +27,9 @@ namespace game::stage
 		float m_uvScaleV{ 1.0f };
 
 		float m_slideAccel{ 0.0f }; // 坂を滑り落ちる加速度（Groundのみ有効。0で滑らない）
+
+		float m_scrollSpeedU{ 0.0f }; // テクスチャを流す速さ（1.0でテクスチャ1枚ぶん/秒）
+		float m_scrollSpeedV{ 0.0f };
 	};
 
 	/**
