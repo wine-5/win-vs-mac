@@ -16,7 +16,8 @@
         20,
         1000
       ],
-      "texture": "assets/model/stage/FloorFolder.png"
+      "texture": "assets/model/stage/FloorFolder.png",
+      "textureTile": 600
     },
     {
       "id": "path_corridor",
@@ -34,7 +35,8 @@
         20,
         2000
       ],
-      "texture": "assets/model/stage/PathCorridor.png"
+      "texture": "assets/model/stage/PathCorridor.png",
+      "textureTile": 800
     },
     {
       "id": "wall_window",
@@ -52,7 +54,8 @@
         900,
         40
       ],
-      "texture": "assets/model/stage/WallWindow.png"
+      "texture": "assets/model/stage/WallWindow.png",
+      "textureTile": 900
     },
     {
       "id": "pillar_folder",
@@ -70,7 +73,8 @@
         500,
         200
       ],
-      "texture": "assets/model/stage/PillarFolder.png"
+      "texture": "assets/model/stage/PillarFolder.png",
+      "textureTile": 500
     },
     {
       "id": "block_file",
@@ -88,7 +92,8 @@
         200,
         200
       ],
-      "texture": "assets/model/stage/BlockFile.png"
+      "texture": "assets/model/stage/BlockFile.png",
+      "textureTile": 0
     },
     {
       "id": "floor_apple",
@@ -106,7 +111,8 @@
         20,
         3000
       ],
-      "texture": "assets/model/stage/FloorApple.png"
+      "texture": "assets/model/stage/FloorApple.png",
+      "textureTile": 0
     }
   ],
   "enemies": [

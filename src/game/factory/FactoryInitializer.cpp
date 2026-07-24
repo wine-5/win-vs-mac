@@ -8,6 +8,7 @@
 #include "game/data/GroundData.h"
 #include <stdexcept>
 #include <cmath>
+#include <utility>
 
 namespace game::factory
 {
@@ -59,17 +60,23 @@ namespace game::factory
 			// JSONは度数法で持つ。DxLibのMV1SetRotationXYZはラジアンなので変換する
 			const core::Vector3 rotation{ prop.m_rotation * core::utility::DEG_TO_RAD };
 
+			stage::StagePropParams params{};
+			params.m_modelHandle = handle;
+			params.m_position = prop.m_position;
+			params.m_rotation = rotation;
+			params.m_scale = scale;
+
 			const auto collision{ constant::toPropCollision(def.m_collider) };
+			params.m_collision = collision;
 
 			// Box（壁・柱）は軸並行(AABB)で押し返すため、Y回転を反映して footprint を
 			// 実物に合わせる（壁を90°横に置くと幅と奥行きが入れ替わる）。
 			// Ground（床・坂）は傾きごと GroundingSystem が扱うので実寸をそのまま渡す
-			core::Vector3 collisionSize{};
 			if (collision == constant::PropCollision::Box)
 			{
 				const float cosYaw{ std::abs(std::cos(rotation.y)) };
 				const float sinYaw{ std::abs(std::sin(rotation.y)) };
-				collisionSize = core::Vector3{
+				params.m_collisionSize = core::Vector3{
 					prop.m_size.x * cosYaw + prop.m_size.z * sinYaw,
 					prop.m_size.y,
 					prop.m_size.x * sinYaw + prop.m_size.z * cosYaw
@@ -77,10 +84,27 @@ namespace game::factory
 			}
 			else if (collision == constant::PropCollision::Ground)
 			{
-				collisionSize = prop.m_size;
+				params.m_collisionSize = prop.m_size;
 			}
 
-			factory.create(handle, prop.m_position, rotation, scale, collision, collisionSize);
+			// テクスチャ1枚が受け持つ実寸から繰り返し回数を決める。
+			// 面の見え方を決めるのは大きい2辺なので、それをU/Vに割り当てる
+			// （壁なら「長さ×高さ」、床なら「奥行×幅」が対象になる）
+			if (def.m_textureTile > 0.0f)
+			{
+				float largest{ prop.m_size.x };
+				float second{ prop.m_size.y };
+				float smallest{ prop.m_size.z };
+				if (second < smallest)
+					std::swap(second, smallest);
+				if (largest < second)
+					std::swap(largest, second);
+
+				params.m_uvScaleU = largest / def.m_textureTile;
+				params.m_uvScaleV = second / def.m_textureTile;
+			}
+
+			factory.create(params);
 		}
 	}
 } // namespace game::factory

@@ -19,6 +19,8 @@ namespace
 		def.m_baseSize.y = j["baseSize"][1];
 		def.m_baseSize.z = j["baseSize"][2];
 		def.m_collider = j["collider"].get<std::string>();
+		if (j.contains("textureTile"))
+			def.m_textureTile = j["textureTile"];
 		return def;
 	}
 } // namespace

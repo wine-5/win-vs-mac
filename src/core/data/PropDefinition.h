@@ -16,6 +16,9 @@ namespace core::data
 		std::string m_id{};
 		std::string m_modelPath{};
 		core::Vector3 m_baseSize{}; // モデル素材の実寸。size ÷ baseSize がモデルスケールになる
-		std::string m_collider{};   // "box" | "none"
+		std::string m_collider{};   // "box" | "ground" | "none"
+		// テクスチャ1枚が受け持つ実寸（ユニット）。0なら繰り返さず面いっぱいに引き伸ばす。
+		// 引き伸ばした壁で窓が間延びしないよう、実寸に応じて模様を繰り返させる
+		float m_textureTile{ 0.0f };
 	};
 } // namespace core::data

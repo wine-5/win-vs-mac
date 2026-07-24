@@ -139,6 +139,11 @@ namespace game::scene
 					continue;
 
 				const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
+				// 同じモデルをサイズ違いで使い回すため、繰り返し回数は描画のたびに設定する。
+				// 繰り返さないモデル（キャラクター等）には触らない。スキニングされたモデルへ
+				// テクスチャ座標変換を掛けると不正なフレーム指定になり得るため
+				if (render.m_uvScaleU != 1.0f || render.m_uvScaleV != 1.0f)
+					m_renderer.setTextureTiling(render.m_modelHandle, render.m_uvScaleU, render.m_uvScaleV);
 				m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
 			}
 		}
