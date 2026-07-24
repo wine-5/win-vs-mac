@@ -15,6 +15,7 @@ namespace core::data
 	{
 		std::string m_type{};
 		core::Vector3 m_position{};
+		float m_rotationY{}; // 初期の向き（度数法）
 	};
 
 	/**

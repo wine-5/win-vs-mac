@@ -22,6 +22,9 @@ namespace
 		spawn.m_position.x = j["position"][0];
 		spawn.m_position.y = j["position"][1];
 		spawn.m_position.z = j["position"][2];
+		// 向きは後から追加した項目のため、持たない古いデータでも読めるようにする
+		if (j.contains("rotationY"))
+			spawn.m_rotationY = j["rotationY"];
 		return spawn;
 	}
 

@@ -307,7 +307,8 @@ namespace game::scene
 		// テスト時は stageData.json の mac.position を近くにすればすぐ戦える
 		const auto& macSpawn{ m_resourceManager.getStageMetadata().m_mac };
 		if (!macSpawn.m_type.empty())
-			m_macId = m_enemySpawner.spawn(constant::toEnemyType(macSpawn.m_type), macSpawn.m_position);
+			m_macId = m_enemySpawner.spawn(constant::toEnemyType(macSpawn.m_type), macSpawn.m_position,
+			    macSpawn.m_rotationY);
 	}
 
 	void InGame::setupSystems()

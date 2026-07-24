@@ -51,9 +51,11 @@ namespace game::factory
 		 * @brief 型と座標を指定して敵を1体生成する
 		 * @param type 敵の種類
 		 * @param position 生成位置
+		 * @param rotationY 初期の向き（度数法）。ボスの召喚など向きを問わない場合は既定の0でよい
 		 * @return 生成したEnemyのEntityId
 		 */
-		core::ecs::EntityId spawn(constant::EnemyType type, const core::Vector3& position);
+		core::ecs::EntityId spawn(constant::EnemyType type, const core::Vector3& position,
+		    float rotationY = 0.0f);
 
 		/**
 		 * @brief ステージ配置定義に基づき雑魚敵を全て生成する
