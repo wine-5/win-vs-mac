@@ -181,6 +181,7 @@
     <ClCompile Include="src\game\system\visual\EffectSystem.cpp" />
     <ClCompile Include="src\game\system\visual\HitEffectSystem.cpp" />
     <ClCompile Include="src\game\system\combat\EnemyDeathSystem.cpp" />
+    <ClCompile Include="src\game\system\combat\PlayerDeathSystem.cpp" />
     <ClCompile Include="src\game\system\visual\DetectionAlertVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\visual\AttackTelegraphVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\visual\TelegraphVisualsSystem.cpp" />
@@ -377,6 +378,7 @@
     <ClInclude Include="src\game\system\visual\EffectSystem.h" />
     <ClInclude Include="src\game\system\visual\HitEffectSystem.h" />
     <ClInclude Include="src\game\system\combat\EnemyDeathSystem.h" />
+    <ClInclude Include="src\game\system\combat\PlayerDeathSystem.h" />
     <ClInclude Include="src\game\system\visual\DetectionAlertVisualsSystem.h" />
     <ClInclude Include="src\game\system\visual\AttackTelegraphVisualsSystem.h" />
     <ClInclude Include="src\game\system\visual\TelegraphVisualsSystem.h" />
