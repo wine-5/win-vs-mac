@@ -8,11 +8,18 @@
 #include "core/input/KeyCode.h"
 #include "game/scene/SceneManager.h"
 #include <DxLib.h>
+#include <chrono>
 
 namespace
 {
 	constexpr float TARGET_FPS{ 60.0f };
 	constexpr float DELTA_TIME{ 1.0f / TARGET_FPS };
+
+	// 1フレームで消化する更新回数の上限。
+	// ブレークポイントで止めた後やロード直後は経過時間が数秒に達することがあり、
+	// 制限しないとその分だけupdateを連打して復帰できなくなる（death spiral）。
+	// 上限に当たった分の時間は切り捨て、ゲーム内時間が遅れることを許容する
+	constexpr int MAX_UPDATES_PER_FRAME{ 5 };
 } // namespace
 
 Application::Application(int screenWidth, int screenHeight)
@@ -36,35 +43,61 @@ Application::Application(int screenWidth, int screenHeight)
 
 void Application::run()
 {
+	// 実経過時間を貯めてDELTA_TIMEぶん溜まるごとにupdateを回す（詳細はヘッダのコメント参照）
+	auto lastFrameTime{ std::chrono::steady_clock::now() };
+	float accumulator{ 0.0f };
+
 	while (m_isRunning && !m_gameManager.isQuitRequested() && ProcessMessage() == 0)
 	{
+		const auto now{ std::chrono::steady_clock::now() };
+		const float elapsedTime{ std::chrono::duration<float>(now - lastFrameTime).count() };
+		lastFrameTime = now;
+
 		ClearDrawScreen(); // 画面クリア
 
 		// このフレームで使うキー入力状態を確定させる（Application/Scene/Systemの
 		// どこで何度チェックしても同じ値になるようにする。詳細はIInputProvider参照）
 		m_inputProvider->captureFrameInput();
 
-		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
-		if (audio)
-			audio->update(DELTA_TIME);
-
 		// シーンをまたぐポーズメニュー（Esc）の開閉・操作を処理する
 		updatePauseMenu();
 
 		if (m_pauseManager.isPausedBy(game::PauseReason::Menu))
 		{
-			// メニュー中はシーンの時間を完全に止め、止まった画面の上へメニューを重ねる
+			// メニュー中はシーンの時間を完全に止め、止まった画面の上へメニューを重ねる。
+			// 貯めた時間も捨てる（捨てないと再開した瞬間にメニューを開いていた時間ぶん早送りされる）
+			accumulator = 0.0f;
 			m_sceneManager->draw();
 			m_pauseMenuController->draw();
-
-			// シーンのupdateを飛ばすため、入力のフレーム更新はここで行う
-			m_inputProvider->updatePreviousState();
 		}
 		else
 		{
-			m_sceneManager->update(DELTA_TIME);
+			accumulator += elapsedTime;
+
+			int updateCount{ 0 };
+			while (accumulator >= DELTA_TIME && updateCount < MAX_UPDATES_PER_FRAME)
+			{
+				auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+				if (audio)
+					audio->update(DELTA_TIME);
+
+				m_sceneManager->update(DELTA_TIME);
+				accumulator -= DELTA_TIME;
+				++updateCount;
+			}
+
+			// 上限まで回しても処理しきれていない＝処理落ちが続いている状態。
+			// 残りを持ち越すと次フレーム以降も上限に張り付いて悪化するため、ここで捨てる
+			if (updateCount >= MAX_UPDATES_PER_FRAME)
+				accumulator = 0.0f;
+
 			m_sceneManager->draw();
 		}
+
+		// 入力の「前回状態」はフレームに1回だけ更新する。
+		// updateの実行回数（0〜MAX_UPDATES_PER_FRAME回）に関わらず、押した瞬間の判定が
+		// 1フレームにつき1回だけ成立するようにするため、updateの外側に置く
+		m_inputProvider->updatePreviousState();
 
 		ScreenFlip(); // 画面を反映
 	}

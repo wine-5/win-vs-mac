@@ -514,7 +514,6 @@ namespace game::scene
 		{
 			if (m_debugCameraSystem)
 				m_debugCameraSystem->update(deltaTime);
-			m_inputProvider.updatePreviousState();
 			return;
 		}
 
@@ -528,9 +527,6 @@ namespace game::scene
 			m_effectFactory.play(core::constant::EffectType::Enemy_HitWindow, transform.m_position);
 			core::log::info("エフェクトが再生");
 		}
-
-		// フレーム最後に入力状態を更新
-		m_inputProvider.updatePreviousState();
 	}
 
 	void InGame::draw()
