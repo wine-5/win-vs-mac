@@ -170,18 +170,40 @@ def tex_floor_apple():
     return img
 
 
-def tex_wall_data():
-    """データ壁：実行時にシステム情報が描き込まれる面。
+# データ壁に流すログ・コード行。ターゲットがプログラマーなので、
+# それらしい専門用語を並べて「システムの内側を覗いている」感じを出す
+DATA_LINES = [
+    "[ok] kernel32.dll  mapped 0x7ffb2c40",
+    "  mov  rax, qword ptr [rsp+28h]",
+    "[warn] handle leak  pid=4812 count=137",
+    "  thread 0x1a4  state=WAITING",
+    "[ok] ntfs  journal flush  12.4MB/s",
+    "  if (hr != S_OK) return hr;",
+    "[intruder] apple.process  signature mismatch",
+    "  call  QueryPerformanceCounter",
+    "[ok] page fault  soft=1284 hard=3",
+    "  lock cmpxchg [rbx], rcx",
+    "[warn] gdi objects  9821 / 10000",
+    "  0x00 0x4d 0x5a 0x90 0x00 0x03",
+    "[ok] scheduler  quantum=15ms",
+    "  while (!queue.empty()) { pop(); }",
+    "[intruder] safari.exe  spawned child",
+    "  ret",
+]
 
-    これは差し替わる前のフォールバック（起動直後や描画失敗時に見えるもの）。
-    実際の内容は SystemMonitorWallSystem がテクスチャへ直接描く。
+
+def tex_wall_data():
+    """データ壁の背景。
+
+    文字は実行時に DataWallSystem がテクスチャへ直接描いて流すので、
+    ここでは「文字が乗る下地」だけを用意する。
+    このPNGは、動的描画が使えないときのフォールバックも兼ねる。
     """
-    img = surface_base((14, 26, 40), BLUE, grid_step=32)
+    img = surface_base((14, 26, 40), BLUE, grid_step=64)
     d = ImageDraw.Draw(img)
-    f = MONO(20)
-    for i in range(12):
-        d.text((28, 40 + i * 36), "> awaiting system data ...", font=f, fill=BLUE + (120,))
-    glow_border(img, BLUE)
+    # 左右の縁だけ光らせる（縦に流しても繋ぎ目が出ないように上下は開ける）
+    d.rectangle([0, 0, 6, SIZE], fill=BLUE + (220,))
+    d.rectangle([SIZE - 7, 0, SIZE - 1, SIZE], fill=BLUE + (220,))
     return img
 
 
