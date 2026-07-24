@@ -44,7 +44,8 @@ namespace game::system::movement
 			worldZ /= length;
 		}
 
-		const float speed{ m_moveSpeed * (input.m_dashPressed ? m_dashMultiplier : 1.0f) };
+		const bool isDashing{ input.m_dashPressed };
+		const float speed{ m_moveSpeed * (isDashing ? m_dashMultiplier : 1.0f) };
 		velocity.m_velocity.x = worldX * speed;
 		velocity.m_velocity.z = worldZ * speed;
 
@@ -53,13 +54,16 @@ namespace game::system::movement
 		if (isMoving)
 			transform.m_rotation.y = atan2f(-worldX, -worldZ);
 
-		// 移動状態に応じたアニメーションを要求する
+		// 移動状態に応じたアニメーションを要求する（ダッシュ中は走りに切り替える）
 		if (m_componentManager.has<component::visual::AnimationComponent>(m_entityId))
 		{
 			auto& anim = m_componentManager.get<component::visual::AnimationComponent>(m_entityId);
-			anim.m_requested = isMoving
-				? constant::AnimationState::Walk
-				: constant::AnimationState::Idle;
+			if (!isMoving)
+				anim.m_requested = constant::AnimationState::Idle;
+			else if (isDashing)
+				anim.m_requested = constant::AnimationState::Run;
+			else
+				anim.m_requested = constant::AnimationState::Walk;
 		}
 	}
 } // namespace game::system::movement
