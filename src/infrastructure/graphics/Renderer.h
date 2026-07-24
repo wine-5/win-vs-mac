@@ -110,6 +110,12 @@ namespace infrastructure::graphics
 		 */
 		core::Vector3 worldToScreen(const core::Vector3& worldPos) override;
 
+		/**
+		 * @brief DEBUG: 直前の1フレームで発行された描画コール数を取得する
+		 * @return 描画コール数
+		 */
+		int getDrawCallCount() override;
+
 	  private:
 		// applyDeathDissolveで初回に保存する、マテリアルの元のディフューズ色とエミッシブ色
 		struct MaterialColors

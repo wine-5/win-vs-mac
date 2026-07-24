@@ -307,4 +307,9 @@ namespace infrastructure::graphics
 		VECTOR screen = ConvWorldPosToScreenPos(VGet(worldPos.x, worldPos.y, worldPos.z));
 		return { screen.x, screen.y, screen.z };
 	}
+
+	int Renderer::getDrawCallCount()
+	{
+		return GetDrawCallCount();
+	}
 } // namespace infrastructure::graphics

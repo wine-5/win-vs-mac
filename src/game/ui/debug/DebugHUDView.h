@@ -8,6 +8,7 @@ namespace core::iface
 {
 	class IPerformanceDataProvider; // 前方宣言
 	class IEffectFactory;           // DEBUG: 前方宣言（リリース時に削除）
+	class IRenderer;                // 前方宣言
 } // namespace core::iface
 
 namespace game
@@ -38,6 +39,7 @@ namespace game::ui::debug
 		 * @param pauseManager シーンビュー状態の参照
 		 * @param perfProvider CPU/メモリ使用率の取得元
 		 * @param effectFactory 同時再生中のエフェクト数の取得元（DEBUG: リリース時に削除）
+		 * @param renderer 描画コール数の取得元
 		 */
 		DebugHUDView(core::iface::IUIRenderer& uiRenderer,
 		    core::iface::IScreen& screen,
@@ -45,7 +47,8 @@ namespace game::ui::debug
 		    GameManager& gameManager,
 		    PauseManager& pauseManager,
 		    core::iface::IPerformanceDataProvider& perfProvider,
-		    core::iface::IEffectFactory& effectFactory);
+		    core::iface::IEffectFactory& effectFactory,
+		    core::iface::IRenderer& renderer);
 
 		/**
 		 * @brief FPS計測とパフォーマンスデータの定期更新を行う
@@ -81,6 +84,7 @@ namespace game::ui::debug
 		PauseManager& m_pauseManager;
 		core::iface::IPerformanceDataProvider& m_perfProvider;
 		core::iface::IEffectFactory& m_effectFactory; // DEBUG: リリース時に削除
+		core::iface::IRenderer& m_renderer;
 
 		// FPS計測用（直近区間のフレーム数を数えて一定間隔ごとに算出する。瞬間値だと表示が揺れるため）
 		// 実際の壁時計時間を使うため、Applicationの固定タイムステップに関わらず正確な値になる

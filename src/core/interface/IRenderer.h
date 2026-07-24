@@ -132,5 +132,15 @@ namespace core::iface
 		 * @return x/yはスクリーン座標、zは深度（0.0〜1.0の範囲内なら画面に映っている）
 		 */
 		virtual core::Vector3 worldToScreen(const core::Vector3& worldPos) = 0;
+
+		/**
+		 * @brief DEBUG: 直前の1フレームで発行された描画コール数を取得する
+		 *
+		 * 描画負荷の当たりをつけるための計測用。値は「前々回の画面更新〜前回の画面更新」の
+		 * 区間の集計であり、フレーム中のどこで呼んでも直前フレームの確定値が返る。
+		 * モデル・UI・エフェクトを含めた総数を数える
+		 * @return 描画コール数
+		 */
+		virtual int getDrawCallCount() = 0;
 	};
 } // namespace core::iface

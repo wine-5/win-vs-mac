@@ -244,7 +244,8 @@ namespace game::scene
 		    m_gameManager,
 		    m_pauseManager,
 		    *core::base::ServiceLocator::get<core::iface::IPerformanceDataProvider>(),
-		    m_effectFactory);
+		    m_effectFactory,
+		    m_renderer);
 		m_view.setDebugGizmoView(m_debugGizmoView.get());
 		m_view.setDebugHUDView(m_debugHUDView.get());
 	}
