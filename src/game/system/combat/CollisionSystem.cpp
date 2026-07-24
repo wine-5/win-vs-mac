@@ -100,38 +100,80 @@ namespace game::system::combat
 		auto& groundCollider = m_componentManager.get<component::combat::ColliderComponent>(groundId);
 		auto& riderVelocity = m_componentManager.get<component::movement::VelocityComponent>(riderId);
 
-		// 各コライダーの中心とAABBの境界を計算
+		// 各コライダーの中心と、軸ごとのめり込み量を計算する
 		const core::Vector3 riderCenter{ riderTransform.m_position + riderCollider.m_offset };
 		const core::Vector3 groundCenter{ groundTransform.m_position + groundCollider.m_offset };
 
-		const float riderBottom{ riderCenter.y - riderCollider.m_size.y / 2.0f };
-		const float groundTop{ groundCenter.y + groundCollider.m_size.y / 2.0f };
+		const core::Vector3 delta{ riderCenter - groundCenter };
+		const float overlapX{ (riderCollider.m_size.x + groundCollider.m_size.x) / 2.0f - std::abs(delta.x) };
+		const float overlapY{ (riderCollider.m_size.y + groundCollider.m_size.y) / 2.0f - std::abs(delta.y) };
+		const float overlapZ{ (riderCollider.m_size.z + groundCollider.m_size.z) / 2.0f - std::abs(delta.z) };
 
-		// 地面より下、または地面に近い場合に補正して下端を地面の上端へ合わせる
-		if (riderBottom > groundTop)
+		// isColliding を通っているので全軸で正のはずだが、安全のため負なら何もしない
+		if (overlapX <= 0.0f || overlapY <= 0.0f || overlapZ <= 0.0f)
 			return;
 
-		riderTransform.m_position.y += groundTop - riderBottom;
-
-		// 死亡中の敵は地面で反発してバウンドする（Safariの落下演出）。
-		// 落下速度が閾値を下回ったら跳ねるのをやめて静止させ、着地済みとして記録する。
-		// この着地フラグを見てEnemyDeathSystemがバウンド完了後に消失フェードを始める
-		auto* death{ m_componentManager.tryGet<component::combat::DeathComponent>(riderId) };
-
-		// 初回接地の時点で「地面に触れた」と記録する。EnemyDeathSystemはこれを見て
-		// バウンド完了を待たずに落下死のガタガタ揺れを止める
-		if (death != nullptr)
-			death->m_hasTouchedGround = true;
-
-		if (death != nullptr && riderVelocity.m_velocity.y < -DEATH_BOUNCE_MIN_SPEED)
+		// 最小めり込み軸に沿って押し出す（Minimum Translation Vector）。
+		// 床（縦に薄い）は上へ押し出して「乗る」、壁（横に薄い）は横へ押し出して「止まる」に
+		// 自然と分岐する。押し出す向きは相手の中心から離れる方向。
+		if (overlapY <= overlapX && overlapY <= overlapZ)
 		{
-			riderVelocity.m_velocity.y = -riderVelocity.m_velocity.y * DEATH_BOUNCE_RESTITUTION;
+			resolveVertical(riderId, riderTransform, riderVelocity, overlapY, delta.y);
 		}
-		else if (riderVelocity.m_velocity.y < 0.0f)
+		else if (overlapX <= overlapZ)
 		{
-			riderVelocity.m_velocity.y = 0.0f;
+			riderTransform.m_position.x += (delta.x >= 0.0f) ? overlapX : -overlapX;
+			// 壁に向かう水平速度だけ止める（横滑りは残す）
+			if ((delta.x >= 0.0f && riderVelocity.m_velocity.x < 0.0f) ||
+			    (delta.x < 0.0f && riderVelocity.m_velocity.x > 0.0f))
+				riderVelocity.m_velocity.x = 0.0f;
+		}
+		else
+		{
+			riderTransform.m_position.z += (delta.z >= 0.0f) ? overlapZ : -overlapZ;
+			if ((delta.z >= 0.0f && riderVelocity.m_velocity.z < 0.0f) ||
+			    (delta.z < 0.0f && riderVelocity.m_velocity.z > 0.0f))
+				riderVelocity.m_velocity.z = 0.0f;
+		}
+	}
+
+	void CollisionSystem::resolveVertical(core::ecs::EntityId riderId,
+	    component::movement::TransformComponent& riderTransform,
+	    component::movement::VelocityComponent& riderVelocity,
+	    float overlapY, float deltaY)
+	{
+		if (deltaY >= 0.0f)
+		{
+			// riderが上＝地面に乗る。上端を相手の上端へ合わせる
+			riderTransform.m_position.y += overlapY;
+
+			// 死亡中の敵は地面で反発してバウンドする（Safariの落下演出）。
+			// 落下速度が閾値を下回ったら跳ねるのをやめて静止させ、着地済みとして記録する。
+			// この着地フラグを見てEnemyDeathSystemがバウンド完了後に消失フェードを始める
+			auto* death{ m_componentManager.tryGet<component::combat::DeathComponent>(riderId) };
+
+			// 初回接地の時点で「地面に触れた」と記録する。EnemyDeathSystemはこれを見て
+			// バウンド完了を待たずに落下死のガタガタ揺れを止める
 			if (death != nullptr)
-				death->m_hasLanded = true;
+				death->m_hasTouchedGround = true;
+
+			if (death != nullptr && riderVelocity.m_velocity.y < -DEATH_BOUNCE_MIN_SPEED)
+			{
+				riderVelocity.m_velocity.y = -riderVelocity.m_velocity.y * DEATH_BOUNCE_RESTITUTION;
+			}
+			else if (riderVelocity.m_velocity.y < 0.0f)
+			{
+				riderVelocity.m_velocity.y = 0.0f;
+				if (death != nullptr)
+					death->m_hasLanded = true;
+			}
+		}
+		else
+		{
+			// riderが下＝天井に頭をぶつけた。下へ押し戻し、上向き速度を止める
+			riderTransform.m_position.y -= overlapY;
+			if (riderVelocity.m_velocity.y > 0.0f)
+				riderVelocity.m_velocity.y = 0.0f;
 		}
 	}
 } // namespace game::system::combat

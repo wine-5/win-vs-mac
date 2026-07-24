@@ -3,6 +3,13 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 
+// 前方宣言（実体は .cpp でインクルード）
+namespace game::component::movement
+{
+	struct TransformComponent;
+	struct VelocityComponent;
+} // namespace game::component::movement
+
 namespace game::system::combat
 {
     /**
@@ -38,6 +45,21 @@ namespace game::system::combat
 		 * @param b EntityID B
 		 */
 		void resolveCollision(core::ecs::EntityId a, core::ecs::EntityId b);
+
+		/**
+		 * @brief 縦方向（上下）の押し出しを解決する
+		 *
+		 * riderが上なら地面に乗せ（着地・死亡バウンド処理を含む）、下なら天井として押し戻す。
+		 * @param riderId 乗る側のEntityID
+		 * @param riderTransform 乗る側のTransform
+		 * @param riderVelocity 乗る側のVelocity
+		 * @param overlapY Y軸のめり込み量（正）
+		 * @param deltaY 乗る側中心 − 相手中心 のY成分（符号で上下を判定）
+		 */
+		void resolveVertical(core::ecs::EntityId riderId,
+		    component::movement::TransformComponent& riderTransform,
+		    component::movement::VelocityComponent& riderVelocity,
+		    float overlapY, float deltaY);
 
 		core::ecs::ComponentManager& m_componentManager;
     };
