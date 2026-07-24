@@ -199,9 +199,11 @@
     <ClCompile Include="src\game\factory\FactoryInitializer.cpp" />
     <ClCompile Include="src\game\factory\FactoryManager.cpp" />
     <ClCompile Include="src\game\factory\GroundFactory.cpp" />
+    <ClCompile Include="src\game\factory\StagePropFactory.cpp" />
     <ClCompile Include="src\game\factory\PlayerFactory.cpp" />
     <ClCompile Include="src\game\scene\SceneManager.cpp" />
     <ClCompile Include="src\game\stage\Ground.cpp" />
+    <ClCompile Include="src\game\stage\StageProp.cpp" />
     <ClCompile Include="src\game\system\visual\AnimationSystem.cpp" />
     <ClCompile Include="src\game\system\combat\CollisionSystem.cpp" />
     <ClCompile Include="src\game\ui\Button.cpp" />
@@ -408,6 +410,7 @@
     <ClInclude Include="src\game\factory\FactoryInitializer.h" />
     <ClInclude Include="src\game\factory\FactoryManager.h" />
     <ClInclude Include="src\game\factory\GroundFactory.h" />
+    <ClInclude Include="src\game\factory\StagePropFactory.h" />
     <ClInclude Include="src\game\factory\PlayerFactory.h" />
     <ClInclude Include="src\game\scene\SceneManager.h" />
     <ClInclude Include="src\game\scene\SceneType.h" />
@@ -417,6 +420,7 @@
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
     <ClInclude Include="src\game\data\PlayerData.h" />
     <ClInclude Include="src\game\stage\Ground.h" />
+    <ClInclude Include="src\game\stage\StageProp.h" />
     <ClInclude Include="src\game\system\visual\AnimationSystem.h" />
     <ClInclude Include="src\game\system\combat\CollisionSystem.h" />
     <ClInclude Include="src\infrastructure\graphics\Animator.h" />
