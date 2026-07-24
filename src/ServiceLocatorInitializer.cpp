@@ -21,6 +21,8 @@
 #include "infrastructure/graphics/Renderer.h"
 #include "core/interface/ILighting.h"
 #include "infrastructure/graphics/Lighting.h"
+#include "core/interface/ITextureCanvas.h"
+#include "infrastructure/graphics/TextureCanvas.h"
 #include "infrastructure/graphics/Animator.h"
 #include "game/scene/SceneManager.h"
 #include "game/GameManager.h"
@@ -81,6 +83,10 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 	// Lighting登録
 	core::base::ServiceLocator::provide<core::iface::ILighting>(
 	    std::make_unique<infrastructure::graphics::Lighting>());
+
+	// TextureCanvas登録（壁にシステム情報を描くのに使う）
+	core::base::ServiceLocator::provide<core::iface::ITextureCanvas>(
+	    std::make_unique<infrastructure::graphics::TextureCanvas>());
 
 	// WindowFactory登録
 	core::base::ServiceLocator::provide<core::iface::IWindowFactory>(
