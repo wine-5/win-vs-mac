@@ -2,7 +2,6 @@
 #include "FactoryManager.h"
 #include "core/interface/IResourceManager.h"
 #include "game/data/PlayerData.h"
-#include "game/data/GroundData.h"
 #include <cassert>
 
 namespace game::factory
@@ -28,12 +27,6 @@ namespace game::factory
 		 * @param playerData Playerのデータ
 		 */
 		void initializePlayer(const data::PlayerData& playerData);
-
-		/**
-		 * @brief Groundを初期化
-		 * @return 生成したGroundのEntityId
-		 */
-		core::ecs::EntityId initializeGround();
 
 		/**
 		 * @brief stageData.jsonのprops[]から配置物（床・壁など）を一括生成する

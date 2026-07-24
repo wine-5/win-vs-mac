@@ -7,7 +7,6 @@ namespace game::constant
     namespace model_id
     {
         constexpr std::string_view PLAYER = "player";
-        constexpr std::string_view GROUND = "ground";
         constexpr std::string_view ENEMY_XCODE = "enemy_xcode";
         constexpr std::string_view ENEMY_SAFARI = "enemy_safari";
         constexpr std::string_view ENEMY_MAC = "enemy_mac";
