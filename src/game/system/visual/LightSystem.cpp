@@ -2,6 +2,7 @@
 #include "core/interface/ILighting.h"
 #include "game/component/visual/LightComponent.h"
 #include "game/component/movement/TransformComponent.h"
+#include <algorithm>
 
 namespace game::system::visual
 {
@@ -13,7 +14,7 @@ namespace game::system::visual
 
 	LightSystem::~LightSystem()
 	{
-		for (const int handle : m_createdLights)
+		for (const auto& [entityId, handle] : m_lightsByEntity)
 			m_lighting.destroyPointLight(handle);
 	}
 
@@ -37,11 +38,34 @@ namespace game::system::visual
 				light.m_lightHandle = m_lighting.createPointLight(
 				    position, light.m_range, light.m_r, light.m_g, light.m_b);
 				if (light.m_lightHandle != -1)
-					m_createdLights.push_back(light.m_lightHandle);
+					m_lightsByEntity[entityId] = light.m_lightHandle;
 				continue;
 			}
 
 			m_lighting.setPointLightPosition(light.m_lightHandle, position);
+		}
+
+		destroyLightsOfLostEntities(entities);
+	}
+
+	void LightSystem::destroyLightsOfLostEntities(const std::vector<core::ecs::EntityId>& aliveEntities)
+	{
+		if (m_lightsByEntity.empty())
+			return;
+
+		// 今フレームに存在しなかったEntityの光源を消す。
+		// 敵が倒されるとEntityごと消えるため、これをしないと死んだ場所に光が残る
+		for (auto it{ m_lightsByEntity.begin() }; it != m_lightsByEntity.end();)
+		{
+			const bool isAlive{ std::find(aliveEntities.begin(), aliveEntities.end(), it->first) != aliveEntities.end() };
+			if (isAlive)
+			{
+				++it;
+				continue;
+			}
+
+			m_lighting.destroyPointLight(it->second);
+			it = m_lightsByEntity.erase(it);
 		}
 	}
 } // namespace game::system::visual

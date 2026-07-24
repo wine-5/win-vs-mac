@@ -2,6 +2,7 @@
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
+#include <unordered_map>
 #include <vector>
 
 namespace core::iface
@@ -37,10 +38,18 @@ namespace game::system::visual
 		void update(float deltaTime) override;
 
 	  private:
+		/**
+		 * @brief 消滅したEntityの光源を破棄する
+		 * @param aliveEntities 今フレームに存在したLightComponent保持Entityの一覧
+		 */
+		void destroyLightsOfLostEntities(const std::vector<core::ecs::EntityId>& aliveEntities);
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::ILighting& m_lighting;
 
-		// 破棄漏れを防ぐため、生成した光源ハンドルを控えておく
-		std::vector<int> m_createdLights;
+		// 生成した光源を持ち主のEntityと対応づけて保持する。
+		// 敵が倒されてEntityごと消えたとき、これを見て光源を破棄する
+		// （放置すると死んだ場所に光が残り続け、召喚のたびに蓄積する）
+		std::unordered_map<core::ecs::EntityId, int> m_lightsByEntity;
 	};
 } // namespace game::system::visual
