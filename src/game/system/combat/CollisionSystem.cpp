@@ -24,103 +24,97 @@ namespace game::system::combat
 
 	void CollisionSystem::update(float deltaTime)
 	{
-		auto entities{ m_componentManager.getAllEntities<component::combat::ColliderComponent>() };
+		collectAabbs();
 
-		for (size_t i = 0; i < entities.size(); i++)
+		// 押し返しが起きるのは 乗る側×地面側 だけ。全Entityの総当たりだと
+		// 地面同士・敵同士といった何もしない組み合わせが大半を占めるため、そこを丸ごと省く
+		for (auto& rider : m_riders)
 		{
-			for (size_t j = i + 1; j < entities.size(); j++)
+			for (const auto& ground : m_grounds)
 			{
-				if (isColliding(entities[i], entities[j]))
-					resolveCollision(entities[i], entities[j]);
+				if (isColliding(rider, ground))
+					resolveCollision(rider, ground);
 			}
 		}
 	}
 
-	bool CollisionSystem::isColliding(core::ecs::EntityId a, core::ecs::EntityId b) const
+	void CollisionSystem::collectAabbs()
 	{
-		auto& transformA = m_componentManager.get<component::movement::TransformComponent>(a);
-		auto& transformB = m_componentManager.get<component::movement::TransformComponent>(b);
-		auto& colliderA = m_componentManager.get<component::combat::ColliderComponent>(a);
-		auto& colliderB = m_componentManager.get<component::combat::ColliderComponent>(b);
+		m_riders.clear();
+		m_grounds.clear();
 
-		// 各軸の中心座標
-		core::Vector3 centerA{ transformA.m_position + colliderA.m_offset };
-		core::Vector3 centerB{ transformB.m_position + colliderB.m_offset };
+		const auto entities{ m_componentManager.getAllEntities<component::combat::ColliderComponent>() };
 
-		// 各軸の距離と必要な距離
-		float distX{ std::abs(centerA.x - centerB.x) };
-		float distY{ std::abs(centerA.y - centerB.y) };
-		float distZ{ std::abs(centerA.z - centerB.z) };
+		for (const auto id : entities)
+		{
+			const auto* tag{ m_componentManager.tryGet<component::TagComponent>(id) };
+			if (tag == nullptr)
+				continue;
 
-		float requiredX{ (colliderA.m_size.x + colliderB.m_size.x) / 2.0f };
-		float requiredY{ (colliderA.m_size.y + colliderB.m_size.y) / 2.0f };
-		float requiredZ{ (colliderA.m_size.z + colliderB.m_size.z) / 2.0f };
+			const bool isRider{ tag->m_tag == constant::Tag::Player || tag->m_tag == constant::Tag::Enemy };
+			if (!isRider && tag->m_tag != constant::Tag::Ground)
+				continue;
 
-		// 各軸の重なりをチェック
-		bool overlapX{ distX <= requiredX };
-		bool overlapY{ distY <= requiredY };
-		bool overlapZ{ distZ <= requiredZ };
+			const auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(id) };
+			if (transform == nullptr)
+				continue;
 
-		return overlapX && overlapY && overlapZ;
+			// 乗る側は速度を止める処理があるため、VelocityComponentが無いものは対象外
+			if (isRider && !m_componentManager.has<component::movement::VelocityComponent>(id))
+				continue;
+
+			const auto& collider{ m_componentManager.get<component::combat::ColliderComponent>(id) };
+
+			Aabb aabb{};
+			aabb.m_id = id;
+			aabb.m_center = transform->m_position + collider.m_offset;
+			aabb.m_halfSize = collider.m_size * 0.5f;
+
+			if (isRider)
+				m_riders.push_back(aabb);
+			else
+				m_grounds.push_back(aabb);
+		}
 	}
 
-	void CollisionSystem::resolveCollision(core::ecs::EntityId a, core::ecs::EntityId b)
+	bool CollisionSystem::isColliding(const Aabb& a, const Aabb& b) noexcept
 	{
-		const auto& tagA{ m_componentManager.get<component::TagComponent>(a) };
-		const auto& tagB{ m_componentManager.get<component::TagComponent>(b) };
+		// 各軸の距離が「半サイズの和」以下なら、その軸は重なっている
+		return std::abs(a.m_center.x - b.m_center.x) <= a.m_halfSize.x + b.m_halfSize.x &&
+		       std::abs(a.m_center.y - b.m_center.y) <= a.m_halfSize.y + b.m_halfSize.y &&
+		       std::abs(a.m_center.z - b.m_center.z) <= a.m_halfSize.z + b.m_halfSize.z;
+	}
 
-		// 地面に乗る側（Player / Enemy）と地面を特定する。
-		// PlayerとEnemyで押し返しの計算は同一なので、DeathComponentの有無だけで分岐すればよい
-		const auto isRider{ [](constant::Tag tag) noexcept
-			{
-			    return tag == constant::Tag::Player || tag == constant::Tag::Enemy;
-			} };
-
-		core::ecs::EntityId riderId{ core::ecs::INVALID_ENTITY_ID };
-		core::ecs::EntityId groundId{ core::ecs::INVALID_ENTITY_ID };
-
-		if (isRider(tagA.m_tag) && tagB.m_tag == constant::Tag::Ground)
-		{
-			riderId = a;
-			groundId = b;
-		}
-		else if (tagA.m_tag == constant::Tag::Ground && isRider(tagB.m_tag))
-		{
-			riderId = b;
-			groundId = a;
-		}
-		else
-		{
-			return;
-		}
-
-		auto& riderTransform = m_componentManager.get<component::movement::TransformComponent>(riderId);
-		auto& groundTransform = m_componentManager.get<component::movement::TransformComponent>(groundId);
-		auto& riderCollider = m_componentManager.get<component::combat::ColliderComponent>(riderId);
-		auto& groundCollider = m_componentManager.get<component::combat::ColliderComponent>(groundId);
-		auto& riderVelocity = m_componentManager.get<component::movement::VelocityComponent>(riderId);
-
-		// 各コライダーの中心と、軸ごとのめり込み量を計算する
-		const core::Vector3 riderCenter{ riderTransform.m_position + riderCollider.m_offset };
-		const core::Vector3 groundCenter{ groundTransform.m_position + groundCollider.m_offset };
-
-		const core::Vector3 delta{ riderCenter - groundCenter };
-		const float overlapX{ (riderCollider.m_size.x + groundCollider.m_size.x) / 2.0f - std::abs(delta.x) };
-		const float overlapY{ (riderCollider.m_size.y + groundCollider.m_size.y) / 2.0f - std::abs(delta.y) };
-		const float overlapZ{ (riderCollider.m_size.z + groundCollider.m_size.z) / 2.0f - std::abs(delta.z) };
+	void CollisionSystem::resolveCollision(Aabb& rider, const Aabb& ground)
+	{
+		// 軸ごとのめり込み量を計算する
+		const core::Vector3 delta{ rider.m_center - ground.m_center };
+		const float overlapX{ rider.m_halfSize.x + ground.m_halfSize.x - std::abs(delta.x) };
+		const float overlapY{ rider.m_halfSize.y + ground.m_halfSize.y - std::abs(delta.y) };
+		const float overlapZ{ rider.m_halfSize.z + ground.m_halfSize.z - std::abs(delta.z) };
 
 		// isColliding を通っているので全軸で正のはずだが、安全のため負なら何もしない
 		if (overlapX <= 0.0f || overlapY <= 0.0f || overlapZ <= 0.0f)
 			return;
 
+		// PlayerとEnemyで押し返しの計算は同一なので、DeathComponentの有無だけで分岐すればよい
+		auto& riderTransform = m_componentManager.get<component::movement::TransformComponent>(rider.m_id);
+		auto& riderVelocity = m_componentManager.get<component::movement::VelocityComponent>(rider.m_id);
+
 		// 最小めり込み軸に沿って押し出す（Minimum Translation Vector）。
 		// 床（縦に薄い）は上へ押し出して「乗る」、壁（横に薄い）は横へ押し出して「止まる」に
 		// 自然と分岐する。押し出す向きは相手の中心から離れる方向。
 		if (overlapY <= overlapX && overlapY <= overlapZ)
-			resolveVertical(riderId, riderTransform, riderVelocity, overlapY, delta.y);
+		{
+			const float pushY{ (delta.y >= 0.0f) ? overlapY : -overlapY };
+			resolveVertical(rider.m_id, riderTransform, riderVelocity, overlapY, delta.y);
+			rider.m_center.y += pushY;
+		}
 		else if (overlapX <= overlapZ)
 		{
-			riderTransform.m_position.x += (delta.x >= 0.0f) ? overlapX : -overlapX;
+			const float pushX{ (delta.x >= 0.0f) ? overlapX : -overlapX };
+			riderTransform.m_position.x += pushX;
+			rider.m_center.x += pushX;
 			// 壁に向かう水平速度だけ止める（横滑りは残す）
 			if ((delta.x >= 0.0f && riderVelocity.m_velocity.x < 0.0f) ||
 			    (delta.x < 0.0f && riderVelocity.m_velocity.x > 0.0f))
@@ -128,7 +122,9 @@ namespace game::system::combat
 		}
 		else
 		{
-			riderTransform.m_position.z += (delta.z >= 0.0f) ? overlapZ : -overlapZ;
+			const float pushZ{ (delta.z >= 0.0f) ? overlapZ : -overlapZ };
+			riderTransform.m_position.z += pushZ;
+			rider.m_center.z += pushZ;
 			if ((delta.z >= 0.0f && riderVelocity.m_velocity.z < 0.0f) ||
 			    (delta.z < 0.0f && riderVelocity.m_velocity.z > 0.0f))
 				riderVelocity.m_velocity.z = 0.0f;
