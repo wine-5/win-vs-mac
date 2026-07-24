@@ -196,8 +196,8 @@
   <span class="sep"></span>
   <button id="btnLoad">stageData 読込</button>
   <button id="btnCatalog">カタログ読込</button>
-  <button id="btnSave">保存 (上書き)</button>
-  <span class="hint">右ドラッグ+WASD: 移動 / Q,E: 上下 / Shift: 加速 / F: フォーカス / Ctrl: スナップ</span>
+  <button id="btnSave" title="Ctrl+S">保存 (上書き)</button>
+  <span class="hint">Ctrl+S: 保存 / 右ドラッグ+WASD: 移動 / Q,E: 上下 / Shift: 加速 / F: フォーカス / Ctrl: スナップ</span>
 </div>
 
 <div id="hierarchy"></div>
@@ -856,6 +856,9 @@ window.addEventListener('keydown', (e) => {
 
   if (e.ctrlKey && !ctrlDown) { ctrlDown = true; applySnap(true); }
 
+  /* ブラウザの「ページを保存」を止めて、ステージJSONの上書き保存に割り当てる。
+     入力欄にフォーカスがあっても効かせたいので typing 判定より前に置く */
+  if (e.ctrlKey && e.code === 'KeyS') { e.preventDefault(); exportStage(); return; }
   if (e.ctrlKey && e.code === 'KeyZ') { e.preventDefault(); doUndo(); return; }
   if (e.ctrlKey && e.code === 'KeyY') { e.preventDefault(); doRedo(); return; }
   if (e.ctrlKey && e.code === 'KeyD') { e.preventDefault(); duplicateSelected(); return; }

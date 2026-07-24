@@ -55,6 +55,7 @@ python tools/serve_editor.py
 | `Ctrl` を押しながらドラッグ | スナップ（移動100 / 回転15° / 拡縮100） |
 | `Ctrl + D` | 複製 |
 | `Delete` | 削除 |
+| `Ctrl + S` | 保存（`stage-test.json` を上書き。ブラウザの「ページを保存」は無効化される） |
 | `Ctrl + Z` / `Ctrl + Y` | Undo / Redo |
 | Global / Local ボタン | ギズモの軸を切り替え（**坂の編集では Local 推奨**） |
 | Hierarchy をダブルクリック | 選択してフォーカス |
