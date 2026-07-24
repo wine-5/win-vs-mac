@@ -50,6 +50,24 @@ namespace
 	}
 
 	/**
+	 * @brief JSONのlight要素をLightMetadataへ変換する
+	 * @param j light要素のJSONオブジェクト
+	 * @return 変換したLightMetadata
+	 */
+	core::data::LightMetadata parseLight(const nlohmann::json& j)
+	{
+		core::data::LightMetadata light{};
+		light.m_position.x = j["position"][0];
+		light.m_position.y = j["position"][1];
+		light.m_position.z = j["position"][2];
+		light.m_range = j["range"];
+		light.m_r = j["color"][0];
+		light.m_g = j["color"][1];
+		light.m_b = j["color"][2];
+		return light;
+	}
+
+	/**
 	 * @brief JSONのplayerStart要素をPlayerStartMetadataへ変換する
 	 * @param j playerStart要素のJSONオブジェクト
 	 * @return 変換したPlayerStartMetadata
@@ -83,6 +101,10 @@ namespace infrastructure::resource::repository
 		if (j.contains("props"))
 			for (const auto& prop : j["props"])
 				m_stageMetadata.m_props.push_back(parseProp(prop));
+
+		if (j.contains("lights"))
+			for (const auto& light : j["lights"])
+				m_stageMetadata.m_lights.push_back(parseLight(light));
 
 		for (const auto& spawn : j["spawns"])
 			m_stageMetadata.m_spawns.push_back(parseSpawn(spawn));

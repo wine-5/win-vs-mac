@@ -44,12 +44,28 @@ namespace core::data
 	};
 
 	/**
+	 * @brief ステージに置く点光源1つ分の定義
+	 *
+	 * 「青い道中 → 白銀のアリーナ」のような明暗・色の演出を、
+	 * コードではなくステージデータ側で組み立てるために持つ。
+	 */
+	struct LightMetadata
+	{
+		core::Vector3 m_position{};
+		float m_range{ 1000.0f };
+		int m_r{ 255 };
+		int m_g{ 255 };
+		int m_b{ 255 };
+	};
+
+	/**
 	 * @brief ステージの配置定義
 	 */
 	struct StageMetadata
 	{
 		PlayerStartMetadata m_playerStart{};
 		std::vector<PropMetadata> m_props{};
+		std::vector<LightMetadata> m_lights{};
 		std::vector<SpawnMetadata> m_spawns{};
 		SpawnMetadata m_mac{};
 	};
