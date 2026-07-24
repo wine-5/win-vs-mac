@@ -86,10 +86,23 @@ namespace game::event
 
 	/**
 	 * @brief プレイヤーが死亡したときに発行されるイベント
+	 *
+	 * これは「HPが尽きた瞬間」であって、シーンを切り替えてよい合図ではない。
+	 * 死亡アニメと暗転演出を挟むため、遷移は PlayerDeathSequenceFinishedEvent を待つ
 	 */
 	struct PlayerDeadEvent : public core::iface::IGameEvent
 	{
 		PlayerDeadEvent() = default;
+	};
+
+	/**
+	 * @brief プレイヤーの死亡演出（死亡アニメ→暗転）が完了したときに発行されるイベント
+	 *
+	 * PlayerDeathSystemが発行する。リザルトへのシーン遷移はこれを合図に行う
+	 */
+	struct PlayerDeathSequenceFinishedEvent : public core::iface::IGameEvent
+	{
+		PlayerDeathSequenceFinishedEvent() = default;
 	};
 
 	/**
