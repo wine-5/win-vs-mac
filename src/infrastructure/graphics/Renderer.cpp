@@ -12,6 +12,11 @@ namespace
 	constexpr float DISSOLVE_RED_R{ 1.0f };
 	constexpr float DISSOLVE_RED_G{ 0.1f };
 	constexpr float DISSOLVE_RED_B{ 0.08f };
+
+	// DEBUG: 球・カプセルのデバッグ描画の分割数。
+	// DxLibの分割数は縦横それぞれに効くため、生成される三角形数は分割数の2乗で増える
+	// （16なら約512三角形、8なら約128三角形）。デバッグ表示は形が分かれば十分なので粗くする
+	constexpr int DEBUG_SHAPE_DIV_NUM{ 8 };
 } // namespace
 
 namespace infrastructure::graphics
@@ -159,21 +164,19 @@ namespace infrastructure::graphics
 
 	void Renderer::drawDebugSphere(const core::Vector3& center, float radius, unsigned int color)
 	{
-		constexpr int DIV_NUM{ 16 }; // 球の分割数（デバッグ用なので粗くてよい）
 		VECTOR pos = VGet(center.x, center.y, center.z);
 
 		// ワイヤーフレームで描画（塗りつぶしなし）
-		DrawSphere3D(pos, radius, DIV_NUM, color, color, FALSE);
+		DrawSphere3D(pos, radius, DEBUG_SHAPE_DIV_NUM, color, color, FALSE);
 	}
 
 	void Renderer::drawDebugCapsule(const core::Vector3& bottom, const core::Vector3& top, float radius, unsigned int color)
 	{
-		constexpr int DIV_NUM{ 16 }; // カプセルの分割数（デバッグ用なので粗くてよい）
 		VECTOR pos1 = VGet(bottom.x, bottom.y, bottom.z);
 		VECTOR pos2 = VGet(top.x, top.y, top.z);
 
 		// ワイヤーフレームで描画（塗りつぶしなし）
-		DrawCapsule3D(pos1, pos2, radius, DIV_NUM, color, color, FALSE);
+		DrawCapsule3D(pos1, pos2, radius, DEBUG_SHAPE_DIV_NUM, color, color, FALSE);
 	}
 
 	void Renderer::drawGroundCircle(const core::Vector3& center, float radius, unsigned int color, bool filled)
