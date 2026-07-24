@@ -25,5 +25,15 @@ namespace core::iface
 		 * @param fovRad 視野角（ラジアン）
 		 */
 		virtual void setFieldOfView(float fovRad) = 0;
+
+		/**
+		 * @brief 描画するNear/Farクリップ距離を設定する
+		 *
+		 * フォグの濃度はこのNear〜Farの範囲を0.0〜1.0として指定するため、
+		 * 明示的に決めておかないとフォグの掛かる距離が読めなくなる。
+		 * @param nearClip 手前のクリップ距離
+		 * @param farClip 奥のクリップ距離
+		 */
+		virtual void setNearFar(float nearClip, float farClip) = 0;
 	};
 } // namespace core::iface
