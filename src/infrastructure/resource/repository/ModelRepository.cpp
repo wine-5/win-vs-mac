@@ -11,6 +11,25 @@ namespace
 {
 	// 腕を広げたポーズだと横幅が実際の胴体より大きく出るため、水平方向を絞って胴体に沿わせる係数
 	constexpr float HORIZONTAL_SHRINK{ 0.5f };
+
+	/**
+	 * @brief モデル全マテリアルの環境光反射を白に揃える
+	 *
+	 * FBX由来のモデルは環境光の反射率が低く（もしくは0）、環境光を上げても暗いままになる。
+	 * 一方こちらで生成したステージ用MQOは amb(1.0) を持つため、同じ光でも明るさが揃わない。
+	 * 読み込み時に一律で白へ正規化し、モデルの出自による明暗のばらつきを無くす。
+	 * @param handle モデルハンドル
+	 */
+	void normalizeMaterialAmbient(int handle)
+	{
+		if (handle == -1)
+			return;
+
+		const COLOR_F white{ GetColorF(1.0f, 1.0f, 1.0f, 1.0f) };
+		const int materialNum{ MV1GetMaterialNum(handle) };
+		for (int i{ 0 }; i < materialNum; ++i)
+			MV1SetMaterialAmbColor(handle, i, white);
+	}
 } // namespace
 
 namespace infrastructure::resource::repository
@@ -38,9 +57,14 @@ namespace infrastructure::resource::repository
 
 				int handle{ MV1LoadModel(rawIt->second.c_str()) };
 				if (handle == -1)
+				{
 					core::log::error("モデルの読み込みに失敗しました: {}", rawIt->second.c_str());
+				}
 				else
+				{
+					normalizeMaterialAmbient(handle);
 					m_modelHandles[id] = handle;
+				}
 				return handle;
 			}
 		}
@@ -63,6 +87,8 @@ namespace infrastructure::resource::repository
 			core::log::error("モデルの読み込みに失敗しました: {}", metadata.modelPath.c_str());
 			return -1;
 		}
+
+		normalizeMaterialAmbient(handle);
 
 		VECTOR scale = VGet(metadata.scale.x, metadata.scale.y, metadata.scale.z);
 		MV1SetScale(handle, scale);
@@ -125,9 +151,14 @@ namespace infrastructure::resource::repository
 
 		int handle{ MV1LoadModel(key.c_str()) };
 		if (handle == -1)
+		{
 			core::log::error("モデルの読み込みに失敗しました: {}", key.c_str());
+		}
 		else
+		{
+			normalizeMaterialAmbient(handle);
 			m_modelHandles[key] = handle;
+		}
 		return handle;
 	}
 
