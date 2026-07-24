@@ -17,6 +17,7 @@
 #include "game/system/movement/InputSystem.h"
 #include "game/system/movement/MoveSystem.h"
 #include "game/system/movement/PhysicsSystem.h"
+#include "game/system/movement/GroundingSystem.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/actor/Player.h"
 #include "game/GameManager.h"
@@ -271,9 +272,7 @@ namespace game::scene
 		if (m_componentManager.has<component::camera::CameraComponent>(m_playerId))
 			m_componentManager.get<component::camera::CameraComponent>(m_playerId).m_yaw = startYawRad;
 
-		initializer.initializeGround();
-
-		// stageData.jsonのprops[]から床・壁などの配置物を生成する
+		// 地面は stageData.json の props[] が持つ（単一の水平地面は坂と競合するため生成しない）
 		initializer.initializeProps();
 
 		// 生成される敵の追跡対象をプレイヤーに設定してからスポーンする
@@ -330,6 +329,8 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::visual::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
 
 		m_systemManager.registerSystem<game::system::combat::CollisionSystem>(m_componentManager);
+		// 障害物の押し返し後に、床・坂の傾いた面へ足を乗せる（坂はAABBで表せないため専用処理）
+		m_systemManager.registerSystem<game::system::movement::GroundingSystem>(m_componentManager);
 		// AI行動分割：近接追跡型敵を駆動
 		m_systemManager.registerSystem<game::system::ai::MeleeChaseAISystem>(m_componentManager);
 		// AI行動分割：遠距離維持型敵を駆動
