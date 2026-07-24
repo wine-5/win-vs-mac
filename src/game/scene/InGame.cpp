@@ -267,7 +267,8 @@ namespace game::scene
 
 	void InGame::spawnEntities()
 	{
-		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
+		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager,
+		    m_entityManager, m_componentManager);
 
 		// 拡張子ボーナスをPlayerDataに反映
 		for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
@@ -298,6 +299,9 @@ namespace game::scene
 
 		// 地面は stageData.json の props[] が持つ（単一の水平地面は坂と競合するため生成しない）
 		initializer.initializeProps();
+
+		// ステージ定義の点光源（青い道中・白銀のアリーナなどの明暗演出）
+		initializer.initializeLights();
 
 		// 生成される敵の追跡対象をプレイヤーに設定してからスポーンする
 		m_enemySpawner.setTargetEntity(core::ecs::Entity(m_playerId));

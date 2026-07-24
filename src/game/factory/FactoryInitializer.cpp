@@ -5,17 +5,45 @@
 #include "core/data/PropDefinition.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/PropCollision.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/visual/LightComponent.h"
 #include <cmath>
 #include <algorithm>
 
 namespace game::factory
 {
 	FactoryInitializer::FactoryInitializer(
-		FactoryManager& factoryManager,
-		core::iface::IResourceManager& resourceManager)
-		: m_factoryManager{factoryManager}
-		, m_resourceManager{resourceManager}
+	    FactoryManager& factoryManager,
+	    core::iface::IResourceManager& resourceManager,
+	    core::ecs::EntityManager& entityManager,
+	    core::ecs::ComponentManager& componentManager)
+	    : m_factoryManager{ factoryManager }
+	    , m_resourceManager{ resourceManager }
+	    , m_entityManager{ entityManager }
+	    , m_componentManager{ componentManager }
 	{
+	}
+
+	void FactoryInitializer::initializeLights()
+	{
+		const auto& stage{ m_resourceManager.getStageMetadata() };
+
+		for (const auto& lightData : stage.m_lights)
+		{
+			const auto entity{ m_entityManager.create() };
+
+			component::movement::TransformComponent transform{};
+			transform.m_position = lightData.m_position;
+			m_componentManager.add<component::movement::TransformComponent>(entity.getId(), transform);
+
+			// 位置はTransformが持つので、Component側のoffsetは0のままでよい
+			component::visual::LightComponent light{};
+			light.m_range = lightData.m_range;
+			light.m_r = lightData.m_r;
+			light.m_g = lightData.m_g;
+			light.m_b = lightData.m_b;
+			m_componentManager.add<component::visual::LightComponent>(entity.getId(), light);
+		}
 	}
 
 	void FactoryInitializer::initializePlayer(const data::PlayerData& playerData)
