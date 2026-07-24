@@ -2,7 +2,10 @@
 #include "core/interface/ITextureCanvas.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/utility/Color.h"
+#include "game/constant/DataWallLines.h"
 #include <array>
+#include <random>
+#include <string_view>
 
 namespace
 {
@@ -23,39 +26,14 @@ namespace
 
 	constexpr unsigned int GRID_COLOR{ core::utility::Color::argb(40, 0, 164, 239) };
 
-	/**
-	 * @brief 壁に流す文字列
-	 *
-	 * ターゲットがプログラマーなので、命令・ログ・16進ダンプらしい行を混ぜて
-	 * 「システムの内側を覗いている」感じを出す。侵入者としてApple側の名前も混ぜる。
-	 */
-	constexpr std::array<const char*, 16> DATA_LINES{
-		"[ok] kernel32.dll mapped 0x7ffb2c40",
-		"mov rax, qword ptr [rsp+28h]",
-		"[warn] handle leak pid=4812",
-		"thread 0x1a4 state=WAITING",
-		"[ok] ntfs journal flush 12.4MB/s",
-		"if (hr != S_OK) return hr;",
-		"[intruder] apple.process detected",
-		"call QueryPerformanceCounter",
-		"[ok] page fault soft=1284 hard=3",
-		"lock cmpxchg [rbx], rcx",
-		"[warn] gdi objects 9821/10000",
-		"0x4d 0x5a 0x90 0x00 0x03",
-		"[ok] scheduler quantum=15ms",
-		"while (!queue.empty()) pop();",
-		"[intruder] safari.exe spawned",
-		"ret",
-	};
-
 	/** @brief 行の種別で色を決める（侵入者=赤、警告=黄、正常=青、コード=淡い水色） */
-	unsigned int lineColor(const char* text) noexcept
+	unsigned int lineColor(std::string_view text) noexcept
 	{
-		if (text[1] == 'i') // "[intruder]"
+		if (text.starts_with("[intruder]"))
 			return core::utility::Color::rgb(232, 17, 35);
-		if (text[1] == 'w') // "[warn]"
+		if (text.starts_with("[warn]"))
 			return core::utility::Color::rgb(255, 200, 61);
-		if (text[1] == 'o') // "[ok]"
+		if (text.starts_with("[ok]"))
 			return core::utility::Color::rgb(0, 164, 239);
 		return core::utility::Color::rgb(120, 200, 245);
 	}
@@ -86,33 +64,40 @@ namespace game::system::visual
 		m_canvas.destroy(m_canvasHandle);
 	}
 
+	std::string_view DataWallSystem::pickLine()
+	{
+		std::uniform_int_distribution<size_t> pick{ 0, constant::data_wall::LINES.size() - 1 };
+		return constant::data_wall::LINES[pick(m_random)];
+	}
+
 	void DataWallSystem::buildStreams()
 	{
-		// 縦の列：下から上へ流す。列ごとに速さと開始位置をずらして単調さを消す
+		std::uniform_real_distribution<float> speed{ 45.0f, 110.0f };
+		std::uniform_real_distribution<float> offset{ 0.0f, static_cast<float>(CANVAS_SIZE) };
+
+		// 縦の列：下から上へ流す。速さと開始位置をばらけさせて単調さを消す
 		for (int i{ 0 }; i < VERTICAL_COUNT; ++i)
 		{
-			const char* text{ DATA_LINES[static_cast<size_t>(i * 3) % DATA_LINES.size()] };
 			Stream stream{};
-			stream.m_text = text;
+			stream.m_text = pickLine();
 			stream.m_x = static_cast<float>(20 + i * (CANVAS_SIZE / VERTICAL_COUNT));
-			stream.m_y = static_cast<float>(CANVAS_SIZE + i * 90);
-			stream.m_speed = 55.0f + static_cast<float>(i) * 13.0f;
+			stream.m_y = static_cast<float>(CANVAS_SIZE) + offset(m_random);
+			stream.m_speed = speed(m_random);
 			stream.m_isVertical = true;
-			stream.m_color = lineColor(text);
+			stream.m_color = lineColor(stream.m_text);
 			m_streams.push_back(stream);
 		}
 
 		// 横のティッカー：右から左へ流す
 		for (int i{ 0 }; i < HORIZONTAL_COUNT; ++i)
 		{
-			const char* text{ DATA_LINES[static_cast<size_t>(i * 5 + 1) % DATA_LINES.size()] };
 			Stream stream{};
-			stream.m_text = text;
-			stream.m_x = static_cast<float>(CANVAS_SIZE + i * 160);
+			stream.m_text = pickLine();
+			stream.m_x = static_cast<float>(CANVAS_SIZE) + offset(m_random);
 			stream.m_y = static_cast<float>(70 + i * 150);
-			stream.m_speed = 90.0f + static_cast<float>(i) * 25.0f;
+			stream.m_speed = speed(m_random);
 			stream.m_isVertical = false;
-			stream.m_color = lineColor(text);
+			stream.m_color = lineColor(stream.m_text);
 			m_streams.push_back(stream);
 		}
 	}
@@ -151,16 +136,24 @@ namespace game::system::visual
 			if (stream.m_isVertical)
 			{
 				stream.m_y -= stream.m_speed * deltaTime;
-				// 上へ抜けたら下から出し直す
+				// 上へ抜けたら下から出し直す。そのとき別の行を引いて内容を入れ替える
 				if (stream.m_y < -FONT_SIZE)
+				{
 					stream.m_y = static_cast<float>(CANVAS_SIZE);
+					stream.m_text = pickLine();
+					stream.m_color = lineColor(stream.m_text);
+				}
 				continue;
 			}
 
 			stream.m_x -= stream.m_speed * deltaTime;
 			// 左へ抜けたら右から出し直す（文字幅ぶん余裕をみる）
 			if (stream.m_x < -static_cast<float>(m_uiRenderer.getTextWidth(stream.m_text.c_str(), FONT_SIZE)))
+			{
 				stream.m_x = static_cast<float>(CANVAS_SIZE);
+				stream.m_text = pickLine();
+				stream.m_color = lineColor(stream.m_text);
+			}
 		}
 
 		redraw();

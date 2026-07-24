@@ -1,6 +1,8 @@
 #pragma once
 #include "core/ecs/ISystem.h"
+#include <random>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace core::iface
@@ -54,6 +56,12 @@ namespace game::system::visual
 			unsigned int m_color{};
 		};
 
+		/**
+		 * @brief 流す文字を1本ランダムに選ぶ
+		 * @return 選ばれた行
+		 */
+		[[nodiscard]] std::string_view pickLine();
+
 		/** @brief 流す文字の初期配置を組み立てる */
 		void buildStreams();
 
@@ -67,5 +75,8 @@ namespace game::system::visual
 		int m_canvasHandle{ -1 };
 
 		std::vector<Stream> m_streams;
+
+		// 壁ごとに違う内容になるよう、行の抽選に使う乱数
+		std::mt19937 m_random{ std::random_device{}() };
 	};
 } // namespace game::system::visual
