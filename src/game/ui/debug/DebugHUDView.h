@@ -51,13 +51,21 @@ namespace game::ui::debug
 		    core::iface::IRenderer& renderer);
 
 		/**
-		 * @brief FPS計測とパフォーマンスデータの定期更新を行う
-		 * @details FPSは引数のdeltaTimeではなく内部で壁時計時間（std::chrono）を直接計測する。
-		 * Applicationのゲームループは固定タイムステップ（常に1/60として進める）のため、
-		 * 引数のdeltaTimeは実際の処理時間を表しておらず、それを使うと重い処理をしていても
-		 * 常に60FPSと表示されてしまう。
+		 * @brief ゲーム更新（固定タイムステップ）が1回行われたことを記録する
+		 * @details 更新レート（UPS）の算出に使う。Applicationの累積器により更新回数は
+		 * 描画フレーム数と一致しないため、描画側とは別に数える必要がある。
+		 * シーンのupdateから毎回呼ぶこと
 		 */
-		void update();
+		void countGameUpdate();
+
+		/**
+		 * @brief FPS計測とパフォーマンスデータの定期更新を行う（描画フレームごとに呼ぶ）
+		 * @details 必ず描画側（drawの経路）から呼ぶこと。シーンのupdateから呼ぶと
+		 * Applicationの固定タイムステップにより呼び出し回数が毎秒60回に固定されてしまい、
+		 * 実際の描画が何FPS出ていても常に60と表示されてしまう。
+		 * また計測には引数のdeltaTimeではなく壁時計時間（std::chrono）を直接使う
+		 */
+		void updateOnRenderFrame();
 
 		/**
 		 * @brief HUDを描画する
@@ -91,9 +99,11 @@ namespace game::ui::debug
 		std::chrono::steady_clock::time_point m_lastUpdateTime{};
 		bool m_hasLastUpdateTime{ false };
 		int m_fpsFrameAccum{ 0 };
+		int m_updateAccum{ 0 }; // 区間中のゲーム更新回数（UPS算出用。描画フレーム数とは一致しない）
 		float m_fpsTimeAccum{ 0.0f };
 		float m_displayFps{ 0.0f };
 		float m_displayFrameMs{ 0.0f };
+		float m_displayUps{ 0.0f };
 
 		// パフォーマンスデータ（CPU/メモリ）の更新間隔管理
 		float m_perfUpdateTimer{ 0.0f };

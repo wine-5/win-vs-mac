@@ -485,9 +485,10 @@ namespace game::scene
 
 	void InGame::update(float deltaTime)
 	{
-		// DEBUG: シーンビュー凍結中もFPS計測やCPU/メモリ取得は続ける（リリース時に削除）
+		// DEBUG: 更新レート（UPS）を数える。FPS計測は描画回数を数える必要があるためdraw側で行う
+		// （リリース時に削除）
 		if (m_debugHUDView)
-			m_debugHUDView->update();
+			m_debugHUDView->countGameUpdate();
 
 		// DEBUG: F1キーでデバッグモード（フリーカメラ）のON/OFFを切り替える（リリース時に削除）
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::F1))
@@ -531,6 +532,11 @@ namespace game::scene
 
 	void InGame::draw()
 	{
+		// DEBUG: FPS計測とCPU/メモリ取得。シーンビュー凍結中もdrawは呼ばれるため計測は続く
+		// （リリース時に削除）
+		if (m_debugHUDView)
+			m_debugHUDView->updateOnRenderFrame();
+
 		// 描画は InGameView へ委譲する。ボスが召喚する雑魚も実行時に増えるため、
 		// スポーン時のスナップショットではなく EnemyFactory が持つ最新の敵一覧を渡す
 		m_view.draw(m_playerId);

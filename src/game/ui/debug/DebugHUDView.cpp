@@ -39,7 +39,12 @@ namespace game::ui::debug
 	{
 	}
 
-	void DebugHUDView::update()
+	void DebugHUDView::countGameUpdate()
+	{
+		++m_updateAccum;
+	}
+
+	void DebugHUDView::updateOnRenderFrame()
 	{
 		// 実際の壁時計時間を計測する（Applicationの固定タイムステップは使わない。
 		// ヘッダのコメント参照）
@@ -53,7 +58,7 @@ namespace game::ui::debug
 		const float realDeltaTime{ std::chrono::duration<float>(now - m_lastUpdateTime).count() };
 		m_lastUpdateTime = now;
 
-		// FPS/フレーム時間は直近FPS_UPDATE_INTERVAL秒間のフレーム数から算出する
+		// FPS/UPS/フレーム時間は直近FPS_UPDATE_INTERVAL秒間の回数から算出する
 		// （毎フレームの瞬間値だと数値が激しく揺れて読みにくいため）
 		++m_fpsFrameAccum;
 		m_fpsTimeAccum += realDeltaTime;
@@ -61,7 +66,9 @@ namespace game::ui::debug
 		{
 			m_displayFps = static_cast<float>(m_fpsFrameAccum) / m_fpsTimeAccum;
 			m_displayFrameMs = (m_fpsTimeAccum / static_cast<float>(m_fpsFrameAccum)) * 1000.0f;
+			m_displayUps = static_cast<float>(m_updateAccum) / m_fpsTimeAccum;
 			m_fpsFrameAccum = 0;
+			m_updateAccum = 0;
 			m_fpsTimeAccum = 0.0f;
 		}
 
@@ -112,7 +119,7 @@ namespace game::ui::debug
 		const int drawCallCount{ m_renderer.getDrawCallCount() };
 
 		char lines[STATS_LINE_COUNT][64]{};
-		std::snprintf(lines[0], sizeof(lines[0]), "FPS: %.1f (%.2fms)", m_displayFps, m_displayFrameMs);
+		std::snprintf(lines[0], sizeof(lines[0]), "FPS: %.1f (%.2fms)  UPS: %.1f", m_displayFps, m_displayFrameMs, m_displayUps);
 		std::snprintf(lines[1], sizeof(lines[1]), "DrawCall: %d", drawCallCount);
 		std::snprintf(lines[2], sizeof(lines[2]), "Entity: %d", entityCount);
 		std::snprintf(lines[3], sizeof(lines[3]), "Enemy: %d  Bullet: %d", enemyCount, projectileCount);
