@@ -8,7 +8,7 @@
 #include "game/data/GroundData.h"
 #include <stdexcept>
 #include <cmath>
-#include <utility>
+#include <algorithm>
 
 namespace game::factory
 {
@@ -89,20 +89,17 @@ namespace game::factory
 			}
 
 			// テクスチャ1枚が受け持つ実寸から繰り返し回数を決める。
-			// 面の見え方を決めるのは大きい2辺なので、それをU/Vに割り当てる
-			// （壁なら「長さ×高さ」、床なら「奥行×幅」が対象になる）
+			// U/Vは面の向きに合わせる。床（Yが最も薄い）は上面を見るのでX×Z、
+			// 壁や柱は側面を見るので「横幅×高さ」を割り当てる。
+			// 1未満にすると繰り返しではなく絵の一部を引き伸ばす（切り取る）ため下限を1にする
 			if (def.m_textureTile > 0.0f)
 			{
-				float largest{ prop.m_size.x };
-				float second{ prop.m_size.y };
-				float smallest{ prop.m_size.z };
-				if (second < smallest)
-					std::swap(second, smallest);
-				if (largest < second)
-					std::swap(largest, second);
+				const bool isFloorLike{ prop.m_size.y <= prop.m_size.x && prop.m_size.y <= prop.m_size.z };
+				const float horizontal{ isFloorLike ? prop.m_size.x : std::max(prop.m_size.x, prop.m_size.z) };
+				const float vertical{ isFloorLike ? prop.m_size.z : prop.m_size.y };
 
-				params.m_uvScaleU = largest / def.m_textureTile;
-				params.m_uvScaleV = second / def.m_textureTile;
+				params.m_uvScaleU = std::max(1.0f, horizontal / def.m_textureTile);
+				params.m_uvScaleV = std::max(1.0f, vertical / def.m_textureTile);
 			}
 
 			factory.create(params);
