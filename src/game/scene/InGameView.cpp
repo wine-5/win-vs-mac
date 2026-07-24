@@ -13,6 +13,7 @@
 #include "game/system/visual/DetectionAlertVisualsSystem.h"
 #include "game/system/visual/AttackTelegraphVisualsSystem.h"
 #include "game/system/visual/TelegraphVisualsSystem.h"
+#include "game/system/combat/PlayerDeathSystem.h"
 #include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
 #include <cmath>
@@ -75,6 +76,10 @@ namespace game::scene
 
 		// Effekseerエフェクトの描画（3Dモデル描画後・UI手前に呼び出す）
 		m_effectFactory.draw();
+
+		// プレイヤー死亡時の暗転。画面の全てを覆って暗くするため最後に描く
+		if (m_playerDeathSystem)
+			m_playerDeathSystem->draw();
 	}
 
 	void InGameView::setPlayerChargeVisualsSystem(system::visual::PlayerChargeVisualsSystem* system)
@@ -100,6 +105,11 @@ namespace game::scene
 	void InGameView::setTelegraphVisualsSystem(system::visual::TelegraphVisualsSystem* system)
 	{
 		m_telegraphSystem = system;
+	}
+
+	void InGameView::setPlayerDeathSystem(system::combat::PlayerDeathSystem* system)
+	{
+		m_playerDeathSystem = system;
 	}
 
 	void InGameView::setDebugGizmoView(ui::debug::DebugGizmoView* view)

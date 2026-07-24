@@ -30,6 +30,7 @@
 #include "game/system/combat/CollisionSystem.h"
 #include "game/system/visual/HitEffectSystem.h"
 #include "game/system/combat/EnemyDeathSystem.h"
+#include "game/system/combat/PlayerDeathSystem.h"
 #include "game/system/ai/DetectionSystem.h"
 #include "game/system/visual/DetectionAlertVisualsSystem.h"
 #include "game/system/visual/AttackTelegraphVisualsSystem.h"
@@ -384,6 +385,15 @@ namespace game::scene
 		// 死亡した敵の後始末（赤化＋ディゾルブ演出→Entity破棄＋モデルハンドルのプール返却）
 		m_systemManager.registerSystem<game::system::combat::EnemyDeathSystem>(m_componentManager, m_entityManager, m_eventBus, m_enemySpawner, m_renderer);
 
+		// プレイヤーの死亡演出（死亡アニメ→暗転）。完了時にシーン遷移用のイベントを発行する。
+		// 描画（暗転）はInGameViewの描画フェーズから呼ぶためポインタを渡す
+		auto* playerDeath{ m_systemManager.registerSystem<game::system::combat::PlayerDeathSystem>(
+			m_componentManager, m_eventBus,
+			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+			*core::base::ServiceLocator::get<core::iface::IScreen>(),
+			m_playerId) };
+		m_view.setPlayerDeathSystem(playerDeath);
+
 		m_systemManager.registerSystem<game::system::visual::EffectSystem>(m_componentManager, m_eventBus, m_effectFactory);
 
 		// LightComponentを持つエンティティの点光源を生成・追従させる（プレイヤーの携行灯など）
@@ -428,20 +438,18 @@ namespace game::scene
 				// 被ダメージ追跡（プレイヤーが攻撃を受けた場合）
 				if (e.m_targetId == m_playerId)
 					m_totalDamageTaken += e.m_damage; }));
-		// プレイヤー死亡イベントの購読
-		m_subscriptions.push_back(m_eventBus.subscribe<event::PlayerDeadEvent>([this](const event::PlayerDeadEvent&)
+		// プレイヤー死亡演出の完了イベントの購読。
+		// HPが尽きた瞬間（PlayerDeadEvent）ではなく、死亡アニメと暗転を見せ終えてから遷移する。
+		// 演出中もモデルは表示し続ける（非表示にすると死亡アニメが見えなくなる）
+		m_subscriptions.push_back(m_eventBus.subscribe<event::PlayerDeathSequenceFinishedEvent>(
+		    [this](const event::PlayerDeathSequenceFinishedEvent&)
 		    {
-						if (m_componentManager.has<component::visual::RenderComponent>(m_playerId))
-						{
-							auto& render{ m_componentManager.get<component::visual::RenderComponent>(m_playerId) };
-							render.m_isVisible = false;
-						}
-
-						saveResultData(false);
-			            // メニュー操作用にカーソルを戻してからシーンを切り替える
-			            m_inputProvider.setMouseCursorVisible(true);
-			            auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
-						sceneManager->changeScene(game::scene::SceneType::Result); }));
+			    saveResultData(false);
+			    // メニュー操作用にカーソルを戻してからシーンを切り替える
+			    m_inputProvider.setMouseCursorVisible(true);
+			    auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
+			    sceneManager->changeScene(game::scene::SceneType::Result);
+		    }));
 
 		// 敵の死亡イベントの購読
 		m_subscriptions.push_back(m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
