@@ -11,6 +11,7 @@
 #include "core/base/ServiceLocator.h"
 #include "core/constant/SeType.h"
 #include "core/data/ResultData.h"
+#include "core/utility/MathConstants.h"
 /* game層 */
 #include "game/factory/FactoryInitializer.h"
 #include "game/system/movement/InputSystem.h"
@@ -257,6 +258,17 @@ namespace game::scene
 
 		// プレイヤー専用コンポーネント（CameraComponent、AimComponent、PlayerChargeComponent）
 		// は Player.cpp のコンストラクタで初期化済
+
+		// stageData.jsonのplayerStartを初期位置・初期向き（モデル・カメラyaw）へ反映する。
+		// rotationYは度数法なのでラジアンへ変換する
+		const auto& playerStart{ m_resourceManager.getStageMetadata().m_playerStart };
+		auto& playerTransform{ m_componentManager.get<component::movement::TransformComponent>(m_playerId) };
+		playerTransform.m_position = playerStart.m_position;
+
+		const float startYawRad{ playerStart.m_rotationY * core::utility::DEG_TO_RAD };
+		playerTransform.m_rotation.y = startYawRad;
+		if (m_componentManager.has<component::camera::CameraComponent>(m_playerId))
+			m_componentManager.get<component::camera::CameraComponent>(m_playerId).m_yaw = startYawRad;
 
 		initializer.initializeGround();
 
