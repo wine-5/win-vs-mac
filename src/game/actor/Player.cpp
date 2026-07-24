@@ -38,7 +38,7 @@ namespace game::actor
 		namespace anim_id = constant::animation_id;
 		namespace priority = constant::animation_priority;
 		constexpr float WALK_ANIM_SPEED{ 0.6f }; // 歩行アニメの再生速度（見た目の調整値）
-		constexpr float RUN_ANIM_SPEED{ 0.3f };  // 走りアニメの再生速度（見た目の調整値）
+		constexpr float RUN_ANIM_SPEED{ 1.0f };  // 走りアニメの再生速度（見た目の調整値）
 
 		component::visual::AnimationComponent anim{};
 		anim.m_clips[AnimationState::Idle]    = { resourceManager.loadAnimationById(anim_id::PLAYER_IDLE),  true };

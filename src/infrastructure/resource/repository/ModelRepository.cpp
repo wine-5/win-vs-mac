@@ -190,7 +190,14 @@ namespace infrastructure::resource::repository
 
 		int duplicated{ MV1DuplicateModel(modelHandle) };
 		if (duplicated == -1)
+		{
 			core::log::error("モデルハンドルの複製に失敗しました: {}", modelHandle);
+			return duplicated;
+		}
+
+		// 複製にはロード時のマテリアル調整が引き継がれないため、ここでも掛け直す。
+		// これを忘れると、複製ハンドルを使う敵だけが暗いまま（プレイヤーは複製しないので明るい）になる
+		normalizeMaterialAmbient(duplicated);
 		return duplicated;
 	}
 
