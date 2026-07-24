@@ -253,12 +253,12 @@ const RAD2DEG = 180 / Math.PI;
 /* デフォルトカタログ（stageCatalog.json 差し替え可能） */
 const DEFAULT_CATALOG = {
   props: [
-    { id: 'floor_folder',  displayName: 'フォルダ床',     model: 'assets/model/stage/FloorFolder.mv1',   baseSize: [100,100,100], editorColor: '#00A4EF', collider: 'box', defaultSize: [1000, 20, 1000] },
-    { id: 'path_corridor', displayName: 'パス通路',       model: 'assets/model/stage/PathCorridor.mv1',  baseSize: [100,100,100], editorColor: '#0078D4', collider: 'box', defaultSize: [800, 20, 2000] },
-    { id: 'wall_window',   displayName: 'ウィンドウ壁',   model: 'assets/model/stage/WallWindow.mv1',    baseSize: [100,100,100], editorColor: '#3A4A5E', collider: 'box', defaultSize: [1600, 900, 40] },
-    { id: 'pillar_folder', displayName: 'フォルダ柱',     model: 'assets/model/stage/PillarFolder.mv1',  baseSize: [100,100,100], editorColor: '#FFC83D', collider: 'box', defaultSize: [200, 500, 200] },
-    { id: 'block_file',    displayName: 'ファイルブロック', model: 'assets/model/stage/BlockFile.mv1',   baseSize: [100,100,100], editorColor: '#8FA6BF', collider: 'box', defaultSize: [200, 200, 200] },
-    { id: 'floor_apple',   displayName: 'アリーナ床',     model: 'assets/model/stage/FloorApple.mv1',    baseSize: [100,100,100], editorColor: '#E8E8ED', collider: 'box', defaultSize: [3000, 20, 3000] }
+    { id: 'floor_folder',  displayName: 'フォルダ床',     model: 'assets/model/stage/FloorFolder.mqo',  texture: 'assets/model/stage/FloorFolder.png',  baseSize: [100,100,100], editorColor: '#00A4EF', collider: 'ground', defaultSize: [1000, 20, 1000] },
+    { id: 'path_corridor', displayName: 'パス通路',       model: 'assets/model/stage/PathCorridor.mqo', texture: 'assets/model/stage/PathCorridor.png', baseSize: [100,100,100], editorColor: '#0078D4', collider: 'ground', defaultSize: [800, 20, 2000] },
+    { id: 'wall_window',   displayName: 'ウィンドウ壁',   model: 'assets/model/stage/WallWindow.mqo',   texture: 'assets/model/stage/WallWindow.png',   baseSize: [100,100,100], editorColor: '#3A4A5E', collider: 'box', defaultSize: [1600, 900, 40] },
+    { id: 'pillar_folder', displayName: 'フォルダ柱',     model: 'assets/model/stage/PillarFolder.mqo', texture: 'assets/model/stage/PillarFolder.png', baseSize: [100,100,100], editorColor: '#FFC83D', collider: 'box', defaultSize: [200, 500, 200] },
+    { id: 'block_file',    displayName: 'ファイルブロック', model: 'assets/model/stage/BlockFile.mqo',  texture: 'assets/model/stage/BlockFile.png',    baseSize: [100,100,100], editorColor: '#8FA6BF', collider: 'box', defaultSize: [200, 200, 200] },
+    { id: 'floor_apple',   displayName: 'アリーナ床',     model: 'assets/model/stage/FloorApple.mqo',   texture: 'assets/model/stage/FloorApple.png',   baseSize: [100,100,100], editorColor: '#E8E8ED', collider: 'ground', defaultSize: [3000, 20, 3000] }
   ],
   enemies: [
     { id: 'safari', displayName: 'Safari', editorColor: '#4DA6FF', editorSize: [200, 300, 200] },
@@ -358,9 +358,35 @@ function makeLabelSprite(text, color) {
   return sp;
 }
 
-function makeBox(color, opacity) {
+/* 配置物テクスチャの読み込み（ゲームと同じPNGを貼って見た目を合わせる） */
+const textureLoader = new THREE.TextureLoader();
+const textureCache = new Map();
+
+/**
+ * カタログのリポジトリ相対パスを、エディタページからのURLへ変換する。
+ * @param {string} path 例: assets/model/stage/FloorFolder.png
+ */
+function assetUrl(path) { return '../../' + path; }
+
+/**
+ * 配置物テクスチャを読み込む（同じパスは使い回す）。
+ * @returns {THREE.Texture|null} textureが未指定ならnull
+ */
+function loadPropTexture(path) {
+  if (!path) return null;
+  if (textureCache.has(path)) return textureCache.get(path);
+  const tex = textureLoader.load(assetUrl(path));
+  tex.colorSpace = THREE.SRGBColorSpace;
+  textureCache.set(path, tex);
+  return tex;
+}
+
+function makeBox(color, opacity, texture) {
+  /* テクスチャがある場合は色で濁らせないよう白で乗算する */
   const mat = new THREE.MeshLambertMaterial({
-    color, side: THREE.DoubleSide, transparent: true, opacity
+    color: texture ? 0xffffff : color,
+    map: texture || null,
+    side: THREE.DoubleSide, transparent: true, opacity
   });
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat);
   const edge = new THREE.LineSegments(
@@ -369,6 +395,8 @@ function makeBox(color, opacity) {
   );
   mesh.add(edge);
   mesh.userData.edge = edge;
+  /* 縁の色はテクスチャの有無に関わらず種類の色を使う（選択解除時に戻すため保持） */
+  mesh.userData.baseColor = color;
   return mesh;
 }
 
@@ -402,7 +430,7 @@ function catalogEnemy(type) { return catalog.enemies.find(e => e.id === type); }
 function buildPropMesh(prop) {
   const cat = catalogProp(prop.type);
   const color = cat ? cat.editorColor : '#FF00FF';
-  const mesh = makeBox(color, 0.85);
+  const mesh = makeBox(color, 0.85, loadPropTexture(cat ? cat.texture : null));
   const label = makeLabelSprite(cat ? cat.displayName : prop.type + ' (未定義!)', color);
   mesh.add(label);
   mesh.userData.label = label;
@@ -530,7 +558,8 @@ function highlight(m) {
   }
 }
 function unhighlight(m) {
-  const base = m.material.color.clone().offsetHSL(0, 0, 0.15);
+  /* テクスチャ付きは material.color が白なので、種類の色を保持しておいたものから戻す */
+  const base = new THREE.Color(m.userData.baseColor).offsetHSL(0, 0, 0.15);
   m.userData.edge.material.color.copy(base);
 }
 
