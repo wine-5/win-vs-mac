@@ -35,6 +35,7 @@
 #include "game/system/visual/AttackTelegraphVisualsSystem.h"
 #include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/system/visual/EffectSystem.h"
+#include "game/system/visual/LightSystem.h"
 #include "core/interface/IEffectFactory.h"
 #include "game/system/combat/AttackSystem.h"
 #include "game/component/combat/ColliderComponent.h"
@@ -379,6 +380,10 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::combat::EnemyDeathSystem>(m_componentManager, m_entityManager, m_eventBus, m_enemySpawner, m_renderer);
 
 		m_systemManager.registerSystem<game::system::visual::EffectSystem>(m_componentManager, m_eventBus, m_effectFactory);
+
+		// LightComponentを持つエンティティの点光源を生成・追従させる（プレイヤーの携行灯など）
+		if (auto* lighting{ core::base::ServiceLocator::get<core::iface::ILighting>() })
+			m_systemManager.registerSystem<game::system::visual::LightSystem>(m_componentManager, *lighting);
 
 		// プレイヤーの溜め攻撃の画面演出（集中線）。描画内容はSystemが持ち、
 		// InGameViewには描画フェーズで呼び出させるためにポインタを渡す
