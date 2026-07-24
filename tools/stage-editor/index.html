@@ -513,8 +513,9 @@ function buildPlayerMesh(ps) {
  */
 function buildLightMesh(light) {
   const hex = lightColorHex(light.color);
+  /* クリックの当たり判定を兼ねるので、小さすぎると掴めない */
   const mesh = new THREE.Mesh(
-    new THREE.SphereGeometry(60, 16, 12),
+    new THREE.SphereGeometry(110, 16, 12),
     new THREE.MeshBasicMaterial({ color: hex })
   );
 
@@ -600,11 +601,24 @@ function select(sel) {
 }
 
 function highlight(m) {
-  if (m.userData.sel && selected && keyOf(m.userData.sel) === keyOf(selected)) {
-    m.userData.edge.material.color.set('#FFC83D');
+  if (!m.userData.sel || !selected || keyOf(m.userData.sel) !== keyOf(selected)) return;
+
+  /* 光源は枠線を持たないので、範囲球を濃くして選択を示す */
+  if (m.userData.rangeSphere) {
+    m.userData.rangeSphere.material.opacity = 0.5;
+    return;
   }
+  m.userData.edge.material.color.set('#FFC83D');
 }
+
 function unhighlight(m) {
+  if (m.userData.rangeSphere) {
+    m.userData.rangeSphere.material.opacity = 0.16;
+    return;
+  }
+  /* 枠線を持たないメッシュもあるので、無ければ何もしない */
+  if (!m.userData.edge) return;
+
   /* テクスチャ付きは material.color が白なので、種類の色を保持しておいたものから戻す */
   const base = new THREE.Color(m.userData.baseColor).offsetHSL(0, 0, 0.15);
   m.userData.edge.material.color.copy(base);
