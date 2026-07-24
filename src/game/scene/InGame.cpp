@@ -7,6 +7,7 @@
 #include "core/interface/IAudioManager.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "core/interface/ILighting.h"
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
 #include "core/constant/SeType.h"
@@ -214,6 +215,19 @@ namespace game::scene
 		m_camera.setNearFar(NEAR_CLIP, FAR_CLIP);
 		if (screen)
 			screen->setFog(true, VOID_R, VOID_G, VOID_B, FOG_START, FOG_END);
+
+		// ライティングを有効化して立体感を出す。環境光は「模様が潰れない下限」を確保しつつ
+		// 低めにして虚無の暗さを残し、上からの平行光で面の向きを分からせる
+		auto* lighting{ core::base::ServiceLocator::get<core::iface::ILighting>() };
+		if (lighting)
+		{
+			constexpr int AMBIENT_R{ 150 };
+			constexpr int AMBIENT_G{ 160 };
+			constexpr int AMBIENT_B{ 180 };
+			lighting->setEnabled(true);
+			lighting->setAmbient(AMBIENT_R, AMBIENT_G, AMBIENT_B);
+			lighting->setDirectionalLight(core::Vector3{ -0.3f, -1.0f, 0.4f }, 255, 255, 255);
+		}
 
 		// DEBUG: 何かと不便なためリリースするときにfalseに変更すること
 		// 3人称マウス視点のためカーソルを非表示にする
