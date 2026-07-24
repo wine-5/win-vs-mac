@@ -1,16 +1,21 @@
 {
-  "spawns": [
+  "playerStart": {
+    "position": [ 0.0, 0.0, -1500.0 ],
+    "rotationY": 0.0
+  },
+  "props": [
     {
-      "type": "safari",
-      "position": [ -200.0, 0.0, 150.0 ]
+      "type": "floor_folder",
+      "position": [ 0.0, -10.0, 0.0 ],
+      "rotation": [ 0.0, 0.0, 0.0 ],
+      "size": [ 4000.0, 20.0, 5000.0 ]
     },
     {
-      "type": "safari",
-      "position": [0, 0.0, 150.0 ]
+      "type": "wall_window",
+      "position": [ 0.0, 750.0, 1500.0 ],
+      "rotation": [ 0.0, 0.0, 0.0 ],
+      "size": [ 3000.0, 1500.0, 40.0 ]
     }
   ],
-  "mac": {
-    "type": "mac",
-    "position": [ 0.0, 0.0, 800.0 ]
-  }
+  "spawns": []
 }
