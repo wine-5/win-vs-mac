@@ -30,6 +30,13 @@ namespace infrastructure::resource
 		int loadModelById(const std::string_view modelId) override;
 
 		/**
+		 * @brief ファイルパスから直接モデルを読み込み、ハンドルを返す（キャッシュ付き）
+		 * @param path モデルファイルのパス
+		 * @return モデルハンドル、失敗時は-1
+		 */
+		int loadModelByPath(std::string_view path) override;
+
+		/**
 		 * @brief modelIDからメタデータを取得する
 		 * @param modelId モデルID
 		 * @return メタデータ（存在しない場合nullopt）

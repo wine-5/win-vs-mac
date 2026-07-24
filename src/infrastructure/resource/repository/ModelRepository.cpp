@@ -115,6 +115,22 @@ namespace infrastructure::resource::repository
 		return handle;
 	}
 
+	int ModelRepository::loadModelByPath(std::string_view path)
+	{
+		std::string key(path);
+
+		auto handleIt{ m_modelHandles.find(key) };
+		if (handleIt != m_modelHandles.end())
+			return handleIt->second;
+
+		int handle{ MV1LoadModel(key.c_str()) };
+		if (handle == -1)
+			core::log::error("モデルの読み込みに失敗しました: {}", key.c_str());
+		else
+			m_modelHandles[key] = handle;
+		return handle;
+	}
+
 	int ModelRepository::duplicateModel(int modelHandle)
 	{
 		if (modelHandle == -1)

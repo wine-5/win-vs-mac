@@ -28,6 +28,15 @@ namespace core::iface
 		virtual int loadModelById(const std::string_view modelId) = 0;
 
 		/**
+		 * @brief ファイルパスから直接モデルを読み込み、ハンドルを返す（キャッシュ付き）
+		 *
+		 * resources.jsonに登録しない配置物モデルなど、種類定義のパスで解決するモデル用。
+		 * @param path モデルファイルのパス
+		 * @return モデルハンドル、失敗時は-1
+		 */
+		virtual int loadModelByPath(std::string_view path) = 0;
+
+		/**
 		 * @brief modelIDからメタデータを取得する
 		 *
 		 * @note コライダーサイズが全成分0のモデルは loadModelById() の中で実寸から

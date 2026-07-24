@@ -38,6 +38,11 @@ namespace infrastructure::resource
 		return m_modelRepo->loadModelById(modelId);
 	}
 
+	int ResourceManager::loadModelByPath(std::string_view path)
+	{
+		return m_modelRepo->loadModelByPath(path);
+	}
+
 	std::optional<core::data::ModelMetadata> ResourceManager::getMetadata(const std::string_view modelId) const
 	{
 		return m_modelRepo->getMetadata(modelId);

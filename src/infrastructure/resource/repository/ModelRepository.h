@@ -35,6 +35,16 @@ namespace infrastructure::resource::repository
 	  int loadModelById(std::string_view modelId);
 
 	  /**
+	   * @brief ファイルパスで直接モデルを読み込みハンドルをキャッシュする
+	   *
+	   * resources.jsonに登録しない配置物モデルなど、パスで解決するモデル用。
+	   * 同じパスは1度だけロードして使い回す。
+	   * @param path モデルファイルのパス
+	   * @return DxLibモデルハンドル、失敗時は-1
+	   */
+	  int loadModelByPath(std::string_view path);
+
+	  /**
 	   * @brief IDでモデルのメタデータを取得する
 	   *
 	   * @param modelId モデル識別子
