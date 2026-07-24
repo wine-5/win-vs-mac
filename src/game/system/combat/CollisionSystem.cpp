@@ -117,9 +117,7 @@ namespace game::system::combat
 		// 床（縦に薄い）は上へ押し出して「乗る」、壁（横に薄い）は横へ押し出して「止まる」に
 		// 自然と分岐する。押し出す向きは相手の中心から離れる方向。
 		if (overlapY <= overlapX && overlapY <= overlapZ)
-		{
 			resolveVertical(riderId, riderTransform, riderVelocity, overlapY, delta.y);
-		}
 		else if (overlapX <= overlapZ)
 		{
 			riderTransform.m_position.x += (delta.x >= 0.0f) ? overlapX : -overlapX;
@@ -158,9 +156,7 @@ namespace game::system::combat
 				death->m_hasTouchedGround = true;
 
 			if (death != nullptr && riderVelocity.m_velocity.y < -DEATH_BOUNCE_MIN_SPEED)
-			{
 				riderVelocity.m_velocity.y = -riderVelocity.m_velocity.y * DEATH_BOUNCE_RESTITUTION;
-			}
 			else if (riderVelocity.m_velocity.y < 0.0f)
 			{
 				riderVelocity.m_velocity.y = 0.0f;
