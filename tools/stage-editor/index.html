@@ -286,8 +286,22 @@ function defaultState() {
       { uid: 'p1', type: 'floor_folder', position: [0, -50, 0], rotation: [0, 0, 0], size: [3000, 20, 3000] }
     ],
     spawns: [],
+    lights: [],
     mac: { type: 'mac', position: [0, 0, 800], rotationY: 180 }
   };
+}
+
+/* 光源の既定値（配置直後の見た目の基準）。色は世界観のパレットから選ぶ */
+const LIGHT_PRESETS = [
+  { name: '青（道中）', color: [0, 164, 239], range: 3000 },
+  { name: '黄（挿し色）', color: [255, 200, 61], range: 1500 },
+  { name: '白銀（アリーナ）', color: [245, 245, 247], range: 3500 },
+  { name: '赤（危険）', color: [232, 17, 35], range: 2000 }
+];
+
+/** 光源の色配列をCSSの#rrggbbへ変換する */
+function lightColorHex(color) {
+  return '#' + color.map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
 }
 function uid() { return 'o' + (nextUid++) + '_' + Date.now().toString(36); }
 
@@ -493,6 +507,35 @@ function buildPlayerMesh(ps) {
   return mesh;
 }
 
+/**
+ * 光源の見た目を作る。中心の球で位置を、ワイヤーフレームの球で届く範囲を示す。
+ * 拡縮ギズモは使わせず、範囲はInspectorの数値で編集させる（半径と拡縮の混同を防ぐ）。
+ */
+function buildLightMesh(light) {
+  const hex = lightColorHex(light.color);
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(60, 16, 12),
+    new THREE.MeshBasicMaterial({ color: hex })
+  );
+
+  const rangeSphere = new THREE.Mesh(
+    new THREE.SphereGeometry(light.range, 16, 12),
+    new THREE.MeshBasicMaterial({ color: hex, wireframe: true, transparent: true, opacity: 0.16 })
+  );
+  mesh.add(rangeSphere);
+  mesh.userData.rangeSphere = rangeSphere;
+
+  const label = makeLabelSprite('Light', hex);
+  label.position.y = 180;
+  mesh.add(label);
+
+  mesh.userData.sel = { kind: 'light', uid: light.uid };
+  mesh.userData.fixedSize = [1, 1, 1];   /* 拡縮不可の目印 */
+  mesh.userData.baseColor = hex;
+  mesh.position.fromArray(light.position);
+  return mesh;
+}
+
 /* state → シーン全再構築 */
 function rebuildScene() {
   gizmo.detach();
@@ -508,6 +551,10 @@ function rebuildScene() {
     const cat = catalogEnemy(s.type);
     const m = buildActorMesh({ kind: 'spawn', uid: s.uid }, s.type, cat ? cat.editorSize : [200,300,200], s.position, s.rotationY);
     world.add(m); meshByKey.set('spawn:' + s.uid, m); pickables.push(m);
+  }
+  for (const l of state.lights) {
+    const m = buildLightMesh(l);
+    world.add(m); meshByKey.set('light:' + l.uid, m); pickables.push(m);
   }
   {
     const m = buildActorMesh({ kind: 'mac' }, 'mac', catalog.boss.editorSize, state.mac.position, state.mac.rotationY);
@@ -609,6 +656,12 @@ function syncStateFromMesh(m) {
     p.rotation = [m.rotation.x * RAD2DEG, m.rotation.y * RAD2DEG, m.rotation.z * RAD2DEG].map(round2);
     p.size = m.scale.toArray().map(v => round2(Math.max(v, 1)));
     syncPropMesh(m, p);   /* ラベルスケール等を追従 */
+  } else if (sel.kind === 'light') {
+    /* 光源は位置のみ。回転・拡縮は意味を持たないので戻す */
+    const l = state.lights.find(x => x.uid === sel.uid);
+    l.position = m.position.toArray().map(round2);
+    m.rotation.set(0, 0, 0);
+    m.scale.set(1, 1, 1);
   } else {
     const h = m.userData.fixedSize[1] / 2;
     const pos = [round2(m.position.x), round2(m.position.y - h), round2(m.position.z)];
@@ -715,6 +768,21 @@ function addSpawn(typeId) {
   select({ kind: 'spawn', uid: s.uid });
 }
 
+function addLight(preset) {
+  pushUndo();
+  const l = {
+    uid: uid(),
+    position: spawnCenterPosition(),
+    range: preset.range,
+    color: [...preset.color]
+  };
+  /* 床に埋まらないよう少し持ち上げて置く */
+  l.position[1] = 600;
+  state.lights.push(l);
+  rebuildScene();
+  select({ kind: 'light', uid: l.uid });
+}
+
 function duplicateSelected() {
   if (!selected) return;
   if (selected.kind === 'prop') {
@@ -731,6 +799,13 @@ function duplicateSelected() {
     c.position = [src.position[0] + 200, src.position[1], src.position[2] + 200];
     state.spawns.push(c);
     rebuildScene(); select({ kind: 'spawn', uid: c.uid });
+  } else if (selected.kind === 'light') {
+    const src = state.lights.find(l => l.uid === selected.uid);
+    pushUndo();
+    const c = structuredClone(src); c.uid = uid();
+    c.position = [src.position[0] + 200, src.position[1], src.position[2] + 200];
+    state.lights.push(c);
+    rebuildScene(); select({ kind: 'light', uid: c.uid });
   }
   /* mac / player は複製不可（各1つ） */
 }
@@ -743,6 +818,9 @@ function deleteSelected() {
   } else if (selected.kind === 'spawn') {
     pushUndo();
     state.spawns = state.spawns.filter(s => s.uid !== selected.uid);
+  } else if (selected.kind === 'light') {
+    pushUndo();
+    state.lights = state.lights.filter(l => l.uid !== selected.uid);
   } else {
     return;  /* mac / player は削除不可 */
   }
@@ -922,6 +1000,10 @@ function renderHierarchy() {
     const c = catalogEnemy(s.type);
     item({ kind: 'spawn', uid: s.uid }, `${s.type}_${i + 1}`, c ? c.editorColor : '#FF00FF');
   });
+  cat(`Lights (${state.lights.length})`);
+  state.lights.forEach((l, i) => {
+    item({ kind: 'light', uid: l.uid }, `Light_${i + 1}`, lightColorHex(l.color));
+  });
   cat('Boss');
   item({ kind: 'mac' }, catalog.boss.displayName, catalog.boss.editorColor);
   cat('Player');
@@ -973,6 +1055,18 @@ function renderInspector() {
     const note = document.createElement('div'); note.className = 'note';
     note.textContent = '坂は Rotation の X / Z を傾けて作成（Local 軸推奨）。Size は実寸ユニット。';
     root.appendChild(note);
+  } else if (selected.kind === 'light') {
+    const l = state.lights.find(x => x.uid === selected.uid);
+    title.textContent = 'Light';
+    typeLine.textContent = 'point light';
+    root.append(title, typeLine,
+      vec('Position', l.position, a => l.position = a),
+      vec('Range', [l.range], a => l.range = Math.max(1, a[0]), ['R']),
+      vec('Color (RGB)', l.color, a => l.color = a.map(v => Math.max(0, Math.min(255, Math.round(v)))), ['R', 'G', 'B'])
+    );
+    const note = document.createElement('div'); note.className = 'note';
+    note.textContent = 'ワイヤーフレームの球が光の届く範囲。色は 0-255 のRGB。';
+    root.appendChild(note);
   } else if (selected.kind === 'spawn') {
     const s = state.spawns.find(x => x.uid === selected.uid);
     title.textContent = s.type;
@@ -1018,6 +1112,7 @@ function renderPalette() {
   };
   for (const p of catalog.props) add(p.displayName, p.editorColor, () => addProp(p.id));
   for (const e of catalog.enemies) add(e.displayName, e.editorColor, () => addSpawn(e.id));
+  for (const preset of LIGHT_PRESETS) add('光 ' + preset.name, lightColorHex(preset.color), () => addLight(preset));
   add(catalog.boss.displayName, catalog.boss.editorColor, null, true);  /* 常に1体・追加不可 */
 }
 
@@ -1035,6 +1130,9 @@ function serializeStageData() {
     })),
     spawns: state.spawns.map(s => ({
       type: s.type, position: [...s.position], rotationY: s.rotationY
+    })),
+    lights: state.lights.map(l => ({
+      position: [...l.position], range: l.range, color: [...l.color]
     })),
     mac: { type: 'mac', position: [...state.mac.position], rotationY: state.mac.rotationY }
   };
@@ -1125,6 +1223,12 @@ document.getElementById('fileStage').addEventListener('change', async (e) => {
         position: s.position ?? [0, 0, 0],
         rotationY: s.rotationY ?? 0
       })),
+      lights: (data.lights ?? []).map(l => ({
+        uid: uid(),
+        position: l.position ?? [0, 600, 0],
+        range: l.range ?? 1000,
+        color: l.color ?? [255, 255, 255]
+      })),
       mac: {
         type: 'mac',
         position: data.mac?.position ?? [0, 0, 800],
@@ -1182,7 +1286,10 @@ function tryRestore() {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return;
     const data = JSON.parse(raw);
-    if (data && data.props) state = data;
+    if (!data || !data.props) return;
+    /* lights は後から追加した項目。古い自動保存データにも無いので補う */
+    data.lights = (data.lights ?? []).map(l => ({ uid: l.uid ?? uid(), ...l }));
+    state = data;
   } catch (_) {}
 }
 
