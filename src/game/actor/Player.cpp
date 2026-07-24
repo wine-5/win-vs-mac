@@ -2,6 +2,7 @@
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/movement/InputComponent.h"
+#include "game/component/movement/FallRecoveryComponent.h"
 #include "game/component/visual/RenderComponent.h"
 #include "game/component/visual/AnimationComponent.h"
 #include "game/component/combat/ColliderComponent.h"
@@ -32,6 +33,8 @@ namespace game::actor
 		componentManager.add<component::movement::TransformComponent>(m_entity.getId(), transform);
 		componentManager.add<component::movement::VelocityComponent>(m_entity.getId(), {});
 		componentManager.add<component::movement::InputComponent>(m_entity.getId(), {});
+		// 床の縁から落ちても詰まないよう、直前に立っていた場所へ戻せるようにする
+		componentManager.add<component::movement::FallRecoveryComponent>(m_entity.getId(), {});
 
 		// アニメーションクリップの登録（状態→クリップの対応表）
 		using constant::AnimationState;

@@ -7,8 +7,9 @@
 // 前方宣言（実体は .cpp でインクルード）
 namespace game::component::movement
 {
+	struct TransformComponent;
 	struct VelocityComponent;
-}
+} // namespace game::component::movement
 
 namespace game::system::movement
 {
@@ -46,6 +47,20 @@ namespace game::system::movement
 		 */
 		bool surfaceHeightAt(core::ecs::EntityId surfaceId, float x, float z,
 		    float& outHeight, core::Vector3& outNormal) const;
+
+		/**
+		 * @brief 奈落へ落ちていたら直前の足場へ戻す
+		 *
+		 * 床だけが虚無に浮かぶ構成のため、縁から落ちるとどこまでも落下する。
+		 * 全周を壁で囲むと世界観が壊れるので、落下を検知して引き戻す方式で救済する。
+		 * @param riderId 対象のEntityID
+		 * @param transform 対象のTransform
+		 * @param velocity 対象のVelocity
+		 * @return 引き戻した場合true（その場合この後の接地処理は行わない）
+		 */
+		bool recoverFromFall(core::ecs::EntityId riderId,
+		    component::movement::TransformComponent& transform,
+		    component::movement::VelocityComponent& velocity) const;
 
 		/**
 		 * @brief 坂を滑り落ちる速度を更新する

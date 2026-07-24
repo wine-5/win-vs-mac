@@ -294,6 +294,7 @@
     <ClInclude Include="src\core\utility\Rotation.h" />
     <ClInclude Include="src\game\constant\PropCollision.h" />
     <ClInclude Include="src\game\component\movement\GroundSurfaceComponent.h" />
+    <ClInclude Include="src\game\component\movement\FallRecoveryComponent.h" />
     <ClInclude Include="src\game\system\movement\GroundingSystem.h" />
     <ClInclude Include="src\core\data\ProjectileMetadata.h" />
     <ClInclude Include="src\game\actor\EnemyBehaviors.h" />
