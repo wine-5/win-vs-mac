@@ -82,7 +82,7 @@ namespace game::ui::debug
 		core::iface::IRenderer& m_renderer;
 
 		bool m_isEnabled{ true };
-		bool m_isColliderEnabled{ false };
+		bool m_isColliderEnabled{ true };
 		bool m_isAttackRangeEnabled{ false };
 		bool m_isDetectionRangeEnabled{ false };
 		bool m_isProjectileRangeEnabled{ false };

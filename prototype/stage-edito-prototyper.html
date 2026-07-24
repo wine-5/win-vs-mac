@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stage Concept — C:\Program Files\Apple\</title>
+<title>Stage Concept — C:\Program Files\Apple\ (5-Zone Route)</title>
 <style>
   :root {
     --blue: #00A4EF;
@@ -33,8 +33,12 @@
     transition: opacity 0.4s;
   }
   #zone .path-prefix { color: #5A6B80; font-size: 15px; display: block; margin-bottom: 2px; }
+  #depth {
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: 11px; color: #5A6B80; margin-top: 4px;
+  }
   #bottom { display: flex; align-items: flex-end; justify-content: space-between; }
-  #desc { font-size: 12px; line-height: 1.7; color: #8FA0B5; max-width: 480px; }
+  #desc { font-size: 12px; line-height: 1.7; color: #8FA0B5; max-width: 500px; }
   #controls { pointer-events: auto; display: flex; gap: 8px; }
   #controls button {
     background: rgba(17,22,31,0.85); color: var(--text);
@@ -58,14 +62,16 @@
 <div id="fade"></div>
 <div id="hud">
   <div>
-    <div id="title">WIN vs MAC — STAGE CONCEPT <b>// 虚無に浮かぶ自分のPC</b></div>
+    <div id="title">WIN vs MAC — STAGE CONCEPT <b>// 5区画・フォルダ深度ルート</b></div>
     <div id="zone"><span class="path-prefix">CURRENT DIRECTORY</span>C:\Users\Player\Desktop</div>
+    <div id="depth">DEPTH: 0m</div>
   </div>
   <div id="bottom">
     <div id="desc">
-      真っ黒な虚無に、床だけが浮かんでいる。<br>
-      Desktop から坂を下り、Program Files の主戦場を抜けると、
-      色が反転する——<b style="color:#E8E8ED">白銀の Apple 領域</b>。その最深部に MacBook が居座る。
+      Desktop → Downloads → System32 → Program Files → <b style="color:#E8E8ED">Apple\</b><br>
+      深いフォルダへ潜るほど、下へ下へと降りていく。
+      序盤から虚無の彼方に見える白い光が、最深部の Apple 領域。<br>
+      System32 のクランク通路、つづら折りの坂、UACゲートを越えてボスへ。
     </div>
     <div id="controls">
       <button id="btnTour" class="active">シネマティック</button>
@@ -95,7 +101,6 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
  * カラーパレット（要件定義書 2-3）
  * ======================================================= */
 const C = {
-  void1: '#000000', void2: '#0A0E14',
   blue: '#00A4EF', blueDim: '#005F8A',
   yellow: '#FFC83D',
   apple: '#E8E8ED', apple2: '#F5F5F7',
@@ -112,10 +117,11 @@ renderer.toneMappingExposure = 1.1;
 document.body.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(C.void1);
-scene.fog = new THREE.FogExp2(0x000208, 0.000075);
+scene.background = new THREE.Color('#000000');
+/* 遠景の Apple 領域が「彼方の光」として見えるよう、霧はごく薄く */
+scene.fog = new THREE.FogExp2(0x000208, 0.000042);
 
-const camera = new THREE.PerspectiveCamera(62, 1, 1, 60000);
+const camera = new THREE.PerspectiveCamera(62, 1, 1, 90000);
 
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
@@ -123,12 +129,10 @@ const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.75, 0.5, 0.62);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
-scene.add(new THREE.AmbientLight(0x223044, 0.9));
+scene.add(new THREE.AmbientLight(0x223044, 0.85));
 
 /* =========================================================
  * Canvas テクスチャ工房
- *  ── DxLib移植時は「発光して見えるテクスチャを描く」方針の
- *     具体イメージとして、全てテクスチャで表現している
  * ======================================================= */
 function canvasTex(w, h, draw, opts = {}) {
   const cv = document.createElement('canvas');
@@ -141,49 +145,64 @@ function canvasTex(w, h, draw, opts = {}) {
   return t;
 }
 
-/* フォルダ床：エクスプローラー詳細表示の等間隔ライン＋青発光縁 */
+/* フォルダ床 */
 const folderFloorTex = canvasTex(1024, 1024, (g, w, h) => {
   g.fillStyle = '#070C13'; g.fillRect(0, 0, w, h);
   for (let y = 40; y < h; y += 64) {
     g.fillStyle = 'rgba(0,164,239,0.10)'; g.fillRect(24, y, w - 48, 2);
-    /* 行の左に小さなフォルダアイコン風の点 */
     g.fillStyle = 'rgba(255,200,61,0.35)'; g.fillRect(40, y - 14, 18, 12);
     g.fillStyle = 'rgba(0,164,239,0.25)';
     g.fillRect(70, y - 12, 180 + (y * 7) % 240, 8);
   }
-  /* 発光する縁 */
   g.strokeStyle = C.blue; g.lineWidth = 10;
   g.shadowColor = C.blue; g.shadowBlur = 30;
   g.strokeRect(6, 6, w - 12, h - 12);
 });
 
-/* パス通路：C:\Users\... の文字が流れる */
-const pathTex = canvasTex(512, 1024, (g, w, h) => {
-  g.fillStyle = '#060A10'; g.fillRect(0, 0, w, h);
-  g.font = '600 44px Consolas, monospace';
-  g.textAlign = 'center';
-  const lines = ['C:\\Users\\Player\\', 'Desktop  >  ..\\..', 'C:\\Program Files\\', '>  >  >'];
-  for (let i = 0; i < 8; i++) {
-    g.fillStyle = i % 2 ? 'rgba(0,164,239,0.85)' : 'rgba(0,164,239,0.35)';
-    g.shadowColor = C.blue; g.shadowBlur = 18;
-    g.fillText(lines[i % lines.length], w / 2, 90 + i * 128);
-  }
-  g.shadowBlur = 0;
-  g.strokeStyle = 'rgba(0,164,239,0.9)'; g.lineWidth = 8;
-  g.strokeRect(4, 0, w - 8, h);
-}, { repeat: [1, 2] });
+/* System32 用の濃青床（密度の高いグリッド） */
+const sys32FloorTex = canvasTex(1024, 1024, (g, w, h) => {
+  g.fillStyle = '#040A14'; g.fillRect(0, 0, w, h);
+  g.strokeStyle = 'rgba(0,164,239,0.22)'; g.lineWidth = 2;
+  for (let x = 0; x < w; x += 64) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
+  for (let y = 0; y < h; y += 64) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
+  g.font = '600 30px Consolas, monospace';
+  g.fillStyle = 'rgba(0,164,239,0.35)';
+  for (let i = 0; i < 10; i++) g.fillText('.dll', (i * 197) % (w - 80), 60 + (i * 313) % (h - 80));
+  g.strokeStyle = C.blue; g.lineWidth = 10;
+  g.shadowColor = C.blue; g.shadowBlur = 34;
+  g.strokeRect(5, 5, w - 10, h - 10);
+});
 
-/* ウィンドウ壁：巨大エクスプローラー枠、右上に − □ ✕ */
+/* パス通路（流れる文字）：区画ごとにパスを変える */
+function makePathTex(lines) {
+  return canvasTex(512, 1024, (g, w, h) => {
+    g.fillStyle = '#060A10'; g.fillRect(0, 0, w, h);
+    g.font = '600 42px Consolas, monospace';
+    g.textAlign = 'center';
+    for (let i = 0; i < 8; i++) {
+      g.fillStyle = i % 2 ? 'rgba(0,164,239,0.85)' : 'rgba(0,164,239,0.35)';
+      g.shadowColor = C.blue; g.shadowBlur = 18;
+      g.fillText(lines[i % lines.length], w / 2, 90 + i * 128);
+    }
+    g.shadowBlur = 0;
+    g.strokeStyle = 'rgba(0,164,239,0.9)'; g.lineWidth = 8;
+    g.strokeRect(4, 0, w - 8, h);
+  }, { repeat: [1, 2] });
+}
+const pathTexA = makePathTex(['C:\\Users\\Player\\', 'Desktop  >  ..\\..', 'Downloads\\', '>  >  >']);
+const pathTexB = makePathTex(['..\\..\\Windows\\', 'System32\\', 'cd  /d  >', '>  >  >']);
+const pathTexC = makePathTex(['C:\\Program Files\\', '>  >  >', 'Apple\\', 'ACCESS  >']);
+const scrollTexes = [pathTexA, pathTexB, pathTexC];
+
+/* ウィンドウ壁 */
 function windowWallTex(title) {
   return canvasTex(2048, 1024, (g, w, h) => {
     g.fillStyle = 'rgba(10,16,26,0.94)'; g.fillRect(0, 0, w, h);
-    /* タイトルバー */
     g.fillStyle = '#0E1622'; g.fillRect(0, 0, w, 110);
     g.font = '600 46px Consolas, monospace';
     g.fillStyle = 'rgba(201,212,227,0.9)';
     g.textBaseline = 'middle';
     g.fillText('📁 ' + title, 46, 56);
-    /* − □ ✕ */
     g.font = '400 52px "Segoe UI", sans-serif';
     g.textAlign = 'center';
     g.fillStyle = '#8FA0B5';
@@ -195,11 +214,9 @@ function windowWallTex(title) {
     g.font = '600 56px "Segoe UI", sans-serif';
     g.fillText('✕', w - 90, 54);
     g.shadowBlur = 0;
-    /* 本体うっすらグリッド */
     g.strokeStyle = 'rgba(0,164,239,0.07)'; g.lineWidth = 2;
     for (let x = 0; x < w; x += 128) { g.beginPath(); g.moveTo(x, 110); g.lineTo(x, h); g.stroke(); }
     for (let y = 110; y < h; y += 128) { g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); }
-    /* 発光する外枠 */
     g.strokeStyle = C.blue; g.lineWidth = 10;
     g.shadowColor = C.blue; g.shadowBlur = 34;
     g.strokeRect(5, 5, w - 10, h - 10);
@@ -215,7 +232,6 @@ function fileBlockTex(ext, color) {
     g.shadowColor = color; g.shadowBlur = 22;
     g.strokeRect(4, 4, w - 8, h - 8);
     g.shadowBlur = 0;
-    /* 紙アイコン */
     g.fillStyle = 'rgba(201,212,227,0.12)';
     g.fillRect(w/2 - 90, 90, 180, 220);
     g.beginPath(); g.moveTo(w/2 + 40, 90); g.lineTo(w/2 + 90, 140); g.lineTo(w/2 + 40, 140); g.closePath();
@@ -227,12 +243,34 @@ function fileBlockTex(ext, color) {
     g.fillText(ext, w/2, 420);
   });
 }
+const texExe = fileBlockTex('.exe', C.blue);
+const texDllB = fileBlockTex('.dll', '#8FA6BF');
+const texTxt = fileBlockTex('.txt', '#C9D4E3');
+const texZip = fileBlockTex('.zip', C.yellow);
 
-/* フォルダ柱（黄） */
+/* System32 通路壁：.dll がびっしり詰まった棚 */
+const dllWallTex = canvasTex(1024, 512, (g, w, h) => {
+  g.fillStyle = '#050B14'; g.fillRect(0, 0, w, h);
+  for (let y = 16; y < h - 40; y += 96) {
+    for (let x = 16; x < w - 60; x += 128) {
+      g.fillStyle = 'rgba(0,164,239,0.08)';
+      g.fillRect(x, y, 112, 80);
+      g.strokeStyle = 'rgba(0,164,239,0.45)'; g.lineWidth = 2;
+      g.strokeRect(x, y, 112, 80);
+      g.font = '600 26px Consolas, monospace';
+      g.fillStyle = 'rgba(0,164,239,0.7)';
+      g.fillText('.dll', x + 26, y + 50);
+    }
+  }
+  g.strokeStyle = C.blue; g.lineWidth = 8;
+  g.shadowColor = C.blue; g.shadowBlur = 26;
+  g.strokeRect(4, 4, w - 8, h - 8);
+}, { repeat: [3, 1] });
+
+/* フォルダ柱 */
 const pillarTex = canvasTex(512, 1024, (g, w, h) => {
   g.fillStyle = '#141005'; g.fillRect(0, 0, w, h);
   g.fillStyle = 'rgba(255,200,61,0.16)';
-  /* フォルダ形シルエットを縦に */
   for (let y = 60; y < h; y += 240) {
     g.beginPath();
     g.moveTo(120, y); g.lineTo(220, y); g.lineTo(250, y + 34); g.lineTo(392, y + 34);
@@ -244,14 +282,13 @@ const pillarTex = canvasTex(512, 1024, (g, w, h) => {
   g.strokeRect(5, 5, w - 10, h - 10);
 });
 
-/* Apple アリーナ床：白銀・継ぎ目なし */
+/* Apple アリーナ床 */
 const appleFloorTex = canvasTex(1024, 1024, (g, w, h) => {
   const rad = g.createRadialGradient(w/2, h/2, 60, w/2, h/2, w/2);
   rad.addColorStop(0, '#FAFAFC');
   rad.addColorStop(0.72, '#E8E8ED');
   rad.addColorStop(1, '#C9CBD3');
   g.fillStyle = rad; g.fillRect(0, 0, w, h);
-  /* 中央に赤い危険サークル */
   g.strokeStyle = 'rgba(232,17,35,0.55)'; g.lineWidth = 6;
   g.shadowColor = C.red; g.shadowBlur = 20;
   g.beginPath(); g.arc(w/2, h/2, 150, 0, Math.PI * 2); g.stroke();
@@ -259,125 +296,330 @@ const appleFloorTex = canvasTex(1024, 1024, (g, w, h) => {
   g.strokeStyle = 'rgba(232,17,35,0.2)'; g.stroke();
 });
 
+/* UAC ゲート：アクセス許可ダイアログ */
+const uacTex = canvasTex(1024, 640, (g, w, h) => {
+  g.fillStyle = 'rgba(8,12,20,0.96)'; g.fillRect(0, 0, w, h);
+  /* タイトルバー（黄帯＝UAC風） */
+  const grad = g.createLinearGradient(0, 0, w, 0);
+  grad.addColorStop(0, '#3A2E08'); grad.addColorStop(1, '#141005');
+  g.fillStyle = grad; g.fillRect(0, 0, w, 90);
+  g.font = '600 40px "Segoe UI", sans-serif';
+  g.fillStyle = C.yellow;
+  g.shadowColor = C.yellow; g.shadowBlur = 14;
+  g.fillText('⛨ ユーザー アカウント制御', 36, 60);
+  g.shadowBlur = 0;
+  g.font = '400 34px "Segoe UI", sans-serif';
+  g.fillStyle = '#C9D4E3';
+  g.fillText('このフォルダーへ移動するには、区画内の', 60, 190);
+  g.fillText('すべての敵プロセスの終了が必要です。', 60, 245);
+  g.font = '400 28px Consolas, monospace';
+  g.fillStyle = '#5A6B80';
+  g.fillText('target: C:\\Program Files\\Apple\\', 60, 320);
+  /* ボタン */
+  g.strokeStyle = '#3A4A5E'; g.lineWidth = 3;
+  g.strokeRect(560, 480, 190, 80);
+  g.fillStyle = '#5A6B80';
+  g.font = '600 34px "Segoe UI", sans-serif';
+  g.textAlign = 'center';
+  g.fillText('いいえ', 655, 532);
+  g.fillStyle = 'rgba(0,164,239,0.25)';
+  g.fillRect(780, 480, 190, 80);
+  g.strokeStyle = C.blue;
+  g.shadowColor = C.blue; g.shadowBlur = 18;
+  g.strokeRect(780, 480, 190, 80);
+  g.fillStyle = '#E8F2FC';
+  g.fillText('はい', 875, 532);
+  g.shadowBlur = 0;
+  g.textAlign = 'left';
+  /* 外枠 */
+  g.strokeStyle = C.yellow; g.lineWidth = 8;
+  g.shadowColor = C.yellow; g.shadowBlur = 26;
+  g.strokeRect(4, 4, w - 8, h - 8);
+});
+
+/* Temp の宝箱アイテム用 */
+const tempSignTex = canvasTex(512, 256, (g, w, h) => {
+  g.fillStyle = 'rgba(10,16,26,0.9)'; g.fillRect(0, 0, w, h);
+  g.font = '600 64px Consolas, monospace';
+  g.textAlign = 'center';
+  g.fillStyle = C.yellow;
+  g.shadowColor = C.yellow; g.shadowBlur = 22;
+  g.fillText('Temp\\', w/2, 105);
+  g.font = '400 34px Consolas, monospace';
+  g.fillStyle = '#8FA0B5'; g.shadowBlur = 0;
+  g.fillText('(行き止まり・回復アイテム)', w/2, 185);
+  g.strokeStyle = C.yellow; g.lineWidth = 6;
+  g.shadowColor = C.yellow; g.shadowBlur = 18;
+  g.strokeRect(3, 3, w - 6, h - 6);
+});
+
 /* =========================================================
- * ステージ構築（3区画・一本道）
- *  スケール感は要件 3-1 準拠（1ユニット≒1cm / 通路幅1000 / アリーナ径3000）
+ * ステージ構築ヘルパー
  * ======================================================= */
 const stage = new THREE.Group();
 scene.add(stage);
 
+const DEG = Math.PI / 180;
 const SLOPE_DEG = 13;
-const SLOPE_LEN = 2600;
-const SLOPE_DROP = SLOPE_LEN * Math.sin(SLOPE_DEG * Math.PI / 180);
-const SLOPE_SPAN = SLOPE_LEN * Math.cos(SLOPE_DEG * Math.PI / 180);
-
-function box(w, h, d, mat) {
-  return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
-}
 const mat = (opt) => new THREE.MeshStandardMaterial(Object.assign({ roughness: 0.85, metalness: 0.05 }, opt));
+const emissiveMat = (tex, intensity, extra = {}) =>
+  mat(Object.assign({ map: tex, emissiveMap: tex, emissive: 0xffffff, emissiveIntensity: intensity }, extra));
 
-/* ---- ① Desktop ---- */
-const z1Y = 0;
-const floor1 = box(2600, 24, 2600, mat({ map: folderFloorTex, emissiveMap: folderFloorTex, emissive: 0xffffff, emissiveIntensity: 0.5 }));
-floor1.position.set(0, z1Y - 12, 0);
-stage.add(floor1);
+function box(w, h, d, m) { return new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); }
 
-const wall1 = box(3000, 1500, 40, mat({ map: windowWallTex('C:\\Users\\Player\\Desktop'), emissiveMap: windowWallTex('C:\\Users\\Player\\Desktop'), emissive: 0xffffff, emissiveIntensity: 0.55, transparent: true, opacity: 0.96 }));
-wall1.position.set(0, z1Y + 750, -1350);
-stage.add(wall1);
-
-/* ---- 坂1 ---- */
-const slope1 = box(1000, 24, SLOPE_LEN, mat({ map: pathTex, emissiveMap: pathTex, emissive: 0xffffff, emissiveIntensity: 0.8 }));
-slope1.position.set(0, z1Y - 12 - SLOPE_DROP / 2, 1300 + SLOPE_SPAN / 2);
-slope1.rotation.x = SLOPE_DEG * Math.PI / 180;
-stage.add(slope1);
-
-/* ---- ② Program Files（主戦場） ---- */
-const z2Y = z1Y - SLOPE_DROP;
-const z2Z = 1300 + SLOPE_SPAN + 1800;
-const floor2 = box(3800, 24, 3600, mat({ map: folderFloorTex, emissiveMap: folderFloorTex, emissive: 0xffffff, emissiveIntensity: 0.5 }));
-floor2.position.set(0, z2Y - 12, z2Z);
-stage.add(floor2);
-
-const wallTexPF = windowWallTex('C:\\Program Files');
-for (const [x, z, ry] of [[-1920, z2Z, Math.PI/2], [1920, z2Z, -Math.PI/2]]) {
-  const w = box(3600, 1500, 40, mat({ map: wallTexPF, emissiveMap: wallTexPF, emissive: 0xffffff, emissiveIntensity: 0.5, transparent: true, opacity: 0.94 }));
-  w.position.set(x, z2Y + 750, z);
-  w.rotation.y = ry;
-  stage.add(w);
+function addFloor(cx, cy, cz, sx, sz, tex = folderFloorTex, glow = 0.5) {
+  const f = box(sx, 24, sz, emissiveMat(tex, glow));
+  f.position.set(cx, cy - 12, cz);
+  stage.add(f);
+  return f;
 }
 
-/* フォルダ柱（遮蔽物） */
-for (const [x, z] of [[-900, z2Z - 800], [900, z2Z - 700], [-800, z2Z + 900], [950, z2Z + 850]]) {
-  const p = box(240, 620, 240, mat({ map: pillarTex, emissiveMap: pillarTex, emissive: 0xffffff, emissiveIntensity: 0.55 }));
-  p.position.set(x, z2Y + 310, z);
-  stage.add(p);
+/* 坂：始点（床の縁・上面高さ）から axis 方向へ下る。終点情報を返す */
+function addSlope(startX, topY, startZ, len, width, axis /* 'z+'|'x-'|'x+' */, tex) {
+  const drop = len * Math.sin(SLOPE_DEG * DEG);
+  const span = len * Math.cos(SLOPE_DEG * DEG);
+  const s = box(width, 24, len, emissiveMat(tex, 0.8));
+  if (axis === 'z+') {
+    s.position.set(startX, topY - 12 - drop / 2, startZ + span / 2);
+    s.rotation.x = SLOPE_DEG * DEG;
+    stage.add(s);
+    return { x: startX, y: topY - drop, z: startZ + span, mesh: s };
+  }
+  if (axis === 'x-') {
+    s.position.set(startX - span / 2, topY - 12 - drop / 2, startZ);
+    s.rotation.y = Math.PI / 2;
+    s.rotation.x = -SLOPE_DEG * DEG;   /* -x 方向へ下る */
+    stage.add(s);
+    return { x: startX - span, y: topY - drop, z: startZ, mesh: s };
+  }
+  /* 'x+' */
+  s.position.set(startX + span / 2, topY - 12 - drop / 2, startZ);
+  s.rotation.y = Math.PI / 2;
+  s.rotation.x = SLOPE_DEG * DEG;
+  stage.add(s);
+  return { x: startX + span, y: topY - drop, z: startZ, mesh: s };
 }
 
-/* ファイルブロックの山 */
-const exts = [['.exe', C.blue], ['.dll', '#8FA6BF'], ['.txt', '#C9D4E3']];
-let bi = 0;
-for (const [bx, bz, n] of [[-1400, z2Z + 100, 3], [1350, z2Z - 200, 2], [200, z2Z + 1300, 2]]) {
-  for (let i = 0; i < n; i++) {
-    const [ext, col] = exts[bi++ % exts.length];
-    const t = fileBlockTex(ext, col);
-    const b = box(220, 220, 220, mat({ map: t, emissiveMap: t, emissive: 0xffffff, emissiveIntensity: 0.45 }));
-    b.position.set(bx + (i % 2) * 120 - 40, z2Y + 110 + Math.floor(i / 1) * 0, bz + i * 140);
-    if (i === n - 1 && n > 1) b.position.set(bx + 40, z2Y + 330, bz + 70); /* 一段積む */
-    b.rotation.y = (bi * 0.7) % 1.2 - 0.6;
-    stage.add(b);
+/* System32 のクランク通路：床＋両側の .dll 壁 */
+function addCorridor(cx, cy, cz, len, axis /* 'z'|'x' */, width = 1000, wallH = 620) {
+  const alongZ = axis === 'z';
+  addFloor(cx, cy, cz, alongZ ? width : len, alongZ ? len : width, sys32FloorTex, 0.55);
+  for (const side of [-1, 1]) {
+    const w = box(len, wallH, 30, emissiveMat(dllWallTex, 0.5));
+    if (alongZ) {
+      w.position.set(cx + side * (width / 2 + 15), cy + wallH / 2, cz);
+      w.rotation.y = Math.PI / 2;
+    } else {
+      w.position.set(cx, cy + wallH / 2, cz + side * (width / 2 + 15));
+    }
+    stage.add(w);
   }
 }
 
-/* ---- 坂2（青 → 白銀への遷移） ---- */
-const z3StartZ = z2Z + 1800;
-const slope2 = box(1000, 24, SLOPE_LEN, mat({ map: pathTex, emissiveMap: pathTex, emissive: 0xffffff, emissiveIntensity: 0.8 }));
-slope2.position.set(0, z2Y - 12 - SLOPE_DROP / 2, z3StartZ + SLOPE_SPAN / 2);
-slope2.rotation.x = SLOPE_DEG * Math.PI / 180;
-stage.add(slope2);
+function addPillar(x, floorY, z) {
+  const p = box(240, 620, 240, emissiveMat(pillarTex, 0.55));
+  p.position.set(x, floorY + 310, z);
+  stage.add(p);
+}
 
-/* ---- ③ Apple 領域（ボスアリーナ） ---- */
-const z3Y = z2Y - SLOPE_DROP;
-const z3Z = z3StartZ + SLOPE_SPAN + 1500;
+function addBlock(tex, x, floorY, z, ry = 0, size = 220, lift = 0) {
+  const b = box(size, size, size, emissiveMat(tex, 0.45));
+  b.position.set(x, floorY + size / 2 + lift, z);
+  b.rotation.y = ry;
+  stage.add(b);
+}
+
+function addWindowWall(title, cx, cy, cz, w, h, ry = 0) {
+  const t = windowWallTex(title);
+  const m = box(w, h, 40, emissiveMat(t, 0.52, { transparent: true, opacity: 0.94 }));
+  m.position.set(cx, cy + h / 2, cz);
+  m.rotation.y = ry;
+  stage.add(m);
+}
+
+/* =========================================================
+ * ルート構築（5区画）
+ *   ① Desktop → 坂A → ② Downloads → 90°通路 → つづら折り坂B1/B2
+ *   → ③ System32（クランク）→ 坂C → ④ Program Files → UACゲート
+ *   → 坂D（青→白銀）→ ⑤ Apple アリーナ
+ * ======================================================= */
+
+/* ---- ① Desktop ---- */
+const Y1 = 0;
+addFloor(0, Y1, 0, 2600, 2600);
+addWindowWall('C:\\Users\\Player\\Desktop', 0, Y1, -1350, 3000, 1500);
+addBlock(texTxt, -900, Y1, -700, 0.4);
+addBlock(texExe, 950, Y1, -800, -0.3);
+
+/* ---- 坂A（直線） ---- */
+const sA = addSlope(0, Y1, 1300, 2600, 1000, 'z+', pathTexA);
+
+/* ---- ② Downloads ---- */
+const Y2 = sA.y;
+const R2Z = sA.z + 1400;
+addFloor(0, Y2, R2Z, 2800, 2800);
+addWindowWall('C:\\Users\\Player\\Downloads', -1420, Y2, R2Z, 2800, 1400, Math.PI / 2);
+/* .zip が散乱 */
+addBlock(texZip, -700, Y2, R2Z - 500, 0.5);
+addBlock(texZip, -450, Y2, R2Z - 350, -0.8);
+addBlock(texZip, -580, Y2, R2Z - 430, 0.1, 220, 220);
+addBlock(texZip, 800, Y2, R2Z + 600, 1.1);
+addBlock(texTxt, 300, Y2, R2Z + 900, -0.5);
+
+/* ---- 90°ターン：+x へ平通路 ---- */
+const T1X = 1400, T1LEN = 1900;
+addFloor(T1X + T1LEN / 2, Y2, R2Z + 500, T1LEN, 1000);
+const J1X = T1X + T1LEN + 500;           /* ターン踊り場 */
+addFloor(J1X, Y2, R2Z + 500, 1000, 1000);
+
+/* ---- つづら折り坂 B1（+z へ下る）→ 踊り場 → B2（-x へ下る） ---- */
+const sB1 = addSlope(J1X, Y2, R2Z + 1000, 2000, 1000, 'z+', pathTexA);
+const J2Z = sB1.z + 500;
+addFloor(J1X, sB1.y, J2Z, 1000, 1000);
+const sB2 = addSlope(J1X - 500, sB1.y, J2Z, 2000, 1000, 'x-', pathTexB);
+const Y3 = sB2.y;
+const J3X = sB2.x - 500;
+addFloor(J3X, Y3, J2Z, 1000, 1000);
+
+/* ---- ③ System32：クランク通路 ---- */
+/* C1: +z */
+const C1LEN = 2400;
+addCorridor(J3X, Y3, J2Z + 500 + C1LEN / 2, C1LEN, 'z');
+const J4Z = J2Z + 500 + C1LEN + 500;
+addFloor(J3X, Y3, J4Z, 1000, 1000, sys32FloorTex, 0.55);
+/* C2: -x */
+const C2LEN = 2000;
+addCorridor(J3X - 500 - C2LEN / 2, Y3, J4Z, C2LEN, 'x');
+const J5X = J3X - 500 - C2LEN - 500;
+addFloor(J5X, Y3, J4Z, 1000, 1000, sys32FloorTex, 0.55);
+/* 寄り道：さらに -x へ行き止まりの Temp\ */
+const TEMP_X = J5X - 500 - 700 - 600;
+addFloor(J5X - 500 - 350, Y3, J4Z, 700, 800, sys32FloorTex, 0.4);   /* 短い接続 */
+addFloor(TEMP_X, Y3, J4Z, 1200, 1200);
+{
+  const sign = box(500, 250, 20, emissiveMat(tempSignTex, 0.8, { transparent: true }));
+  sign.position.set(TEMP_X, Y3 + 520, J4Z - 590);
+  stage.add(sign);
+  /* 回復アイテム（黄色いオーブ） */
+  const orb = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(70, 1),
+    mat({ color: C.yellow, emissive: C.yellow, emissiveIntensity: 2.0 })
+  );
+  orb.position.set(TEMP_X, Y3 + 160, J4Z);
+  orb.userData.spin = true;
+  stage.add(orb);
+  window.__tempOrb = orb;
+}
+/* C3: +z（本ルート続き） */
+const C3LEN = 2400;
+addCorridor(J5X, Y3, J4Z + 500 + C3LEN / 2, C3LEN, 'z');
+const J6Z = J4Z + 500 + C3LEN + 500;
+addFloor(J5X, Y3, J6Z, 1000, 1000, sys32FloorTex, 0.55);
+
+/* ---- 坂C ---- */
+const sC = addSlope(J5X, Y3, J6Z + 500, 2600, 1000, 'z+', pathTexC);
+
+/* ---- ④ Program Files（主戦場） ---- */
+const Y4 = sC.y;
+const R4Z = sC.z + 1800;
+const R4X = J5X;
+addFloor(R4X, Y4, R4Z, 3800, 3600);
+const wallPF = 'C:\\Program Files';
+addWindowWall(wallPF, R4X - 1920, Y4, R4Z, 3600, 1500, Math.PI / 2);
+addWindowWall(wallPF, R4X + 1920, Y4, R4Z, 3600, 1500, -Math.PI / 2);
+for (const [dx, dz] of [[-900, -800], [900, -700], [-800, 900], [950, 850]]) addPillar(R4X + dx, Y4, R4Z + dz);
+addBlock(texExe, R4X - 1400, Y4, R4Z + 100, 0.3);
+addBlock(texDllB, R4X - 1290, Y4, R4Z + 240, -0.4);
+addBlock(texExe, R4X - 1350, Y4, R4Z + 170, 0.9, 220, 220);
+addBlock(texDllB, R4X + 1350, Y4, R4Z - 200, 0.6);
+addBlock(texTxt, R4X + 1420, Y4, R4Z - 60, -0.7);
+addBlock(texExe, R4X + 200, Y4, R4Z + 1300, 0.2);
+
+/* ---- UAC ゲート（区画の出口） ---- */
+const GATE_Z = R4Z + 1800;
+{
+  /* 左右の門柱壁＋中央上にダイアログ */
+  for (const side of [-1, 1]) {
+    const w = box(1450, 1300, 60, emissiveMat(dllWallTex, 0.4));
+    w.position.set(R4X + side * (500 + 725), Y4 + 650, GATE_Z);
+    stage.add(w);
+  }
+  const dlg = box(1100, 688, 30, emissiveMat(uacTex, 0.85, { transparent: true }));
+  dlg.position.set(R4X, Y4 + 1050, GATE_Z);
+  stage.add(dlg);
+  window.__uacDlg = dlg;
+  /* ゲート下のライン */
+  const line = box(1000, 8, 40, mat({ color: C.yellow, emissive: C.yellow, emissiveIntensity: 2.0 }));
+  line.position.set(R4X, Y4 + 4, GATE_Z);
+  stage.add(line);
+}
+
+/* ---- 坂D（青 → 白銀） ---- */
+const sD = addSlope(R4X, Y4, GATE_Z + 100, 2600, 1000, 'z+', pathTexC);
+
+/* ---- ⑤ Apple アリーナ ---- */
+const Y5 = sD.y;
+const R5Z = sD.z + 1500;
 const arena = new THREE.Mesh(
   new THREE.CylinderGeometry(1550, 1550, 24, 72),
-  mat({ map: appleFloorTex, emissiveMap: appleFloorTex, emissive: 0xffffff, emissiveIntensity: 0.32, roughness: 0.35, metalness: 0.25 })
+  emissiveMat(appleFloorTex, 0.32, { roughness: 0.35, metalness: 0.25 })
 );
-arena.position.set(0, z3Y - 12, z3Z);
+arena.position.set(R4X, Y5 - 12, R5Z);
 stage.add(arena);
-
-/* アリーナ縁の白銀リング */
 const ring = new THREE.Mesh(
   new THREE.TorusGeometry(1550, 14, 12, 96),
   mat({ color: C.apple2, emissive: C.apple2, emissiveIntensity: 1.4, roughness: 0.3 })
 );
 ring.rotation.x = Math.PI / 2;
-ring.position.set(0, z3Y + 4, z3Z);
+ring.position.set(R4X, Y5 + 4, R5Z);
 stage.add(ring);
 
-/* =========================================================
- * キャラクター（グレーボックス表現＋発光）
- * ======================================================= */
-const actors = [];
-function actor(w, h, d, color, x, y, z, opts = {}) {
-  const m = box(w, h, d, mat({ color, emissive: color, emissiveIntensity: opts.glow ?? 0.5, roughness: 0.6, transparent: true, opacity: 0.95 }));
-  m.position.set(x, y + h / 2, z);
-  stage.add(m);
-  actors.push({ mesh: m, baseY: y + h / 2, phase: Math.random() * 6.28, bob: opts.bob ?? 24 });
-  return m;
+/* 序盤から見える「彼方の白い光」：アリーナ上空の発光体 */
+{
+  const glow = new THREE.Mesh(
+    new THREE.SphereGeometry(220, 24, 24),
+    mat({ color: C.apple2, emissive: C.apple2, emissiveIntensity: 3.0, transparent: true, opacity: 0.9 })
+  );
+  glow.position.set(R4X, Y5 + 1500, R5Z);
+  stage.add(glow);
+  const beam = new THREE.Mesh(
+    new THREE.CylinderGeometry(60, 200, 2800, 24, 1, true),
+    mat({ color: C.apple2, emissive: C.apple2, emissiveIntensity: 0.8, transparent: true, opacity: 0.15, side: THREE.DoubleSide, depthWrite: false })
+  );
+  beam.position.set(R4X, Y5 + 1400, R5Z);
+  stage.add(beam);
 }
 
-/* safari（青系） */
-actor(200, 300, 200, '#4DA6FF', -500, z1Y, 300);
-actor(200, 300, 200, '#4DA6FF', 550, z1Y, 150);
-actor(200, 300, 200, '#4DA6FF', -1000, z2Y, z2Z - 400);
-actor(200, 300, 200, '#4DA6FF', 1100, z2Y, z2Z + 300);
-actor(200, 300, 200, '#4DA6FF', -300, z2Y, z2Z + 1100);
-/* xcode（濃青・大柄） */
-actor(220, 400, 220, '#1E90FF', 500, z2Y, z2Z - 900, { glow: 0.55 });
-actor(220, 400, 220, '#1E90FF', -1300, z2Y, z2Z + 700, { glow: 0.55 });
+/* =========================================================
+ * キャラクター
+ * ======================================================= */
+const actors = [];
+function actor(w, h, d, color, x, floorY, z, opts = {}) {
+  const m = box(w, h, d, mat({ color, emissive: color, emissiveIntensity: opts.glow ?? 0.5, roughness: 0.6, transparent: true, opacity: 0.95 }));
+  m.position.set(x, floorY + h / 2, z);
+  stage.add(m);
+  actors.push({ mesh: m, baseY: floorY + h / 2, phase: Math.random() * 6.28, bob: 24 });
+  return m;
+}
+/* ① Desktop: 雑魚1〜2 */
+actor(200, 300, 200, '#4DA6FF', -500, Y1, 300);
+actor(200, 300, 200, '#4DA6FF', 550, Y1, 150);
+/* ② Downloads: 2〜3 */
+actor(200, 300, 200, '#4DA6FF', -600, Y2, R2Z + 400);
+actor(200, 300, 200, '#4DA6FF', 700, Y2, R2Z - 300);
+actor(220, 400, 220, '#1E90FF', 100, Y2, R2Z + 900, { glow: 0.55 });
+/* ③ System32: 通路に少数（緊張ゾーン） */
+actor(200, 300, 200, '#4DA6FF', J3X, Y3, J2Z + 1700);
+actor(220, 400, 220, '#1E90FF', J5X, Y3, J4Z + 1600, { glow: 0.55 });
+/* ④ Program Files: 主戦場 5〜7 */
+actor(200, 300, 200, '#4DA6FF', R4X - 1000, Y4, R4Z - 400);
+actor(200, 300, 200, '#4DA6FF', R4X + 1100, Y4, R4Z + 300);
+actor(200, 300, 200, '#4DA6FF', R4X - 300, Y4, R4Z + 1100);
+actor(200, 300, 200, '#4DA6FF', R4X + 400, Y4, R4Z - 1100);
+actor(220, 400, 220, '#1E90FF', R4X + 500, Y4, R4Z - 900, { glow: 0.55 });
+actor(220, 400, 220, '#1E90FF', R4X - 1300, Y4, R4Z + 700, { glow: 0.55 });
 
-/* MacBook（ボス）：白銀の筐体＋開いたスクリーン＋赤の警告リング */
+/* MacBook（ボス） */
 const macGroup = new THREE.Group();
 {
   const body = box(520, 40, 380, mat({ color: C.apple, emissive: C.apple, emissiveIntensity: 0.35, metalness: 0.7, roughness: 0.25 }));
@@ -385,13 +627,12 @@ const macGroup = new THREE.Group();
   const screen = box(520, 360, 24, mat({ color: C.apple2, emissive: C.apple2, emissiveIntensity: 0.4, metalness: 0.7, roughness: 0.25 }));
   screen.position.set(0, 200, -180);
   screen.rotation.x = -0.32;
-  /* スクリーン面の赤い光 */
   const face = box(470, 310, 6, mat({ color: '#1A0508', emissive: C.red, emissiveIntensity: 1.6 }));
   face.position.set(0, 200, -167);
   face.rotation.x = -0.32;
   macGroup.add(body, screen, face);
   macGroup.scale.setScalar(1.35);
-  macGroup.position.set(0, z3Y, z3Z);
+  macGroup.position.set(R4X, Y5, R5Z);
   stage.add(macGroup);
 }
 const dangerRing = new THREE.Mesh(
@@ -399,35 +640,39 @@ const dangerRing = new THREE.Mesh(
   mat({ color: C.red, emissive: C.red, emissiveIntensity: 2.2, transparent: true, opacity: 0.9 })
 );
 dangerRing.rotation.x = Math.PI / 2;
-dangerRing.position.set(0, z3Y + 10, z3Z);
+dangerRing.position.set(R4X, Y5 + 10, R5Z);
 stage.add(dangerRing);
 
 /* =========================================================
- * ライティング（青の道中 → 白銀のアリーナで明暗反転）
+ * ライティング
  * ======================================================= */
 function pt(color, intensity, dist, x, y, z) {
   const l = new THREE.PointLight(color, intensity, dist, 1.6);
   l.position.set(x, y, z);
   scene.add(l);
 }
-pt(C.blue, 90000, 6000, 0, 900, 0);
-pt(C.blue, 140000, 7000, 0, 1000, z2Z);
-pt(C.yellow, 30000, 2500, -900, z2Y + 800, z2Z - 800);
-pt(C.yellow, 30000, 2500, 950, z2Y + 800, z2Z + 850);
-/* アリーナ：眩しい白 ＋ 赤 */
-pt('#FFFFFF', 260000, 8000, 0, z3Y + 1600, z3Z);
-pt(C.red, 60000, 3000, 0, z3Y + 300, z3Z);
+pt(C.blue, 90000, 6000, 0, Y1 + 900, 0);                       /* Desktop */
+pt(C.blue, 110000, 6000, 0, Y2 + 900, R2Z);                    /* Downloads */
+pt(C.yellow, 26000, 2200, TEMP_X, Y3 + 600, J4Z);              /* Temp */
+pt(C.blue, 80000, 5000, J3X, Y3 + 800, J4Z);                   /* System32 前半 */
+pt(C.blue, 80000, 5000, J5X, Y3 + 800, J4Z + 1800);            /* System32 後半 */
+pt(C.blue, 150000, 7000, R4X, Y4 + 1000, R4Z);                 /* Program Files */
+pt(C.yellow, 30000, 2500, R4X - 900, Y4 + 800, R4Z - 800);
+pt(C.yellow, 30000, 2500, R4X + 950, Y4 + 800, R4Z + 850);
+pt(C.yellow, 45000, 3000, R4X, Y4 + 1100, GATE_Z);             /* UAC ゲート */
+pt('#FFFFFF', 260000, 8000, R4X, Y5 + 1600, R5Z);              /* アリーナ */
+pt(C.red, 60000, 3000, R4X, Y5 + 300, R5Z);
 
 /* =========================================================
- * 虚無を漂うデータ片（パーティクル）
+ * 虚無を漂うデータ片
  * ======================================================= */
-const PCOUNT = 900;
+const PCOUNT = 1300;
 const pGeo = new THREE.BufferGeometry();
 const pPos = new Float32Array(PCOUNT * 3);
 for (let i = 0; i < PCOUNT; i++) {
-  pPos[i*3]   = (Math.random() - 0.5) * 14000;
-  pPos[i*3+1] = (Math.random() - 0.5) * 6000 - 500;
-  pPos[i*3+2] = Math.random() * 16000 - 2500;
+  pPos[i*3]   = (Math.random() - 0.5) * 18000 - 1000;
+  pPos[i*3+1] = (Math.random() - 0.5) * 8000 - 1400;
+  pPos[i*3+2] = Math.random() * 30000 - 3000;
 }
 pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
 const points = new THREE.Points(pGeo, new THREE.PointsMaterial({
@@ -439,25 +684,36 @@ scene.add(points);
  * カメラ：シネマティック巡回 ⇄ 自由視点
  * ======================================================= */
 const tourCurve = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(0, 700, -2600),
-  new THREE.Vector3(-900, 500, -300),
-  new THREE.Vector3(400, 380, 1200),
-  new THREE.Vector3(0, z2Y + 500, 1300 + SLOPE_SPAN + 300),
-  new THREE.Vector3(-1200, z2Y + 420, z2Z + 300),
-  new THREE.Vector3(900, z2Y + 600, z2Z + 1500),
-  new THREE.Vector3(0, z2Y + 350, z3StartZ + 600),
-  new THREE.Vector3(-1100, z3Y + 500, z3Z - 600),
-  new THREE.Vector3(0, z3Y + 900, z3Z + 1400),
-  new THREE.Vector3(1500, z3Y + 1400, z3Z - 200),
-  new THREE.Vector3(600, 1600, z2Z),
-  new THREE.Vector3(0, 1100, -1500)
-], true, 'catmullrom', 0.35);
+  new THREE.Vector3(0, 800, -2900),                            /* 開幕：遠景に白い光 */
+  new THREE.Vector3(-700, 450, 0),
+  new THREE.Vector3(200, 200, 2200),                           /* 坂A */
+  new THREE.Vector3(-500, Y2 + 450, R2Z - 300),                /* Downloads */
+  new THREE.Vector3(900, Y2 + 380, R2Z + 500),
+  new THREE.Vector3(T1X + 1000, Y2 + 350, R2Z + 500),          /* 90°通路 */
+  new THREE.Vector3(J1X, Y2 + 300, R2Z + 1400),                /* 坂B1へ */
+  new THREE.Vector3(J1X, sB1.y + 350, J2Z),                    /* 踊り場（見下ろし） */
+  new THREE.Vector3(J1X - 1200, Y3 + 400, J2Z),                /* 坂B2 */
+  new THREE.Vector3(J3X, Y3 + 320, J2Z + 1200),                /* System32 C1 */
+  new THREE.Vector3(J3X, Y3 + 320, J4Z - 300),
+  new THREE.Vector3(J3X - 1300, Y3 + 320, J4Z),                /* C2 クランク */
+  new THREE.Vector3(TEMP_X + 400, Y3 + 350, J4Z),              /* Temp 寄り道ちら見せ */
+  new THREE.Vector3(J5X, Y3 + 320, J4Z + 1300),                /* C3 */
+  new THREE.Vector3(J5X, Y3 + 250, J6Z + 900),                 /* 坂C */
+  new THREE.Vector3(R4X - 1300, Y4 + 500, R4Z - 700),          /* Program Files */
+  new THREE.Vector3(R4X + 1000, Y4 + 420, R4Z + 800),
+  new THREE.Vector3(R4X, Y4 + 600, GATE_Z - 900),              /* UAC ゲートへ */
+  new THREE.Vector3(R4X, Y4 + 300, GATE_Z + 600),              /* ゲート通過 */
+  new THREE.Vector3(R4X - 900, Y5 + 500, R5Z - 800),           /* アリーナ */
+  new THREE.Vector3(R4X, Y5 + 1000, R5Z + 1500),
+  new THREE.Vector3(R4X + 1700, Y5 + 1500, R5Z - 300),
+  new THREE.Vector3(0, 1800, 12000),                           /* 全景の引き */
+  new THREE.Vector3(0, 1400, 2000)
+], true, 'catmullrom', 0.3);
 
 let mode = 'tour';
 let tourT = 0;
-const TOUR_SPEED = 1 / 75;      /* 一周 75 秒 */
+const TOUR_SPEED = 1 / 110;      /* 一周 110 秒 */
 
-/* 自由視点 */
 let yaw = 0, pitch = -0.15, dragging = false;
 const keys = new Set();
 renderer.domElement.addEventListener('pointerdown', (e) => {
@@ -484,7 +740,6 @@ function setMode(m) {
   btnFly.classList.toggle('active', m === 'fly');
   document.getElementById('flyHint').style.display = m === 'fly' ? 'block' : 'none';
   if (m === 'fly') {
-    /* 現在のカメラ姿勢から引き継ぐ */
     const e = new THREE.Euler().setFromQuaternion(camera.quaternion, 'YXZ');
     yaw = e.y; pitch = e.x;
   }
@@ -493,23 +748,33 @@ btnTour.onclick = () => setMode('tour');
 btnFly.onclick = () => setMode('fly');
 
 /* =========================================================
- * ゾーン表示
+ * ゾーン表示（カメラ位置 → 区画名）
  * ======================================================= */
 const zoneEl = document.getElementById('zone');
+const depthEl = document.getElementById('depth');
 let currentZone = '';
-function updateZone(z) {
-  let name;
-  if (z < 1300 + SLOPE_SPAN * 0.5) name = 'C:\\Users\\Player\\Desktop';
-  else if (z < z3StartZ + SLOPE_SPAN * 0.5) name = 'C:\\Program Files\\';
-  else name = 'C:\\Program Files\\Apple\\';
+function zoneAt(p) {
+  if (p.z > GATE_Z + 300 || (p.z > sD.mesh.position.z - 1000 && p.y < Y4 - 200)) return 'C:\\Program Files\\Apple\\';
+  if (p.z > J6Z - 400) return 'C:\\Program Files\\';
+  if (p.x < TEMP_X + 900 && Math.abs(p.z - J4Z) < 900) return 'C:\\Windows\\Temp\\';
+  if (p.z > J2Z - 700) return 'C:\\Windows\\System32\\';
+  if (p.z > 2600) return 'C:\\Users\\Player\\Downloads';
+  return 'C:\\Users\\Player\\Desktop';
+}
+function updateZone(p) {
+  const name = zoneAt(p);
+  depthEl.textContent = 'DEPTH: ' + Math.max(0, -p.y / 100).toFixed(1) + 'm';
   if (name !== currentZone) {
     currentZone = name;
     zoneEl.style.opacity = 0;
     setTimeout(() => {
-      zoneEl.innerHTML = '<span class="path-prefix">CURRENT DIRECTORY</span>' + name.replace(/\\/g, '\\');
-      zoneEl.style.color = name.includes('Apple') ? '#F5F5F7' : '#E8F2FC';
-      zoneEl.style.textShadow = name.includes('Apple')
-        ? '0 0 18px rgba(232,17,35,0.5)' : '0 0 18px rgba(0,164,239,0.55)';
+      const isApple = name.includes('Apple');
+      const isTemp = name.includes('Temp');
+      zoneEl.innerHTML = '<span class="path-prefix">CURRENT DIRECTORY</span>' + name;
+      zoneEl.style.color = isApple ? '#F5F5F7' : (isTemp ? '#FFC83D' : '#E8F2FC');
+      zoneEl.style.textShadow = isApple
+        ? '0 0 18px rgba(232,17,35,0.5)'
+        : (isTemp ? '0 0 18px rgba(255,200,61,0.5)' : '0 0 18px rgba(0,164,239,0.55)');
       zoneEl.style.opacity = 1;
     }, 400);
   }
@@ -524,32 +789,34 @@ function tick(t) {
   const dt = Math.min((t - last) / 1000, 0.1); last = t;
   const time = t / 1000;
 
-  /* パス文字を流す */
-  pathTex.offset.y = (pathTex.offset.y - dt * 0.12) % 1;
+  for (const tx of scrollTexes) tx.offset.y = (tx.offset.y - dt * 0.12) % 1;
 
-  /* 敵の浮遊 */
   for (const a of actors) {
     a.mesh.position.y = a.baseY + Math.sin(time * 1.4 + a.phase) * a.bob;
     a.mesh.rotation.y += dt * 0.25;
   }
-  /* ボス演出 */
   dangerRing.scale.setScalar(1 + Math.sin(time * 2.2) * 0.05);
   dangerRing.material.emissiveIntensity = 1.8 + Math.sin(time * 2.2) * 0.7;
-  macGroup.position.y = z3Y + Math.sin(time * 0.9) * 18;
-
-  /* パーティクル漂流 */
+  macGroup.position.y = Y5 + Math.sin(time * 0.9) * 18;
+  if (window.__tempOrb) {
+    window.__tempOrb.rotation.y = time * 1.2;
+    window.__tempOrb.position.y = Y3 + 160 + Math.sin(time * 2) * 20;
+  }
+  if (window.__uacDlg) {
+    window.__uacDlg.material.emissiveIntensity = 0.75 + Math.sin(time * 1.8) * 0.2;
+  }
   points.rotation.y = time * 0.004;
 
   if (mode === 'tour') {
     tourT = (tourT + dt * TOUR_SPEED) % 1;
     const pos = tourCurve.getPointAt(tourT);
-    const ahead = tourCurve.getPointAt((tourT + 0.015) % 1);
+    const ahead = tourCurve.getPointAt((tourT + 0.012) % 1);
     camera.position.lerp(pos, 0.9);
     camera.lookAt(ahead);
   } else {
     camera.rotation.order = 'YXZ';
     camera.rotation.set(pitch, yaw, 0);
-    const speed = 2400 * (keys.has('ShiftLeft') || keys.has('ShiftRight') ? 3 : 1) * dt;
+    const speed = 2600 * (keys.has('ShiftLeft') || keys.has('ShiftRight') ? 3 : 1) * dt;
     const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd);
     const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
     if (keys.has('KeyW')) camera.position.addScaledVector(fwd, speed);
@@ -560,11 +827,11 @@ function tick(t) {
     if (keys.has('KeyE')) camera.position.y += speed;
   }
 
-  /* アリーナ接近でブルームをやや強めて「眩しさ」を演出 */
-  const nearArena = Math.max(0, 1 - Math.abs(camera.position.z - z3Z) / 4000);
-  bloom.strength = 0.7 + nearArena * 0.45;
+  /* アリーナ接近で眩しく */
+  const dArena = Math.hypot(camera.position.x - R4X, camera.position.z - R5Z);
+  bloom.strength = 0.7 + Math.max(0, 1 - dArena / 4500) * 0.45;
 
-  updateZone(camera.position.z);
+  updateZone(camera.position);
   composer.render();
 }
 
