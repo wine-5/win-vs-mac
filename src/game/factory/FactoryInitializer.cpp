@@ -1,6 +1,8 @@
 ﻿#include "FactoryInitializer.h"
 #include "core/interface/ILogger.h"
 #include "core/utility/Log.h"
+#include "core/utility/MathConstants.h"
+#include "core/data/PropDefinition.h"
 #include "game/constant/ModelId.h"
 #include "game/data/GroundData.h"
 #include <stdexcept>
@@ -32,5 +34,33 @@ namespace game::factory
 
 		data::GroundData groundData = data::GroundData::fromMetadata(groundMeta.value());
 		return m_factoryManager.getGroundFactory().create(groundHandle, groundData);
+	}
+
+	void FactoryInitializer::initializeProps()
+	{
+		const auto& stage{ m_resourceManager.getStageMetadata() };
+		auto& factory{ m_factoryManager.getStagePropFactory() };
+
+		for (const auto& prop : stage.m_props)
+		{
+			const auto& def{ m_resourceManager.getPropDefinition(prop.m_type) };
+			const int handle{ m_resourceManager.loadModelByPath(def.m_modelPath) };
+
+			// 実寸(size) ÷ 素材実寸(baseSize) をモデルスケールにする。
+			// baseSizeが0の軸は割れないためスケール1にフォールバックする
+			const core::Vector3 scale{
+				def.m_baseSize.x != 0.0f ? prop.m_size.x / def.m_baseSize.x : 1.0f,
+				def.m_baseSize.y != 0.0f ? prop.m_size.y / def.m_baseSize.y : 1.0f,
+				def.m_baseSize.z != 0.0f ? prop.m_size.z / def.m_baseSize.z : 1.0f
+			};
+
+			// JSONは度数法で持つ。DxLibのMV1SetRotationXYZはラジアンなので変換する
+			const core::Vector3 rotation{ prop.m_rotation * core::utility::DEG_TO_RAD };
+
+			// カタログで "box" 指定のものだけコライダーを付ける（size全0でStageProp側が判定を省く）
+			const core::Vector3 colliderSize{ (def.m_collider == "box") ? prop.m_size : core::Vector3{} };
+
+			factory.create(handle, prop.m_position, rotation, scale, colliderSize);
+		}
 	}
 } // namespace game::factory

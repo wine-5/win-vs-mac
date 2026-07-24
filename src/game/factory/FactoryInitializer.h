@@ -35,7 +35,15 @@ namespace game::factory
 		 */
 		core::ecs::EntityId initializeGround();
 
-	private:
+		/**
+		 * @brief stageData.jsonのprops[]から配置物（床・壁など）を一括生成する
+		 *
+		 * 各propのtypeをstageCatalogで解決し、size÷baseSizeをモデルスケール、
+		 * 回転（度）をラジアンへ変換して生成する。
+		 */
+		void initializeProps();
+
+	  private:
 		FactoryManager& m_factoryManager;
 		core::iface::IResourceManager& m_resourceManager;
 	};

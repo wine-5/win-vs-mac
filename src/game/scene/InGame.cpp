@@ -260,6 +260,9 @@ namespace game::scene
 
 		initializer.initializeGround();
 
+		// stageData.jsonのprops[]から床・壁などの配置物を生成する
+		initializer.initializeProps();
+
 		// 生成される敵の追跡対象をプレイヤーに設定してからスポーンする
 		m_enemySpawner.setTargetEntity(core::ecs::Entity(m_playerId));
 		m_enemySpawner.spawnStageEnemies();
