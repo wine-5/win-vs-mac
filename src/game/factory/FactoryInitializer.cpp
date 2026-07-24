@@ -6,6 +6,7 @@
 #include "game/constant/ModelId.h"
 #include "game/data/GroundData.h"
 #include <stdexcept>
+#include <cmath>
 
 namespace game::factory
 {
@@ -57,8 +58,22 @@ namespace game::factory
 			// JSONは度数法で持つ。DxLibのMV1SetRotationXYZはラジアンなので変換する
 			const core::Vector3 rotation{ prop.m_rotation * core::utility::DEG_TO_RAD };
 
-			// カタログで "box" 指定のものだけコライダーを付ける（size全0でStageProp側が判定を省く）
-			const core::Vector3 colliderSize{ (def.m_collider == "box") ? prop.m_size : core::Vector3{} };
+			// カタログで "box" 指定のものだけコライダーを付ける（size全0でStageProp側が判定を省く）。
+			// コライダーは軸並行(AABB)なので、Y回転を反映して footprint を実物に合わせる
+			// （壁を90°横に置くと幅と奥行きが入れ替わる）。X/Z回転（坂）はAABBで正確に
+			// 表せないため考慮しない（坂の接地はレイキャストで別途対応する）
+			core::Vector3 colliderSize{};
+			if (def.m_collider == "box")
+			{
+				const float yaw{ rotation.y };
+				const float cosYaw{ std::abs(std::cos(yaw)) };
+				const float sinYaw{ std::abs(std::sin(yaw)) };
+				colliderSize = core::Vector3{
+					prop.m_size.x * cosYaw + prop.m_size.z * sinYaw,
+					prop.m_size.y,
+					prop.m_size.x * sinYaw + prop.m_size.z * cosYaw
+				};
+			}
 
 			factory.create(handle, prop.m_position, rotation, scale, colliderSize);
 		}
