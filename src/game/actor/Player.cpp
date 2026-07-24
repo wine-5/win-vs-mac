@@ -12,6 +12,7 @@
 #include "game/component/visual/EffectComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
 #include "game/component/camera/CameraComponent.h"
+#include "game/component/visual/LightComponent.h"
 #include "game/component/camera/CameraEffectComponent.h"
 #include "game/component/combat/AimComponent.h"
 #include "game/constant/Tag.h"
@@ -70,6 +71,16 @@ namespace game::actor
 		componentManager.add<component::combat::ColliderComponent>(m_entity.getId(), collider);
 
 		componentManager.add<component::combat::PlayerChargeComponent>(m_entity.getId(), {});
+		// プレイヤーに追従する点光源。虚無の中で自機が沈まないようにしつつ、
+		// 「自機が周囲を照らす」演出も兼ねる。頭上に置いて上から当てる
+		component::visual::LightComponent light{};
+		light.m_offset = core::Vector3{ 0.0f, 250.0f, 0.0f };
+		light.m_range = 1200.0f;
+		light.m_r = 220;
+		light.m_g = 235;
+		light.m_b = 255;
+		componentManager.add<component::visual::LightComponent>(m_entity.getId(), light);
+
 		componentManager.add<component::camera::CameraComponent>(m_entity.getId(), {});
 		componentManager.add<component::camera::CameraEffectComponent>(m_entity.getId(), {});
 		componentManager.add<component::combat::AimComponent>(m_entity.getId(), {});
