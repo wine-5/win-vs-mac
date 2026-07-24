@@ -170,7 +170,23 @@ def tex_floor_apple():
     return img
 
 
+def tex_wall_data():
+    """データ壁：実行時にシステム情報が描き込まれる面。
+
+    これは差し替わる前のフォールバック（起動直後や描画失敗時に見えるもの）。
+    実際の内容は SystemMonitorWallSystem がテクスチャへ直接描く。
+    """
+    img = surface_base((14, 26, 40), BLUE, grid_step=32)
+    d = ImageDraw.Draw(img)
+    f = MONO(20)
+    for i in range(12):
+        d.text((28, 40 + i * 36), "> awaiting system data ...", font=f, fill=BLUE + (120,))
+    glow_border(img, BLUE)
+    return img
+
+
 TEXTURES = {
+    "WallData": tex_wall_data,
     "FloorFolder": tex_floor_folder,
     "PathCorridor": tex_path_corridor,
     "WallWindow": tex_wall_window,

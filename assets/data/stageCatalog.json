@@ -119,6 +119,26 @@
       "texture": "assets/model/stage/FloorApple.png",
       "textureTile": 0,
       "slideAccel": 0.0
+    },
+    {
+      "id": "wall_data",
+      "displayName": "データ壁",
+      "model": "assets/model/stage/WallData.mqo",
+      "texture": "assets/model/stage/WallData.png",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#00A4EF",
+      "collider": "box",
+      "defaultSize": [
+        1600,
+        900,
+        40
+      ],
+      "textureTile": 0,
+      "slideAccel": 0.0
     }
   ],
   "enemies": [
