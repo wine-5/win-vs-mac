@@ -69,7 +69,11 @@ VSCode の Live Server 拡張を使ってもよい。
 | ボタン | 動作 |
 |---|---|
 | stageData 読込 | 既存の `assets/data/stageData.json` を読み込んで編集を再開 |
-| カタログ読込 | `assets/data/stageCatalog.json` を読み込んでパレットを差し替え |
+| カタログ読込 | `assets/data/stageCatalog.json` を手動で読み込んでパレットを差し替え（下記の通り通常は自動） |
+
+> **カタログは起動時に自動読込される。** ローカルサーバー経由なら `assets/data/stageCatalog.json` を
+> `fetch` して常に最新へ同期する。取得に失敗した場合（`file://` 起動やファイル欠損）のみ、
+> HTML内の埋め込みカタログにフォールバックする。手動の「カタログ読込」は差し替え検証用。
 | 保存 (JSON書き出し) | `stageData.json` をダウンロード。**手動で `assets/data/` へ配置する** |
 
 編集内容は `localStorage` に自動保存されるため、リロードしても失われない。

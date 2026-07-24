@@ -1134,11 +1134,36 @@ function tryRestore() {
 /* =========================================================
  * 起動
  * ======================================================= */
-tryRestore();
-renderPalette();
-rebuildScene();
-resize();
-requestAnimationFrame(tick);
+
+/**
+ * 実物の stageCatalog.json をサーバーから読み込んで catalog を差し替える。
+ * 埋め込みの DEFAULT_CATALOG は fetch できない場合（file:// 起動やファイル欠損）の
+ * フォールバックに徹し、通常は常に最新のカタログと同期させる。
+ * @returns {Promise<boolean>} 読み込めたら true
+ */
+async function loadCatalogFromServer() {
+  try {
+    const res = await fetch('../../assets/data/stageCatalog.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!Array.isArray(data.props) || !Array.isArray(data.enemies) || !data.boss)
+      throw new Error('props / enemies / boss が見つかりません');
+    catalog = data;
+    return true;
+  } catch (err) {
+    console.warn('stageCatalog.json の自動読込に失敗（埋め込みカタログを使用）:', err.message);
+    return false;
+  }
+}
+
+(async function init() {
+  await loadCatalogFromServer();
+  tryRestore();
+  renderPalette();
+  rebuildScene();
+  resize();
+  requestAnimationFrame(tick);
+})();
 </script>
 </body>
 </html>
