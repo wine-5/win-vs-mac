@@ -1,0 +1,86 @@
+{
+  "playerStart": {
+    "position": [
+      0,
+      0,
+      -1500
+    ],
+    "rotationY": 0
+  },
+  "props": [
+    {
+      "type": "floor_folder",
+      "position": [
+        0,
+        -50,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        3000,
+        20,
+        3000
+      ]
+    },
+    {
+      "type": "floor_folder",
+      "position": [
+        500,
+        10,
+        -2013.78
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        2830.42,
+        56.61,
+        2830.42
+      ]
+    }
+  ],
+  "spawns": [
+    {
+      "type": "safari",
+      "position": [
+        500,
+        0,
+        -900.63
+      ],
+      "rotationY": 0
+    },
+    {
+      "type": "xcode",
+      "position": [
+        -619.87,
+        0,
+        -343.03
+      ],
+      "rotationY": 0
+    },
+    {
+      "type": "xcode",
+      "position": [
+        1136.22,
+        0,
+        -188.46
+      ],
+      "rotationY": 0
+    }
+  ],
+  "mac": {
+    "type": "mac",
+    "position": [
+      0,
+      0,
+      800
+    ],
+    "rotationY": 180
+  }
+}

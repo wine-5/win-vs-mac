@@ -1,10 +1,15 @@
 #include "StageRepository.h"
 #include <fstream>
 #include <stdexcept>
+#include <string>
 #include "thirdparty/nlohmann/json.hpp"
 
 namespace
 {
+	// DEBUG: エディタで編集中のテストステージを読み込む。
+	// ステージが完成したら "assets/data/stageData.json"（本番用）へ切り替えること。
+	constexpr const char* STAGE_DATA_PATH{ "assets/data/stage-test.json" };
+
 	/**
 	 * @brief JSONのspawn要素をSpawnMetadataへ変換する
 	 * @param j spawn要素のJSONオブジェクト
@@ -61,9 +66,9 @@ namespace infrastructure::resource::repository
 {
 	StageRepository::StageRepository()
 	{
-		std::ifstream file("assets/data/stageData.json");
+		std::ifstream file(STAGE_DATA_PATH);
 		if (!file.is_open())
-			throw std::runtime_error("assets/data/stageData.jsonを開けませんでした");
+			throw std::runtime_error(std::string(STAGE_DATA_PATH) + "を開けませんでした");
 
 		const nlohmann::json j = nlohmann::json::parse(file);
 
