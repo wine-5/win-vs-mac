@@ -38,9 +38,11 @@ namespace game::system::movement
 					velocity.m_velocity.y = m_maxFallSpeed;
 			}
 
-			transform.m_position.x += velocity.m_velocity.x * deltaTime;
-			transform.m_position.y += velocity.m_velocity.y * deltaTime;
-			transform.m_position.z += velocity.m_velocity.z * deltaTime;
+			// 入力による速度と、外から加わる速度（坂の滑り等）を合算して動かす
+			const core::Vector3 total{ velocity.m_velocity + velocity.m_externalVelocity };
+			transform.m_position.x += total.x * deltaTime;
+			transform.m_position.y += total.y * deltaTime;
+			transform.m_position.z += total.z * deltaTime;
 		}
 	}
 } // namespace game::system::movement
