@@ -10,17 +10,21 @@
 ## 起動方法
 
 ⚠️ **`index.html` をダブルクリックしても動かない。** ES Modules と importmap を使っているため、
-`file://` では CORS で読み込みがブロックされる。**ローカルサーバー経由で開くこと。**
+`file://` では CORS で読み込みがブロックされる。**同梱のローカルサーバー経由で開くこと。**
 
 ```sh
-# リポジトリのルートで実行
-python -m http.server 8080
+# リポジトリのルートで実行（既定ポート 8091）
+python tools/serve_editor.py
 
 # ブラウザで開く
-# http://localhost:8080/tools/stage-editor/
+# http://127.0.0.1:8091/tools/stage-editor/
 ```
 
-VSCode の Live Server 拡張を使ってもよい。
+このサーバーは静的配信に加えて、エディタの「保存 (上書き)」からの書き込みを受け付け、
+`assets/data/stage-test.json` を**直接上書き**する（ダウンロードして手動配置する必要がない）。
+
+> 素の `python -m http.server` でも閲覧・編集はできるが、その場合「保存」は上書きできず
+> **ダウンロードにフォールバック**する。上書き保存を使うには `serve_editor.py` で起動すること。
 
 > three.js は CDN（jsdelivr）から読み込んでいるため、**初回起動時はインターネット接続が必要**。
 > オフラインで使いたい場合は `three.module.js` と `examples/jsm/controls/TransformControls.js` を

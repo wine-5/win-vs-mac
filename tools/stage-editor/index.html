@@ -196,7 +196,7 @@
   <span class="sep"></span>
   <button id="btnLoad">stageData 読込</button>
   <button id="btnCatalog">カタログ読込</button>
-  <button id="btnSave">保存 (JSON書き出し)</button>
+  <button id="btnSave">保存 (上書き)</button>
   <span class="hint">右ドラッグ+WASD: 移動 / Q,E: 上下 / Shift: 加速 / F: フォーカス / Ctrl: スナップ</span>
 </div>
 
@@ -1027,24 +1027,50 @@ function validate() {
   return problems;
 }
 
+/** 開発サーバー経由で stage-test.json を直接上書き保存する（ダウンロードしない） */
+async function saveStageToServer(data) {
+  const res = await fetch('/api/save-stage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data, null, 2)
+  });
+  const result = await res.json().catch(() => ({}));
+  if (!res.ok || !result.ok) throw new Error(result.error || ('HTTP ' + res.status));
+  return result;
+}
+
+/** サーバーが使えない場合のフォールバック：ブラウザのダウンロードで書き出す */
+function downloadStage(data) {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'stage-test.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/** 実際の保存処理。サーバー上書きを試み、失敗時のみダウンロードへ切り替える */
+async function commitStage() {
+  const data = serializeStageData();
+  try {
+    const result = await saveStageToServer(data);
+    showDialog('保存しました', `<div>${result.path} に上書き保存しました。</div><br>ゲームを起動すると反映されます。`, null);
+  } catch (err) {
+    downloadStage(data);
+    showDialog('ダウンロードで保存', 'サーバー保存に失敗したためダウンロードしました：<br>' + err.message + '<br>手動で assets/data/ へ配置してください。', null);
+  }
+}
+
 function exportStage() {
   const problems = validate();
-  const doDownload = () => {
-    const json = JSON.stringify(serializeStageData(), null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'stageData.json';
-    a.click();
-    URL.revokeObjectURL(a.href);
-  };
-  if (problems.length === 0) { doDownload(); return; }
+  if (problems.length === 0) { commitStage(); return; }
   const hasErr = problems.some(p => p.level === 'err');
   showDialog(
     hasErr ? '書き出し前の検証エラー' : '書き出し前の警告',
     problems.map(p => `<div class="${p.level}">${p.level === 'err' ? '✕' : '⚠'} ${p.msg}</div>`).join('') +
-    (hasErr ? '<br>エラーを解消してから書き出してください。' : '<br>このまま書き出しますか？'),
-    hasErr ? null : doDownload
+    (hasErr ? '<br>エラーを解消してから書き出してください。' : '<br>このまま保存しますか？'),
+    hasErr ? null : commitStage
   );
 }
 
