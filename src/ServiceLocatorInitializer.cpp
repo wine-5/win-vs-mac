@@ -19,6 +19,8 @@
 #include "infrastructure/InputManager.h"
 #include "infrastructure/graphics/Camera.h"
 #include "infrastructure/graphics/Renderer.h"
+#include "core/interface/ILighting.h"
+#include "infrastructure/graphics/Lighting.h"
 #include "infrastructure/graphics/Animator.h"
 #include "game/scene/SceneManager.h"
 #include "game/GameManager.h"
@@ -75,6 +77,10 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 	// Animator登録
 	core::base::ServiceLocator::provide<core::iface::IAnimator>(
 	    std::make_unique<infrastructure::graphics::Animator>());
+
+	// Lighting登録
+	core::base::ServiceLocator::provide<core::iface::ILighting>(
+	    std::make_unique<infrastructure::graphics::Lighting>());
 
 	// WindowFactory登録
 	core::base::ServiceLocator::provide<core::iface::IWindowFactory>(

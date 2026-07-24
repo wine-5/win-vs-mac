@@ -210,6 +210,7 @@
     <ClCompile Include="src\game\ui\UIManager.cpp" />
     <ClCompile Include="src\infrastructure\graphics\Animator.cpp" />
     <ClCompile Include="src\infrastructure\graphics\Camera.cpp" />
+    <ClCompile Include="src\infrastructure\graphics\Lighting.cpp" />
     <ClCompile Include="src\infrastructure\InputManager.cpp" />
     <ClCompile Include="src\infrastructure\graphics\Renderer.cpp" />
     <ClCompile Include="src\infrastructure\resource\ResourceManager.cpp" />
