@@ -25,20 +25,10 @@ namespace game::factory
 
 		/**
 		 * @brief 配置物を1つ生成する
-		 * @param modelHandle モデルハンドル
-		 * @param position 中心座標
-		 * @param rotation 回転（ラジアン）
-		 * @param scale モデルスケール（size ÷ baseSize）
-		 * @param collision 当たり判定の役割（塞ぐ障害物か・歩ける面か・無しか）
-		 * @param collisionSize 判定に使う実寸
+		 * @param params 生成に必要な値一式
 		 * @return 生成した配置物のEntityId
 		 */
-		core::ecs::EntityId create(int modelHandle,
-		    const core::Vector3& position,
-		    const core::Vector3& rotation,
-		    const core::Vector3& scale,
-		    constant::PropCollision collision,
-		    const core::Vector3& collisionSize);
+		core::ecs::EntityId create(const stage::StagePropParams& params);
 
 	  private:
 		core::ecs::EntityManager& m_entityManager;

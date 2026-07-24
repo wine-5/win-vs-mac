@@ -10,22 +10,12 @@ namespace game::factory
 	{
 	}
 
-	core::ecs::EntityId StagePropFactory::create(int modelHandle,
-	    const core::Vector3& position,
-	    const core::Vector3& rotation,
-	    const core::Vector3& scale,
-	    constant::PropCollision collision,
-	    const core::Vector3& collisionSize)
+	core::ecs::EntityId StagePropFactory::create(const stage::StagePropParams& params)
 	{
 		auto prop{ std::make_unique<stage::StageProp>(
 			m_entityManager,
 			m_componentManager,
-			modelHandle,
-			position,
-			rotation,
-			scale,
-			collision,
-			collisionSize) };
+			params) };
 
 		core::ecs::EntityId id{ prop->getId() };
 		m_props.push_back(std::move(prop));
