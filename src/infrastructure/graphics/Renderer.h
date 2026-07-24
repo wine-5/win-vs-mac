@@ -61,7 +61,7 @@ namespace infrastructure::graphics
 		 * @param size サイズ
 		 * @param color 色（ARGB）
 		 */
-		void drawCollider(const core::Vector3& center, const core::Vector3& size, unsigned int color) override;
+		void drawCollider(const core::Vector3& center, const core::Vector3& size, float rotationY, unsigned int color) override;
 
 		/**
 		 * @brief デバッグ用に球（範囲）を可視化する

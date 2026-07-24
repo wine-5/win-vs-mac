@@ -34,16 +34,17 @@ namespace game::system::combat
 
 	private:
 	  /**
-	   * @brief 判定に必要な値だけを抜き出した、1フレーム限りのAABB情報
+	   * @brief 判定に必要な値だけを抜き出した、1フレーム限りの箱情報
 	   *
 	   * 総当たりの内側でComponentを引き直すとハッシュ検索が要素数の二乗で効いてくるため、
 	   * フレーム頭に一度だけ集めてこの形に持つ。
 	   */
-	  struct Aabb
+	  struct Box
 	  {
 		  core::ecs::EntityId m_id{};
 		  core::Vector3 m_center{};   // position + offset
 		  core::Vector3 m_halfSize{}; // size / 2
+		  float m_yaw{ 0.0f };        // Y軸まわりの向き（ラジアン）
 	  };
 
 	  /**
@@ -52,22 +53,27 @@ namespace game::system::combat
 	   * 押し返しが起きるのは 乗る側×地面側 の組み合わせだけなので、
 	   * 事前に分けておき総当たりの回数そのものを減らす。
 	   */
-	  void collectAabbs();
+	  void collectBoxes();
 
 	  /**
-	   * @brief 2つのAABBが重なっているか判定する
-	   * @param a AABB A
-	   * @param b AABB B
-	   * @return 衝突している場合true
+	   * @brief 乗る側を地面側のローカル座標系へ移した箱として表す
+	   *
+	   * 地面側が傾いていても、その向きに合わせた座標系で見れば軸並行の判定で済む。
+	   * 乗る側は縦に細長い人型なので、回転による広がりは外接する箱で近似する。
+	   * @param rider 乗る側の箱（ワールド座標）
+	   * @param ground 地面側の箱（ワールド座標）
+	   * @param outLocalDelta 地面中心から見た乗る側中心（地面ローカル）
+	   * @param outLocalHalfSize 地面ローカルでの乗る側の半サイズ
 	   */
-	  static bool isColliding(const Aabb& a, const Aabb& b) noexcept;
+	  static void toGroundLocal(const Box& rider, const Box& ground,
+		  core::Vector3& outLocalDelta, core::Vector3& outLocalHalfSize) noexcept;
 
 	  /**
 	   * @brief 衝突を解決し、押し返し処理を行う
-	   * @param rider 乗る側のAABB（押し出した分だけ中心が更新される）
-	   * @param ground 地面側のAABB
+	   * @param rider 乗る側の箱（押し出した分だけ中心が更新される）
+	   * @param ground 地面側の箱
 	   */
-	  void resolveCollision(Aabb& rider, const Aabb& ground);
+	  void resolveCollision(Box& rider, const Box& ground);
 
 	  /**
 	   * @brief 縦方向（上下）の押し出しを解決する
@@ -87,7 +93,7 @@ namespace game::system::combat
 	  core::ecs::ComponentManager& m_componentManager;
 
 	  // 毎フレーム作り直すが、確保済みメモリを使い回すためメンバに持つ
-	  std::vector<Aabb> m_riders;  // Player / Enemy
-	  std::vector<Aabb> m_grounds; // Ground
+	  std::vector<Box> m_riders;  // Player / Enemy
+	  std::vector<Box> m_grounds; // Ground
 	};
 } // namespace game::system::combat

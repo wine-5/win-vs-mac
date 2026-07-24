@@ -72,9 +72,10 @@ namespace core::iface
 		 * @brief デバッグ用にコライダーを可視化する
 		 * @param center 中心座標
 		 * @param size サイズ
+		 * @param rotationY Y軸まわりの向き（ラジアン）
 		 * @param color 色（ARGB）
 		 */
-		virtual void drawCollider(const core::Vector3& center, const core::Vector3& size, unsigned int color) = 0;
+		virtual void drawCollider(const core::Vector3& center, const core::Vector3& size, float rotationY, unsigned int color) = 0;
 
 		/**
 		 * @brief デバッグ用に球（範囲）を可視化する

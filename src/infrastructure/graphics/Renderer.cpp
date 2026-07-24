@@ -141,25 +141,37 @@ namespace infrastructure::graphics
 		m_originalColors.erase(it);
 	}
 
-	void Renderer::drawCollider(const core::Vector3& center, const core::Vector3& size, unsigned int color)
+	void Renderer::drawCollider(const core::Vector3& center, const core::Vector3& size, float rotationY, unsigned int color)
 	{
-		// コライダーの最小・最大座標を計算
-		core::Vector3 min = {
-			center.x - size.x / 2.0f,
-			center.y - size.y / 2.0f,
-			center.z - size.z / 2.0f
-		};
-		core::Vector3 max = {
-			center.x + size.x / 2.0f,
-			center.y + size.y / 2.0f,
-			center.z + size.z / 2.0f
-		};
+		const float halfX{ size.x / 2.0f };
+		const float halfY{ size.y / 2.0f };
+		const float halfZ{ size.z / 2.0f };
 
-		VECTOR v1 = VGet(min.x, min.y, min.z);
-		VECTOR v2 = VGet(max.x, max.y, max.z);
+		// 傾いた箱はDrawCube3Dでは表せないので、8頂点を回して稜線を引く
+		const float cosYaw{ std::cos(rotationY) };
+		const float sinYaw{ std::sin(rotationY) };
 
-		// ワイヤーフレームで描画（塗りつぶしなし）
-		DrawCube3D(v1, v2, color, color, FALSE);
+		VECTOR corners[8]{};
+		for (int i{ 0 }; i < 8; ++i)
+		{
+			const float localX{ (i & 1) ? halfX : -halfX };
+			const float localY{ (i & 2) ? halfY : -halfY };
+			const float localZ{ (i & 4) ? halfZ : -halfZ };
+			corners[i] = VGet(
+			    center.x + localX * cosYaw + localZ * sinYaw,
+			    center.y + localY,
+			    center.z - localX * sinYaw + localZ * cosYaw);
+		}
+
+		// 各ビットが1軸に対応するので、1ビットだけ違う頂点同士が稜線になる
+		for (int i{ 0 }; i < 8; ++i)
+		{
+			for (const int axis : { 1, 2, 4 })
+			{
+				if ((i & axis) == 0)
+					DrawLine3D(corners[i], corners[i | axis], color);
+			}
+		}
 	}
 
 	void Renderer::drawDebugSphere(const core::Vector3& center, float radius, unsigned int color)

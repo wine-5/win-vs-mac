@@ -35,6 +35,8 @@ namespace game::stage
 			collider.m_size = params.m_collisionSize;
 			// 配置物の中心座標がそのまま箱の中心になる
 			collider.m_offset = core::Vector3{ 0.0f, 0.0f, 0.0f };
+			// 見た目と同じ向きに箱を傾ける（斜めに置いたブロックで実物とズレないように）
+			collider.m_rotationY = params.m_rotation.y;
 			componentManager.add<component::combat::ColliderComponent>(m_entity.getId(), collider);
 		}
 		else if (params.m_collision == constant::PropCollision::Ground)

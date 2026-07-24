@@ -85,19 +85,10 @@ namespace game::factory
 			const auto collision{ constant::toPropCollision(def.m_collider) };
 			params.m_collision = collision;
 
-			// Box（壁・柱）は軸並行(AABB)で押し返すため、Y回転を反映して footprint を
-			// 実物に合わせる（壁を90°横に置くと幅と奥行きが入れ替わる）。
-			// Ground（床・坂）は傾きごと GroundingSystem が扱うので実寸をそのまま渡す
+			// Box（壁・柱・ブロック）はY回転ごとCollisionSystemが扱うので実寸をそのまま渡す。
+			// Ground（床・坂）も傾きごと GroundingSystem が扱うので同じく実寸でよい
 			if (collision == constant::PropCollision::Box)
-			{
-				const float cosYaw{ std::abs(std::cos(rotation.y)) };
-				const float sinYaw{ std::abs(std::sin(rotation.y)) };
-				params.m_collisionSize = core::Vector3{
-					prop.m_size.x * cosYaw + prop.m_size.z * sinYaw,
-					prop.m_size.y,
-					prop.m_size.x * sinYaw + prop.m_size.z * cosYaw
-				};
-			}
+				params.m_collisionSize = prop.m_size;
 			else if (collision == constant::PropCollision::Ground)
 			{
 				params.m_collisionSize = prop.m_size;

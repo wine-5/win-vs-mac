@@ -5,6 +5,7 @@
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/DeathComponent.h"
 #include "game/constant/Tag.h"
+#include "core/utility/Rotation.h"
 #include <cmath>
 
 namespace
@@ -24,21 +25,18 @@ namespace game::system::combat
 
 	void CollisionSystem::update(float deltaTime)
 	{
-		collectAabbs();
+		collectBoxes();
 
 		// 押し返しが起きるのは 乗る側×地面側 だけ。全Entityの総当たりだと
 		// 地面同士・敵同士といった何もしない組み合わせが大半を占めるため、そこを丸ごと省く
 		for (auto& rider : m_riders)
 		{
 			for (const auto& ground : m_grounds)
-			{
-				if (isColliding(rider, ground))
-					resolveCollision(rider, ground);
-			}
+				resolveCollision(rider, ground);
 		}
 	}
 
-	void CollisionSystem::collectAabbs()
+	void CollisionSystem::collectBoxes()
 	{
 		m_riders.clear();
 		m_grounds.clear();
@@ -65,35 +63,46 @@ namespace game::system::combat
 
 			const auto& collider{ m_componentManager.get<component::combat::ColliderComponent>(id) };
 
-			Aabb aabb{};
-			aabb.m_id = id;
-			aabb.m_center = transform->m_position + collider.m_offset;
-			aabb.m_halfSize = collider.m_size * 0.5f;
+			Box box{};
+			box.m_id = id;
+			box.m_center = transform->m_position + collider.m_offset;
+			box.m_halfSize = collider.m_size * 0.5f;
+			box.m_yaw = collider.m_rotationY;
 
 			if (isRider)
-				m_riders.push_back(aabb);
+				m_riders.push_back(box);
 			else
-				m_grounds.push_back(aabb);
+				m_grounds.push_back(box);
 		}
 	}
 
-	bool CollisionSystem::isColliding(const Aabb& a, const Aabb& b) noexcept
+	void CollisionSystem::toGroundLocal(const Box& rider, const Box& ground,
+	    core::Vector3& outLocalDelta, core::Vector3& outLocalHalfSize) noexcept
 	{
-		// 各軸の距離が「半サイズの和」以下なら、その軸は重なっている
-		return std::abs(a.m_center.x - b.m_center.x) <= a.m_halfSize.x + b.m_halfSize.x &&
-		       std::abs(a.m_center.y - b.m_center.y) <= a.m_halfSize.y + b.m_halfSize.y &&
-		       std::abs(a.m_center.z - b.m_center.z) <= a.m_halfSize.z + b.m_halfSize.z;
+		const core::Vector3 yaw{ 0.0f, ground.m_yaw, 0.0f };
+		outLocalDelta = core::utility::inverseRotateEulerXYZ(rider.m_center - ground.m_center, yaw);
+
+		// 乗る側の箱を地面側の向きへ傾けると、軸並行では外接する箱まで広がる
+		const float cosYaw{ std::abs(std::cos(ground.m_yaw)) };
+		const float sinYaw{ std::abs(std::sin(ground.m_yaw)) };
+		outLocalHalfSize = core::Vector3{
+			rider.m_halfSize.x * cosYaw + rider.m_halfSize.z * sinYaw,
+			rider.m_halfSize.y,
+			rider.m_halfSize.x * sinYaw + rider.m_halfSize.z * cosYaw
+		};
 	}
 
-	void CollisionSystem::resolveCollision(Aabb& rider, const Aabb& ground)
+	void CollisionSystem::resolveCollision(Box& rider, const Box& ground)
 	{
-		// 軸ごとのめり込み量を計算する
-		const core::Vector3 delta{ rider.m_center - ground.m_center };
-		const float overlapX{ rider.m_halfSize.x + ground.m_halfSize.x - std::abs(delta.x) };
-		const float overlapY{ rider.m_halfSize.y + ground.m_halfSize.y - std::abs(delta.y) };
-		const float overlapZ{ rider.m_halfSize.z + ground.m_halfSize.z - std::abs(delta.z) };
+		// 地面側の向きに合わせた座標系へ移すと、傾いた配置物でも軸並行の判定で済む
+		core::Vector3 delta{};
+		core::Vector3 riderHalfSize{};
+		toGroundLocal(rider, ground, delta, riderHalfSize);
 
-		// isColliding を通っているので全軸で正のはずだが、安全のため負なら何もしない
+		// 軸ごとのめり込み量を計算する。1つでも0以下なら離れている
+		const float overlapX{ riderHalfSize.x + ground.m_halfSize.x - std::abs(delta.x) };
+		const float overlapY{ riderHalfSize.y + ground.m_halfSize.y - std::abs(delta.y) };
+		const float overlapZ{ riderHalfSize.z + ground.m_halfSize.z - std::abs(delta.z) };
 		if (overlapX <= 0.0f || overlapY <= 0.0f || overlapZ <= 0.0f)
 			return;
 
@@ -104,31 +113,40 @@ namespace game::system::combat
 		// 最小めり込み軸に沿って押し出す（Minimum Translation Vector）。
 		// 床（縦に薄い）は上へ押し出して「乗る」、壁（横に薄い）は横へ押し出して「止まる」に
 		// 自然と分岐する。押し出す向きは相手の中心から離れる方向。
+		// 縦はY軸まわりの回転で変わらないので、ローカルとワールドで同じ向きになる
 		if (overlapY <= overlapX && overlapY <= overlapZ)
 		{
 			const float pushY{ (delta.y >= 0.0f) ? overlapY : -overlapY };
 			resolveVertical(rider.m_id, riderTransform, riderVelocity, overlapY, delta.y);
 			rider.m_center.y += pushY;
+			return;
 		}
-		else if (overlapX <= overlapZ)
-		{
-			const float pushX{ (delta.x >= 0.0f) ? overlapX : -overlapX };
-			riderTransform.m_position.x += pushX;
-			rider.m_center.x += pushX;
-			// 壁に向かう水平速度だけ止める（横滑りは残す）
-			if ((delta.x >= 0.0f && riderVelocity.m_velocity.x < 0.0f) ||
-			    (delta.x < 0.0f && riderVelocity.m_velocity.x > 0.0f))
-				riderVelocity.m_velocity.x = 0.0f;
-		}
+
+		core::Vector3 localPush{};
+		if (overlapX <= overlapZ)
+			localPush.x = (delta.x >= 0.0f) ? overlapX : -overlapX;
 		else
-		{
-			const float pushZ{ (delta.z >= 0.0f) ? overlapZ : -overlapZ };
-			riderTransform.m_position.z += pushZ;
-			rider.m_center.z += pushZ;
-			if ((delta.z >= 0.0f && riderVelocity.m_velocity.z < 0.0f) ||
-			    (delta.z < 0.0f && riderVelocity.m_velocity.z > 0.0f))
-				riderVelocity.m_velocity.z = 0.0f;
-		}
+			localPush.z = (delta.z >= 0.0f) ? overlapZ : -overlapZ;
+
+		// 押し出しをワールドへ戻す。傾いた壁では斜め方向のずらしになる
+		const core::Vector3 push{ core::utility::rotateEulerXYZ(localPush, core::Vector3{ 0.0f, ground.m_yaw, 0.0f }) };
+		riderTransform.m_position.x += push.x;
+		riderTransform.m_position.z += push.z;
+		rider.m_center.x += push.x;
+		rider.m_center.z += push.z;
+
+		// 壁へ向かう速度成分だけ打ち消す（壁沿いの横滑りは残す）
+		const float pushLength{ std::sqrt(push.x * push.x + push.z * push.z) };
+		if (pushLength <= 0.0f)
+			return;
+
+		const core::Vector3 normal{ push.x / pushLength, 0.0f, push.z / pushLength };
+		const float into{ riderVelocity.m_velocity.x * normal.x + riderVelocity.m_velocity.z * normal.z };
+		if (into >= 0.0f)
+			return;
+
+		riderVelocity.m_velocity.x -= normal.x * into;
+		riderVelocity.m_velocity.z -= normal.z * into;
 	}
 
 	void CollisionSystem::resolveVertical(core::ecs::EntityId riderId,
