@@ -21,6 +21,8 @@ namespace
 		def.m_collider = j["collider"].get<std::string>();
 		if (j.contains("textureTile"))
 			def.m_textureTile = j["textureTile"];
+		if (j.contains("slideAccel"))
+			def.m_slideAccel = j["slideAccel"];
 		return def;
 	}
 } // namespace

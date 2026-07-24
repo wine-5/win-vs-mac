@@ -25,6 +25,8 @@ namespace game::stage
 
 		float m_uvScaleU{ 1.0f }; // テクスチャの繰り返し回数（1.0で引き伸ばし）
 		float m_uvScaleV{ 1.0f };
+
+		float m_slideAccel{ 0.0f }; // 坂を滑り落ちる加速度（Groundのみ有効。0で滑らない）
 	};
 
 	/**

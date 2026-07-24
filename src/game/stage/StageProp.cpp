@@ -39,6 +39,7 @@ namespace game::stage
 		{
 			component::movement::GroundSurfaceComponent surface{};
 			surface.m_size = params.m_collisionSize;
+			surface.m_slideAccel = params.m_slideAccel;
 			componentManager.add<component::movement::GroundSurfaceComponent>(m_entity.getId(), surface);
 		}
 

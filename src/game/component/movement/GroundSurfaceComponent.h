@@ -13,5 +13,9 @@ namespace game::component::movement
 	struct GroundSurfaceComponent
 	{
 		core::Vector3 m_size{}; // 回転前の実寸（ワールドユニット）
+
+		// 坂を滑り落ちる加速度。0なら滑らない普通の足場。
+		// 傾きが急なほど強く働き、水平な面では効かない
+		float m_slideAccel{ 0.0f };
 	};
 } // namespace game::component::movement

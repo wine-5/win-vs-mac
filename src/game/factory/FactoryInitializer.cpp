@@ -85,6 +85,7 @@ namespace game::factory
 			else if (collision == constant::PropCollision::Ground)
 			{
 				params.m_collisionSize = prop.m_size;
+				params.m_slideAccel = def.m_slideAccel;
 			}
 
 			// テクスチャ1枚が受け持つ実寸から繰り返し回数を決める。
