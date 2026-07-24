@@ -103,9 +103,12 @@ namespace game::system::camera
 
 		// カメラが地面を突き抜けないよう、床より少し上に制限する
 		// （下から地面を見ると片面ポリゴンが裏面カリングで消えて真っ黒になるのを防ぐ）
+		// 高さはワールド絶対値ではなくプレイヤーの足元基準で見る。
+		// 絶対値にすると坂を下って足元が下がったときにクランプへ張り付き、pitchを動かしても上を向けなくなる。
 		constexpr float MIN_CAMERA_HEIGHT{ 30.0f };
-		if (cameraPos.y < MIN_CAMERA_HEIGHT)
-			cameraPos.y = MIN_CAMERA_HEIGHT;
+		const float minCameraY{ lookTarget.y - camera.m_targetHeight + MIN_CAMERA_HEIGHT };
+		if (cameraPos.y < minCameraY)
+			cameraPos.y = minCameraY;
 
 		// Shakeの揺れをカメラ位置と注視点の両方へ加算する（画面全体が同じだけ揺れる）
 		cameraPos = cameraPos + shakeOffset;
