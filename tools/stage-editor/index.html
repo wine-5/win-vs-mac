@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stage Editor — Win vs Mac</title>
+<style>
+  :root {
+    --bg-void: #0A0E14;
+    --bg-panel: #11161F;
+    --bg-panel-2: #171E2A;
+    --bg-input: #0C1119;
+    --border: #232C3B;
+    --text: #C9D4E3;
+    --text-dim: #6B7A8F;
+    --accent: #00A4EF;
+    --accent-dim: #005F8A;
+    --yellow: #FFC83D;
+    --red: #E81123;
+    --apple: #E8E8ED;
+    --mono: "Cascadia Code", "Consolas", monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--bg-void);
+    color: var(--text);
+    font-family: "Segoe UI", "Yu Gothic UI", sans-serif;
+    font-size: 12px;
+    display: grid;
+    grid-template-rows: 36px 1fr 76px;
+    grid-template-columns: 220px 1fr 250px;
+    grid-template-areas:
+      "toolbar toolbar toolbar"
+      "hier viewport insp"
+      "palette palette palette";
+    user-select: none;
+  }
+
+  /* ---------- toolbar ---------- */
+  #toolbar {
+    grid-area: toolbar;
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+    padding: 0 10px;
+  }
+  #toolbar .brand {
+    font-family: var(--mono); font-size: 12px; color: var(--accent);
+    margin-right: 8px; letter-spacing: 0.5px;
+  }
+  #toolbar .sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+  button {
+    background: var(--bg-panel-2); color: var(--text);
+    border: 1px solid var(--border); border-radius: 3px;
+    padding: 4px 10px; font-size: 12px; cursor: pointer;
+    font-family: inherit;
+  }
+  button:hover { border-color: var(--accent-dim); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button.active { background: var(--accent-dim); border-color: var(--accent); color: #fff; }
+  button.danger:hover { border-color: var(--red); color: #ff8a94; }
+  #toolbar .hint { margin-left: auto; color: var(--text-dim); font-size: 11px; }
+
+  /* ---------- hierarchy ---------- */
+  #hierarchy {
+    grid-area: hier;
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+  .hier-cat {
+    padding: 4px 10px; color: var(--text-dim);
+    font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .hier-item {
+    padding: 4px 10px 4px 22px; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .hier-item:hover { background: var(--bg-panel-2); }
+  .hier-item.selected { background: var(--accent-dim); color: #fff; }
+  .hier-dot { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+
+  /* ---------- viewport ---------- */
+  #viewport { grid-area: viewport; position: relative; overflow: hidden; }
+  #viewport canvas { display: block; }
+  #status {
+    position: absolute; left: 8px; bottom: 6px;
+    font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+    pointer-events: none; text-shadow: 0 1px 2px #000;
+  }
+  #snapBadge {
+    position: absolute; right: 8px; top: 6px;
+    font-family: var(--mono); font-size: 11px; color: var(--yellow);
+    pointer-events: none; display: none;
+  }
+
+  /* ---------- inspector ---------- */
+  #inspector {
+    grid-area: insp;
+    background: var(--bg-panel);
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 10px;
+  }
+  #inspector h3 {
+    font-size: 12px; font-weight: 600; color: var(--text);
+    margin-bottom: 2px; word-break: break-all;
+  }
+  #inspector .type-line {
+    font-family: var(--mono); font-size: 11px; color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .insp-empty { color: var(--text-dim); padding-top: 20px; text-align: center; }
+  .vec-group { margin-bottom: 10px; }
+  .vec-group > label { display: block; color: var(--text-dim); margin-bottom: 3px; font-size: 11px; }
+  .vec-row { display: flex; gap: 4px; }
+  .vec-row .axis {
+    display: flex; align-items: center; flex: 1; min-width: 0;
+    background: var(--bg-input); border: 1px solid var(--border); border-radius: 3px;
+  }
+  .vec-row .axis span {
+    padding: 0 4px; font-family: var(--mono); font-size: 10px; flex: none;
+  }
+  .axis.ax-x span { color: #E86A6A; }
+  .axis.ax-y span { color: #7CCB6B; }
+  .axis.ax-z span { color: #5AA7F0; }
+  .vec-row input {
+    width: 100%; min-width: 0; background: transparent; border: none;
+    color: var(--text); font-family: var(--mono); font-size: 11px;
+    padding: 4px 4px 4px 0;
+  }
+  .vec-row input:focus { outline: none; }
+  .vec-row .axis:focus-within { border-color: var(--accent); }
+  #inspector .note { color: var(--text-dim); font-size: 11px; margin-top: 8px; line-height: 1.5; }
+
+  /* ---------- palette ---------- */
+  #palette {
+    grid-area: palette;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 10px; overflow-x: auto;
+  }
+  .pal-label { color: var(--text-dim); font-size: 11px; flex: none; }
+  .pal-item {
+    flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    background: var(--bg-panel-2); border: 1px solid var(--border); border-radius: 4px;
+    padding: 6px 10px; cursor: pointer; min-width: 76px;
+  }
+  .pal-item:hover { border-color: var(--accent-dim); }
+  .pal-item.disabled { opacity: 0.35; cursor: default; }
+  .pal-swatch { width: 22px; height: 14px; border-radius: 2px; }
+  .pal-name { font-size: 11px; white-space: nowrap; }
+
+  /* ---------- dialog ---------- */
+  #dialogBack {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: none; align-items: center; justify-content: center; z-index: 20;
+  }
+  #dialogBack.show { display: flex; }
+  #dialog {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 6px;
+    min-width: 380px; max-width: 520px; max-height: 70vh; display: flex; flex-direction: column;
+  }
+  #dialog header {
+    padding: 10px 14px; border-bottom: 1px solid var(--border); font-weight: 600;
+  }
+  #dialog .body { padding: 14px; overflow-y: auto; line-height: 1.6; font-family: var(--mono); font-size: 11px; }
+  #dialog .body .warn { color: var(--yellow); }
+  #dialog .body .err { color: #ff8a94; }
+  #dialog footer { padding: 10px 14px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <span class="brand">STAGE-EDITOR</span>
+  <button id="btnTranslate" class="active" title="移動 (W)">移動</button>
+  <button id="btnRotate" title="回転 (E)">回転</button>
+  <button id="btnScale" title="拡縮 (R)">拡縮</button>
+  <span class="sep"></span>
+  <button id="btnSpace" title="ギズモの軸を切り替え">Global</button>
+  <span class="sep"></span>
+  <button id="btnUndo" title="Ctrl+Z">Undo</button>
+  <button id="btnRedo" title="Ctrl+Y">Redo</button>
+  <span class="sep"></span>
+  <button id="btnDup" title="Ctrl+D">複製</button>
+  <button id="btnDel" class="danger" title="Delete">削除</button>
+  <span class="sep"></span>
+  <button id="btnLoad">stageData 読込</button>
+  <button id="btnCatalog">カタログ読込</button>
+  <button id="btnSave">保存 (JSON書き出し)</button>
+  <span class="hint">右ドラッグ+WASD: 移動 / Q,E: 上下 / Shift: 加速 / F: フォーカス / Ctrl: スナップ</span>
+</div>
+
+<div id="hierarchy"></div>
+
+<div id="viewport">
+  <div id="status"></div>
+  <div id="snapBadge">SNAP: 移動100 / 回転15° / 拡縮100</div>
+</div>
+
+<div id="inspector"><div class="insp-empty">オブジェクトを選択してください</div></div>
+
+<div id="palette"><span class="pal-label">パレット:</span></div>
+
+<div id="dialogBack">
+  <div id="dialog">
+    <header id="dialogTitle"></header>
+    <div class="body" id="dialogBody"></div>
+    <footer>
+      <button id="dialogCancel">キャンセル</button>
+      <button id="dialogOk">OK</button>
+    </footer>
+  </div>
+</div>
+
+<input type="file" id="fileStage" accept=".json" hidden>
+<input type="file" id="fileCatalog" accept=".json" hidden>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { TransformControls } from 'three/addons/controls/TransformControls.js';
+
+/* =========================================================
+ * 定数
+ * ======================================================= */
+const GRID_UNIT = 100;
+const SNAP_MOVE = 100;
+const SNAP_ROTATE_DEG = 15;
+const SNAP_SCALE = 100;
+const UNDO_LIMIT = 50;
+const LS_KEY = 'stageEditor.autosave.v1';
+const DEG2RAD = Math.PI / 180;
+const RAD2DEG = 180 / Math.PI;
+
+/* デフォルトカタログ（stageCatalog.json 差し替え可能） */
+const DEFAULT_CATALOG = {
+  props: [
+    { id: 'floor_folder',  displayName: 'フォルダ床',     model: 'assets/model/stage/FloorFolder.mv1',   baseSize: [100,100,100], editorColor: '#00A4EF', collider: 'box', defaultSize: [1000, 20, 1000] },
+    { id: 'path_corridor', displayName: 'パス通路',       model: 'assets/model/stage/PathCorridor.mv1',  baseSize: [100,100,100], editorColor: '#0078D4', collider: 'box', defaultSize: [800, 20, 2000] },
+    { id: 'wall_window',   displayName: 'ウィンドウ壁',   model: 'assets/model/stage/WallWindow.mv1',    baseSize: [100,100,100], editorColor: '#3A4A5E', collider: 'box', defaultSize: [1600, 900, 40] },
+    { id: 'pillar_folder', displayName: 'フォルダ柱',     model: 'assets/model/stage/PillarFolder.mv1',  baseSize: [100,100,100], editorColor: '#FFC83D', collider: 'box', defaultSize: [200, 500, 200] },
+    { id: 'block_file',    displayName: 'ファイルブロック', model: 'assets/model/stage/BlockFile.mv1',   baseSize: [100,100,100], editorColor: '#8FA6BF', collider: 'box', defaultSize: [200, 200, 200] },
+    { id: 'floor_apple',   displayName: 'アリーナ床',     model: 'assets/model/stage/FloorApple.mv1',    baseSize: [100,100,100], editorColor: '#E8E8ED', collider: 'box', defaultSize: [3000, 20, 3000] }
+  ],
+  enemies: [
+    { id: 'safari', displayName: 'Safari', editorColor: '#4DA6FF', editorSize: [200, 300, 200] },
+    { id: 'xcode',  displayName: 'Xcode',  editorColor: '#1E90FF', editorSize: [200, 400, 200] }
+  ],
+  boss: { id: 'mac', displayName: 'MacBook', editorColor: '#E8E8ED', editorSize: [400, 600, 400] }
+};
+
+/* =========================================================
+ * 状態（保存対象は state のみ）
+ * ======================================================= */
+let catalog = structuredClone(DEFAULT_CATALOG);
+let state = defaultState();
+let nextUid = 1;
+let selected = null;            // { kind, uid } | { kind:'mac' } | { kind:'player' }
+let undoStack = [];
+let redoStack = [];
+let gizmoMode = 'translate';
+let gizmoSpace = 'world';
+
+function defaultState() {
+  return {
+    playerStart: { position: [0, 0, -1500], rotationY: 0 },
+    props: [
+      { uid: 'p1', type: 'floor_folder', position: [0, -50, 0], rotation: [0, 0, 0], size: [3000, 20, 3000] }
+    ],
+    spawns: [],
+    mac: { type: 'mac', position: [0, 0, 800], rotationY: 180 }
+  };
+}
+function uid() { return 'o' + (nextUid++) + '_' + Date.now().toString(36); }
+
+/* =========================================================
+ * three.js セットアップ
+ * ======================================================= */
+const viewport = document.getElementById('viewport');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+viewport.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0A0E14');
+scene.fog = new THREE.Fog('#0A0E14', 8000, 20000);
+
+const camera = new THREE.PerspectiveCamera(60, 1, 1, 50000);
+camera.position.set(2500, 2000, -3500);
+
+/* DxLib 左手系吸収コンテナ：子の position/rotation に DxLib の値をそのまま入れる */
+const world = new THREE.Group();
+world.scale.z = -1;
+scene.add(world);
+
+/* グリッド・軸（対称なので scene 直下でも可だが、軸は world 内で DxLib +Z を向ける） */
+const grid = new THREE.GridHelper(6000, 6000 / GRID_UNIT, 0x2A3B52, 0x1A2432);
+scene.add(grid);
+const axes = new THREE.AxesHelper(600);
+world.add(axes);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+dirLight.position.set(2000, 4000, -2500);
+scene.add(dirLight);
+
+/* ギズモ */
+const gizmo = new TransformControls(camera, renderer.domElement);
+gizmo.setSpace(gizmoSpace);
+scene.add(gizmo);
+
+/* =========================================================
+ * メッシュ生成
+ * ======================================================= */
+const meshByKey = new Map();   // key: kind:uid → mesh
+const pickables = [];
+
+function keyOf(sel) { return sel.kind + ':' + (sel.uid ?? sel.kind); }
+
+function makeLabelSprite(text, color) {
+  const cv = document.createElement('canvas');
+  const ctx = cv.getContext('2d');
+  ctx.font = '600 28px "Segoe UI", sans-serif';
+  const w = Math.ceil(ctx.measureText(text).width) + 28;
+  cv.width = w; cv.height = 44;
+  const c2 = cv.getContext('2d');
+  c2.fillStyle = 'rgba(10,14,20,0.8)';
+  c2.beginPath(); c2.roundRect(0, 0, w, 44, 8); c2.fill();
+  c2.strokeStyle = color; c2.lineWidth = 2;
+  c2.beginPath(); c2.roundRect(1, 1, w - 2, 42, 8); c2.stroke();
+  c2.font = '600 28px "Segoe UI", sans-serif';
+  c2.fillStyle = '#E8F2FC';
+  c2.textBaseline = 'middle';
+  c2.fillText(text, 14, 23);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  sp.scale.set(w * 3.2, 44 * 3.2, 1);
+  sp.renderOrder = 5;
+  return sp;
+}
+
+function makeBox(color, opacity) {
+  const mat = new THREE.MeshLambertMaterial({
+    color, side: THREE.DoubleSide, transparent: true, opacity
+  });
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat);
+  const edge = new THREE.LineSegments(
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1)),
+    new THREE.LineBasicMaterial({ color: new THREE.Color(color).offsetHSL(0, 0, 0.15) })
+  );
+  mesh.add(edge);
+  mesh.userData.edge = edge;
+  return mesh;
+}
+
+function makeDirectionCone(color) {
+  const cone = new THREE.Mesh(
+    new THREE.ConeGeometry(0.18, 0.5, 12),
+    new THREE.MeshLambertMaterial({ color, side: THREE.DoubleSide })
+  );
+  cone.rotation.x = Math.PI / 2;   /* ローカル +Z（DxLib 前方）を指す */
+  cone.position.z = 0.75;
+  return cone;
+}
+
+/**
+ * メッシュとその子のGPUリソースを解放する。
+ * rebuildSceneは全メッシュを作り直すため、これを呼ばないと編集のたびにリークする。
+ */
+function disposeMesh(root) {
+  root.traverse((o) => {
+    if (o.geometry) o.geometry.dispose();
+    if (o.material) {
+      if (o.material.map) o.material.map.dispose();
+      o.material.dispose();
+    }
+  });
+}
+
+function catalogProp(type)  { return catalog.props.find(p => p.id === type); }
+function catalogEnemy(type) { return catalog.enemies.find(e => e.id === type); }
+
+function buildPropMesh(prop) {
+  const cat = catalogProp(prop.type);
+  const color = cat ? cat.editorColor : '#FF00FF';
+  const mesh = makeBox(color, 0.85);
+  const label = makeLabelSprite(cat ? cat.displayName : prop.type + ' (未定義!)', color);
+  mesh.add(label);
+  mesh.userData.label = label;
+  mesh.userData.sel = { kind: 'prop', uid: prop.uid };
+  syncPropMesh(mesh, prop);
+  return mesh;
+}
+
+function syncPropMesh(mesh, prop) {
+  mesh.position.fromArray(prop.position);
+  mesh.rotation.set(prop.rotation[0] * DEG2RAD, prop.rotation[1] * DEG2RAD, prop.rotation[2] * DEG2RAD);
+  mesh.scale.fromArray(prop.size.map(v => Math.max(v, 0.001)));
+  /* ラベルは親スケールの影響を打ち消して等倍表示 */
+  const label = mesh.userData.label;
+  label.position.set(0, 0.5 + 120 / Math.max(prop.size[1], 1), 0);
+  if (label.userData.baseW === undefined) {
+    label.userData.baseW = label.scale.x;
+    label.userData.baseH = label.scale.y;
+  }
+  label.scale.set(
+    label.userData.baseW / Math.max(prop.size[0], 0.001),
+    label.userData.baseH / Math.max(prop.size[1], 0.001),
+    1
+  );
+}
+
+function buildActorMesh(sel, type, size, position, rotationY) {
+  const cat = sel.kind === 'mac' ? catalog.boss : catalogEnemy(type);
+  const color = cat ? cat.editorColor : '#FF00FF';
+  const mesh = makeBox(color, 0.9);
+  mesh.scale.fromArray(size);
+  mesh.add(makeDirectionCone(color));
+  const label = makeLabelSprite(cat ? cat.displayName : type + ' (未定義!)', color);
+  label.position.y = 0.5 + 120 / size[1];
+  label.userData.baseW = label.scale.x; label.userData.baseH = label.scale.y;
+  label.scale.set(label.scale.x / size[0], label.scale.y / size[1], 1);
+  mesh.add(label);
+  mesh.userData.sel = sel;
+  mesh.userData.fixedSize = size;
+  mesh.position.fromArray(position);
+  mesh.position.y += size[1] / 2;      /* 足元基準 → 中心へ持ち上げて表示 */
+  mesh.rotation.y = rotationY * DEG2RAD;
+  return mesh;
+}
+
+function buildPlayerMesh(ps) {
+  const size = [150, 150, 150];
+  const mesh = makeBox('#7CCB6B', 0.9);
+  mesh.scale.fromArray(size);
+  mesh.add(makeDirectionCone('#7CCB6B'));
+  const label = makeLabelSprite('Player Start', '#7CCB6B');
+  label.position.y = 0.5 + 120 / size[1];
+  label.scale.set(label.scale.x / size[0], label.scale.y / size[1], 1);
+  mesh.add(label);
+  mesh.userData.sel = { kind: 'player' };
+  mesh.userData.fixedSize = size;
+  mesh.position.fromArray(ps.position);
+  mesh.position.y += size[1] / 2;
+  mesh.rotation.y = ps.rotationY * DEG2RAD;
+  return mesh;
+}
+
+/* state → シーン全再構築 */
+function rebuildScene() {
+  gizmo.detach();
+  for (const m of meshByKey.values()) { world.remove(m); disposeMesh(m); }
+  meshByKey.clear();
+  pickables.length = 0;
+
+  for (const p of state.props) {
+    const m = buildPropMesh(p);
+    world.add(m); meshByKey.set('prop:' + p.uid, m); pickables.push(m);
+  }
+  for (const s of state.spawns) {
+    const cat = catalogEnemy(s.type);
+    const m = buildActorMesh({ kind: 'spawn', uid: s.uid }, s.type, cat ? cat.editorSize : [200,300,200], s.position, s.rotationY);
+    world.add(m); meshByKey.set('spawn:' + s.uid, m); pickables.push(m);
+  }
+  {
+    const m = buildActorMesh({ kind: 'mac' }, 'mac', catalog.boss.editorSize, state.mac.position, state.mac.rotationY);
+    world.add(m); meshByKey.set('mac:mac', m); pickables.push(m);
+  }
+  {
+    const m = buildPlayerMesh(state.playerStart);
+    world.add(m); meshByKey.set('player:player', m); pickables.push(m);
+  }
+  reattachSelection();
+  renderHierarchy();
+  renderInspector();
+}
+
+function reattachSelection() {
+  if (!selected) return;
+  const m = meshByKey.get(keyOf(selected));
+  if (m) { gizmo.attach(m); highlight(m); }
+  else selected = null;
+}
+
+/* =========================================================
+ * 選択
+ * ======================================================= */
+const raycaster = new THREE.Raycaster();
+
+function select(sel) {
+  selected = sel;
+  for (const m of meshByKey.values()) unhighlight(m);
+  if (sel) {
+    const m = meshByKey.get(keyOf(sel));
+    if (m) {
+      /* 敵・ボス・プレイヤーは拡縮不可 → scale モード中なら移動に戻す */
+      if (m.userData.fixedSize && gizmoMode === 'scale') setGizmoMode('translate');
+      gizmo.attach(m);
+      highlight(m);
+    }
+  } else {
+    gizmo.detach();
+  }
+  renderHierarchy();
+  renderInspector();
+}
+
+function highlight(m) {
+  if (m.userData.sel && selected && keyOf(m.userData.sel) === keyOf(selected)) {
+    m.userData.edge.material.color.set('#FFC83D');
+  }
+}
+function unhighlight(m) {
+  const base = m.material.color.clone().offsetHSL(0, 0, 0.15);
+  m.userData.edge.material.color.copy(base);
+}
+
+/* クリック選択（ドラッグと区別） */
+let downPos = null;
+renderer.domElement.addEventListener('pointerdown', (e) => {
+  if (e.button === 0) downPos = [e.clientX, e.clientY];
+});
+renderer.domElement.addEventListener('pointerup', (e) => {
+  if (e.button !== 0 || !downPos) return;
+  const moved = Math.hypot(e.clientX - downPos[0], e.clientY - downPos[1]);
+  downPos = null;
+  if (moved > 4 || gizmo.dragging) return;
+  const rect = renderer.domElement.getBoundingClientRect();
+  const ndc = new THREE.Vector2(
+    ((e.clientX - rect.left) / rect.width) * 2 - 1,
+    -((e.clientY - rect.top) / rect.height) * 2 + 1
+  );
+  raycaster.setFromCamera(ndc, camera);
+  const hits = raycaster.intersectObjects(pickables, false);
+  select(hits.length ? hits[0].object.userData.sel : null);
+});
+
+/* =========================================================
+ * ギズモ ↔ state 同期
+ * ======================================================= */
+gizmo.addEventListener('objectChange', () => {
+  const m = gizmo.object;
+  if (!m || !selected) return;
+  syncStateFromMesh(m);
+  renderInspector();
+  scheduleAutosave();
+});
+gizmo.addEventListener('dragging-changed', (e) => {
+  cameraEnabled = !e.value;
+  /* ドラッグ「開始時」に履歴へ積む。終了時に積むと変更後の状態を保存してしまい
+     Undoが1回空振りする */
+  if (e.value) pushUndo();
+});
+
+function syncStateFromMesh(m) {
+  const sel = m.userData.sel;
+  const round2 = v => Math.round(v * 100) / 100;
+  if (sel.kind === 'prop') {
+    const p = state.props.find(x => x.uid === sel.uid);
+    p.position = m.position.toArray().map(round2);
+    p.rotation = [m.rotation.x * RAD2DEG, m.rotation.y * RAD2DEG, m.rotation.z * RAD2DEG].map(round2);
+    p.size = m.scale.toArray().map(v => round2(Math.max(v, 1)));
+    syncPropMesh(m, p);   /* ラベルスケール等を追従 */
+  } else {
+    const h = m.userData.fixedSize[1] / 2;
+    const pos = [round2(m.position.x), round2(m.position.y - h), round2(m.position.z)];
+    const rotY = round2(m.rotation.y * RAD2DEG);
+    if (sel.kind === 'spawn') {
+      const s = state.spawns.find(x => x.uid === sel.uid);
+      s.position = pos; s.rotationY = rotY;
+    } else if (sel.kind === 'mac') {
+      state.mac.position = pos; state.mac.rotationY = rotY;
+    } else if (sel.kind === 'player') {
+      state.playerStart.position = pos; state.playerStart.rotationY = rotY;
+    }
+    /* 回転は Y のみ許可：X/Z が動いたら戻す */
+    m.rotation.x = 0; m.rotation.z = 0;
+    m.scale.fromArray(m.userData.fixedSize);
+  }
+}
+
+/* =========================================================
+ * ツールバー
+ * ======================================================= */
+const modeButtons = { translate: btn('btnTranslate'), rotate: btn('btnRotate'), scale: btn('btnScale') };
+function btn(id) { return document.getElementById(id); }
+
+function setGizmoMode(mode) {
+  const m = selected && meshByKey.get(keyOf(selected));
+  if (mode === 'scale' && m && m.userData.fixedSize) return;  /* 敵等は拡縮不可 */
+  gizmoMode = mode;
+  gizmo.setMode(mode);
+  for (const [k, b] of Object.entries(modeButtons)) b.classList.toggle('active', k === mode);
+}
+modeButtons.translate.onclick = () => setGizmoMode('translate');
+modeButtons.rotate.onclick = () => setGizmoMode('rotate');
+modeButtons.scale.onclick = () => setGizmoMode('scale');
+
+btn('btnSpace').onclick = () => {
+  gizmoSpace = gizmoSpace === 'world' ? 'local' : 'world';
+  gizmo.setSpace(gizmoSpace);
+  btn('btnSpace').textContent = gizmoSpace === 'world' ? 'Global' : 'Local';
+};
+btn('btnUndo').onclick = doUndo;
+btn('btnRedo').onclick = doRedo;
+btn('btnDup').onclick = duplicateSelected;
+btn('btnDel').onclick = deleteSelected;
+btn('btnSave').onclick = exportStage;
+btn('btnLoad').onclick = () => document.getElementById('fileStage').click();
+btn('btnCatalog').onclick = () => document.getElementById('fileCatalog').click();
+
+/* =========================================================
+ * Undo / Redo（スナップショット方式）
+ * ======================================================= */
+function snapshot() { return JSON.stringify(state); }
+function pushUndo() {
+  undoStack.push(snapshot());
+  if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+  redoStack.length = 0;
+  scheduleAutosave();
+}
+function doUndo() {
+  if (!undoStack.length) return;
+  redoStack.push(snapshot());
+  state = JSON.parse(undoStack.pop());
+  rebuildScene();
+  scheduleAutosave();
+}
+function doRedo() {
+  if (!redoStack.length) return;
+  undoStack.push(snapshot());
+  state = JSON.parse(redoStack.pop());
+  rebuildScene();
+  scheduleAutosave();
+}
+
+/* =========================================================
+ * 追加・複製・削除
+ * ======================================================= */
+function spawnCenterPosition() {
+  /* カメラ前方 1500 の地点（DxLib座標で返す） */
+  const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
+  const p = camera.position.clone().add(dir.multiplyScalar(1500));
+  return [Math.round(p.x / GRID_UNIT) * GRID_UNIT, 0, Math.round(-p.z / GRID_UNIT) * GRID_UNIT];
+}
+
+function addProp(typeId) {
+  const cat = catalogProp(typeId);
+  pushUndo();
+  const p = {
+    uid: uid(), type: typeId,
+    position: spawnCenterPosition(),
+    rotation: [0, 0, 0],
+    size: [...(cat.defaultSize ?? [200, 200, 200])]
+  };
+  p.position[1] = p.size[1] / 2;
+  state.props.push(p);
+  rebuildScene();
+  select({ kind: 'prop', uid: p.uid });
+}
+
+function addSpawn(typeId) {
+  pushUndo();
+  const s = { uid: uid(), type: typeId, position: spawnCenterPosition(), rotationY: 0 };
+  state.spawns.push(s);
+  rebuildScene();
+  select({ kind: 'spawn', uid: s.uid });
+}
+
+function duplicateSelected() {
+  if (!selected) return;
+  if (selected.kind === 'prop') {
+    const src = state.props.find(p => p.uid === selected.uid);
+    pushUndo();
+    const c = structuredClone(src); c.uid = uid();
+    c.position = [src.position[0] + 200, src.position[1], src.position[2] + 200];
+    state.props.push(c);
+    rebuildScene(); select({ kind: 'prop', uid: c.uid });
+  } else if (selected.kind === 'spawn') {
+    const src = state.spawns.find(s => s.uid === selected.uid);
+    pushUndo();
+    const c = structuredClone(src); c.uid = uid();
+    c.position = [src.position[0] + 200, src.position[1], src.position[2] + 200];
+    state.spawns.push(c);
+    rebuildScene(); select({ kind: 'spawn', uid: c.uid });
+  }
+  /* mac / player は複製不可（各1つ） */
+}
+
+function deleteSelected() {
+  if (!selected) return;
+  if (selected.kind === 'prop') {
+    pushUndo();
+    state.props = state.props.filter(p => p.uid !== selected.uid);
+  } else if (selected.kind === 'spawn') {
+    pushUndo();
+    state.spawns = state.spawns.filter(s => s.uid !== selected.uid);
+  } else {
+    return;  /* mac / player は削除不可 */
+  }
+  selected = null;
+  rebuildScene();
+}
+
+/* =========================================================
+ * キーボード
+ * ======================================================= */
+const keys = new Set();
+let ctrlDown = false;
+
+window.addEventListener('keydown', (e) => {
+  const tag = document.activeElement?.tagName;
+  const typing = tag === 'INPUT' || tag === 'TEXTAREA';
+
+  if (e.ctrlKey && !ctrlDown) { ctrlDown = true; applySnap(true); }
+
+  if (e.ctrlKey && e.code === 'KeyZ') { e.preventDefault(); doUndo(); return; }
+  if (e.ctrlKey && e.code === 'KeyY') { e.preventDefault(); doRedo(); return; }
+  if (e.ctrlKey && e.code === 'KeyD') { e.preventDefault(); duplicateSelected(); return; }
+  if (typing) return;
+
+  /* カメラ移動用に先に登録する。ここを後回しにすると
+     「Wでモード切替 → そのままRMBを押す」のときに前進が効かない */
+  keys.add(e.code);
+
+  if (e.code === 'Delete') { deleteSelected(); return; }
+  if (e.code === 'KeyF') { focusSelected(); return; }
+
+  /* W/E/R：右ドラッグ中はカメラ移動キーとして扱うためモード切替しない */
+  if (!rmbDown && !e.ctrlKey) {
+    if (e.code === 'KeyW') { setGizmoMode('translate'); return; }
+    if (e.code === 'KeyE') { setGizmoMode('rotate'); return; }
+    if (e.code === 'KeyR') { setGizmoMode('scale'); return; }
+  }
+});
+window.addEventListener('keyup', (e) => {
+  if (!e.ctrlKey && ctrlDown) { ctrlDown = false; applySnap(false); }
+  keys.delete(e.code);
+});
+window.addEventListener('blur', () => { keys.clear(); ctrlDown = false; applySnap(false); });
+
+function applySnap(on) {
+  gizmo.setTranslationSnap(on ? SNAP_MOVE : null);
+  gizmo.setRotationSnap(on ? SNAP_ROTATE_DEG * DEG2RAD : null);
+  /* unit box のため scale = 実寸。よって拡縮スナップも 100 で「100ユニット単位」になる */
+  gizmo.setScaleSnap(on ? SNAP_SCALE : null);
+  document.getElementById('snapBadge').style.display = on ? 'block' : 'none';
+}
+
+/* =========================================================
+ * カメラ（Unity シーンビュー準拠のフライスルー）
+ * ======================================================= */
+let cameraEnabled = true;
+let rmbDown = false, mmbDown = false;
+let yaw = 0;
+let pitch = -0.45;
+const MOVE_SPEED = 2200;         /* units/sec */
+
+function updateCameraRotation() {
+  camera.rotation.order = 'YXZ';
+  camera.rotation.y = yaw;
+  camera.rotation.x = pitch;
+  camera.rotation.z = 0;
+}
+{
+  /* 初期姿勢を原点向きに */
+  const to = new THREE.Vector3(0, 0, 0).sub(camera.position).normalize();
+  yaw = Math.atan2(-to.x, -to.z);
+  pitch = Math.asin(THREE.MathUtils.clamp(to.y, -1, 1));
+  updateCameraRotation();
+}
+
+renderer.domElement.addEventListener('contextmenu', e => e.preventDefault());
+/* 中ボタンのオートスクロール（丸いアイコン）を抑止する */
+renderer.domElement.addEventListener('mousedown', (e) => { if (e.button === 1) e.preventDefault(); });
+renderer.domElement.addEventListener('pointerdown', (e) => {
+  if (!cameraEnabled) return;
+  if (e.button === 2) { rmbDown = true; renderer.domElement.setPointerCapture(e.pointerId); }
+  if (e.button === 1) { mmbDown = true; e.preventDefault(); renderer.domElement.setPointerCapture(e.pointerId); }
+});
+window.addEventListener('pointerup', (e) => {
+  if (e.button === 2) rmbDown = false;
+  if (e.button === 1) mmbDown = false;
+});
+renderer.domElement.addEventListener('pointermove', (e) => {
+  if (!cameraEnabled) return;
+  if (rmbDown) {
+    yaw   -= e.movementX * 0.0035;
+    pitch -= e.movementY * 0.0035;
+    pitch = THREE.MathUtils.clamp(pitch, -1.55, 1.55);
+    updateCameraRotation();
+  } else if (mmbDown) {
+    const panSpeed = camera.position.length() * 0.0012 + 0.6;
+    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+    const up = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+    camera.position.addScaledVector(right, -e.movementX * panSpeed);
+    camera.position.addScaledVector(up, e.movementY * panSpeed);
+  }
+});
+renderer.domElement.addEventListener('wheel', (e) => {
+  if (!cameraEnabled) return;
+  e.preventDefault();
+  const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
+  camera.position.addScaledVector(dir, e.deltaY < 0 ? 300 : -300);
+}, { passive: false });
+
+function focusSelected() {
+  if (!selected) return;
+  const m = meshByKey.get(keyOf(selected));
+  if (!m) return;
+  const target = m.getWorldPosition(new THREE.Vector3());
+  const ext = Math.max(...m.scale.toArray(), 300);
+  const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
+  camera.position.copy(target).addScaledVector(dir, -(ext * 2.2 + 400));
+}
+
+let lastT = performance.now();
+function tick(t) {
+  requestAnimationFrame(tick);
+  const dt = Math.min((t - lastT) / 1000, 0.1); lastT = t;
+
+  if (rmbDown && cameraEnabled) {
+    const speed = MOVE_SPEED * (keys.has('ShiftLeft') || keys.has('ShiftRight') ? 3 : 1) * dt;
+    const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd);
+    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+    if (keys.has('KeyW')) camera.position.addScaledVector(fwd, speed);
+    if (keys.has('KeyS')) camera.position.addScaledVector(fwd, -speed);
+    if (keys.has('KeyA')) camera.position.addScaledVector(right, -speed);
+    if (keys.has('KeyD')) camera.position.addScaledVector(right, speed);
+    if (keys.has('KeyQ')) camera.position.y -= speed;
+    if (keys.has('KeyE')) camera.position.y += speed;
+  }
+
+  const s = document.getElementById('status');
+  const cp = camera.position;
+  s.textContent = `cam (DxLib): X ${cp.x.toFixed(0)}  Y ${cp.y.toFixed(0)}  Z ${(-cp.z).toFixed(0)}   |   grid: ${GRID_UNIT}`;
+
+  renderer.render(scene, camera);
+}
+
+function resize() {
+  const w = viewport.clientWidth, h = viewport.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+
+/* =========================================================
+ * Hierarchy
+ * ======================================================= */
+function renderHierarchy() {
+  const root = document.getElementById('hierarchy');
+  root.innerHTML = '';
+  const cat = (name) => { const d = document.createElement('div'); d.className = 'hier-cat'; d.textContent = name; root.appendChild(d); };
+  const item = (sel, name, color) => {
+    const d = document.createElement('div');
+    d.className = 'hier-item' + (selected && keyOf(selected) === keyOf(sel) ? ' selected' : '');
+    const dot = document.createElement('span'); dot.className = 'hier-dot'; dot.style.background = color;
+    d.appendChild(dot);
+    d.appendChild(document.createTextNode(name));
+    d.onclick = () => select(sel);
+    d.ondblclick = () => { select(sel); focusSelected(); };
+    root.appendChild(d);
+  };
+
+  cat(`Props (${state.props.length})`);
+  state.props.forEach((p, i) => {
+    const c = catalogProp(p.type);
+    item({ kind: 'prop', uid: p.uid }, `${c ? c.displayName : p.type}_${i + 1}`, c ? c.editorColor : '#FF00FF');
+  });
+  cat(`Enemies (${state.spawns.length})`);
+  state.spawns.forEach((s, i) => {
+    const c = catalogEnemy(s.type);
+    item({ kind: 'spawn', uid: s.uid }, `${s.type}_${i + 1}`, c ? c.editorColor : '#FF00FF');
+  });
+  cat('Boss');
+  item({ kind: 'mac' }, catalog.boss.displayName, catalog.boss.editorColor);
+  cat('Player');
+  item({ kind: 'player' }, 'Player Start', '#7CCB6B');
+}
+
+/* =========================================================
+ * Inspector
+ * ======================================================= */
+function renderInspector() {
+  const root = document.getElementById('inspector');
+  if (!selected) { root.innerHTML = '<div class="insp-empty">オブジェクトを選択してください</div>'; return; }
+  root.innerHTML = '';
+
+  const title = document.createElement('h3');
+  const typeLine = document.createElement('div'); typeLine.className = 'type-line';
+
+  const vec = (labelText, values, onCommit, axesNames = ['X', 'Y', 'Z']) => {
+    const g = document.createElement('div'); g.className = 'vec-group';
+    const l = document.createElement('label'); l.textContent = labelText; g.appendChild(l);
+    const row = document.createElement('div'); row.className = 'vec-row';
+    values.forEach((v, i) => {
+      const box = document.createElement('div'); box.className = 'axis ax-' + axesNames[i].toLowerCase();
+      const sp = document.createElement('span'); sp.textContent = axesNames[i]; box.appendChild(sp);
+      const inp = document.createElement('input');
+      inp.type = 'number'; inp.step = 'any'; inp.value = v;
+      inp.addEventListener('change', () => {
+        const arr = [...row.querySelectorAll('input')].map(x => parseFloat(x.value) || 0);
+        pushUndo();
+        onCommit(arr);
+        rebuildScene();
+      });
+      box.appendChild(inp); row.appendChild(box);
+    });
+    g.appendChild(row);
+    return g;
+  };
+
+  if (selected.kind === 'prop') {
+    const p = state.props.find(x => x.uid === selected.uid);
+    const c = catalogProp(p.type);
+    title.textContent = c ? c.displayName : p.type;
+    typeLine.textContent = 'type: ' + p.type;
+    root.append(title, typeLine,
+      vec('Position', p.position, a => p.position = a),
+      vec('Rotation (deg)', p.rotation, a => p.rotation = a),
+      vec('Size', p.size, a => p.size = a.map(v => Math.max(v, 1)))
+    );
+    const note = document.createElement('div'); note.className = 'note';
+    note.textContent = '坂は Rotation の X / Z を傾けて作成（Local 軸推奨）。Size は実寸ユニット。';
+    root.appendChild(note);
+  } else if (selected.kind === 'spawn') {
+    const s = state.spawns.find(x => x.uid === selected.uid);
+    title.textContent = s.type;
+    typeLine.textContent = 'type: ' + s.type + ' (enemy)';
+    root.append(title, typeLine,
+      vec('Position', s.position, a => s.position = a),
+      vec('Rotation Y (deg)', [s.rotationY], a => s.rotationY = a[0], ['Y'])
+    );
+    const note = document.createElement('div'); note.className = 'note';
+    note.textContent = 'サイズは enemies/*.json 側の責務（エディタでは変更不可）。';
+    root.appendChild(note);
+  } else if (selected.kind === 'mac') {
+    title.textContent = catalog.boss.displayName;
+    typeLine.textContent = 'type: mac (boss / 別枠・削除不可)';
+    root.append(title, typeLine,
+      vec('Position', state.mac.position, a => state.mac.position = a),
+      vec('Rotation Y (deg)', [state.mac.rotationY], a => state.mac.rotationY = a[0], ['Y'])
+    );
+  } else if (selected.kind === 'player') {
+    title.textContent = 'Player Start';
+    typeLine.textContent = 'playerStart (必須・削除不可)';
+    root.append(title, typeLine,
+      vec('Position', state.playerStart.position, a => state.playerStart.position = a),
+      vec('Rotation Y (deg)', [state.playerStart.rotationY], a => state.playerStart.rotationY = a[0], ['Y'])
+    );
+  }
+}
+
+/* =========================================================
+ * パレット
+ * ======================================================= */
+function renderPalette() {
+  const root = document.getElementById('palette');
+  root.innerHTML = '<span class="pal-label">パレット:</span>';
+  const add = (name, color, onClick, disabled) => {
+    const d = document.createElement('div');
+    d.className = 'pal-item' + (disabled ? ' disabled' : '');
+    const sw = document.createElement('div'); sw.className = 'pal-swatch'; sw.style.background = color;
+    const nm = document.createElement('div'); nm.className = 'pal-name'; nm.textContent = name;
+    d.append(sw, nm);
+    if (!disabled) d.onclick = onClick;
+    root.appendChild(d);
+  };
+  for (const p of catalog.props) add(p.displayName, p.editorColor, () => addProp(p.id));
+  for (const e of catalog.enemies) add(e.displayName, e.editorColor, () => addSpawn(e.id));
+  add(catalog.boss.displayName, catalog.boss.editorColor, null, true);  /* 常に1体・追加不可 */
+}
+
+/* =========================================================
+ * 入出力
+ * ======================================================= */
+function serializeStageData() {
+  return {
+    playerStart: {
+      position: [...state.playerStart.position],
+      rotationY: state.playerStart.rotationY
+    },
+    props: state.props.map(p => ({
+      type: p.type, position: [...p.position], rotation: [...p.rotation], size: [...p.size]
+    })),
+    spawns: state.spawns.map(s => ({
+      type: s.type, position: [...s.position], rotationY: s.rotationY
+    })),
+    mac: { type: 'mac', position: [...state.mac.position], rotationY: state.mac.rotationY }
+  };
+}
+
+function validate() {
+  const problems = [];
+  if (!state.playerStart || !Array.isArray(state.playerStart.position))
+    problems.push({ level: 'err', msg: 'playerStart が未設定です' });
+  for (const p of state.props) {
+    if (!catalogProp(p.type)) problems.push({ level: 'err', msg: `props: カタログに無い type "${p.type}"` });
+    if (p.size.some(v => v <= 0)) problems.push({ level: 'err', msg: `props(${p.type}): size に 0 以下の値` });
+  }
+  for (const s of state.spawns) {
+    if (!catalogEnemy(s.type)) problems.push({ level: 'err', msg: `spawns: カタログに無い type "${s.type}"` });
+  }
+  if (state.spawns.length === 0)
+    problems.push({ level: 'warn', msg: 'spawns が 0 件です（雑魚全滅→ボス出現フローに注意）' });
+  return problems;
+}
+
+function exportStage() {
+  const problems = validate();
+  const doDownload = () => {
+    const json = JSON.stringify(serializeStageData(), null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'stageData.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  if (problems.length === 0) { doDownload(); return; }
+  const hasErr = problems.some(p => p.level === 'err');
+  showDialog(
+    hasErr ? '書き出し前の検証エラー' : '書き出し前の警告',
+    problems.map(p => `<div class="${p.level}">${p.level === 'err' ? '✕' : '⚠'} ${p.msg}</div>`).join('') +
+    (hasErr ? '<br>エラーを解消してから書き出してください。' : '<br>このまま書き出しますか？'),
+    hasErr ? null : doDownload
+  );
+}
+
+document.getElementById('fileStage').addEventListener('change', async (e) => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    pushUndo();
+    state = {
+      playerStart: {
+        position: data.playerStart?.position ?? [0, 0, 0],
+        rotationY: data.playerStart?.rotationY ?? 0
+      },
+      props: (data.props ?? []).map(p => ({
+        uid: uid(), type: p.type,
+        position: p.position ?? [0, 0, 0],
+        rotation: p.rotation ?? [0, 0, 0],
+        size: p.size ?? [100, 100, 100]
+      })),
+      spawns: (data.spawns ?? []).map(s => ({
+        uid: uid(), type: s.type,
+        position: s.position ?? [0, 0, 0],
+        rotationY: s.rotationY ?? 0
+      })),
+      mac: {
+        type: 'mac',
+        position: data.mac?.position ?? [0, 0, 800],
+        rotationY: data.mac?.rotationY ?? 180
+      }
+    };
+    selected = null;
+    rebuildScene();
+    scheduleAutosave();
+  } catch (err) {
+    showDialog('読み込みエラー', 'stageData.json の解析に失敗しました：<br>' + err.message, null);
+  }
+});
+
+document.getElementById('fileCatalog').addEventListener('change', async (e) => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    if (!Array.isArray(data.props) || !Array.isArray(data.enemies) || !data.boss)
+      throw new Error('props / enemies / boss が見つかりません');
+    catalog = data;
+    renderPalette();
+    rebuildScene();
+  } catch (err) {
+    showDialog('カタログ読み込みエラー', 'stageCatalog.json の解析に失敗しました：<br>' + err.message, null);
+  }
+});
+
+/* =========================================================
+ * ダイアログ / 自動保存
+ * ======================================================= */
+function showDialog(title, html, onOk) {
+  document.getElementById('dialogTitle').textContent = title;
+  document.getElementById('dialogBody').innerHTML = html;
+  const back = document.getElementById('dialogBack');
+  const okB = document.getElementById('dialogOk');
+  const cancelB = document.getElementById('dialogCancel');
+  okB.style.display = onOk ? '' : 'none';
+  cancelB.textContent = onOk ? 'キャンセル' : '閉じる';
+  back.classList.add('show');
+  okB.onclick = () => { back.classList.remove('show'); onOk && onOk(); };
+  cancelB.onclick = () => back.classList.remove('show');
+}
+
+let autosaveTimer = null;
+function scheduleAutosave() {
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(() => {
+    try { localStorage.setItem(LS_KEY, snapshot()); } catch (_) {}
+  }, 400);
+}
+function tryRestore() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data && data.props) state = data;
+  } catch (_) {}
+}
+
+/* =========================================================
+ * 起動
+ * ======================================================= */
+tryRestore();
+renderPalette();
+rebuildScene();
+resize();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
