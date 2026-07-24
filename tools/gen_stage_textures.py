@@ -63,25 +63,41 @@ def base(color=VOID):
     return Image.new("RGBA", (SIZE, SIZE), color + (255,))
 
 
+def surface_base(bg, accent, grid_step=64):
+    """面を「立体の一部」として認識させるための下地を作る。
+
+    背景が真っ黒な虚無のため、ベースまで暗いと面が背景に溶けて箱に見えなくなる。
+    ベースを虚無より明確に明るくし、控えめなグリッドで面の広がりを、
+    発光する縁で箱の稜線を示す。この上に種類ごとのモチーフを載せる。
+    """
+    img = base(bg)
+    d = ImageDraw.Draw(img)
+    for x in range(grid_step, SIZE, grid_step):
+        d.line([x, 0, x, SIZE], fill=accent + (36,), width=1)
+    for y in range(grid_step, SIZE, grid_step):
+        d.line([0, y, SIZE, y], fill=accent + (36,), width=1)
+    return img
+
+
 # ---- 各配置物のテクスチャ ----
 
 def tex_floor_folder():
     """フォルダ床：エクスプローラー詳細表示ふうの等間隔ライン＋青発光縁。"""
-    img = base(VOID)
+    img = surface_base((18, 30, 46), BLUE)
     d = ImageDraw.Draw(img)
-    y = 30
-    while y < SIZE:
-        d.rectangle([16, y, SIZE - 16, y + 2], fill=BLUE + (90,))
-        d.rectangle([26, y - 10, 42, y + 2], fill=YELLOW + (120,))  # 小さなフォルダ点
-        d.rectangle([50, y - 8, 50 + 110 + (y * 7) % 150, y - 2], fill=BLUE + (70,))
-        y += 44
+    y = 44
+    while y < SIZE - 20:
+        d.rectangle([28, y, SIZE - 28, y + 3], fill=BLUE + (150,))
+        d.rectangle([40, y - 14, 58, y - 2], fill=YELLOW + (190,))  # 小さなフォルダ点
+        d.rectangle([70, y - 12, 70 + 120 + (y * 7) % 160, y - 4], fill=BLUE + (110,))
+        y += 64
     glow_border(img, BLUE)
     return img
 
 
 def tex_path_corridor():
     """パス通路：C:\\Users\\... の文字が並ぶ通路。坂に使う。"""
-    img = base((6, 10, 16))
+    img = surface_base((16, 28, 44), BLUE)
     d = ImageDraw.Draw(img)
     f = MONO(30)
     lines = ["C:\\Users\\Player\\", "Desktop > ..", "C:\\Program Files\\", ">  >  >"]
@@ -94,10 +110,10 @@ def tex_path_corridor():
 
 def tex_wall_window():
     """ウィンドウ壁：巨大なエクスプローラーの枠。タイトルバー＋ − □ ✕。"""
-    img = base((10, 16, 26))
+    img = surface_base((20, 32, 50), BLUE)
     d = ImageDraw.Draw(img)
     # タイトルバー
-    d.rectangle([0, 0, SIZE, 60], fill=(14, 22, 34, 255))
+    d.rectangle([0, 0, SIZE, 60], fill=(30, 46, 68, 255))
     d.text((16, 30), "C:\\Program Files", font=MONO(26), fill=TEXT + (230,), anchor="lm")
     # - □ ×
     d.text((SIZE - 150, 28), "\u2014", font=SANS(30), fill=(143, 160, 181, 255), anchor="mm")
@@ -113,24 +129,24 @@ def tex_wall_window():
 
 
 def tex_pillar_folder():
-    """フォルダ柱：黄色い折れたフォルダ形が縦に並ぶ柱。"""
-    img = base((20, 16, 5))
+    """フォルダ柱：黄色いフォルダアイコンが並ぶ柱。"""
+    img = surface_base((46, 38, 16), YELLOW)
     d = ImageDraw.Draw(img)
-    y = 40
-    while y < SIZE:
-        d.polygon([(120, y), (210, y), (238, y + 26), (392, y + 26),
-                   (392, y + 150), (120, y + 150)], fill=YELLOW + (40,))
-        y += 190
+    # フォルダアイコンを小さめに、縦に間隔をあけて並べる
+    for y in (96, 288):
+        left, right = 168, 344
+        d.polygon([(left, y), (left + 58, y), (left + 78, y + 20), (right, y + 20),
+                   (right, y + 118), (left, y + 118)], fill=YELLOW + (235,))
     glow_border(img, YELLOW)
     return img
 
 
 def tex_block_file():
     """ファイルブロック：紙アイコン＋ .exe ラベル。"""
-    img = base((11, 20, 32))
+    img = surface_base((30, 44, 62), BLUE)
     d = ImageDraw.Draw(img)
     # 紙アイコン
-    d.rectangle([SIZE / 2 - 80, 70, SIZE / 2 + 80, 300], fill=(201, 212, 227, 30))
+    d.rectangle([SIZE / 2 - 80, 70, SIZE / 2 + 80, 300], fill=(201, 212, 227, 120))
     d.polygon([(SIZE / 2 + 40, 70), (SIZE / 2 + 80, 110), (SIZE / 2 + 40, 110)],
               fill=(201, 212, 227, 70))
     d.text((SIZE / 2, 380), ".exe", font=MONO(72), fill=BLUE + (255,), anchor="mm")
