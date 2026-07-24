@@ -37,6 +37,9 @@
 #include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/system/visual/EffectSystem.h"
 #include "game/system/visual/LightSystem.h"
+#include "game/system/visual/DataWallSystem.h"
+#include "core/interface/ITextureCanvas.h"
+#include "game/constant/PropId.h"
 #include "core/interface/IEffectFactory.h"
 #include "game/system/combat/AttackSystem.h"
 #include "game/component/combat/ColliderComponent.h"
@@ -400,6 +403,17 @@ namespace game::scene
 		// LightComponentを持つエンティティの点光源を生成・追従させる（プレイヤーの携行灯など）
 		if (auto* lighting{ core::base::ServiceLocator::get<core::iface::ILighting>() })
 			m_systemManager.registerSystem<game::system::visual::LightSystem>(m_componentManager, *lighting);
+
+		// データ壁に流れる文字を描く。テクスチャはモデル単位で差し替わるので、
+		// カタログのモデルパスから直接ハンドルを引く
+		if (auto* canvas{ core::base::ServiceLocator::get<core::iface::ITextureCanvas>() })
+		{
+			const auto& wallDef{ m_resourceManager.getPropDefinition(constant::prop_id::WALL_DATA) };
+			m_systemManager.registerSystem<game::system::visual::DataWallSystem>(
+			    *canvas,
+			    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+			    m_resourceManager.loadModelByPath(wallDef.m_modelPath));
+		}
 
 		// プレイヤーの溜め攻撃の画面演出（集中線）。描画内容はSystemが持ち、
 		// InGameViewには描画フェーズで呼び出させるためにポインタを渡す
