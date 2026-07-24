@@ -1,8 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include "platform/window/WindowConstants.h"
-#include "platform/window/WindowBase.h"
-#include "platform/webview/WebView2Host.h"
+#include "platform/window/WebViewWindowBase.h"
 #include <string>
 #include <functional>
 
@@ -12,8 +11,8 @@ namespace platform::window::select
      * @class DifficultyWindow
      * @brief 難易度選択ウィンドウ
      */
-    class DifficultyWindow : public WindowBase
-    {
+	class DifficultyWindow : public platform::window::WebViewWindowBase
+	{
     public:
         /**
          * @brief コンストラクタ
@@ -27,11 +26,11 @@ namespace platform::window::select
         /// @brief デストラクタ
         virtual ~DifficultyWindow() noexcept = default;
 
-        /**
-         * @brief 現在選択されている難易度を取得する
-         * @return 難易度文字列 ("EASY" | "NORMAL" | "HARD")
-         */
-        [[nodiscard]] std::string getSelectedDifficulty() const noexcept;
+		/**
+		 * @brief 現在選択されている難易度を取得する
+		 * @return 難易度文字列 ("NORMAL" | "HARD")
+		 */
+		[[nodiscard]] std::string getSelectedDifficulty() const noexcept;
 
     protected:
         void onCreateControls(HWND hwnd) override;
@@ -50,7 +49,6 @@ namespace platform::window::select
         static constexpr const char* MESSAGE_TYPE_HARD_CONFIRMED{ "hardConfirmed" };
 
         // 難易度値
-        static constexpr const char* DIFFICULTY_EASY{ "EASY" };
         static constexpr const char* DIFFICULTY_NORMAL{ "NORMAL" };
         static constexpr const char* DIFFICULTY_HARD{ "HARD" };
 
@@ -63,7 +61,6 @@ namespace platform::window::select
         };
         static constexpr const wchar_t* HARD_WARNING_TITLE{ L"警告 - Win vs Mac.exe" };
 
-        platform::webview::WebView2Host m_webView{};
         std::string m_selectedDifficulty{ DIFFICULTY_NORMAL };
 
         void handleMessage(const std::string& json) noexcept;

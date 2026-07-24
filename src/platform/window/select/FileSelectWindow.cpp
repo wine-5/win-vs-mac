@@ -1,21 +1,27 @@
-#include <windows.h>
+﻿#include <windows.h>
 #include <commdlg.h>
 #include <sstream>
 #include "FileSelectWindow.h"
+#include "core/interface/IResourceManager.h"
 #include "platform/window/WindowConstants.h"
 #include "core/interface/ILogger.h"
 #include "thirdparty/nlohmann/json.hpp"
+#include "core/utility/Log.h"
+#include <exception>
+#include <utility>
 
 namespace platform::window::select
 {
-	FileSelectWindow::FileSelectWindow(int x, int y, int width, int height) noexcept
-		: WindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height)
+	FileSelectWindow::FileSelectWindow(int x, int y, int width, int height,
+	    core::iface::IResourceManager& resourceManager) noexcept
+	    : WebViewWindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height)
+	    , m_resourceManager{ resourceManager }
 	{
 	}
 
 	void FileSelectWindow::setOnFileSlotChanged(std::function<void(int, const std::string&)> callback) noexcept
 	{
-		m_onFileSlotChanged = callback;
+		m_onFileSlotChanged = std::move(callback);
 	}
 
 	std::string FileSelectWindow::getFilePath(int slot) const noexcept
@@ -35,23 +41,10 @@ namespace platform::window::select
 
 	LRESULT FileSelectWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 	{
-		if (msg == WM_SIZE)
-		{
-			if (wParam == SIZE_MINIMIZED)
-				m_webView.setVisible(false);
-			else
-				m_webView.resize(LOWORD(lParam), HIWORD(lParam));
-			return 0;
-		}
-		if (msg == WM_SHOWWINDOW)
-			m_webView.setVisible(wParam != 0);
-		if (msg == WM_ACTIVATEAPP && wParam != 0)
-		{
-			RECT rc{};
-			GetClientRect(hwnd, &rc);
-			if (rc.right > 0 && rc.bottom > 0)
-				m_webView.resize(rc.right, rc.bottom);
-		}
+		// サイズ追従・可視追従は WebViewWindowBase に集約している
+		if (const auto handled{ handleWebViewMessage(hwnd, msg, wParam, lParam) })
+			return *handled;
+
 		return WindowBase::onMessage(hwnd, msg, wParam, lParam);
 	}
 
@@ -72,7 +65,14 @@ namespace platform::window::select
 				sendBonusInfo();
 			}
 		}
-		catch (...) {}
+		catch (const std::exception& e)
+		{
+			core::log::error("FileSelectWindow::handleMessage: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("FileSelectWindow::handleMessage: 不明な例外が発生しました");
+		}
 	}
 
 	void FileSelectWindow::openFileDialog(int slotIndex)
@@ -92,19 +92,7 @@ namespace platform::window::select
 		{
 			m_filePaths[slotIndex] = szFile;
 
-			// Determine extension type
-			std::string path{ szFile };
-			auto dotPos = path.rfind('.');
-			if (dotPos != std::string::npos)
-			{
-				std::string ext{ path.substr(dotPos) };
-				std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-				m_extensionTypes[slotIndex] = game::utility::FileExtensionTypeResolver::toFileExtensionType(ext);
-			}
-			else
-			{
-				m_extensionTypes[slotIndex] = game::data::FileExtensionType::Unknown;
-			}
+			m_extensionTypes[slotIndex] = game::utility::FileExtensionTypeResolver::fromPath(m_filePaths[slotIndex]);
 
 			if (m_onFileSlotChanged)
 				m_onFileSlotChanged(slotIndex, m_filePaths[slotIndex]);
@@ -115,14 +103,15 @@ namespace platform::window::select
 
 	void FileSelectWindow::sendSlotsRefresh() noexcept
 	{
-		auto toName = [this](game::data::FileExtensionType t) -> const char* {
+		auto toName = [this](core::data::FileExtensionType t) -> const char*
+		{
 			switch (t)
 			{
-			case game::data::FileExtensionType::Executable: return EXT_TYPE_NAME_EXECUTABLE;
-			case game::data::FileExtensionType::Document:   return EXT_TYPE_NAME_DOCUMENT;
-			case game::data::FileExtensionType::Image:      return EXT_TYPE_NAME_IMAGE;
-			case game::data::FileExtensionType::Audio:      return EXT_TYPE_NAME_AUDIO;
-			case game::data::FileExtensionType::Archive:    return EXT_TYPE_NAME_ARCHIVE;
+			case core::data::FileExtensionType::Executable: return EXT_TYPE_NAME_EXECUTABLE;
+			case core::data::FileExtensionType::Document: return EXT_TYPE_NAME_DOCUMENT;
+			case core::data::FileExtensionType::Image: return EXT_TYPE_NAME_IMAGE;
+			case core::data::FileExtensionType::Audio: return EXT_TYPE_NAME_AUDIO;
+			case core::data::FileExtensionType::Archive: return EXT_TYPE_NAME_ARCHIVE;
 			default:                                        return EXT_TYPE_NAME_UNKNOWN;
 			}
 		};
@@ -155,20 +144,31 @@ namespace platform::window::select
 			}
 			m_webView.postMessage(resp.dump());
 		}
-		catch (...) {}
+		catch (const std::exception& e)
+		{
+			core::log::error("FileSelectWindow::sendSlotsRefresh: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("FileSelectWindow::sendSlotsRefresh: 不明な例外が発生しました");
+		}
 	}
 
 	void FileSelectWindow::sendBonusInfo() noexcept
 	{
-		// ExtensionBonusCalculator の定数から説明文を生成（C++ が正とする）
-		struct Entry { const char* m_key; game::data::FileExtensionType m_type; };
-		constexpr Entry entries[] = {
-			{ EXT_TYPE_NAME_EXECUTABLE, game::data::FileExtensionType::Executable },
-			{ EXT_TYPE_NAME_DOCUMENT,   game::data::FileExtensionType::Document   },
-			{ EXT_TYPE_NAME_IMAGE,      game::data::FileExtensionType::Image      },
-			{ EXT_TYPE_NAME_AUDIO,      game::data::FileExtensionType::Audio      },
-			{ EXT_TYPE_NAME_ARCHIVE,    game::data::FileExtensionType::Archive    },
-			{ EXT_TYPE_NAME_UNKNOWN,    game::data::FileExtensionType::Unknown    },
+		// extensionBonus.json の値から説明文を生成する（C++ が正とする）
+		struct Entry
+		{
+			const char* m_key;
+			core::data::FileExtensionType m_type;
+		};
+		constexpr Entry ENTRIES[] = {
+			{ EXT_TYPE_NAME_EXECUTABLE, core::data::FileExtensionType::Executable },
+			{ EXT_TYPE_NAME_DOCUMENT, core::data::FileExtensionType::Document },
+			{ EXT_TYPE_NAME_IMAGE, core::data::FileExtensionType::Image },
+			{ EXT_TYPE_NAME_AUDIO, core::data::FileExtensionType::Audio },
+			{ EXT_TYPE_NAME_ARCHIVE, core::data::FileExtensionType::Archive },
+			{ EXT_TYPE_NAME_UNKNOWN, core::data::FileExtensionType::Unknown },
 		};
 
 		auto fmt = [](float v) -> std::string {
@@ -179,8 +179,9 @@ namespace platform::window::select
 			return oss.str();
 		};
 
-		auto describe = [&](game::data::FileExtensionType t) -> std::string {
-			auto b = game::utility::ExtensionBonusCalculator::calculate(t);
+		auto describe = [&](core::data::FileExtensionType t) -> std::string
+		{
+			const auto& b = m_resourceManager.getExtensionBonus(t);
 			std::string result{};
 			auto append = [&](const char* label, float val) {
 				if (val == 0.0f) return;
@@ -202,10 +203,17 @@ namespace platform::window::select
 			nlohmann::json resp;
 			resp[platform::window::WindowConstants::JSON_KEY_TYPE]  = platform::window::WindowConstants::MESSAGE_TYPE_BONUS_INFO;
 			resp[platform::window::WindowConstants::JSON_KEY_DESCRIPTIONS] = nlohmann::json::object();
-			for (const auto& e : entries)
+			for (const auto& e : ENTRIES)
 				resp[platform::window::WindowConstants::JSON_KEY_DESCRIPTIONS][e.m_key] = describe(e.m_type);
 			m_webView.postMessage(resp.dump());
 		}
-		catch (...) {}
+		catch (const std::exception& e)
+		{
+			core::log::error("FileSelectWindow::sendBonusInfo: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("FileSelectWindow::sendBonusInfo: 不明な例外が発生しました");
+		}
 	}
 } // namespace platform::window::select

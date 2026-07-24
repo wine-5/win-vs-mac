@@ -84,10 +84,11 @@ namespace platform::webview
         MessageCallback m_onMessage{}; // JS -> C++でメッセージを受信したときに呼ぶコールバック
         bool m_ready{false};
         std::vector<std::wstring> m_pendingMessages{}; // m_readyがfalseの時の間に送信を試みたメッセージを一時的にためておくキュー
-        EventRegistrationToken    m_webMessageToken{}; // JSメッセージ受信ハンドラの登録トークンで、デストラクタで解除するために
-        EventRegistrationToken    m_navToken{};        // ナビゲーション完了ハンドラの登録トークン
+		// 各ハンドラの登録トークン。どちらも初期化直後に登録し、デストラクタで解除する
+		EventRegistrationToken m_webMessageToken{}; // JSメッセージ受信ハンドラ
+		EventRegistrationToken m_navToken{};        // ナビゲーション完了ハンドラ
 
-        HRESULT onControllerCreated(HRESULT result, ICoreWebView2Controller* controller,
+		HRESULT onControllerCreated(HRESULT result, ICoreWebView2Controller* controller,
             HWND parentHwnd, const std::wstring& htmlPath) noexcept;       // コントローラーとWebViewを保存して、サイズ設定・ハンドラ登録・ナビゲーション開始を行う
         void setupVirtualHostMappings(ICoreWebView2_3* webview3) noexcept; // ローカルフォルダを仮想ホスト名に紐づける。HTTPS経由でローカルファイルにアクセスできるようにする
         void registerMessageHandler(ICoreWebView2* webview) noexcept;      // JS -> C++のメッセージ受信イベントハンドラを受信する

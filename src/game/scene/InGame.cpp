@@ -2,73 +2,73 @@
 
 /* core層 */
 #include "core/interface/ILogger.h"
+#include "core/utility/Log.h"
 #include "core/interface/IEffectFactory.h"
 #include "core/interface/IAudioManager.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
-#include "core/constant/JobType.h"
 #include "core/constant/SeType.h"
 #include "core/data/ResultData.h"
 /* game層 */
 #include "game/factory/FactoryInitializer.h"
-#include "game/system/InputSystem.h"
-#include "game/system/MoveSystem.h"
-#include "game/system/PhysicsSystem.h"
-#include "game/component/TransformComponent.h"
+#include "game/system/movement/InputSystem.h"
+#include "game/system/movement/MoveSystem.h"
+#include "game/system/movement/PhysicsSystem.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/actor/Player.h"
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
-#include "game/component/RenderComponent.h"
-#include "game/component/HealthComponent.h"
-#include "game/component/HitEffectComponent.h"
-#include "game/system/AnimationSystem.h"
-#include "game/system/CollisionSystem.h"
-#include "game/system/HitEffectSystem.h"
-#include "game/system/EnemyDeathSystem.h"
+#include "game/component/visual/RenderComponent.h"
+#include "game/component/combat/HealthComponent.h"
+#include "game/component/visual/HitEffectComponent.h"
+#include "game/system/visual/AnimationSystem.h"
+#include "game/system/combat/CollisionSystem.h"
+#include "game/system/visual/HitEffectSystem.h"
+#include "game/system/combat/EnemyDeathSystem.h"
 #include "game/system/ai/DetectionSystem.h"
-#include "game/system/DetectionAlertVisualsSystem.h"
-#include "game/system/AttackTelegraphVisualsSystem.h"
-#include "game/system/TelegraphVisualsSystem.h"
-#include "game/system/EffectSystem.h"
+#include "game/system/visual/DetectionAlertVisualsSystem.h"
+#include "game/system/visual/AttackTelegraphVisualsSystem.h"
+#include "game/system/visual/TelegraphVisualsSystem.h"
+#include "game/system/visual/EffectSystem.h"
 #include "core/interface/IEffectFactory.h"
-#include "game/system/AttackSystem.h"
-#include "game/component/ColliderComponent.h"
-#include "game/component/AttackComponent.h"
+#include "game/system/combat/AttackSystem.h"
+#include "game/component/combat/ColliderComponent.h"
+#include "game/component/combat/AttackComponent.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/AnimationId.h"
 #include "game/constant/ProjectileId.h"
 #include "game/constant/EnemyType.h"
+#include "game/component/EnemyTypeComponent.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
 #include "game/system/ai/MeleeChaseAISystem.h"
 #include "game/system/ai/RangeKeepAISystem.h"
 #include "game/system/ai/EnemyRangedAttackSystem.h"
 #include "game/system/ai/MacAISystem.h"
-#include "game/component/AIComponent.h"
+#include "game/component/ai/AIComponent.h"
 #include "game/component/ai/MeleeChaseAIComponent.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/MacAIComponent.h"
-#include "game/system/CameraSystem.h"
-#include "game/system/DebugCameraSystem.h" // DEBUG: フリーカメラ（リリース時に削除）
-#include "game/component/CameraComponent.h"
-#include "game/system/TargetingSystem.h"
-#include "game/component/AimComponent.h"
-#include "game/system/ProjectileSystem.h"
-#include "game/system/ProjectileReflectSystem.h"
-#include "game/system/PlayerRangedAttackSystem.h"
-#include "game/system/ProjectileWindowSystem.h"
-#include "game/system/PlayerChargeVisualsSystem.h"
-#include "game/system/ChargeZoomSystem.h"
-#include "game/system/DamageShakeSystem.h"
-#include "game/system/MacAwakenEffectSystem.h"
+#include "game/system/camera/CameraSystem.h"
+#include "game/system/camera/DebugCameraSystem.h" // DEBUG: フリーカメラ（リリース時に削除）
+#include "game/component/camera/CameraComponent.h"
+#include "game/system/combat/TargetingSystem.h"
+#include "game/component/combat/AimComponent.h"
+#include "game/system/combat/ProjectileSystem.h"
+#include "game/system/combat/ProjectileReflectSystem.h"
+#include "game/system/combat/PlayerRangedAttackSystem.h"
+#include "game/system/combat/ProjectileWindowSystem.h"
+#include "game/system/visual/PlayerChargeVisualsSystem.h"
+#include "game/system/camera/ChargeZoomSystem.h"
+#include "game/system/camera/DamageShakeSystem.h"
+#include "game/system/visual/MacAwakenEffectSystem.h"
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
 #include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
 #include "core/interface/IWindowFactory.h"
 #include "game/event/InGameEvents.h"
-#include "game/utility/ExtensionBonusCalculator.h"
 
 /* 標準のインクルード */
 #include <cassert>
@@ -78,6 +78,85 @@
 #include <vector>
 #include <string_view>
 #include <utility>
+
+namespace
+{
+	/**
+	 * @brief 弾の当たり判定半径を決める
+	 *
+	 * projectileData.json の radius が 0 ならモデル実寸から自動計算し、0以外ならその値を使う。
+	 * @param resourceManager リソース管理インターフェース
+	 * @param meta 弾のメタデータ
+	 * @param modelHandle 弾のモデルハンドル
+	 * @return 当たり判定半径
+	 */
+	float resolveProjectileRadius(core::iface::IResourceManager& resourceManager,
+	    const core::data::ProjectileMetadata& meta, int modelHandle)
+	{
+		return meta.m_radius > 0.0f
+		           ? meta.m_radius
+		           : resourceManager.computeBoundingRadius(modelHandle, meta.m_scale);
+	}
+
+	/** @brief Safariが投げるタブ弾の見た目一式 */
+	struct TabProjectileSetup
+	{
+		core::data::ProjectileMetadata m_meta{};
+		std::vector<game::system::ai::RangedProjectileVisual> m_visuals{};
+	};
+
+	/**
+	 * @brief タブ弾（3種ランダム）のモデルと当たり判定半径を解決する
+	 * @param resourceManager リソース管理インターフェース
+	 * @return 解決済みのメタデータと見た目一覧
+	 */
+	TabProjectileSetup buildTabProjectileSetup(core::iface::IResourceManager& resourceManager)
+	{
+		using namespace game::constant;
+
+		TabProjectileSetup setup{};
+		setup.m_meta = resourceManager.getProjectileMetadata(projectile_id::ENEMY_SAFARI_TAB);
+
+		constexpr std::array<std::string_view, 3> TAB_MODEL_IDS{
+			model_id::TAB_STORAGE_FULL,
+			model_id::TAB_SAFARI_ERROR,
+			model_id::TAB_XCODE_BUILDING
+		};
+
+		setup.m_visuals.reserve(TAB_MODEL_IDS.size());
+		for (const auto modelId : TAB_MODEL_IDS)
+		{
+			const int handle{ resourceManager.loadModelById(modelId) };
+			setup.m_visuals.push_back({ handle, resolveProjectileRadius(resourceManager, setup.m_meta, handle) });
+		}
+		return setup;
+	}
+
+	/** @brief ボスが投げるレインボー弾の見た目一式 */
+	struct RainbowSetup
+	{
+		core::data::ProjectileMetadata m_meta{};
+		int m_handle{ -1 };
+		float m_radius{ 0.0f };
+		core::Vector3 m_center{};
+	};
+
+	/**
+	 * @brief レインボー弾のモデル・半径・見た目中心を解決する
+	 * @param resourceManager リソース管理インターフェース
+	 * @return 解決済みの設定
+	 */
+	RainbowSetup buildRainbowSetup(core::iface::IResourceManager& resourceManager)
+	{
+		RainbowSetup setup{};
+		setup.m_meta = resourceManager.getProjectileMetadata(game::constant::projectile_id::MAC_RAINBOW);
+		setup.m_handle = resourceManager.loadModelById(game::constant::model_id::MAC_RAINBOW_WHEEL);
+		setup.m_radius = resolveProjectileRadius(resourceManager, setup.m_meta, setup.m_handle);
+		// モデル原点が見た目の中心とズレていると回転で円軌道を描くため、中心を求めて逆補正する
+		setup.m_center = resourceManager.computeBoundingCenter(setup.m_handle);
+		return setup;
+	}
+} // namespace
 
 namespace game::scene
 {
@@ -96,11 +175,12 @@ namespace game::scene
 	    , m_gameManager{ gameManager }
 	    , m_pauseManager{ pauseManager }
 	    , m_fileEquipmentData{ gameManager.getFileEquipmentData() }
+	    , m_effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() }
 	    , m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }
 	    , m_enemySpawner{ m_factoryManager, m_componentManager, m_resourceManager, m_eventBus }
 	    , m_projectileFactory{ m_entityManager, m_componentManager }
-	    , m_playerData{ game::data::PlayerData::fromMetadata(m_resourceManager.getMetadata(constant::model_id::PLAYER).value()) }
-	    , m_effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() }
+	    // 実データは loadResources() で設定する（コライダー自動計算がモデルロード後に確定するため）
+	    , m_playerData{}
 	    , m_view{ m_componentManager, m_renderer,
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
@@ -152,10 +232,9 @@ namespace game::scene
 		auto playerMeta{ m_resourceManager.getMetadata(constant::model_id::PLAYER) };
 		if (!playerMeta.has_value())
 		{
-			LOG("ERROR: Playerのメタデータが見つかりません");
+			core::log::info("ERROR: Playerのメタデータが見つかりません");
 			throw std::runtime_error("Playerのメタデータの読み込みに失敗しました");
 		}
-		assert(playerMeta.has_value() && "Playerのメタデータが見つかりません");
 		m_playerData = game::data::PlayerData::fromMetadata(playerMeta.value());
 	}
 
@@ -163,23 +242,13 @@ namespace game::scene
 	{
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager);
 
-		// 職業パラメータをPlayerDataに反映
-		const auto& jobSelectionData{ m_gameManager.getJobSelectionData() };
-		if (jobSelectionData.hasJobSelected())
-		{
-			const auto jobType{ jobSelectionData.getSelectedJobType() };
-			const auto jobInfo{ m_resourceManager.getJobInfo(jobType) };
-			m_playerData.applyJobParameters(jobInfo.m_hp, jobInfo.m_atk, jobInfo.m_def, jobInfo.m_spd);
-		}
-
 		// 拡張子ボーナスをPlayerDataに反映
 		for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
 		{
 			if (m_fileEquipmentData.hasSelection(i))
 			{
-				const auto bonus{ utility::ExtensionBonusCalculator::calculate(
-					m_fileEquipmentData.getExtensionType(i)) };
-				m_playerData.applyExtensionBonus(bonus);
+				m_playerData.applyExtensionBonus(
+				    m_resourceManager.getExtensionBonus(m_fileEquipmentData.getExtensionType(i)));
 			}
 		}
 
@@ -189,7 +258,7 @@ namespace game::scene
 		// プレイヤー専用コンポーネント（CameraComponent、AimComponent、PlayerChargeComponent）
 		// は Player.cpp のコンストラクタで初期化済
 
-		m_groundId = initializer.initializeGround();
+		initializer.initializeGround();
 
 		// 生成される敵の追跡対象をプレイヤーに設定してからスポーンする
 		m_enemySpawner.setTargetEntity(core::ecs::Entity(m_playerId));
@@ -205,109 +274,75 @@ namespace game::scene
 	void InGame::setupSystems()
 	{
 		// システム登録
-		m_systemManager.registerSystem<game::system::InputSystem>(m_componentManager, m_playerId, m_inputProvider, m_gameManager);
+		m_systemManager.registerSystem<game::system::movement::InputSystem>(m_componentManager, m_playerId, m_inputProvider, m_gameManager);
 		// カメラ演出（Zoom/Shake）はCameraSystemより前に走らせ、合成結果をCameraEffectComponentへ書いておく
-		m_systemManager.registerSystem<game::system::ChargeZoomSystem>(m_componentManager, m_playerId);
-		m_systemManager.registerSystem<game::system::DamageShakeSystem>(m_componentManager, m_eventBus, m_playerId);
+		m_systemManager.registerSystem<game::system::camera::ChargeZoomSystem>(m_componentManager, m_playerId);
+		m_systemManager.registerSystem<game::system::camera::DamageShakeSystem>(m_componentManager, m_eventBus, m_playerId);
 		// ボス覚醒演出（ズーム・シェイク・赤ビネット）。CameraSystemより前に走らせて演出チャンネルを書く。
 		// 描画（赤ビネット）はInGameViewの描画フェーズから呼ぶためポインタを渡す
-		auto* macAwakenEffect{ m_systemManager.registerSystem<game::system::MacAwakenEffectSystem>(
+		auto* macAwakenEffect{ m_systemManager.registerSystem<game::system::visual::MacAwakenEffectSystem>(
 			m_componentManager, m_eventBus,
 			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
 			m_playerId) };
 		m_view.setMacAwakenEffectSystem(macAwakenEffect);
 		// カメラはMoveSystemより前に更新し、最新のyawで移動方向を計算させる
-		m_systemManager.registerSystem<game::system::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera, m_gameManager);
+		m_systemManager.registerSystem<game::system::camera::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera, m_gameManager);
 		// DEBUG: デバッグモード時のフリーカメラ。CameraSystem直後・MoveSystemより前に走らせる（リリース時に削除）
 		// シーンビュー凍結中に単独更新するためポインタも保持する
-		m_debugCameraSystem = m_systemManager.registerSystem<game::system::DebugCameraSystem>(
+		m_debugCameraSystem = m_systemManager.registerSystem<game::system::camera::DebugCameraSystem>(
 		    m_componentManager, m_playerId, m_inputProvider, m_camera, m_gameManager, m_pauseManager);
-		m_systemManager.registerSystem<game::system::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
+		m_systemManager.registerSystem<game::system::movement::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
 		// 照準の敵捕捉判定（カメラ更新後・描画前に走らせる）
-		m_systemManager.registerSystem<game::system::TargetingSystem>(m_componentManager);
+		m_systemManager.registerSystem<game::system::combat::TargetingSystem>(m_componentManager);
 		// 発射入力→弾生成（生成はPhysicsSystemより前でよい）。弾定義はjsonから取得する
 		const auto& projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
-		m_systemManager.registerSystem<game::system::PlayerRangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory,
+		m_systemManager.registerSystem<game::system::combat::PlayerRangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory,
 		    projectileMeta);
-		m_systemManager.registerSystem<game::system::PhysicsSystem>(m_componentManager);
+		m_systemManager.registerSystem<game::system::movement::PhysicsSystem>(m_componentManager);
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
-		m_systemManager.registerSystem<game::system::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);
+		m_systemManager.registerSystem<game::system::combat::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);
 		// 敵弾をプレイヤーのWindow弾で跳ね返す（移動後・ダメージ判定AttackSystemより前に判定する）
-		m_systemManager.registerSystem<game::system::ProjectileReflectSystem>(m_componentManager);
+		m_systemManager.registerSystem<game::system::combat::ProjectileReflectSystem>(m_componentManager);
 
 		// 弾の見た目として実OSウィンドウを追従させる（移動後の位置を射影するためPhysicsSystemより後）
 		auto* windowFactory{ core::base::ServiceLocator::get<core::iface::IWindowFactory>() };
 		if (windowFactory)
 			m_projectileWindowManager = windowFactory->createProjectileWindowManager();
 		if (m_projectileWindowManager)
-			m_systemManager.registerSystem<game::system::ProjectileWindowSystem>(m_componentManager, m_renderer, *m_projectileWindowManager);
-		m_systemManager.registerSystem<game::system::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
+			m_systemManager.registerSystem<game::system::combat::ProjectileWindowSystem>(m_componentManager, m_renderer, *m_projectileWindowManager);
+		m_systemManager.registerSystem<game::system::visual::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
 
-		m_systemManager.registerSystem<game::system::CollisionSystem>(m_componentManager);
+		m_systemManager.registerSystem<game::system::combat::CollisionSystem>(m_componentManager);
 		// AI行動分割：近接追跡型敵を駆動
 		m_systemManager.registerSystem<game::system::ai::MeleeChaseAISystem>(m_componentManager);
 		// AI行動分割：遠距離維持型敵を駆動
 		m_systemManager.registerSystem<game::system::ai::RangeKeepAISystem>(m_componentManager);
-		// 遠距離維持型敵の弾発射（Safariのタブ投擲）。見た目は3種のタブモデルからランダムに選ぶ。
-		// 当たり判定半径は projectileData.json の radius が 0 ならモデル実寸から自動計算、0以外なら手動指定
-		const auto& tabProjectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::ENEMY_SAFARI_TAB) };
-		const std::array<std::string_view, 3> tabModelIds{
-			constant::model_id::TAB_STORAGE_FULL,
-			constant::model_id::TAB_SAFARI_ERROR,
-			constant::model_id::TAB_XCODE_BUILDING
-		};
-		std::vector<game::system::ai::RangedProjectileVisual> tabVisuals{};
-		for (const auto tabModelId : tabModelIds)
-		{
-			const int handle{ m_resourceManager.loadModelById(tabModelId) };
-			const float radius{ tabProjectileMeta.m_radius > 0.0f
-				                    ? tabProjectileMeta.m_radius
-				                    : m_resourceManager.computeBoundingRadius(handle, tabProjectileMeta.m_scale) };
-			tabVisuals.push_back({ handle, radius });
-		}
+		// 遠距離維持型敵の弾発射（Safariのタブ投擲）。見た目は3種のタブモデルからランダムに選ぶ
+		auto tabSetup{ buildTabProjectileSetup(m_resourceManager) };
 		m_systemManager.registerSystem<game::system::ai::EnemyRangedAttackSystem>(
-		    m_componentManager, m_projectileFactory, tabProjectileMeta, std::move(tabVisuals));
+		    m_componentManager, m_projectileFactory, tabSetup.m_meta, std::move(tabSetup.m_visuals));
 
-		// ボス（Mac）のFSM駆動。遠距離はレインボー弾を扇状に、召喚はEnemySpawner経由で行う。
-		// レインボーの当たり判定半径は projectileData.json の radius が 0 ならモデル実寸から自動計算
-		const auto& rainbowMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::MAC_RAINBOW) };
-		const int rainbowHandle{ m_resourceManager.loadModelById(constant::model_id::MAC_RAINBOW_WHEEL) };
-		const float rainbowRadius{ rainbowMeta.m_radius > 0.0f
-			                           ? rainbowMeta.m_radius
-			                           : m_resourceManager.computeBoundingRadius(rainbowHandle, rainbowMeta.m_scale) };
-		// モデル原点が見た目の中心とズレていると回転で円軌道を描くため、中心を求めて逆補正する
-		const core::Vector3 rainbowCenter{ m_resourceManager.computeBoundingCenter(rainbowHandle) };
-
+		// ボス（Mac）のFSM駆動。遠距離はレインボー弾を扇状に、召喚はEnemySpawner経由で行う
+		const auto rainbow{ buildRainbowSetup(m_resourceManager) };
 		m_systemManager.registerSystem<game::system::ai::MacAISystem>(
 		    m_componentManager, m_eventBus, m_projectileFactory, m_enemySpawner,
-		    rainbowMeta, rainbowHandle, rainbowRadius, rainbowCenter);
+		    rainbow.m_meta, rainbow.m_handle, rainbow.m_radius, rainbow.m_center);
 
 		// 敵がプレイヤーを発見した瞬間を検知（全敵共通）。発見演出のトリガーになる
 		m_systemManager.registerSystem<game::system::ai::DetectionSystem>(m_componentManager, m_eventBus);
 
-		// ジョブに応じた攻撃SEタイプを決定してAttackSystemに渡す
-		core::constant::SeType playerAttackSeType{ core::constant::SeType::None };
-		const auto& jobData{ m_gameManager.getJobSelectionData() };
-		if (jobData.hasJobSelected())
-		{
-			switch (jobData.getSelectedJobType())
-			{
-			case core::constant::JobType::Warrior: playerAttackSeType = core::constant::SeType::AttackWarrior; break;
-			case core::constant::JobType::Mage:    playerAttackSeType = core::constant::SeType::AttackFire;    break;
-			case core::constant::JobType::Ninja:   playerAttackSeType = core::constant::SeType::AttackNinja;   break;
-			}
-		}
-		m_systemManager.registerSystem<game::system::AttackSystem>(m_componentManager, m_eventBus, playerAttackSeType);
-		m_systemManager.registerSystem<game::system::HitEffectSystem>(m_componentManager, m_eventBus);
+		m_systemManager.registerSystem<game::system::combat::AttackSystem>(
+		    m_componentManager, m_eventBus, core::constant::SeType::AttackPlayer);
+		m_systemManager.registerSystem<game::system::visual::HitEffectSystem>(m_componentManager, m_eventBus);
 		// 死亡した敵の後始末（赤化＋ディゾルブ演出→Entity破棄＋モデルハンドルのプール返却）
-		m_systemManager.registerSystem<game::system::EnemyDeathSystem>(m_componentManager, m_entityManager, m_eventBus, m_enemySpawner, m_renderer);
+		m_systemManager.registerSystem<game::system::combat::EnemyDeathSystem>(m_componentManager, m_entityManager, m_eventBus, m_enemySpawner, m_renderer);
 
-		m_systemManager.registerSystem<game::system::EffectSystem>(m_componentManager, m_eventBus, m_effectFactory);
+		m_systemManager.registerSystem<game::system::visual::EffectSystem>(m_componentManager, m_eventBus, m_effectFactory);
 
 		// プレイヤーの溜め攻撃の画面演出（集中線）。描画内容はSystemが持ち、
 		// InGameViewには描画フェーズで呼び出させるためにポインタを渡す
-		auto* chargeVisuals{ m_systemManager.registerSystem<game::system::PlayerChargeVisualsSystem>(
+		auto* chargeVisuals{ m_systemManager.registerSystem<game::system::visual::PlayerChargeVisualsSystem>(
 			m_componentManager,
 			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
@@ -315,7 +350,7 @@ namespace game::scene
 		m_view.setPlayerChargeVisualsSystem(chargeVisuals);
 
 		// 敵の発見演出（頭上の通知バッジ）。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
-		auto* detectionAlert{ m_systemManager.registerSystem<game::system::DetectionAlertVisualsSystem>(
+		auto* detectionAlert{ m_systemManager.registerSystem<game::system::visual::DetectionAlertVisualsSystem>(
 			m_componentManager,
 			m_eventBus,
 			m_renderer,
@@ -325,12 +360,12 @@ namespace game::scene
 		m_view.setDetectionAlertVisualsSystem(detectionAlert);
 
 		// 攻撃予兆（地面の攻撃範囲サークル）。描画内容はSystemが持ち、Viewが3D描画フェーズで呼ぶ
-		auto* attackTelegraph{ m_systemManager.registerSystem<game::system::AttackTelegraphVisualsSystem>(
+		auto* attackTelegraph{ m_systemManager.registerSystem<game::system::visual::AttackTelegraphVisualsSystem>(
 			m_componentManager, m_renderer) };
 		m_view.setAttackTelegraphVisualsSystem(attackTelegraph);
 
 		// 汎用の攻撃予兆（TelegraphComponent駆動：円・扇）。ボスの溜め攻撃などが使う
-		auto* telegraph{ m_systemManager.registerSystem<game::system::TelegraphVisualsSystem>(
+		auto* telegraph{ m_systemManager.registerSystem<game::system::visual::TelegraphVisualsSystem>(
 			m_componentManager, m_renderer) };
 		m_view.setTelegraphVisualsSystem(telegraph);
 	}
@@ -338,18 +373,17 @@ namespace game::scene
 	void InGame::setupEvents()
 	{
 		// Hitイベントの購読
-		m_eventBus.subscribe<event::AttackHitEvent>([this](const event::AttackHitEvent& e)
-			{
+		m_subscriptions.push_back(m_eventBus.subscribe<event::AttackHitEvent>([this](const event::AttackHitEvent& e)
+		    {
 				// 被ダメージ追跡（プレイヤーが攻撃を受けた場合）
 				if (e.m_targetId == m_playerId)
-					m_totalDamageTaken += e.m_damage;
-			});
-			// プレイヤー死亡イベントの購読
-				m_eventBus.subscribe<event::PlayerDeadEvent>([this](const event::PlayerDeadEvent&)
-					{
-						if (m_componentManager.has<component::RenderComponent>(m_playerId))
+					m_totalDamageTaken += e.m_damage; }));
+		// プレイヤー死亡イベントの購読
+		m_subscriptions.push_back(m_eventBus.subscribe<event::PlayerDeadEvent>([this](const event::PlayerDeadEvent&)
+		    {
+						if (m_componentManager.has<component::visual::RenderComponent>(m_playerId))
 						{
-							auto& render{ m_componentManager.get<component::RenderComponent>(m_playerId) };
+							auto& render{ m_componentManager.get<component::visual::RenderComponent>(m_playerId) };
 							render.m_isVisible = false;
 						}
 
@@ -357,30 +391,25 @@ namespace game::scene
 			            // メニュー操作用にカーソルを戻してからシーンを切り替える
 			            m_inputProvider.setMouseCursorVisible(true);
 			            auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
-						sceneManager->changeScene(game::scene::SceneType::Result); });
+						sceneManager->changeScene(game::scene::SceneType::Result); }));
 
-				// 敵の死亡イベントの購読
-		        m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
-		            {
+		// 敵の死亡イベントの購読
+		m_subscriptions.push_back(m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
+		    {
 						// 倒した敵の種類をログに出す（動作確認用）。
-						// 種別専用の判定コンポーネント（各SystemがAI行動の分岐に使っているもの）の
-						// 有無で判定する。専用コンポーネントを新設せず既存の設計をそのまま流用する
+						// 敵種はスポーン時に確定した EnemyTypeComponent を唯一の情報源にする
 						std::string_view enemyTypeName{ "Unknown" };
-			            if (m_componentManager.has<component::ai::MacAIComponent>(e.m_entityId))
-				            enemyTypeName = "Mac";
-						else if (m_componentManager.has<component::ai::RangeKeepAIComponent>(e.m_entityId))
-							enemyTypeName = "Safari";
-						else if (m_componentManager.has<component::ai::MeleeChaseAIComponent>(e.m_entityId))
-							enemyTypeName = "Xcode";
-						LOG("敵を撃破: {} (EntityId={})", enemyTypeName, static_cast<unsigned int>(e.m_entityId));
+			            if (const auto* type{ m_componentManager.tryGet<component::EnemyTypeComponent>(e.m_entityId) })
+				            enemyTypeName = constant::toEnemyTypeName(type->m_type);
+			            core::log::info("敵を撃破: {} (EntityId={})", enemyTypeName, e.m_entityId);
 
 			            // モデルはここで非表示にしない。EnemyDeathSystemが赤化＋ディゾルブ演出を
 			            // 進めながら表示し続け、演出完了時にEntityごと破棄する
 
 			            // AIを停止する。これをしないと死亡後も移動や弾発射が続き、
 			            // 「まだSafariがタブをPlayerに投げてくる」状態になる
-			            if (m_componentManager.has<component::AIComponent>(e.m_entityId))
-				            m_componentManager.get<component::AIComponent>(e.m_entityId).m_isActive = false;
+			            if (m_componentManager.has<component::ai::AIComponent>(e.m_entityId))
+				            m_componentManager.get<component::ai::AIComponent>(e.m_entityId).m_isActive = false;
 
 			            m_killCount++;
 
@@ -392,7 +421,7 @@ namespace game::scene
 				            m_inputProvider.setMouseCursorVisible(true);
 				            auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 							sceneManager->changeScene(game::scene::SceneType::Result);
-						} });
+						} }));
 	}
 
 	void InGame::update(float deltaTime)
@@ -406,9 +435,9 @@ namespace game::scene
 		{
 			m_gameManager.toggleDebugMode();
 			if (m_gameManager.isDebugMode())
-				LOG("DEBUG: デバッグモードON");
+				core::log::info("DEBUG: デバッグモードON");
 			else
-				LOG("DEBUG: デバッグモードOFF");
+				core::log::info("DEBUG: デバッグモードOFF");
 		}
 
 		// DEBUG: F2キーでシーンビュー（時間停止＋フリーカメラ）のON/OFFを切り替える（リリース時に削除）
@@ -416,9 +445,9 @@ namespace game::scene
 		{
 			m_pauseManager.toggle(PauseReason::DebugSceneView);
 			if (m_pauseManager.isPausedBy(PauseReason::DebugSceneView))
-				LOG("DEBUG: シーンビューON（時間停止）");
+				core::log::info("DEBUG: シーンビューON（時間停止）");
 			else
-				LOG("DEBUG: シーンビューOFF");
+				core::log::info("DEBUG: シーンビューOFF");
 		}
 
 		// DEBUG: シーンビュー凍結中はゲームロジックを止め、フリーカメラだけを更新する（リリース時に削除）
@@ -436,9 +465,9 @@ namespace game::scene
 		// DEBUG: Tキーでプレイヤー位置にテストエフェクト（Enemy_Spawn）を再生する（テスト後に削除）
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::T))
 		{
-			const auto& transform{ m_componentManager.get<component::TransformComponent>(m_playerId) };
+			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_playerId) };
 			m_effectFactory.play(core::constant::EffectType::Enemy_HitWindow, transform.m_position);
-			LOG("エフェクトが再生");
+			core::log::info("エフェクトが再生");
 		}
 
 		// フレーム最後に入力状態を更新
@@ -449,7 +478,7 @@ namespace game::scene
 	{
 		// 描画は InGameView へ委譲する。ボスが召喚する雑魚も実行時に増えるため、
 		// スポーン時のスナップショットではなく EnemyFactory が持つ最新の敵一覧を渡す
-		m_view.draw(m_playerId, m_groundId, m_factoryManager.getEnemyFactory().getEnemyIds());
+		m_view.draw(m_playerId);
 	}
 
 	void InGame::saveResultData	(bool isVictory) noexcept

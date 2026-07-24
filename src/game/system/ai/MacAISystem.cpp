@@ -1,10 +1,10 @@
-#include "MacAISystem.h"
-#include "game/component/AIComponent.h"
-#include "game/component/VelocityComponent.h"
-#include "game/component/AttackComponent.h"
-#include "game/component/HealthComponent.h"
-#include "game/component/AnimationComponent.h"
-#include "game/component/TelegraphComponent.h"
+﻿#include "MacAISystem.h"
+#include "game/component/ai/AIComponent.h"
+#include "game/component/movement/VelocityComponent.h"
+#include "game/component/combat/AttackComponent.h"
+#include "game/component/combat/HealthComponent.h"
+#include "game/component/visual/AnimationComponent.h"
+#include "game/component/combat/TelegraphComponent.h"
 #include "game/constant/AnimationState.h"
 #include "game/constant/Tag.h"
 #include "game/constant/EnemyType.h"
@@ -13,28 +13,17 @@
 #include <cmath>
 #include <utility>
 #include <algorithm>
-#include <numbers>
+#include "core/utility/MathConstants.h"
 
 namespace
 {
-	constexpr float PI{ std::numbers::pi_v<float> };
-	constexpr float DEG_TO_RAD{ PI / 180.0f };
 
-	// 各アクションの再生ロック時間（秒）。この間は次の行動を抽選しない（アニメ・演出の尺）
-	constexpr float MELEE_LOCK{ 1.0f };
-	constexpr float RANGED_LOCK{ 1.2f };
-	constexpr float SUMMON_LOCK{ 1.2f };
-	constexpr float NOVA_LOCK{ 1.4f };
-	// 覚醒演出の停止時間。演出タイムラインの合計（MacAwakenTiming.h）と共有し、ズレを防ぐ
+	// 覚醒演出の停止時間。演出タイムラインの合計（MacAwakenTiming.h）から導出する値なので
+	// データ化せずここに置く（演出の尺とズレると覚醒中に動き出してしまう）
 	constexpr float PHASE_TRANSITION_LOCK{ game::constant::mac_awaken::TOTAL_TIME };
 
-	// 攻撃前の溜め（予兆表示）の長さ（秒）。満ちきると発動する。溜め中ボスは静止し中断しない
-	constexpr float MELEE_WINDUP{ 0.6f };
-	constexpr float RANGED_WINDUP{ 0.9f };
-	constexpr float SUMMON_WINDUP{ 0.7f };
-	constexpr float NOVA_WINDUP{ 1.1f }; // 全方位ノヴァは大技なので長めに溜める
-	// レインボー扇の予兆として床に出す扇の半径（弾の到達範囲の見せ方）
-	constexpr float RANGED_TELEGRAPH_RANGE{ 800.0f };
+	// 各アクションの溜め・硬直の長さと予兆の半径は macData.json の "mac.actions" から読む
+	// （MacActionTiming）。戦闘のテンポ調整で頻繁に触るためソースに持たせない
 } // namespace
 
 namespace game::system::ai
@@ -71,11 +60,11 @@ namespace game::system::ai
 			if (mac.m_config.m_phase1.m_actionInterval <= 0.0f)
 				continue;
 
-			auto& health{ m_componentManager.get<component::HealthComponent>(entityId) };
-			auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
-			auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+			auto& health{ m_componentManager.get<component::combat::HealthComponent>(entityId) };
+			auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
+			auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 
-			const bool hasVelocity{ m_componentManager.has<component::VelocityComponent>(entityId) };
+			const bool hasVelocity{ m_componentManager.has<component::movement::VelocityComponent>(entityId) };
 
 			// --- 死亡 ---
 			if (health.m_isDead || mac.m_state == MacState::Dead)
@@ -83,8 +72,8 @@ namespace game::system::ai
 				mac.m_state = MacState::Dead;
 				if (hasVelocity)
 					stopHorizontalVelocity(entityId);
-				if (m_componentManager.has<component::AnimationComponent>(entityId))
-					m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Dying;
+				if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+					m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Dying;
 				continue;
 			}
 
@@ -113,8 +102,8 @@ namespace game::system::ai
 					health.m_isInvincible = true; // 覚醒演出中は無敵（演出終了時に解除する）
 					if (hasVelocity)
 						stopHorizontalVelocity(entityId);
-					if (m_componentManager.has<component::AnimationComponent>(entityId))
-						m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
+					if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+						m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 
 					// 覚醒演出（カメラをボスへ寄せる・シェイク・赤ビネット）のトリガー
 					m_eventBus.publish(event::MacPhaseTransitionEvent{ entityId, core::data::MacPhase::Awakened });
@@ -131,7 +120,7 @@ namespace game::system::ai
 				continue;
 			}
 
-			const auto& targetTransform{ m_componentManager.get<component::TransformComponent>(ai.m_targetEntity.getId()) };
+			const auto& targetTransform{ m_componentManager.get<component::movement::TransformComponent>(ai.m_targetEntity.getId()) };
 			core::Vector3 dir{
 				targetTransform.m_position.x - transform.m_position.x,
 				0.0f,
@@ -151,15 +140,15 @@ namespace game::system::ai
 			{
 				if (hasVelocity)
 					stopHorizontalVelocity(entityId);
-				if (m_componentManager.has<component::AnimationComponent>(entityId))
-					m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
+				if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+					m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 
 				mac.m_windupTimer -= deltaTime;
 
 				// 予兆の進行度を更新（中心はボス足元、形状・向きは溜め開始時に固定済み）
-				if (m_componentManager.has<component::TelegraphComponent>(entityId))
+				if (m_componentManager.has<component::combat::TelegraphComponent>(entityId))
 				{
-					auto& tel{ m_componentManager.get<component::TelegraphComponent>(entityId) };
+					auto& tel{ m_componentManager.get<component::combat::TelegraphComponent>(entityId) };
 					// 予兆はボスの高さではなく足元の地面（Y=0）に描く
 					tel.m_center = core::Vector3{ transform.m_position.x, 0.0f, transform.m_position.z };
 					tel.m_progress = std::clamp(1.0f - mac.m_windupTimer / mac.m_windupDuration, 0.0f, 1.0f);
@@ -173,25 +162,25 @@ namespace game::system::ai
 					{
 					case MacState::Melee:
 						performMelee(entityId);
-						mac.m_animLockTimer = MELEE_LOCK;
+						mac.m_animLockTimer = mac.m_config.m_actions.m_meleeLock;
 						break;
 					case MacState::Ranged:
 						performRanged(entityId, transform, mac.m_windupAimDir, windupPhase);
-						mac.m_animLockTimer = RANGED_LOCK;
+						mac.m_animLockTimer = mac.m_config.m_actions.m_rangedLock;
 						break;
 					case MacState::Nova:
 						performNova(entityId, transform, windupPhase);
-						mac.m_animLockTimer = NOVA_LOCK;
+						mac.m_animLockTimer = mac.m_config.m_actions.m_novaLock;
 						break;
 					case MacState::Summon:
 						performSummon(transform, windupPhase, windupPhase.m_summonMax - countAliveMinions());
-						mac.m_animLockTimer = SUMMON_LOCK;
+						mac.m_animLockTimer = mac.m_config.m_actions.m_summonLock;
 						break;
 					default:
 						break;
 					}
-					if (m_componentManager.has<component::TelegraphComponent>(entityId))
-						m_componentManager.get<component::TelegraphComponent>(entityId).m_active = false;
+					if (m_componentManager.has<component::combat::TelegraphComponent>(entityId))
+						m_componentManager.get<component::combat::TelegraphComponent>(entityId).m_active = false;
 					mac.m_state = mac.m_pendingAction;
 					mac.m_actionTimer = windupPhase.m_actionInterval;
 				}
@@ -204,8 +193,8 @@ namespace game::system::ai
 				mac.m_state = MacState::Idle;
 				if (hasVelocity)
 					stopHorizontalVelocity(entityId);
-				if (m_componentManager.has<component::AnimationComponent>(entityId))
-					m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
+				if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+					m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 				continue;
 			}
 
@@ -229,25 +218,25 @@ namespace game::system::ai
 				{
 					if (hasVelocity)
 					{
-						auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+						auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 						velocity.m_velocity.x = dir.x * phase.m_moveSpeed;
 						velocity.m_velocity.z = dir.z * phase.m_moveSpeed;
 					}
-					if (m_componentManager.has<component::AnimationComponent>(entityId))
+					if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
 					{
 						// Phase2は走り（Run）で覚醒感を出す
 						const auto moveAnim{ (mac.m_currentPhase == core::data::MacPhase::Awakened)
 							                     ? constant::AnimationState::Run
 							                     : constant::AnimationState::Walk };
-						m_componentManager.get<component::AnimationComponent>(entityId).m_requested = moveAnim;
+						m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = moveAnim;
 					}
 				}
 				else
 				{
 					if (hasVelocity)
 						stopHorizontalVelocity(entityId);
-					if (m_componentManager.has<component::AnimationComponent>(entityId))
-						m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
+					if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+						m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Idle;
 				}
 				continue;
 			}
@@ -270,36 +259,37 @@ namespace game::system::ai
 			// 溜め開始：狙いを固定し、技に応じた予兆（近接=円 / 遠距離=扇 / 召喚=円）を出す
 			mac.m_pendingAction = action;
 			mac.m_windupAimDir = dir;
-			mac.m_windupDuration = (action == MacState::Ranged)   ? RANGED_WINDUP
-			                       : (action == MacState::Summon) ? SUMMON_WINDUP
-			                       : (action == MacState::Nova)   ? NOVA_WINDUP
-			                                                      : MELEE_WINDUP;
+			const auto& actions{ mac.m_config.m_actions };
+			mac.m_windupDuration = (action == MacState::Ranged)   ? actions.m_rangedWindup
+			                       : (action == MacState::Summon) ? actions.m_summonWindup
+			                       : (action == MacState::Nova)   ? actions.m_novaWindup
+			                                                      : actions.m_meleeWindup;
 			mac.m_windupTimer = mac.m_windupDuration;
 			mac.m_state = MacState::Windup;
 
-			if (m_componentManager.has<component::TelegraphComponent>(entityId))
+			if (m_componentManager.has<component::combat::TelegraphComponent>(entityId))
 			{
-				auto& tel{ m_componentManager.get<component::TelegraphComponent>(entityId) };
+				auto& tel{ m_componentManager.get<component::combat::TelegraphComponent>(entityId) };
 				tel.m_active = true;
 				// 予兆はボスの高さではなく足元の地面（Y=0）に描く
 				tel.m_center = core::Vector3{ transform.m_position.x, 0.0f, transform.m_position.z };
 				tel.m_progress = 0.0f;
 				if (action == MacState::Ranged)
 				{
-					tel.m_shape = component::TelegraphShape::Sector;
+					tel.m_shape = component::combat::TelegraphShape::Sector;
 					tel.m_facingRad = std::atan2f(dir.z, dir.x);
-					tel.m_radius = RANGED_TELEGRAPH_RANGE;
-					tel.m_halfAngleRad = phase.m_rainbowSpreadDeg * 0.5f * DEG_TO_RAD;
+					tel.m_radius = mac.m_config.m_actions.m_rangedTelegraphRange;
+					tel.m_halfAngleRad = phase.m_rainbowSpreadDeg * 0.5f * core::utility::DEG_TO_RAD;
 				}
 				else if (action == MacState::Nova)
 				{
 					// 全方位ノヴァは全周が危険なので大きな円で予告する
-					tel.m_shape = component::TelegraphShape::Circle;
-					tel.m_radius = RANGED_TELEGRAPH_RANGE;
+					tel.m_shape = component::combat::TelegraphShape::Circle;
+					tel.m_radius = mac.m_config.m_actions.m_rangedTelegraphRange;
 				}
 				else // Melee / Summon は円（近接は攻撃レンジ、召喚は召喚半径）
 				{
-					tel.m_shape = component::TelegraphShape::Circle;
+					tel.m_shape = component::combat::TelegraphShape::Circle;
 					tel.m_radius = (action == MacState::Summon) ? phase.m_summonRadiusMax : phase.m_meleeRange;
 				}
 			}
@@ -334,22 +324,24 @@ namespace game::system::ai
 		return MacState::Nova;
 	}
 
+	// 攻撃間隔はこのFSM（フェーズごとのアクション抽選とロック時間）が唯一の管理者。
+	// そのため macData.json の attackCooldown は 0 にして AttackSystem 側のゲートを効かせない
 	void MacAISystem::performMelee(core::ecs::EntityId entityId)
 	{
-		if (m_componentManager.has<component::AttackComponent>(entityId))
-			m_componentManager.get<component::AttackComponent>(entityId).m_attackRequested = true;
-		if (m_componentManager.has<component::AnimationComponent>(entityId))
-			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack1;
+		if (m_componentManager.has<component::combat::AttackComponent>(entityId))
+			m_componentManager.get<component::combat::AttackComponent>(entityId).m_attackRequested = true;
+		if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+			m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack1;
 	}
 
-	void MacAISystem::performRanged(core::ecs::EntityId entityId, const component::TransformComponent& transform,
+	void MacAISystem::performRanged(core::ecs::EntityId entityId, const component::movement::TransformComponent& transform,
 	    const core::Vector3& dirToTarget, const core::data::MacPhaseData& phase)
 	{
 		const int count{ phase.m_rainbowCount };
 		if (count <= 0)
 			return;
 
-		const float spreadRad{ phase.m_rainbowSpreadDeg * DEG_TO_RAD };
+		const float spreadRad{ phase.m_rainbowSpreadDeg * core::utility::DEG_TO_RAD };
 
 		for (int i{ 0 }; i < count; ++i)
 		{
@@ -378,8 +370,8 @@ namespace game::system::ai
 			m_projectileFactory.spawn(origin, fanDir, config, constant::Tag::Enemy);
 		}
 
-		if (m_componentManager.has<component::AnimationComponent>(entityId))
-			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack2;
+		if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+			m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack2;
 	}
 
 	factory::ProjectileConfig MacAISystem::makeRainbowConfig(const core::data::MacPhaseData& phase) const
@@ -397,7 +389,7 @@ namespace game::system::ai
 		return config;
 	}
 
-	void MacAISystem::performNova(core::ecs::EntityId entityId, const component::TransformComponent& transform,
+	void MacAISystem::performNova(core::ecs::EntityId entityId, const component::movement::TransformComponent& transform,
 	    const core::data::MacPhaseData& phase)
 	{
 		const int count{ phase.m_novaCount };
@@ -405,7 +397,7 @@ namespace game::system::ai
 			return;
 
 		// 360度に均等な方向へ発射する（水平面）
-		const float step{ 2.0f * PI / static_cast<float>(count) };
+		const float step{ core::utility::TWO_PI / static_cast<float>(count) };
 		for (int i{ 0 }; i < count; ++i)
 		{
 			const float angle{ step * static_cast<float>(i) };
@@ -422,11 +414,11 @@ namespace game::system::ai
 			m_projectileFactory.spawn(origin, dir, config, constant::Tag::Enemy);
 		}
 
-		if (m_componentManager.has<component::AnimationComponent>(entityId))
-			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack2;
+		if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+			m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Attack2;
 	}
 
-	void MacAISystem::performSummon(const component::TransformComponent& transform,
+	void MacAISystem::performSummon(const component::movement::TransformComponent& transform,
 	    const core::data::MacPhaseData& phase, int summonSlots)
 	{
 		const int n{ std::min(phase.m_summonCount, summonSlots) };
@@ -434,7 +426,7 @@ namespace game::system::ai
 			return;
 
 		std::uniform_int_distribution<std::size_t> typeDist{ 0, phase.m_summonTypes.size() - 1 };
-		std::uniform_real_distribution<float> angleDist{ 0.0f, 2.0f * PI };
+		std::uniform_real_distribution<float> angleDist{ 0.0f, core::utility::TWO_PI };
 		std::uniform_real_distribution<float> radiusDist{ phase.m_summonRadiusMin, phase.m_summonRadiusMax };
 
 		for (int i{ 0 }; i < n; ++i)
@@ -457,24 +449,24 @@ namespace game::system::ai
 	int MacAISystem::countAliveMinions()
 	{
 		int count{ 0 };
-		auto entities{ m_componentManager.getAllEntities<component::AIComponent>() };
+		auto entities{ m_componentManager.getAllEntities<component::ai::AIComponent>() };
 		for (auto entityId : entities)
 		{
 			// ボス自身は雑魚数に含めない
 			if (m_componentManager.has<component::ai::MacAIComponent>(entityId))
 				continue;
-			if (!m_componentManager.has<component::HealthComponent>(entityId))
+			if (!m_componentManager.has<component::combat::HealthComponent>(entityId))
 				continue;
-			if (!m_componentManager.get<component::HealthComponent>(entityId).m_isDead)
+			if (!m_componentManager.get<component::combat::HealthComponent>(entityId).m_isDead)
 				++count;
 		}
 		return count;
 	}
 	void MacAISystem::stopHorizontalVelocity(core::ecs::EntityId entityId)
 	{
-		if (!m_componentManager.has<component::VelocityComponent>(entityId))
+		if (!m_componentManager.has<component::movement::VelocityComponent>(entityId))
 			return;
-		auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+		auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 		velocity.m_velocity.x = 0.0f;
 		velocity.m_velocity.z = 0.0f;
 		// Y（重力ぶんの落下速度）は残す＝ボスが地面に着地・接地し続けるようにする

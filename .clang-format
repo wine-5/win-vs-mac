@@ -24,6 +24,13 @@ ContinuationIndentWidth: 4
 BreakConstructorInitializers: BeforeComma
 PackConstructorInitializers: Never
 
+# 継承リストも1基底1行・カンマ前置で縦に並べる（初期化リストと形を揃える）
+# 例:
+#   class Foo
+#       : public Bar
+#       , public Baz
+BreakInheritanceList: BeforeComma
+
 # 名前空間の中もインデントする
 NamespaceIndentation: All
 

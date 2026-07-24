@@ -97,7 +97,6 @@ body {
 
 .diff-shield { width: 24px; height: 24px; object-fit: contain; }
 
-.diff-btn.active-easy   { background: #1a5c1a; border-color: #2ea02e; color: #4ec94e; }
 .diff-btn.active-normal { background: var(--accent); border-color: var(--accent); color: #fff; }
 .diff-btn.active-hard   { background: var(--danger); border-color: var(--danger); color: #fff; }
 

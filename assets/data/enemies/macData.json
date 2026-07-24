@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "enemy_mac",
   "category": "enemy",
   "model": {
@@ -15,7 +15,7 @@
     "maxHp": 500.0,
     "defence": 15.0,
     "attackPower": 35.0,
-    "attackCooldown": 4.0
+    "attackCooldown": 0.0
   },
   "behaviors": [ "boss" ],
   "animations": [
@@ -28,6 +28,17 @@
   ],
   "mac": {
     "phase2HpRatio": 0.99,
+    "actions": {
+      "meleeWindup": 0.6,
+      "rangedWindup": 0.9,
+      "summonWindup": 0.7,
+      "novaWindup": 1.1,
+      "meleeLock": 1.0,
+      "rangedLock": 1.2,
+      "summonLock": 1.2,
+      "novaLock": 1.4,
+      "rangedTelegraphRange": 800.0
+    },
     "phase1": {
       "moveSpeed": 10.0,
       "actionInterval": 4.0,

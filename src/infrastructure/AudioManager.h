@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 #include "core/interface/IAudioManager.h"
-#include "infrastructure/repository/AudioRepository.h"
+#include "infrastructure/resource/repository/AudioRepository.h"
 
 namespace infrastructure
 {
@@ -27,10 +27,10 @@ namespace infrastructure
 		void playBgm(core::constant::BgmType type, bool fade = true) override;
 
 		/**
-		 * @brief 現在再生中の BGM を停止する
+		 * @brief 現在再生中の BGM を停止する（デストラクタからの内部利用）
 		 * @param fade true の場合フェードアウトを使用する（デフォルト: true）
 		 */
-		void stopBgm(bool fade = true) override;
+		void stopBgm(bool fade = true);
 
 		/**
 		 * @brief SE を再生する
@@ -41,9 +41,9 @@ namespace infrastructure
 		/**
 		 * @brief フェード処理など毎フレームの更新処理
 		 */
-		void update() override;
+		void update(float deltaTime) override;
 
-	private:
+	  private:
 		/** @brief フェード処理の種類 */
 		enum class FadeState
 		{
@@ -52,12 +52,17 @@ namespace infrastructure
 			FadeOut,
 		};
 
-		/** @brief フェード速度（1フレームあたりの音量変化量、0.0f〜1.0f） */
-		static constexpr float FADE_SPEED{ 0.01f };
+		/**
+		 * @brief フェードにかける時間（秒）
+		 *
+		 * 従来は「1フレームあたりの変化量0.01」で、60fps換算だと約1.67秒だった。
+		 * 他の演出（FadeTransition等）が秒指定なのに合わせ、フレームレート非依存にする
+		 */
+		static constexpr float FADE_DURATION{ 1.67f };
 
 		void applyBgmVolume(int handle, float normalizedVolume) const;
 
-		repository::AudioRepository m_repository{};
+		resource::repository::AudioRepository m_repository{};
 
 		int       m_currentBgmHandle{ -1 };
 		float     m_currentBgmVolume{ 0.0f };

@@ -1,10 +1,11 @@
-#include "LoadingWindow.h"
+﻿#include "LoadingWindow.h"
 #include "thirdparty/nlohmann/json.hpp"
+#include <utility>
 
 namespace platform::window::loading
 {
 	LoadingWindow::LoadingWindow(int x, int y, int width, int height) noexcept
-		: WindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height)
+	    : WebViewWindowBase(WINDOW_CLASS_NAME, WINDOW_TITLE, x, y, width, height)
 	{
 	}
 
@@ -15,7 +16,7 @@ namespace platform::window::loading
 
 	void LoadingWindow::setOnLoadingComplete(std::function<void()> callback) noexcept
 	{
-		m_onLoadingComplete = callback;
+		m_onLoadingComplete = std::move(callback);
 	}
 
 	void LoadingWindow::pumpMessages() noexcept
@@ -43,6 +44,10 @@ namespace platform::window::loading
 
 	LRESULT LoadingWindow::onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
 	{
+		// サイズ追従・可視追従は WebViewWindowBase に集約している
+		if (const auto handled{ handleWebViewMessage(hwnd, msg, wParam, lParam) })
+			return *handled;
+
 		return WindowBase::onMessage(hwnd, msg, wParam, lParam);
 	}
 

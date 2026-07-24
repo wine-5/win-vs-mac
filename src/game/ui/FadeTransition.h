@@ -28,14 +28,14 @@ namespace game::ui
          */
         void update(float deltaTime);
 
-        /**
-         * @brief 遷移アニメーションを描画する
-         * @param uiRenderer UI描画インターフェース
-         * @param screen 画面サイズインターフェース
-         */
-        void draw(core::iface::IUIRenderer& uiRenderer, core::iface::IScreen& screen) const;
+		/**
+		 * @brief 遷移アニメーションを描画する
+		 *
+		 * 描画先はコンストラクタで受け取ったものを使う（引数で二重に受け取らない）
+		 */
+		void draw() const;
 
-        /**
+		/**
          * @brief 遷移が完了したか
          * @return 完了した場合true
          */

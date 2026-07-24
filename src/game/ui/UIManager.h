@@ -34,11 +34,6 @@ namespace game::ui
          */
         void draw(core::iface::IUIRenderer& uiRenderer) const;
 
-        /**
-         * @brief すべてのUI要素をクリア
-         */
-        void clear();
-
     private:
         std::vector<std::unique_ptr<IUIElement>> m_elements;
     };

@@ -8,18 +8,15 @@
 
 namespace game::scene
 {
-	Select::Select(core::iface::IInputProvider& inputProvider,
-		core::iface::IUIRenderer& uiRenderer,
-		core::iface::IScreen& screen,
-		core::iface::IFileProvider& fileProvider,
-		core::iface::IResourceManager& resourceManager,
-		data::FileEquipmentData& fileEquipmentData,
-		std::unique_ptr<core::iface::ISelectWindowManager> windowManager)
-		: m_uiRenderer{ uiRenderer }
-		, m_screen{ screen }
-		, m_resourceManager{ resourceManager }
-		, m_windowManager{ std::move(windowManager) }
-		, m_fade{ std::make_unique<ui::FadeTransition>(uiRenderer, screen, FADE_DURATION, true) }
+	Select::Select(core::iface::IUIRenderer& uiRenderer,
+	    core::iface::IScreen& screen,
+	    core::iface::IResourceManager& resourceManager,
+	    std::unique_ptr<core::iface::ISelectWindowManager> windowManager)
+	    : m_uiRenderer{ uiRenderer }
+	    , m_screen{ screen }
+	    , m_resourceManager{ resourceManager }
+	    , m_windowManager{ std::move(windowManager) }
+	    , m_fade{ std::make_unique<ui::FadeTransition>(uiRenderer, screen, FADE_DURATION, true) }
 	{
 		if (m_windowManager)
 			m_windowManager->createAllWindows();
@@ -68,7 +65,7 @@ namespace game::scene
 	void Select::draw()
 	{
 		if (m_fade)
-			m_fade->draw(m_uiRenderer, m_screen);
+			m_fade->draw();
 	}
 
 	void Select::startFadeOut()
@@ -92,18 +89,9 @@ namespace game::scene
 
 	void Select::notifyGameStart() noexcept
 	{
-		if (!m_windowManager || !m_windowManager->isJobSelected())
-		{
-			m_windowManager->showWarningMessage("職業を選択してからスタートしてください。");
+		if (!m_windowManager)
 			return;
-		}
 		startFadeOut();
-	}
-
-	void Select::notifyJobSelected(core::constant::JobType jobType) noexcept
-	{
-		if (m_windowManager)
-			m_windowManager->updateParameterWindowForJob(jobType);
 	}
 
 } // namespace game::scene

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <vector>
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
@@ -7,14 +7,14 @@
 #include "core/interface/IScreen.h"
 #include "core/interface/IEffectFactory.h"
 
-namespace game::system
+namespace game::system::visual
 {
 	class PlayerChargeVisualsSystem;
 	class MacAwakenEffectSystem;
 	class DetectionAlertVisualsSystem;
 	class AttackTelegraphVisualsSystem;
 	class TelegraphVisualsSystem;
-} // namespace game::system
+} // namespace game::system::visual
 
 namespace game::ui::debug
 {
@@ -50,43 +50,42 @@ namespace game::scene
 
 		/**
 		 * @brief インゲームを描画する
+		 *
+		 * モデルはRenderComponentの全走査で描くため、描画対象のIDは受け取らない。
+		 * playerIdはレティクル（照準状態の表示）にのみ使う
 		 * @param playerId プレイヤーのEntityID
-		 * @param groundId 地面のEntityID
-		 * @param enemyIds 敵のEntityID一覧
 		 */
-		void draw(core::ecs::EntityId playerId,
-		    core::ecs::EntityId groundId,
-		    const std::vector<core::ecs::EntityId>& enemyIds);
+		void draw(core::ecs::EntityId playerId);
 
 		/**
 		 * @brief 溜め攻撃の演出System（集中線の描画元）を設定する
 		 * @param system PlayerChargeVisualsSystemのポインタ（所有はSystemManager）
 		 */
-		void setPlayerChargeVisualsSystem(system::PlayerChargeVisualsSystem* system);
+		void setPlayerChargeVisualsSystem(system::visual::PlayerChargeVisualsSystem* system);
 
 		/**
 		 * @brief ボス覚醒演出System（赤ビネットの描画元）を設定する
 		 * @param system MacAwakenEffectSystemのポインタ（所有はSystemManager）
 		 */
-		void setMacAwakenEffectSystem(system::MacAwakenEffectSystem* system);
+		void setMacAwakenEffectSystem(system::visual::MacAwakenEffectSystem* system);
 
 		/**
 		 * @brief 発見演出System（頭上の通知バッジの描画元）を設定する
 		 * @param system DetectionAlertVisualsSystemのポインタ（所有はSystemManager）
 		 */
-		void setDetectionAlertVisualsSystem(system::DetectionAlertVisualsSystem* system);
+		void setDetectionAlertVisualsSystem(system::visual::DetectionAlertVisualsSystem* system);
 
 		/**
 		 * @brief 攻撃予兆System（地面の攻撃範囲サークルの描画元）を設定する
 		 * @param system AttackTelegraphVisualsSystemのポインタ（所有はSystemManager）
 		 */
-		void setAttackTelegraphVisualsSystem(system::AttackTelegraphVisualsSystem* system);
+		void setAttackTelegraphVisualsSystem(system::visual::AttackTelegraphVisualsSystem* system);
 
 		/**
 		 * @brief 汎用攻撃予兆System（TelegraphComponent駆動：円・扇）を設定する
 		 * @param system TelegraphVisualsSystemのポインタ（所有はSystemManager）
 		 */
-		void setTelegraphVisualsSystem(system::TelegraphVisualsSystem* system);
+		void setTelegraphVisualsSystem(system::visual::TelegraphVisualsSystem* system);
 
 		/**
 		 * @brief DEBUG: ワールド空間デバッグ可視化Viewを設定する（リリース時に削除）
@@ -102,11 +101,12 @@ namespace game::scene
 
 	  private:
 		/**
-		 * @brief プレイヤー・地面・敵のモデルを描画する
+		 * @brief RenderComponentを持つ全Entityのモデルを描画する
+		 *
+		 * 弾は drawProjectileModels が専用に描くため対象外。
+		 * 半透明（死亡ディゾルブ中）は不透明の後に描く
 		 */
-		void drawModels(core::ecs::EntityId playerId,
-		    core::ecs::EntityId groundId,
-		    const std::vector<core::ecs::EntityId>& enemyIds);
+		void drawModels();
 
 		/**
 		 * @brief 画面中央に照準レティクル（クロスヘア）を描画する
@@ -130,17 +130,17 @@ namespace game::scene
 
 		// 溜め攻撃の集中線の描画元（描画内容はSystemが持ち、Viewは描画順だけを管理する）
 		// 所有はSystemManagerにあり、InGameがsetupSystemsで設定する
-		system::PlayerChargeVisualsSystem* m_playerChargeVisualsSystem{ nullptr };
+		system::visual::PlayerChargeVisualsSystem* m_playerChargeVisualsSystem{ nullptr };
 
 		// ボス覚醒演出の赤ビネットの描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
-		system::MacAwakenEffectSystem* m_macAwakenEffectSystem{ nullptr };
+		system::visual::MacAwakenEffectSystem* m_macAwakenEffectSystem{ nullptr };
 
 		// 発見演出（頭上の通知バッジ）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
-		system::DetectionAlertVisualsSystem* m_detectionAlertSystem{ nullptr };
+		system::visual::DetectionAlertVisualsSystem* m_detectionAlertSystem{ nullptr };
 
 		// 攻撃予兆（地面の攻撃範囲サークル）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
-		system::AttackTelegraphVisualsSystem* m_attackTelegraphSystem{ nullptr };
-		system::TelegraphVisualsSystem* m_telegraphSystem{ nullptr };
+		system::visual::AttackTelegraphVisualsSystem* m_attackTelegraphSystem{ nullptr };
+		system::visual::TelegraphVisualsSystem* m_telegraphSystem{ nullptr };
 
 		// DEBUG: デバッグ可視化・HUDの描画元（所有はInGame。リリース時に削除）
 		ui::debug::DebugGizmoView* m_debugGizmoView{ nullptr };

@@ -11,7 +11,6 @@ namespace core::input
         A,
         S,
         D,
-		R,  // DEBUG: デバッグ用（現在未使用）
 		T,  // DEBUG: テストエフェクト再生
 		F1, // DEBUG: デバッグモードのON/OFF切り替え
 		F2, // DEBUG: シーンビュー（時間停止＋フリーカメラ）のON/OFF切り替え
@@ -25,6 +24,5 @@ namespace core::input
         Right,
 
 		Shift, // ダッシュ用
-		Tab,   // ロックオン切り替え用
 	};
 } // namespace core::input

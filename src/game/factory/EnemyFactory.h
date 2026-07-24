@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "IFactory.h"
 #include "core/ecs/EntityManager.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/interface/IResourceManager.h"
@@ -21,8 +20,8 @@ namespace game::factory
 	 * ゲーム文脈を組み立てて本クラスを呼び出す高レベルな役割は EnemySpawner が担う。
 	 * （生成の「オーケストレーション」と「インスタンス化」を意図的に分離している）
 	 */
-	class EnemyFactory : public IFactory
-    {
+	class EnemyFactory
+	{
     public:
         /**
          * @brief EnemyFactoryのコンストラクタ
@@ -44,16 +43,10 @@ namespace game::factory
 		core::ecs::EntityId create(int modelHandle, const data::EnemyData& enemyData);
 
 		/**
-         * @brief 生成した全EnemyのEntityIdを取得する
-         * @return EntityIdのvector
-         */
-        [[nodiscard]] const std::vector<core::ecs::EntityId>& getEnemyIds() const noexcept;
-
-		/**
 		 * @brief 内部で保持しているEnemyを破棄する（死亡後の後始末で呼ぶ）
 		 *
 		 * Entity/Componentの破棄はこのクラスの責務外。あくまで内部リスト
-		 * （m_enemies・m_enemyIds）からの除去のみを行う
+		 * （m_enemies）からの除去のみを行う
 		 * @param id 除去するEnemyのEntityId
 		 */
 		void remove(core::ecs::EntityId id);
@@ -64,6 +57,5 @@ namespace game::factory
         core::iface::IResourceManager& m_resourceManager;
 
         std::vector<std::unique_ptr<actor::EnemyBase>> m_enemies;
-        std::vector<core::ecs::EntityId> m_enemyIds{};
     };
 } // namespace game::factory

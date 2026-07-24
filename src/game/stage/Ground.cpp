@@ -1,7 +1,7 @@
 ﻿#include "Ground.h"
-#include "game/component/TransformComponent.h"
-#include "game/component/RenderComponent.h"
-#include "game/component/ColliderComponent.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/visual/RenderComponent.h"
+#include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/constant/Tag.h"
 #include "game/data/GroundData.h"
@@ -14,18 +14,18 @@ namespace game::stage
 		const game::data::GroundData& groundData)
 		: m_entity{entityManager.create()}
 	{
-		component::TransformComponent transform;
+		component::movement::TransformComponent transform;
 		transform.m_position = groundData.getPosition();
 		transform.m_rotation = groundData.getRotation();
 		transform.m_scale = groundData.getScale();
 
-		componentManager.add<component::TransformComponent>(m_entity.getId(), transform);
-		componentManager.add<component::RenderComponent>(m_entity.getId(), { modelHandle });
+		componentManager.add<component::movement::TransformComponent>(m_entity.getId(), transform);
+		componentManager.add<component::visual::RenderComponent>(m_entity.getId(), { modelHandle });
 
-		component::ColliderComponent collider;
+		component::combat::ColliderComponent collider;
 		collider.m_size = groundData.getColliderSize();
 		collider.m_offset = groundData.getColliderOffset();
-		componentManager.add<component::ColliderComponent>(m_entity.getId(), collider);
+		componentManager.add<component::combat::ColliderComponent>(m_entity.getId(), collider);
 
 		component::TagComponent tag{};
 		tag.m_tag = constant::Tag::Ground;

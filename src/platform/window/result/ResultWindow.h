@@ -1,8 +1,7 @@
-#pragma once
+﻿#pragma once
 
-#include "platform/window/WindowBase.h"
+#include "platform/window/WebViewWindowBase.h"
 #include "platform/window/WindowConstants.h"
-#include "platform/webview/WebView2Host.h"
 #include "core/interface/IResultWindowManager.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IWindow.h"
@@ -16,9 +15,12 @@ namespace platform::window::result
      * @class ResultWindow
      * @brief リザルト画面を表示する WebView2 ウィンドウ
      */
-    class ResultWindow : public WindowBase, public core::iface::IResultWindowManager, public core::iface::IWindow
-    {
-    public:
+	class ResultWindow
+	    : public platform::window::WebViewWindowBase
+	    , public core::iface::IResultWindowManager
+	    , public core::iface::IWindow
+	{
+	  public:
         /**
          * @brief コンストラクタ
          * @param screen 画面情報インターフェース（位置計算・オーナーHWND取得に使用）
@@ -58,7 +60,6 @@ namespace platform::window::result
         static constexpr const wchar_t* RESULT_HTML_URL{ L"https://game.web/result/result.html" };
 
         core::iface::IScreen& m_screen;
-        platform::webview::WebView2Host m_webView{};
 
         std::function<void()> m_onRetry{};
         std::function<void()> m_onTitle{};
@@ -67,5 +68,5 @@ namespace platform::window::result
 
         void handleMessage(const std::string& json) noexcept;
         void sendResultData(const core::data::ResultData& data) noexcept;
-    };
+	};
 } // namespace platform::window::result

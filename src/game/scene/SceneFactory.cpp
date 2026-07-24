@@ -8,7 +8,6 @@
 #include "Result.h"
 #include "SceneManager.h"
 #include "core/base/ServiceLocator.h"
-#include "core/interface/IFileProvider.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IWindowFactory.h"
 #include "core/interface/ISelectWindowManager.h"
@@ -27,10 +26,10 @@ namespace game::scene
 
 	IScene* SceneFactory::createScene(SceneType sceneType)
 	{
-		// TODO: 現在は全て軽量なシーンであるためシーンが作られるたびに生成をしているが、
-		// 本来であればreset()関数をInGameなどの状態をゲームループするたびにリセットする必要がある
-		// オブジェクトに持たせる必要があり、逆にリセットが不要なシーンに関しては
-		// if文で重複して何度も生成されないようにするべき
+		// 方針: シーンは遷移のたびに作り直す（インスタンスをキャッシュしない）。
+		// 作り直し方式には「状態のリセット漏れが構造的に起き得ない」という利点があり、
+		// キャッシュを導入すると全シーンにreset()を実装・保守する義務が新たに発生する。
+		// 生成が重くなった場合はシーンの再利用ではなく、ResourceManager側のキャッシュで対処する。
 		auto* screen = core::base::ServiceLocator::get<core::iface::IScreen>();
 
 		switch (sceneType)
@@ -51,9 +50,10 @@ namespace game::scene
 			auto* inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
 			auto* uiRenderer = core::base::ServiceLocator::get<core::iface::IUIRenderer>();
 			m_titleScene = std::make_unique<Title>(
-				*inputProvider,
-				*uiRenderer,
-				*screen);
+			    *inputProvider,
+			    *uiRenderer,
+			    *screen,
+			    m_gameManager);
 			return m_titleScene.get();
 		}
 
@@ -70,29 +70,19 @@ namespace game::scene
 
 		case SceneType::Select:
 		{
-			auto* inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
 			auto* uiRenderer = core::base::ServiceLocator::get<core::iface::IUIRenderer>();
-			auto* fileProvider = core::base::ServiceLocator::get<core::iface::IFileProvider>();
 			auto* resourceManager = core::base::ServiceLocator::get<core::iface::IResourceManager>();
 
 			m_selectScene = std::make_unique<Select>(
-			    *inputProvider,
 			    *uiRenderer,
 			    *screen,
-			    *fileProvider,
 			    *resourceManager,
-			    m_gameManager.getFileEquipmentData(),
 			    nullptr);
 
 			auto* windowFactory = core::base::ServiceLocator::get<core::iface::IWindowFactory>();
 			auto windowManager = windowFactory->createSelectWindowManager(
 			    [selectPtr = m_selectScene.get()]()
 			    { selectPtr->notifyGameStart(); },
-			    [this, selectPtr = m_selectScene.get()](core::constant::JobType jt)
-			    {
-				    m_gameManager.getJobSelectionData().setSelectedJobType(jt);
-				    selectPtr->notifyJobSelected(jt);
-			    },
 			    [this](int slot, const std::string& path)
 			    {
 				    m_gameManager.getFileEquipmentData().setFilePath(slot, path);

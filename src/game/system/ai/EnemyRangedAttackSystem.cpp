@@ -1,7 +1,7 @@
-#include "EnemyRangedAttackSystem.h"
+﻿#include "EnemyRangedAttackSystem.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
-#include "game/component/AIComponent.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/ai/AIComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include "game/constant/Tag.h"
 #include <cmath>
 #include <utility>
@@ -43,10 +43,10 @@ namespace game::system::ai
 
 		for (auto entityId : entities)
 		{
-			if (!m_componentManager.has<component::AIComponent>(entityId))
+			if (!m_componentManager.has<component::ai::AIComponent>(entityId))
 				continue;
 
-			auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+			auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 			auto& rangeKeep{ m_componentManager.get<component::ai::RangeKeepAIComponent>(entityId) };
 
 			// 各種タイマーを進める
@@ -59,7 +59,7 @@ namespace game::system::ai
 			if (rangeKeep.m_fireCooldown <= 0.0f)
 				continue;
 
-			auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+			auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 
 			// 予備動作のスケール演出用に基準スケールを一度だけ取得する
 			if (rangeKeep.m_baseScale.x == 0.0f && rangeKeep.m_baseScale.y == 0.0f && rangeKeep.m_baseScale.z == 0.0f)
@@ -71,13 +71,13 @@ namespace game::system::ai
 			float distance{ 0.0f };
 			if (ai.m_isActive && ai.m_targetEntity.getId() != 0)
 			{
-				const auto& targetTransform{ m_componentManager.get<component::TransformComponent>(ai.m_targetEntity.getId()) };
-				direction = {
-					targetTransform.m_position.x - transform.m_position.x,
-					(targetTransform.m_position.y + AIM_TARGET_HEIGHT) - transform.m_position.y,
-					targetTransform.m_position.z - transform.m_position.z
-				};
-				distance = std::sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+				const auto& targetTransform{ m_componentManager.get<component::movement::TransformComponent>(ai.m_targetEntity.getId()) };
+				direction = core::Vector3{
+					targetTransform.m_position.x,
+					targetTransform.m_position.y + AIM_TARGET_HEIGHT,
+					targetTransform.m_position.z
+				} - transform.m_position;
+				distance = direction.length();
 				inRange = (distance <= ai.m_detectionRange);
 			}
 
@@ -88,13 +88,7 @@ namespace game::system::ai
 			if (!inRange || rangeKeep.m_currentFireCooldown > 0.0f)
 				continue;
 
-			// 方向ベクトルを正規化
-			if (distance > 0.0f)
-			{
-				direction.x /= distance;
-				direction.y /= distance;
-				direction.z /= distance;
-			}
+			direction = direction.normalized();
 
 			// 発射源より少し前方から出す（発射者自身への即着弾を避ける）
 			core::Vector3 origin{
@@ -120,7 +114,7 @@ namespace game::system::ai
 		}
 	}
 
-	void EnemyRangedAttackSystem::applyAttackAnimation(component::TransformComponent& transform,
+	void EnemyRangedAttackSystem::applyAttackAnimation(component::movement::TransformComponent& transform,
 	    component::ai::RangeKeepAIComponent& rangeKeep, bool inRange)
 	{
 		float scaleFactor{ 1.0f }; // 基準スケールに対する倍率

@@ -2,7 +2,6 @@
 
 const ParamView = (function () {
     let firstRender = true;
-    let prevJob = null;
 
     function initialize() {
         ParamLogic.onStateChange(function () {
@@ -11,8 +10,8 @@ const ParamView = (function () {
         return true;
     }
 
-    /** Job が切り替わったとき: バーを 0 リセット → 時間差でスライドイン + アニメーション */
-    function animateJobEntrance(state) {
+    /** 初回表示時: バーを 0 リセット → 時間差でスライドイン + アニメーション */
+    function animateEntrance(state) {
         const stats = [
             { id: 'hp',  base: state.baseHp,  bonus: state.bonusHp  },
             { id: 'atk', base: state.baseAtk, bonus: state.bonusAtk },
@@ -97,12 +96,9 @@ const ParamView = (function () {
 
     function renderAll() {
         const state = ParamLogic.getState();
-        const jobChanged = state.job !== prevJob && state.job != null;
-        prevJob = state.job;
-
-        if (jobChanged) {
-            // Job が変わったとき: 時間差スライドイン演出
-            animateJobEntrance(state);
+        if (firstRender) {
+            // 初回表示: 時間差スライドイン演出
+            animateEntrance(state);
         } else {
             setBar('hp',  state.baseHp,  state.bonusHp);
             setBar('atk', state.baseAtk, state.bonusAtk);
@@ -114,8 +110,6 @@ const ParamView = (function () {
             const el = document.getElementById(id);
             if (el) el.textContent = val != null ? val : '—';
         };
-        set('top-job', state.job);
-        set('m-skill', state.skill);
         set('m-slot', state.slot != null && state.slot > 0 ? state.slot + '/3' : null);
 
         firstRender = false;

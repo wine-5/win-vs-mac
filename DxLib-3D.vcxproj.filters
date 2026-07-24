@@ -21,25 +21,25 @@
     <ClCompile Include="src\core\base\ServiceLocator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\InputSystem.cpp">
+    <ClCompile Include="src\game\system\movement\InputSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\MoveSystem.cpp">
+    <ClCompile Include="src\game\system\movement\MoveSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\PhysicsSystem.cpp">
+    <ClCompile Include="src\game\system\movement\PhysicsSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\actor\Player.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\Camera.cpp">
+    <ClCompile Include="src\infrastructure\graphics\Camera.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\Renderer.cpp">
+    <ClCompile Include="src\infrastructure\graphics\Renderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\ResourceManager.cpp">
+    <ClCompile Include="src\infrastructure\resource\ResourceManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\scene\InGame.cpp">
@@ -48,7 +48,7 @@
     <ClCompile Include="src\game\scene\InGameView.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\utility\LogUtil.cpp">
+    <ClCompile Include="src\platform\utility\LogUtil.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\ServiceLocatorInitializer.cpp">
@@ -60,13 +60,13 @@
     <ClCompile Include="src\game\stage\Ground.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\AnimationSystem.cpp">
+    <ClCompile Include="src\game\system\visual\AnimationSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\CollisionSystem.cpp">
+    <ClCompile Include="src\game\system\combat\CollisionSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\Animator.cpp">
+    <ClCompile Include="src\infrastructure\graphics\Animator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\factory\PlayerFactory.cpp">
@@ -87,7 +87,7 @@
     <ClCompile Include="src\game\scene\Title.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\Screen.cpp">
+    <ClCompile Include="src\infrastructure\graphics\Screen.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\scene\SceneManager.cpp">
@@ -99,7 +99,7 @@
     <ClCompile Include="src\game\ui\UIManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\UIRenderer.cpp">
+    <ClCompile Include="src\infrastructure\graphics\UIRenderer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\scene\Select.cpp">
@@ -123,49 +123,40 @@
     <ClCompile Include="src\game\attack\DefenseHandler.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\AttackSystem.cpp">
+    <ClCompile Include="src\game\system\combat\AttackSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\CameraSystem.cpp">
+    <ClCompile Include="src\game\system\camera\CameraSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\DebugCameraSystem.cpp">
+    <ClCompile Include="src\game\system\camera\DebugCameraSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\TargetingSystem.cpp">
+    <ClCompile Include="src\game\system\combat\TargetingSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\HitEffectSystem.cpp">
+    <ClCompile Include="src\game\system\visual\HitEffectSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\EnemyDeathSystem.cpp">
+    <ClCompile Include="src\game\system\combat\EnemyDeathSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\system\ai\DetectionSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\DetectionAlertVisualsSystem.cpp">
+    <ClCompile Include="src\game\system\visual\DetectionAlertVisualsSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\AttackTelegraphVisualsSystem.cpp">
+    <ClCompile Include="src\game\system\visual\AttackTelegraphVisualsSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\TelegraphVisualsSystem.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\platform\WindowsDataProvider.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\ui\Label.cpp">
+    <ClCompile Include="src\game\system\visual\TelegraphVisualsSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\ui\FadeTransition.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\scene\TitleView.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\game\scene\SelectView.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\scene\LockscreenView.cpp">
@@ -192,25 +183,19 @@
     <ClCompile Include="src\game\ui\pause\PauseMenuView.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\ModelRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\ModelRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\ImageRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\ImageRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\FontRepository.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\JobRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\FontRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\window\WindowBase.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\webview\WebView2Host.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="src\platform\window\select\JobWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\window\select\FileSelectWindow.cpp">
@@ -237,7 +222,7 @@
     <ClCompile Include="src\game\scene\Bios.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\AnimationRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\AnimationRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\system\WindowsPerformanceProvider.cpp">
@@ -249,7 +234,7 @@
     <ClCompile Include="src\platform\window\projectile\ProjectileWindowManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\ProjectileWindowSystem.cpp">
+    <ClCompile Include="src\game\system\combat\ProjectileWindowSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\platform\window\WindowFactory.cpp">
@@ -258,22 +243,22 @@
     <ClCompile Include="src\platform\window\loading\LoadingWindow.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\AudioRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\AudioRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\EffectRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\EffectRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\EffectPool.cpp">
+    <ClCompile Include="src\infrastructure\effect\EffectPool.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\infrastructure\AudioManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\EffectFactory.cpp">
+    <ClCompile Include="src\infrastructure\effect\EffectFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\EffectSystem.cpp">
+    <ClCompile Include="src\game\system\visual\EffectSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\event\AudioEventListener.cpp">
@@ -285,34 +270,37 @@
     <ClCompile Include="src\game\actor\EnemyBehaviors.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\ProjectileRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\ProjectileRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\infrastructure\repository\StageRepository.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\StageRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\ProjectileReflectSystem.cpp">
+    <ClCompile Include="src\infrastructure\resource\repository\ExtensionBonusRepository.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\ProjectileSystem.cpp">
+    <ClCompile Include="src\game\system\combat\ProjectileReflectSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\PlayerRangedAttackSystem.cpp">
+    <ClCompile Include="src\game\system\combat\ProjectileSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game\system\combat\PlayerRangedAttackSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\factory\ProjectileFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\PlayerChargeVisualsSystem.cpp">
+    <ClCompile Include="src\game\system\visual\PlayerChargeVisualsSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\ChargeZoomSystem.cpp">
+    <ClCompile Include="src\game\system\camera\ChargeZoomSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\MacAwakenEffectSystem.cpp">
+    <ClCompile Include="src\game\system\visual\MacAwakenEffectSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\system\DamageShakeSystem.cpp">
+    <ClCompile Include="src\game\system\camera\DamageShakeSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="src\game\system\ai\MeleeChaseAISystem.cpp">
@@ -359,7 +347,7 @@
     <ClInclude Include="src\core\ecs\ComponentManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\ecs\IComponent.h">
+    <ClInclude Include="src\core\ecs\IComponentArray.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\ecs\ComponentArray.h">
@@ -383,28 +371,28 @@
     <ClInclude Include="src\game\event\InGameEvents.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\InputComponent.h">
+    <ClInclude Include="src\game\component\movement\InputComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\CameraComponent.h">
+    <ClInclude Include="src\game\component\camera\CameraComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\AimComponent.h">
+    <ClInclude Include="src\game\component\combat\AimComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\TransformComponent.h">
+    <ClInclude Include="src\game\component\movement\TransformComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\VelocityComponent.h">
+    <ClInclude Include="src\game\component\movement\VelocityComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\InputSystem.h">
+    <ClInclude Include="src\game\system\movement\InputSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\MoveSystem.h">
+    <ClInclude Include="src\game\system\movement\MoveSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\PhysicsSystem.h">
+    <ClInclude Include="src\game\system\movement\PhysicsSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\actor\Player.h">
@@ -413,13 +401,13 @@
     <ClInclude Include="src\core\utility\Vector3.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\Camera.h">
+    <ClInclude Include="src\infrastructure\graphics\Camera.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\Renderer.h">
+    <ClInclude Include="src\infrastructure\graphics\Renderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\ResourceManager.h">
+    <ClInclude Include="src\infrastructure\resource\ResourceManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\scene\InGame.h">
@@ -431,10 +419,10 @@
     <ClInclude Include="src\game\scene\IScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\RenderComponent.h">
+    <ClInclude Include="src\game\component\visual\RenderComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\utility\LogUtil.h">
+    <ClInclude Include="src\platform\utility\LogUtil.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\interface\IResourceManager.h">
@@ -461,10 +449,10 @@
     <ClInclude Include="src\core\input\KeyCode.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\AnimationComponent.h">
+    <ClInclude Include="src\game\component\visual\AnimationComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\ColliderComponent.h">
+    <ClInclude Include="src\game\component\combat\ColliderComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\constant\Tag.h">
@@ -479,13 +467,13 @@
     <ClInclude Include="src\game\stage\Ground.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\AnimationSystem.h">
+    <ClInclude Include="src\game\system\visual\AnimationSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\CollisionSystem.h">
+    <ClInclude Include="src\game\system\combat\CollisionSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\Animator.h">
+    <ClInclude Include="src\infrastructure\graphics\Animator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\data\MacMetadata.h">
@@ -494,16 +482,10 @@
     <ClInclude Include="src\core\data\ModelMetadata.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\constant\JsonKeys.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\game\constant\ModelId.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\data\GroundData.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\factory\IFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\factory\PlayerFactory.h">
@@ -530,10 +512,16 @@
     <ClInclude Include="src\game\scene\Title.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\Screen.h">
+    <ClInclude Include="src\infrastructure\graphics\Screen.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\utility\Color.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\utility\MathConstants.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\utility\Log.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\constant\UI.h">
@@ -554,7 +542,7 @@
     <ClInclude Include="src\game\ui\UIManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\UIRenderer.h">
+    <ClInclude Include="src\infrastructure\graphics\UIRenderer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\scene\Select.h">
@@ -566,13 +554,16 @@
     <ClInclude Include="src\game\scene\Result.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\HealthComponent.h">
+    <ClInclude Include="src\game\component\combat\HealthComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\AIComponent.h">
+    <ClInclude Include="src\game\component\ai\AIComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\AttackComponent.h">
+    <ClInclude Include="src\game\component\EnemyTypeComponent.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\component\combat\AttackComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\constant\EnemyAnimationState.h">
@@ -602,76 +593,64 @@
     <ClInclude Include="src\game\attack\DefenseHandler.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\AttackSystem.h">
+    <ClInclude Include="src\game\system\combat\AttackSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\CameraSystem.h">
+    <ClInclude Include="src\game\system\camera\CameraSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\DebugCameraSystem.h">
+    <ClInclude Include="src\game\system\camera\DebugCameraSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\TargetingSystem.h">
+    <ClInclude Include="src\game\system\combat\TargetingSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\component\TagComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\HitEffectComponent.h">
+    <ClInclude Include="src\game\component\visual\HitEffectComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\HitEffectSystem.h">
+    <ClInclude Include="src\game\system\visual\HitEffectSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\EnemyDeathSystem.h">
+    <ClInclude Include="src\game\system\combat\EnemyDeathSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\system\ai\DetectionSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\DetectionAlertVisualsSystem.h">
+    <ClInclude Include="src\game\system\visual\DetectionAlertVisualsSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\AttackTelegraphVisualsSystem.h">
+    <ClInclude Include="src\game\system\visual\AttackTelegraphVisualsSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\TelegraphVisualsSystem.h">
+    <ClInclude Include="src\game\system\visual\TelegraphVisualsSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\TelegraphComponent.h">
+    <ClInclude Include="src\game\component\combat\TelegraphComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\DeathComponent.h">
+    <ClInclude Include="src\game\component\combat\DeathComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\AlertComponent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\interface\IFileProvider.h">
+    <ClInclude Include="src\game\component\ai\AlertComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\data\FileEquipmentData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\data\FileExtensionBonus.h">
+    <ClInclude Include="src\core\data\FileExtensionBonus.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\data\FileExtensionType.h">
+    <ClInclude Include="src\core\data\FileExtensionType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\GameManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\utility\ExtensionBonusCalculator.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\platform\WindowsDataProvider.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\ui\Label.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\ui\FadeTransition.h">
@@ -680,40 +659,22 @@
     <ClInclude Include="src\game\scene\TitleView.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\scene\SelectView.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="src\game\scene\LockscreenView.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\scene\Lockscreen.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\constant\SelectWindowId.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\event\IGameEvent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\event\ISelectEvent.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\event\SelectEvents.h">
+    <ClInclude Include="src\core\interface\IGameEvent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\interface\ISelectWindowManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\core\constant\JobType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\base\Singleton.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\interface\IStringConverter.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\data\JobSelectionData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\utility\StringConverter.h">
@@ -740,19 +701,16 @@
     <ClInclude Include="src\game\ui\pause\PauseMenuView.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\ModelRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\ModelRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\FontRepository.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\JobRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\FontRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\window\WindowBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\platform\window\select\JobWindow.h">
+    <ClInclude Include="src\platform\window\WebViewWindowBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\platform\window\result\ResultWindow.h">
@@ -779,13 +737,13 @@
     <ClInclude Include="src\platform\window\projectile\ProjectileWindowManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\ProjectileWindowSystem.h">
+    <ClInclude Include="src\game\system\combat\ProjectileWindowSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\interface\IWindowFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\AnimationRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\AnimationRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\constant\AnimationId.h">
@@ -815,28 +773,28 @@
     <ClInclude Include="src\core\constant\EffectType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\ecs\ObjectPool.h">
+    <ClInclude Include="src\core\base\ObjectPool.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\core\interface\IEffectFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\EffectRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\EffectRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\EffectPool.h">
+    <ClInclude Include="src\infrastructure\effect\EffectPool.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\infrastructure\AudioManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\EffectFactory.h">
+    <ClInclude Include="src\infrastructure\effect\EffectFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\EffectComponent.h">
+    <ClInclude Include="src\game\component\visual\EffectComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\EffectSystem.h">
+    <ClInclude Include="src\game\system\visual\EffectSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\event\AudioEventListener.h">
@@ -851,7 +809,7 @@
     <ClInclude Include="src\core\interface\IAudioManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\AudioRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\AudioRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\actor\EnemyBase.h">
@@ -869,7 +827,7 @@
     <ClInclude Include="src\core\data\ProjectileMetadata.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\ProjectileRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\ProjectileRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\constant\ProjectileId.h">
@@ -878,34 +836,37 @@
     <ClInclude Include="src\core\data\StageMetadata.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\infrastructure\repository\StageRepository.h">
+    <ClInclude Include="src\infrastructure\resource\repository\StageRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\ProjectileComponent.h">
+    <ClInclude Include="src\infrastructure\resource\repository\ExtensionBonusRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\ProjectileReflectSystem.h">
+    <ClInclude Include="src\game\component\combat\ProjectileComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\ProjectileSystem.h">
+    <ClInclude Include="src\game\system\combat\ProjectileReflectSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\PlayerRangedAttackSystem.h">
+    <ClInclude Include="src\game\system\combat\ProjectileSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\system\combat\PlayerRangedAttackSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\factory\ProjectileFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\PlayerChargeVisualsSystem.h">
+    <ClInclude Include="src\game\system\visual\PlayerChargeVisualsSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\ChargeZoomSystem.h">
+    <ClInclude Include="src\game\system\camera\ChargeZoomSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\MacAwakenEffectSystem.h">
+    <ClInclude Include="src\game\system\visual\MacAwakenEffectSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\system\DamageShakeSystem.h">
+    <ClInclude Include="src\game\system\camera\DamageShakeSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\system\ai\MeleeChaseAISystem.h">
@@ -920,10 +881,10 @@
     <ClInclude Include="src\game\system\ai\EnemyRangedAttackSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\CameraEffectComponent.h">
+    <ClInclude Include="src\game\component\camera\CameraEffectComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\component\PlayerChargeComponent.h">
+    <ClInclude Include="src\game\component\combat\PlayerChargeComponent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\component\ai\MeleeChaseAIComponent.h">

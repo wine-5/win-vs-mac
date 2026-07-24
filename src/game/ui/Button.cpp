@@ -78,8 +78,8 @@ namespace game::ui
 
     void Button::setOnClick(std::function<void()> callback)
     {
-        m_onClick = callback;
-    }
+		m_onClick = std::move(callback);
+	}
 
     bool Button::isMouseOver() const
     {

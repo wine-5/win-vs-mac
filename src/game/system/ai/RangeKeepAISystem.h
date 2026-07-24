@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/utility/Vector3.h"
@@ -6,7 +6,10 @@
 
 namespace game::component
 {
-	struct TransformComponent;
+	namespace movement
+	{
+		struct TransformComponent;
+	}
 	namespace ai
 	{
 		struct RangeKeepAIComponent;
@@ -50,7 +53,7 @@ namespace game::system::ai
 		 * @param deltaTime フレーム間の時間差
 		 */
 		void updatePatrol(core::ecs::EntityId entityId, component::ai::RangeKeepAIComponent& rangeKeep,
-		    component::TransformComponent& transform, float deltaTime);
+		    component::movement::TransformComponent& transform, float deltaTime);
 
 		/**
 		 * @brief ホーム地点まわりの水平な徘徊目的地をランダムに選ぶ

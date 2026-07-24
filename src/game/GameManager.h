@@ -1,6 +1,5 @@
 #pragma once
 #include "game/data/FileEquipmentData.h"
-#include "game/data/JobSelectionData.h"
 #include "core/base/NonCopyable.h"
 #include "core/data/ResultData.h"
 
@@ -23,16 +22,27 @@ namespace game
             return m_fileEquipmentData;
         }
 
-        /**
-         * @brief JobSelectionData への参照を返す
-         * @return JobSelectionData の参照
-         */
-        [[nodiscard]] data::JobSelectionData& getJobSelectionData() noexcept
-        {
-            return m_jobSelectionData;
-        }
+		/**
+		 * @brief アプリケーションの終了を要求する
+		 *
+		 * 実際の終了はApplicationがメインループの条件で検知して行う。
+		 * デストラクタとDxLib_Endを正しく通すため、std::exitは使わない。
+		 */
+		void requestQuit() noexcept
+		{
+			m_quitRequested = true;
+		}
 
-        /**
+		/**
+		 * @brief 終了が要求されているかを返す
+		 * @return 要求されている場合true
+		 */
+		[[nodiscard]] bool isQuitRequested() const noexcept
+		{
+			return m_quitRequested;
+		}
+
+		/**
          * @brief ResultData を保存する
          * @param data リザルトデータ
          */
@@ -79,8 +89,8 @@ namespace game
     private:
 
         data::FileEquipmentData m_fileEquipmentData{};
-        data::JobSelectionData m_jobSelectionData{};
         core::data::ResultData m_resultData{};
+		bool m_quitRequested{ false };
 
 		// DEBUG: デバッグモードの状態（リリース時に削除）
 		bool m_debugMode{ false };

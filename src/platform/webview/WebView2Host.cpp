@@ -7,10 +7,20 @@ namespace platform::webview
 {
     WebView2Host::~WebView2Host() noexcept
     {
-        // m_ready が true のときだけハンドラを登録しているので、その場合のみ解除する
-        if (m_webview && m_ready)
-            m_webview->remove_WebMessageReceived(m_webMessageToken);
-        // ComPtr のリリース順：WebView 本体 → コントローラーの順で解放する
+		// ハンドラは初期化直後（ページ読み込み完了より前）に登録されるため、
+		// m_ready ではなくWebView本体の有無で解除を判断する。
+		// m_ready を条件にすると、読み込み完了前に破棄されたときに解除漏れになる
+		if (m_webview)
+		{
+			m_webview->remove_WebMessageReceived(m_webMessageToken);
+			m_webview->remove_NavigationCompleted(m_navToken);
+		}
+
+		// WebView2 の推奨手順に従い、コントローラーを明示的に閉じてから解放する
+		if (m_controller)
+			m_controller->Close();
+
+		// ComPtr のリリース順：WebView 本体 → コントローラーの順で解放する
         m_webview = nullptr;
         m_controller = nullptr;
     }

@@ -8,7 +8,7 @@
 #include "game/factory/ProjectileFactory.h"
 #include "game/factory/EnemySpawner.h"
 #include "game/component/ai/MacAIComponent.h"
-#include "game/component/TransformComponent.h"
+#include "game/component/movement/TransformComponent.h"
 #include <random>
 
 namespace game::system::ai
@@ -73,7 +73,7 @@ namespace game::system::ai
 		 * @param dirToTarget プレイヤーへの方向（正規化済み）
 		 * @param phase 現在フェーズのパラメータ
 		 */
-		void performRanged(core::ecs::EntityId entityId, const component::TransformComponent& transform,
+		void performRanged(core::ecs::EntityId entityId, const component::movement::TransformComponent& transform,
 		    const core::Vector3& dirToTarget, const core::data::MacPhaseData& phase);
 
 		/**
@@ -82,7 +82,7 @@ namespace game::system::ai
 		 * @param transform ボスのTransform
 		 * @param phase 現在フェーズのパラメータ
 		 */
-		void performNova(core::ecs::EntityId entityId, const component::TransformComponent& transform,
+		void performNova(core::ecs::EntityId entityId, const component::movement::TransformComponent& transform,
 		    const core::data::MacPhaseData& phase);
 
 		/**
@@ -98,7 +98,7 @@ namespace game::system::ai
 		 * @param phase 現在フェーズのパラメータ
 		 * @param summonSlots 召喚可能な残り数
 		 */
-		void performSummon(const component::TransformComponent& transform,
+		void performSummon(const component::movement::TransformComponent& transform,
 		    const core::data::MacPhaseData& phase, int summonSlots);
 
 		/**

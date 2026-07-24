@@ -3,10 +3,10 @@
 #include <string_view>
 #include <optional>
 #include "core/data/ModelMetadata.h"
-#include "core/data/JobInfo.h"
 #include "core/data/StageMetadata.h"
+#include "core/data/FileExtensionBonus.h"
+#include "core/data/FileExtensionType.h"
 #include "core/data/ProjectileMetadata.h"
-#include "core/constant/JobType.h"
 
 namespace core::iface
 {
@@ -28,24 +28,21 @@ namespace core::iface
 
 		/**
 		 * @brief modelIDからメタデータを取得する
+		 *
+		 * @note コライダーサイズが全成分0のモデルは loadModelById() の中で実寸から
+		 *       自動計算され、その結果が書き戻される。そのため本メソッドを
+		 *       loadModelById() より先に呼ぶと、自動計算前の0が返る点に注意すること。
 		 * @param modelId モデルID
 		 * @return メタデータ（存在しない場合nullopt）
 		 */
-		virtual std::optional<core::data::ModelMetadata> getMetadata(const std::string_view modelId) const = 0;
+		[[nodiscard]] virtual std::optional<core::data::ModelMetadata> getMetadata(const std::string_view modelId) const = 0;
 
 		/**
 		 * @brief フォントIDからフォント名を取得する
 		 * @param fontId フォントID
 		 * @return フォントファミリー名（存在しない場合nullopt）
 		 */
-		virtual std::optional<std::string> getFontName(const std::string_view fontId) const = 0;
-
-		/**
-		 * @brief ジョブタイプからジョブ情報を取得する
-		 * @param jobType ジョブタイプ
-		 * @return ジョブ情報
-		 */
-		[[nodiscard]] virtual core::data::JobInfo getJobInfo(core::constant::JobType jobType) const = 0;
+		[[nodiscard]] virtual std::optional<std::string> getFontName(const std::string_view fontId) const = 0;
 
 		/**
 		 * @brief 画像IDから画像を読み込みハンドルを返す（キャッシュ付き）
@@ -65,7 +62,15 @@ namespace core::iface
 		 * @brief ステージの配置定義を取得する
 		 * @return ステージ配置定義
 		 */
-		[[nodiscard]] virtual const core::data::StageMetadata& getStageMetadata() const = 0;
+		[[nodiscard]] virtual const core::data::StageMetadata& getStageMetadata() const noexcept = 0;
+
+		/**
+		 * @brief 拡張子種別に対応するパラメータボーナスを取得する
+		 * @param type ファイル拡張子グループ種別
+		 * @return 対応するボーナス値
+		 */
+		[[nodiscard]] virtual const core::data::FileExtensionBonus& getExtensionBonus(
+		    core::data::FileExtensionType type) const noexcept = 0;
 
 		/**
 		 * @brief 弾IDから弾定義を取得する
@@ -82,7 +87,7 @@ namespace core::iface
 		 * @param modelHandle 複製元のモデルハンドル
 		 * @return 複製したモデルハンドル、失敗時は-1
 		 */
-		virtual int duplicateModel(int modelHandle) = 0;
+		[[nodiscard]] virtual int duplicateModel(int modelHandle) = 0;
 
 		/**
 		 * @brief モデルにアタッチされている全アニメーションをデタッチする
@@ -103,7 +108,7 @@ namespace core::iface
 		 * @param scale 適用するスケール
 		 * @return 水平方向の外接半径。失敗時は 0.0f
 		 */
-		[[nodiscard]] virtual float computeBoundingRadius(int modelHandle, float scale) const = 0;
+		[[nodiscard]] virtual float computeBoundingRadius(int modelHandle, float scale) const noexcept = 0;
 
 		/**
 		 * @brief モデルのAABB中心（ローカル座標・スケール未適用）を計算する
@@ -113,6 +118,6 @@ namespace core::iface
 		 * @param modelHandle モデルハンドル
 		 * @return AABB中心のローカル座標。失敗時はゼロベクトル
 		 */
-		[[nodiscard]] virtual core::Vector3 computeBoundingCenter(int modelHandle) const = 0;
+		[[nodiscard]] virtual core::Vector3 computeBoundingCenter(int modelHandle) const noexcept = 0;
 	};
 } // namespace core::iface

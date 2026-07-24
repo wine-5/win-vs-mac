@@ -1,16 +1,18 @@
-#include "InGameView.h"
+﻿#include "InGameView.h"
 #include "core/utility/Color.h"
-#include "game/component/TransformComponent.h"
-#include "game/component/RenderComponent.h"
-#include "game/component/AimComponent.h"
-#include "game/component/ProjectileComponent.h"
-#include "game/component/VelocityComponent.h"
-#include "game/component/PlayerChargeComponent.h"
-#include "game/system/PlayerChargeVisualsSystem.h"
-#include "game/system/MacAwakenEffectSystem.h"
-#include "game/system/DetectionAlertVisualsSystem.h"
-#include "game/system/AttackTelegraphVisualsSystem.h"
-#include "game/system/TelegraphVisualsSystem.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/visual/RenderComponent.h"
+#include "game/component/combat/AimComponent.h"
+#include "game/component/combat/ProjectileComponent.h"
+#include "game/component/combat/DeathComponent.h"
+#include "game/component/ai/AIComponent.h"
+#include "game/component/movement/VelocityComponent.h"
+#include "game/component/combat/PlayerChargeComponent.h"
+#include "game/system/visual/PlayerChargeVisualsSystem.h"
+#include "game/system/visual/MacAwakenEffectSystem.h"
+#include "game/system/visual/DetectionAlertVisualsSystem.h"
+#include "game/system/visual/AttackTelegraphVisualsSystem.h"
+#include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
 #include <cmath>
@@ -30,11 +32,9 @@ namespace game::scene
 	{
 	}
 
-	void InGameView::draw(core::ecs::EntityId playerId,
-	    core::ecs::EntityId groundId,
-	    const std::vector<core::ecs::EntityId>& enemyIds)
+	void InGameView::draw(core::ecs::EntityId playerId)
 	{
-		drawModels(playerId, groundId, enemyIds);
+		drawModels();
 
 		// 攻撃予兆（地面の攻撃範囲サークル）。地面の上・敵の足元に3Dで描く（3D描画フェーズ）
 		if (m_attackTelegraphSystem)
@@ -68,34 +68,36 @@ namespace game::scene
 		drawReticle(playerId);
 
 		// DEBUG: デバッグHUD（FPS等の統計・カメラ状態ラベル）（リリース時に削除）
+		// 敵数はAIComponentを持つEntity数から数える（IDリストを引き回さない）
 		if (m_debugHUDView)
-			m_debugHUDView->draw(static_cast<int>(enemyIds.size()));
+			m_debugHUDView->draw(
+			    static_cast<int>(m_componentManager.getAllEntities<component::ai::AIComponent>().size()));
 
 		// Effekseerエフェクトの描画（3Dモデル描画後・UI手前に呼び出す）
 		m_effectFactory.draw();
 	}
 
-	void InGameView::setPlayerChargeVisualsSystem(system::PlayerChargeVisualsSystem* system)
+	void InGameView::setPlayerChargeVisualsSystem(system::visual::PlayerChargeVisualsSystem* system)
 	{
 		m_playerChargeVisualsSystem = system;
 	}
 
-	void InGameView::setMacAwakenEffectSystem(system::MacAwakenEffectSystem* system)
+	void InGameView::setMacAwakenEffectSystem(system::visual::MacAwakenEffectSystem* system)
 	{
 		m_macAwakenEffectSystem = system;
 	}
 
-	void InGameView::setDetectionAlertVisualsSystem(system::DetectionAlertVisualsSystem* system)
+	void InGameView::setDetectionAlertVisualsSystem(system::visual::DetectionAlertVisualsSystem* system)
 	{
 		m_detectionAlertSystem = system;
 	}
 
-	void InGameView::setAttackTelegraphVisualsSystem(system::AttackTelegraphVisualsSystem* system)
+	void InGameView::setAttackTelegraphVisualsSystem(system::visual::AttackTelegraphVisualsSystem* system)
 	{
 		m_attackTelegraphSystem = system;
 	}
 
-	void InGameView::setTelegraphVisualsSystem(system::TelegraphVisualsSystem* system)
+	void InGameView::setTelegraphVisualsSystem(system::visual::TelegraphVisualsSystem* system)
 	{
 		m_telegraphSystem = system;
 	}
@@ -110,26 +112,35 @@ namespace game::scene
 		m_debugHUDView = view;
 	}
 
-	void InGameView::drawModels(core::ecs::EntityId playerId,
-	    core::ecs::EntityId groundId,
-	    const std::vector<core::ecs::EntityId>& enemyIds)
+	void InGameView::drawModels()
 	{
-		const auto& transform{ m_componentManager.get<component::TransformComponent>(playerId) };
-		const auto& render{ m_componentManager.get<component::RenderComponent>(playerId) };
-		const auto& groundTransform{ m_componentManager.get<component::TransformComponent>(groundId) };
-		const auto& groundRender{ m_componentManager.get<component::RenderComponent>(groundId) };
+		// RenderComponentを持つEntityを一律に描く。
+		// プレイヤー・地面・敵をIDで名指ししないため、描画対象が増えてもここは変わらない。
+		//
+		// ただし2パスに分けている。死亡ディゾルブ中の敵は半透明合成で描かれ、
+		// 半透明はZバッファがあっても描画順に依存するため、不透明を全て描いた後に回す。
+		const auto entities{ m_componentManager.getAllEntities<component::visual::RenderComponent>() };
 
-		if (render.m_isVisible)
-			m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
-
-		m_renderer.drawModel(groundRender.m_modelHandle, groundTransform.m_position, groundTransform.m_rotation, groundTransform.m_scale);
-
-		for (auto enemyId : enemyIds)
+		for (const bool dissolvingPass : { false, true })
 		{
-			const auto& enemyRender{ m_componentManager.get<component::RenderComponent>(enemyId) };
-			const auto& enemyTransform{ m_componentManager.get<component::TransformComponent>(enemyId) };
-			if (enemyRender.m_isVisible)
-				m_renderer.drawModel(enemyRender.m_modelHandle, enemyTransform.m_position, enemyTransform.m_rotation, enemyTransform.m_scale);
+			for (const auto entityId : entities)
+			{
+				const auto& render{ m_componentManager.get<component::visual::RenderComponent>(entityId) };
+				if (!render.m_isVisible || render.m_modelHandle == -1)
+					continue;
+
+				// 弾は回転・向きの扱いが特殊なため drawProjectileModels が専用に描く
+				if (m_componentManager.has<component::combat::ProjectileComponent>(entityId))
+					continue;
+
+				// 死亡演出中（＝半透明）かどうかで描くパスを振り分ける
+				const bool isDissolving{ m_componentManager.has<component::combat::DeathComponent>(entityId) };
+				if (isDissolving != dissolvingPass)
+					continue;
+
+				const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
+				m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
+			}
 		}
 	}
 
@@ -138,13 +149,13 @@ namespace game::scene
 		// 敵を捕捉していれば赤、最大溜め完了ならWindowsロゴの水色、通常は黒
 		// （捕捉＝発射判断に直結する情報なので最優先で表示する）
 		bool onTarget{ false };
-		if (m_componentManager.has<component::AimComponent>(playerId))
-			onTarget = m_componentManager.get<component::AimComponent>(playerId).m_hasTarget;
+		if (m_componentManager.has<component::combat::AimComponent>(playerId))
+			onTarget = m_componentManager.get<component::combat::AimComponent>(playerId).m_hasTarget;
 
 		bool isMaxCharged{ false };
-		if (m_componentManager.has<component::PlayerChargeComponent>(playerId))
+		if (m_componentManager.has<component::combat::PlayerChargeComponent>(playerId))
 		{
-			const auto& charge{ m_componentManager.get<component::PlayerChargeComponent>(playerId) };
+			const auto& charge{ m_componentManager.get<component::combat::PlayerChargeComponent>(playerId) };
 			isMaxCharged = charge.m_isCharging && charge.m_chargeRate >= 1.0f;
 		}
 
@@ -182,26 +193,21 @@ namespace game::scene
 		// 発射地点からの移動距離に掛ける係数（1ワールド単位あたりのタンブル回転量[rad]）
 		constexpr float TUMBLE_PER_UNIT{ 0.015f };
 
-		auto projectiles{ m_componentManager.getAllEntities<component::ProjectileComponent>() };
+		auto projectiles{ m_componentManager.getAllEntities<component::combat::ProjectileComponent>() };
 		for (auto id : projectiles)
 		{
-			if (!m_componentManager.has<component::RenderComponent>(id))
+			if (!m_componentManager.has<component::visual::RenderComponent>(id))
 				continue;
 
-			const auto& render{ m_componentManager.get<component::RenderComponent>(id) };
+			const auto& render{ m_componentManager.get<component::visual::RenderComponent>(id) };
 			if (!render.m_isVisible || render.m_modelHandle == -1)
 				continue;
 
-			const auto& transform{ m_componentManager.get<component::TransformComponent>(id) };
-			const auto& projectile{ m_componentManager.get<component::ProjectileComponent>(id) };
+			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(id) };
+			const auto& projectile{ m_componentManager.get<component::combat::ProjectileComponent>(id) };
 
 			// 発射地点からの移動距離に応じてタンブルさせる（状態を持たず距離から導出する）
-			const core::Vector3 traveled{
-				transform.m_position.x - projectile.m_spawnPosition.x,
-				transform.m_position.y - projectile.m_spawnPosition.y,
-				transform.m_position.z - projectile.m_spawnPosition.z
-			};
-			const float distance{ std::sqrt(traveled.x * traveled.x + traveled.y * traveled.y + traveled.z * traveled.z) };
+			const float distance{ (transform.m_position - projectile.m_spawnPosition).length() };
 			const float tumble{ distance * TUMBLE_PER_UNIT };
 
 			if (projectile.m_spinRollSpeed > 0.0f)
@@ -211,9 +217,9 @@ namespace game::scene
 				const float roll{ distance * projectile.m_spinRollSpeed };
 				// 進行方向（velocity）を向いたまま飛ばす。モデルの正面が逆なので反転して渡す（180度逆）
 				core::Vector3 faceDir{ 0.0f, 0.0f, -1.0f };
-				if (m_componentManager.has<component::VelocityComponent>(id))
+				if (m_componentManager.has<component::movement::VelocityComponent>(id))
 				{
-					const auto& vel{ m_componentManager.get<component::VelocityComponent>(id).m_velocity };
+					const auto& vel{ m_componentManager.get<component::movement::VelocityComponent>(id).m_velocity };
 					faceDir = core::Vector3{ -vel.x, -vel.y, -vel.z };
 				}
 				m_renderer.drawSpinningModelFacing(render.m_modelHandle, transform.m_position,

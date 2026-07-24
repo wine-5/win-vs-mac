@@ -18,7 +18,7 @@
 #include "core/interface/IProjectileWindowManager.h"
 #include "game/factory/FactoryManager.h"
 #include "game/factory/EnemySpawner.h"
-#include "game/component/RenderComponent.h"
+#include "game/component/visual/RenderComponent.h"
 #include "game/data/PlayerData.h"
 #include "game/data/FileEquipmentData.h"
 #include "game/event/AudioEventListener.h"
@@ -36,10 +36,10 @@ namespace game
 	class GameManager;  // 前方宣言
 	class PauseManager; // 前方宣言
 
-	namespace system
+	namespace system::camera
 	{
 		class DebugCameraSystem; // DEBUG: 前方宣言（リリース時に削除）
-	} // namespace system
+	} // namespace system::camera
 
 	namespace ui::debug
 	{
@@ -104,12 +104,17 @@ namespace game::scene
 		 */
 		void saveResultData(bool isVictory) noexcept;
 
+		// 各クラスにイベントバスの参照を渡したいため先にメンバ変数として宣言しておく。
+		//
+		// 【重要】購読者（SystemManagerが持つ各System・m_audioEventListener）より
+		// 必ず前に宣言すること。メンバの破棄は宣言の逆順で行われるため、
+		// これより後に宣言すると購読者のSubscriptionが解除される時点で
+		// EventBusが破棄済みになり、解放後アクセスになる
+		core::base::EventBus m_eventBus;
+
 		core::ecs::EntityManager 	m_entityManager;
 		core::ecs::ComponentManager m_componentManager;
 		core::ecs::SystemManager 	m_systemManager;
-
-		// 各クラスにイベントバスの参照を渡したいため先にメンバ変数として宣言しておく
-		core::base::EventBus m_eventBus;
 
 		core::iface::ICamera          &m_camera;
 		core::iface::IRenderer        &m_renderer;
@@ -127,7 +132,6 @@ namespace game::scene
 		game::data::PlayerData m_playerData;
 		InGameView m_view;
 
-		core::ecs::EntityId m_groundId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_macId{ core::ecs::INVALID_ENTITY_ID };
 
@@ -137,7 +141,7 @@ namespace game::scene
 		std::unique_ptr<core::iface::IProjectileWindowManager> m_projectileWindowManager;
 
 		// DEBUG: シーンビュー凍結中に単独更新するための参照（所有はSystemManager。リリース時に削除）
-		system::DebugCameraSystem* m_debugCameraSystem{ nullptr };
+		system::camera::DebugCameraSystem* m_debugCameraSystem{ nullptr };
 
 		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（リリース時にまとめて削除）
 		std::unique_ptr<ui::debug::DebugGizmoView> m_debugGizmoView;
@@ -147,5 +151,8 @@ namespace game::scene
 		float m_elapsedTime{0.0f};
 		int   m_killCount{0};
 		float m_totalDamageTaken{0.0f};
+
+		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
+		std::vector<core::base::EventBus::Subscription> m_subscriptions{};
 	};
 } // namespace game::scene

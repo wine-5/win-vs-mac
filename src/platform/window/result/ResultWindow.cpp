@@ -1,22 +1,21 @@
-#include <windows.h>
+﻿#include <windows.h>
 #include "ResultWindow.h"
 #include "thirdparty/nlohmann/json.hpp"
-#include "core/base/ServiceLocator.h"
-#include "game/scene/SceneManager.h"
-#include "game/scene/SceneType.h"
+#include "core/utility/Log.h"
+#include <exception>
 
 namespace platform::window::result
 {
-    ResultWindow::ResultWindow(
-        core::iface::IScreen& screen,
-        std::function<void()> onRetry,
-        std::function<void()> onTitle) noexcept
-        : WindowBase(WINDOW_CLASS_NAME, L"Result - Win vs Mac.exe",
-            0, 0, 0, 0)
-        , m_screen{ screen }
-        , m_onRetry{ std::move(onRetry) }
-        , m_onTitle{ std::move(onTitle) }
-    {
+	ResultWindow::ResultWindow(
+	    core::iface::IScreen& screen,
+	    std::function<void()> onRetry,
+	    std::function<void()> onTitle) noexcept
+	    : WebViewWindowBase(WINDOW_CLASS_NAME, L"Result - Win vs Mac.exe",
+	          0, 0, 0, 0)
+	    , m_screen{ screen }
+	    , m_onRetry{ std::move(onRetry) }
+	    , m_onTitle{ std::move(onTitle) }
+	{
     }
 
     ResultWindow::~ResultWindow() noexcept
@@ -86,24 +85,11 @@ namespace platform::window::result
     LRESULT ResultWindow::onMessage(
         HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
     {
-        if (msg == WM_SIZE)
-        {
-            if (wParam == SIZE_MINIMIZED)
-                m_webView.setVisible(false);
-            else
-                m_webView.resize(LOWORD(lParam), HIWORD(lParam));
-            return 0;
-        }
-        if (msg == WM_SHOWWINDOW)
-            m_webView.setVisible(wParam != 0);
-        if (msg == WM_ACTIVATEAPP && wParam != 0)
-        {
-            RECT rc{};
-            GetClientRect(hwnd, &rc);
-            if (rc.right > 0 && rc.bottom > 0)
-                m_webView.resize(rc.right, rc.bottom);
-        }
-        return WindowBase::onMessage(hwnd, msg, wParam, lParam);
+		// サイズ追従・可視追従は WebViewWindowBase に集約している
+		if (const auto handled{ handleWebViewMessage(hwnd, msg, wParam, lParam) })
+			return *handled;
+
+		return WindowBase::onMessage(hwnd, msg, wParam, lParam);
     }
 
     void ResultWindow::handleMessage(const std::string& json) noexcept
@@ -135,8 +121,15 @@ namespace platform::window::result
                     m_onTitle();
             }
         }
-        catch (...) {}
-    }
+		catch (const std::exception& e)
+		{
+			core::log::error("ResultWindow::handleMessage: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("ResultWindow::handleMessage: 不明な例外が発生しました");
+		}
+	}
 
     void ResultWindow::sendResultData(const core::data::ResultData& data) noexcept
     {
@@ -153,6 +146,13 @@ namespace platform::window::result
             std::string jsonStr = j.dump();
             m_webView.postMessage(jsonStr);
         }
-        catch (...) { }
-    }
+		catch (const std::exception& e)
+		{
+			core::log::error("ResultWindow::sendResultData: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("ResultWindow::sendResultData: 不明な例外が発生しました");
+		}
+	}
 } // namespace platform::window::result

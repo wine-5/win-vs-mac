@@ -1,4 +1,4 @@
-#include "AudioManager.h"
+﻿#include "AudioManager.h"
 #include "DxLib.h"
 
 namespace infrastructure
@@ -19,8 +19,13 @@ namespace infrastructure
 		auto it{ configs.find(type) };
 		if (it == configs.end()) return;
 
-		const repository::BgmConfig& config{ it->second };
+		const resource::repository::BgmConfig& config{ it->second };
 		const bool useFade{ fade && config.m_useFade };
+
+		// 同じBGMが既に鳴っている場合は何もしない。
+		// これが無いと「フェードアウト→同じ曲をフェードイン」が走り、曲に不自然な切れ目ができる
+		if (config.m_handle == m_currentBgmHandle && m_fadeState != FadeState::FadeOut)
+			return;
 
 		if (m_currentBgmHandle != -1)
 		{
@@ -82,18 +87,21 @@ namespace infrastructure
 		auto it{ configs.find(type) };
 		if (it == configs.end()) return;
 
-		const repository::SeConfig& config{ it->second };
+		const resource::repository::SeConfig& config{ it->second };
 		ChangeVolumeSoundMem(static_cast<int>(config.m_volume * 255), config.m_handle);
 		PlaySoundMem(config.m_handle, DX_PLAYTYPE_BACK);
 	}
 
-	void AudioManager::update()
+	void AudioManager::update(float deltaTime)
 	{
 		if (m_fadeState == FadeState::None) return;
 
+		// 1フレームあたりではなく秒あたりの変化量にして、フレームレートに依存させない
+		const float step{ deltaTime / FADE_DURATION };
+
 		if (m_fadeState == FadeState::FadeIn)
 		{
-			m_currentBgmVolume += FADE_SPEED;
+			m_currentBgmVolume += step;
 			if (m_currentBgmVolume >= m_targetBgmVolume)
 			{
 				m_currentBgmVolume = m_targetBgmVolume;
@@ -103,7 +111,7 @@ namespace infrastructure
 		}
 		else if (m_fadeState == FadeState::FadeOut)
 		{
-			m_currentBgmVolume -= FADE_SPEED;
+			m_currentBgmVolume -= step;
 			if (m_currentBgmVolume <= 0.0f)
 			{
 				m_currentBgmVolume = 0.0f;

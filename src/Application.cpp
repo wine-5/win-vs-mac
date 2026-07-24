@@ -1,4 +1,4 @@
-#include "Application.h"
+﻿#include "Application.h"
 #include "ServiceLocatorInitializer.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IInputProvider.h"
@@ -36,7 +36,7 @@ Application::Application(int screenWidth, int screenHeight)
 
 void Application::run()
 {
-	while (m_isRunning && ProcessMessage() == 0)
+	while (m_isRunning && !m_gameManager.isQuitRequested() && ProcessMessage() == 0)
 	{
 		ClearDrawScreen(); // 画面クリア
 
@@ -46,7 +46,7 @@ void Application::run()
 
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio)
-			audio->update();
+			audio->update(DELTA_TIME);
 
 		// シーンをまたぐポーズメニュー（Esc）の開閉・操作を処理する
 		updatePauseMenu();

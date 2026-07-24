@@ -3,8 +3,8 @@
 #include "core/interface/IEffectFactory.h" // DEBUG: リリース時に削除
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
-#include "game/component/TransformComponent.h"
-#include "game/component/ProjectileComponent.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/combat/ProjectileComponent.h"
 #include <cstdio>
 
 namespace
@@ -99,8 +99,8 @@ namespace game::ui::debug
 
 	void DebugHUDView::drawStats(int enemyCount)
 	{
-		const int entityCount{ static_cast<int>(m_componentManager.getAllEntities<component::TransformComponent>().size()) };
-		const int projectileCount{ static_cast<int>(m_componentManager.getAllEntities<component::ProjectileComponent>().size()) };
+		const int entityCount{ static_cast<int>(m_componentManager.getAllEntities<component::movement::TransformComponent>().size()) };
+		const int projectileCount{ static_cast<int>(m_componentManager.getAllEntities<component::combat::ProjectileComponent>().size()) };
 		const int activeEffectCount{ m_effectFactory.getActiveEffectCount() };
 		const auto snapshot{ m_perfProvider.getSnapshot() };
 

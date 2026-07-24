@@ -93,14 +93,6 @@ namespace core::iface
 		    float halfAngleRad, unsigned int color, bool filled) = 0;
 
 		/**
-		 * @brief 常にカメラの方を向く板（ビルボード）として画像を描画する
-		 * @param imageHandle 画像ハンドル（loadImageByIdで取得）
-		 * @param position ワールド座標（板の中心）
-		 * @param size 描画サイズ（ワールド単位・一辺の長さ）
-		 */
-		virtual void drawBillboard(int imageHandle, const core::Vector3& position, float size) = 0;
-
-		/**
 		 * @brief 3Dモデルの正面(ローカル+Z)を指定方向へ向け、その面内で回転させて描画する
 		 *
 		 * faceDir（進行方向など）へモデルの正面を向け、faceDir軸まわりに spinAngle だけ回す。
@@ -118,9 +110,10 @@ namespace core::iface
 		    const core::Vector3& scale, const core::Vector3& centerOffset,
 		    const core::Vector3& faceDir, float spinAngle) = 0;
 
-		// TODO: worldToScreen はワールド→スクリーンの射影変換であり、厳密には3D描画の責務ではない。
-		//       ICameraは「計算しない薄い層」の方針のため置けない。将来のリファクタリングで
-		//       screenToWorld 等とあわせて専用の IViewProjection インターフェースへ分離する。
+		// 補足: worldToScreen は射影変換であり、厳密には3D描画の責務ではない。
+		//       ただし現状の利用は順変換の2箇所のみで、メソッド1本のために
+		//       IViewProjection を新設しても抽象が増えるだけで得るものが少ない。
+		//       screenToWorld（クリック→ワールド）等の逆変換が必要になった時点で分離する。
 		/**
 		 * @brief ワールド座標をスクリーン座標へ変換する
 		 * @param worldPos ワールド座標

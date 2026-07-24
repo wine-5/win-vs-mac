@@ -57,25 +57,6 @@ namespace game::scene
 		m_uiManager.update();
 	}
 
-	void TitleView::drawSplash(int dotCount) const
-	{
-		m_uiRenderer.setFont(m_mainFontName.c_str());
-
-		std::string text{ "Win vs Mac.exeを起動しています" };
-		for (int i{ 0 }; i < dotCount; ++i)
-			text += '.';
-
-		auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
-		if (converter)
-			text = converter->utf8ToShiftJis(text);
-
-		const int normalFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
-		const int textWidth{ m_uiRenderer.getTextWidth(text.c_str(), normalFontSize) };
-		const int x{ (m_screen.getWidth() - textWidth) / 2 };
-		const int y{ (m_screen.getHeight() - normalFontSize) / 2 };
-		m_uiRenderer.drawText(x, y, text.c_str(), core::utility::Color::WHITE, normalFontSize);
-	}
-
 	void TitleView::drawTitle() const
 	{
 		drawBackground();
@@ -100,7 +81,7 @@ namespace game::scene
 
 	void TitleView::pushHistory(std::array<float, HISTORY_SIZE>& buf, float value)
 	{
-		std::rotate(buf.begin(), buf.begin() + 1, buf.end());
+		std::ranges::rotate(buf, buf.begin() + 1);
 		buf.back() = value;
 	}
 

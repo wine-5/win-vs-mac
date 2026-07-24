@@ -3,7 +3,7 @@
 #include "core/utility/Vector3.h"
 #include "core/data/ModelMetadata.h"
 #include "game/constant/MetadataKeys.h"
-#include "game/data/FileExtensionBonus.h"
+#include "core/data/FileExtensionBonus.h"
 
 namespace game::data
 {
@@ -21,21 +21,9 @@ namespace game::data
 		static PlayerData fromMetadata(const core::data::ModelMetadata& metadata)
 		{
 			PlayerData data;
-			data.m_modelPath = metadata.modelPath;
 			data.m_scale = metadata.scale;
 			data.m_colliderSize = metadata.colliderSize;
 			data.m_colliderOffset = metadata.colliderOffset;
-
-			// アニメーションパス（stringProperties から取得）
-			auto idleIt{ metadata.stringProperties.find(
-				std::string(constant::metadata_keys::IDLE_ANIM)) };
-			if (idleIt != metadata.stringProperties.end())
-				data.m_idleAnimPath = idleIt->second;
-
-			auto walkIt{ metadata.stringProperties.find(
-				std::string(constant::metadata_keys::WALK_ANIM)) };
-			if (walkIt != metadata.stringProperties.end())
-				data.m_walkAnimPath = walkIt->second;
 
 			// moveSpeed（floatProperties から取得）
 			auto moveSpeedIt{ metadata.floatProperties.find(
@@ -73,21 +61,9 @@ namespace game::data
 			if (attackCooldownIt != metadata.floatProperties.end())
 				data.m_attackCooldown = attackCooldownIt->second;
 
-			// 基本値を保存（ボーナス計算用）
-			data.m_baseHp = data.m_maxHp;
-			data.m_baseAtk = data.m_attackPower;
-			data.m_baseDef = data.m_defence;
-			data.m_baseSpd = data.m_moveSpeed;
-
 			return data;
 		}
 
-		/** @brief モデルパスを取得 */
-		[[nodiscard]] const std::string& getModelPath()    const noexcept { return m_modelPath; }
-		/** @brief Idleアニメーションパスを取得 */
-		[[nodiscard]] const std::string& getIdleAnimPath() const noexcept { return m_idleAnimPath; }
-		/** @brief Walkアニメーションパスを取得 */
-		[[nodiscard]] const std::string& getWalkAnimPath() const noexcept { return m_walkAnimPath; }
 		/** @brief 移動速度を取得 */
 		[[nodiscard]] float              getMoveSpeed()      const noexcept { return m_moveSpeed; }
 		/** @brief ダッシュ速度倍率を取得 */
@@ -114,10 +90,15 @@ namespace game::data
 
 		/**
 		 * @brief FileExtensionBonus をパラメータに加算する
+		 *
+		 * 方針: 装備スロットごとにこの関数を呼んで実値へ加算していく形を維持する。
+		 * ベース値と修正値を分けて保持する仕組み（StatModifier等）は、実行時に
+		 * 「基礎値＋ボーナス」を分けて見せる必要が出るまで導入しない。
+		 * セレクト画面の内訳表示は Win32SelectWindowManager 側が別途計算しており、
+		 * ここでは最終値だけを持てば足りる。
 		 * @param bonus 拡張子ボーナス値
-		 * TODO: 今後はプレイヤーのパラメータを直接変更する以外に武器の攻撃力を上げるなどにする
 		 */
-		void applyExtensionBonus(const data::FileExtensionBonus& bonus)
+		void applyExtensionBonus(const core::data::FileExtensionBonus& bonus)
 		{
 			m_attackPower += bonus.atk;
 			m_moveSpeed += bonus.spd;
@@ -126,32 +107,7 @@ namespace game::data
 			m_attackRange += bonus.attackRange;
 		}
 
-		/**
-		 * @brief 職業パラメータを加算値として適用する
-		 * @param hp 職業HP値
-		 * @param atk 職業攻撃力
-		 * @param def 職業防御力
-		 * @param spd 職業移動速度
-		 */
-		void applyJobParameters(float hp, float atk, float def, float spd) noexcept
-		{
-			// 職業パラメータを加算値として保存
-			m_jobHpAddition = hp - m_baseHp;
-			m_jobAtkAddition = atk - m_baseAtk;
-			m_jobDefAddition = def - m_baseDef;
-			m_jobSpdAddition = spd - m_baseSpd;
-
-			// 実際の値を更新
-			m_maxHp = m_baseHp + m_jobHpAddition;
-			m_attackPower = m_baseAtk + m_jobAtkAddition;
-			m_defence = m_baseDef + m_jobDefAddition;
-			m_moveSpeed = m_baseSpd + m_jobSpdAddition;
-		}
-
 	private:
-		std::string   m_modelPath;
-		std::string   m_idleAnimPath;
-		std::string   m_walkAnimPath;
 		float         m_moveSpeed{ 0.0f };
 		float m_dashMultiplier{ 1.0f }; // JSON未設定時はダッシュしても等速
 		float         m_maxHp{ 0.0f };
@@ -162,17 +118,5 @@ namespace game::data
 		core::Vector3 m_colliderSize;
 		core::Vector3 m_colliderOffset;
 		core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
-
-		// 基本値（メタデータから取得）
-		float m_baseHp{ 0.0f };
-		float m_baseAtk{ 0.0f };
-		float m_baseDef{ 0.0f };
-		float m_baseSpd{ 0.0f };
-
-		// 加算値（職業選択で加算）
-		float m_jobHpAddition{ 0.0f };
-		float m_jobAtkAddition{ 0.0f };
-		float m_jobDefAddition{ 0.0f };
-		float m_jobSpdAddition{ 0.0f };
 	};
 } // namespace game::data

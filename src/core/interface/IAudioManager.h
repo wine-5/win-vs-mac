@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "core/constant/BgmType.h"
 #include "core/constant/SeType.h"
 
@@ -27,12 +27,6 @@ namespace core::iface
 		virtual void playBgm(core::constant::BgmType type, bool fade = true) = 0;
 
 		/**
-		 * @brief 現在再生中の BGM を停止する
-		 * @param fade true の場合フェードアウトを使用する（デフォルト: true）
-		 */
-		virtual void stopBgm(bool fade = true) = 0;
-
-		/**
 		 * @brief SE を再生する
 		 * @param type 再生する SE の種別
 		 */
@@ -40,7 +34,8 @@ namespace core::iface
 
 		/**
 		 * @brief フェード処理など毎フレームの更新処理
+		 * @param deltaTime フレーム間の時間差（秒）
 		 */
-		virtual void update() = 0;
+		virtual void update(float deltaTime) = 0;
 	};
 } // namespace core::iface

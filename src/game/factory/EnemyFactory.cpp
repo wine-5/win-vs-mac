@@ -25,21 +25,11 @@ namespace game::factory
 		core::ecs::EntityId id{ enemy->getId() };
 
 		m_enemies.push_back(std::move(enemy));
-		m_enemyIds.push_back(id);
 		return id;
-	}
-
-	const std::vector<core::ecs::EntityId>& EnemyFactory::getEnemyIds() const noexcept
-	{
-		return m_enemyIds;
 	}
 
 	void EnemyFactory::remove(core::ecs::EntityId id)
 	{
-		auto idIt{ std::ranges::find(m_enemyIds, id) };
-		if (idIt != m_enemyIds.end())
-			m_enemyIds.erase(idIt);
-
 		auto enemyIt{ std::ranges::find_if(m_enemies,
 			[id](const auto& enemy) { return enemy->getId() == id; }) };
 		if (enemyIt != m_enemies.end())

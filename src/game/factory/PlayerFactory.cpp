@@ -1,4 +1,5 @@
 ﻿#include "PlayerFactory.h"
+#include <cassert>
 
 namespace game::factory
 {
@@ -24,6 +25,7 @@ namespace game::factory
 
 	actor::Player& PlayerFactory::getPlayer() const
 	{
+		assert(m_player && "PlayerFactory::getPlayer(): create()より前に呼ばれました");
 		return *m_player;
 	}
 } // namespace game::factory

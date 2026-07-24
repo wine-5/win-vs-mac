@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <vector>
 #include <random>
 #include "core/ecs/ISystem.h"
@@ -8,7 +8,10 @@
 
 namespace game::component
 {
-	struct TransformComponent;
+	namespace movement
+	{
+		struct TransformComponent;
+	}
 	namespace ai
 	{
 		struct RangeKeepAIComponent;
@@ -76,7 +79,7 @@ namespace game::system::ai
 		 * @param rangeKeep 対象のRangeKeepAIComponent（タイマー・基準スケールを参照）
 		 * @param inRange プレイヤーが索敵範囲内か
 		 */
-		void applyAttackAnimation(component::TransformComponent& transform,
+		void applyAttackAnimation(component::movement::TransformComponent& transform,
 		    component::ai::RangeKeepAIComponent& rangeKeep, bool inRange);
 
 		core::ecs::ComponentManager& m_componentManager;

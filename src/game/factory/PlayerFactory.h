@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "IFactory.h"
 #include "core/ecs/EntityManager.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/interface/IResourceManager.h"
@@ -12,7 +11,7 @@ namespace game::factory
 	/**
 	 * @brief Playerオブジェクトの生成と寿命管理を担当
 	 */
-	class PlayerFactory : public IFactory
+	class PlayerFactory
 	{
 	public:
 		/**

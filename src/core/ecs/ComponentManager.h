@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 #include "Entity.h"
-#include "IComponent.h"
+#include "IComponentArray.h"
 #include "ComponentArray.h"
 
 namespace core::ecs
@@ -37,6 +37,20 @@ namespace core::ecs
 		T& get(EntityId id)
 		{
 			return getComponentArray<T>()->get(id);
+		}
+
+		/**
+		 * @brief EntityのComponentを取得する（持っていなければnullptr）
+		 *
+		 * has()→get() と2回ハッシュ検索する代わりに1回で済ませたい場面で使う。
+		 * @tparam T Componentの型
+		 * @param id EntityID
+		 * @return Componentのポインタ（持っていない場合nullptr）
+		 */
+		template <typename T>
+		[[nodiscard]] T* tryGet(EntityId id)
+		{
+			return getComponentArray<T>()->tryGet(id);
 		}
 
 		/**
@@ -95,6 +109,6 @@ namespace core::ecs
 			return static_cast<ComponentArray<T>*>(m_componentArrays[type].get());
 		}
 
-		std::unordered_map<std::type_index, std::unique_ptr<IComponent>> m_componentArrays;
+		std::unordered_map<std::type_index, std::unique_ptr<IComponentArray>> m_componentArrays;
 	};
 } // namespace core::ecs

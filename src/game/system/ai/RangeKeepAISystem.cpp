@@ -1,16 +1,16 @@
-#include "RangeKeepAISystem.h"
+﻿#include "RangeKeepAISystem.h"
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/PatrolComponent.h"
-#include "game/component/AIComponent.h"
-#include "game/component/TransformComponent.h"
-#include "game/component/VelocityComponent.h"
-#include "game/component/AttackComponent.h"
-#include "game/component/AnimationComponent.h"
+#include "game/component/ai/AIComponent.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/movement/VelocityComponent.h"
+#include "game/component/combat/AttackComponent.h"
+#include "game/component/visual/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
 #include <cmath>
 #include <algorithm>
 #include <random>
-#include <numbers>
+#include "core/utility/MathConstants.h"
 
 namespace
 {
@@ -63,13 +63,13 @@ namespace game::system::ai
 
 		for (auto entityId : entities)
 		{
-			if (!m_componentManager.has<component::AIComponent>(entityId))
+			if (!m_componentManager.has<component::ai::AIComponent>(entityId))
 				continue;
 
 			// 個体ごとに揺らぎの位相をずらし、複数体が同じタイミングで上下しないようにする
 			const float swayPhase{ static_cast<float>(entityId) * 1.7f };
 
-			auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+			auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 			auto& rangeKeep{ m_componentManager.get<component::ai::RangeKeepAIComponent>(entityId) };
 
 			// AIが無効なら処理をスキップ
@@ -80,7 +80,7 @@ namespace game::system::ai
 			if (ai.m_targetEntity.getId() == 0)
 				continue;
 
-			auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+			auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 
 			// 徘徊の基準点（スポーン地点）を初回だけ記録する（共通のPatrolComponentが保持する）
 			auto& patrol{ m_componentManager.get<component::ai::PatrolComponent>(entityId) };
@@ -90,15 +90,11 @@ namespace game::system::ai
 				patrol.m_homeInitialized = true;
 			}
 
-			auto& targetTransform{ m_componentManager.get<component::TransformComponent>(ai.m_targetEntity.getId()) };
+			auto& targetTransform{ m_componentManager.get<component::movement::TransformComponent>(ai.m_targetEntity.getId()) };
 
 			// ターゲットへの方向ベクトルを計算（3D全軸）
-			core::Vector3 direction{};
-			direction.x = targetTransform.m_position.x - transform.m_position.x;
-			direction.y = targetTransform.m_position.y - transform.m_position.y;
-			direction.z = targetTransform.m_position.z - transform.m_position.z;
-
-			float distance{ std::sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z) };
+			core::Vector3 direction{ targetTransform.m_position - transform.m_position };
+			float distance{ direction.length() };
 
 			// 索敵範囲外なら攻撃・追跡はせず、ホーム周辺をふらつく徘徊に切り替える（その場で固まらせない）
 			if (distance > ai.m_detectionRange)
@@ -109,20 +105,14 @@ namespace game::system::ai
 
 			// 方向ベクトルを正規化
 			if (distance > 0.0f)
-			{
-				direction.x /= distance;
-				direction.y /= distance;
-				direction.z /= distance;
-			}
+				direction = direction.normalized();
 
 			// 距離維持ロジック：推奨距離の帯に入るよう前後方向（ラジアル成分）を決める
 			core::Vector3 moveDirection{ 0.0f, 0.0f, 0.0f };
 			if (distance < rangeKeep.m_preferredDistanceMin)
 			{
 				// 近すぎたら後退
-				moveDirection.x = -direction.x;
-				moveDirection.y = -direction.y;
-				moveDirection.z = -direction.z;
+				moveDirection = -direction;
 			}
 			else if (distance > rangeKeep.m_preferredDistanceMax)
 			{
@@ -147,9 +137,9 @@ namespace game::system::ai
 			}
 
 			// 移動速度を設定（水平と垂直を分ける場合もあるが、ここでは統一）
-			if (m_componentManager.has<component::VelocityComponent>(entityId))
+			if (m_componentManager.has<component::movement::VelocityComponent>(entityId))
 			{
-				auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+				auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 				velocity.m_velocity.x = moveDirection.x * ai.m_moveSpeed;
 				velocity.m_velocity.y = moveDirection.y * ai.m_moveSpeed;
 				velocity.m_velocity.z = moveDirection.z * ai.m_moveSpeed;
@@ -162,9 +152,9 @@ namespace game::system::ai
 				// （重力があれば、重力で下がるので、その分を補正）
 				const float target{ hoverTargetHeight(rangeKeep.m_hoverHeight, m_elapsedTime, swayPhase, rangeKeep.m_attackAnimTimer) };
 				const float heightDiff{ target - transform.m_position.y };
-				if (m_componentManager.has<component::VelocityComponent>(entityId))
+				if (m_componentManager.has<component::movement::VelocityComponent>(entityId))
 				{
-					auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+					auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 					velocity.m_velocity.y += heightDiff * HOVER_RESTORE_SPEED * deltaTime;
 				}
 			}
@@ -180,39 +170,29 @@ namespace game::system::ai
 			}
 
 			// アニメーション要求：移動中は Walk、停止時は Idle
-			if (m_componentManager.has<component::AnimationComponent>(entityId))
+			if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
 			{
-				auto& anim{ m_componentManager.get<component::AnimationComponent>(entityId) };
+				auto& anim{ m_componentManager.get<component::visual::AnimationComponent>(entityId) };
 				anim.m_requested = (std::sqrt(moveDirection.x * moveDirection.x + moveDirection.z * moveDirection.z) > 0.01f)
 				                       ? constant::AnimationState::Walk
 				                       : constant::AnimationState::Idle;
 			}
 
-			// 攻撃のクールダウンを更新
-			if (ai.m_currentAttackCooldown > 0.0f)
-				ai.m_currentAttackCooldown -= deltaTime;
-
-			// 攻撃判定：索敵範囲内かつクールダウンが完了なら攻撃（レンジ判定なし）
-			if (m_componentManager.has<component::AttackComponent>(entityId))
-			{
-				auto& attack{ m_componentManager.get<component::AttackComponent>(entityId) };
-				if (ai.m_currentAttackCooldown <= 0.0f)
-				{
-					attack.m_attackRequested = true;
-					ai.m_currentAttackCooldown = ai.m_attackCooldown;
-				}
-			}
+			// 攻撃判定：索敵範囲内なら毎フレーム要求だけ出す（レンジ判定なし）。
+			// 実際に撃つ間隔はAttackComponentのクールダウンでAttackSystemが管理する
+			if (auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(entityId) })
+				attack->m_attackRequested = true;
 		}
 	}
 	void RangeKeepAISystem::updatePatrol(core::ecs::EntityId entityId, component::ai::RangeKeepAIComponent& rangeKeep,
-	    component::TransformComponent& transform, float deltaTime)
+	    component::movement::TransformComponent& transform, float deltaTime)
 	{
 		auto& patrol{ m_componentManager.get<component::ai::PatrolComponent>(entityId) };
-		const bool hasVelocity{ m_componentManager.has<component::VelocityComponent>(entityId) };
+		const bool hasVelocity{ m_componentManager.has<component::movement::VelocityComponent>(entityId) };
 		const float swayPhase{ static_cast<float>(entityId) * 1.7f };
 
 		// ホバー高度（アイドル揺らぎ込み）を垂直速度へ反映する。徘徊の移動中も待機中も浮遊は保つ
-		auto applyHover{ [&](component::VelocityComponent& velocity)
+		auto applyHover{ [&](component::movement::VelocityComponent& velocity)
 			{
 			    if (rangeKeep.m_hoverHeight > 0.0f)
 			    {
@@ -225,7 +205,7 @@ namespace game::system::ai
 
 		if (!hasVelocity)
 			return;
-		auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+		auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 
 		// 到着後の待機中：水平は止めつつホバーは維持する
 		if (patrol.m_pauseTimer > 0.0f)
@@ -267,20 +247,20 @@ namespace game::system::ai
 		// 目的地へゆっくり移動し、その方向を向く（機体正面軸のズレは facingYawOffset で補正）
 		const float normalizedX{ toTarget.x / distance };
 		const float normalizedZ{ toTarget.z / distance };
-		const float patrolSpeed{ m_componentManager.get<component::AIComponent>(entityId).m_moveSpeed * PATROL_SPEED_FACTOR };
+		const float patrolSpeed{ m_componentManager.get<component::ai::AIComponent>(entityId).m_moveSpeed * PATROL_SPEED_FACTOR };
 		velocity.m_velocity.x = normalizedX * patrolSpeed;
 		velocity.m_velocity.z = normalizedZ * patrolSpeed;
 		applyHover(velocity);
 		transform.m_rotation.y = std::atan2f(-normalizedX, -normalizedZ) + rangeKeep.m_facingYawOffset;
 
 		// アニメを持つ距離維持型が将来出た場合に備えて移動中はWalkを要求する（Safariはアニメ無しで無害）
-		if (m_componentManager.has<component::AnimationComponent>(entityId))
-			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = constant::AnimationState::Walk;
+		if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+			m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = constant::AnimationState::Walk;
 	}
 
 	core::Vector3 RangeKeepAISystem::pickWanderTarget(const core::Vector3& home)
 	{
-		std::uniform_real_distribution<float> angleDist{ 0.0f, 2.0f * std::numbers::pi_v<float> };
+		std::uniform_real_distribution<float> angleDist{ 0.0f, core::utility::TWO_PI };
 		std::uniform_real_distribution<float> radiusDist{ WANDER_RADIUS_MIN, WANDER_RADIUS_MAX };
 		const float angle{ angleDist(m_rng) };
 		const float radius{ radiusDist(m_rng) };

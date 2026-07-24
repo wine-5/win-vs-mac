@@ -1,20 +1,20 @@
-#include <windows.h>
+﻿#include <windows.h>
 #pragma comment(lib, "user32.lib")
-
-#ifndef GWL_USERDATA
-constexpr int GWL_USERDATA{-21};
-#endif
 
 #include "platform/window/WindowBase.h"
 #include "core/interface/ILogger.h"
 
 namespace platform::window
 {
-    WindowBase::WindowBase(const wchar_t* className, const wchar_t* title,
-        int x, int y, int width, int height) noexcept
-        : m_className{className}, m_title{title}, m_x{x}, m_y{y},
-        m_width{width}, m_height{height}, m_hwnd{nullptr}
-    {
+	WindowBase::WindowBase(const wchar_t* className, const wchar_t* title,
+	    int x, int y, int width, int height) noexcept
+	    : m_className{ className }
+	    , m_title{ title }
+	    , m_x{ x }
+	    , m_y{ y }
+	    , m_width{ width }
+	    , m_height{ height }
+	{
     }
 
     WindowBase::~WindowBase() noexcept
@@ -36,15 +36,15 @@ namespace platform::window
         wndClass.lpfnWndProc = &WindowBase::staticWindowProc;
         wndClass.hInstance = GetModuleHandleW(nullptr);
         wndClass.lpszClassName = m_className.c_str();
-        wndClass.hCursor = LoadCursorW(nullptr, (LPCWSTR)IDC_ARROW);
-        wndClass.hbrBackground = (HBRUSH)BACKGROUND_BRUSH_COLOR;
+		wndClass.hCursor = LoadCursorW(nullptr, reinterpret_cast<LPCWSTR>(IDC_ARROW));
+		wndClass.hbrBackground = reinterpret_cast<HBRUSH>(static_cast<INT_PTR>(BACKGROUND_BRUSH_COLOR));
 
-        ATOM atom = RegisterClassW(&wndClass);
+		ATOM atom = RegisterClassW(&wndClass);
         if (atom == 0) return false;
 
-        // lpCreateParams に this を渡すことで staticWindowProc 内から
-        // WM_CREATE のタイミングにインスタンスポインタを GWL_USERDATA に保存できる
-        m_hwnd = CreateWindowExW(
+		// lpCreateParams に this を渡すことで staticWindowProc 内から
+		// WM_CREATE のタイミングにインスタンスポインタを GWLP_USERDATA に保存できる
+		m_hwnd = CreateWindowExW(
             0,
             m_className.c_str(),
             m_title.c_str(),
@@ -68,11 +68,14 @@ namespace platform::window
     {
         if (m_hwnd == nullptr) return;
 
-        // PostQuitMessage は呼ばない（DxLib のメインループが止まるため）
-        if (::DestroyWindow(m_hwnd))
-            m_hwnd = nullptr;
+		// PostQuitMessage は呼ばない（DxLib のメインループが止まるため）
+		// DestroyWindow が失敗した場合はウィンドウが残っているため、
+		// クラス登録も解除せずハンドルも保持したままにして状態の食い違いを避ける
+		if (!::DestroyWindow(m_hwnd))
+			return;
 
-        UnregisterClassW(m_className.c_str(), GetModuleHandleW(nullptr));
+		m_hwnd = nullptr;
+		UnregisterClassW(m_className.c_str(), GetModuleHandleW(nullptr));
     }
 
     void WindowBase::show() noexcept
@@ -88,16 +91,6 @@ namespace platform::window
     {
         if (m_hwnd != nullptr)
             ::ShowWindow(m_hwnd, SW_HIDE);
-    }
-
-    void WindowBase::bringToFront() noexcept
-    {
-        if (m_hwnd == nullptr) return;
-
-        ::SetForegroundWindow(m_hwnd);
-        // SWP_NOMOVE | SWP_NOSIZE で位置・サイズを変えずに Z オーダーだけ最前面に変更する
-        SetWindowPos(m_hwnd, HWND_TOP, 0, 0, 0, 0,
-            SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
     }
 
     [[nodiscard]] HWND WindowBase::getHwnd() const noexcept
@@ -134,17 +127,17 @@ namespace platform::window
     {
         if (msg == WM_CREATE)
         {
-            // WM_CREATE 時だけ lpCreateParams からインスタンスポインタを取り出して
-            // GWL_USERDATA に保存する。以降のメッセージでは GWL_USERDATA から復元する
-            CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
-            WindowBase* pThis = reinterpret_cast<WindowBase*>(pCreate->lpCreateParams);
-            SetWindowLongPtrW(hwnd, GWL_USERDATA, (LONG_PTR)pThis);
-            return pThis->onMessage(hwnd, msg, wParam, lParam);
+			// WM_CREATE 時だけ lpCreateParams からインスタンスポインタを取り出して
+			// GWLP_USERDATA に保存する。以降のメッセージでは GWLP_USERDATA から復元する
+			auto* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
+			auto* pThis = static_cast<WindowBase*>(pCreate->lpCreateParams);
+			SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pThis));
+			return pThis->onMessage(hwnd, msg, wParam, lParam);
         }
 
-        WindowBase* pThis = reinterpret_cast<WindowBase*>(GetWindowLongPtrW(hwnd, GWL_USERDATA));
+		auto* pThis = reinterpret_cast<WindowBase*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
 
-        if (pThis != nullptr) return pThis->onMessage(hwnd, msg, wParam, lParam);
+		if (pThis != nullptr) return pThis->onMessage(hwnd, msg, wParam, lParam);
 
         return DefWindowProcW(hwnd, msg, wParam, lParam);
     }

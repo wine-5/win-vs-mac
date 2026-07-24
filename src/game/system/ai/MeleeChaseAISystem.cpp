@@ -1,15 +1,15 @@
-#include "MeleeChaseAISystem.h"
+﻿#include "MeleeChaseAISystem.h"
 #include "game/component/ai/MeleeChaseAIComponent.h"
 #include "game/component/ai/PatrolComponent.h"
-#include "game/component/AIComponent.h"
-#include "game/component/TransformComponent.h"
-#include "game/component/VelocityComponent.h"
-#include "game/component/AttackComponent.h"
-#include "game/component/AnimationComponent.h"
+#include "game/component/ai/AIComponent.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/movement/VelocityComponent.h"
+#include "game/component/combat/AttackComponent.h"
+#include "game/component/visual/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
 #include <cmath>
 #include <algorithm>
-#include <numbers>
+#include "core/utility/MathConstants.h"
 
 namespace
 {
@@ -39,10 +39,10 @@ namespace game::system::ai
 
 		for (auto entityId : entities)
 		{
-			if (!m_componentManager.has<component::AIComponent>(entityId))
+			if (!m_componentManager.has<component::ai::AIComponent>(entityId))
 				continue;
 
-			auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+			auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 
 			// AIが無効なら処理をスキップ（死亡後など）
 			if (!ai.m_isActive)
@@ -50,7 +50,7 @@ namespace game::system::ai
 
 			auto& melee{ m_componentManager.get<component::ai::MeleeChaseAIComponent>(entityId) };
 			auto& patrol{ m_componentManager.get<component::ai::PatrolComponent>(entityId) };
-			auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+			auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 
 			// 徘徊の基準点（スポーン地点）を初回だけ記録する
 			if (!patrol.m_homeInitialized)
@@ -65,7 +65,7 @@ namespace game::system::ai
 			float distanceToPlayer{ 0.0f };
 			if (ai.m_targetEntity.getId() != 0)
 			{
-				auto& targetTransform{ m_componentManager.get<component::TransformComponent>(ai.m_targetEntity.getId()) };
+				auto& targetTransform{ m_componentManager.get<component::movement::TransformComponent>(ai.m_targetEntity.getId()) };
 				dirToPlayer.x = targetTransform.m_position.x - transform.m_position.x;
 				dirToPlayer.z = targetTransform.m_position.z - transform.m_position.z;
 				distanceToPlayer = std::sqrt(dirToPlayer.x * dirToPlayer.x + dirToPlayer.z * dirToPlayer.z);
@@ -90,19 +90,19 @@ namespace game::system::ai
 	void MeleeChaseAISystem::updateChase(core::ecs::EntityId entityId, float distanceToPlayer,
 	    const core::Vector3& dirToPlayer, float deltaTime)
 	{
-		auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
-		auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+		auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
+		auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 
 		// 攻撃レンジ内かどうかを判定
 		bool inAttackRange{ false };
-		if (m_componentManager.has<component::AttackComponent>(entityId))
-			inAttackRange = distanceToPlayer <= m_componentManager.get<component::AttackComponent>(entityId).m_attackRange;
+		if (m_componentManager.has<component::combat::AttackComponent>(entityId))
+			inAttackRange = distanceToPlayer <= m_componentManager.get<component::combat::AttackComponent>(entityId).m_attackRange;
 
 		// 移動：攻撃レンジ内では止まり、外なら接近する
 		// （従来はレンジ内でも速度を与え続け、プレイヤーへ押し込んでいた）
-		if (m_componentManager.has<component::VelocityComponent>(entityId))
+		if (m_componentManager.has<component::movement::VelocityComponent>(entityId))
 		{
-			auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+			auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 			if (inAttackRange)
 			{
 				velocity.m_velocity.x = 0.0f;
@@ -119,19 +119,16 @@ namespace game::system::ai
 		if (distanceToPlayer > 0.0f)
 			transform.m_rotation.y = std::atan2f(-dirToPlayer.x, -dirToPlayer.z);
 
-		// 攻撃クールダウンを更新
-		if (ai.m_currentAttackCooldown > 0.0f)
-			ai.m_currentAttackCooldown -= deltaTime;
-
-		// 攻撃：レンジ内かつクールダウン完了で攻撃を要求する
+		// 攻撃：レンジ内なら毎フレーム要求だけ出す。
+		// 実際に撃つ間隔はAttackComponentのクールダウンでAttackSystemが管理する
 		bool attacking{ false };
-		if (inAttackRange && ai.m_currentAttackCooldown <= 0.0f &&
-		    m_componentManager.has<component::AttackComponent>(entityId))
+		if (auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(entityId) })
 		{
-			auto& attack{ m_componentManager.get<component::AttackComponent>(entityId) };
-			attack.m_attackRequested = true;
-			ai.m_currentAttackCooldown = ai.m_attackCooldown;
-			attacking = true;
+			if (inAttackRange)
+				attack->m_attackRequested = true;
+
+			// 攻撃アニメはAttackSystemが実際に攻撃を開始したフレームだけ要求する
+			attacking = attack->m_justFired;
 		}
 
 		// アニメ要求：攻撃時はAttack1、レンジ内待機はIdle、接近中はWalk
@@ -145,11 +142,11 @@ namespace game::system::ai
 
 	void MeleeChaseAISystem::updatePatrol(core::ecs::EntityId entityId, float deltaTime)
 	{
-		auto& ai{ m_componentManager.get<component::AIComponent>(entityId) };
+		auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 		auto& patrol{ m_componentManager.get<component::ai::PatrolComponent>(entityId) };
-		auto& transform{ m_componentManager.get<component::TransformComponent>(entityId) };
+		auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 
-		const bool hasVelocity{ m_componentManager.has<component::VelocityComponent>(entityId) };
+		const bool hasVelocity{ m_componentManager.has<component::movement::VelocityComponent>(entityId) };
 
 		// 立ち止まり中：時間を消化し、その間は停止＋Idle
 		if (patrol.m_pauseTimer > 0.0f)
@@ -157,7 +154,7 @@ namespace game::system::ai
 			patrol.m_pauseTimer -= deltaTime;
 			if (hasVelocity)
 			{
-				auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+				auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 				velocity.m_velocity.x = 0.0f;
 				velocity.m_velocity.z = 0.0f;
 			}
@@ -186,7 +183,7 @@ namespace game::system::ai
 			patrol.m_pauseTimer = pauseDist(m_rng);
 			if (hasVelocity)
 			{
-				auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+				auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 				velocity.m_velocity.x = 0.0f;
 				velocity.m_velocity.z = 0.0f;
 			}
@@ -200,7 +197,7 @@ namespace game::system::ai
 		const float patrolSpeed{ ai.m_moveSpeed * PATROL_SPEED_FACTOR };
 		if (hasVelocity)
 		{
-			auto& velocity{ m_componentManager.get<component::VelocityComponent>(entityId) };
+			auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 			velocity.m_velocity.x = toTarget.x * patrolSpeed;
 			velocity.m_velocity.z = toTarget.z * patrolSpeed;
 		}
@@ -210,7 +207,7 @@ namespace game::system::ai
 
 	core::Vector3 MeleeChaseAISystem::pickWanderTarget(const core::Vector3& home)
 	{
-		std::uniform_real_distribution<float> angleDist{ 0.0f, 2.0f * std::numbers::pi_v<float> };
+		std::uniform_real_distribution<float> angleDist{ 0.0f, core::utility::TWO_PI };
 		std::uniform_real_distribution<float> radiusDist{ WANDER_RADIUS_MIN, WANDER_RADIUS_MAX };
 		const float angle{ angleDist(m_rng) };
 		const float radius{ radiusDist(m_rng) };
@@ -223,7 +220,7 @@ namespace game::system::ai
 
 	void MeleeChaseAISystem::requestAnimation(core::ecs::EntityId entityId, constant::AnimationState state)
 	{
-		if (m_componentManager.has<component::AnimationComponent>(entityId))
-			m_componentManager.get<component::AnimationComponent>(entityId).m_requested = state;
+		if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+			m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested = state;
 	}
 } // namespace game::system::ai

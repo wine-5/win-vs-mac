@@ -1,6 +1,4 @@
-#pragma once
-#include "core/constant/SelectWindowId.h"
-#include "core/constant/JobType.h"
+﻿#pragma once
 #include <string>
 
 namespace core::iface
@@ -27,24 +25,6 @@ namespace core::iface
 		 * @brief メッセージポンプ（毎フレーム呼び出し）
 		 */
 		virtual void pumpMessages() = 0;
-
-		/**
-		 * @brief 指定したWindowを前面に出す
-		 * @param id Window識別子
-		 */
-		virtual void bringToFront(core::constant::SelectWindowId id) = 0;
-
-		/**
-		 * @brief 職業選択時にパラメータウィンドウを更新する
-		 * @param jobType 職業タイプ
-		 */
-		virtual void updateParameterWindowForJob(core::constant::JobType jobType) = 0;
-
-		/**
-		 * @brief 職業が選択されているかを確認する
-		 * @return 職業が選択されている場合true
-		 */
-		virtual bool isJobSelected() const = 0;
 
 		/**
 		 * @brief 警告メッセージボックスを表示する

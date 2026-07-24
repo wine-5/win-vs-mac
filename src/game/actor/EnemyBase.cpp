@@ -1,15 +1,15 @@
 #include "EnemyBase.h"
 #include "game/actor/EnemyBehaviors.h"
-#include "game/component/TransformComponent.h"
-#include "game/component/VelocityComponent.h"
-#include "game/component/RenderComponent.h"
-#include "game/component/ColliderComponent.h"
-#include "game/component/AIComponent.h"
-#include "game/component/HealthComponent.h"
-#include "game/component/AttackComponent.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/movement/VelocityComponent.h"
+#include "game/component/visual/RenderComponent.h"
+#include "game/component/combat/ColliderComponent.h"
+#include "game/component/ai/AIComponent.h"
+#include "game/component/combat/HealthComponent.h"
+#include "game/component/combat/AttackComponent.h"
 #include "game/component/TagComponent.h"
-#include "game/component/HitEffectComponent.h"
-#include "game/component/EffectComponent.h"
+#include "game/component/visual/HitEffectComponent.h"
+#include "game/component/visual/EffectComponent.h"
 #include "game/constant/Tag.h"
 #include <utility>
 
@@ -45,41 +45,41 @@ namespace game::actor
 
 	void EnemyBase::buildCommonComponents()
 	{
-		component::TransformComponent transform{};
+		component::movement::TransformComponent transform{};
 		transform.m_position = m_enemyData.getPosition();
 		transform.m_scale = m_enemyData.getScale();
-		m_componentManager.add<component::TransformComponent>(m_entity.getId(), transform);
+		m_componentManager.add<component::movement::TransformComponent>(m_entity.getId(), transform);
 
-		m_componentManager.add<component::VelocityComponent>(m_entity.getId(), {});
-		m_componentManager.add<component::RenderComponent>(m_entity.getId(), component::RenderComponent{ .m_modelHandle = m_modelHandle });
-		m_componentManager.add<component::HitEffectComponent>(m_entity.getId(), {});
-		m_componentManager.add<component::EffectComponent>(m_entity.getId(), {});
+		m_componentManager.add<component::movement::VelocityComponent>(m_entity.getId(), {});
+		m_componentManager.add<component::visual::RenderComponent>(m_entity.getId(), component::visual::RenderComponent{ .m_modelHandle = m_modelHandle });
+		m_componentManager.add<component::visual::HitEffectComponent>(m_entity.getId(), {});
+		m_componentManager.add<component::visual::EffectComponent>(m_entity.getId(), {});
 
-		component::HealthComponent health{};
+		component::combat::HealthComponent health{};
 		health.m_maxHp = m_enemyData.getMaxHp();
 		health.m_currentHp = m_enemyData.getMaxHp();
 		health.m_defence = m_enemyData.getDefence();
-		m_componentManager.add<component::HealthComponent>(m_entity.getId(), health);
+		m_componentManager.add<component::combat::HealthComponent>(m_entity.getId(), health);
 
-		component::AttackComponent attack{};
+		component::combat::AttackComponent attack{};
 		attack.m_attackPower = m_enemyData.getAttackPower();
 		attack.m_attackRange = m_enemyData.getAttackRange();
 		attack.m_attackCooldown = m_enemyData.getAttackCooldown();
 		attack.m_windupDelay = m_enemyData.getAttackWindup();
-		m_componentManager.add<component::AttackComponent>(m_entity.getId(), attack);
+		m_componentManager.add<component::combat::AttackComponent>(m_entity.getId(), attack);
 
-		component::ColliderComponent collider{};
+		component::combat::ColliderComponent collider{};
 		collider.m_size = m_enemyData.getColliderSize();
 		collider.m_offset = m_enemyData.getColliderOffset();
-		m_componentManager.add<component::ColliderComponent>(m_entity.getId(), collider);
+		m_componentManager.add<component::combat::ColliderComponent>(m_entity.getId(), collider);
 
 		component::TagComponent tag{};
 		tag.m_tag = constant::Tag::Enemy;
 		m_componentManager.add<component::TagComponent>(m_entity.getId(), tag);
 
-		component::AIComponent ai{};
+		component::ai::AIComponent ai{};
 		ai.m_moveSpeed = m_enemyData.getMoveSpeed();
 		ai.m_detectionRange = m_enemyData.getDetectionRange();
-		m_componentManager.add<component::AIComponent>(m_entity.getId(), ai);
+		m_componentManager.add<component::ai::AIComponent>(m_entity.getId(), ai);
 	}
 } // namespace game::actor

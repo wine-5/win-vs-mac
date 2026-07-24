@@ -33,13 +33,13 @@ namespace game::scene
 
     Result::~Result() noexcept = default;
 
-    void Result::update(float deltaTime)
-    {
-        if (m_resultWindow)
+	void Result::update(float /*deltaTime*/)
+	{
+		if (m_resultWindow)
             m_resultWindow->pumpMessages();
-    }
+	}
 
-    void Result::draw()
+	void Result::draw()
     {
     }
 } // namespace game::scene

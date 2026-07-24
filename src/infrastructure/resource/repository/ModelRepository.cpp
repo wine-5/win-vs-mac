@@ -1,0 +1,429 @@
+﻿#include "ModelRepository.h"
+#include <DxLib.h>
+#include <fstream>
+#include <string_view>
+#include <stdexcept>
+#include "core/base/ServiceLocator.h"
+#include "core/interface/ILogger.h"
+#include "core/utility/Log.h"
+
+namespace
+{
+	// 腕を広げたポーズだと横幅が実際の胴体より大きく出るため、水平方向を絞って胴体に沿わせる係数
+	constexpr float HORIZONTAL_SHRINK{ 0.5f };
+} // namespace
+
+namespace infrastructure::resource::repository
+{
+	ModelRepository::ModelRepository(const nlohmann::json& j)
+	{
+		for (const auto& res : loadResourceList(j))
+			m_metadata[res.m_id] = parseJsonFile(res.m_path);
+		for (const auto& res : loadRawModelList(j))
+			m_rawModelPaths[res.m_id] = res.m_path;
+	}
+
+	int ModelRepository::loadModelById(std::string_view modelId)
+	{
+		std::string id(modelId);
+
+		// raw modelの場合は直接MV1LoadModel
+		{
+			auto rawIt{ m_rawModelPaths.find(id) };
+			if (rawIt != m_rawModelPaths.end())
+			{
+				auto handleIt{ m_modelHandles.find(id) };
+				if (handleIt != m_modelHandles.end())
+					return handleIt->second;
+
+				int handle{ MV1LoadModel(rawIt->second.c_str()) };
+				if (handle == -1)
+					core::log::error("モデルの読み込みに失敗しました: {}", rawIt->second.c_str());
+				else
+					m_modelHandles[id] = handle;
+				return handle;
+			}
+		}
+
+		auto metaIt{ m_metadata.find(id) };
+		if (metaIt == m_metadata.end())
+		{
+			core::log::error("モデルID '{}' が見つかりません", id.c_str());
+			return -1;
+		}
+
+		auto handleIt{ m_modelHandles.find(id) };
+		if (handleIt != m_modelHandles.end())
+			return handleIt->second;
+
+		const auto& metadata = metaIt->second;
+		int handle{ MV1LoadModel(metadata.modelPath.c_str()) };
+		if (handle == -1)
+		{
+			core::log::error("モデルの読み込みに失敗しました: {}", metadata.modelPath.c_str());
+			return -1;
+		}
+
+		VECTOR scale = VGet(metadata.scale.x, metadata.scale.y, metadata.scale.z);
+		MV1SetScale(handle, scale);
+
+		if (metadata.colliderSize.x == 0.0f &&
+		    metadata.colliderSize.y == 0.0f &&
+		    metadata.colliderSize.z == 0.0f)
+		{
+			auto& mutableMeta = m_metadata[id];
+
+			// モデル全体の頂点からAABBを求める（参照メッシュはスケール適用後のワールド座標で取得する）
+			MV1SetupReferenceMesh(handle, -1, TRUE);
+			const MV1_REF_POLYGONLIST refPoly{ MV1GetReferenceMesh(handle, -1, TRUE) };
+
+			if (refPoly.VertexNum > 0)
+			{
+				VECTOR vMin{ refPoly.Vertexs[0].Position };
+				VECTOR vMax{ refPoly.Vertexs[0].Position };
+				for (int i{ 1 }; i < refPoly.VertexNum; ++i)
+				{
+					const VECTOR& p{ refPoly.Vertexs[i].Position };
+					vMin.x = (p.x < vMin.x) ? p.x : vMin.x;
+					vMin.y = (p.y < vMin.y) ? p.y : vMin.y;
+					vMin.z = (p.z < vMin.z) ? p.z : vMin.z;
+					vMax.x = (p.x > vMax.x) ? p.x : vMax.x;
+					vMax.y = (p.y > vMax.y) ? p.y : vMax.y;
+					vMax.z = (p.z > vMax.z) ? p.z : vMax.z;
+				}
+
+				// 地面などのステージモデルは実寸のまま、キャラは腕幅を絞るため水平方向を縮小する
+				const float horizontalScale{ (mutableMeta.category == "stage") ? 1.0f : HORIZONTAL_SHRINK };
+
+				// 参照メッシュはスケール適用済みなのでそのままワールド寸法になる
+				mutableMeta.colliderSize.x = (vMax.x - vMin.x) * horizontalScale;
+				mutableMeta.colliderSize.y = vMax.y - vMin.y;
+				mutableMeta.colliderSize.z = (vMax.z - vMin.z) * horizontalScale;
+
+				// コライダー中心も自動計算する（足元原点モデルなら高さの半分が中心になる）
+				mutableMeta.colliderOffset.x = (vMax.x + vMin.x) * 0.5f;
+				mutableMeta.colliderOffset.y = (vMax.y + vMin.y) * 0.5f;
+				mutableMeta.colliderOffset.z = (vMax.z + vMin.z) * 0.5f;
+			}
+			else
+				core::log::error("'{}' のコライダー自動計算に失敗しました（頂点が取得できません）", id.c_str());
+
+			MV1TerminateReferenceMesh(handle, -1, TRUE);
+		}
+
+		m_modelHandles[id] = handle;
+		return handle;
+	}
+
+	int ModelRepository::duplicateModel(int modelHandle)
+	{
+		if (modelHandle == -1)
+			return -1;
+
+		int duplicated{ MV1DuplicateModel(modelHandle) };
+		if (duplicated == -1)
+			core::log::error("モデルハンドルの複製に失敗しました: {}", modelHandle);
+		return duplicated;
+	}
+
+	void ModelRepository::detachAllAnimations(int modelHandle)
+	{
+		if (modelHandle == -1)
+			return;
+
+		// DxLibにアタッチ数を取得するAPIがないため、想定しうるアタッチ枠を
+		// 高いインデックスから走査する（デタッチによるインデックス詰めの影響を避けるため降順）
+		constexpr int MAX_ATTACH_SLOTS{ 16 };
+		for (int i{ MAX_ATTACH_SLOTS - 1 }; i >= 0; --i)
+		{
+			if (MV1GetAttachAnim(modelHandle, i) != -1)
+				MV1DetachAnim(modelHandle, i);
+		}
+	}
+
+	float ModelRepository::computeBoundingRadius(int modelHandle, float scale) const noexcept
+	{
+		if (modelHandle == -1)
+			return 0.0f;
+
+		// 参照メッシュからAABBを求める（水平方向の大きい辺の半分を半径とする）
+		MV1SetupReferenceMesh(modelHandle, -1, TRUE);
+		const MV1_REF_POLYGONLIST refPoly{ MV1GetReferenceMesh(modelHandle, -1, TRUE) };
+
+		float radius{ 0.0f };
+		if (refPoly.VertexNum > 0)
+		{
+			VECTOR vMin{ refPoly.Vertexs[0].Position };
+			VECTOR vMax{ refPoly.Vertexs[0].Position };
+			for (int i{ 1 }; i < refPoly.VertexNum; ++i)
+			{
+				const VECTOR& p{ refPoly.Vertexs[i].Position };
+				vMin.x = (p.x < vMin.x) ? p.x : vMin.x;
+				vMin.z = (p.z < vMin.z) ? p.z : vMin.z;
+				vMax.x = (p.x > vMax.x) ? p.x : vMax.x;
+				vMax.z = (p.z > vMax.z) ? p.z : vMax.z;
+			}
+			const float sizeX{ vMax.x - vMin.x };
+			const float sizeZ{ vMax.z - vMin.z };
+			radius = 0.5f * ((sizeX > sizeZ) ? sizeX : sizeZ) * scale;
+		}
+
+		MV1TerminateReferenceMesh(modelHandle, -1, TRUE);
+		return radius;
+	}
+
+	core::Vector3 ModelRepository::computeBoundingCenter(int modelHandle) const noexcept
+	{
+		if (modelHandle == -1)
+			return core::Vector3{};
+
+		// 参照メッシュからAABBを求め、その中心（ローカル座標）を返す
+		MV1SetupReferenceMesh(modelHandle, -1, TRUE);
+		const MV1_REF_POLYGONLIST refPoly{ MV1GetReferenceMesh(modelHandle, -1, TRUE) };
+
+		core::Vector3 center{};
+		if (refPoly.VertexNum > 0)
+		{
+			VECTOR vMin{ refPoly.Vertexs[0].Position };
+			VECTOR vMax{ refPoly.Vertexs[0].Position };
+			for (int i{ 1 }; i < refPoly.VertexNum; ++i)
+			{
+				const VECTOR& p{ refPoly.Vertexs[i].Position };
+				vMin.x = (p.x < vMin.x) ? p.x : vMin.x;
+				vMin.y = (p.y < vMin.y) ? p.y : vMin.y;
+				vMin.z = (p.z < vMin.z) ? p.z : vMin.z;
+				vMax.x = (p.x > vMax.x) ? p.x : vMax.x;
+				vMax.y = (p.y > vMax.y) ? p.y : vMax.y;
+				vMax.z = (p.z > vMax.z) ? p.z : vMax.z;
+			}
+			center = core::Vector3{
+				(vMax.x + vMin.x) * 0.5f,
+				(vMax.y + vMin.y) * 0.5f,
+				(vMax.z + vMin.z) * 0.5f
+			};
+		}
+
+		MV1TerminateReferenceMesh(modelHandle, -1, TRUE);
+		return center;
+	}
+
+	std::optional<core::data::ModelMetadata> ModelRepository::getMetadata(std::string_view modelId) const
+	{
+		auto it{ m_metadata.find(std::string(modelId)) };
+		if (it == m_metadata.end())
+			return std::nullopt;
+		return it->second;
+	}
+
+	std::vector<ModelRepository::ResourceDefinition> ModelRepository::loadResourceList(const nlohmann::json& json)
+	{
+		std::vector<ResourceDefinition> resources;
+		if (!json.contains("resources"))
+			return resources;
+
+		for (const auto& item : json["resources"])
+			resources.push_back({ item["id"], item["path"] });
+		return resources;
+	}
+
+	std::vector<ModelRepository::ResourceDefinition> ModelRepository::loadRawModelList(const nlohmann::json& json)
+	{
+		std::vector<ResourceDefinition> resources;
+		if (!json.contains("rawModels"))
+			return resources;
+
+		for (const auto& item : json["rawModels"])
+			resources.push_back({ item["id"], item["path"] });
+		return resources;
+	}
+
+	core::data::ModelMetadata ModelRepository::parseJsonFile(const std::string& filePath)
+	{
+		std::ifstream file(filePath);
+		if (!file.is_open())
+			throw std::runtime_error("ファイルを開けませんでした: " + filePath);
+
+		nlohmann::json j = nlohmann::json::parse(file);
+
+		// 必須キーは存在チェックしてからアクセスする。
+		// nlohmann の汎用例外だと「どのファイルのどのキーか」が分からず調査に時間がかかるため
+		for (const auto* required : { "id", "category", "model", "collider" })
+		{
+			if (!j.contains(required))
+				throw std::runtime_error(filePath + ": 必須キー '" + std::string{ required } + "' がありません");
+		}
+
+		core::data::ModelMetadata metadata;
+		metadata.id = j["id"];
+		metadata.category = j["category"];
+		metadata.modelPath = j["model"]["path"];
+		metadata.scale.x = j["model"]["scale"][0];
+		metadata.scale.y = j["model"]["scale"][1];
+		metadata.scale.z = j["model"]["scale"][2];
+		metadata.colliderSize.x = j["collider"]["size"][0];
+		metadata.colliderSize.y = j["collider"]["size"][1];
+		metadata.colliderSize.z = j["collider"]["size"][2];
+
+		// コライダーのoffsetはJSONで持たず自動導出する（手で size と整合を取る事故を防ぐ）。
+		// ・sizeを明示指定した場合：中心を高さの半分に置く＝モデル原点（足元）が地面に接する
+		// ・sizeが全0の場合：loadModelById がモデルのAABBから size/offset をまとめて自動計算する
+		if (metadata.colliderSize.y != 0.0f)
+			metadata.colliderOffset = core::Vector3{ 0.0f, metadata.colliderSize.y * 0.5f, 0.0f };
+
+		if (j.contains("transform"))
+		{
+			auto& tf = j["transform"];
+			if (tf.contains("posX")) metadata.position.x = tf["posX"];
+			if (tf.contains("posY")) metadata.position.y = tf["posY"];
+			if (tf.contains("posZ")) metadata.position.z = tf["posZ"];
+			if (tf.contains("rotX")) metadata.rotation.x = tf["rotX"];
+			if (tf.contains("rotY")) metadata.rotation.y = tf["rotY"];
+			if (tf.contains("rotZ")) metadata.rotation.z = tf["rotZ"];
+		}
+
+		if (j.contains("animations"))
+		{
+			auto& anim = j["animations"];
+			if (anim.is_array())
+			{
+				// 新形式：状態ごとのクリップ定義配列（敵をデータで組むための形式）
+				for (const auto& c : anim)
+				{
+					core::data::AnimationClipDef def{};
+					def.state = c["state"].get<std::string>();
+					def.animId = c["id"].get<std::string>();
+					if (c.contains("loop"))
+						def.loop = c["loop"].get<bool>();
+					if (c.contains("onComplete"))
+						def.onComplete = c["onComplete"].get<std::string>();
+					if (c.contains("priority"))
+						def.priority = c["priority"].get<std::string>();
+					if (c.contains("speed"))
+						def.speed = c["speed"].get<float>();
+					metadata.animations.push_back(def);
+				}
+			}
+			else
+			{
+				// 旧形式：{ "idle": ..., "walk": ... }（Player等が使用）
+				if (anim.contains("idle"))
+					metadata.stringProperties["idleAnim"] = anim["idle"];
+				if (anim.contains("walk"))
+					metadata.stringProperties["walkAnim"] = anim["walk"];
+			}
+		}
+
+		if (j.contains("gameplay"))
+		{
+			// gameplay配下は「キー名がそのまま floatProperties のキーになる」だけなので、
+			// キーを1箇所の配列で持ち、存在するものだけ取り込む
+			static constexpr std::string_view FLOAT_KEYS[]{
+				"moveSpeed", "dashMultiplier", "detectionRange", "attackRange",
+				"maxHp", "defence", "attackPower", "attackCooldown", "attackWindup",
+				"hoverHeight", "preferredDistanceMin", "preferredDistanceMax",
+				"fireCooldown", "facingYawOffset"
+			};
+
+			const auto& gp = j["gameplay"];
+			for (const auto key : FLOAT_KEYS)
+			{
+				const std::string name{ key };
+				if (gp.contains(name))
+					metadata.floatProperties[name] = gp[name];
+			}
+		}
+
+		// 敵の振る舞いレシピ（積むAI振る舞いの名前リスト）。データの組み合わせで敵を定義するために使う
+		if (j.contains("behaviors"))
+			for (const auto& name : j["behaviors"])
+				metadata.behaviors.push_back(name.get<std::string>());
+
+		if (j.contains("mac"))
+			metadata.mac = parseMac(j["mac"]);
+
+		return metadata;
+	}
+
+	core::data::MacMetadata ModelRepository::parseMac(const nlohmann::json& j)
+	{
+		core::data::MacMetadata mac{};
+		if (j.contains("phase2HpRatio"))
+			mac.m_phase2HpRatio = j["phase2HpRatio"];
+
+		if (j.contains("phase1"))
+			mac.m_phase1 = parseMacPhase(j["phase1"]);
+		if (j.contains("phase2"))
+		{
+			mac.m_phase2 = parseMacPhase(j["phase2"]);
+			mac.m_hasPhase2 = true;
+		}
+
+		// アクションの尺。未設定のキーは MacActionTiming の既定値のまま使う
+		if (j.contains("actions"))
+		{
+			const auto& a = j["actions"];
+			const auto read{ [&a](const char* key, float& out)
+				{
+				    if (a.contains(key))
+					    out = a[key];
+				} };
+			read("meleeWindup", mac.m_actions.m_meleeWindup);
+			read("rangedWindup", mac.m_actions.m_rangedWindup);
+			read("summonWindup", mac.m_actions.m_summonWindup);
+			read("novaWindup", mac.m_actions.m_novaWindup);
+			read("meleeLock", mac.m_actions.m_meleeLock);
+			read("rangedLock", mac.m_actions.m_rangedLock);
+			read("summonLock", mac.m_actions.m_summonLock);
+			read("novaLock", mac.m_actions.m_novaLock);
+			read("rangedTelegraphRange", mac.m_actions.m_rangedTelegraphRange);
+		}
+		return mac;
+	}
+
+	core::data::MacPhaseData ModelRepository::parseMacPhase(const nlohmann::json& p)
+	{
+		core::data::MacPhaseData phase{};
+		if (p.contains("moveSpeed"))
+			phase.m_moveSpeed = p["moveSpeed"];
+		if (p.contains("actionInterval"))
+			phase.m_actionInterval = p["actionInterval"];
+		if (p.contains("meleeRange"))
+			phase.m_meleeRange = p["meleeRange"];
+
+		if (p.contains("weights"))
+		{
+			const auto& w = p["weights"];
+			if (w.contains("melee"))
+				phase.m_weightMelee = w["melee"];
+			if (w.contains("ranged"))
+				phase.m_weightRanged = w["ranged"];
+			if (w.contains("summon"))
+				phase.m_weightSummon = w["summon"];
+			if (w.contains("nova"))
+				phase.m_weightNova = w["nova"];
+		}
+
+		if (p.contains("rainbowCount"))
+			phase.m_rainbowCount = p["rainbowCount"];
+		if (p.contains("rainbowSpreadDeg"))
+			phase.m_rainbowSpreadDeg = p["rainbowSpreadDeg"];
+		if (p.contains("rainbowSpeed"))
+			phase.m_rainbowSpeed = p["rainbowSpeed"];
+		if (p.contains("rainbowSpinSpeed"))
+			phase.m_rainbowSpinSpeed = p["rainbowSpinSpeed"];
+		if (p.contains("novaCount"))
+			phase.m_novaCount = p["novaCount"];
+
+		if (p.contains("summonTypes"))
+			for (const auto& t : p["summonTypes"])
+				phase.m_summonTypes.push_back(t.get<std::string>());
+		if (p.contains("summonCount"))
+			phase.m_summonCount = p["summonCount"];
+		if (p.contains("summonMax"))
+			phase.m_summonMax = p["summonMax"];
+		if (p.contains("summonRadiusMin")) phase.m_summonRadiusMin = p["summonRadiusMin"];
+		if (p.contains("summonRadiusMax")) phase.m_summonRadiusMax = p["summonRadiusMax"];
+
+		return phase;
+	}
+} // namespace infrastructure::resource::repository

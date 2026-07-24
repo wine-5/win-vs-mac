@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "core/ecs/Entity.h"
-#include "core/event/IGameEvent.h"
+#include "core/interface/IGameEvent.h"
 #include "core/constant/EffectType.h"
 #include "core/constant/SeType.h"
 #include "core/data/MacMetadata.h"
@@ -12,7 +12,7 @@ namespace game::event
 	/**
 	 * @brief 攻撃がヒットしたときに発行されるイベント
 	 */
-	struct AttackHitEvent : public core::event::IGameEvent
+	struct AttackHitEvent : public core::iface::IGameEvent
 	{
 		/** @brief 攻撃者のEntityId */
 		core::ecs::EntityId m_attackerId{ core::ecs::INVALID_ENTITY_ID };
@@ -46,7 +46,7 @@ namespace game::event
 	 * @brief 攻撃を開始した（振り始めた）ときに発行されるイベント
 	 * ヒットの有無に関わらず、攻撃モーションの再生に合わせたエフェクト（斬撃など）を出すために使用する
 	 */
-	struct AttackStartEvent : public core::event::IGameEvent
+	struct AttackStartEvent : public core::iface::IGameEvent
 	{
 		/** @brief 攻撃者のEntityId */
 		core::ecs::EntityId m_attackerId{ core::ecs::INVALID_ENTITY_ID };
@@ -54,7 +54,8 @@ namespace game::event
 		/** @brief 再生するエフェクトの種類 */
 		core::constant::EffectType m_effectType{ core::constant::EffectType::None };
 
-		// TODO: ここに音も追加して敵、Playerごとに異なる音を再生するようにする予定
+		// 攻撃開始SE（敵・Playerごとに音を変える）は機能追加のため別ブランチで対応する。
+		// 実装する場合は AttackHitEvent と同じく SeType を持たせ、AudioEventListener で購読する
 
 		AttackStartEvent() = default;
 		AttackStartEvent(core::ecs::EntityId attackerId, core::constant::EffectType effectType)
@@ -67,7 +68,7 @@ namespace game::event
 	/**
 	 * @brief 非ループアニメーションが再生完了したときに発行されるイベント
 	 */
-	struct AnimationFinishedEvent : public core::event::IGameEvent
+	struct AnimationFinishedEvent : public core::iface::IGameEvent
 	{
 		/** @brief 再生が完了したEntityId */
 		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
@@ -86,7 +87,7 @@ namespace game::event
 	/**
 	 * @brief プレイヤーが死亡したときに発行されるイベント
 	 */
-	struct PlayerDeadEvent : public core::event::IGameEvent
+	struct PlayerDeadEvent : public core::iface::IGameEvent
 	{
 		PlayerDeadEvent() = default;
 	};
@@ -94,7 +95,7 @@ namespace game::event
 	/**
 	 * @brief 敵が死亡したときに発行されるイベント
 	 */
-	struct EnemyDeadEvent : public core::event::IGameEvent
+	struct EnemyDeadEvent : public core::iface::IGameEvent
 	{
 		/** @brief 死亡した敵のEntityId */
 		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
@@ -106,7 +107,7 @@ namespace game::event
 	/**
 	 * @brief 敵がスポーンしたときに発行されるイベント（初期配置・ボスの召喚の両方で発行）
 	 */
-	struct EnemySpawnedEvent : public core::event::IGameEvent
+	struct EnemySpawnedEvent : public core::iface::IGameEvent
 	{
 		/** @brief スポーンした敵のEntityId */
 		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
@@ -128,7 +129,7 @@ namespace game::event
 	 * DetectionSystemが敵の種類に依らず一律に検知して発行する。
 	 * 発見演出（通知バッジ表示など）のトリガーに使う
 	 */
-	struct EnemyAlertedEvent : public core::event::IGameEvent
+	struct EnemyAlertedEvent : public core::iface::IGameEvent
 	{
 		/** @brief 発見した敵のEntityId */
 		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
@@ -145,7 +146,7 @@ namespace game::event
 	 *
 	 * 覚醒演出（カメラのズーム・シェイク・赤ビネット等）のトリガーに使う。
 	 */
-	struct MacPhaseTransitionEvent : public core::event::IGameEvent
+	struct MacPhaseTransitionEvent : public core::iface::IGameEvent
 	{
 		/** @brief 移行したボスのEntityId */
 		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };

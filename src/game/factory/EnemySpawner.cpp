@@ -1,7 +1,9 @@
-#include "EnemySpawner.h"
+﻿#include "EnemySpawner.h"
+#include "game/component/EnemyTypeComponent.h"
 #include "FactoryManager.h"
 #include "core/interface/ILogger.h"
-#include "game/component/AIComponent.h"
+#include "core/utility/Log.h"
+#include "game/component/ai/AIComponent.h"
 #include "game/constant/ModelId.h"
 #include "game/event/InGameEvents.h"
 #include <stdexcept>
@@ -56,7 +58,7 @@ namespace game::factory
 		auto meta{ m_resourceManager.getMetadata(modelId) };
 		if (!meta.has_value())
 		{
-			LOG("ERROR: 敵メタデータが見つかりません: {}", std::string(modelId).c_str());
+			core::log::info("ERROR: 敵メタデータが見つかりません: {}", std::string(modelId).c_str());
 			throw std::runtime_error("敵メタデータの読み込みに失敗しました");
 		}
 
@@ -64,10 +66,13 @@ namespace game::factory
 		enemyData.setPosition(position); // 位置は呼び出し側の指定が正
 		const auto enemyId{ m_factoryManager.getEnemyFactory().create(modelHandle, enemyData) };
 
+		// 敵種はスポーン時にしか分からないのでコンポーネントとして持たせる（推測させない）
+		m_componentManager.add<component::EnemyTypeComponent>(enemyId, { type });
+
 		// 追跡対象が設定されていれば反映する（召喚された敵も即プレイヤーを追う）
-		if (m_target.getId() != 0 && m_componentManager.has<component::AIComponent>(enemyId))
+		if (m_target.getId() != 0 && m_componentManager.has<component::ai::AIComponent>(enemyId))
 		{
-			auto& ai = m_componentManager.get<component::AIComponent>(enemyId);
+			auto& ai = m_componentManager.get<component::ai::AIComponent>(enemyId);
 			ai.m_targetEntity = m_target;
 		}
 

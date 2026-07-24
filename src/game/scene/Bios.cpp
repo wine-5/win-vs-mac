@@ -19,37 +19,36 @@ namespace
     // BIOS 起動シーケンスの表示行。各行は順序通りに画面に表示される
     // 形式: { テキスト, 行タイプ, 前の行からの遅延時間（秒） }
     // 遅延時間をマジックナンバーである理由として定数化にしても再利用する予定がなく、冗長になってしまうだけだと思ったため
-    constexpr BiosLine BIOS_LINES[] =
-    {
-        { "  [ESC]: Skip  ",                                                        LineType::Guide,    0.00f },
-        { "  AMI UEFI BIOS  -  WIN vs MAC.exe v1.0.0  ",                            LineType::Header,   0.00f },
-        { "  Copyright (C) 2026  WIN vs MAC wine-5      ",                          LineType::Header,   0.08f },
-        { "----------------------------------------------------------------------", LineType::Category, 0.08f },
-        { "Loading Core Systems",                                                   LineType::Category, 0.32f },
-        { "  Service Locator ........................................ [OK]",        LineType::Content,  0.21f },
-        { "  ECS Entity Manager ..................................... [OK]",        LineType::Content,  0.21f },
-        { "  Layered Architecture ................................... [OK]",        LineType::Content,  0.18f },
-        { "  Singleton Pattern ....................................... [OK]",       LineType::Content,  0.17f },
-        { "  EventBus ............................................... [OK]",        LineType::Content,  0.17f },
-        { "  Chain of Responsibility ................................. [OK]",       LineType::Content,  0.18f },
-        { "----------------------------------------------------------------------", LineType::Category, 0.08f },
-        { "External Libraries",                                                     LineType::Category, 0.24f },
-        { "  DxLib 3D Graphics ....................................... [OK]",       LineType::Content,  0.27f },
-        { "  Raylib Graphics Engine ................................... [OK]",      LineType::Content,  0.21f },
-        { "  RapidJSON Parser ......................................... [OK]",      LineType::Content,  0.29f },
-        { "  Effekseer Particle Engine ................................ [OK]",      LineType::Content,  0.31f },
-        { "  WebView2 Integration ..................................... [OK]",      LineType::Content,  0.21f },
-        { "----------------------------------------------------------------------", LineType::Category, 0.08f },
-        { "Programming Language",                                                   LineType::Category, 0.24f },
-        { "  C++17 Standard .......................................... [OK]",       LineType::Content,  0.21f },
-        { "  GLSL/HLSL Shaders ....................................... [OK]",       LineType::Content,  0.17f },
-        { "  HTML/CSS/JavaScript ..................................... [OK]",       LineType::Content,  0.18f },
-        { "  JSON Data Format ......................................... [OK]",      LineType::Content,  0.17f },
-        { "System Ready.  Starting WIN vs MAC.exe...",                              LineType::Content,  0.56f },
-        { "[ESC] Skip ",                                                            LineType::Footer,   0.5f },
-    };
+	constexpr BiosLine BIOS_LINES[] = {
+		{ "  [ESC]: Skip  ", LineType::Guide, 0.00f },
+		{ "  AMI UEFI BIOS  -  WIN vs MAC.exe v1.0.0  ", LineType::Header, 0.00f },
+		{ "  Copyright (C) 2026  WIN vs MAC wine-5      ", LineType::Header, 0.08f },
+		{ "----------------------------------------------------------------------", LineType::Category, 0.08f },
+		{ "Loading Core Systems", LineType::Category, 0.32f },
+		{ "  Service Locator ........................................ [OK]", LineType::Content, 0.21f },
+		{ "  ECS Entity Manager ..................................... [OK]", LineType::Content, 0.21f },
+		{ "  Layered Architecture ................................... [OK]", LineType::Content, 0.18f },
+		{ "  Singleton Pattern ....................................... [OK]", LineType::Content, 0.17f },
+		{ "  EventBus ............................................... [OK]", LineType::Content, 0.17f },
+		{ "  Chain of Responsibility ................................. [OK]", LineType::Content, 0.18f },
+		{ "----------------------------------------------------------------------", LineType::Category, 0.08f },
+		{ "External Libraries", LineType::Category, 0.24f },
+		{ "  DxLib 3D Graphics ....................................... [OK]", LineType::Content, 0.27f },
+		{ "  Raylib Graphics Engine ................................... [OK]", LineType::Content, 0.21f },
+		{ "  RapidJSON Parser ......................................... [OK]", LineType::Content, 0.29f },
+		{ "  Effekseer Particle Engine ................................ [OK]", LineType::Content, 0.31f },
+		{ "  WebView2 Integration ..................................... [OK]", LineType::Content, 0.21f },
+		{ "----------------------------------------------------------------------", LineType::Category, 0.08f },
+		{ "Programming Language", LineType::Category, 0.24f },
+		{ "  C++20 Standard .......................................... [OK]", LineType::Content, 0.21f },
+		{ "  GLSL/HLSL Shaders ....................................... [OK]", LineType::Content, 0.17f },
+		{ "  HTML/CSS/JavaScript ..................................... [OK]", LineType::Content, 0.18f },
+		{ "  JSON Data Format ......................................... [OK]", LineType::Content, 0.17f },
+		{ "System Ready.  Starting WIN vs MAC.exe...", LineType::Content, 0.56f },
+		{ "[ESC] Skip ", LineType::Footer, 0.5f },
+	};
 
-    constexpr int LINE_COUNT{ static_cast<int>(sizeof(BIOS_LINES) / sizeof(BIOS_LINES[0])) };
+	constexpr int LINE_COUNT{ static_cast<int>(sizeof(BIOS_LINES) / sizeof(BIOS_LINES[0])) };
 
     constexpr float BIOS_FONT_RATIO        = 16.0f / 720.0f;
     constexpr float BIOS_LINE_HEIGHT_RATIO = 24.0f / 720.0f;

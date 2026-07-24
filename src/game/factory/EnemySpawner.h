@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/Entity.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/interface/IResourceManager.h"
@@ -58,7 +58,6 @@ namespace game::factory
 		/**
 		 * @brief ステージ配置定義に基づき雑魚敵を全て生成する
 		 *
-		 * 生成した敵のIDは EnemyFactory::getEnemyIds() から取得できる
 		 */
 		void spawnStageEnemies();
 

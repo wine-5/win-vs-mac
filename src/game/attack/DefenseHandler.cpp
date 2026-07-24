@@ -1,5 +1,5 @@
 #include "DefenseHandler.h"
-#include "game/component/HealthComponent.h"
+#include "game/component/combat/HealthComponent.h"
 
 namespace game::attack
 {
@@ -16,7 +16,7 @@ namespace game::attack
 
 	void DefenseHandler::handle(DamageChain& chain)
 	{
-		auto& health{ m_componentManager.get<component::HealthComponent>(chain.m_targetId) };
+		auto& health{ m_componentManager.get<component::combat::HealthComponent>(chain.m_targetId) };
 		chain.m_damage -= health.m_defence;
 
 		// 攻撃力より防御力のほうが高いときに攻撃を0にする（そうしないと回復する）

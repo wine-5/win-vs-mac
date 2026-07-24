@@ -50,11 +50,6 @@ namespace platform::window
         void hide() noexcept;
 
         /**
-         * @brief ウィンドウを最前面に持ってくる
-         */
-        void bringToFront() noexcept;
-
-        /**
          * @brief 最小化ボタン押下時のコールバックを設定する
          * @details 設定するとデフォルトの最小化を抑制してコールバックを呼ぶ
          * @param callback 最小化時に呼ぶコールバック

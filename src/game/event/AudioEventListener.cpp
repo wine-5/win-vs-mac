@@ -1,4 +1,4 @@
-#include "AudioEventListener.h"
+﻿#include "AudioEventListener.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IAudioManager.h"
 #include "core/constant/SeType.h"
@@ -9,11 +9,13 @@ namespace game::event
 		: m_eventBus{ eventBus }
 		, m_playerId{ playerId }
 	{
-		m_eventBus.subscribe<AttackHitEvent>(
-			[this](const AttackHitEvent& e) { onAttackHit(e); });
+		m_subscriptions.push_back(m_eventBus.subscribe<AttackHitEvent>(
+		    [this](const AttackHitEvent& e)
+		    { onAttackHit(e); }));
 
-		m_eventBus.subscribe<EnemyDeadEvent>(
-			[this](const EnemyDeadEvent& e) { onEnemyDead(e); });
+		m_subscriptions.push_back(m_eventBus.subscribe<EnemyDeadEvent>(
+		    [this](const EnemyDeadEvent& e)
+		    { onEnemyDead(e); }));
 	}
 
 	void AudioEventListener::onAttackHit(const AttackHitEvent& e)

@@ -27,7 +27,16 @@ jobs:
           msbuild DxLib-3D.sln `
             /p:Configuration=Debug `
             /p:Platform=x64 `
-            /m
+            /m `
+            /fl /flp:"logfile=build_output.txt;verbosity=minimal"
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: build_output.txt
+          if-no-files-found: warn
 
   lint:
     runs-on: ubuntu-latest
@@ -160,68 +169,107 @@ jobs:
           name: lint-output
         continue-on-error: true
 
+      - name: Download build log
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+        continue-on-error: true
+
       - name: Notify Discord
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           BUILD_STATUS="${{ needs.build.result }}"
           LINT_STATUS="${{ needs.lint.result }}"
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+          # combined_lint.txt から指定セクション（=== 見出し === 〜 次の見出し）を取り出す
+          extract_section() {
+            [ -f "combined_lint.txt" ] || return 0
+            # セクション本文にも "=== xxx ===" 行が現れるため、見出し行だけを終端とみなす
+            awk -v head="$1" '
+              /^=== (Initialization Check|Architecture Compliance|JavaScript Naming Convention|clang-tidy Check) ===$/ {
+                grab = ($0 == head)
+                next
+              }
+              grab { print }
+            ' combined_lint.txt
+          }
+
+          # 実行環境の絶対パスを取り除いてリポジトリ相対にする
+          strip_paths() {
+            sed 's|/home/runner/work/[^/]*/[^/]*/||g; s|[A-Za-z]:\\a\\[^\\]*\\[^\\]*\\||g'
+          }
+
+          NL=$'\n'
+          FENCE='```'
+
+          # 見出し付きのコードブロックとして詳細に追記する
+          DETAILS=""
+          add_section() {
+            local title="$1"
+            local body="$2"
+            [ -n "$body" ] || return 0
+            body=$(printf '%s' "$body" | head -c 700)
+            DETAILS="${DETAILS}${NL}**${title}**${NL}${FENCE}${NL}${body}${NL}${FENCE}${NL}"
+          }
 
           if [ "$BUILD_STATUS" = "success" ] && [ "$LINT_STATUS" = "success" ]; then
             MESSAGE="✅ ビルド・コードチェック成功 (C++命名規則・初期化・アーキテクチャ・JS命名規則)"
             COLOR=3066993
           else
-            LINT_DETAILS=""
-            ARCH_VIOLATIONS=""
-            if [ -f "combined_lint.txt" ] && [ -s "combined_lint.txt" ]; then
+            if [ -f "combined_lint.txt" ]; then
               echo "=== Lint Output File Contents ===" >&2
               cat combined_lint.txt >&2
-
-              # アーキテクチャ違反を抽出
-              ARCH_VIOLATIONS=$(sed -n '/=== Architecture Compliance ===/,/=== JavaScript/p' combined_lint.txt \
-                | grep -v "^===" \
-                | grep -v "No architecture" \
-                | grep -v "^$" \
-                | sed 's|/home/runner/work/[^/]*/[^/]*/||g' \
-                | head -15)
-
-              # その他のエラーを抽出
-              OTHER_ERRORS=$(cat combined_lint.txt \
-                | sed -n '/=== clang-tidy/,/^$/p' \
-                | grep -E "warning:|error:" \
-                | head -10 \
-                | sed 's|/home/runner/work/[^/]*/[^/]*/||g')
-
-              # メッセージを構築
-              LINT_DETAILS=""
-
-              if [ -n "$ARCH_VIOLATIONS" ]; then
-                ARCH_VIOLATIONS=$(echo "$ARCH_VIOLATIONS" | head -c 800)
-                LINT_DETAILS="${LINT_DETAILS}**🔴 アーキテクチャ違反:**\n${ARCH_VIOLATIONS}\n\n"
-              fi
-
-              if [ -n "$OTHER_ERRORS" ]; then
-                OTHER_ERRORS=$(echo "$OTHER_ERRORS" | head -c 800)
-                LINT_DETAILS="${LINT_DETAILS}**🟡 その他のエラー:**\n${OTHER_ERRORS}\n"
-              fi
-
-              if [ -n "$LINT_DETAILS" ]; then
-                LINT_DETAILS="\n\n${LINT_DETAILS}"
-              else
-                LINT_DETAILS="\n\n✅ すべてのチェックに合格しました"
-              fi
             else
-              echo "⚠️ combined_lint.txt not found or empty" >&2
+              echo "⚠️ combined_lint.txt not found" >&2
             fi
-            
-            MESSAGE="❌ **失敗**\nビルド: \`${BUILD_STATUS}\`\nコードチェック: \`${LINT_STATUS}\`${LINT_DETAILS}"
+
+            # ビルドエラー（MSBuild の error / fatal error 行）
+            BUILD_ERRORS=""
+            if [ "$BUILD_STATUS" != "success" ] && [ -f "build_output.txt" ]; then
+              BUILD_ERRORS=$(grep -E "error [A-Z]+[0-9]+|fatal error" build_output.txt \
+                | sort -u | head -10 | strip_paths)
+            fi
+
+            # 初期化スタイル違反
+            INIT_ERRORS=$(extract_section "=== Initialization Check ===" \
+              | grep -E "初期化は \{\} を使ってください" | head -10 | strip_paths)
+
+            # アーキテクチャ違反
+            ARCH_VIOLATIONS=$(extract_section "=== Architecture Compliance ===" \
+              | grep -E "^\s*src/|❌|⚠️" | grep -v "合格" | head -12 | strip_paths)
+
+            # JavaScript 命名規則違反
+            JS_VIOLATIONS=$(extract_section "=== JavaScript Naming Convention ===" \
+              | grep -E "❌|⚠️|^\s+web/" | grep -v "合格" | head -12 | strip_paths)
+
+            # clang-tidy の警告・エラー
+            TIDY_ERRORS=$(extract_section "=== clang-tidy Check ===" \
+              | grep -E "warning:|error:" | head -10 | strip_paths)
+
+            add_section "🔨 ビルドエラー" "$BUILD_ERRORS"
+            add_section "🔴 アーキテクチャ違反" "$ARCH_VIOLATIONS"
+            add_section "🟠 初期化スタイル違反" "$INIT_ERRORS"
+            add_section "🟣 JavaScript命名規則違反" "$JS_VIOLATIONS"
+            add_section "🟡 clang-tidy 警告" "$TIDY_ERRORS"
+
+            if [ -z "$DETAILS" ]; then
+              DETAILS="${NL}詳細を抽出できませんでした。ログを確認してください。${NL}"
+            fi
+
+            MESSAGE="❌ **失敗**${NL}ビルド: \`${BUILD_STATUS}\`${NL}コードチェック: \`${LINT_STATUS}\`${NL}${DETAILS}${NL}🔗 [GitHub Actions のログを開く](${RUN_URL})"
             COLOR=15158332
           fi
 
+          # Discord の description 上限（4096文字）に収める
+          MESSAGE=$(printf '%s' "$MESSAGE" | head -c 3900)
+
           PAYLOAD=$(jq -n \
             --arg msg "$MESSAGE" \
+            --arg url "$RUN_URL" \
             --argjson color "$COLOR" \
-            '{embeds: [{title: "CI結果", description: $msg, color: $color}]}')
+            '{embeds: [{title: "CI結果", url: $url, description: $msg, color: $color}]}')
 
           curl -H "Content-Type: application/json" \
             -d "$PAYLOAD" \

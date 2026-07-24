@@ -3,6 +3,7 @@
 #include "core/base/ServiceLocator.h"
 #include "DxLib.h"
 #include "resource.h"
+#include <exception>
 
 namespace
 {
@@ -42,6 +43,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SetMouseDispFlag(TRUE); // リリース・デバッグ問わずマウスカーソルを常時表示
 	SetUseLighting(FALSE);
 
+	try
 	{
 		// アプリケーション本体（サービス初期化・メインループ・ポーズ制御を統括する）
 		// GameManager/PauseManagerの寿命をServiceLocator::clear()より先に終わらせないよう
@@ -51,6 +53,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		// DxLib_End の前にサービスを解放する（Effekseer 等のリソース破棄順序を保証する）
 		core::base::ServiceLocator::clear();
+	}
+	catch (const std::exception& e)
+	{
+		// リソース欠落などの初期化失敗をここで受け止める。
+		// 中途半端な状態で起動を続けず、原因を提示して終了する
+		core::base::ServiceLocator::clear();
+		DxLib_End();
+		MessageBoxA(nullptr, e.what(), "起動に失敗しました", MB_OK | MB_ICONERROR);
+		return -1;
 	}
 
 	DxLib_End();
