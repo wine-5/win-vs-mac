@@ -3,7 +3,7 @@
     {
       "id": "floor_folder",
       "displayName": "フォルダ床",
-      "model": "assets/model/stage/FloorFolder.mv1",
+      "model": "assets/model/stage/Cube.mqo",
       "baseSize": [ 100, 100, 100 ],
       "editorColor": "#00A4EF",
       "collider": "box",
@@ -12,7 +12,7 @@
     {
       "id": "path_corridor",
       "displayName": "パス通路",
-      "model": "assets/model/stage/PathCorridor.mv1",
+      "model": "assets/model/stage/Cube.mqo",
       "baseSize": [ 100, 100, 100 ],
       "editorColor": "#0078D4",
       "collider": "box",
@@ -21,7 +21,7 @@
     {
       "id": "wall_window",
       "displayName": "ウィンドウ壁",
-      "model": "assets/model/stage/WallWindow.mv1",
+      "model": "assets/model/stage/Cube.mqo",
       "baseSize": [ 100, 100, 100 ],
       "editorColor": "#3A4A5E",
       "collider": "box",
@@ -30,7 +30,7 @@
     {
       "id": "pillar_folder",
       "displayName": "フォルダ柱",
-      "model": "assets/model/stage/PillarFolder.mv1",
+      "model": "assets/model/stage/Cube.mqo",
       "baseSize": [ 100, 100, 100 ],
       "editorColor": "#FFC83D",
       "collider": "box",
@@ -39,7 +39,7 @@
     {
       "id": "block_file",
       "displayName": "ファイルブロック",
-      "model": "assets/model/stage/BlockFile.mv1",
+      "model": "assets/model/stage/Cube.mqo",
       "baseSize": [ 100, 100, 100 ],
       "editorColor": "#8FA6BF",
       "collider": "box",
@@ -48,7 +48,7 @@
     {
       "id": "floor_apple",
       "displayName": "アリーナ床",
-      "model": "assets/model/stage/FloorApple.mv1",
+      "model": "assets/model/stage/Cube.mqo",
       "baseSize": [ 100, 100, 100 ],
       "editorColor": "#E8E8ED",
       "collider": "box",
