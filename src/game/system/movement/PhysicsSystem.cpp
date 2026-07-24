@@ -6,8 +6,9 @@
 
 namespace game::system::movement
 {
-	PhysicsSystem::PhysicsSystem(core::ecs::ComponentManager& componentManager)
-		: m_componentManager{ componentManager }
+	PhysicsSystem::PhysicsSystem(core::ecs::ComponentManager& componentManager, float jumpForce)
+	    : m_componentManager{ componentManager }
+	    , m_jumpForce{ jumpForce }
 	{
 	}
 

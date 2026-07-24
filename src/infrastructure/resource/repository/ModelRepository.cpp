@@ -393,7 +393,7 @@ namespace infrastructure::resource::repository
 			// gameplay配下は「キー名がそのまま floatProperties のキーになる」だけなので、
 			// キーを1箇所の配列で持ち、存在するものだけ取り込む
 			static constexpr std::string_view FLOAT_KEYS[]{
-				"moveSpeed", "dashMultiplier", "detectionRange", "attackRange",
+				"moveSpeed", "dashMultiplier", "jumpForce", "detectionRange", "attackRange",
 				"maxHp", "defence", "attackPower", "attackCooldown", "attackWindup",
 				"hoverHeight", "preferredDistanceMin", "preferredDistanceMax",
 				"fireCooldown", "facingYawOffset"

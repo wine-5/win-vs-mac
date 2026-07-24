@@ -36,6 +36,11 @@ namespace game::data
 			if (dashMultiplierIt != metadata.floatProperties.end())
 				data.m_dashMultiplier = dashMultiplierIt->second;
 
+			auto jumpForceIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::JUMP_FORCE)) };
+			if (jumpForceIt != metadata.floatProperties.end())
+				data.m_jumpForce = jumpForceIt->second;
+
 			auto maxHpIt{ metadata.floatProperties.find(
 				std::string(constant::metadata_keys::MAX_HP)) };
 			if (maxHpIt != metadata.floatProperties.end())
@@ -70,6 +75,11 @@ namespace game::data
 		[[nodiscard]] float getDashMultiplier() const noexcept
 		{
 			return m_dashMultiplier;
+		}
+		/** @brief ジャンプの初速を取得 */
+		[[nodiscard]] float getJumpForce() const noexcept
+		{
+			return m_jumpForce;
 		}
 		/** @brief 最大HPを取得 */
 		[[nodiscard]] float              getMaxHp()          const noexcept { return m_maxHp; }
@@ -110,6 +120,7 @@ namespace game::data
 	private:
 		float         m_moveSpeed{ 0.0f };
 		float m_dashMultiplier{ 1.0f }; // JSON未設定時はダッシュしても等速
+		float m_jumpForce{ 50.0f };     // ジャンプの初速（JSON未設定時の従来値）
 		float         m_maxHp{ 0.0f };
 		float         m_defence{ 0.0f };
 		float         m_attackPower{ 0.0f };
