@@ -9,7 +9,7 @@
     "size": [ 150, 260, 150 ]
   },
   "gameplay": {
-    "moveSpeed": 10.0,
+    "moveSpeed": 240.0,
     "detectionRange": 3000.0,
     "attackRange": 180.0,
     "maxHp": 500.0,
@@ -40,7 +40,7 @@
       "rangedTelegraphRange": 800.0
     },
     "phase1": {
-      "moveSpeed": 10.0,
+      "moveSpeed": 240.0,
       "actionInterval": 4.0,
       "meleeRange": 180.0,
       "weights": { "melee": 0, "ranged": 2, "summon": 0 },
@@ -55,7 +55,7 @@
       "summonRadiusMax": 400.0
     },
     "phase2": {
-      "moveSpeed": 16.0,
+      "moveSpeed": 380.0,
       "actionInterval": 2.0,
       "meleeRange": 180.0,
       "weights": { "melee": 2, "ranged": 3, "summon": 3, "nova": 2 },

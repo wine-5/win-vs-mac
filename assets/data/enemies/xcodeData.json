@@ -9,7 +9,7 @@
     "size": [ 0, 0, 0 ]
   },
   "gameplay": {
-    "moveSpeed": 12.0,
+    "moveSpeed": 220.0,
     "detectionRange": 500.0,
     "attackRange": 200.0,
     "maxHp": 50.0,
@@ -21,8 +21,8 @@
   "behaviors": [ "meleeChase", "patrol" ],
   "animations": [
     { "state": "Idle",    "id": "anim_xcode_idle" },
-    { "state": "Walk",    "id": "anim_xcode_walk",        "loop": true,  "onComplete": "Idle",  "priority": "locomotion", "speed": 0.6 },
-    { "state": "Attack1", "id": "anim_xcode_ground_slam", "loop": false, "onComplete": "Idle",  "priority": "attack",     "speed": 0.7 },
+    { "state": "Walk",    "id": "anim_xcode_walk",        "loop": true,  "onComplete": "Idle",  "priority": "locomotion", "speed": 1.0 },
+    { "state": "Attack1", "id": "anim_xcode_ground_slam", "loop": false, "onComplete": "Idle",  "priority": "attack",     "speed": 2.0 },
     { "state": "Dying",   "id": "anim_xcode_dying",       "loop": false, "onComplete": "Dying", "priority": "dying" }
   ]
 }
