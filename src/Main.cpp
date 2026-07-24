@@ -8,19 +8,64 @@
 namespace
 {
 	constexpr int COLOR_BIT = 32;
+
+	// 描画解像度は常にこの値で固定する。
+	// フルスクリーンでもモニタのネイティブ解像度（4K等）では描かず、この解像度で描いた画面を
+	// デスクトップ解像度へ拡大表示する。ピクセル処理量が青天井にならず、どのモニタでも
+	// 負荷とUIレイアウトが一定になる
+	constexpr int RENDER_WIDTH = 1920;
+	constexpr int RENDER_HEIGHT = 1080;
+
+#ifdef _DEBUG
+	// DEBUG: 開発中のウィンドウが画面に対して占める割合（タスクバーとタイトルバーのぶん余らせる）
+	constexpr double DEBUG_WINDOW_SCREEN_RATIO = 0.8;
+	// DEBUG: 表示倍率の下限・上限（極端な解像度でも常識的なサイズに収める）
+	constexpr double DEBUG_WINDOW_MIN_RATE = 0.5;
+	constexpr double DEBUG_WINDOW_MAX_RATE = 2.0;
+
+	/**
+	 * @brief DEBUG: 開発用ウィンドウの表示倍率を、実際のモニタ解像度から求める
+	 *
+	 * SetWindowSizeExtendRate が扱うのは物理ピクセル数のため、DPIスケーリングの影響を
+	 * 受けない EnumDisplaySettings で実解像度を取得する（GetSystemMetrics はプロセスの
+	 * DPI認識状態によって論理座標を返すことがあり、高DPI機でウィンドウが極端に小さくなる）。
+	 * @return 描画解像度に掛ける表示倍率
+	 */
+	double calcDebugWindowExtendRate()
+	{
+		DEVMODE displayMode{};
+		displayMode.dmSize = sizeof(displayMode);
+		if (EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &displayMode) == 0)
+			return 1.0;
+
+		const double rateX{ DEBUG_WINDOW_SCREEN_RATIO * displayMode.dmPelsWidth / RENDER_WIDTH };
+		const double rateY{ DEBUG_WINDOW_SCREEN_RATIO * displayMode.dmPelsHeight / RENDER_HEIGHT };
+		const double rate{ rateX < rateY ? rateX : rateY };
+
+		if (rate < DEBUG_WINDOW_MIN_RATE)
+			return DEBUG_WINDOW_MIN_RATE;
+		if (rate > DEBUG_WINDOW_MAX_RATE)
+			return DEBUG_WINDOW_MAX_RATE;
+		return rate;
+	}
+#endif
 } // namespace
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
-	int screenWidth{}, screenHeight{};
-#ifdef _DEBUG // DEBUG: 開発中はウインドウモードで起動
-	screenWidth = 1280;
-	screenHeight = 720;
+	// 描画解像度はDebug/Releaseで揃える（違うとUIの座標ズレや負荷差がビルド構成に依存してしまう）。
+	// フルスクリーン時はこの解像度で描いた画面をデスクトップ解像度へバイリニア拡大する。
+	// モニタの画面モードを切り替えないため、切り替え時のちらつきも起きない
+	const int screenWidth{ RENDER_WIDTH };
+	const int screenHeight{ RENDER_HEIGHT };
 	SetGraphMode(screenWidth, screenHeight, COLOR_BIT);
+	SetFullScreenResolutionMode(DX_FSRESOLUTIONMODE_DESKTOP);
+	SetFullScreenScalingMode(DX_FSSCALINGMODE_BILINEAR);
+
+#ifdef _DEBUG // DEBUG: 開発中はウインドウモードで起動する（画面に収まるよう縮小表示する）
 	ChangeWindowMode(TRUE);
-#else // リリース用（フルサイズ）
-	GetDefaultState(&screenWidth, &screenHeight, nullptr);
-	SetGraphMode(screenWidth, screenHeight, COLOR_BIT);
+	SetWindowSizeExtendRate(calcDebugWindowExtendRate());
+#else // リリース用（フルスクリーン）
 	ChangeWindowMode(FALSE);
 #endif
 
@@ -40,7 +85,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SetUseZBuffer3D(TRUE);
 	SetWriteZBuffer3D(TRUE);
 
-	SetMouseDispFlag(TRUE); // リリース・デバッグ問わずマウスカーソルを常時表示
 	SetUseLighting(FALSE);
 
 	try
