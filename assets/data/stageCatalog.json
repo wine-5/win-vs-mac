@@ -10,7 +10,7 @@
         100
       ],
       "editorColor": "#00A4EF",
-      "collider": "box",
+      "collider": "ground",
       "defaultSize": [
         1000,
         20,
@@ -27,7 +27,7 @@
         100
       ],
       "editorColor": "#0078D4",
-      "collider": "box",
+      "collider": "ground",
       "defaultSize": [
         800,
         20,
@@ -95,7 +95,7 @@
         100
       ],
       "editorColor": "#E8E8ED",
-      "collider": "box",
+      "collider": "ground",
       "defaultSize": [
         3000,
         20,

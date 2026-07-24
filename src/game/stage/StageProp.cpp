@@ -1,5 +1,6 @@
 #include "StageProp.h"
 #include "game/component/movement/TransformComponent.h"
+#include "game/component/movement/GroundSurfaceComponent.h"
 #include "game/component/visual/RenderComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
@@ -13,7 +14,8 @@ namespace game::stage
 	    const core::Vector3& position,
 	    const core::Vector3& rotation,
 	    const core::Vector3& scale,
-	    const core::Vector3& colliderSize)
+	    constant::PropCollision collision,
+	    const core::Vector3& collisionSize)
 	    : m_entity{ entityManager.create() }
 	{
 		component::movement::TransformComponent transform;
@@ -24,15 +26,21 @@ namespace game::stage
 
 		componentManager.add<component::visual::RenderComponent>(m_entity.getId(), { modelHandle });
 
-		// コライダー指定（size全0）が無ければ判定を付けない（装飾のみの配置物）
-		const bool hasCollider{ colliderSize.x != 0.0f || colliderSize.y != 0.0f || colliderSize.z != 0.0f };
-		if (hasCollider)
+		// 塞ぐ障害物はAABBで押し返し、歩ける面は傾きを考慮した接地計算に回す。
+		// 床・坂にAABBを付けると「傾いた面」を表現できず、上に乗れず浮くため分けている
+		if (collision == constant::PropCollision::Box)
 		{
 			component::combat::ColliderComponent collider;
-			collider.m_size = colliderSize;
-			// 中心を高さの半分に置く＝配置物の中心座標が箱の中心に一致する
+			collider.m_size = collisionSize;
+			// 配置物の中心座標がそのまま箱の中心になる
 			collider.m_offset = core::Vector3{ 0.0f, 0.0f, 0.0f };
 			componentManager.add<component::combat::ColliderComponent>(m_entity.getId(), collider);
+		}
+		else if (collision == constant::PropCollision::Ground)
+		{
+			component::movement::GroundSurfaceComponent surface{};
+			surface.m_size = collisionSize;
+			componentManager.add<component::movement::GroundSurfaceComponent>(m_entity.getId(), surface);
 		}
 
 		component::TagComponent tag{};

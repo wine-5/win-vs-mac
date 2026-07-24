@@ -3,6 +3,7 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 #include "core/utility/Vector3.h"
+#include "game/constant/PropCollision.h"
 
 namespace game::stage
 {
@@ -24,7 +25,8 @@ namespace game::stage
 		 * @param position 中心座標
 		 * @param rotation 回転（ラジアン）
 		 * @param scale モデルスケール（size ÷ baseSize）
-		 * @param colliderSize コライダーの実寸。全成分0ならコライダーを付けない
+		 * @param collision 当たり判定の役割（塞ぐ障害物か・歩ける面か・無しか）
+		 * @param collisionSize 判定に使う実寸。Boxならコライダー、Groundなら歩ける面の寸法
 		 */
 		StageProp(core::ecs::EntityManager& entityManager,
 		    core::ecs::ComponentManager& componentManager,
@@ -32,7 +34,8 @@ namespace game::stage
 		    const core::Vector3& position,
 		    const core::Vector3& rotation,
 		    const core::Vector3& scale,
-		    const core::Vector3& colliderSize);
+		    constant::PropCollision collision,
+		    const core::Vector3& collisionSize);
 
 		/**
 		 * @brief StagePropのEntityIDを取得する

@@ -14,7 +14,8 @@ namespace game::factory
 	    const core::Vector3& position,
 	    const core::Vector3& rotation,
 	    const core::Vector3& scale,
-	    const core::Vector3& colliderSize)
+	    constant::PropCollision collision,
+	    const core::Vector3& collisionSize)
 	{
 		auto prop{ std::make_unique<stage::StageProp>(
 			m_entityManager,
@@ -23,7 +24,8 @@ namespace game::factory
 			position,
 			rotation,
 			scale,
-			colliderSize) };
+			collision,
+			collisionSize) };
 
 		core::ecs::EntityId id{ prop->getId() };
 		m_props.push_back(std::move(prop));

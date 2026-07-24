@@ -4,6 +4,7 @@
 #include "core/utility/MathConstants.h"
 #include "core/data/PropDefinition.h"
 #include "game/constant/ModelId.h"
+#include "game/constant/PropCollision.h"
 #include "game/data/GroundData.h"
 #include <stdexcept>
 #include <cmath>
@@ -58,24 +59,28 @@ namespace game::factory
 			// JSONは度数法で持つ。DxLibのMV1SetRotationXYZはラジアンなので変換する
 			const core::Vector3 rotation{ prop.m_rotation * core::utility::DEG_TO_RAD };
 
-			// カタログで "box" 指定のものだけコライダーを付ける（size全0でStageProp側が判定を省く）。
-			// コライダーは軸並行(AABB)なので、Y回転を反映して footprint を実物に合わせる
-			// （壁を90°横に置くと幅と奥行きが入れ替わる）。X/Z回転（坂）はAABBで正確に
-			// 表せないため考慮しない（坂の接地はレイキャストで別途対応する）
-			core::Vector3 colliderSize{};
-			if (def.m_collider == "box")
+			const auto collision{ constant::toPropCollision(def.m_collider) };
+
+			// Box（壁・柱）は軸並行(AABB)で押し返すため、Y回転を反映して footprint を
+			// 実物に合わせる（壁を90°横に置くと幅と奥行きが入れ替わる）。
+			// Ground（床・坂）は傾きごと GroundingSystem が扱うので実寸をそのまま渡す
+			core::Vector3 collisionSize{};
+			if (collision == constant::PropCollision::Box)
 			{
-				const float yaw{ rotation.y };
-				const float cosYaw{ std::abs(std::cos(yaw)) };
-				const float sinYaw{ std::abs(std::sin(yaw)) };
-				colliderSize = core::Vector3{
+				const float cosYaw{ std::abs(std::cos(rotation.y)) };
+				const float sinYaw{ std::abs(std::sin(rotation.y)) };
+				collisionSize = core::Vector3{
 					prop.m_size.x * cosYaw + prop.m_size.z * sinYaw,
 					prop.m_size.y,
 					prop.m_size.x * sinYaw + prop.m_size.z * cosYaw
 				};
 			}
+			else if (collision == constant::PropCollision::Ground)
+			{
+				collisionSize = prop.m_size;
+			}
 
-			factory.create(handle, prop.m_position, rotation, scale, colliderSize);
+			factory.create(handle, prop.m_position, rotation, scale, collision, collisionSize);
 		}
 	}
 } // namespace game::factory
