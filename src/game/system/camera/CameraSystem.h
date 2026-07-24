@@ -42,10 +42,26 @@ namespace game::system::camera
 		void update(float deltaTime) override;
 
 	  private:
+		/**
+		 * @brief 壁に遮られない位置までカメラを手前へ寄せる
+		 *
+		 * 注視点からカメラへの線分が配置物を貫いていたら、その手前で止める。
+		 * これをしないと壁の中にカメラが入り、プレイヤーが見えなくなる。
+		 * @param lookTarget 注視点（プレイヤーの頭あたり）
+		 * @param desiredDistance 遮蔽が無いときに保ちたい距離
+		 * @param direction 注視点からカメラへ向かう単位ベクトル
+		 * @return 実際に保てる距離
+		 */
+		float clampDistanceByWalls(const core::Vector3& lookTarget,
+		    float desiredDistance, const core::Vector3& direction) const;
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::ecs::EntityId m_targetEntityId{};
 		core::iface::IInputProvider& m_inputProvider;
 		core::iface::ICamera& m_camera;
 		GameManager& m_gameManager; // DEBUG: デバッグモード状態の参照（リリース時に削除）
+
+		// 壁で寄せた距離。寄るのは即座、戻るのは緩やかにするため前フレームの値を持つ
+		float m_currentDistance{ 0.0f };
 	};
 } // namespace game::system::camera
