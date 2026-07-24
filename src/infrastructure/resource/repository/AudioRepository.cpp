@@ -56,6 +56,10 @@ namespace infrastructure::resource::repository
 			{ "ResultLose", core::constant::BgmType::ResultLose },
 		};
 
+		// BGM は同時に1曲しか鳴らないため、全曲を PCM 展開してメモリに載せる必要がない。
+		// ストリーミング再生にすることで mp3 6曲分（展開後 約285MB）の常駐を避ける。
+		SetCreateSoundDataType(DX_SOUNDDATATYPE_FILE);
+
 		for (const auto& entry : json["bgm"])
 		{
 			const std::string key  { entry["type"] };
@@ -77,6 +81,9 @@ namespace infrastructure::resource::repository
 
 			m_bgmConfigs[it->second] = config;
 		}
+
+		// SE は連続再生されるためメモリ展開のままにする（既定値へ戻す）
+		SetCreateSoundDataType(DX_SOUNDDATATYPE_MEMNOPRESS);
 	}
 
 	void AudioRepository::loadSe(const nlohmann::json& json)
