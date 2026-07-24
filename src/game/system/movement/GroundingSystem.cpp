@@ -8,6 +8,7 @@
 #include "game/constant/Tag.h"
 #include "core/utility/Rotation.h"
 #include <cmath>
+#include <algorithm>
 
 namespace
 {
@@ -19,6 +20,12 @@ namespace
 	constexpr float DEATH_BOUNCE_RESTITUTION{ 0.5f };
 	// これより落下速度が遅くなったらバウンドをやめて静止させる
 	constexpr float DEATH_BOUNCE_MIN_SPEED{ 20.0f };
+	// これ未満の傾きは水平とみなして滑らせない
+	constexpr float MIN_SLIDE_STEEPNESS{ 0.01f };
+	// 滑り速度の上限（際限なく加速させない）
+	constexpr float MAX_SLIDE_SPEED{ 1800.0f };
+	// 滑らない足場に移ったとき、残った滑り速度が減衰する割合（毎秒）
+	constexpr float SLIDE_DECAY_PER_SEC{ 6.0f };
 } // namespace
 
 namespace game::system::movement
@@ -28,7 +35,40 @@ namespace game::system::movement
 	{
 	}
 
-	bool GroundingSystem::surfaceHeightAt(core::ecs::EntityId surfaceId, float x, float z, float& outHeight) const
+	void GroundingSystem::updateSlide(component::movement::VelocityComponent& velocity,
+	    const core::Vector3& normal, float slideAccel, float deltaTime) const
+	{
+		// 法線の水平成分＝坂を下る向き。長さは傾きの強さ（水平面なら0）
+		const core::Vector3 downhill{ normal.x, 0.0f, normal.z };
+		const float steepness{ downhill.length() };
+
+		if (slideAccel <= 0.0f || steepness < MIN_SLIDE_STEEPNESS)
+		{
+			// 滑らない足場では、残っている滑り速度を減衰させて止める
+			const float decay{ 1.0f - std::min(SLIDE_DECAY_PER_SEC * deltaTime, 1.0f) };
+			velocity.m_externalVelocity.x *= decay;
+			velocity.m_externalVelocity.z *= decay;
+			return;
+		}
+
+		const core::Vector3 direction{ downhill * (1.0f / steepness) };
+		const float accel{ slideAccel * steepness * deltaTime };
+		velocity.m_externalVelocity.x += direction.x * accel;
+		velocity.m_externalVelocity.z += direction.z * accel;
+
+		// 落ち続けて無限に速くならないよう頭打ちにする
+		const float speed{ std::sqrt(velocity.m_externalVelocity.x * velocity.m_externalVelocity.x +
+			                         velocity.m_externalVelocity.z * velocity.m_externalVelocity.z) };
+		if (speed > MAX_SLIDE_SPEED)
+		{
+			const float scale{ MAX_SLIDE_SPEED / speed };
+			velocity.m_externalVelocity.x *= scale;
+			velocity.m_externalVelocity.z *= scale;
+		}
+	}
+
+	bool GroundingSystem::surfaceHeightAt(core::ecs::EntityId surfaceId, float x, float z,
+	    float& outHeight, core::Vector3& outNormal) const
 	{
 		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(surfaceId) };
 		const auto& surface{ m_componentManager.get<component::movement::GroundSurfaceComponent>(surfaceId) };
@@ -54,6 +94,7 @@ namespace game::system::movement
 			return false;
 
 		outHeight = height;
+		outNormal = normal;
 		return true;
 	}
 
@@ -90,10 +131,13 @@ namespace game::system::movement
 			// 足元にある面のうち最も高いものを選ぶ
 			bool found{ false };
 			float bestHeight{ 0.0f };
+			core::Vector3 bestNormal{ 0.0f, 1.0f, 0.0f };
+			float bestSlideAccel{ 0.0f };
 			for (const auto surfaceId : surfaces)
 			{
 				float height{ 0.0f };
-				if (!surfaceHeightAt(surfaceId, transform.m_position.x, transform.m_position.z, height))
+				core::Vector3 normal{};
+				if (!surfaceHeightAt(surfaceId, transform.m_position.x, transform.m_position.z, height, normal))
 					continue;
 				if (height > foot + reach)
 					continue; // 頭上の面（別階層の床など）は無視する
@@ -101,8 +145,17 @@ namespace game::system::movement
 				{
 					found = true;
 					bestHeight = height;
+					bestNormal = normal;
+					bestSlideAccel = m_componentManager
+					                     .get<component::movement::GroundSurfaceComponent>(surfaceId)
+					                     .m_slideAccel;
 				}
 			}
+
+			// 接地している面に応じて滑り速度を更新する（空中では減衰させる）
+			const bool isStanding{ found && foot <= bestHeight + STEP_TOLERANCE };
+			updateSlide(velocity, isStanding ? bestNormal : core::Vector3{ 0.0f, 1.0f, 0.0f },
+			    isStanding ? bestSlideAccel : 0.0f, deltaTime);
 
 			// 面より下に沈んでいるときだけ持ち上げる。引き下げないので
 			// 障害物（Box）の上に立っている状態を壊さない
