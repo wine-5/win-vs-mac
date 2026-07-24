@@ -4,6 +4,7 @@
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/visual/AnimationComponent.h"
 #include "game/component/camera/CameraComponent.h"
+#include "game/component/combat/HealthComponent.h"
 #include <cmath>
 
 namespace game::system::movement
@@ -18,6 +19,16 @@ namespace game::system::movement
 		auto& input = m_componentManager.get<component::movement::InputComponent>(m_entityId);
 		auto& velocity = m_componentManager.get<component::movement::VelocityComponent>(m_entityId);
 		auto& transform = m_componentManager.get<component::movement::TransformComponent>(m_entityId);
+
+		// 死亡後は移動もアニメ要求もしない。ここで止めないと毎フレームIdleを要求し続け、
+		// 死亡アニメが再生完了した瞬間（優先度を失った瞬間）にIdleへ戻ってしまう
+		if (m_componentManager.has<component::combat::HealthComponent>(m_entityId) &&
+		    m_componentManager.get<component::combat::HealthComponent>(m_entityId).m_isDead)
+		{
+			velocity.m_velocity.x = 0.0f;
+			velocity.m_velocity.z = 0.0f;
+			return;
+		}
 
 		// カメラのyawを基準に、入力をカメラ相対のワールド方向へ変換する
 		float cameraYaw{ 0.0f };
