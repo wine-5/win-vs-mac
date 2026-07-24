@@ -247,6 +247,8 @@ const SNAP_ROTATE_DEG = 15;
 const SNAP_SCALE = 100;
 const UNDO_LIMIT = 50;
 const LS_KEY = 'stageEditor.autosave.v1';
+/* 編集対象のステージ。serve_editor.py の保存先と一致させること */
+const STAGE_FILE = 'assets/data/stage-test.json';
 const DEG2RAD = Math.PI / 180;
 const RAD2DEG = 180 / Math.PI;
 
@@ -1215,40 +1217,49 @@ function exportStage() {
   );
 }
 
+/**
+ * stageData形式のJSONをエディタの内部状態へ変換する。
+ * 編集にはオブジェクトの同一性を追う uid が要るのでここで振る。
+ * 欠けている項目は既定値で補い、古い形式のファイルでも開けるようにする。
+ */
+function stateFromStageData(data) {
+  return {
+    playerStart: {
+      position: data.playerStart?.position ?? [0, 0, 0],
+      rotationY: data.playerStart?.rotationY ?? 0
+    },
+    props: (data.props ?? []).map(p => ({
+      uid: uid(), type: p.type,
+      position: p.position ?? [0, 0, 0],
+      rotation: p.rotation ?? [0, 0, 0],
+      size: p.size ?? [100, 100, 100]
+    })),
+    spawns: (data.spawns ?? []).map(s => ({
+      uid: uid(), type: s.type,
+      position: s.position ?? [0, 0, 0],
+      rotationY: s.rotationY ?? 0
+    })),
+    lights: (data.lights ?? []).map(l => ({
+      uid: uid(),
+      position: l.position ?? [0, 600, 0],
+      range: l.range ?? 1000,
+      color: l.color ?? [255, 255, 255]
+    })),
+    mac: {
+      type: 'mac',
+      position: data.mac?.position ?? [0, 0, 800],
+      rotationY: data.mac?.rotationY ?? 180
+    }
+  };
+}
+
 document.getElementById('fileStage').addEventListener('change', async (e) => {
   const f = e.target.files[0]; e.target.value = '';
   if (!f) return;
   try {
     const data = JSON.parse(await f.text());
     pushUndo();
-    state = {
-      playerStart: {
-        position: data.playerStart?.position ?? [0, 0, 0],
-        rotationY: data.playerStart?.rotationY ?? 0
-      },
-      props: (data.props ?? []).map(p => ({
-        uid: uid(), type: p.type,
-        position: p.position ?? [0, 0, 0],
-        rotation: p.rotation ?? [0, 0, 0],
-        size: p.size ?? [100, 100, 100]
-      })),
-      spawns: (data.spawns ?? []).map(s => ({
-        uid: uid(), type: s.type,
-        position: s.position ?? [0, 0, 0],
-        rotationY: s.rotationY ?? 0
-      })),
-      lights: (data.lights ?? []).map(l => ({
-        uid: uid(),
-        position: l.position ?? [0, 600, 0],
-        range: l.range ?? 1000,
-        color: l.color ?? [255, 255, 255]
-      })),
-      mac: {
-        type: 'mac',
-        position: data.mac?.position ?? [0, 0, 800],
-        rotationY: data.mac?.rotationY ?? 180
-      }
-    };
+    state = stateFromStageData(data);
     selected = null;
     rebuildScene();
     scheduleAutosave();
@@ -1332,9 +1343,29 @@ async function loadCatalogFromServer() {
   }
 }
 
+/**
+ * 編集対象のステージ（保存先と同じファイル）をサーバーから読み込む。
+ * 保存はこのファイルを上書きするので、起動時にも同じものを読まないと
+ * エディタの表示と実ファイルが食い違う。
+ * @returns {Promise<boolean>} 読み込めたら true
+ */
+async function loadStageFromServer() {
+  try {
+    const res = await fetch(assetUrl(STAGE_FILE), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    state = stateFromStageData(await res.json());
+    return true;
+  } catch (err) {
+    console.warn(STAGE_FILE + ' の自動読込に失敗（自動保存の復元にフォールバック）:', err.message);
+    return false;
+  }
+}
+
 (async function init() {
   await loadCatalogFromServer();
-  tryRestore();
+  /* 実ファイルを正とし、読めなかったときだけ自動保存から復元する */
+  if (!await loadStageFromServer())
+    tryRestore();
   renderPalette();
   rebuildScene();
   resize();
