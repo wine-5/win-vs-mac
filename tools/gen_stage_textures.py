@@ -193,15 +193,31 @@ DATA_LINES = [
 
 
 def tex_wall_data():
-    """データ壁の背景。
+    """データ壁：ログとコードが並ぶ面。
 
-    文字は実行時に DataWallSystem がテクスチャへ直接描いて流すので、
-    ここでは「文字が乗る下地」だけを用意する。
-    このPNGは、動的描画が使えないときのフォールバックも兼ねる。
+    描画側でUVを縦にずらして流すため、**上下が繋がる**ように作る。
+    行を等間隔に並べ、上下端に半端な行を残さないことでシームレスになる。
+    上下に縁を入れると繋ぎ目が出るので、光らせるのは左右だけにする。
     """
     img = surface_base((14, 26, 40), BLUE, grid_step=64)
     d = ImageDraw.Draw(img)
-    # 左右の縁だけ光らせる（縦に流しても繋ぎ目が出ないように上下は開ける）
+    f = MONO(18)
+
+    # 行間は SIZE を割り切れる値にする（繰り返しても行が途切れない）
+    line_height = SIZE // len(DATA_LINES)
+    for i, text in enumerate(DATA_LINES):
+        y = i * line_height + line_height // 2
+        # 種別で色を変え、ログとしての情報の粒度を出す
+        if text.startswith("[intruder]"):
+            color = RED + (235,)
+        elif text.startswith("[warn]"):
+            color = YELLOW + (215,)
+        elif text.startswith("[ok]"):
+            color = BLUE + (215,)
+        else:
+            color = (120, 200, 245, 160)  # コード行は控えめに
+        d.text((16, y), text, font=f, fill=color, anchor="lm")
+
     d.rectangle([0, 0, 6, SIZE], fill=BLUE + (220,))
     d.rectangle([SIZE - 7, 0, SIZE - 1, SIZE], fill=BLUE + (220,))
     return img
