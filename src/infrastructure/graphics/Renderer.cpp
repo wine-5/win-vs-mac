@@ -36,6 +36,13 @@ namespace infrastructure::graphics
 
 	void Renderer::setTextureTiling(int modelHandle, float scaleU, float scaleV)
 	{
+		constexpr float NO_OFFSET{ 0.0f };
+		setTextureScroll(modelHandle, scaleU, scaleV, NO_OFFSET, NO_OFFSET);
+	}
+
+	void Renderer::setTextureScroll(int modelHandle, float scaleU, float scaleV,
+	    float offsetU, float offsetV)
+	{
 		if (modelHandle == -1)
 			return;
 
@@ -46,12 +53,11 @@ namespace infrastructure::graphics
 			MV1SetTextureAddressMode(modelHandle, i, DX_TEXADDRESS_WRAP, DX_TEXADDRESS_WRAP);
 
 		// 配置物は単一フレームの立方体を想定している。フレームが無いモデルには何もしない
-		constexpr float NO_TRANSLATE{ 0.0f };
 		constexpr float NO_ROTATE{ 0.0f };
 		const int frameNum{ MV1GetFrameNum(modelHandle) };
 		for (int i{ 0 }; i < frameNum; ++i)
 			MV1SetFrameTextureAddressTransform(modelHandle, i,
-			    NO_TRANSLATE, NO_TRANSLATE, scaleU, scaleV, NO_TRANSLATE, NO_TRANSLATE, NO_ROTATE);
+			    offsetU, offsetV, scaleU, scaleV, NO_ROTATE, NO_ROTATE, NO_ROTATE);
 	}
 
 	void Renderer::applyDeathDissolve(int modelHandle, float redProgress, float alpha)

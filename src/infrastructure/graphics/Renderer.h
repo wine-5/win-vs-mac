@@ -31,6 +31,17 @@ namespace infrastructure::graphics
 		void setTextureTiling(int modelHandle, float scaleU, float scaleV) override;
 
 		/**
+		 * @brief モデルのテクスチャをずらして貼る（模様を流す演出に使う）
+		 * @param modelHandle モデルハンドル
+		 * @param scaleU 横方向の繰り返し回数（1.0で引き伸ばし）
+		 * @param scaleV 縦方向の繰り返し回数（1.0で引き伸ばし）
+		 * @param offsetU 横方向のずらし量（1.0でテクスチャ1枚ぶん）
+		 * @param offsetV 縦方向のずらし量（1.0でテクスチャ1枚ぶん）
+		 */
+		void setTextureScroll(int modelHandle, float scaleU, float scaleV,
+		    float offsetU, float offsetV) override;
+
+		/**
 		 * @brief 敵撃破時の赤化＋ディゾルブ（消失）演出をモデルに適用する
 		 * @param modelHandle 対象のモデルハンドル
 		 * @param redProgress 赤化の進行度（0.0=元の色 〜 1.0=赤）

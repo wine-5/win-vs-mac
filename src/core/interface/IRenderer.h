@@ -32,6 +32,21 @@ namespace core::iface
 		 * @param scaleV 縦方向の繰り返し回数（1.0で引き伸ばし）
 		 */
 		virtual void setTextureTiling(int modelHandle, float scaleU, float scaleV) = 0;
+
+		/**
+		 * @brief モデルのテクスチャをずらして貼る（模様を流す演出に使う）
+		 *
+		 * 繰り返し回数に加えて平行移動を指定する。offsetV を時間で増やし続ければ、
+		 * 壁の模様が流れ続けて「情報が流れるサーバー内部」に見える。
+		 * 描画のたびに設定するため、同じモデルを別の流し方で使い回しても混ざらない。
+		 * @param modelHandle モデルハンドル
+		 * @param scaleU 横方向の繰り返し回数（1.0で引き伸ばし）
+		 * @param scaleV 縦方向の繰り返し回数（1.0で引き伸ばし）
+		 * @param offsetU 横方向のずらし量（1.0でテクスチャ1枚ぶん）
+		 * @param offsetV 縦方向のずらし量（1.0でテクスチャ1枚ぶん）
+		 */
+		virtual void setTextureScroll(int modelHandle, float scaleU, float scaleV,
+		    float offsetU, float offsetV) = 0;
 		/**
 		 * @brief 敵撃破時の赤化＋ディゾルブ（消失）演出をモデルに適用する
 		 *
