@@ -20,6 +20,18 @@ namespace core::iface
 		 * @param scale スケール
 		 */
 		virtual void drawModel(int modelHandle, const core::Vector3& position, const::core::Vector3& rotation, const core::Vector3& scale) = 0;
+
+		/**
+		 * @brief モデルのテクスチャ繰り返し回数を設定する
+		 *
+		 * 立方体を引き伸ばして作る配置物は、そのままだと模様が間延びする。
+		 * 実寸に応じて繰り返し回数を上げることで、長い壁に窓が連続して並ぶようになる。
+		 * 描画のたびに設定するため、同じモデルを別サイズで使い回しても混ざらない。
+		 * @param modelHandle モデルハンドル
+		 * @param scaleU 横方向の繰り返し回数（1.0で引き伸ばし）
+		 * @param scaleV 縦方向の繰り返し回数（1.0で引き伸ばし）
+		 */
+		virtual void setTextureTiling(int modelHandle, float scaleU, float scaleV) = 0;
 		/**
 		 * @brief 敵撃破時の赤化＋ディゾルブ（消失）演出をモデルに適用する
 		 *

@@ -34,6 +34,26 @@ namespace infrastructure::graphics
 		MV1DrawModel(modelHandle);
 	}
 
+	void Renderer::setTextureTiling(int modelHandle, float scaleU, float scaleV)
+	{
+		if (modelHandle == -1)
+			return;
+
+		// テクスチャ座標を繰り返し回数ぶん引き伸ばすことで、面いっぱいに絵が繰り返される。
+		// 繰り返すにはアドレスモードがWRAPである必要がある
+		const int textureNum{ MV1GetTextureNum(modelHandle) };
+		for (int i{ 0 }; i < textureNum; ++i)
+			MV1SetTextureAddressMode(modelHandle, i, DX_TEXADDRESS_WRAP, DX_TEXADDRESS_WRAP);
+
+		// 配置物は単一フレームの立方体を想定している。フレームが無いモデルには何もしない
+		constexpr float NO_TRANSLATE{ 0.0f };
+		constexpr float NO_ROTATE{ 0.0f };
+		const int frameNum{ MV1GetFrameNum(modelHandle) };
+		for (int i{ 0 }; i < frameNum; ++i)
+			MV1SetFrameTextureAddressTransform(modelHandle, i,
+			    NO_TRANSLATE, NO_TRANSLATE, scaleU, scaleV, NO_TRANSLATE, NO_TRANSLATE, NO_ROTATE);
+	}
+
 	void Renderer::applyDeathDissolve(int modelHandle, float redProgress, float alpha)
 	{
 		if (modelHandle == -1)

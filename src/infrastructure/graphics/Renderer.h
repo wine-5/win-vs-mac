@@ -23,6 +23,14 @@ namespace infrastructure::graphics
 		void drawModel(int modelHandle, const core::Vector3& position, const core::Vector3& rotation, const core::Vector3& scale) override;
 
 		/**
+		 * @brief モデルのテクスチャ繰り返し回数を設定する
+		 * @param modelHandle モデルハンドル
+		 * @param scaleU 横方向の繰り返し回数（1.0で引き伸ばし）
+		 * @param scaleV 縦方向の繰り返し回数（1.0で引き伸ばし）
+		 */
+		void setTextureTiling(int modelHandle, float scaleU, float scaleV) override;
+
+		/**
 		 * @brief 敵撃破時の赤化＋ディゾルブ（消失）演出をモデルに適用する
 		 * @param modelHandle 対象のモデルハンドル
 		 * @param redProgress 赤化の進行度（0.0=元の色 〜 1.0=赤）
