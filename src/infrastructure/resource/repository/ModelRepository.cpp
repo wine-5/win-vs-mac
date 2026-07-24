@@ -30,6 +30,24 @@ namespace
 		for (int i{ 0 }; i < materialNum; ++i)
 			MV1SetMaterialAmbColor(handle, i, white);
 	}
+
+	/**
+	 * @brief モデルの背面カリングを無効にする
+	 *
+	 * 配置物は自前生成の立方体で、DxLibのカリング判定と面の巻き方向が噛み合わず
+	 * 手前の面が消えることがある。カリングを切れば巻き方向に関係なく全面が描かれる。
+	 * 両面ポリゴンを重ねる方式と違い、Zファイティングも起きない。
+	 * @param handle モデルハンドル
+	 */
+	void disableBackCulling(int handle)
+	{
+		if (handle == -1)
+			return;
+
+		const int meshNum{ MV1GetMeshNum(handle) };
+		for (int i{ 0 }; i < meshNum; ++i)
+			MV1SetMeshBackCulling(handle, i, DX_CULLING_NONE);
+	}
 } // namespace
 
 namespace infrastructure::resource::repository
@@ -157,6 +175,9 @@ namespace infrastructure::resource::repository
 		else
 		{
 			normalizeMaterialAmbient(handle);
+			// パス指定で読むのは配置物（自前生成の立方体）なので、巻き方向に左右されないよう
+			// カリングを切る。キャラクター等のID指定モデルには適用しない
+			disableBackCulling(handle);
 			m_modelHandles[key] = handle;
 		}
 		return handle;
