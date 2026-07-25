@@ -73,6 +73,7 @@
 #include "game/system/visual/MacAwakenEffectSystem.h"
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
+#include "game/ui/ingame/PlayerHUDView.h"
 #include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
 #include "game/event/InGameEvents.h"
 
@@ -249,6 +250,12 @@ namespace game::scene
 		    m_renderer);
 		m_view.setDebugGizmoView(m_debugGizmoView.get());
 		m_view.setDebugHUDView(m_debugHUDView.get());
+
+		m_playerHUDView = std::make_unique<ui::ingame::PlayerHUDView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager);
+		m_view.setPlayerHUDView(m_playerHUDView.get());
 	}
 
 	InGame::~InGame() = default;

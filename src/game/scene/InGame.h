@@ -46,6 +46,11 @@ namespace game
 		class DebugGizmoView; // DEBUG: 前方宣言（リリース時に削除）
 		class DebugHUDView;   // DEBUG: 前方宣言（リリース時に削除）
 	} // namespace ui::debug
+
+	namespace ui::ingame
+	{
+		class PlayerHUDView; // 前方宣言
+	} // namespace ui::ingame
 } // namespace game
 
 namespace game::scene
@@ -154,6 +159,9 @@ namespace game::scene
 		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（リリース時にまとめて削除）
 		std::unique_ptr<ui::debug::DebugGizmoView> m_debugGizmoView;
 		std::unique_ptr<ui::debug::DebugHUDView> m_debugHUDView;
+
+		// プレイヤーステータス（左下のHP）のView
+		std::unique_ptr<ui::ingame::PlayerHUDView> m_playerHUDView;
 
 		// 進行トラッキング
 		float m_elapsedTime{0.0f};

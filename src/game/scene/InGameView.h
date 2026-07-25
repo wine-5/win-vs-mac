@@ -27,6 +27,11 @@ namespace game::ui::debug
 	class DebugHUDView;   // DEBUG: 前方宣言（リリース時に削除）
 } // namespace game::ui::debug
 
+namespace game::ui::ingame
+{
+	class PlayerHUDView; // 前方宣言
+} // namespace game::ui::ingame
+
 namespace game::scene
 {
 	/**
@@ -110,6 +115,12 @@ namespace game::scene
 		 */
 		void setDebugHUDView(ui::debug::DebugHUDView* view);
 
+		/**
+		 * @brief プレイヤーステータス（左下のHUD）Viewを設定する
+		 * @param view PlayerHUDViewのポインタ（所有はInGame）
+		 */
+		void setPlayerHUDView(ui::ingame::PlayerHUDView* view);
+
 	  private:
 		/**
 		 * @brief RenderComponentを持つ全Entityのモデルを描画する
@@ -162,6 +173,9 @@ namespace game::scene
 		// 攻撃予兆（地面の攻撃範囲サークル）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::visual::AttackTelegraphVisualsSystem* m_attackTelegraphSystem{ nullptr };
 		system::visual::TelegraphVisualsSystem* m_telegraphSystem{ nullptr };
+
+		// プレイヤーステータス（左下のHUD）の描画元（所有はInGame）
+		ui::ingame::PlayerHUDView* m_playerHUDView{ nullptr };
 
 		// プレイヤー死亡時の暗転の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::combat::PlayerDeathSystem* m_playerDeathSystem{ nullptr };

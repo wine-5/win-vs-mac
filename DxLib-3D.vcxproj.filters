@@ -180,6 +180,9 @@
     <ClCompile Include="src\game\ui\debug\DebugHUDView.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\ui\ingame\PlayerHUDView.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="src\game\ui\pause\PauseMenuController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -690,6 +693,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\ui\debug\DebugHUDView.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\ui\ingame\PlayerHUDView.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\ui\pause\PauseMenuController.h">

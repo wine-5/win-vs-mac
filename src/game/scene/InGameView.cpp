@@ -18,6 +18,7 @@
 #include "game/system/combat/PlayerDeathSystem.h"
 #include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
+#include "game/ui/ingame/PlayerHUDView.h"
 #include <cmath>
 
 namespace game::scene
@@ -65,6 +66,10 @@ namespace game::scene
 		// 敵の発見演出（頭上の通知バッジ）。モデルの手前・HUDより奥に描く
 		if (m_detectionAlertSystem)
 			m_detectionAlertSystem->draw();
+
+		// プレイヤーステータス（左下のHP）。演出より手前・レティクルと同じHUD層に描く
+		if (m_playerHUDView)
+			m_playerHUDView->draw(playerId);
 
 		// 照準レティクル（HUD）は最前面に描く
 		drawReticle(playerId);
@@ -121,6 +126,11 @@ namespace game::scene
 	void InGameView::setDebugHUDView(ui::debug::DebugHUDView* view)
 	{
 		m_debugHUDView = view;
+	}
+
+	void InGameView::setPlayerHUDView(ui::ingame::PlayerHUDView* view)
+	{
+		m_playerHUDView = view;
 	}
 
 	void InGameView::drawModels()
