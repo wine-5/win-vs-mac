@@ -1,4 +1,7 @@
 ﻿#pragma once
+#include <string>
+#include <string_view>
+#include <vector>
 #include "core/utility/Vector3.h"
 
 namespace core::iface
@@ -20,6 +23,49 @@ namespace core::iface
 		 * @param scale スケール
 		 */
 		virtual void drawModel(int modelHandle, const core::Vector3& position, const::core::Vector3& rotation, const core::Vector3& scale) = 0;
+
+		/**
+		 * @brief モデルのフレーム（ボーン）を名前から検索する
+		 *
+		 * 武器をキャラクターの手へ装着する際、装着先のボーン番号を得るのに使う。
+		 * ボーン名はモデルの作り（リグ）によって異なるため、見つからない場合は
+		 * getModelFrameNames() で実際の候補を確認すること
+		 * @param modelHandle モデルハンドル
+		 * @param frameName フレーム（ボーン）名
+		 * @return フレーム番号。見つからない場合は -1
+		 */
+		[[nodiscard]] virtual int findModelFrame(int modelHandle, std::string_view frameName) = 0;
+
+		/**
+		 * @brief モデルが持つ全フレーム（ボーン）の名前を取得する
+		 *
+		 * 装着先のボーン名が分からないときに候補を列挙するために使う
+		 * @param modelHandle モデルハンドル
+		 * @return フレーム名の一覧（フレーム番号順）。失敗時は空
+		 */
+		[[nodiscard]] virtual std::vector<std::string> getModelFrameNames(int modelHandle) = 0;
+
+		/**
+		 * @brief モデルを他モデルのフレーム（ボーン）へ追従させて描画する
+		 *
+		 * 親のアニメーションが適用された後のボーン位置へ武器を貼り付ける。
+		 * オフセットは装着先ボーンのローカル空間で解釈されるため、握りの位置・
+		 * 角度の微調整に使える。
+		 *
+		 * @note 親のボーン行列にはアニメーションと親のスケールが反映済みである必要が
+		 *       あるため、必ず親モデルを描画した後に呼ぶこと
+		 * @note modelHandle には武器専用のハンドルを渡すこと。行列を直接指定して描く
+		 *       ため、以後このハンドルには位置・回転・スケール指定が効かなくなる
+		 * @param modelHandle 装着するモデル（武器）のハンドル
+		 * @param parentModelHandle 装着先モデル（キャラクター）のハンドル
+		 * @param frameIndex 装着先のフレーム番号（findModelFrameで取得したもの）
+		 * @param offsetPosition ボーンのローカル空間での位置オフセット
+		 * @param offsetRotation ボーンのローカル空間での回転オフセット（ラジアン）
+		 * @param offsetScale 武器自体のスケール（親のスケールに乗算される）
+		 */
+		virtual void drawModelOnFrame(int modelHandle, int parentModelHandle, int frameIndex,
+		    const core::Vector3& offsetPosition, const core::Vector3& offsetRotation,
+		    const core::Vector3& offsetScale) = 0;
 
 		/**
 		 * @brief モデルのテクスチャ繰り返し回数を設定する

@@ -39,6 +39,56 @@ namespace infrastructure::graphics
 		MV1DrawModel(modelHandle);
 	}
 
+	int Renderer::findModelFrame(int modelHandle, std::string_view frameName)
+	{
+		if (modelHandle == -1)
+			return -1;
+
+		// MV1SearchFrame はヌル終端の文字列を要求するため、string_view から詰め直す
+		const std::string name{ frameName };
+		return MV1SearchFrame(modelHandle, name.c_str());
+	}
+
+	std::vector<std::string> Renderer::getModelFrameNames(int modelHandle)
+	{
+		std::vector<std::string> names{};
+		if (modelHandle == -1)
+			return names;
+
+		const int frameNum{ MV1GetFrameNum(modelHandle) };
+		names.reserve(static_cast<size_t>(frameNum));
+		for (int i{ 0 }; i < frameNum; ++i)
+		{
+			const char* name{ MV1GetFrameName(modelHandle, i) };
+			names.emplace_back(name != nullptr ? name : "");
+		}
+		return names;
+	}
+
+	void Renderer::drawModelOnFrame(int modelHandle, int parentModelHandle, int frameIndex,
+	    const core::Vector3& offsetPosition, const core::Vector3& offsetRotation,
+	    const core::Vector3& offsetScale)
+	{
+		if (modelHandle == -1 || parentModelHandle == -1 || frameIndex < 0)
+			return;
+
+		// 装着先ボーンのワールド行列。親の位置・回転・スケールとアニメーションが
+		// 反映済みのものなので、親を描画した後でなければ1フレーム古い姿勢になる
+		const MATRIX frameMatrix{ MV1GetFrameLocalWorldMatrix(parentModelHandle, frameIndex) };
+
+		// 装着オフセットを 拡大→回転→平行移動 の順で組む。
+		// これをボーン行列へ左から掛けることで、オフセットがボーンのローカル空間で
+		// 解釈され、手の動きにそのまま追従する
+		MATRIX offset{ MGetScale(VGet(offsetScale.x, offsetScale.y, offsetScale.z)) };
+		offset = MMult(offset, MGetRotX(offsetRotation.x));
+		offset = MMult(offset, MGetRotY(offsetRotation.y));
+		offset = MMult(offset, MGetRotZ(offsetRotation.z));
+		offset = MMult(offset, MGetTranslate(VGet(offsetPosition.x, offsetPosition.y, offsetPosition.z)));
+
+		MV1SetMatrix(modelHandle, MMult(offset, frameMatrix));
+		MV1DrawModel(modelHandle);
+	}
+
 	void Renderer::setTextureTiling(int modelHandle, float scaleU, float scaleV)
 	{
 		constexpr float NO_OFFSET{ 0.0f };
