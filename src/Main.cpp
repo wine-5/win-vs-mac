@@ -53,20 +53,41 @@ namespace
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
-	// 描画解像度はDebug/Releaseで揃える（違うとUIの座標ズレや負荷差がビルド構成に依存してしまう）。
-	// フルスクリーン時はこの解像度で描いた画面をデスクトップ解像度へバイリニア拡大する。
-	// モニタの画面モードを切り替えないため、切り替え時のちらつきも起きない
-	const int screenWidth{ RENDER_WIDTH };
-	const int screenHeight{ RENDER_HEIGHT };
+	// 描画の高さは 1080 に固定し（UIスケールと負荷を端末に依らず一定に保つ）、
+	// 幅だけデスクトップのアスペクト比に合わせる。これで枠なしウィンドウをデスクトップ全体へ
+	// 拡大したとき、余白（レターボックス）も歪み（ストレッチ）も無くどの端末でも全画面になる。
+	// ＝ Unity の Fullscreen Window と同じ考え方
+	int screenWidth{ RENDER_WIDTH };
+	int screenHeight{ RENDER_HEIGHT };
+
+#ifndef _DEBUG
+	double fullscreenRate{ 1.0 }; // 描画バッファをデスクトップ全体へ広げる拡大率
+	{
+		DEVMODE displayMode{};
+		displayMode.dmSize = sizeof(displayMode);
+		if (EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &displayMode) != 0 && displayMode.dmPelsHeight > 0)
+		{
+			// 高さは固定、幅をデスクトップのアスペクト比に合わせる（縦横比が一致するので歪まない）
+			screenWidth = static_cast<int>(RENDER_HEIGHT * static_cast<double>(displayMode.dmPelsWidth) / displayMode.dmPelsHeight);
+			screenHeight = RENDER_HEIGHT;
+			fullscreenRate = static_cast<double>(displayMode.dmPelsHeight) / RENDER_HEIGHT;
+		}
+	}
+#endif
+
 	SetGraphMode(screenWidth, screenHeight, COLOR_BIT);
-	SetFullScreenResolutionMode(DX_FSRESOLUTIONMODE_DESKTOP);
-	SetFullScreenScalingMode(DX_FSSCALINGMODE_BILINEAR);
 
 #ifdef _DEBUG // DEBUG: 開発中はウインドウモードで起動する（画面に収まるよう縮小表示する）
 	ChangeWindowMode(TRUE);
 	SetWindowSizeExtendRate(calcDebugWindowExtendRate());
-#else // リリース用（フルスクリーン）
-	ChangeWindowMode(FALSE);
+#else // リリース：ボーダーレス全画面（枠なしウィンドウでデスクトップ全体を覆う）
+	// 排他フルスクリーンにすると、セレクト/リザルトのWebViewなど別ウィンドウが前面に出るたびに
+	// 前面を奪い合い、画面が切り替わって入力が他アプリへ行ってしまう。枠なしウィンドウにすれば
+	// 見た目は全画面のまま、他ウィンドウと素直に重なるためこの問題が起きない
+	ChangeWindowMode(TRUE);
+	SetWindowStyleMode(4); // タイトルバー・枠の無いスタイル
+	SetWindowSizeExtendRate(fullscreenRate);
+	SetWindowPosition(0, 0); // デスクトップ左上に合わせて全体を覆う
 #endif
 
 	SetAlwaysRunFlag(TRUE); // ファイルダイアログ等でウィンドウが非アクティブになっても描画を継続する
