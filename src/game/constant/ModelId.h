@@ -7,7 +7,9 @@ namespace game::constant
     namespace model_id
     {
         constexpr std::string_view PLAYER = "player";
-        constexpr std::string_view ENEMY_XCODE = "enemy_xcode";
+		// プレイヤーが右手に持つ剣（本体とは別モデルで、手のボーンへ装着する）
+		constexpr std::string_view PLAYER_SWORD = "player_sword";
+		constexpr std::string_view ENEMY_XCODE = "enemy_xcode";
         constexpr std::string_view ENEMY_SAFARI = "enemy_safari";
         constexpr std::string_view ENEMY_MAC = "enemy_mac";
 		// Safariが投げるブラウザタブ弾（3種ランダム）
