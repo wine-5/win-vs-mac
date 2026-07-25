@@ -1,6 +1,7 @@
 #pragma once
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include <chrono>
 #include <string>
 
 namespace core::iface
@@ -52,6 +53,18 @@ namespace game::ui::ingame
 		 */
 		void drawPanel(int x, int y, int width, int height);
 
+		/**
+		 * @brief 残り数の変化を検知し、減ったときに反応アニメーションを開始する
+		 * @param remainingEnemyCount 今フレームの残り数
+		 */
+		void updateCountReaction(int remainingEnemyCount);
+
+		/**
+		 * @brief 反応アニメーションの進行度を返す
+		 * @return 0.0（開始直後）〜1.0（終了）。再生中でなければ1.0
+		 */
+		[[nodiscard]] float getCountReactionProgress() const;
+
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
 
@@ -59,5 +72,11 @@ namespace game::ui::ingame
 		// 変換結果は毎フレーム同じなので生成時に一度だけ変換して保持する
 		std::string m_detailText{};
 		std::string m_bossText{};
+
+		// 残り数が減った瞬間に反応させるための状態。
+		// 描画経路からしか呼ばれずdeltaTimeを受け取らないため、経過時間は壁時計から求める
+		int m_lastCount{ -1 };
+		std::chrono::steady_clock::time_point m_countChangedTime{};
+		bool m_isCountReacting{ false };
 	};
 } // namespace game::ui::ingame

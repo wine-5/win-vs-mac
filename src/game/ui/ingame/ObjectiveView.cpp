@@ -4,6 +4,7 @@
 #include "core/interface/IStringConverter.h"
 #include "core/utility/Color.h"
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
 
 namespace
@@ -38,9 +39,35 @@ namespace
 	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono SemiBold" };
 	constexpr const char* UI_FONT_NAME{ "Noto Sans JP" };
 
+	constexpr float PI{ 3.141593f };
+
+	// 残り数が減ったときの反応
+	constexpr float COUNT_REACTION_DURATION{ 0.45f };
+	constexpr int COUNT_REACTION_POP{ 7 }; // 跳ね上がる最大量（1080p基準・上方向）
+
 	constexpr const char* CAPTION_TEXT{ "OBJECTIVE" };
 	constexpr const char* DETAIL_TEXT{ "体 倒すと Mac が出現" };
 	constexpr const char* BOSS_TEXT{ "Mac を破壊せよ" };
+
+	/**
+	 * @brief 2色を線形補間する
+	 * @param from 進行度0.0のときの色（ARGB形式：0xAARRGGBB）
+	 * @param to 進行度1.0のときの色（ARGB形式：0xAARRGGBB）
+	 * @param t 進行度（0.0〜1.0）
+	 * @return 補間した色（アルファは不透明で返す）
+	 */
+	unsigned int lerpColor(unsigned int from, unsigned int to, float t)
+	{
+		auto channel = [](unsigned int color, int shift)
+		{ return static_cast<int>((color >> shift) & 0xFFu); };
+		auto blend = [&](int shift)
+		{
+			const int a{ channel(from, shift) };
+			const int b{ channel(to, shift) };
+			return a + static_cast<int>((b - a) * t);
+		};
+		return core::utility::Color::argb(255, blend(16), blend(8), blend(0));
+	}
 } // namespace
 
 namespace game::ui::ingame
@@ -66,12 +93,41 @@ namespace game::ui::ingame
 		return value * m_screen.getHeight() / BASE_SCREEN_HEIGHT;
 	}
 
+	void ObjectiveView::updateCountReaction(int remainingEnemyCount)
+	{
+		if (remainingEnemyCount == m_lastCount)
+			return;
+
+		// 初回（-1からの初期化）とボス召喚などで増えた場合は反応させない。
+		// 「1体倒した」という手応えを返すのが目的なので、減ったときだけ動かす
+		const bool decreased{ m_lastCount >= 0 && remainingEnemyCount < m_lastCount };
+		m_lastCount = remainingEnemyCount;
+		if (!decreased)
+			return;
+
+		m_countChangedTime = std::chrono::steady_clock::now();
+		m_isCountReacting = true;
+	}
+
+	float ObjectiveView::getCountReactionProgress() const
+	{
+		if (!m_isCountReacting)
+			return 1.0f;
+
+		const float elapsed{ std::chrono::duration<float>(
+			std::chrono::steady_clock::now() - m_countChangedTime)
+			    .count() };
+		return std::clamp(elapsed / COUNT_REACTION_DURATION, 0.0f, 1.0f);
+	}
+
 	void ObjectiveView::draw(int remainingEnemyCount, bool isBossAppeared)
 	{
 		const int panelX{ scaled(PANEL_MARGIN) };
 		const int panelY{ scaled(PANEL_MARGIN) };
 		const int panelWidth{ scaled(PANEL_WIDTH) };
 		const int panelHeight{ scaled(PANEL_HEIGHT) };
+
+		updateCountReaction(remainingEnemyCount);
 
 		drawPanel(panelX, panelY, panelWidth, panelHeight);
 
@@ -96,10 +152,19 @@ namespace game::ui::ingame
 		char countText[8]{};
 		std::snprintf(countText, sizeof(countText), "%02d", std::max(0, remainingEnemyCount));
 
+		// 減った瞬間だけ黄色く光らせて跳ねさせる。数字が変わったこと自体に気づけるようにする。
+		// 文字サイズは変えない（サイズごとにフォントハンドルが増えるため）
+		const float reaction{ getCountReactionProgress() };
+		const unsigned int countColor{ lerpColor(core::utility::Color::HUD_CHARGE_MAX,
+			core::utility::Color::HUD_INK, reaction) };
+		// sinで上へ跳ねて戻る。開始と終了がどちらも0になるので継ぎ目が出ない
+		const int popOffset{ static_cast<int>(
+			-scaled(COUNT_REACTION_POP) * std::sin(reaction * PI)) };
+
 		m_uiRenderer.setFont(MONO_FONT_NAME);
 		const int countFontSize{ scaled(COUNT_FONT_SIZE) };
-		m_uiRenderer.drawText(panelX + padding, panelY + scaled(COUNT_Y), countText,
-		    core::utility::Color::HUD_INK, countFontSize);
+		m_uiRenderer.drawText(panelX + padding, panelY + scaled(COUNT_Y) + popOffset, countText,
+		    countColor, countFontSize);
 		const int countWidth{ m_uiRenderer.getTextWidth(countText, countFontSize) };
 		m_uiRenderer.resetFont();
 
