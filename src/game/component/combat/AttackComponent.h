@@ -21,6 +21,10 @@ namespace game::component::combat
 		float m_windupTimer{ 0.0f };
 		bool m_windupPending{ false };
 
+		// 攻撃が届く高さの上限（攻撃者の足元からの相対Y）。地面を叩きつける攻撃のように
+		// 「跳んでいれば当たらない」攻撃で使う。0なら高さ無制限（従来動作）
+		float m_attackMaxHeight{ 0.0f };
+
 		// このフレームでAttackSystemが実際に攻撃を開始したか。
 		// 攻撃間隔の管理はAttackSystem側に一本化しているため、AI Systemが
 		// 「攻撃した瞬間」を知りたい場合（攻撃アニメの要求など）はこれを見る

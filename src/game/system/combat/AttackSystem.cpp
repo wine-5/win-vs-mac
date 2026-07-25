@@ -178,6 +178,12 @@ namespace game::system::combat
 			if (distanceSq > rangeSq) // 攻撃範囲外の場合
 				continue;
 
+			// 高さ制限のある攻撃（地面叩きつけ等）は、相手が上限より高く浮いていたら当たらない。
+			// 0なら高さ無制限なのでこのチェックは行わない
+			if (attack.m_attackMaxHeight > 0.0f &&
+			    targetTransform.m_position.y - attackerTransform.m_position.y > attack.m_attackMaxHeight)
+				continue;
+
 			// CORチェーンでダメージ計算を行う
 			attack::DamageChain chain{};
 			chain.m_attackId = attackerId;
