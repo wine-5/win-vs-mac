@@ -20,8 +20,6 @@
 #include "game/actor/AnimationSetup.h"
 #include "game/constant/Tag.h"
 #include "game/constant/ModelId.h"
-#include "core/interface/ILogger.h"
-#include "core/utility/Log.h"
 #include <algorithm>
 
 namespace game::actor
@@ -117,9 +115,6 @@ namespace game::actor
 		float swordScale{ 1.0f };
 		if (modelLength > 0.0f && playerScale > 0.0f)
 			swordScale = SWORD_WORLD_LENGTH / (modelLength * playerScale);
-
-		core::log::info("[Weapon] 剣の実寸={:.3f} プレイヤー拡大率={:.1f} 適用倍率={:.5f}",
-		    modelLength, playerScale, swordScale);
 
 		component::visual::WeaponAttachComponent weapon{};
 		weapon.m_modelHandle = weaponHandle;
