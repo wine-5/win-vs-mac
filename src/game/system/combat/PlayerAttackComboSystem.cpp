@@ -53,12 +53,26 @@ namespace game::system::combat
 		const bool isJustPressed{ isPressedNow && !m_wasAttackPressed };
 		m_wasAttackPressed = isPressedNow;
 
-		if (!isJustPressed)
+		// 前の攻撃が終わるまでは新しい攻撃を出せない（連打で段が飛ぶのを防ぐ）
+		const bool isAttacking{ attack.m_currentCooldown > 0.0f || attack.m_windupPending };
+
+		// 振っている最中の入力は捨てずに覚えておく。攻撃アニメが終わってから
+		// 入力を受け付けるまでには隙間があり、そこで待機モーションへ戻ってしまうため、
+		// 先に押しておけば終わり次第すぐ次の段へ繋がるようにする
+		if (isJustPressed && isAttacking)
+		{
+			combo.m_hasBufferedInput = true;
+			return;
+		}
+
+		if (isAttacking)
 			return;
 
-		// 前の攻撃がまだ終わっていない間は受け付けない（連打で段が飛ぶのを防ぐ）
-		if (attack.m_currentCooldown > 0.0f || attack.m_windupPending)
+		// 押した瞬間、または攻撃中に溜めておいた入力があれば次の段を出す
+		if (!isJustPressed && !combo.m_hasBufferedInput)
 			return;
+
+		combo.m_hasBufferedInput = false;
 
 		// 受付時間内なら次の段へ、最終段まで来ていれば1段目へ戻す
 		combo.m_stage = (combo.m_stage >= MAX_COMBO_STAGE) ? 1 : combo.m_stage + 1;

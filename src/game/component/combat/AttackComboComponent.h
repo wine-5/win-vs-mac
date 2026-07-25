@@ -21,5 +21,10 @@ namespace game::component::combat
 
 		// 受付時間の残り。0以下になった時点で段数を0へ戻す
 		float m_windowTimer{ 0.0f };
+
+		// 振っている最中に押された次段入力を覚えておくフラグ（先行入力）。
+		// これが無いと、アニメが終わってから入力を受け付けるまでの隙間で
+		// 待機モーションが一瞬挟まる
+		bool m_hasBufferedInput{ false };
 	};
 } // namespace game::component::combat
