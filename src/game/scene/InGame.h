@@ -16,7 +16,6 @@
 #include "core/base/EventBus.h"
 
 /* game層のインクルード */
-#include "core/interface/IProjectileWindowManager.h"
 #include "game/factory/FactoryManager.h"
 #include "game/factory/EnemySpawner.h"
 #include "game/component/visual/RenderComponent.h"
@@ -148,9 +147,6 @@ namespace game::scene
 		std::unordered_set<core::ecs::EntityId> m_stageEnemyIds{};
 
 		std::unique_ptr<game::event::AudioEventListener> m_audioEventListener;
-
-		// 弾の見た目として実OSウィンドウを追従表示するマネージャ（Platform層実装）
-		std::unique_ptr<core::iface::IProjectileWindowManager> m_projectileWindowManager;
 
 		// DEBUG: シーンビュー凍結中に単独更新するための参照（所有はSystemManager。リリース時に削除）
 		system::camera::DebugCameraSystem* m_debugCameraSystem{ nullptr };

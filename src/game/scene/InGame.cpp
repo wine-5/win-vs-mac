@@ -66,7 +66,6 @@
 #include "game/system/combat/ProjectileSystem.h"
 #include "game/system/combat/ProjectileReflectSystem.h"
 #include "game/system/combat/PlayerRangedAttackSystem.h"
-#include "game/system/combat/ProjectileWindowSystem.h"
 #include "game/system/visual/PlayerChargeVisualsSystem.h"
 #include "game/system/camera/ChargeZoomSystem.h"
 #include "game/system/camera/DamageShakeSystem.h"
@@ -74,7 +73,6 @@
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
 #include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
-#include "core/interface/IWindowFactory.h"
 #include "game/event/InGameEvents.h"
 
 /* 標準のインクルード */
