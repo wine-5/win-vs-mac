@@ -21,6 +21,7 @@
 #include "game/actor/AnimationSetup.h"
 #include "game/constant/Tag.h"
 #include "game/constant/ModelId.h"
+#include "core/utility/MathConstants.h"
 #include <algorithm>
 
 namespace game::actor
@@ -46,7 +47,7 @@ namespace game::actor
 		componentManager.add<component::visual::AnimationComponent>(
 		    m_entity.getId(), buildAnimationComponent(playerData.getAnimations(), resourceManager));
 		componentManager.add<component::visual::RenderComponent>(m_entity.getId(), { modelHandle });
-		attachWeapon(componentManager, resourceManager, playerData.getScale().x);
+		attachWeapon(componentManager, resourceManager, playerData);
 		componentManager.add<component::visual::HitEffectComponent>(m_entity.getId(), {});
 		componentManager.add<component::visual::EffectComponent>(m_entity.getId(), {});
 
@@ -94,9 +95,14 @@ namespace game::actor
 
 	void Player::attachWeapon(core::ecs::ComponentManager& componentManager,
 	    core::iface::IResourceManager& resourceManager,
-	    float playerScale)
+	    const data::PlayerData& playerData)
 	{
-		const int sourceHandle{ resourceManager.loadModelById(constant::model_id::PLAYER_SWORD) };
+		// weapon要素が無ければ武器を持たない（素手のキャラにも使えるようにする）
+		const auto& config{ playerData.getWeapon() };
+		if (!config.has_value())
+			return;
+
+		const int sourceHandle{ resourceManager.loadModelById(config->modelId) };
 		if (sourceHandle == -1)
 			return;
 
@@ -106,27 +112,29 @@ namespace game::actor
 		if (weaponHandle == -1)
 			return;
 
-		// 右手のボーン名。Mixamoのリグだが、mv1へ変換する際に "mixamorig:" の
-		// プレフィックスが落ちるためプレフィックス無しで指定する。
-		// リグ依存なので、名前が変わった場合は起動時のログに候補一覧が出る
-		constexpr std::string_view RIGHT_HAND_FRAME{ "RightHand" };
-
 		// 見た目の長さから必要な拡大率を逆算する。モデルの実寸は変換ツールの単位系
 		// （メートルかセンチメートルか）で桁が変わるため、倍率を固定値で置くと
 		// モデルを作り直すたびに破綻する。
 		// なお手のボーン行列にはプレイヤーの拡大率が既に乗っているため、その分を割り戻す
-		constexpr float SWORD_WORLD_LENGTH{ 80.0f }; // プレイヤーのコライダー高さ150.7の約半分
+		const float playerScale{ playerData.getScale().x };
 		const core::Vector3 modelSize{ resourceManager.computeBoundingSize(weaponHandle) };
 		const float modelLength{ std::max({ modelSize.x, modelSize.y, modelSize.z }) };
 
-		float swordScale{ 1.0f };
-		if (modelLength > 0.0f && playerScale > 0.0f)
-			swordScale = SWORD_WORLD_LENGTH / (modelLength * playerScale);
+		float weaponScale{ 1.0f };
+		if (config->length > 0.0f && modelLength > 0.0f && playerScale > 0.0f)
+			weaponScale = config->length / (modelLength * playerScale);
 
 		component::visual::WeaponAttachComponent weapon{};
 		weapon.m_modelHandle = weaponHandle;
-		weapon.m_frameName = RIGHT_HAND_FRAME;
-		weapon.m_offsetScale = core::Vector3{ swordScale, swordScale, swordScale };
+		weapon.m_frameName = config->frameName;
+		weapon.m_offsetPosition = config->offsetPosition;
+		// JSONは度で持つのでラジアンへ変換する（手で角度を書くときに度のほうが扱いやすい）
+		weapon.m_offsetRotation = core::Vector3{
+			config->offsetRotation.x * core::utility::DEG_TO_RAD,
+			config->offsetRotation.y * core::utility::DEG_TO_RAD,
+			config->offsetRotation.z * core::utility::DEG_TO_RAD
+		};
+		weapon.m_offsetScale = core::Vector3{ weaponScale, weaponScale, weaponScale };
 		componentManager.add<component::visual::WeaponAttachComponent>(m_entity.getId(), weapon);
 	}
 
