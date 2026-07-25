@@ -2,6 +2,8 @@
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
+#include "game/component/TagComponent.h"
+#include "game/constant/Tag.h"
 #include "core/utility/Color.h"
 #include <algorithm>
 
@@ -50,10 +52,20 @@ namespace game::system::visual
 			// 溜めの進行度（0→1）。満ちきると着弾する
 			const float progress{ std::clamp(1.0f - attack.m_windupTimer / attack.m_windupDelay, 0.0f, 1.0f) };
 
+			// 自分の攻撃か敵の攻撃かを色で区別する。同じ赤オレンジだと、自分が
+			// 振っているだけなのに危険範囲に入られたように見えてしまう
+			const bool isAlly{ m_componentManager.has<component::TagComponent>(attackerId) &&
+				               m_componentManager.get<component::TagComponent>(attackerId).m_tag ==
+				                   constant::Tag::Player };
+
+			const unsigned int baseColor{ isAlly ? Color::TELEGRAPH_ALLY_BASE : Color::TELEGRAPH_BASE };
+			const unsigned int fillColor{ isAlly ? Color::TELEGRAPH_ALLY_FILL : Color::TELEGRAPH_FILL };
+			const unsigned int ringColor{ isAlly ? Color::TELEGRAPH_ALLY_RING : Color::TELEGRAPH_RING };
+
 			// 危険範囲の下地 → 中心から満ちていく内側 → 外周リング、の順で重ねる
-			m_renderer.drawGroundCircle(center, radius, Color::TELEGRAPH_BASE, true);
-			m_renderer.drawGroundCircle(center, radius * progress, Color::TELEGRAPH_FILL, true);
-			m_renderer.drawGroundCircle(center, radius, Color::TELEGRAPH_RING, false);
+			m_renderer.drawGroundCircle(center, radius, baseColor, true);
+			m_renderer.drawGroundCircle(center, radius * progress, fillColor, true);
+			m_renderer.drawGroundCircle(center, radius, ringColor, false);
 		}
 	}
 } // namespace game::system::visual
