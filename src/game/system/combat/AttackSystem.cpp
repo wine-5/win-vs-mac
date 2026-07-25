@@ -69,14 +69,9 @@ namespace game::system::combat
 			if (attack.m_attackRange <= 0.0f)
 				continue;
 
-			if (m_componentManager.has<component::movement::InputComponent>(attackerId))
-			{
-
-				auto& input{ m_componentManager.get<component::movement::InputComponent>(attackerId) };
-				if (input.m_attackPressed)
-					attack.m_attackRequested = true;
-			}
-
+			// プレイヤーの攻撃入力は PlayerAttackComboSystem が段数へ振り分けたうえで
+			// m_attackRequested を立てる。敵はAI Systemが立てる。
+			// 本Systemは要求を受けて成立させるだけで、入力そのものは見ない
 			if (!attack.m_attackRequested)
 				continue;
 
@@ -100,14 +95,9 @@ namespace game::system::combat
 				// プレイヤーは近接（剣）のときだけ斬撃エフェクト。弾（遠距離）は出さない
 				if (!isProjectile)
 				{
+					// 剣を振るアニメーションは段数に応じて PlayerAttackComboSystem が要求する
 					shouldPlayStartEffect = true;
 					startEffect = core::constant::EffectType::Player_Slash;
-
-					// 剣を振るアニメを要求する。優先度がATTACKなので、MoveSystemが毎フレーム出す
-					// 移動系（Idle/Walk/Run）の要求には割り込まれず、振り終わりまで再生される
-					if (m_componentManager.has<component::visual::AnimationComponent>(attackerId))
-						m_componentManager.get<component::visual::AnimationComponent>(attackerId)
-						    .request(constant::AnimationState::Attack1);
 				}
 			}
 			else if (attackerTagForStart.m_tag == constant::Tag::Enemy)
