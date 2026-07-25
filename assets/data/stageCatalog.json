@@ -1,28 +1,6 @@
 {
   "props": [
     {
-      "id": "floor_folder",
-      "displayName": "フォルダ床",
-      "model": "assets/model/stage/FloorFolder.mqo",
-      "baseSize": [
-        100,
-        100,
-        100
-      ],
-      "editorColor": "#00A4EF",
-      "collider": "ground",
-      "defaultSize": [
-        1000,
-        20,
-        1000
-      ],
-      "texture": "assets/model/stage/FloorFolder.png",
-      "textureTile": 600,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
-    },
-    {
       "id": "path_corridor",
       "displayName": "パス通路",
       "model": "assets/model/stage/PathCorridor.mqo",
@@ -41,72 +19,6 @@
       "texture": "assets/model/stage/PathCorridor.png",
       "textureTile": 800,
       "slideAccel": 900.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
-    },
-    {
-      "id": "wall_window",
-      "displayName": "ウィンドウ壁",
-      "model": "assets/model/stage/WallWindow.mqo",
-      "baseSize": [
-        100,
-        100,
-        100
-      ],
-      "editorColor": "#3A4A5E",
-      "collider": "box",
-      "defaultSize": [
-        1600,
-        900,
-        40
-      ],
-      "texture": "assets/model/stage/WallWindow.png",
-      "textureTile": 900,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
-    },
-    {
-      "id": "pillar_folder",
-      "displayName": "フォルダ柱",
-      "model": "assets/model/stage/PillarFolder.mqo",
-      "baseSize": [
-        100,
-        100,
-        100
-      ],
-      "editorColor": "#FFC83D",
-      "collider": "box",
-      "defaultSize": [
-        200,
-        500,
-        200
-      ],
-      "texture": "assets/model/stage/PillarFolder.png",
-      "textureTile": 500,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
-    },
-    {
-      "id": "block_file",
-      "displayName": "ファイルブロック",
-      "model": "assets/model/stage/BlockFile.mqo",
-      "baseSize": [
-        100,
-        100,
-        100
-      ],
-      "editorColor": "#8FA6BF",
-      "collider": "box",
-      "defaultSize": [
-        200,
-        200,
-        200
-      ],
-      "texture": "assets/model/stage/BlockFile.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
       "scrollU": 0.0,
       "scrollV": 0.0
     },
@@ -158,10 +70,18 @@
       "id": "floor_desktop",
       "displayName": "デスクトップ床",
       "model": "assets/model/stage/FloorDesktop.mqo",
-      "baseSize": [ 100, 100, 100 ],
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
       "editorColor": "#0067C0",
       "collider": "ground",
-      "defaultSize": [ 1000, 20, 1000 ],
+      "defaultSize": [
+        1000,
+        20,
+        1000
+      ],
       "texture": "assets/model/stage/FloorDesktop.png",
       "textureTile": 600,
       "slideAccel": 0.0,
@@ -172,10 +92,18 @@
       "id": "block_folder",
       "displayName": "フォルダブロック",
       "model": "assets/model/stage/BlockFolder.mqo",
-      "baseSize": [ 100, 100, 100 ],
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
       "editorColor": "#0067C0",
       "collider": "box",
-      "defaultSize": [ 200, 200, 200 ],
+      "defaultSize": [
+        200,
+        200,
+        200
+      ],
       "texture": "assets/model/stage/BlockFolder.png",
       "textureTile": 0,
       "slideAccel": 0.0,
@@ -186,10 +114,18 @@
       "id": "block_recyclebin",
       "displayName": "ごみ箱ブロック",
       "model": "assets/model/stage/BlockRecycleBin.mqo",
-      "baseSize": [ 100, 100, 100 ],
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
       "editorColor": "#0067C0",
       "collider": "box",
-      "defaultSize": [ 200, 200, 200 ],
+      "defaultSize": [
+        200,
+        200,
+        200
+      ],
       "texture": "assets/model/stage/BlockRecycleBin.png",
       "textureTile": 0,
       "slideAccel": 0.0,
@@ -200,10 +136,18 @@
       "id": "wall_explorer",
       "displayName": "エクスプローラー壁",
       "model": "assets/model/stage/WallExplorer.mqo",
-      "baseSize": [ 100, 100, 100 ],
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
       "editorColor": "#0067C0",
       "collider": "box",
-      "defaultSize": [ 1600, 900, 40 ],
+      "defaultSize": [
+        1600,
+        900,
+        40
+      ],
       "texture": "assets/model/stage/WallExplorer.png",
       "textureTile": 0,
       "slideAccel": 0.0,
@@ -214,10 +158,18 @@
       "id": "floor_terminal",
       "displayName": "ターミナル床",
       "model": "assets/model/stage/FloorTerminal.mqo",
-      "baseSize": [ 100, 100, 100 ],
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
       "editorColor": "#3FB950",
       "collider": "ground",
-      "defaultSize": [ 1000, 20, 1000 ],
+      "defaultSize": [
+        1000,
+        20,
+        1000
+      ],
       "texture": "assets/model/stage/FloorTerminal.png",
       "textureTile": 600,
       "slideAccel": 0.0,
@@ -228,10 +180,18 @@
       "id": "block_dll",
       "displayName": "DLLブロック",
       "model": "assets/model/stage/BlockDll.mqo",
-      "baseSize": [ 100, 100, 100 ],
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
       "editorColor": "#D29922",
       "collider": "box",
-      "defaultSize": [ 200, 200, 200 ],
+      "defaultSize": [
+        200,
+        200,
+        200
+      ],
       "texture": "assets/model/stage/BlockDll.png",
       "textureTile": 0,
       "slideAccel": 0.0,
@@ -242,10 +202,18 @@
       "id": "block_exe",
       "displayName": "EXEブロック",
       "model": "assets/model/stage/BlockExe.mqo",
-      "baseSize": [ 100, 100, 100 ],
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
       "editorColor": "#D29922",
       "collider": "box",
-      "defaultSize": [ 200, 200, 200 ],
+      "defaultSize": [
+        200,
+        200,
+        200
+      ],
       "texture": "assets/model/stage/BlockExe.png",
       "textureTile": 0,
       "slideAccel": 0.0,
@@ -256,10 +224,18 @@
       "id": "wall_registry",
       "displayName": "レジストリ壁",
       "model": "assets/model/stage/WallRegistry.mqo",
-      "baseSize": [ 100, 100, 100 ],
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
       "editorColor": "#3FB950",
       "collider": "box",
-      "defaultSize": [ 1600, 900, 40 ],
+      "defaultSize": [
+        1600,
+        900,
+        40
+      ],
       "texture": "assets/model/stage/WallRegistry.png",
       "textureTile": 0,
       "slideAccel": 0.0,
@@ -270,10 +246,18 @@
       "id": "gate_uac",
       "displayName": "UACゲート",
       "model": "assets/model/stage/GateUac.mqo",
-      "baseSize": [ 100, 100, 100 ],
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
       "editorColor": "#E8891C",
       "collider": "box",
-      "defaultSize": [ 1600, 900, 40 ],
+      "defaultSize": [
+        1600,
+        900,
+        40
+      ],
       "texture": "assets/model/stage/GateUac.png",
       "textureTile": 0,
       "slideAccel": 0.0,
@@ -284,10 +268,18 @@
       "id": "pillar_app",
       "displayName": "アプリ柱",
       "model": "assets/model/stage/PillarApp.mqo",
-      "baseSize": [ 100, 100, 100 ],
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
       "editorColor": "#E8891C",
       "collider": "box",
-      "defaultSize": [ 200, 500, 200 ],
+      "defaultSize": [
+        200,
+        500,
+        200
+      ],
       "texture": "assets/model/stage/PillarApp.png",
       "textureTile": 500,
       "slideAccel": 0.0,
@@ -298,10 +290,18 @@
       "id": "block_zip",
       "displayName": "ZIPブロック",
       "model": "assets/model/stage/BlockZip.mqo",
-      "baseSize": [ 100, 100, 100 ],
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
       "editorColor": "#E8891C",
       "collider": "box",
-      "defaultSize": [ 200, 200, 200 ],
+      "defaultSize": [
+        200,
+        200,
+        200
+      ],
       "texture": "assets/model/stage/BlockZip.png",
       "textureTile": 0,
       "slideAccel": 0.0,
@@ -312,10 +312,18 @@
       "id": "wall_danger",
       "displayName": "危険警告壁",
       "model": "assets/model/stage/WallDanger.mqo",
-      "baseSize": [ 100, 100, 100 ],
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
       "editorColor": "#E81123",
       "collider": "box",
-      "defaultSize": [ 1600, 900, 40 ],
+      "defaultSize": [
+        1600,
+        900,
+        40
+      ],
       "texture": "assets/model/stage/WallDanger.png",
       "textureTile": 0,
       "slideAccel": 0.0,
