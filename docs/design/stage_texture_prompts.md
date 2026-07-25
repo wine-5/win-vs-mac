@@ -48,6 +48,13 @@ Each prompt below is self-contained (the common spec is baked in). Every texture
 **1024x1024, square, opaque, flat orthographic (no perspective), evenly lit**, because the
 engine renders with lighting disabled. Prompts marked *tileable* must have connecting edges.
 
+**Legibility rule (important):** these textures are mapped onto small cube/wall faces in 3D, so
+each face only occupies a fraction of the screen and gets minified by mipmaps. Any "densely
+packed tiny text" turns into gray noise. Text-based textures must use **large, high-contrast
+monospaced type — only ~8 to 15 lines per 1024px texture**, with generous line spacing and margins,
+so the terminal / code / error character reads at a glance. Prefer a few big, recognizable
+keywords (`ERROR`, `root@`, `0xDEADBEEF`, `segfault`, `[FATAL]`) over walls of unreadable text.
+
 ---
 
 ## 1. FloorDesktop.png — ① Desktop / floor / tileable
@@ -77,7 +84,7 @@ A wall texture showing the Windows 11 File Explorer window UI seen straight on. 
 ## 5. FloorTerminal.png — ② System32 / floor / tileable
 
 ```
-A top-down floor texture of a terminal / console: a black background densely filled with green monospaced command-line logs and code, with occasional amber warning lines. Green (#3FB950) dominant. Seamlessly tileable — top/bottom and left/right edges must connect and text lines must not get cut off at the seams so it repeats cleanly. Flat orthographic straight-down view, no perspective, no camera tilt, even and uniform brightness. Fully opaque, no transparency. 1024x1024 pixels, square.
+A top-down floor texture of a terminal / console: a black background with about 10 to 12 lines of LARGE, bold, high-contrast green monospaced command-line logs, with one or two amber warning lines. The text must be big and clearly readable at a glance (each line spanning most of the width), with generous line spacing and margins — NOT densely packed small text. Green (#3FB950) dominant. Seamlessly tileable — top/bottom and left/right edges must connect and text lines must not get cut off at the seams so it repeats cleanly. Flat orthographic straight-down view, no perspective, no camera tilt, even and uniform brightness. Fully opaque, no transparency. 1024x1024 pixels, square.
 ```
 
 ## 6. BlockDll.png — ② System32 / one face of a cube block
@@ -95,13 +102,13 @@ A single face texture for a cube: a ".exe" executable file icon, large and cente
 ## 8. WallRegistry.png — ② System32 / wall
 
 ```
-A wall texture showing a Windows Registry Editor style UI seen straight on. A hierarchical key tree on the left (HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER, etc.) and a right panel with "Name, Type, Data" columns listing registry values. Dark background with green-to-amber text, a hard technical System32 atmosphere. A complete single image (not tiled). Flat front-facing orthographic view, no perspective, no camera tilt, even lighting. Fully opaque, no transparency. 1024x1024 pixels, square.
+A wall texture showing a Windows Registry Editor style UI seen straight on. A hierarchical key tree on the left (HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER, etc.) and a right panel with "Name, Type, Data" columns listing registry values. Use LARGE, clearly readable text with only a handful of tree entries and rows (roughly 6 to 10) — big legible type, not a dense cramped list. Dark background with green-to-amber text, a hard technical System32 atmosphere. A complete single image (not tiled). Flat front-facing orthographic view, no perspective, no camera tilt, even lighting. Fully opaque, no transparency. 1024x1024 pixels, square.
 ```
 
 ## 9. WallData.png — ②③ / wall / vertically tileable
 
 ```
-A "server interior" wall texture: a black background with source code from several programming languages (C++, Python, JavaScript) and system logs streaming densely in vertical columns. Text color mainly amber-to-orange (#D29922 to #E8891C) with a few red [ERROR] lines. Vertically tileable — top and bottom edges must connect, with lines spaced evenly so nothing is cut off at the seam when repeated vertically. Flat front-facing orthographic view, no perspective, no camera tilt, even brightness. Fully opaque, no transparency. 1024x1024 pixels, square.
+A "server interior" wall texture: a black background with a single column of LARGE, bold, high-contrast source code and system logs (C++, Python, JavaScript flavored). Only about 10 to 14 lines total, big and clearly readable with generous line spacing — NOT densely packed small text and NOT multiple narrow columns. Text color mainly amber-to-orange (#D29922 to #E8891C) with one or two red [ERROR] lines standing out. Vertically tileable — top and bottom edges must connect, with lines spaced evenly so nothing is cut off at the seam when repeated vertically. Flat front-facing orthographic view, no perspective, no camera tilt, even brightness. Fully opaque, no transparency. 1024x1024 pixels, square.
 ```
 
 ## 10. GateUac.png — ③ Program Files / wall
@@ -131,5 +138,5 @@ A top-down floor texture: a silver-white brushed metal surface with Apple-style 
 ## 14. WallDanger.png — ④ Apple arena / wall / tileable
 
 ```
-A wall texture of a red crash screen — like a Windows Blue Screen of Death but recolored red. A dark-red to red background (#8B0000 to #E81123) with white warning text and error codes streaming across it: words like "CRITICAL", "FATAL", and stack-trace style lines. Seamlessly tileable — all four edges must connect so it repeats without seams. Flat front-facing orthographic view, no perspective, no camera tilt, even brightness. Fully opaque, no transparency. 1024x1024 pixels, square.
+A wall texture of a red crash screen — like a Windows Blue Screen of Death but recolored red. A dark-red to red background (#8B0000 to #E81123) with a few big, bold white warning words dominating the image: "CRITICAL" and "FATAL" in large type, plus only about 4 to 6 lines of readable error-code / stack-trace text below. Keep it bold and legible at a glance — NOT a wall of tiny streaming text. Seamlessly tileable — all four edges must connect so it repeats without seams. Flat front-facing orthographic view, no perspective, no camera tilt, even brightness. Fully opaque, no transparency. 1024x1024 pixels, square.
 ```
