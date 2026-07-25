@@ -52,14 +52,24 @@ namespace game::system::visual
 	    , m_screen{ screen }
 	    , m_playerId{ playerId }
 	{
-		// ボスが覚醒したら演出シーケンスを起動する
-		m_subscriptions.push_back(eventBus.subscribe<event::MacPhaseTransitionEvent>(
-		    [this](const event::MacPhaseTransitionEvent& e)
-		    {
-			    m_macId = e.m_entityId;
+		// ボスへ寄る同一のシネマを、覚醒（フェーズ移行）と出現の2つのトリガーから起動する。
+		// 起動処理は共通なので1つのラムダにまとめる
+		const auto start{ [this](core::ecs::EntityId bossId)
+			{
+			    m_macId = bossId;
 			    m_elapsedTime = 0.0f;
 			    m_isPlaying = true;
-		    }));
+			} };
+
+		// 覚醒（HP閾値でのフェーズ移行）
+		m_subscriptions.push_back(eventBus.subscribe<event::MacPhaseTransitionEvent>(
+		    [start](const event::MacPhaseTransitionEvent& e)
+		    { start(e.m_entityId); }));
+
+		// 出現（雑魚を全滅させてボスが登場）
+		m_subscriptions.push_back(eventBus.subscribe<event::BossAppearedEvent>(
+		    [start](const event::BossAppearedEvent& e)
+		    { start(e.m_entityId); }));
 	}
 
 	void MacAwakenEffectSystem::update(float deltaTime)

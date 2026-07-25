@@ -174,4 +174,23 @@ namespace game::event
 		{
 		}
 	};
+
+	/**
+	 * @brief 雑魚を全滅させてボスが出現した瞬間に発行されるイベント
+	 *
+	 * 出現シネマ（カメラをボスへ寄せてシェイク→プレイヤーへ戻す）のトリガーに使う。
+	 * フェーズ移行（MacPhaseTransitionEvent）とは意味が異なるため別イベントにしている
+	 * ＝出現と覚醒で演出の強さ・タイミングを個別に調整できる。
+	 */
+	struct BossAppearedEvent : public core::iface::IGameEvent
+	{
+		/** @brief 出現したボスのEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		BossAppearedEvent() = default;
+		explicit BossAppearedEvent(core::ecs::EntityId id)
+		    : m_entityId{ id }
+		{
+		}
+	};
 } // namespace game::event

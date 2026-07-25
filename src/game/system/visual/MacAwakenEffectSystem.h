@@ -11,9 +11,10 @@
 namespace game::system::visual
 {
 	/**
-	 * @brief ボス覚醒（フェーズ移行）時のシネマ演出を担うSystem
+	 * @brief ボスへ寄るシネマ演出を担うSystem（出現時・覚醒時に共用）
 	 *
-	 * MacPhaseTransitionEventを購読し、以下のタイムラインを駆動する：
+	 * BossAppearedEvent（雑魚全滅→ボス出現）と MacPhaseTransitionEvent（覚醒）を購読し、
+	 * どちらも同一のタイムラインを駆動する：
 	 *   ①ズームイン（カメラがボスへ寄る）→ ②ホールド（シェイク＋赤ビネット）→ ③ズームアウト → 再開
 	 * 毎フレーム、CameraEffectComponentのシネマ・シェイクチャンネルを書き込み（driver System）、
 	 * 演出中はプレイヤーのInputComponentをロックして操作を無効化する。

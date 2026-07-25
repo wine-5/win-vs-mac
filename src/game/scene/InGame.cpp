@@ -506,6 +506,10 @@ namespace game::scene
 		m_macId = m_enemySpawner.spawn(constant::toEnemyType(macSpawn.m_type), macSpawn.m_position,
 		    macSpawn.m_rotationY);
 		core::log::info("雑魚を全滅：ボスが出現しました (EntityId={})", m_macId);
+
+		// 出現シネマ（カメラをボスへ寄せてシェイク→プレイヤーへ戻す）を起動する。
+		// 実際の演出はMacAwakenEffectSystemが担う
+		m_eventBus.publish(event::BossAppearedEvent{ m_macId });
 	}
 
 	void InGame::update(float deltaTime)
