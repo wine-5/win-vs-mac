@@ -4,7 +4,9 @@
 #include "core/utility/Color.h"
 #include "core/utility/Log.h"
 #include "game/data/FileEquipmentData.h"
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <utility>
 
 namespace
@@ -32,6 +34,14 @@ namespace
 	constexpr unsigned int SLOT_BORDER_COLOR{ 0xFF8CAAD2 };
 	constexpr int SLOT_BORDER_ALPHA{ 46 };         // 約18%
 	constexpr int SLOT_ACCENT_BORDER_ALPHA{ 200 }; // 装備済みスロットの枠
+
+	// 縁を周回する光の粒（装備中のスロットのみ）
+	constexpr float ORBIT_PERIOD{ 3.2f };          // 一周にかける秒数
+	constexpr int ORBIT_TRAIL_COUNT{ 6 };          // 先頭を含む粒の数（後ろほど淡くなる）
+	constexpr float ORBIT_TRAIL_SPACING{ 0.016f }; // 粒どうしの間隔（周回全体を1.0とした割合）
+	constexpr int ORBIT_DOT_RADIUS{ 3 };           // 先頭の粒の半径（1080p基準）
+	constexpr int ORBIT_HEAD_ALPHA{ 210 };         // 先頭の粒の明るさ
+	constexpr float ORBIT_PHASE_PER_SLOT{ 0.33f }; // スロットごとに位相をずらして同期させない
 
 	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono" };
 	constexpr const char* EMPTY_LABEL{ "--" };
@@ -82,6 +92,46 @@ namespace
 		case core::data::FileExtensionType::Audio: return "HP+";
 		case core::data::FileExtensionType::Archive: return "ALL+";
 		default: return "RNG+";
+		}
+	}
+
+	/**
+	 * @brief 正方形の外周上の点を求める
+	 *
+	 * 角丸ぶんのズレは半径4pxと小さく、粒が角を通る一瞬しか出ないため無視する
+	 * @param x 左上のX座標
+	 * @param y 左上のY座標
+	 * @param size 一辺の長さ
+	 * @param t 外周をひと回りする進行度（0.0〜1.0。0.0が左上で時計回り）
+	 * @param outX 求めたX座標の格納先
+	 * @param outY 求めたY座標の格納先
+	 */
+	void pointOnSquarePerimeter(int x, int y, int size, float t, int& outX, int& outY)
+	{
+		// 0.0〜1.0の範囲へ丸めてから、上→右→下→左の4辺に割り当てる
+		const float wrapped{ t - std::floor(t) };
+		const float edge{ wrapped * 4.0f };
+		const int side{ static_cast<int>(edge) };
+		const int along{ static_cast<int>((edge - side) * size) };
+
+		switch (side)
+		{
+		case 0:
+			outX = x + along;
+			outY = y;
+			break; // 上辺（左→右）
+		case 1:
+			outX = x + size;
+			outY = y + along;
+			break; // 右辺（上→下）
+		case 2:
+			outX = x + size - along;
+			outY = y + size;
+			break; // 下辺（右→左）
+		default:
+			outX = x;
+			outY = y + size - along;
+			break; // 左辺（下→上）
 		}
 	}
 } // namespace
@@ -137,7 +187,12 @@ namespace game::ui::ingame
 		for (int i{ 0 }; i < SLOT_COUNT; ++i)
 		{
 			const int x{ startX + i * (slotSize + gap) };
-			drawSlot(x, y, slotSize, m_equipmentData.getExtensionType(i), m_equipmentData.hasSelection(i));
+			const bool hasSelection{ m_equipmentData.hasSelection(i) };
+			drawSlot(x, y, slotSize, m_equipmentData.getExtensionType(i), hasSelection);
+
+			// 装備中のスロットだけ縁を光の粒が回り続ける（起動中であることの表現）
+			if (hasSelection)
+				drawOrbitingGlow(x, y, slotSize, i * ORBIT_PHASE_PER_SLOT);
 		}
 	}
 
@@ -186,6 +241,36 @@ namespace game::ui::ingame
 		    core::utility::Color::HUD_INK_FAINT, scaled(BONUS_FONT_SIZE));
 
 		m_uiRenderer.resetFont();
+	}
+
+	void EquipmentSlotView::drawOrbitingGlow(int x, int y, int size, float phaseOffset)
+	{
+		const float elapsed{ std::chrono::duration<float>(
+			std::chrono::steady_clock::now() - m_startTime)
+			    .count() };
+		const float head{ elapsed / ORBIT_PERIOD + phaseOffset };
+
+		const int dotRadius{ std::max(2, scaled(ORBIT_DOT_RADIUS)) };
+
+		// 加算合成で重ねると、粒が枠線の上を通るときに芯が白く抜けて発光して見える
+		for (int i{ 0 }; i < ORBIT_TRAIL_COUNT; ++i)
+		{
+			// 後続ほど過去の位置に置き、暗く小さくして尾を引かせる
+			const float fade{ 1.0f - static_cast<float>(i) / ORBIT_TRAIL_COUNT };
+			const int alpha{ static_cast<int>(ORBIT_HEAD_ALPHA * fade * fade) };
+			if (alpha <= 0)
+				continue;
+
+			int dotX{ 0 };
+			int dotY{ 0 };
+			pointOnSquarePerimeter(x, y, size, head - i * ORBIT_TRAIL_SPACING, dotX, dotY);
+
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, alpha);
+			m_uiRenderer.drawCircle(dotX, dotY, std::max(1, static_cast<int>(dotRadius * fade)),
+			    core::utility::Color::HUD_CHARGE_CYAN, true, 1);
+		}
+
+		m_uiRenderer.resetBlendMode();
 	}
 
 	void EquipmentSlotView::drawCenteredText(int centerX, int y, const char* text, unsigned int color, int fontSize)

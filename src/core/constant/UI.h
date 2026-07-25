@@ -22,5 +22,6 @@ namespace core::constant
         // ブレンドモード（DxLib の DX_BLENDMODE_ * と対応）
         constexpr int BLEND_MODE_NONE = 0;
         constexpr int BLEND_MODE_ALPHA = 1;
+		constexpr int BLEND_MODE_ADD = 2; // 加算合成（発光表現に使う）
 	} // namespace ui
 } // namespace core::constant

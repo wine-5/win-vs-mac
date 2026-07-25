@@ -2,6 +2,7 @@
 #include "core/data/FileExtensionType.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include <chrono>
 #include <unordered_map>
 
 namespace core::iface
@@ -80,6 +81,18 @@ namespace game::ui::ingame
 		 */
 		[[nodiscard]] int getIconHandle(core::data::FileExtensionType type) const;
 
+		/**
+		 * @brief スロットの縁に沿って光の粒を周回させる
+		 *
+		 * 静止したHUDは死んで見えるため、装備中のスロットだけを常に動かして
+		 * 「起動中のプログラム」であることを示す。装備していないスロットは動かさない
+		 * @param x スロット左上のX座標
+		 * @param y スロット左上のY座標
+		 * @param size スロットの一辺の長さ
+		 * @param phaseOffset 周回位相のずらし量（0.0〜1.0。スロットごとに変えて同期させない）
+		 */
+		void drawOrbitingGlow(int x, int y, int size, float phaseOffset);
+
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
 		const data::FileEquipmentData& m_equipmentData;
@@ -88,5 +101,9 @@ namespace game::ui::ingame
 		std::unordered_map<int, int> m_iconHandles{};
 		// 空きスロットに描くアイコンの画像ハンドル
 		int m_emptyIconHandle{ -1 };
+
+		// 周回演出の基準時刻。描画経路からしか呼ばれずdeltaTimeを受け取らないため、
+		// 経過時間は壁時計から求める
+		std::chrono::steady_clock::time_point m_startTime{ std::chrono::steady_clock::now() };
 	};
 } // namespace game::ui::ingame
