@@ -60,6 +60,11 @@ namespace game::system::visual
 		bool m_isPlaying{ false };     // 演出中かどうか
 		float m_vignetteAlpha{ 0.0f }; // 今フレームの赤ビネットの濃さ（0〜1）
 
+		// 今回の演出の強度。トリガー（出現／覚醒）ごとに別プリセットを起動時に取り込む。
+		// 出現は控えめ、覚醒は強め、というように個別調整できる
+		float m_shakeStrength{ 0.0f };    // ホールド中のシェイクの最大振幅（ワールド単位）
+		float m_vignetteStrength{ 0.0f }; // 赤ビネットの最大濃さ（0〜1）
+
 		std::mt19937 m_rng{ std::random_device{}() }; // ビネットのちらつき用乱数
 
 		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される

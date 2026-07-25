@@ -16,11 +16,9 @@ namespace
 
 	constexpr float MAC_LOOK_HEIGHT{ 180.0f }; // ボスの足元でなく胴体〜頭あたりを注視する高さ
 
-	constexpr float MAX_SHAKE_STRENGTH{ 22.0f };     // ホールド中の揺れの最大振幅（ワールド単位）
 	constexpr float SHAKE_FREQUENCY{ 38.0f };        // 揺れの振動周波数
 	constexpr float SHAKE_Y_FREQUENCY_RATIO{ 1.3f }; // Y軸をX軸と別周波数にする比（円状でなく不規則な揺れにする）
 
-	constexpr float MAX_VIGNETTE_ALPHA{ 0.85f };     // 赤ビネットの最大濃さ（0〜1）
 	constexpr float VIGNETTE_PULSE_FREQ{ 9.0f };     // 濃さの脈動（心拍のようなドクドク感）の周波数
 	constexpr float VIGNETTE_PULSE_AMOUNT{ 0.25f };  // 脈動で濃さが揺れる割合
 	constexpr float VIGNETTE_JITTER_AMOUNT{ 0.15f }; // フレームごとのランダムなちらつき割合
@@ -38,6 +36,18 @@ namespace
 		t = std::clamp(t, 0.0f, 1.0f);
 		return t * t * (3.0f - 2.0f * t);
 	}
+
+	// 演出の強度プリセット。トリガーごとにシェイク振幅・赤ビネット濃さを個別に決める。
+	struct CinematicIntensity
+	{
+		float m_shakeStrength; // ホールド中のシェイクの最大振幅（ワールド単位）
+		float m_vignetteAlpha; // 赤ビネットの最大濃さ（0〜1）
+	};
+
+	// 出現：初登場なので控えめ（軽い揺れ・淡い赤縁）
+	constexpr CinematicIntensity APPEARANCE_INTENSITY{ 12.0f, 0.45f };
+	// 覚醒：本気モードなので強め（従来値を維持）
+	constexpr CinematicIntensity AWAKEN_INTENSITY{ 22.0f, 0.85f };
 } // namespace
 
 namespace game::system::visual
@@ -52,24 +62,26 @@ namespace game::system::visual
 	    , m_screen{ screen }
 	    , m_playerId{ playerId }
 	{
-		// ボスへ寄る同一のシネマを、覚醒（フェーズ移行）と出現の2つのトリガーから起動する。
-		// 起動処理は共通なので1つのラムダにまとめる
-		const auto start{ [this](core::ecs::EntityId bossId)
+		// ボスへ寄る同一のカメラ演出を、覚醒（フェーズ移行）と出現の2つのトリガーから起動する。
+		// カメラの動きは共通だが、シェイク・赤ビネットの強度はトリガーごとのプリセットで切り替える
+		const auto start{ [this](core::ecs::EntityId bossId, const CinematicIntensity& intensity)
 			{
 			    m_macId = bossId;
 			    m_elapsedTime = 0.0f;
 			    m_isPlaying = true;
+			    m_shakeStrength = intensity.m_shakeStrength;
+			    m_vignetteStrength = intensity.m_vignetteAlpha;
 			} };
 
-		// 覚醒（HP閾値でのフェーズ移行）
+		// 覚醒（HP閾値でのフェーズ移行）：強め
 		m_subscriptions.push_back(eventBus.subscribe<event::MacPhaseTransitionEvent>(
 		    [start](const event::MacPhaseTransitionEvent& e)
-		    { start(e.m_entityId); }));
+		    { start(e.m_entityId, AWAKEN_INTENSITY); }));
 
-		// 出現（雑魚を全滅させてボスが登場）
+		// 出現（雑魚を全滅させてボスが登場）：控えめ
 		m_subscriptions.push_back(eventBus.subscribe<event::BossAppearedEvent>(
 		    [start](const event::BossAppearedEvent& e)
-		    { start(e.m_entityId); }));
+		    { start(e.m_entityId, APPEARANCE_INTENSITY); }));
 	}
 
 	void MacAwakenEffectSystem::update(float deltaTime)
@@ -139,7 +151,7 @@ namespace game::system::visual
 		// --- シェイク（ホールド中のみ） ---
 		if (holdIntensity > 0.0f)
 		{
-			const float amplitude{ MAX_SHAKE_STRENGTH * holdIntensity };
+			const float amplitude{ m_shakeStrength * holdIntensity };
 			const float phase{ m_elapsedTime * SHAKE_FREQUENCY };
 			effect.m_awakenShakeOffset = core::Vector3{
 				std::sin(phase) * amplitude,
@@ -158,7 +170,7 @@ namespace game::system::visual
 			// 心拍のような脈動（sin）＋フレームごとの微細な乱れ
 			const float pulse{ 1.0f - VIGNETTE_PULSE_AMOUNT * (0.5f + 0.5f * std::sin(m_elapsedTime * VIGNETTE_PULSE_FREQ)) };
 			std::uniform_real_distribution<float> jitterDist{ 1.0f - VIGNETTE_JITTER_AMOUNT, 1.0f };
-			m_vignetteAlpha = MAX_VIGNETTE_ALPHA * holdIntensity * pulse * jitterDist(m_rng);
+			m_vignetteAlpha = m_vignetteStrength * holdIntensity * pulse * jitterDist(m_rng);
 		}
 		else
 		{
