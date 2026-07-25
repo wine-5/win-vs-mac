@@ -15,7 +15,6 @@ namespace
 	constexpr int PANEL_WIDTH{ 380 };
 	constexpr int PANEL_HEIGHT{ 92 };
 	constexpr int PANEL_PADDING{ 20 };
-	constexpr int PANEL_RADIUS{ 8 }; // Windows 11のウィンドウ・パネルの角丸
 
 	// パネル内の各要素の位置（パネル左上からの相対座標・1080p基準）
 	constexpr int LABEL_Y{ 16 };
@@ -24,12 +23,7 @@ namespace
 	constexpr int BAR_Y{ 54 };
 	constexpr int BAR_HEIGHT{ 18 };
 
-	// パネルの塗りと枠。DxLibのブレンドはアルファ値を別途指定するため、色と不透明度を分けて持つ
-	constexpr unsigned int PANEL_FILL_COLOR{ 0xFF0E1420 };
-	constexpr int PANEL_FILL_ALPHA{ 184 }; // 約72%
-	constexpr unsigned int PANEL_BORDER_COLOR{ 0xFF8CAAD2 };
-	constexpr int PANEL_BORDER_ALPHA{ 46 }; // 約18%
-	constexpr int BAR_GROOVE_ALPHA{ 20 };   // バーの溝（白をごく薄く敷く）
+	constexpr int BAR_GROOVE_ALPHA{ 20 }; // バーの溝（白をごく薄く敷く）
 
 	// HP残量に応じたバーの色。Windows 11のプログレスバーに倣い単色で塗る
 	constexpr unsigned int BAR_COLOR_HIGH{ 0xFF36D07B };
@@ -60,6 +54,7 @@ namespace game::ui::ingame
 	    : m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_componentManager{ componentManager }
+	    , m_panel{ uiRenderer, screen }
 	{
 	}
 
@@ -132,7 +127,7 @@ namespace game::ui::ingame
 		const int panelX{ scaled(PANEL_MARGIN) };
 		const int panelY{ m_screen.getHeight() - scaled(PANEL_MARGIN) - panelHeight };
 
-		drawPanel(panelX, panelY, panelWidth, panelHeight);
+		m_panel.draw(panelX, panelY, panelWidth, panelHeight);
 
 		// 左に見出し、右にHPの実数値。数値は桁が動いても右端が揃うよう右寄せで置く
 		const int padding{ scaled(PANEL_PADDING) };
@@ -156,19 +151,6 @@ namespace game::ui::ingame
 		updateDamageReaction(ratio);
 		drawHealthBar(panelX + padding, panelY + scaled(BAR_Y),
 		    panelWidth - padding * 2, scaled(BAR_HEIGHT), ratio);
-	}
-
-	void PlayerHUDView::drawPanel(int x, int y, int width, int height)
-	{
-		const int radius{ scaled(PANEL_RADIUS) };
-
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, PANEL_FILL_ALPHA);
-		m_uiRenderer.drawRoundedBox(x, y, width, height, radius, PANEL_FILL_COLOR, true, 1);
-
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, PANEL_BORDER_ALPHA);
-		m_uiRenderer.drawRoundedBox(x, y, width, height, radius, PANEL_BORDER_COLOR, false, 1);
-
-		m_uiRenderer.resetBlendMode();
 	}
 
 	void PlayerHUDView::drawHealthBar(int x, int y, int width, int height, float ratio)

@@ -1,4 +1,4 @@
-#include "ObjectiveView.h"
+﻿#include "ObjectiveView.h"
 #include "core/base/ServiceLocator.h"
 #include "core/constant/UI.h"
 #include "core/interface/IStringConverter.h"
@@ -17,7 +17,6 @@ namespace
 	constexpr int PANEL_WIDTH{ 330 };
 	constexpr int PANEL_HEIGHT{ 104 };
 	constexpr int PANEL_PADDING{ 20 };
-	constexpr int PANEL_RADIUS{ 8 }; // Windows 11のウィンドウ・パネルの角丸
 
 	// パネル内の各要素の位置（パネル左上からの相対座標・1080p基準）
 	constexpr int CAPTION_Y{ 14 };
@@ -29,12 +28,6 @@ namespace
 	constexpr int COUNT_DETAIL_GAP{ 12 };
 	constexpr int BOSS_LABEL_Y{ 48 };
 	constexpr int BOSS_FONT_SIZE{ 26 };
-
-	// パネルの塗りと枠。色と不透明度を分けて持つ（DxLibのブレンドはアルファを別途指定するため）
-	constexpr unsigned int PANEL_FILL_COLOR{ 0xFF0E1420 };
-	constexpr int PANEL_FILL_ALPHA{ 184 }; // 約72%
-	constexpr unsigned int PANEL_BORDER_COLOR{ 0xFF8CAAD2 };
-	constexpr int PANEL_BORDER_ALPHA{ 46 }; // 約18%
 
 	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono SemiBold" };
 	constexpr const char* UI_FONT_NAME{ "Noto Sans JP" };
@@ -75,6 +68,7 @@ namespace game::ui::ingame
 	ObjectiveView::ObjectiveView(core::iface::IUIRenderer& uiRenderer, core::iface::IScreen& screen)
 	    : m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
+	    , m_panel{ uiRenderer, screen }
 	    , m_detailText{ DETAIL_TEXT }
 	    , m_bossText{ BOSS_TEXT }
 	{
@@ -129,7 +123,7 @@ namespace game::ui::ingame
 
 		updateCountReaction(remainingEnemyCount);
 
-		drawPanel(panelX, panelY, panelWidth, panelHeight);
+		m_panel.draw(panelX, panelY, panelWidth, panelHeight);
 
 		const int padding{ scaled(PANEL_PADDING) };
 
@@ -175,16 +169,4 @@ namespace game::ui::ingame
 		m_uiRenderer.resetFont();
 	}
 
-	void ObjectiveView::drawPanel(int x, int y, int width, int height)
-	{
-		const int radius{ scaled(PANEL_RADIUS) };
-
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, PANEL_FILL_ALPHA);
-		m_uiRenderer.drawRoundedBox(x, y, width, height, radius, PANEL_FILL_COLOR, true, 1);
-
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, PANEL_BORDER_ALPHA);
-		m_uiRenderer.drawRoundedBox(x, y, width, height, radius, PANEL_BORDER_COLOR, false, 1);
-
-		m_uiRenderer.resetBlendMode();
-	}
 } // namespace game::ui::ingame

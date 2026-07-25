@@ -252,6 +252,7 @@
     <ClCompile Include="src\game\ui\ingame\PlayerHUDView.cpp" />
     <ClCompile Include="src\game\ui\ingame\EquipmentSlotView.cpp" />
     <ClCompile Include="src\game\ui\ingame\ObjectiveView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\HudPanel.cpp" />
     <ClCompile Include="src\game\ui\pause\PauseMenuController.cpp" />
     <ClCompile Include="src\game\ui\pause\PauseMenuView.cpp" />
   </ItemGroup>
@@ -412,6 +413,7 @@
     <ClInclude Include="src\game\component\visual\WeaponAttachComponent.h" />
     <ClInclude Include="src\game\component\combat\ColliderComponent.h" />
     <ClInclude Include="src\game\component\combat\AttackComboComponent.h" />
+    <ClInclude Include="src\core\data\WeaponAttachMetadata.h" />
     <ClInclude Include="src\game\constant\Tag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
     <ClInclude Include="src\game\constant\AnimationId.h" />
@@ -486,6 +488,7 @@
     <ClInclude Include="src\game\ui\ingame\PlayerHUDView.h" />
     <ClInclude Include="src\game\ui\ingame\EquipmentSlotView.h" />
     <ClInclude Include="src\game\ui\ingame\ObjectiveView.h" />
+    <ClInclude Include="src\game\ui\ingame\HudPanel.h" />
     <ClInclude Include="src\game\ui\pause\PauseMenuController.h" />
     <ClInclude Include="src\game\ui\pause\PauseMenuView.h" />
   </ItemGroup>

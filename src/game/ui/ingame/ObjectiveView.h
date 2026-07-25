@@ -1,6 +1,7 @@
 #pragma once
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "HudPanel.h"
 #include <chrono>
 #include <string>
 
@@ -45,15 +46,6 @@ namespace game::ui::ingame
 		[[nodiscard]] int scaled(int value) const;
 
 		/**
-		 * @brief 角丸の半透明パネル（Fluentのサーフェス）を描画する
-		 * @param x パネル左上のX座標
-		 * @param y パネル左上のY座標
-		 * @param width パネルの幅
-		 * @param height パネルの高さ
-		 */
-		void drawPanel(int x, int y, int width, int height);
-
-		/**
 		 * @brief 残り数の変化を検知し、減ったときに反応アニメーションを開始する
 		 * @param remainingEnemyCount 今フレームの残り数
 		 */
@@ -67,6 +59,7 @@ namespace game::ui::ingame
 
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
+		HudPanel m_panel;
 
 		// DxLibの描画はShift_JISを期待するため、ソース上のUTF-8日本語をそのまま渡すと文字化けする。
 		// 変換結果は毎フレーム同じなので生成時に一度だけ変換して保持する

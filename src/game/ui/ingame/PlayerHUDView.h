@@ -2,6 +2,7 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "HudPanel.h"
 #include <chrono>
 
 namespace game::ui::ingame
@@ -43,15 +44,6 @@ namespace game::ui::ingame
 		[[nodiscard]] int scaled(int value) const;
 
 		/**
-		 * @brief 角丸の半透明パネル（Fluentのサーフェス）を描画する
-		 * @param x パネル左上のX座標
-		 * @param y パネル左上のY座標
-		 * @param width パネルの幅
-		 * @param height パネルの高さ
-		 */
-		void drawPanel(int x, int y, int width, int height);
-
-		/**
 		 * @brief HPバーを描画する
 		 *
 		 * Windows 11のプログレスバーに倣い、溝と塗りをどちらも角丸のピル形状で描く。
@@ -81,6 +73,7 @@ namespace game::ui::ingame
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
 		core::ecs::ComponentManager& m_componentManager;
+		HudPanel m_panel;
 
 		// 被弾演出の状態。実HPより遅れて縮む残像バーで「今どれだけ削られたか」を見せる
 		float m_displayedRatio{ -1.0f }; // 負の値は未初期化（初回の描画で実HPに合わせる）
