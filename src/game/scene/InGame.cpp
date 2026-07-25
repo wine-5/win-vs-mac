@@ -311,12 +311,14 @@ namespace game::scene
 		m_enemySpawner.setTargetEntity(core::ecs::Entity(m_playerId));
 		m_enemySpawner.spawnStageEnemies();
 
-		// ボス（Mac）をステージ定義の mac 位置に生成する。撃破判定用にIDを保持する。
-		// テスト時は stageData.json の mac.position を近くにすればすぐ戦える
-		const auto& macSpawn{ m_resourceManager.getStageMetadata().m_mac };
-		if (!macSpawn.m_type.empty())
-			m_macId = m_enemySpawner.spawn(constant::toEnemyType(macSpawn.m_type), macSpawn.m_position,
-			    macSpawn.m_rotationY);
+		// 開始時に配置された雑魚のIDを控える。ボスはまだ出さず、これらを全滅させてから出現させる。
+		// この時点ではボスが未生成なので、敵種を持つEntity＝開始時の雑魚だけが集まる
+		for (const auto enemyId : m_componentManager.getAllEntities<component::EnemyTypeComponent>())
+			m_stageEnemyIds.insert(enemyId);
+
+		// 雑魚が1体もいないステージ定義（テスト用など）なら、すぐボスを出す
+		if (m_stageEnemyIds.empty())
+			spawnBoss();
 	}
 
 	void InGame::setupSystems()
@@ -478,6 +480,12 @@ namespace game::scene
 
 			            m_killCount++;
 
+			            // 開始時の雑魚を全滅させたらボスを出現させる。
+			            // 集合に無いID（ボスの召喚した雑魚・ボス自身）はここでは無視される
+			            if (m_stageEnemyIds.erase(e.m_entityId) > 0 &&
+			                m_stageEnemyIds.empty() && m_macId == core::ecs::INVALID_ENTITY_ID)
+				            spawnBoss();
+
 			            // 勝利条件はボス撃破のみ（ボスは雑魚を絶えず生成するため全滅判定にしない）
 			            if (e.m_entityId == m_macId)
 			            {
@@ -487,6 +495,17 @@ namespace game::scene
 				            auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 							sceneManager->changeScene(game::scene::SceneType::Result);
 						} }));
+	}
+
+	void InGame::spawnBoss()
+	{
+		const auto& macSpawn{ m_resourceManager.getStageMetadata().m_mac };
+		if (macSpawn.m_type.empty())
+			return; // ボス未定義のステージなら何もしない（勝利条件が成立しなくなる点は許容）
+
+		m_macId = m_enemySpawner.spawn(constant::toEnemyType(macSpawn.m_type), macSpawn.m_position,
+		    macSpawn.m_rotationY);
+		core::log::info("雑魚を全滅：ボスが出現しました (EntityId={})", m_macId);
 	}
 
 	void InGame::update(float deltaTime)

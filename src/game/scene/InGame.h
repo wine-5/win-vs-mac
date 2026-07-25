@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "IScene.h"
 #include <vector>
+#include <unordered_set>
 
 /* core層のインクルード */
 #include "core/ecs/EntityManager.h"
@@ -104,6 +105,13 @@ namespace game::scene
 		 */
 		void saveResultData(bool isVictory) noexcept;
 
+		/**
+		 * @brief ボス（Mac）をステージ定義の位置に生成する
+		 *
+		 * 開始時ではなく、配置された雑魚を全滅させてから呼ぶ。撃破判定用にIDを保持する。
+		 */
+		void spawnBoss();
+
 		// 各クラスにイベントバスの参照を渡したいため先にメンバ変数として宣言しておく。
 		//
 		// 【重要】購読者（SystemManagerが持つ各System・m_audioEventListener）より
@@ -134,6 +142,10 @@ namespace game::scene
 
 		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_macId{ core::ecs::INVALID_ENTITY_ID };
+
+		// 開始時に配置した雑魚のID集合。全滅（空になる）を検知してボスを出現させる。
+		// ボスが召喚する雑魚は含めない（開始時のぶんだけを数える）
+		std::unordered_set<core::ecs::EntityId> m_stageEnemyIds{};
 
 		std::unique_ptr<game::event::AudioEventListener> m_audioEventListener;
 
