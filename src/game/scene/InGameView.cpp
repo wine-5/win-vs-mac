@@ -22,6 +22,7 @@
 #include "game/ui/ingame/EquipmentSlotView.h"
 #include "game/ui/ingame/ObjectiveView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
+#include "game/ui/ingame/BossHUDView.h"
 #include <algorithm>
 #include <cmath>
 
@@ -40,7 +41,7 @@ namespace game::scene
 	{
 	}
 
-	void InGameView::draw(core::ecs::EntityId playerId, int remainingEnemyCount, bool isBossAppeared)
+	void InGameView::draw(core::ecs::EntityId playerId, int remainingEnemyCount, core::ecs::EntityId bossId)
 	{
 		drawModels();
 
@@ -81,7 +82,11 @@ namespace game::scene
 
 		// 目標（左上）
 		if (m_objectiveView)
-			m_objectiveView->draw(remainingEnemyCount, isBossAppeared);
+			m_objectiveView->draw(remainingEnemyCount, bossId != core::ecs::INVALID_ENTITY_ID);
+
+		// ボスHP（上中央）。出現していなければ描かれない
+		if (m_bossHUDView)
+			m_bossHUDView->draw(bossId);
 
 		// 低HP警告のビネット。四隅を赤く染めるが、下の隅はHUDのパネルが占めているため、
 		// パネルより手前に描かないと下2つの隅が隠れてしまう。
@@ -164,6 +169,11 @@ namespace game::scene
 	void InGameView::setLowHealthVignetteView(ui::ingame::LowHealthVignetteView* view)
 	{
 		m_lowHealthVignetteView = view;
+	}
+
+	void InGameView::setBossHUDView(ui::ingame::BossHUDView* view)
+	{
+		m_bossHUDView = view;
 	}
 
 	void InGameView::drawModels()

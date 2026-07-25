@@ -33,6 +33,7 @@ namespace game::ui::ingame
 	class EquipmentSlotView; // 前方宣言
 	class ObjectiveView;     // 前方宣言
 	class LowHealthVignetteView; // 前方宣言
+	class BossHUDView;           // 前方宣言
 } // namespace game::ui::ingame
 
 namespace game::scene
@@ -68,9 +69,9 @@ namespace game::scene
 		 * playerIdはレティクル（照準状態の表示）とプレイヤーHUDに使う
 		 * @param playerId プレイヤーのEntityID
 		 * @param remainingEnemyCount 残っている開始時配置の雑魚の数（左上の目標表示に使う）
-		 * @param isBossAppeared ボスが出現済みかどうか（左上の目標表示に使う）
+		 * @param bossId ボスのEntityID（未出現ならINVALID_ENTITY_ID）
 		 */
-		void draw(core::ecs::EntityId playerId, int remainingEnemyCount, bool isBossAppeared);
+		void draw(core::ecs::EntityId playerId, int remainingEnemyCount, core::ecs::EntityId bossId);
 
 		/**
 		 * @brief 溜め攻撃の演出System（集中線の描画元）を設定する
@@ -143,6 +144,12 @@ namespace game::scene
 		 * @param view LowHealthVignetteViewのポインタ（所有はInGame）
 		 */
 		void setLowHealthVignetteView(ui::ingame::LowHealthVignetteView* view);
+
+		/**
+		 * @brief ボスHP（上中央のHUD）Viewを設定する
+		 * @param view BossHUDViewのポインタ（所有はInGame）
+		 */
+		void setBossHUDView(ui::ingame::BossHUDView* view);
 
 	  private:
 		/**
@@ -220,6 +227,9 @@ namespace game::scene
 
 		// 低HP警告のビネットの描画元（所有はInGame）
 		ui::ingame::LowHealthVignetteView* m_lowHealthVignetteView{ nullptr };
+
+		// ボスHP（上中央のHUD）の描画元（所有はInGame）
+		ui::ingame::BossHUDView* m_bossHUDView{ nullptr };
 
 		// プレイヤー死亡時の暗転の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::combat::PlayerDeathSystem* m_playerDeathSystem{ nullptr };

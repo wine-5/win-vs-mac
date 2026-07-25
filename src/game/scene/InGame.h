@@ -53,6 +53,7 @@ namespace game
 		class EquipmentSlotView; // 前方宣言
 		class ObjectiveView;     // 前方宣言
 		class LowHealthVignetteView; // 前方宣言
+		class BossHUDView;           // 前方宣言
 	} // namespace ui::ingame
 } // namespace game
 
@@ -174,6 +175,9 @@ namespace game::scene
 
 		// 低HP警告のビネットのView
 		std::unique_ptr<ui::ingame::LowHealthVignetteView> m_lowHealthVignetteView;
+
+		// ボスHP（上中央）のView
+		std::unique_ptr<ui::ingame::BossHUDView> m_bossHUDView;
 
 		// 進行トラッキング
 		float m_elapsedTime{0.0f};

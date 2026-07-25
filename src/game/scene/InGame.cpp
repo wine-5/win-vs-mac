@@ -78,6 +78,7 @@
 #include "game/ui/ingame/EquipmentSlotView.h"
 #include "game/ui/ingame/ObjectiveView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
+#include "game/ui/ingame/BossHUDView.h"
 #include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
 #include "game/event/InGameEvents.h"
 
@@ -279,6 +280,12 @@ namespace game::scene
 		    m_componentManager,
 		    m_resourceManager);
 		m_view.setLowHealthVignetteView(m_lowHealthVignetteView.get());
+
+		m_bossHUDView = std::make_unique<ui::ingame::BossHUDView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager);
+		m_view.setBossHUDView(m_bossHUDView.get());
 	}
 
 	InGame::~InGame() = default;
@@ -622,8 +629,7 @@ namespace game::scene
 		// スポーン時のスナップショットではなく EnemyFactory が持つ最新の敵一覧を渡す
 		// 残り雑魚はボス出現条件そのものなので、開始時スナップショットの生き残り数を渡す
 		// （ボスが召喚する雑魚は条件に含めない）
-		m_view.draw(m_playerId, static_cast<int>(m_stageEnemyIds.size()),
-		    m_macId != core::ecs::INVALID_ENTITY_ID);
+		m_view.draw(m_playerId, static_cast<int>(m_stageEnemyIds.size()), m_macId);
 	}
 
 	void InGame::saveResultData	(bool isVictory) noexcept

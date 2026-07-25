@@ -254,6 +254,7 @@
     <ClCompile Include="src\game\ui\ingame\ObjectiveView.cpp" />
     <ClCompile Include="src\game\ui\ingame\HudPanel.cpp" />
     <ClCompile Include="src\game\ui\ingame\LowHealthVignetteView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\BossHUDView.cpp" />
     <ClCompile Include="src\game\ui\pause\PauseMenuController.cpp" />
     <ClCompile Include="src\game\ui\pause\PauseMenuView.cpp" />
   </ItemGroup>
@@ -492,6 +493,7 @@
     <ClInclude Include="src\game\ui\ingame\HudPanel.h" />
     <ClInclude Include="src\game\ui\ingame\LowHealthPulse.h" />
     <ClInclude Include="src\game\ui\ingame\LowHealthVignetteView.h" />
+    <ClInclude Include="src\game\ui\ingame\BossHUDView.h" />
     <ClInclude Include="src\game\ui\pause\PauseMenuController.h" />
     <ClInclude Include="src\game\ui\pause\PauseMenuView.h" />
   </ItemGroup>
