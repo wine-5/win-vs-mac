@@ -61,6 +61,8 @@ namespace game::actor
 		attack.m_attackPower = playerData.getAttackPower();
 		attack.m_attackRange = playerData.getAttackRange();
 		attack.m_attackCooldown = playerData.getAttackCooldown();
+		// 振り下ろしの瞬間にダメージが出るよう、アニメーションの溜め分だけ判定を遅らせる
+		attack.m_windupDelay = playerData.getAttackWindup();
 		componentManager.add<component::combat::AttackComponent>(m_entity.getId(), attack);
 
 		// 近接攻撃の2段コンボ（斬り→回転斬り）。次段の受付時間はJSONで調整する

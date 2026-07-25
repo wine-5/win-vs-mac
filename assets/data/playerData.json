@@ -36,6 +36,7 @@
     "attackPower": 30.0,
     "attackRange": 200.0,
     "attackCooldown": 0.5,
-    "comboInputWindow": 1.0
+    "attackWindup": 0.25,
+    "comboInputWindow": 1.5
   }
 }
