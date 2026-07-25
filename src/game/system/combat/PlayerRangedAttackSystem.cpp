@@ -4,6 +4,7 @@
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
 #include "game/constant/Tag.h"
+#include <algorithm>
 #include <utility>
 
 namespace game::system::combat
@@ -19,6 +20,13 @@ namespace game::system::combat
 	    , m_metadata{ std::move(metadata) }
 	    , m_billboardImage{ billboardImage }
 	{
+	}
+
+	float PlayerRangedAttackSystem::getCooldownRatio() const
+	{
+		if (m_metadata.m_cooldown <= 0.0f)
+			return 0.0f;
+		return std::clamp(m_cooldownTimer / m_metadata.m_cooldown, 0.0f, 1.0f);
 	}
 
 	void PlayerRangedAttackSystem::update(float deltaTime)
