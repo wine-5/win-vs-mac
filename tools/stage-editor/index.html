@@ -275,7 +275,9 @@ const DEFAULT_CATALOG = {
 let catalog = structuredClone(DEFAULT_CATALOG);
 let state = defaultState();
 let nextUid = 1;
-let selected = null;            // { kind, uid } | { kind:'mac' } | { kind:'player' }
+let selection = [];             // 複数選択：[{ kind, uid } | { kind:'mac' } | { kind:'player' }]
+let selected = null;            // 主選択（selectionの末尾）。単一選択向けの既存処理が参照する
+function isSelected(sel) { const k = keyOf(sel); return selection.some(s => keyOf(s) === k); }
 let undoStack = [];
 let redoStack = [];
 let gizmoMode = 'translate';
@@ -342,6 +344,13 @@ scene.add(dirLight);
 const gizmo = new TransformControls(camera, renderer.domElement);
 gizmo.setSpace(gizmoSpace);
 scene.add(gizmo);
+
+/* 複数選択時、まとめて動かすための仮ピボット。メッシュと同じ world 直下に置いて
+   座標系（Z反転）を揃える。ギズモはこれにアタッチし、移動量を各メンバーへ配る */
+const groupPivot = new THREE.Object3D();
+world.add(groupPivot);
+let groupMode = false;      // 複数選択でピボット操作中か
+let groupDragStart = null;  // ドラッグ開始時のピボット位置と各メンバー位置
 
 /* =========================================================
  * メッシュ生成
@@ -573,10 +582,10 @@ function rebuildScene() {
 }
 
 function reattachSelection() {
-  if (!selected) return;
-  const m = meshByKey.get(keyOf(selected));
-  if (m) { gizmo.attach(m); highlight(m); }
-  else selected = null;
+  /* シーン再構築で消えた選択（削除済みuidなど）を取り除いてから貼り直す */
+  selection = selection.filter(s => meshByKey.has(keyOf(s)));
+  selected = selection.length ? selection[selection.length - 1] : null;
+  refreshSelectionVisual();
 }
 
 /* =========================================================
@@ -584,32 +593,75 @@ function reattachSelection() {
  * ======================================================= */
 const raycaster = new THREE.Raycaster();
 
-function select(sel) {
-  selected = sel;
-  for (const m of meshByKey.values()) unhighlight(m);
-  if (sel) {
-    const m = meshByKey.get(keyOf(sel));
-    if (m) {
-      /* 敵・ボス・プレイヤーは拡縮不可 → scale モード中なら移動に戻す */
-      if (m.userData.fixedSize && gizmoMode === 'scale') setGizmoMode('translate');
-      gizmo.attach(m);
-      highlight(m);
-    }
+/**
+ * 選択を更新する。
+ * @param sel 対象（null で全解除）
+ * @param additive true なら Shift/Ctrl による加算・トグル選択
+ */
+function select(sel, additive = false) {
+  if (!sel) {
+    if (additive) return;  /* 加算クリックで空を掴んでも解除しない */
+    selection = [];
+  } else if (additive) {
+    const k = keyOf(sel);
+    const idx = selection.findIndex(s => keyOf(s) === k);
+    if (idx >= 0) selection.splice(idx, 1); else selection.push(sel);
   } else {
-    gizmo.detach();
+    selection = [sel];
   }
+  selected = selection.length ? selection[selection.length - 1] : null;
+  refreshSelectionVisual();
   renderHierarchy();
   renderInspector();
 }
 
-function highlight(m) {
-  if (!m.userData.sel || !selected || keyOf(m.userData.sel) !== keyOf(selected)) return;
+/* 選択中メッシュのハイライトとギズモのアタッチを現在の selection に合わせる */
+function refreshSelectionVisual() {
+  for (const m of meshByKey.values()) unhighlight(m);
+  for (const s of selection) {
+    const m = meshByKey.get(keyOf(s));
+    if (m) highlight(m);
+  }
+  updateGizmoAttachment();
+}
 
+/* selection の数に応じてギズモの付け先を決める（単一＝直接、複数＝ピボット） */
+function updateGizmoAttachment() {
+  groupMode = false;
+  if (selection.length === 0) { gizmo.detach(); return; }
+
+  if (selection.length === 1) {
+    const m = meshByKey.get(keyOf(selection[0]));
+    if (!m) { gizmo.detach(); return; }
+    /* 敵・ボス・プレイヤーは拡縮不可 → scale モード中なら移動に戻す */
+    if (m.userData.fixedSize && gizmoMode === 'scale') setGizmoMode('translate');
+    gizmo.attach(m);
+    return;
+  }
+
+  /* 複数選択：重心にピボットを置いてまとめて移動する（回転・拡縮はグループ非対応） */
+  groupMode = true;
+  if (gizmoMode !== 'translate') setGizmoMode('translate');
+  const center = new THREE.Vector3();
+  let n = 0;
+  for (const s of selection) {
+    const m = meshByKey.get(keyOf(s));
+    if (m) { center.add(m.position); n++; }
+  }
+  if (n) center.multiplyScalar(1 / n);
+  groupPivot.position.copy(center);
+  groupPivot.rotation.set(0, 0, 0);
+  groupPivot.scale.set(1, 1, 1);
+  gizmo.attach(groupPivot);
+}
+
+function highlight(m) {
   /* 光源は枠線を持たないので、範囲球を濃くして選択を示す */
   if (m.userData.rangeSphere) {
     m.userData.rangeSphere.material.opacity = 0.5;
     return;
   }
+  if (!m.userData.edge) return;
   m.userData.edge.material.color.set('#FFC83D');
 }
 
@@ -643,13 +695,30 @@ renderer.domElement.addEventListener('pointerup', (e) => {
   );
   raycaster.setFromCamera(ndc, camera);
   const hits = raycaster.intersectObjects(pickables, false);
-  select(hits.length ? hits[0].object.userData.sel : null);
+  const additive = e.shiftKey || e.ctrlKey || e.metaKey;
+  if (hits.length) select(hits[0].object.userData.sel, additive);
+  else if (!additive) select(null);
 });
 
 /* =========================================================
  * ギズモ ↔ state 同期
  * ======================================================= */
 gizmo.addEventListener('objectChange', () => {
+  if (groupMode) {
+    /* ピボットの移動量を各メンバーの開始位置へ加えて、まとめて動かす */
+    if (!groupDragStart) return;
+    const delta = new THREE.Vector3().subVectors(groupPivot.position, groupDragStart.pivot);
+    for (const s of selection) {
+      const m = meshByKey.get(keyOf(s));
+      const start = groupDragStart.members.get(keyOf(s));
+      if (!m || !start) continue;
+      m.position.copy(start).add(delta);
+      syncStateFromMesh(m);
+    }
+    renderInspector();
+    scheduleAutosave();
+    return;
+  }
   const m = gizmo.object;
   if (!m || !selected) return;
   syncStateFromMesh(m);
@@ -660,7 +729,19 @@ gizmo.addEventListener('dragging-changed', (e) => {
   cameraEnabled = !e.value;
   /* ドラッグ「開始時」に履歴へ積む。終了時に積むと変更後の状態を保存してしまい
      Undoが1回空振りする */
-  if (e.value) pushUndo();
+  if (e.value) {
+    pushUndo();
+    if (groupMode) {
+      /* ドラッグ開始時点のピボット位置と各メンバー位置を控える */
+      groupDragStart = { pivot: groupPivot.position.clone(), members: new Map() };
+      for (const s of selection) {
+        const m = meshByKey.get(keyOf(s));
+        if (m) groupDragStart.members.set(keyOf(s), m.position.clone());
+      }
+    }
+  } else {
+    groupDragStart = null;
+  }
 });
 
 function syncStateFromMesh(m) {
@@ -703,6 +784,7 @@ const modeButtons = { translate: btn('btnTranslate'), rotate: btn('btnRotate'), 
 function btn(id) { return document.getElementById(id); }
 
 function setGizmoMode(mode) {
+  if (groupMode && mode !== 'translate') return;  /* 複数選択は移動のみ対応 */
   const m = selected && meshByKey.get(keyOf(selected));
   if (mode === 'scale' && m && m.userData.fixedSize) return;  /* 敵等は拡縮不可 */
   gizmoMode = mode;
@@ -800,47 +882,52 @@ function addLight(preset) {
 }
 
 function duplicateSelected() {
-  if (!selected) return;
-  if (selected.kind === 'prop') {
-    const src = state.props.find(p => p.uid === selected.uid);
-    pushUndo();
-    const c = structuredClone(src); c.uid = uid();
-    c.position = [src.position[0] + 200, src.position[1], src.position[2] + 200];
-    state.props.push(c);
-    rebuildScene(); select({ kind: 'prop', uid: c.uid });
-  } else if (selected.kind === 'spawn') {
-    const src = state.spawns.find(s => s.uid === selected.uid);
-    pushUndo();
-    const c = structuredClone(src); c.uid = uid();
-    c.position = [src.position[0] + 200, src.position[1], src.position[2] + 200];
-    state.spawns.push(c);
-    rebuildScene(); select({ kind: 'spawn', uid: c.uid });
-  } else if (selected.kind === 'light') {
-    const src = state.lights.find(l => l.uid === selected.uid);
-    pushUndo();
-    const c = structuredClone(src); c.uid = uid();
-    c.position = [src.position[0] + 200, src.position[1], src.position[2] + 200];
-    state.lights.push(c);
-    rebuildScene(); select({ kind: 'light', uid: c.uid });
+  if (!selection.length) return;
+  /* mac / player は複製不可。複製できるものが1つも無ければ何もしない */
+  const dupable = selection.filter(s => s.kind === 'prop' || s.kind === 'spawn' || s.kind === 'light');
+  if (!dupable.length) return;
+
+  pushUndo();
+  const offset = (pos) => [pos[0] + 200, pos[1], pos[2] + 200];
+  const newSel = [];
+  for (const s of dupable) {
+    if (s.kind === 'prop') {
+      const src = state.props.find(p => p.uid === s.uid);
+      const c = structuredClone(src); c.uid = uid(); c.position = offset(src.position);
+      state.props.push(c); newSel.push({ kind: 'prop', uid: c.uid });
+    } else if (s.kind === 'spawn') {
+      const src = state.spawns.find(x => x.uid === s.uid);
+      const c = structuredClone(src); c.uid = uid(); c.position = offset(src.position);
+      state.spawns.push(c); newSel.push({ kind: 'spawn', uid: c.uid });
+    } else if (s.kind === 'light') {
+      const src = state.lights.find(x => x.uid === s.uid);
+      const c = structuredClone(src); c.uid = uid(); c.position = offset(src.position);
+      state.lights.push(c); newSel.push({ kind: 'light', uid: c.uid });
+    }
   }
-  /* mac / player は複製不可（各1つ） */
+  rebuildScene();
+  /* 複製したものを選択状態にする */
+  selection = newSel;
+  selected = newSel.length ? newSel[newSel.length - 1] : null;
+  refreshSelectionVisual(); renderHierarchy(); renderInspector();
 }
 
 function deleteSelected() {
-  if (!selected) return;
-  if (selected.kind === 'prop') {
-    pushUndo();
-    state.props = state.props.filter(p => p.uid !== selected.uid);
-  } else if (selected.kind === 'spawn') {
-    pushUndo();
-    state.spawns = state.spawns.filter(s => s.uid !== selected.uid);
-  } else if (selected.kind === 'light') {
-    pushUndo();
-    state.lights = state.lights.filter(l => l.uid !== selected.uid);
-  } else {
-    return;  /* mac / player は削除不可 */
+  if (!selection.length) return;
+  const propU = new Set(), spawnU = new Set(), lightU = new Set();
+  for (const s of selection) {
+    if (s.kind === 'prop') propU.add(s.uid);
+    else if (s.kind === 'spawn') spawnU.add(s.uid);
+    else if (s.kind === 'light') lightU.add(s.uid);
+    /* mac / player は削除不可なので無視する */
   }
-  selected = null;
+  if (!propU.size && !spawnU.size && !lightU.size) return;
+
+  pushUndo();
+  if (propU.size)  state.props  = state.props.filter(p => !propU.has(p.uid));
+  if (spawnU.size) state.spawns = state.spawns.filter(s => !spawnU.has(s.uid));
+  if (lightU.size) state.lights = state.lights.filter(l => !lightU.has(l.uid));
+  selection = []; selected = null;
   rebuildScene();
 }
 
@@ -1000,11 +1087,12 @@ function renderHierarchy() {
   const cat = (name) => { const d = document.createElement('div'); d.className = 'hier-cat'; d.textContent = name; root.appendChild(d); };
   const item = (sel, name, color) => {
     const d = document.createElement('div');
-    d.className = 'hier-item' + (selected && keyOf(selected) === keyOf(sel) ? ' selected' : '');
+    d.className = 'hier-item' + (isSelected(sel) ? ' selected' : '');
     const dot = document.createElement('span'); dot.className = 'hier-dot'; dot.style.background = color;
     d.appendChild(dot);
     d.appendChild(document.createTextNode(name));
-    d.onclick = () => select(sel);
+    /* Shift/Ctrl クリックで加算・トグル選択（シーンビューと揃える） */
+    d.onclick = (e) => select(sel, e.shiftKey || e.ctrlKey || e.metaKey);
     d.ondblclick = () => { select(sel); focusSelected(); };
     root.appendChild(d);
   };
@@ -1034,6 +1122,11 @@ function renderHierarchy() {
  * ======================================================= */
 function renderInspector() {
   const root = document.getElementById('inspector');
+  if (selection.length > 1) {
+    const n = selection.length;
+    root.innerHTML = `<div class="insp-empty">${n} 個を選択中<br>ドラッグでまとめて移動／複製／削除できます<br>（個別の数値編集は1つだけ選択してください）</div>`;
+    return;
+  }
   if (!selected) { root.innerHTML = '<div class="insp-empty">オブジェクトを選択してください</div>'; return; }
   root.innerHTML = '';
 
@@ -1263,7 +1356,7 @@ document.getElementById('fileStage').addEventListener('change', async (e) => {
     const data = JSON.parse(await f.text());
     pushUndo();
     state = stateFromStageData(data);
-    selected = null;
+    selection = []; selected = null;
     rebuildScene();
     scheduleAutosave();
   } catch (err) {
