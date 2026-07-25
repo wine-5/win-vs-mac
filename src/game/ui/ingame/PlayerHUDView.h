@@ -2,6 +2,7 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include <chrono>
 
 namespace game::ui::ingame
 {
@@ -63,8 +64,29 @@ namespace game::ui::ingame
 		 */
 		void drawHealthBar(int x, int y, int width, int height, float ratio);
 
+		/**
+		 * @brief 被弾の検知と、遅れて追従する残像バーの更新を行う
+		 *
+		 * 描画経路からしか呼ばれずdeltaTimeを受け取らないため、経過時間は壁時計から求める
+		 * @param ratio 今フレームのHP残量比（0.0〜1.0）
+		 */
+		void updateDamageReaction(float ratio);
+
+		/**
+		 * @brief 被弾フラッシュの進行度を返す
+		 * @return 0.0（被弾直後）〜1.0（終了）。再生中でなければ1.0
+		 */
+		[[nodiscard]] float getDamageFlashProgress() const;
+
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
 		core::ecs::ComponentManager& m_componentManager;
+
+		// 被弾演出の状態。実HPより遅れて縮む残像バーで「今どれだけ削られたか」を見せる
+		float m_displayedRatio{ -1.0f }; // 負の値は未初期化（初回の描画で実HPに合わせる）
+		std::chrono::steady_clock::time_point m_lastDamageTime{};
+		std::chrono::steady_clock::time_point m_lastFrameTime{};
+		bool m_hasLastFrameTime{ false };
+		bool m_isDamageFlashing{ false };
 	};
 } // namespace game::ui::ingame
