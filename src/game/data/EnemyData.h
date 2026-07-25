@@ -71,6 +71,11 @@ namespace game::data
 			if (attackWindupIt != metadata.floatProperties.end())
 				data.m_attackWindup = attackWindupIt->second;
 
+			auto attackMaxHeightIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::ATTACK_MAX_HEIGHT)) };
+			if (attackMaxHeightIt != metadata.floatProperties.end())
+				data.m_attackMaxHeight = attackMaxHeightIt->second;
+
 			auto hoverHeightIt{ metadata.floatProperties.find(
 				std::string(constant::metadata_keys::HOVER_HEIGHT)) };
 			if (hoverHeightIt != metadata.floatProperties.end())
@@ -145,6 +150,12 @@ namespace game::data
 		[[nodiscard]] float getAttackWindup() const noexcept
 		{
 			return m_attackWindup;
+		}
+
+		/** @brief 攻撃が届く高さの上限（攻撃者の足元からの相対Y）を取得。0なら高さ無制限 */
+		[[nodiscard]] float getAttackMaxHeight() const noexcept
+		{
+			return m_attackMaxHeight;
 		}
 
 		/** @brief 浮遊高度を取得（0なら地上型） */
@@ -234,6 +245,7 @@ namespace game::data
 	  float m_attackPower{ 0.0f };
 	  float m_attackCooldown{ 0.0f };
 	  float m_attackWindup{ 0.0f };
+	  float m_attackMaxHeight{ 0.0f };
 	  float m_hoverHeight{ 0.0f };
 	  float m_preferredDistanceMin{ 0.0f };
 	  float m_preferredDistanceMax{ 0.0f };

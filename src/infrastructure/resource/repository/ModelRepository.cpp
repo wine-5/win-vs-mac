@@ -428,6 +428,7 @@ namespace infrastructure::resource::repository
 				"moveSpeed", "dashMultiplier", "jumpForce", "gravity", "maxFallSpeed",
 				"detectionRange", "attackRange",
 				"maxHp", "defence", "attackPower", "attackCooldown", "attackWindup",
+				"attackMaxHeight",
 				"comboInputWindow",
 				"hoverHeight", "preferredDistanceMin", "preferredDistanceMax",
 				"fireCooldown", "facingYawOffset"
