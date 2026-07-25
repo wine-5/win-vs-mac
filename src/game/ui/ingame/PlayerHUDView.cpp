@@ -186,16 +186,22 @@ namespace game::ui::ingame
 		m_uiRenderer.drawRoundedBox(x, y, width, height, radius, core::utility::Color::WHITE, true, 1);
 		m_uiRenderer.resetBlendMode();
 
+		// ピル形状は幅が高さを下回ると成立しないため、残量が僅かでも高さぶんの幅は確保する。
+		// 打ち切ってしまうと、残りHPが数％のときにバーが空になって「もう死んでいる」ように見える
+		auto pillWidth = [&](float value)
+		{ return std::max(height, static_cast<int>(width * value)); };
+
 		// 実HPより先に、遅れて縮む残像を赤で描く。実HPのバーが上に重なるので、
 		// はみ出した赤い帯＝直前に失った分として読める（格闘ゲームの体力バーと同じ仕組み）
-		const int residualWidth{ static_cast<int>(width * m_displayedRatio) };
-		if (residualWidth >= height)
-			m_uiRenderer.drawRoundedBox(x, y, residualWidth, height, radius, BAR_RESIDUAL_COLOR, true, 1);
+		if (m_displayedRatio > 0.0f)
+			m_uiRenderer.drawRoundedBox(x, y, pillWidth(m_displayedRatio), height, radius,
+			    BAR_RESIDUAL_COLOR, true, 1);
 
-		const int fillWidth{ static_cast<int>(width * ratio) };
-		// 残りわずかなときに潰れて見えなくなるのを防ぐため、ピルが成立する最小幅を確保する
-		if (fillWidth < height)
+		// 倒れている間はバーを空にする（ここだけは何も描かないのが正しい状態）
+		if (ratio <= 0.0f)
 			return;
+
+		const int fillWidth{ pillWidth(ratio) };
 
 		unsigned int fillColor{ BAR_COLOR_HIGH };
 		if (low_health::isLow(ratio))
