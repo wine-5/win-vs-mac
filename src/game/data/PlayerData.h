@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <string>
 #include <vector>
+#include <optional>
 #include "core/utility/Vector3.h"
 #include "core/data/ModelMetadata.h"
 #include "game/constant/MetadataKeys.h"
@@ -26,6 +27,7 @@ namespace game::data
 			data.m_colliderSize = metadata.colliderSize;
 			data.m_colliderOffset = metadata.colliderOffset;
 			data.m_animations = metadata.animations;
+			data.m_weapon = metadata.weapon;
 
 			// moveSpeed（floatProperties から取得）
 			auto moveSpeedIt{ metadata.floatProperties.find(
@@ -129,6 +131,11 @@ namespace game::data
 		[[nodiscard]] core::Vector3      getColliderOffset() const noexcept { return m_colliderOffset; }
 		/** @brief モデルスケールを取得 */
 		[[nodiscard]] core::Vector3      getScale()          const noexcept { return m_scale; }
+		/** @brief 武器の装着設定を取得（JSONに weapon 要素が無ければ nullopt） */
+		[[nodiscard]] const std::optional<core::data::WeaponAttachMetadata>& getWeapon() const noexcept
+		{
+			return m_weapon;
+		}
 		/** @brief アニメーションクリップ定義の一覧を取得（JSONの animations 配列） */
 		[[nodiscard]] const std::vector<core::data::AnimationClipDef>& getAnimations() const noexcept
 		{
@@ -170,5 +177,6 @@ namespace game::data
 		core::Vector3 m_colliderOffset;
 		core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
 		std::vector<core::data::AnimationClipDef> m_animations{}; // アニメーションクリップ定義
+		std::optional<core::data::WeaponAttachMetadata> m_weapon{}; // 武器の装着設定
 	};
 } // namespace game::data

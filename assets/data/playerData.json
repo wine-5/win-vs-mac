@@ -8,6 +8,13 @@
   "collider": {
     "size": [ 50.5, 150.7, 50.5 ]
   },
+  "weapon": {
+    "modelId": "player_sword",
+    "frameName": "RightHand",
+    "offsetPosition": [ 0.0, 0.0, 0.0 ],
+    "offsetRotation": [ 0.0, 0.0, 0.0 ],
+    "length": 80.0
+  },
   "animations": [
     { "state": "Idle",    "id": "anim_player_idle",  "loop": true },
     { "state": "Walk",    "id": "anim_player_walk",  "loop": true, "speed": 0.8 },
