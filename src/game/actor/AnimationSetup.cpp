@@ -17,6 +17,8 @@ namespace
 			return AnimationState::Attack1;
 		if (name == "Attack2")
 			return AnimationState::Attack2;
+		if (name == "Throw")
+			return AnimationState::Throw;
 		if (name == "Hit")
 			return AnimationState::Hit;
 		if (name == "Dying")
