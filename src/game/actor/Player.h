@@ -42,9 +42,11 @@ namespace game::actor
 	   * WeaponAttachSystem が実際のボーン名一覧をログへ出力する
 	   * @param componentManager ComponentManagerの参照
 	   * @param resourceManager 剣モデル読み込み用のIResourceManager
+	   * @param playerScale プレイヤーの拡大率（剣の見た目サイズの逆算に使う）
 	   */
 	  void attachWeapon(core::ecs::ComponentManager& componentManager,
-		  core::iface::IResourceManager& resourceManager);
+		  core::iface::IResourceManager& resourceManager,
+		  float playerScale);
 
 	  core::ecs::Entity m_entity;
 	};
