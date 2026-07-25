@@ -155,6 +155,7 @@
     <ClCompile Include="src\game\system\combat\ProjectileReflectSystem.cpp" />
     <ClCompile Include="src\game\system\combat\ProjectileSystem.cpp" />
     <ClCompile Include="src\game\system\combat\PlayerRangedAttackSystem.cpp" />
+    <ClCompile Include="src\game\system\combat\PlayerAttackComboSystem.cpp" />
     <ClCompile Include="src\game\system\visual\PlayerChargeVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\camera\ChargeZoomSystem.cpp" />
     <ClCompile Include="src\game\system\visual\MacAwakenEffectSystem.cpp" />
@@ -352,6 +353,7 @@
     <ClInclude Include="src\game\system\combat\ProjectileReflectSystem.h" />
     <ClInclude Include="src\game\system\combat\ProjectileSystem.h" />
     <ClInclude Include="src\game\system\combat\PlayerRangedAttackSystem.h" />
+    <ClInclude Include="src\game\system\combat\PlayerAttackComboSystem.h" />
     <ClInclude Include="src\game\system\visual\PlayerChargeVisualsSystem.h" />
     <ClInclude Include="src\game\GameManager.h" />
     <ClInclude Include="src\game\scene\Loading.h" />
