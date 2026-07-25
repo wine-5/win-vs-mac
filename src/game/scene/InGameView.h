@@ -32,6 +32,7 @@ namespace game::ui::ingame
 	class PlayerHUDView;     // 前方宣言
 	class EquipmentSlotView; // 前方宣言
 	class ObjectiveView;     // 前方宣言
+	class LowHealthVignetteView; // 前方宣言
 } // namespace game::ui::ingame
 
 namespace game::scene
@@ -137,6 +138,12 @@ namespace game::scene
 		 */
 		void setObjectiveView(ui::ingame::ObjectiveView* view);
 
+		/**
+		 * @brief 低HP警告のビネットViewを設定する
+		 * @param view LowHealthVignetteViewのポインタ（所有はInGame）
+		 */
+		void setLowHealthVignetteView(ui::ingame::LowHealthVignetteView* view);
+
 	  private:
 		/**
 		 * @brief RenderComponentを持つ全Entityのモデルを描画する
@@ -210,6 +217,9 @@ namespace game::scene
 
 		// 目標表示（左上のHUD）の描画元（所有はInGame）
 		ui::ingame::ObjectiveView* m_objectiveView{ nullptr };
+
+		// 低HP警告のビネットの描画元（所有はInGame）
+		ui::ingame::LowHealthVignetteView* m_lowHealthVignetteView{ nullptr };
 
 		// プレイヤー死亡時の暗転の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::combat::PlayerDeathSystem* m_playerDeathSystem{ nullptr };

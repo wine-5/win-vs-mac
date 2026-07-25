@@ -77,6 +77,7 @@
 #include "game/ui/ingame/PlayerHUDView.h"
 #include "game/ui/ingame/EquipmentSlotView.h"
 #include "game/ui/ingame/ObjectiveView.h"
+#include "game/ui/ingame/LowHealthVignetteView.h"
 #include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
 #include "game/event/InGameEvents.h"
 
@@ -271,6 +272,13 @@ namespace game::scene
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    *core::base::ServiceLocator::get<core::iface::IScreen>());
 		m_view.setObjectiveView(m_objectiveView.get());
+
+		m_lowHealthVignetteView = std::make_unique<ui::ingame::LowHealthVignetteView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager,
+		    m_resourceManager);
+		m_view.setLowHealthVignetteView(m_lowHealthVignetteView.get());
 	}
 
 	InGame::~InGame() = default;

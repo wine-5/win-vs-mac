@@ -50,7 +50,8 @@
     {"id": "ext-aud",           "path": "assets/images/ui/ingame/ext/aud.png"},
     {"id": "ext-arc",           "path": "assets/images/ui/ingame/ext/arc.png"},
     {"id": "ext-etc",           "path": "assets/images/ui/ingame/ext/etc.png"},
-    {"id": "ext-emp",           "path": "assets/images/ui/ingame/ext/emp.png"}
+    {"id": "ext-emp",           "path": "assets/images/ui/ingame/ext/emp.png"},
+    {"id": "vignette-lowhp",    "path": "assets/images/ui/ingame/vignette_lowhp.png"}
   ],
   "bgm": [
     { "type": "Title",      "path": "assets/audio/bgm/bgm_title.mp3",         "volume":0.5, "useFade": true  },

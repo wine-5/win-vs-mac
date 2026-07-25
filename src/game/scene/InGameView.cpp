@@ -21,6 +21,7 @@
 #include "game/ui/ingame/PlayerHUDView.h"
 #include "game/ui/ingame/EquipmentSlotView.h"
 #include "game/ui/ingame/ObjectiveView.h"
+#include "game/ui/ingame/LowHealthVignetteView.h"
 #include <algorithm>
 #include <cmath>
 
@@ -69,6 +70,10 @@ namespace game::scene
 		// 敵の発見演出（頭上の通知バッジ）。モデルの手前・HUDより奥に描く
 		if (m_detectionAlertSystem)
 			m_detectionAlertSystem->draw();
+
+		// 低HP警告のビネット。画面全体を覆うのでHUDのパネル類より奥に描く
+		if (m_lowHealthVignetteView)
+			m_lowHealthVignetteView->draw(playerId);
 
 		// プレイヤーステータス（左下のHP）。演出より手前・レティクルと同じHUD層に描く
 		if (m_playerHUDView)
@@ -152,6 +157,11 @@ namespace game::scene
 	void InGameView::setObjectiveView(ui::ingame::ObjectiveView* view)
 	{
 		m_objectiveView = view;
+	}
+
+	void InGameView::setLowHealthVignetteView(ui::ingame::LowHealthVignetteView* view)
+	{
+		m_lowHealthVignetteView = view;
 	}
 
 	void InGameView::drawModels()
