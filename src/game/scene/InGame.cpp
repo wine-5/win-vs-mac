@@ -235,7 +235,7 @@ namespace game::scene
 
 		// DEBUG: 何かと不便なためリリースするときにfalseに変更すること
 		// 3人称マウス視点のためカーソルを非表示にする
-		m_inputProvider.setMouseCursorVisible(true);
+		m_inputProvider.setMouseCursorVisible(false);
 
 		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（リリース時にまとめて削除）
 		m_debugGizmoView = std::make_unique<ui::debug::DebugGizmoView>(m_componentManager, m_renderer);
@@ -463,38 +463,47 @@ namespace game::scene
 		// 敵の死亡イベントの購読
 		m_subscriptions.push_back(m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
 		    {
-						// 倒した敵の種類をログに出す（動作確認用）。
-						// 敵種はスポーン時に確定した EnemyTypeComponent を唯一の情報源にする
-						std::string_view enemyTypeName{ "Unknown" };
-			            if (const auto* type{ m_componentManager.tryGet<component::EnemyTypeComponent>(e.m_entityId) })
-				            enemyTypeName = constant::toEnemyTypeName(type->m_type);
-			            core::log::info("敵を撃破: {} (EntityId={})", enemyTypeName, e.m_entityId);
+			    // 倒した敵の種類をログに出す（動作確認用）。
+			    // 敵種はスポーン時に確定した EnemyTypeComponent を唯一の情報源にする
+			    std::string_view enemyTypeName{ "Unknown" };
+			    if (const auto* type{ m_componentManager.tryGet<component::EnemyTypeComponent>(e.m_entityId) })
+				    enemyTypeName = constant::toEnemyTypeName(type->m_type);
+			    core::log::info("敵を撃破: {} (EntityId={})", enemyTypeName, e.m_entityId);
 
-			            // モデルはここで非表示にしない。EnemyDeathSystemが赤化＋ディゾルブ演出を
-			            // 進めながら表示し続け、演出完了時にEntityごと破棄する
+			    // モデルはここで非表示にしない。EnemyDeathSystemが赤化＋ディゾルブ演出を
+			    // 進めながら表示し続け、演出完了時にEntityごと破棄する
 
-			            // AIを停止する。これをしないと死亡後も移動や弾発射が続き、
-			            // 「まだSafariがタブをPlayerに投げてくる」状態になる
-			            if (m_componentManager.has<component::ai::AIComponent>(e.m_entityId))
-				            m_componentManager.get<component::ai::AIComponent>(e.m_entityId).m_isActive = false;
+			    // AIを停止する。これをしないと死亡後も移動や弾発射が続き、
+			    // 「まだSafariがタブをPlayerに投げてくる」状態になる
+			    if (m_componentManager.has<component::ai::AIComponent>(e.m_entityId))
+				    m_componentManager.get<component::ai::AIComponent>(e.m_entityId).m_isActive = false;
 
-			            m_killCount++;
+			    m_killCount++;
 
-			            // 開始時の雑魚を全滅させたらボスを出現させる。
-			            // 集合に無いID（ボスの召喚した雑魚・ボス自身）はここでは無視される
-			            if (m_stageEnemyIds.erase(e.m_entityId) > 0 &&
-			                m_stageEnemyIds.empty() && m_macId == core::ecs::INVALID_ENTITY_ID)
-				            spawnBoss();
+			    // 開始時の雑魚を全滅させたらボスを出現させる。
+			    // 集合に無いID（ボスの召喚した雑魚・ボス自身）はここでは無視される
+			    if (m_stageEnemyIds.erase(e.m_entityId) > 0 &&
+			        m_stageEnemyIds.empty() && m_macId == core::ecs::INVALID_ENTITY_ID)
+				    spawnBoss();
 
-			            // 勝利条件はボス撃破のみ（ボスは雑魚を絶えず生成するため全滅判定にしない）
-			            if (e.m_entityId == m_macId)
-			            {
-							saveResultData(true);
-				            // メニュー操作用にカーソルを戻してからシーンを切り替える
-				            m_inputProvider.setMouseCursorVisible(true);
-				            auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
-							sceneManager->changeScene(game::scene::SceneType::Result);
-						} }));
+			    // 勝利遷移はここ（HP0の瞬間）では行わない。ボスの死亡アニメと消失フェードを
+			    // 見せ終えてから遷移したいので、EnemyVanishedEvent（消滅完了）を待つ
+		    }));
+
+		// ボスが死亡演出を終えて完全に消滅したら勝利リザルトへ遷移する。
+		// プレイヤー死亡（PlayerDeathSequenceFinishedEvent）と同じく、演出を見せ終えてから切り替える
+		m_subscriptions.push_back(m_eventBus.subscribe<event::EnemyVanishedEvent>(
+		    [this](const event::EnemyVanishedEvent& e)
+		    {
+			    // ボス（Mac）が消滅したときだけ勝利遷移する
+			    if (e.m_type != constant::EnemyType::Mac)
+				    return;
+			    saveResultData(true);
+			    // メニュー操作用にカーソルを戻してからシーンを切り替える
+			    m_inputProvider.setMouseCursorVisible(true);
+			    auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
+			    sceneManager->changeScene(game::scene::SceneType::Result);
+		    }));
 	}
 
 	void InGame::spawnBoss()

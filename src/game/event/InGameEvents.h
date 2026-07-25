@@ -6,6 +6,7 @@
 #include "core/data/MacMetadata.h"
 #include "core/utility/Vector3.h"
 #include "game/constant/AnimationState.h"
+#include "game/constant/EnemyType.h"
 
 namespace game::event
 {
@@ -115,6 +116,28 @@ namespace game::event
 
 		EnemyDeadEvent() = default;
 		EnemyDeadEvent(core::ecs::EntityId id) : m_entityId(id) {}
+	};
+
+	/**
+	 * @brief 敵が死亡演出（死亡アニメ＋消失フェード）を終えて完全に消滅した瞬間に発行されるイベント
+	 *
+	 * HPが尽きた瞬間（EnemyDeadEvent）ではなく、EnemyDeathSystemがEntityを破棄する直前に発行する。
+	 * ボス撃破の勝利遷移など「敵が見た目上も消えてから」進めたい処理のトリガーに使う。
+	 */
+	struct EnemyVanishedEvent : public core::iface::IGameEvent
+	{
+		/** @brief 消滅した敵のEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief 消滅した敵の種類（Mac＝ボスかどうかを購読側が明示的に判定できるように持たせる） */
+		constant::EnemyType m_type{ constant::EnemyType::Xcode };
+
+		EnemyVanishedEvent() = default;
+		EnemyVanishedEvent(core::ecs::EntityId id, constant::EnemyType type)
+		    : m_entityId(id)
+		    , m_type(type)
+		{
+		}
 	};
 
 	/**
