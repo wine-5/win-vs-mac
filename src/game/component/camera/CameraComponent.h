@@ -19,8 +19,10 @@ namespace game::component::camera
 		float m_fov{ 1.047f };          // 視野角（ラジアン、約60度）
 		float m_sensitivity{ 0.003f };  // マウス感度（ラジアン/ピクセル）
 
-		// ピッチの可動範囲（見上げすぎ・見下ろしすぎを防ぐ）
-		float m_pitchMin{ -0.3f };
+		// ピッチの可動範囲（見上げすぎ・見下ろしすぎを防ぐ）。
+		// 下限（見上げ側）は浮遊敵（Safari等：高度300を保ちつつ水平400〜600）へ
+		// 弾を届かせるため約46度まで許す。見上げるとCameraSystemがカメラを引き寄せる
+		float m_pitchMin{ -0.8f };
 		float m_pitchMax{ 1.2f };
 
 		// カメラの視線方向（単位ベクトル）。CameraSystemが毎フレーム更新する。
