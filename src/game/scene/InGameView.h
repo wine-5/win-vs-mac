@@ -31,6 +31,7 @@ namespace game::ui::ingame
 {
 	class PlayerHUDView;     // 前方宣言
 	class EquipmentSlotView; // 前方宣言
+	class ObjectiveView;     // 前方宣言
 } // namespace game::ui::ingame
 
 namespace game::scene
@@ -63,10 +64,12 @@ namespace game::scene
 		 * @brief インゲームを描画する
 		 *
 		 * モデルはRenderComponentの全走査で描くため、描画対象のIDは受け取らない。
-		 * playerIdはレティクル（照準状態の表示）にのみ使う
+		 * playerIdはレティクル（照準状態の表示）とプレイヤーHUDに使う
 		 * @param playerId プレイヤーのEntityID
+		 * @param remainingEnemyCount 残っている開始時配置の雑魚の数（左上の目標表示に使う）
+		 * @param isBossAppeared ボスが出現済みかどうか（左上の目標表示に使う）
 		 */
-		void draw(core::ecs::EntityId playerId);
+		void draw(core::ecs::EntityId playerId, int remainingEnemyCount, bool isBossAppeared);
 
 		/**
 		 * @brief 溜め攻撃の演出System（集中線の描画元）を設定する
@@ -127,6 +130,12 @@ namespace game::scene
 		 * @param view EquipmentSlotViewのポインタ（所有はInGame）
 		 */
 		void setEquipmentSlotView(ui::ingame::EquipmentSlotView* view);
+
+		/**
+		 * @brief 目標表示（左上のHUD）Viewを設定する
+		 * @param view ObjectiveViewのポインタ（所有はInGame）
+		 */
+		void setObjectiveView(ui::ingame::ObjectiveView* view);
 
 	  private:
 		/**
@@ -198,6 +207,9 @@ namespace game::scene
 
 		// 装備スロット（右下のHUD）の描画元（所有はInGame）
 		ui::ingame::EquipmentSlotView* m_equipmentSlotView{ nullptr };
+
+		// 目標表示（左上のHUD）の描画元（所有はInGame）
+		ui::ingame::ObjectiveView* m_objectiveView{ nullptr };
 
 		// プレイヤー死亡時の暗転の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::combat::PlayerDeathSystem* m_playerDeathSystem{ nullptr };

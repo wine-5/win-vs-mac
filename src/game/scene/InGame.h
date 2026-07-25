@@ -51,6 +51,7 @@ namespace game
 	{
 		class PlayerHUDView;     // 前方宣言
 		class EquipmentSlotView; // 前方宣言
+		class ObjectiveView;     // 前方宣言
 	} // namespace ui::ingame
 } // namespace game
 
@@ -166,6 +167,9 @@ namespace game::scene
 
 		// 装備スロット（右下）のView
 		std::unique_ptr<ui::ingame::EquipmentSlotView> m_equipmentSlotView;
+
+		// 目標表示（左上）のView
+		std::unique_ptr<ui::ingame::ObjectiveView> m_objectiveView;
 
 		// 進行トラッキング
 		float m_elapsedTime{0.0f};

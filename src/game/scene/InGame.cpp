@@ -75,6 +75,7 @@
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
 #include "game/ui/ingame/PlayerHUDView.h"
 #include "game/ui/ingame/EquipmentSlotView.h"
+#include "game/ui/ingame/ObjectiveView.h"
 #include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
 #include "game/event/InGameEvents.h"
 
@@ -264,6 +265,11 @@ namespace game::scene
 		    m_fileEquipmentData,
 		    m_resourceManager);
 		m_view.setEquipmentSlotView(m_equipmentSlotView.get());
+
+		m_objectiveView = std::make_unique<ui::ingame::ObjectiveView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>());
+		m_view.setObjectiveView(m_objectiveView.get());
 	}
 
 	InGame::~InGame() = default;
@@ -600,7 +606,10 @@ namespace game::scene
 
 		// 描画は InGameView へ委譲する。ボスが召喚する雑魚も実行時に増えるため、
 		// スポーン時のスナップショットではなく EnemyFactory が持つ最新の敵一覧を渡す
-		m_view.draw(m_playerId);
+		// 残り雑魚はボス出現条件そのものなので、開始時スナップショットの生き残り数を渡す
+		// （ボスが召喚する雑魚は条件に含めない）
+		m_view.draw(m_playerId, static_cast<int>(m_stageEnemyIds.size()),
+		    m_macId != core::ecs::INVALID_ENTITY_ID);
 	}
 
 	void InGame::saveResultData	(bool isVictory) noexcept

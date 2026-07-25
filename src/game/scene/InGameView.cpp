@@ -20,6 +20,7 @@
 #include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
 #include "game/ui/ingame/PlayerHUDView.h"
 #include "game/ui/ingame/EquipmentSlotView.h"
+#include "game/ui/ingame/ObjectiveView.h"
 #include <algorithm>
 #include <cmath>
 
@@ -38,7 +39,7 @@ namespace game::scene
 	{
 	}
 
-	void InGameView::draw(core::ecs::EntityId playerId)
+	void InGameView::draw(core::ecs::EntityId playerId, int remainingEnemyCount, bool isBossAppeared)
 	{
 		drawModels();
 
@@ -76,6 +77,10 @@ namespace game::scene
 		// 装備スロット（右下）
 		if (m_equipmentSlotView)
 			m_equipmentSlotView->draw();
+
+		// 目標（左上）
+		if (m_objectiveView)
+			m_objectiveView->draw(remainingEnemyCount, isBossAppeared);
 
 		// 照準レティクル（HUD）は最前面に描く
 		drawReticle(playerId);
@@ -142,6 +147,11 @@ namespace game::scene
 	void InGameView::setEquipmentSlotView(ui::ingame::EquipmentSlotView* view)
 	{
 		m_equipmentSlotView = view;
+	}
+
+	void InGameView::setObjectiveView(ui::ingame::ObjectiveView* view)
+	{
+		m_objectiveView = view;
 	}
 
 	void InGameView::drawModels()
