@@ -402,6 +402,7 @@
     <ClInclude Include="src\core\utility\Log.h" />
     <ClInclude Include="src\core\utility\Vector3.h" />
     <ClInclude Include="src\game\component\visual\AnimationComponent.h" />
+    <ClInclude Include="src\game\component\visual\WeaponAttachComponent.h" />
     <ClInclude Include="src\game\component\combat\ColliderComponent.h" />
     <ClInclude Include="src\game\constant\Tag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
