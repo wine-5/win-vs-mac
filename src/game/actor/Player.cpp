@@ -100,9 +100,7 @@ namespace game::actor
 	void Player::attachWeapon(core::ecs::ComponentManager& componentManager,
 	    core::iface::IResourceManager& resourceManager)
 	{
-		// 剣モデルは制作中のため、暫定でボスの虹色くるくるを仮の剣として使う。
-		// 装着位置・向き・大きさの調整はモデル差し替え後に実機を見ながら行う
-		const int sourceHandle{ resourceManager.loadModelById(constant::model_id::MAC_RAINBOW_WHEEL) };
+		const int sourceHandle{ resourceManager.loadModelById(constant::model_id::PLAYER_SWORD) };
 		if (sourceHandle == -1)
 			return;
 
