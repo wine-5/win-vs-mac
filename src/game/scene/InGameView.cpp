@@ -13,8 +13,10 @@
 #include "game/system/visual/PlayerChargeVisualsSystem.h"
 #include "game/system/visual/MacAwakenEffectSystem.h"
 #include "game/system/visual/DetectionAlertVisualsSystem.h"
+#include "game/system/visual/DamagePopupSystem.h"
 #include "game/system/visual/AttackTelegraphVisualsSystem.h"
 #include "game/system/visual/TelegraphVisualsSystem.h"
+#include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/system/combat/PlayerDeathSystem.h"
 #include "game/system/combat/PlayerRangedAttackSystem.h"
 #include "game/component/combat/AttackComponent.h"
@@ -46,6 +48,11 @@ namespace game::scene
 
 	void InGameView::draw(core::ecs::EntityId playerId, int remainingEnemyCount, core::ecs::EntityId bossId)
 	{
+		// 虚空を流れるデータの光跡。壁や床に隠れてほしいのでモデルと同じ3D描画フェーズで、
+		// かつ最初に描いて他の要素の背景に回す
+		if (m_backgroundParticleSystem)
+			m_backgroundParticleSystem->draw();
+
 		drawModels();
 
 		// 攻撃予兆（地面の攻撃範囲サークル）。地面の上・敵の足元に3Dで描く（3D描画フェーズ）
@@ -78,6 +85,10 @@ namespace game::scene
 		// 敵の頭上HPバー。同じ頭上に出る発見バッジより手前に描く
 		if (m_enemyHealthBarView)
 			m_enemyHealthBarView->draw(bossId);
+
+		// ダメージ数値。HPバーと重なる位置に出るため、必ず読めるようその手前に描く
+		if (m_damagePopupSystem)
+			m_damagePopupSystem->draw();
 
 		// プレイヤーステータス（左下のHP）。演出より手前・レティクルと同じHUD層に描く
 		if (m_playerHUDView)
@@ -133,6 +144,11 @@ namespace game::scene
 		m_detectionAlertSystem = system;
 	}
 
+	void InGameView::setDamagePopupSystem(system::visual::DamagePopupSystem* system)
+	{
+		m_damagePopupSystem = system;
+	}
+
 	void InGameView::setAttackTelegraphVisualsSystem(system::visual::AttackTelegraphVisualsSystem* system)
 	{
 		m_attackTelegraphSystem = system;
@@ -141,6 +157,11 @@ namespace game::scene
 	void InGameView::setTelegraphVisualsSystem(system::visual::TelegraphVisualsSystem* system)
 	{
 		m_telegraphSystem = system;
+	}
+
+	void InGameView::setBackgroundParticleSystem(system::visual::BackgroundParticleSystem* system)
+	{
+		m_backgroundParticleSystem = system;
 	}
 
 	void InGameView::setPlayerDeathSystem(system::combat::PlayerDeathSystem* system)

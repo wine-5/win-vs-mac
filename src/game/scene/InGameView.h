@@ -20,6 +20,8 @@ namespace game::system::visual
 	class DetectionAlertVisualsSystem;
 	class AttackTelegraphVisualsSystem;
 	class TelegraphVisualsSystem;
+	class BackgroundParticleSystem;
+	class DamagePopupSystem;
 } // namespace game::system::visual
 
 namespace game::ui::debug
@@ -94,6 +96,12 @@ namespace game::scene
 		void setDetectionAlertVisualsSystem(system::visual::DetectionAlertVisualsSystem* system);
 
 		/**
+		 * @brief ダメージ数値の表示System（敵に与えた数値の描画元）を設定する
+		 * @param system DamagePopupSystemのポインタ（所有はSystemManager）
+		 */
+		void setDamagePopupSystem(system::visual::DamagePopupSystem* system);
+
+		/**
 		 * @brief 攻撃予兆System（地面の攻撃範囲サークルの描画元）を設定する
 		 * @param system AttackTelegraphVisualsSystemのポインタ（所有はSystemManager）
 		 */
@@ -104,6 +112,12 @@ namespace game::scene
 		 * @param system TelegraphVisualsSystemのポインタ（所有はSystemManager）
 		 */
 		void setTelegraphVisualsSystem(system::visual::TelegraphVisualsSystem* system);
+
+		/**
+		 * @brief 背景パーティクル（虚空を流れるデータの光跡）Systemを設定する
+		 * @param system BackgroundParticleSystemのポインタ（所有はSystemManager）
+		 */
+		void setBackgroundParticleSystem(system::visual::BackgroundParticleSystem* system);
 
 		/**
 		 * @brief プレイヤー死亡演出System（暗転の描画元）を設定する
@@ -235,9 +249,15 @@ namespace game::scene
 		// 発見演出（頭上の通知バッジ）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::visual::DetectionAlertVisualsSystem* m_detectionAlertSystem{ nullptr };
 
+		// ダメージ数値の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
+		system::visual::DamagePopupSystem* m_damagePopupSystem{ nullptr };
+
 		// 攻撃予兆（地面の攻撃範囲サークル）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::visual::AttackTelegraphVisualsSystem* m_attackTelegraphSystem{ nullptr };
 		system::visual::TelegraphVisualsSystem* m_telegraphSystem{ nullptr };
+
+		// 背景パーティクルの描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
+		system::visual::BackgroundParticleSystem* m_backgroundParticleSystem{ nullptr };
 
 		// プレイヤーステータス（左下のHUD）の描画元（所有はInGame）
 		ui::ingame::PlayerHUDView* m_playerHUDView{ nullptr };

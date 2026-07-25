@@ -33,6 +33,7 @@
 #include "game/system/combat/PlayerDeathSystem.h"
 #include "game/system/ai/DetectionSystem.h"
 #include "game/system/visual/DetectionAlertVisualsSystem.h"
+#include "game/system/visual/DamagePopupSystem.h"
 #include "game/system/visual/AttackTelegraphVisualsSystem.h"
 #include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/system/visual/EffectSystem.h"
@@ -72,6 +73,7 @@
 #include "game/system/camera/ChargeZoomSystem.h"
 #include "game/system/camera/DamageShakeSystem.h"
 #include "game/system/visual/MacAwakenEffectSystem.h"
+#include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
 #include "game/ui/ingame/PlayerHUDView.h"
@@ -467,6 +469,11 @@ namespace game::scene
 			m_playerId) };
 		m_view.setPlayerChargeVisualsSystem(chargeVisuals);
 
+		// 虚空を流れるデータの光跡（背景の奥行きと動きを作る）
+		auto* backgroundParticles{ m_systemManager.registerSystem<game::system::visual::BackgroundParticleSystem>(
+			m_componentManager, m_playerId, m_renderer, m_resourceManager) };
+		m_view.setBackgroundParticleSystem(backgroundParticles);
+
 		// 敵の発見演出（頭上の通知バッジ）。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
 		auto* detectionAlert{ m_systemManager.registerSystem<game::system::visual::DetectionAlertVisualsSystem>(
 			m_componentManager,
@@ -476,6 +483,15 @@ namespace game::scene
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
 			m_resourceManager) };
 		m_view.setDetectionAlertVisualsSystem(detectionAlert);
+
+		// 敵に与えたダメージ量の表示。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
+		auto* damagePopup{ m_systemManager.registerSystem<game::system::visual::DamagePopupSystem>(
+			m_componentManager,
+			m_eventBus,
+			m_renderer,
+			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+			*core::base::ServiceLocator::get<core::iface::IScreen>()) };
+		m_view.setDamagePopupSystem(damagePopup);
 
 		// 攻撃予兆（地面の攻撃範囲サークル）。描画内容はSystemが持ち、Viewが3D描画フェーズで呼ぶ
 		auto* attackTelegraph{ m_systemManager.registerSystem<game::system::visual::AttackTelegraphVisualsSystem>(
