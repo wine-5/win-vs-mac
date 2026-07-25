@@ -9,10 +9,10 @@
     "size": [ 150, 260, 150 ]
   },
   "gameplay": {
-    "moveSpeed": 10.0,
+    "moveSpeed": 240.0,
     "detectionRange": 3000.0,
     "attackRange": 180.0,
-    "maxHp": 500.0,
+    "maxHp": 1000.0,
     "defence": 15.0,
     "attackPower": 35.0,
     "attackCooldown": 0.0
@@ -20,14 +20,14 @@
   "behaviors": [ "boss" ],
   "animations": [
     { "state": "Idle",    "id": "anim_mac_idle" },
-    { "state": "Walk",    "id": "anim_mac_walk",         "loop": true,  "onComplete": "Idle",  "priority": "locomotion", "speed": 0.6 },
-    { "state": "Run",     "id": "anim_mac_run",          "loop": true,  "onComplete": "Idle",  "priority": "locomotion", "speed": 0.8 },
-    { "state": "Attack1", "id": "anim_mac_swing_attack", "loop": false, "onComplete": "Idle",  "priority": "attack" },
-    { "state": "Attack2", "id": "anim_mac_magic_attack", "loop": false, "onComplete": "Idle",  "priority": "attack" },
+    { "state": "Walk",    "id": "anim_mac_walk",         "loop": true,  "onComplete": "Idle",  "priority": "locomotion", "speed": 1.2 },
+    { "state": "Run",     "id": "anim_mac_run",          "loop": true,  "onComplete": "Idle",  "priority": "locomotion", "speed": 1.4 },
+    { "state": "Attack1", "id": "anim_mac_swing_attack", "loop": false, "onComplete": "Idle",  "priority": "attack", "speed": 1.6 },
+    { "state": "Attack2", "id": "anim_mac_magic_attack", "loop": false, "onComplete": "Idle",  "priority": "attack", "speed": 1.6 },
     { "state": "Dying",   "id": "anim_mac_dying",        "loop": false, "onComplete": "Dying", "priority": "dying" }
   ],
   "mac": {
-    "phase2HpRatio": 0.99,
+    "phase2HpRatio": 0.50,
     "actions": {
       "meleeWindup": 0.6,
       "rangedWindup": 0.9,
@@ -40,7 +40,7 @@
       "rangedTelegraphRange": 800.0
     },
     "phase1": {
-      "moveSpeed": 10.0,
+      "moveSpeed": 240.0,
       "actionInterval": 4.0,
       "meleeRange": 180.0,
       "weights": { "melee": 0, "ranged": 2, "summon": 0 },
@@ -55,7 +55,7 @@
       "summonRadiusMax": 400.0
     },
     "phase2": {
-      "moveSpeed": 16.0,
+      "moveSpeed": 380.0,
       "actionInterval": 2.0,
       "meleeRange": 180.0,
       "weights": { "melee": 2, "ranged": 3, "summon": 3, "nova": 2 },

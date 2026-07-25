@@ -12,6 +12,11 @@ namespace
 	constexpr float DISSOLVE_RED_R{ 1.0f };
 	constexpr float DISSOLVE_RED_G{ 0.1f };
 	constexpr float DISSOLVE_RED_B{ 0.08f };
+
+	// DEBUG: 球・カプセルのデバッグ描画の分割数。
+	// DxLibの分割数は縦横それぞれに効くため、生成される三角形数は分割数の2乗で増える
+	// （16なら約512三角形、8なら約128三角形）。デバッグ表示は形が分かれば十分なので粗くする
+	constexpr int DEBUG_SHAPE_DIV_NUM{ 8 };
 } // namespace
 
 namespace infrastructure::graphics
@@ -32,6 +37,32 @@ namespace infrastructure::graphics
 		MV1SetPosition(modelHandle, pos);
 		MV1SetRotationXYZ(modelHandle, rot);
 		MV1DrawModel(modelHandle);
+	}
+
+	void Renderer::setTextureTiling(int modelHandle, float scaleU, float scaleV)
+	{
+		constexpr float NO_OFFSET{ 0.0f };
+		setTextureScroll(modelHandle, scaleU, scaleV, NO_OFFSET, NO_OFFSET);
+	}
+
+	void Renderer::setTextureScroll(int modelHandle, float scaleU, float scaleV,
+	    float offsetU, float offsetV)
+	{
+		if (modelHandle == -1)
+			return;
+
+		// テクスチャ座標を繰り返し回数ぶん引き伸ばすことで、面いっぱいに絵が繰り返される。
+		// 繰り返すにはアドレスモードがWRAPである必要がある
+		const int textureNum{ MV1GetTextureNum(modelHandle) };
+		for (int i{ 0 }; i < textureNum; ++i)
+			MV1SetTextureAddressMode(modelHandle, i, DX_TEXADDRESS_WRAP, DX_TEXADDRESS_WRAP);
+
+		// 配置物は単一フレームの立方体を想定している。フレームが無いモデルには何もしない
+		constexpr float NO_ROTATE{ 0.0f };
+		const int frameNum{ MV1GetFrameNum(modelHandle) };
+		for (int i{ 0 }; i < frameNum; ++i)
+			MV1SetFrameTextureAddressTransform(modelHandle, i,
+			    offsetU, offsetV, scaleU, scaleV, NO_ROTATE, NO_ROTATE, NO_ROTATE);
 	}
 
 	void Renderer::applyDeathDissolve(int modelHandle, float redProgress, float alpha)
@@ -110,44 +141,54 @@ namespace infrastructure::graphics
 		m_originalColors.erase(it);
 	}
 
-	void Renderer::drawCollider(const core::Vector3& center, const core::Vector3& size, unsigned int color)
+	void Renderer::drawCollider(const core::Vector3& center, const core::Vector3& size, float rotationY, unsigned int color)
 	{
-		// コライダーの最小・最大座標を計算
-		core::Vector3 min = {
-			center.x - size.x / 2.0f,
-			center.y - size.y / 2.0f,
-			center.z - size.z / 2.0f
-		};
-		core::Vector3 max = {
-			center.x + size.x / 2.0f,
-			center.y + size.y / 2.0f,
-			center.z + size.z / 2.0f
-		};
+		const float halfX{ size.x / 2.0f };
+		const float halfY{ size.y / 2.0f };
+		const float halfZ{ size.z / 2.0f };
 
-		VECTOR v1 = VGet(min.x, min.y, min.z);
-		VECTOR v2 = VGet(max.x, max.y, max.z);
+		// 傾いた箱はDrawCube3Dでは表せないので、8頂点を回して稜線を引く
+		const float cosYaw{ std::cos(rotationY) };
+		const float sinYaw{ std::sin(rotationY) };
 
-		// ワイヤーフレームで描画（塗りつぶしなし）
-		DrawCube3D(v1, v2, color, color, FALSE);
+		VECTOR corners[8]{};
+		for (int i{ 0 }; i < 8; ++i)
+		{
+			const float localX{ (i & 1) ? halfX : -halfX };
+			const float localY{ (i & 2) ? halfY : -halfY };
+			const float localZ{ (i & 4) ? halfZ : -halfZ };
+			corners[i] = VGet(
+			    center.x + localX * cosYaw + localZ * sinYaw,
+			    center.y + localY,
+			    center.z - localX * sinYaw + localZ * cosYaw);
+		}
+
+		// 各ビットが1軸に対応するので、1ビットだけ違う頂点同士が稜線になる
+		for (int i{ 0 }; i < 8; ++i)
+		{
+			for (const int axis : { 1, 2, 4 })
+			{
+				if ((i & axis) == 0)
+					DrawLine3D(corners[i], corners[i | axis], color);
+			}
+		}
 	}
 
 	void Renderer::drawDebugSphere(const core::Vector3& center, float radius, unsigned int color)
 	{
-		constexpr int DIV_NUM{ 16 }; // 球の分割数（デバッグ用なので粗くてよい）
 		VECTOR pos = VGet(center.x, center.y, center.z);
 
 		// ワイヤーフレームで描画（塗りつぶしなし）
-		DrawSphere3D(pos, radius, DIV_NUM, color, color, FALSE);
+		DrawSphere3D(pos, radius, DEBUG_SHAPE_DIV_NUM, color, color, FALSE);
 	}
 
 	void Renderer::drawDebugCapsule(const core::Vector3& bottom, const core::Vector3& top, float radius, unsigned int color)
 	{
-		constexpr int DIV_NUM{ 16 }; // カプセルの分割数（デバッグ用なので粗くてよい）
 		VECTOR pos1 = VGet(bottom.x, bottom.y, bottom.z);
 		VECTOR pos2 = VGet(top.x, top.y, top.z);
 
 		// ワイヤーフレームで描画（塗りつぶしなし）
-		DrawCapsule3D(pos1, pos2, radius, DIV_NUM, color, color, FALSE);
+		DrawCapsule3D(pos1, pos2, radius, DEBUG_SHAPE_DIV_NUM, color, color, FALSE);
 	}
 
 	void Renderer::drawGroundCircle(const core::Vector3& center, float radius, unsigned int color, bool filled)
@@ -232,6 +273,17 @@ namespace infrastructure::graphics
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 	}
 
+	void Renderer::drawBillboard(int imageHandle, const core::Vector3& position, float size, float angle)
+	{
+		if (imageHandle == -1)
+			return;
+
+		const VECTOR pos{ VGet(position.x, position.y, position.z) };
+		// cx,cy=0.5,0.5で画像中心を position に合わせる。TransFlag=TRUEで透過を有効にする。
+		// 深度テストが効くので、壁の裏へ回れば自然に隠れる
+		DrawBillboard3D(pos, 0.5f, 0.5f, size, angle, imageHandle, TRUE);
+	}
+
 	void Renderer::drawSpinningModelFacing(int modelHandle, const core::Vector3& position,
 	    const core::Vector3& scale, const core::Vector3& centerOffset,
 	    const core::Vector3& faceDir, float spinAngle)
@@ -286,5 +338,10 @@ namespace infrastructure::graphics
 	{
 		VECTOR screen = ConvWorldPosToScreenPos(VGet(worldPos.x, worldPos.y, worldPos.z));
 		return { screen.x, screen.y, screen.z };
+	}
+
+	int Renderer::getDrawCallCount()
+	{
+		return GetDrawCallCount();
 	}
 } // namespace infrastructure::graphics

@@ -5,6 +5,7 @@
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/DeathComponent.h"
 #include "game/constant/Tag.h"
+#include "core/utility/Rotation.h"
 #include <cmath>
 
 namespace
@@ -24,114 +25,165 @@ namespace game::system::combat
 
 	void CollisionSystem::update(float deltaTime)
 	{
-		auto entities{ m_componentManager.getAllEntities<component::combat::ColliderComponent>() };
+		collectBoxes();
 
-		for (size_t i = 0; i < entities.size(); i++)
+		// 押し返しが起きるのは 乗る側×地面側 だけ。全Entityの総当たりだと
+		// 地面同士・敵同士といった何もしない組み合わせが大半を占めるため、そこを丸ごと省く
+		for (auto& rider : m_riders)
 		{
-			for (size_t j = i + 1; j < entities.size(); j++)
-			{
-				if (isColliding(entities[i], entities[j]))
-					resolveCollision(entities[i], entities[j]);
-			}
+			for (const auto& ground : m_grounds)
+				resolveCollision(rider, ground);
 		}
 	}
 
-	bool CollisionSystem::isColliding(core::ecs::EntityId a, core::ecs::EntityId b) const
+	void CollisionSystem::collectBoxes()
 	{
-		auto& transformA = m_componentManager.get<component::movement::TransformComponent>(a);
-		auto& transformB = m_componentManager.get<component::movement::TransformComponent>(b);
-		auto& colliderA = m_componentManager.get<component::combat::ColliderComponent>(a);
-		auto& colliderB = m_componentManager.get<component::combat::ColliderComponent>(b);
+		m_riders.clear();
+		m_grounds.clear();
 
-		// 各軸の中心座標
-		core::Vector3 centerA{ transformA.m_position + colliderA.m_offset };
-		core::Vector3 centerB{ transformB.m_position + colliderB.m_offset };
+		const auto entities{ m_componentManager.getAllEntities<component::combat::ColliderComponent>() };
 
-		// 各軸の距離と必要な距離
-		float distX{ std::abs(centerA.x - centerB.x) };
-		float distY{ std::abs(centerA.y - centerB.y) };
-		float distZ{ std::abs(centerA.z - centerB.z) };
+		for (const auto id : entities)
+		{
+			const auto* tag{ m_componentManager.tryGet<component::TagComponent>(id) };
+			if (tag == nullptr)
+				continue;
 
-		float requiredX{ (colliderA.m_size.x + colliderB.m_size.x) / 2.0f };
-		float requiredY{ (colliderA.m_size.y + colliderB.m_size.y) / 2.0f };
-		float requiredZ{ (colliderA.m_size.z + colliderB.m_size.z) / 2.0f };
+			const bool isRider{ tag->m_tag == constant::Tag::Player || tag->m_tag == constant::Tag::Enemy };
+			if (!isRider && tag->m_tag != constant::Tag::Ground)
+				continue;
 
-		// 各軸の重なりをチェック
-		bool overlapX{ distX <= requiredX };
-		bool overlapY{ distY <= requiredY };
-		bool overlapZ{ distZ <= requiredZ };
+			const auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(id) };
+			if (transform == nullptr)
+				continue;
 
-		return overlapX && overlapY && overlapZ;
+			// 乗る側は速度を止める処理があるため、VelocityComponentが無いものは対象外
+			if (isRider && !m_componentManager.has<component::movement::VelocityComponent>(id))
+				continue;
+
+			const auto& collider{ m_componentManager.get<component::combat::ColliderComponent>(id) };
+
+			Box box{};
+			box.m_id = id;
+			box.m_center = transform->m_position + collider.m_offset;
+			box.m_halfSize = collider.m_size * 0.5f;
+			box.m_yaw = collider.m_rotationY;
+
+			if (isRider)
+				m_riders.push_back(box);
+			else
+				m_grounds.push_back(box);
+		}
 	}
 
-	void CollisionSystem::resolveCollision(core::ecs::EntityId a, core::ecs::EntityId b)
+	void CollisionSystem::toGroundLocal(const Box& rider, const Box& ground,
+	    core::Vector3& outLocalDelta, core::Vector3& outLocalHalfSize) noexcept
 	{
-		const auto& tagA{ m_componentManager.get<component::TagComponent>(a) };
-		const auto& tagB{ m_componentManager.get<component::TagComponent>(b) };
+		const core::Vector3 yaw{ 0.0f, ground.m_yaw, 0.0f };
+		outLocalDelta = core::utility::inverseRotateEulerXYZ(rider.m_center - ground.m_center, yaw);
 
-		// 地面に乗る側（Player / Enemy）と地面を特定する。
+		// 乗る側の箱を地面側の向きへ傾けると、軸並行では外接する箱まで広がる
+		const float cosYaw{ std::abs(std::cos(ground.m_yaw)) };
+		const float sinYaw{ std::abs(std::sin(ground.m_yaw)) };
+		outLocalHalfSize = core::Vector3{
+			rider.m_halfSize.x * cosYaw + rider.m_halfSize.z * sinYaw,
+			rider.m_halfSize.y,
+			rider.m_halfSize.x * sinYaw + rider.m_halfSize.z * cosYaw
+		};
+	}
+
+	void CollisionSystem::resolveCollision(Box& rider, const Box& ground)
+	{
+		// 地面側の向きに合わせた座標系へ移すと、傾いた配置物でも軸並行の判定で済む
+		core::Vector3 delta{};
+		core::Vector3 riderHalfSize{};
+		toGroundLocal(rider, ground, delta, riderHalfSize);
+
+		// 軸ごとのめり込み量を計算する。1つでも0以下なら離れている
+		const float overlapX{ riderHalfSize.x + ground.m_halfSize.x - std::abs(delta.x) };
+		const float overlapY{ riderHalfSize.y + ground.m_halfSize.y - std::abs(delta.y) };
+		const float overlapZ{ riderHalfSize.z + ground.m_halfSize.z - std::abs(delta.z) };
+		if (overlapX <= 0.0f || overlapY <= 0.0f || overlapZ <= 0.0f)
+			return;
+
 		// PlayerとEnemyで押し返しの計算は同一なので、DeathComponentの有無だけで分岐すればよい
-		const auto isRider{ [](constant::Tag tag) noexcept
-			{
-			    return tag == constant::Tag::Player || tag == constant::Tag::Enemy;
-			} };
+		auto& riderTransform = m_componentManager.get<component::movement::TransformComponent>(rider.m_id);
+		auto& riderVelocity = m_componentManager.get<component::movement::VelocityComponent>(rider.m_id);
 
-		core::ecs::EntityId riderId{ core::ecs::INVALID_ENTITY_ID };
-		core::ecs::EntityId groundId{ core::ecs::INVALID_ENTITY_ID };
-
-		if (isRider(tagA.m_tag) && tagB.m_tag == constant::Tag::Ground)
+		// 最小めり込み軸に沿って押し出す（Minimum Translation Vector）。
+		// 床（縦に薄い）は上へ押し出して「乗る」、壁（横に薄い）は横へ押し出して「止まる」に
+		// 自然と分岐する。押し出す向きは相手の中心から離れる方向。
+		// 縦はY軸まわりの回転で変わらないので、ローカルとワールドで同じ向きになる
+		if (overlapY <= overlapX && overlapY <= overlapZ)
 		{
-			riderId = a;
-			groundId = b;
+			const float pushY{ (delta.y >= 0.0f) ? overlapY : -overlapY };
+			resolveVertical(rider.m_id, riderTransform, riderVelocity, overlapY, delta.y);
+			rider.m_center.y += pushY;
+			return;
 		}
-		else if (tagA.m_tag == constant::Tag::Ground && isRider(tagB.m_tag))
+
+		core::Vector3 localPush{};
+		if (overlapX <= overlapZ)
+			localPush.x = (delta.x >= 0.0f) ? overlapX : -overlapX;
+		else
+			localPush.z = (delta.z >= 0.0f) ? overlapZ : -overlapZ;
+
+		// 押し出しをワールドへ戻す。傾いた壁では斜め方向のずらしになる
+		const core::Vector3 push{ core::utility::rotateEulerXYZ(localPush, core::Vector3{ 0.0f, ground.m_yaw, 0.0f }) };
+		riderTransform.m_position.x += push.x;
+		riderTransform.m_position.z += push.z;
+		rider.m_center.x += push.x;
+		rider.m_center.z += push.z;
+
+		// 壁へ向かう速度成分だけ打ち消す（壁沿いの横滑りは残す）
+		const float pushLength{ std::sqrt(push.x * push.x + push.z * push.z) };
+		if (pushLength <= 0.0f)
+			return;
+
+		const core::Vector3 normal{ push.x / pushLength, 0.0f, push.z / pushLength };
+		const float into{ riderVelocity.m_velocity.x * normal.x + riderVelocity.m_velocity.z * normal.z };
+		if (into >= 0.0f)
+			return;
+
+		riderVelocity.m_velocity.x -= normal.x * into;
+		riderVelocity.m_velocity.z -= normal.z * into;
+	}
+
+	void CollisionSystem::resolveVertical(core::ecs::EntityId riderId,
+	    component::movement::TransformComponent& riderTransform,
+	    component::movement::VelocityComponent& riderVelocity,
+	    float overlapY, float deltaY)
+	{
+		if (deltaY >= 0.0f)
 		{
-			riderId = b;
-			groundId = a;
+			// riderが上＝地面に乗る。上端を相手の上端へ合わせる
+			riderTransform.m_position.y += overlapY;
+
+			// 死亡中の敵は地面で反発してバウンドする（Safariの落下演出）。
+			// 落下速度が閾値を下回ったら跳ねるのをやめて静止させ、着地済みとして記録する。
+			// この着地フラグを見てEnemyDeathSystemがバウンド完了後に消失フェードを始める
+			auto* death{ m_componentManager.tryGet<component::combat::DeathComponent>(riderId) };
+
+			// 初回接地の時点で「地面に触れた」と記録する。EnemyDeathSystemはこれを見て
+			// バウンド完了を待たずに落下死のガタガタ揺れを止める
+			if (death != nullptr)
+				death->m_hasTouchedGround = true;
+
+			if (death != nullptr && riderVelocity.m_velocity.y < -DEATH_BOUNCE_MIN_SPEED)
+				riderVelocity.m_velocity.y = -riderVelocity.m_velocity.y * DEATH_BOUNCE_RESTITUTION;
+			else if (riderVelocity.m_velocity.y < 0.0f)
+			{
+				riderVelocity.m_velocity.y = 0.0f;
+				if (death != nullptr)
+					death->m_hasLanded = true;
+			}
 		}
 		else
 		{
-			return;
-		}
-
-		auto& riderTransform = m_componentManager.get<component::movement::TransformComponent>(riderId);
-		auto& groundTransform = m_componentManager.get<component::movement::TransformComponent>(groundId);
-		auto& riderCollider = m_componentManager.get<component::combat::ColliderComponent>(riderId);
-		auto& groundCollider = m_componentManager.get<component::combat::ColliderComponent>(groundId);
-		auto& riderVelocity = m_componentManager.get<component::movement::VelocityComponent>(riderId);
-
-		// 各コライダーの中心とAABBの境界を計算
-		const core::Vector3 riderCenter{ riderTransform.m_position + riderCollider.m_offset };
-		const core::Vector3 groundCenter{ groundTransform.m_position + groundCollider.m_offset };
-
-		const float riderBottom{ riderCenter.y - riderCollider.m_size.y / 2.0f };
-		const float groundTop{ groundCenter.y + groundCollider.m_size.y / 2.0f };
-
-		// 地面より下、または地面に近い場合に補正して下端を地面の上端へ合わせる
-		if (riderBottom > groundTop)
-			return;
-
-		riderTransform.m_position.y += groundTop - riderBottom;
-
-		// 死亡中の敵は地面で反発してバウンドする（Safariの落下演出）。
-		// 落下速度が閾値を下回ったら跳ねるのをやめて静止させ、着地済みとして記録する。
-		// この着地フラグを見てEnemyDeathSystemがバウンド完了後に消失フェードを始める
-		auto* death{ m_componentManager.tryGet<component::combat::DeathComponent>(riderId) };
-
-		// 初回接地の時点で「地面に触れた」と記録する。EnemyDeathSystemはこれを見て
-		// バウンド完了を待たずに落下死のガタガタ揺れを止める
-		if (death != nullptr)
-			death->m_hasTouchedGround = true;
-
-		if (death != nullptr && riderVelocity.m_velocity.y < -DEATH_BOUNCE_MIN_SPEED)
-		{
-			riderVelocity.m_velocity.y = -riderVelocity.m_velocity.y * DEATH_BOUNCE_RESTITUTION;
-		}
-		else if (riderVelocity.m_velocity.y < 0.0f)
-		{
-			riderVelocity.m_velocity.y = 0.0f;
-			if (death != nullptr)
-				death->m_hasLanded = true;
+			// riderが下＝天井に頭をぶつけた。下へ押し戻し、上向き速度を止める
+			riderTransform.m_position.y -= overlapY;
+			if (riderVelocity.m_velocity.y > 0.0f)
+				riderVelocity.m_velocity.y = 0.0f;
 		}
 	}
 } // namespace game::system::combat

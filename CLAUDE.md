@@ -60,6 +60,20 @@ platform → infrastructure → game → core
 
 - メンバ変数はクラス定義時に **Uniform Initialization（`{}`）** で初期化する
 - **ローカル変数も Uniform Initialization（`{}`）** で初期化する
+- **`if` の中身が1行の場合は `{}` を省略する**（複数行のときのみブロックにする）
+
+```cpp
+// Good
+if (!found)
+    return;
+
+// Bad
+if (!found)
+{
+    return;
+}
+```
+
 - public 関数には必ず **Doxygen コメント**（`@brief`, `@param`, `@return`）を記載する
 - スマートポインタは `make_unique` / `make_shared` を使用する
 

@@ -6,6 +6,7 @@
 #include "core/data/MacMetadata.h"
 #include "core/utility/Vector3.h"
 #include "game/constant/AnimationState.h"
+#include "game/constant/EnemyType.h"
 
 namespace game::event
 {
@@ -86,10 +87,23 @@ namespace game::event
 
 	/**
 	 * @brief プレイヤーが死亡したときに発行されるイベント
+	 *
+	 * これは「HPが尽きた瞬間」であって、シーンを切り替えてよい合図ではない。
+	 * 死亡アニメと暗転演出を挟むため、遷移は PlayerDeathSequenceFinishedEvent を待つ
 	 */
 	struct PlayerDeadEvent : public core::iface::IGameEvent
 	{
 		PlayerDeadEvent() = default;
+	};
+
+	/**
+	 * @brief プレイヤーの死亡演出（死亡アニメ→暗転）が完了したときに発行されるイベント
+	 *
+	 * PlayerDeathSystemが発行する。リザルトへのシーン遷移はこれを合図に行う
+	 */
+	struct PlayerDeathSequenceFinishedEvent : public core::iface::IGameEvent
+	{
+		PlayerDeathSequenceFinishedEvent() = default;
 	};
 
 	/**
@@ -102,6 +116,28 @@ namespace game::event
 
 		EnemyDeadEvent() = default;
 		EnemyDeadEvent(core::ecs::EntityId id) : m_entityId(id) {}
+	};
+
+	/**
+	 * @brief 敵が死亡演出（死亡アニメ＋消失フェード）を終えて完全に消滅した瞬間に発行されるイベント
+	 *
+	 * HPが尽きた瞬間（EnemyDeadEvent）ではなく、EnemyDeathSystemがEntityを破棄する直前に発行する。
+	 * ボス撃破の勝利遷移など「敵が見た目上も消えてから」進めたい処理のトリガーに使う。
+	 */
+	struct EnemyVanishedEvent : public core::iface::IGameEvent
+	{
+		/** @brief 消滅した敵のEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief 消滅した敵の種類（Mac＝ボスかどうかを購読側が明示的に判定できるように持たせる） */
+		constant::EnemyType m_type{ constant::EnemyType::Xcode };
+
+		EnemyVanishedEvent() = default;
+		EnemyVanishedEvent(core::ecs::EntityId id, constant::EnemyType type)
+		    : m_entityId{ id }
+		    , m_type{ type }
+		{
+		}
 	};
 
 	/**
@@ -158,6 +194,25 @@ namespace game::event
 		MacPhaseTransitionEvent(core::ecs::EntityId id, core::data::MacPhase newPhase)
 		    : m_entityId{ id }
 		    , m_newPhase{ newPhase }
+		{
+		}
+	};
+
+	/**
+	 * @brief 雑魚を全滅させてボスが出現した瞬間に発行されるイベント
+	 *
+	 * 出現シネマ（カメラをボスへ寄せてシェイク→プレイヤーへ戻す）のトリガーに使う。
+	 * フェーズ移行（MacPhaseTransitionEvent）とは意味が異なるため別イベントにしている
+	 * ＝出現と覚醒で演出の強さ・タイミングを個別に調整できる。
+	 */
+	struct BossAppearedEvent : public core::iface::IGameEvent
+	{
+		/** @brief 出現したボスのEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		BossAppearedEvent() = default;
+		explicit BossAppearedEvent(core::ecs::EntityId id)
+		    : m_entityId{ id }
 		{
 		}
 	};

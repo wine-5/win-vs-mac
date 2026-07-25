@@ -181,6 +181,7 @@
     <ClCompile Include="src\game\system\visual\EffectSystem.cpp" />
     <ClCompile Include="src\game\system\visual\HitEffectSystem.cpp" />
     <ClCompile Include="src\game\system\combat\EnemyDeathSystem.cpp" />
+    <ClCompile Include="src\game\system\combat\PlayerDeathSystem.cpp" />
     <ClCompile Include="src\game\system\visual\DetectionAlertVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\visual\AttackTelegraphVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\visual\TelegraphVisualsSystem.cpp" />
@@ -198,16 +199,19 @@
     <ClCompile Include="src\core\base\ServiceLocator.cpp" />
     <ClCompile Include="src\game\factory\FactoryInitializer.cpp" />
     <ClCompile Include="src\game\factory\FactoryManager.cpp" />
-    <ClCompile Include="src\game\factory\GroundFactory.cpp" />
+    <ClCompile Include="src\game\factory\StagePropFactory.cpp" />
     <ClCompile Include="src\game\factory\PlayerFactory.cpp" />
     <ClCompile Include="src\game\scene\SceneManager.cpp" />
-    <ClCompile Include="src\game\stage\Ground.cpp" />
+    <ClCompile Include="src\game\stage\StageProp.cpp" />
     <ClCompile Include="src\game\system\visual\AnimationSystem.cpp" />
     <ClCompile Include="src\game\system\combat\CollisionSystem.cpp" />
     <ClCompile Include="src\game\ui\Button.cpp" />
     <ClCompile Include="src\game\ui\UIManager.cpp" />
     <ClCompile Include="src\infrastructure\graphics\Animator.cpp" />
     <ClCompile Include="src\infrastructure\graphics\Camera.cpp" />
+    <ClCompile Include="src\infrastructure\graphics\Lighting.cpp" />
+    <ClCompile Include="src\game\system\visual\LightSystem.cpp" />
+    <ClCompile Include="src\game\system\visual\TextureScrollSystem.cpp" />
     <ClCompile Include="src\infrastructure\InputManager.cpp" />
     <ClCompile Include="src\infrastructure\graphics\Renderer.cpp" />
     <ClCompile Include="src\infrastructure\resource\ResourceManager.cpp" />
@@ -217,7 +221,9 @@
     <ClCompile Include="src\game\system\movement\InputSystem.cpp" />
     <ClCompile Include="src\game\system\movement\MoveSystem.cpp" />
     <ClCompile Include="src\game\system\movement\PhysicsSystem.cpp" />
+    <ClCompile Include="src\game\system\movement\GroundingSystem.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageRepository.cpp" />
+    <ClCompile Include="src\infrastructure\resource\repository\StageCatalogRepository.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\ExtensionBonusRepository.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\ProjectileRepository.cpp" />
     <ClCompile Include="src\infrastructure\graphics\UIRenderer.cpp" />
@@ -233,9 +239,6 @@
     <ClCompile Include="src\platform\window\select\ParameterWindow.cpp" />
     <ClCompile Include="src\platform\window\WindowBase.cpp" />
     <ClCompile Include="src\platform\window\WindowFactory.cpp" />
-    <ClCompile Include="src\platform\window\projectile\ProjectileWindow.cpp" />
-    <ClCompile Include="src\platform\window\projectile\ProjectileWindowManager.cpp" />
-    <ClCompile Include="src\game\system\combat\ProjectileWindowSystem.cpp" />
     <ClCompile Include="src\platform\window\select\Win32SelectWindowManager.cpp" />
     <ClCompile Include="src\platform\window\result\ResultWindow.cpp" />
     <ClCompile Include="src\platform\window\loading\LoadingWindow.cpp" />
@@ -252,7 +255,6 @@
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="assets\data\enemyData.json" />
-    <None Include="assets\data\groundData.json" />
     <None Include="assets\data\jobData.json" />
     <None Include="assets\data\playerData.json" />
     <None Include="assets\config\resources.json" />
@@ -285,6 +287,12 @@
   <ItemGroup>
     <ClInclude Include="src\core\base\Singleton.h" />
     <ClInclude Include="src\core\data\StageMetadata.h" />
+    <ClInclude Include="src\core\data\PropDefinition.h" />
+    <ClInclude Include="src\core\utility\Rotation.h" />
+    <ClInclude Include="src\game\constant\PropCollision.h" />
+    <ClInclude Include="src\game\component\movement\GroundSurfaceComponent.h" />
+    <ClInclude Include="src\game\component\movement\FallRecoveryComponent.h" />
+    <ClInclude Include="src\game\system\movement\GroundingSystem.h" />
     <ClInclude Include="src\core\data\ProjectileMetadata.h" />
     <ClInclude Include="src\game\actor\EnemyBehaviors.h" />
     <ClInclude Include="src\game\component\combat\ProjectileComponent.h" />
@@ -312,10 +320,6 @@
     <ClInclude Include="src\core\interface\IUIRenderer.h" />
     <ClInclude Include="src\core\interface\IWindow.h" />
     <ClInclude Include="src\core\interface\IWindowFactory.h" />
-    <ClInclude Include="src\core\interface\IProjectileWindowManager.h" />
-    <ClInclude Include="src\platform\window\projectile\ProjectileWindow.h" />
-    <ClInclude Include="src\platform\window\projectile\ProjectileWindowManager.h" />
-    <ClInclude Include="src\game\system\combat\ProjectileWindowSystem.h" />
     <ClInclude Include="src\game\actor\EnemyBase.h" />
     <ClInclude Include="src\game\attack\BaseAttackHandler.h" />
     <ClInclude Include="src\game\attack\DamageChain.h" />
@@ -369,6 +373,7 @@
     <ClInclude Include="src\game\system\visual\EffectSystem.h" />
     <ClInclude Include="src\game\system\visual\HitEffectSystem.h" />
     <ClInclude Include="src\game\system\combat\EnemyDeathSystem.h" />
+    <ClInclude Include="src\game\system\combat\PlayerDeathSystem.h" />
     <ClInclude Include="src\game\system\visual\DetectionAlertVisualsSystem.h" />
     <ClInclude Include="src\game\system\visual\AttackTelegraphVisualsSystem.h" />
     <ClInclude Include="src\game\system\visual\TelegraphVisualsSystem.h" />
@@ -386,6 +391,7 @@
     <ClInclude Include="src\infrastructure\resource\repository\ModelRepository.h" />
     <ClInclude Include="src\infrastructure\resource\repository\AnimationRepository.h" />
     <ClInclude Include="src\infrastructure\resource\repository\StageRepository.h" />
+    <ClInclude Include="src\infrastructure\resource\repository\StageCatalogRepository.h" />
     <ClInclude Include="src\infrastructure\resource\repository\ExtensionBonusRepository.h" />
     <ClInclude Include="src\infrastructure\resource\repository\ProjectileRepository.h" />
     <ClInclude Include="src\game\constant\ProjectileId.h" />
@@ -401,10 +407,9 @@
     <ClInclude Include="src\game\constant\ModelId.h" />
     <ClInclude Include="src\game\constant\AnimationId.h" />
     <ClInclude Include="src\core\constant\UI.h" />
-    <ClInclude Include="src\game\data\GroundData.h" />
     <ClInclude Include="src\game\factory\FactoryInitializer.h" />
     <ClInclude Include="src\game\factory\FactoryManager.h" />
-    <ClInclude Include="src\game\factory\GroundFactory.h" />
+    <ClInclude Include="src\game\factory\StagePropFactory.h" />
     <ClInclude Include="src\game\factory\PlayerFactory.h" />
     <ClInclude Include="src\game\scene\SceneManager.h" />
     <ClInclude Include="src\game\scene\SceneType.h" />
@@ -413,7 +418,7 @@
     <ClInclude Include="src\game\ui\UIManager.h" />
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
     <ClInclude Include="src\game\data\PlayerData.h" />
-    <ClInclude Include="src\game\stage\Ground.h" />
+    <ClInclude Include="src\game\stage\StageProp.h" />
     <ClInclude Include="src\game\system\visual\AnimationSystem.h" />
     <ClInclude Include="src\game\system\combat\CollisionSystem.h" />
     <ClInclude Include="src\infrastructure\graphics\Animator.h" />

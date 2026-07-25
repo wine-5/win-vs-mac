@@ -4,7 +4,7 @@
       "id": "player_window",
       "imageId": "projectile-window",
       "speed": 600.0,
-      "damage": 20.0,
+      "damage": 100.0,
       "lifetime": 3.0,
       "radius": 40.0,
       "scale": 1.0,
@@ -13,7 +13,8 @@
       "cooldown": 0.4,
       "chargeMaxTime": 1.5,
       "chargeDamageMultiplier": 3.0,
-      "chargeSizeMultiplier": 5.0
+      "chargeSizeMultiplier": 5.0,
+      "chargeRangeMultiplier": 2.0
     },
     {
       "id": "enemy_safari_tab",
@@ -28,8 +29,8 @@
     },
     {
       "id": "mac_rainbow",
-      "speed": 200.0,
-      "damage": 15.0,
+      "speed": 400.0,
+      "damage": 100.0,
       "lifetime": 8.0,
       "radius": 0.0,
       "scale": 1.0,

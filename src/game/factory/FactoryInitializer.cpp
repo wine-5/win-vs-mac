@@ -1,36 +1,122 @@
 ﻿#include "FactoryInitializer.h"
 #include "core/interface/ILogger.h"
 #include "core/utility/Log.h"
+#include "core/utility/MathConstants.h"
+#include "core/data/PropDefinition.h"
 #include "game/constant/ModelId.h"
-#include "game/data/GroundData.h"
-#include <stdexcept>
+#include "game/constant/PropCollision.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/visual/LightComponent.h"
+#include <cmath>
+#include <algorithm>
 
 namespace game::factory
 {
 	FactoryInitializer::FactoryInitializer(
-		FactoryManager& factoryManager,
-		core::iface::IResourceManager& resourceManager)
-		: m_factoryManager{factoryManager}
-		, m_resourceManager{resourceManager}
+	    FactoryManager& factoryManager,
+	    core::iface::IResourceManager& resourceManager,
+	    core::ecs::EntityManager& entityManager,
+	    core::ecs::ComponentManager& componentManager)
+	    : m_factoryManager{ factoryManager }
+	    , m_resourceManager{ resourceManager }
+	    , m_entityManager{ entityManager }
+	    , m_componentManager{ componentManager }
 	{
+	}
+
+	void FactoryInitializer::initializeLights()
+	{
+		const auto& stage{ m_resourceManager.getStageMetadata() };
+
+		for (const auto& lightData : stage.m_lights)
+		{
+			const auto entity{ m_entityManager.create() };
+
+			component::movement::TransformComponent transform{};
+			transform.m_position = lightData.m_position;
+			m_componentManager.add<component::movement::TransformComponent>(entity.getId(), transform);
+
+			// 位置はTransformが持つので、Component側のoffsetは0のままでよい
+			component::visual::LightComponent light{};
+			light.m_range = lightData.m_range;
+			light.m_r = lightData.m_r;
+			light.m_g = lightData.m_g;
+			light.m_b = lightData.m_b;
+			m_componentManager.add<component::visual::LightComponent>(entity.getId(), light);
+		}
 	}
 
 	void FactoryInitializer::initializePlayer(const data::PlayerData& playerData)
 	{
 		int playerHandle{m_resourceManager.loadModelById(constant::model_id::PLAYER)};
+
+		// プレイヤーモデルはハンドルがキャッシュされ、再プレイでも同じ実体を使い回す。
+		// 前回プレイの死亡（Dying）アニメがアタッチされたまま残ると、新しいIdleと重なって
+		// 死亡ポーズが抜けないため、生成前に一度すべてのアニメをデタッチして初期化する。
+		// 敵は複製ハンドル＋プール返却時のデタッチで済むが、プレイヤーは複製しないのでここで行う
+		m_resourceManager.detachAllAnimations(playerHandle);
+
 		m_factoryManager.getPlayerFactory().create(playerHandle, playerData);
 	}
 
-	core::ecs::EntityId FactoryInitializer::initializeGround()
+	void FactoryInitializer::initializeProps()
 	{
-		int groundHandle{m_resourceManager.loadModelById(constant::model_id::GROUND)};
-		auto groundMeta{m_resourceManager.getMetadata(constant::model_id::GROUND)};
-		if (!groundMeta.has_value()) {
-			core::log::info("ERROR: Groundのメタデータが見つかりません");
-			throw std::runtime_error("Groundのメタデータの読み込みに失敗しました");
-		}
+		const auto& stage{ m_resourceManager.getStageMetadata() };
+		auto& factory{ m_factoryManager.getStagePropFactory() };
 
-		data::GroundData groundData = data::GroundData::fromMetadata(groundMeta.value());
-		return m_factoryManager.getGroundFactory().create(groundHandle, groundData);
+		for (const auto& prop : stage.m_props)
+		{
+			const auto& def{ m_resourceManager.getPropDefinition(prop.m_type) };
+			const int handle{ m_resourceManager.loadModelByPath(def.m_modelPath) };
+
+			// 実寸(size) ÷ 素材実寸(baseSize) をモデルスケールにする。
+			// baseSizeが0の軸は割れないためスケール1にフォールバックする
+			const core::Vector3 scale{
+				def.m_baseSize.x != 0.0f ? prop.m_size.x / def.m_baseSize.x : 1.0f,
+				def.m_baseSize.y != 0.0f ? prop.m_size.y / def.m_baseSize.y : 1.0f,
+				def.m_baseSize.z != 0.0f ? prop.m_size.z / def.m_baseSize.z : 1.0f
+			};
+
+			// JSONは度数法で持つ。DxLibのMV1SetRotationXYZはラジアンなので変換する
+			const core::Vector3 rotation{ prop.m_rotation * core::utility::DEG_TO_RAD };
+
+			stage::StagePropParams params{};
+			params.m_modelHandle = handle;
+			params.m_position = prop.m_position;
+			params.m_rotation = rotation;
+			params.m_scale = scale;
+
+			params.m_scrollSpeedU = def.m_scrollU;
+			params.m_scrollSpeedV = def.m_scrollV;
+
+			const auto collision{ constant::toPropCollision(def.m_collider) };
+			params.m_collision = collision;
+
+			// Box（壁・柱・ブロック）はY回転ごとCollisionSystemが扱うので実寸をそのまま渡す。
+			// Ground（床・坂）も傾きごと GroundingSystem が扱うので同じく実寸でよい
+			if (collision == constant::PropCollision::Box)
+				params.m_collisionSize = prop.m_size;
+			else if (collision == constant::PropCollision::Ground)
+			{
+				params.m_collisionSize = prop.m_size;
+				params.m_slideAccel = def.m_slideAccel;
+			}
+
+			// テクスチャ1枚が受け持つ実寸から繰り返し回数を決める。
+			// U/Vは面の向きに合わせる。床（Yが最も薄い）は上面を見るのでX×Z、
+			// 壁や柱は側面を見るので「横幅×高さ」を割り当てる。
+			// 1未満にすると繰り返しではなく絵の一部を引き伸ばす（切り取る）ため下限を1にする
+			if (def.m_textureTile > 0.0f)
+			{
+				const bool isFloorLike{ prop.m_size.y <= prop.m_size.x && prop.m_size.y <= prop.m_size.z };
+				const float horizontal{ isFloorLike ? prop.m_size.x : std::max(prop.m_size.x, prop.m_size.z) };
+				const float vertical{ isFloorLike ? prop.m_size.z : prop.m_size.y };
+
+				params.m_uvScaleU = std::max(1.0f, horizontal / def.m_textureTile);
+				params.m_uvScaleV = std::max(1.0f, vertical / def.m_textureTile);
+			}
+
+			factory.create(params);
+		}
 	}
 } // namespace game::factory

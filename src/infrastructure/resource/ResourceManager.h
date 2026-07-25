@@ -6,6 +6,7 @@
 #include "infrastructure/resource/repository/ImageRepository.h"
 #include "infrastructure/resource/repository/AnimationRepository.h"
 #include "infrastructure/resource/repository/StageRepository.h"
+#include "infrastructure/resource/repository/StageCatalogRepository.h"
 #include "infrastructure/resource/repository/ExtensionBonusRepository.h"
 #include "infrastructure/resource/repository/ProjectileRepository.h"
 
@@ -27,6 +28,13 @@ namespace infrastructure::resource
 		 * @return モデルハンドル
 		 */
 		int loadModelById(const std::string_view modelId) override;
+
+		/**
+		 * @brief ファイルパスから直接モデルを読み込み、ハンドルを返す（キャッシュ付き）
+		 * @param path モデルファイルのパス
+		 * @return モデルハンドル、失敗時は-1
+		 */
+		int loadModelByPath(std::string_view path) override;
 
 		/**
 		 * @brief modelIDからメタデータを取得する
@@ -61,6 +69,13 @@ namespace infrastructure::resource
 		 * @return ステージ配置定義
 		 */
 		[[nodiscard]] const core::data::StageMetadata& getStageMetadata() const noexcept override;
+
+		/**
+		 * @brief 配置物の種類IDから種類定義を取得する
+		 * @param type 種類ID（stageCatalog.jsonのprops[].id）
+		 * @return 配置物の種類定義（存在しない場合はthrow）
+		 */
+		[[nodiscard]] const core::data::PropDefinition& getPropDefinition(std::string_view type) const override;
 
 		/**
 		 * @brief 拡張子種別に対応するパラメータボーナスを取得する
@@ -106,6 +121,7 @@ namespace infrastructure::resource
 		std::unique_ptr<repository::ImageRepository> m_imageRepo;
 		std::unique_ptr<repository::AnimationRepository> m_animRepo;
 		std::unique_ptr<repository::StageRepository> m_stageRepo;
+		std::unique_ptr<repository::StageCatalogRepository> m_stageCatalogRepo;
 		std::unique_ptr<repository::ExtensionBonusRepository> m_extensionBonusRepo;
 		std::unique_ptr<repository::ProjectileRepository> m_projectileRepo;
 	};

@@ -14,4 +14,9 @@ namespace infrastructure::graphics
 	{
 		SetupCamera_Perspective(fovRad);
 	}
+
+	void Camera::setNearFar(float nearClip, float farClip)
+	{
+		SetCameraNearFar(nearClip, farClip);
+	}
 } // namespace infrastructure::graphics

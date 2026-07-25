@@ -249,7 +249,16 @@ namespace platform::window::select
                 if (m_fileSelectWindow) m_fileSelectWindow->hide();
                 if (m_parameterWindow)  m_parameterWindow->hide();
                 if (m_difficultyWindow) m_difficultyWindow->hide();
-                if (m_onGameStart) m_onGameStart();
+
+				// デスクトップのギミックで開いた実アプリ（cmd.exe等）が前面に残ると、
+				// ボーダーレスのゲーム画面が隠れてしまう。ゲーム本体ウィンドウを前面へ戻す
+				if (HWND gameHwnd{ static_cast<HWND>(m_screen.getNativeWindowHandle()) })
+				{
+					SetForegroundWindow(gameHwnd);
+					SetActiveWindow(gameHwnd);
+				}
+
+				if (m_onGameStart) m_onGameStart();
             }
             else if (type == platform::window::WindowConstants::MESSAGE_TYPE_TOGGLE_WINDOW)
             {
@@ -282,7 +291,19 @@ namespace platform::window::select
             else if (type == platform::window::WindowConstants::MESSAGE_TYPE_LAUNCH_APP)
             {
                 const std::string app{ j.value(platform::window::WindowConstants::JSON_KEY_APP, "") };
-                if (app == "cmd")
+
+				// デスクトップ背景ウィンドウは常時最前面(TOPMOST)なので、そのままだと
+				// 起動したアプリがその後ろに隠れてしまう（TOPMOSTはフォーカスに関係なくz順で手前）。
+				// 起動時に最前面指定を解除して、実アプリが前に出られるようにする。
+				// ゲームへ戻れば WM_ACTIVATEAPP で再びTOPMOSTに戻る
+				if (m_desktopWindow && m_desktopWindow->getHwnd())
+					SetWindowPos(m_desktopWindow->getHwnd(), HWND_NOTOPMOST, 0, 0, 0, 0,
+					    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+
+				// Windowsのフォーカス保護で後ろに開くのを防ぎ、起動アプリが自分で前面に出られるようにする
+				AllowSetForegroundWindow(ASFW_ANY);
+
+				if (app == "cmd")
                     ShellExecuteW(nullptr, L"open", APP_CMD_PATH, nullptr, nullptr, SW_SHOW);
                 else if (app == "taskmgr")
                     ShellExecuteW(nullptr, L"open", APP_TASKMGR_PATH, nullptr, nullptr, SW_SHOW);

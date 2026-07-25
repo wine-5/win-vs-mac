@@ -48,12 +48,6 @@ namespace platform::window
             std::function<void(int, const std::string&)> onFileSlotChanged,
             core::iface::IResourceManager& resourceManager) override;
 
-		/**
-		 * @brief 弾追従ウィンドウのマネージャを生成する
-		 * @return 生成されたマネージャ
-		 */
-		std::unique_ptr<core::iface::IProjectileWindowManager> createProjectileWindowManager() override;
-
 	  private:
         // ローディングウィンドウのサイズ比率（スクリーンサイズに対する割合）
         static constexpr int LOADING_WINDOW_SIZE_RATIO{ 80 };

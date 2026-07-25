@@ -23,6 +23,25 @@ namespace infrastructure::graphics
 		void drawModel(int modelHandle, const core::Vector3& position, const core::Vector3& rotation, const core::Vector3& scale) override;
 
 		/**
+		 * @brief モデルのテクスチャ繰り返し回数を設定する
+		 * @param modelHandle モデルハンドル
+		 * @param scaleU 横方向の繰り返し回数（1.0で引き伸ばし）
+		 * @param scaleV 縦方向の繰り返し回数（1.0で引き伸ばし）
+		 */
+		void setTextureTiling(int modelHandle, float scaleU, float scaleV) override;
+
+		/**
+		 * @brief モデルのテクスチャをずらして貼る（模様を流す演出に使う）
+		 * @param modelHandle モデルハンドル
+		 * @param scaleU 横方向の繰り返し回数（1.0で引き伸ばし）
+		 * @param scaleV 縦方向の繰り返し回数（1.0で引き伸ばし）
+		 * @param offsetU 横方向のずらし量（1.0でテクスチャ1枚ぶん）
+		 * @param offsetV 縦方向のずらし量（1.0でテクスチャ1枚ぶん）
+		 */
+		void setTextureScroll(int modelHandle, float scaleU, float scaleV,
+		    float offsetU, float offsetV) override;
+
+		/**
 		 * @brief 敵撃破時の赤化＋ディゾルブ（消失）演出をモデルに適用する
 		 * @param modelHandle 対象のモデルハンドル
 		 * @param redProgress 赤化の進行度（0.0=元の色 〜 1.0=赤）
@@ -42,7 +61,7 @@ namespace infrastructure::graphics
 		 * @param size サイズ
 		 * @param color 色（ARGB）
 		 */
-		void drawCollider(const core::Vector3& center, const core::Vector3& size, unsigned int color) override;
+		void drawCollider(const core::Vector3& center, const core::Vector3& size, float rotationY, unsigned int color) override;
 
 		/**
 		 * @brief デバッグ用に球（範囲）を可視化する
@@ -91,6 +110,9 @@ namespace infrastructure::graphics
 		 * @param faceDir モデルの正面を向ける方向（正規化不要）
 		 * @param spinAngle 面内回転角（ラジアン）
 		 */
+		void drawBillboard(int imageHandle, const core::Vector3& position,
+		    float size, float angle) override;
+
 		void drawSpinningModelFacing(int modelHandle, const core::Vector3& position,
 		    const core::Vector3& scale, const core::Vector3& centerOffset,
 		    const core::Vector3& faceDir, float spinAngle) override;
@@ -101,6 +123,12 @@ namespace infrastructure::graphics
 		 * @return x/yはスクリーン座標、zは深度（0.0〜1.0の範囲内なら画面に映っている）
 		 */
 		core::Vector3 worldToScreen(const core::Vector3& worldPos) override;
+
+		/**
+		 * @brief DEBUG: 直前の1フレームで発行された描画コール数を取得する
+		 * @return 描画コール数
+		 */
+		int getDrawCallCount() override;
 
 	  private:
 		// applyDeathDissolveで初回に保存する、マテリアルの元のディフューズ色とエミッシブ色

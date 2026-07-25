@@ -1,6 +1,7 @@
 #include "DebugHUDView.h"
 #include "core/interface/IPerformanceDataProvider.h"
 #include "core/interface/IEffectFactory.h" // DEBUG: リリース時に削除
+#include "core/interface/IRenderer.h"
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
 #include "game/component/movement/TransformComponent.h"
@@ -14,6 +15,7 @@ namespace
 	constexpr int STATS_LINE_HEIGHT{ 26 };
 	constexpr int STATS_MARGIN{ 16 };
 	constexpr unsigned int STATS_TEXT_COLOR{ 0xFFFFFF00 }; // 黄色（ARGB）
+	constexpr int STATS_LINE_COUNT{ 7 };                   // 右上に並べる統計の行数
 } // namespace
 
 namespace game::ui::debug
@@ -24,7 +26,8 @@ namespace game::ui::debug
 	    GameManager& gameManager,
 	    PauseManager& pauseManager,
 	    core::iface::IPerformanceDataProvider& perfProvider,
-	    core::iface::IEffectFactory& effectFactory)
+	    core::iface::IEffectFactory& effectFactory,
+	    core::iface::IRenderer& renderer)
 	    : m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_componentManager{ componentManager }
@@ -32,10 +35,16 @@ namespace game::ui::debug
 	    , m_pauseManager{ pauseManager }
 	    , m_perfProvider{ perfProvider }
 	    , m_effectFactory{ effectFactory }
+	    , m_renderer{ renderer }
 	{
 	}
 
-	void DebugHUDView::update()
+	void DebugHUDView::countGameUpdate()
+	{
+		++m_updateAccum;
+	}
+
+	void DebugHUDView::updateOnRenderFrame()
 	{
 		// 実際の壁時計時間を計測する（Applicationの固定タイムステップは使わない。
 		// ヘッダのコメント参照）
@@ -49,7 +58,7 @@ namespace game::ui::debug
 		const float realDeltaTime{ std::chrono::duration<float>(now - m_lastUpdateTime).count() };
 		m_lastUpdateTime = now;
 
-		// FPS/フレーム時間は直近FPS_UPDATE_INTERVAL秒間のフレーム数から算出する
+		// FPS/UPS/フレーム時間は直近FPS_UPDATE_INTERVAL秒間の回数から算出する
 		// （毎フレームの瞬間値だと数値が激しく揺れて読みにくいため）
 		++m_fpsFrameAccum;
 		m_fpsTimeAccum += realDeltaTime;
@@ -57,7 +66,9 @@ namespace game::ui::debug
 		{
 			m_displayFps = static_cast<float>(m_fpsFrameAccum) / m_fpsTimeAccum;
 			m_displayFrameMs = (m_fpsTimeAccum / static_cast<float>(m_fpsFrameAccum)) * 1000.0f;
+			m_displayUps = static_cast<float>(m_updateAccum) / m_fpsTimeAccum;
 			m_fpsFrameAccum = 0;
+			m_updateAccum = 0;
 			m_fpsTimeAccum = 0.0f;
 		}
 
@@ -104,15 +115,19 @@ namespace game::ui::debug
 		const int activeEffectCount{ m_effectFactory.getActiveEffectCount() };
 		const auto snapshot{ m_perfProvider.getSnapshot() };
 
-		char lines[6][64]{};
-		std::snprintf(lines[0], sizeof(lines[0]), "FPS: %.1f (%.2fms)", m_displayFps, m_displayFrameMs);
-		std::snprintf(lines[1], sizeof(lines[1]), "Entity: %d", entityCount);
-		std::snprintf(lines[2], sizeof(lines[2]), "Enemy: %d  Bullet: %d", enemyCount, projectileCount);
-		std::snprintf(lines[3], sizeof(lines[3]), "Active Effects: %d", activeEffectCount);
-		std::snprintf(lines[4], sizeof(lines[4]), "System  CPU: %.1f%%  Mem: %.1f%%", snapshot.cpuUsage * 100.0f, snapshot.memoryUsage * 100.0f);
-		std::snprintf(lines[5], sizeof(lines[5]), "This Game  CPU: %.1f%%  Mem: %.0fMB", snapshot.processCpuUsage * 100.0f, snapshot.processMemoryUsageMB);
+		// 描画コール数は前フレームの確定値（DxLibが画面更新のたびに集計している）
+		const int drawCallCount{ m_renderer.getDrawCallCount() };
 
-		for (int i{ 0 }; i < 6; ++i)
+		char lines[STATS_LINE_COUNT][64]{};
+		std::snprintf(lines[0], sizeof(lines[0]), "FPS: %.1f (%.2fms)  UPS: %.1f", m_displayFps, m_displayFrameMs, m_displayUps);
+		std::snprintf(lines[1], sizeof(lines[1]), "DrawCall: %d", drawCallCount);
+		std::snprintf(lines[2], sizeof(lines[2]), "Entity: %d", entityCount);
+		std::snprintf(lines[3], sizeof(lines[3]), "Enemy: %d  Bullet: %d", enemyCount, projectileCount);
+		std::snprintf(lines[4], sizeof(lines[4]), "Active Effects: %d", activeEffectCount);
+		std::snprintf(lines[5], sizeof(lines[5]), "System  CPU: %.1f%%  Mem: %.1f%%", snapshot.cpuUsage * 100.0f, snapshot.memoryUsage * 100.0f);
+		std::snprintf(lines[6], sizeof(lines[6]), "This Game  CPU: %.1f%%  Mem: %.0fMB", snapshot.processCpuUsage * 100.0f, snapshot.processMemoryUsageMB);
+
+		for (int i{ 0 }; i < STATS_LINE_COUNT; ++i)
 		{
 			const int textWidth{ m_uiRenderer.getTextWidth(lines[i], STATS_FONT_SIZE) };
 			const int x{ m_screen.getWidth() - textWidth - STATS_MARGIN };

@@ -6,6 +6,7 @@
 #include "game/component/TagComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
 #include "game/component/visual/HitEffectComponent.h"
+#include "game/component/visual/AnimationComponent.h"
 #include "game/constant/Tag.h"
 #include "game/attack/DamageChain.h"
 #include "game/attack/BaseAttackHandler.h"
@@ -101,6 +102,12 @@ namespace game::system::combat
 				{
 					shouldPlayStartEffect = true;
 					startEffect = core::constant::EffectType::Player_Slash;
+
+					// 剣を振るアニメを要求する。優先度がATTACKなので、MoveSystemが毎フレーム出す
+					// 移動系（Idle/Walk/Run）の要求には割り込まれず、振り終わりまで再生される
+					if (m_componentManager.has<component::visual::AnimationComponent>(attackerId))
+						m_componentManager.get<component::visual::AnimationComponent>(attackerId).m_requested =
+						    constant::AnimationState::Attack1;
 				}
 			}
 			else if (attackerTagForStart.m_tag == constant::Tag::Enemy)

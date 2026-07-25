@@ -13,6 +13,7 @@
 #include "game/system/visual/DetectionAlertVisualsSystem.h"
 #include "game/system/visual/AttackTelegraphVisualsSystem.h"
 #include "game/system/visual/TelegraphVisualsSystem.h"
+#include "game/system/combat/PlayerDeathSystem.h"
 #include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
 #include <cmath>
@@ -44,8 +45,7 @@ namespace game::scene
 		if (m_telegraphSystem)
 			m_telegraphSystem->draw();
 
-		// プレイヤー弾の見た目は実OSウィンドウ（ProjectileWindowSystem）が担うため描かない。
-		// 敵のタブ弾など3Dモデルを持つ弾はここで回転描画する
+		// 弾を描く。プレイヤーのWindow弾はビルボード、敵のタブ弾など3Dモデルはモデルで描画する
 		drawProjectileModels();
 
 		// DEBUG: 当たり判定等のワールド空間デバッグ可視化（リリース時に削除）
@@ -75,6 +75,10 @@ namespace game::scene
 
 		// Effekseerエフェクトの描画（3Dモデル描画後・UI手前に呼び出す）
 		m_effectFactory.draw();
+
+		// プレイヤー死亡時の暗転。画面の全てを覆って暗くするため最後に描く
+		if (m_playerDeathSystem)
+			m_playerDeathSystem->draw();
 	}
 
 	void InGameView::setPlayerChargeVisualsSystem(system::visual::PlayerChargeVisualsSystem* system)
@@ -100,6 +104,11 @@ namespace game::scene
 	void InGameView::setTelegraphVisualsSystem(system::visual::TelegraphVisualsSystem* system)
 	{
 		m_telegraphSystem = system;
+	}
+
+	void InGameView::setPlayerDeathSystem(system::combat::PlayerDeathSystem* system)
+	{
+		m_playerDeathSystem = system;
 	}
 
 	void InGameView::setDebugGizmoView(ui::debug::DebugGizmoView* view)
@@ -139,6 +148,14 @@ namespace game::scene
 					continue;
 
 				const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
+				// 同じモデルをサイズ違い・流し方違いで使い回すため、貼り方は描画のたびに設定する。
+				// 触らないモデル（キャラクター等）はそのまま。スキニングされたモデルへ
+				// テクスチャ座標変換を掛けると不正なフレーム指定になり得るため
+				const bool needsUv{ render.m_uvScaleU != 1.0f || render.m_uvScaleV != 1.0f ||
+					                render.m_scrollOffsetU != 0.0f || render.m_scrollOffsetV != 0.0f };
+				if (needsUv)
+					m_renderer.setTextureScroll(render.m_modelHandle, render.m_uvScaleU, render.m_uvScaleV,
+					    render.m_scrollOffsetU, render.m_scrollOffsetV);
 				m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
 			}
 		}
@@ -200,10 +217,22 @@ namespace game::scene
 				continue;
 
 			const auto& render{ m_componentManager.get<component::visual::RenderComponent>(id) };
-			if (!render.m_isVisible || render.m_modelHandle == -1)
+			if (!render.m_isVisible)
 				continue;
 
 			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(id) };
+
+			// プレイヤーのWindow弾はビルボード（板に貼ったWindow画像）で描く。
+			// 深度を持つので壁の裏では隠れ、実OSウィンドウのようにプレイヤーを覆い隠さない
+			if (render.m_billboardImage != -1)
+			{
+				m_renderer.drawBillboard(render.m_billboardImage, transform.m_position, render.m_billboardSize, 0.0f);
+				continue;
+			}
+
+			if (render.m_modelHandle == -1)
+				continue;
+
 			const auto& projectile{ m_componentManager.get<component::combat::ProjectileComponent>(id) };
 
 			// 発射地点からの移動距離に応じてタンブルさせる（状態を持たず距離から導出する）

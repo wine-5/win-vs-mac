@@ -44,6 +44,17 @@ namespace infrastructure::graphics
 		 */
 		void setBackgroundColor(int r, int g, int b) noexcept override;
 
+		/**
+		 * @brief 距離フォグを設定する
+		 * @param enable 有効にするならtrue
+		 * @param r フォグ色の赤成分（0-255）
+		 * @param g フォグ色の緑成分（0-255）
+		 * @param b フォグ色の青成分（0-255）
+		 * @param startDistance 掛かり始める距離（ワールドユニット）
+		 * @param endDistance 完全にフォグ色になる距離（ワールドユニット）
+		 */
+		void setFog(bool enable, int r, int g, int b, float startDistance, float endDistance) noexcept override;
+
 	  private:
         int m_width;
         int m_height;

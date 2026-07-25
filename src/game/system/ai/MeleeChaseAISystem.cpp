@@ -98,21 +98,19 @@ namespace game::system::ai
 		if (m_componentManager.has<component::combat::AttackComponent>(entityId))
 			inAttackRange = distanceToPlayer <= m_componentManager.get<component::combat::AttackComponent>(entityId).m_attackRange;
 
-		// 移動：攻撃レンジ内では止まり、外なら接近する
+		// 攻撃モーション中はレンジから外れても足を止める。
+		// 溜め・振りの最中に追いかけると滑って見え、間合いを外して避ける動きも成立しなくなる
+		const bool isAttacking{ isAttackInProgress(entityId) };
+
+		// 移動：攻撃レンジ内・攻撃モーション中は止まり、それ以外なら接近する
 		// （従来はレンジ内でも速度を与え続け、プレイヤーへ押し込んでいた）
-		if (m_componentManager.has<component::movement::VelocityComponent>(entityId))
+		if (inAttackRange || isAttacking)
+			stopHorizontalMovement(entityId);
+		else if (m_componentManager.has<component::movement::VelocityComponent>(entityId))
 		{
 			auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
-			if (inAttackRange)
-			{
-				velocity.m_velocity.x = 0.0f;
-				velocity.m_velocity.z = 0.0f;
-			}
-			else
-			{
-				velocity.m_velocity.x = dirToPlayer.x * ai.m_moveSpeed;
-				velocity.m_velocity.z = dirToPlayer.z * ai.m_moveSpeed;
-			}
+			velocity.m_velocity.x = dirToPlayer.x * ai.m_moveSpeed;
+			velocity.m_velocity.z = dirToPlayer.z * ai.m_moveSpeed;
 		}
 
 		// 常にプレイヤーの方を向く
@@ -131,9 +129,12 @@ namespace game::system::ai
 			attacking = attack->m_justFired;
 		}
 
-		// アニメ要求：攻撃時はAttack1、レンジ内待機はIdle、接近中はWalk
+		// アニメ要求：攻撃時はAttack1、レンジ内待機はIdle、接近中はWalk。
+		// 攻撃モーションの再生中は歩き・待機で上書きせず、最後まで振らせる
 		if (attacking)
 			requestAnimation(entityId, constant::AnimationState::Attack1);
+		else if (isAttacking)
+			return;
 		else if (inAttackRange)
 			requestAnimation(entityId, constant::AnimationState::Idle);
 		else
@@ -147,6 +148,13 @@ namespace game::system::ai
 		auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 
 		const bool hasVelocity{ m_componentManager.has<component::movement::VelocityComponent>(entityId) };
+
+		// 攻撃モーション中に索敵から外れて巡回へ移った場合も、振り終わるまでは動かさない
+		if (isAttackInProgress(entityId))
+		{
+			stopHorizontalMovement(entityId);
+			return;
+		}
 
 		// 立ち止まり中：時間を消化し、その間は停止＋Idle
 		if (patrol.m_pauseTimer > 0.0f)
@@ -216,6 +224,31 @@ namespace game::system::ai
 		target.x += std::cos(angle) * radius;
 		target.z += std::sin(angle) * radius;
 		return target;
+	}
+
+	bool MeleeChaseAISystem::isAttackInProgress(core::ecs::EntityId entityId) const
+	{
+		// 溜め中はまだ振っていないが、すでに攻撃に入っているので動かさない
+		const auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(entityId) };
+		if (attack != nullptr && attack->m_windupPending)
+			return true;
+
+		// 振りの最中：攻撃アニメが再生中で、まだ終端に達していない
+		const auto* anim{ m_componentManager.tryGet<component::visual::AnimationComponent>(entityId) };
+		return anim != nullptr &&
+		       anim->m_current == constant::AnimationState::Attack1 &&
+		       !anim->m_isCompleted;
+	}
+
+	void MeleeChaseAISystem::stopHorizontalMovement(core::ecs::EntityId entityId)
+	{
+		auto* velocity{ m_componentManager.tryGet<component::movement::VelocityComponent>(entityId) };
+		if (velocity == nullptr)
+			return;
+
+		// 落下は止めない。Yを触ると空中で固まってしまう
+		velocity->m_velocity.x = 0.0f;
+		velocity->m_velocity.z = 0.0f;
 	}
 
 	void MeleeChaseAISystem::requestAnimation(core::ecs::EntityId entityId, constant::AnimationState state)

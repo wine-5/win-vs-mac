@@ -57,6 +57,22 @@ namespace game::system::ai
 		core::Vector3 pickWanderTarget(const core::Vector3& home);
 
 		/**
+		 * @brief 攻撃モーションの最中かを判定する
+		 *
+		 * 溜め（ワインドアップ）中と、攻撃アニメが再生し終わるまでを「攻撃中」とみなす。
+		 * この間に動くと足が滑って見え、プレイヤーが間合いを読めなくなる。
+		 * @param entityId 対象のEntityId
+		 * @return 攻撃モーション中ならtrue
+		 */
+		bool isAttackInProgress(core::ecs::EntityId entityId) const;
+
+		/**
+		 * @brief 水平方向の移動を止める（縦の速度＝落下は残す）
+		 * @param entityId 対象のEntityId
+		 */
+		void stopHorizontalMovement(core::ecs::EntityId entityId);
+
+		/**
 		 * @brief アニメーション状態を要求する（AnimationComponentを持つ場合のみ）
 		 * @param entityId 対象のEntityId
 		 * @param state 要求する状態

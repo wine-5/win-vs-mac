@@ -9,10 +9,10 @@
     "size": [ 0, 0, 0 ]
   },
   "gameplay": {
-    "moveSpeed": 10.0,
+    "moveSpeed": 260.0,
     "detectionRange": 1200.0,
     "attackRange": 350.0,
-    "maxHp": 30.0,
+    "maxHp": 100.0,
     "defence": 0.0,
     "attackPower": 10.0,
     "attackCooldown": 4.0,

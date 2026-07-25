@@ -10,6 +10,7 @@
 #include "game/component/TagComponent.h"
 #include "game/component/visual/HitEffectComponent.h"
 #include "game/component/visual/EffectComponent.h"
+#include "game/component/visual/LightComponent.h"
 #include "game/constant/Tag.h"
 #include <utility>
 
@@ -81,5 +82,20 @@ namespace game::actor
 		ai.m_moveSpeed = m_enemyData.getMoveSpeed();
 		ai.m_detectionRange = m_enemyData.getDetectionRange();
 		m_componentManager.add<component::ai::AIComponent>(m_entity.getId(), ai);
+
+		// 敵に追従する点光源。虚無の中でシルエットに潰れないよう、自分の体を照らす。
+		// 範囲を絞ってあるのは、敵が増えたときに周囲まで明るくしすぎないため
+		constexpr float LIGHT_RANGE{ 700.0f };
+		constexpr int LIGHT_R{ 210 };
+		constexpr int LIGHT_G{ 225 };
+		constexpr int LIGHT_B{ 255 };
+		component::visual::LightComponent light{};
+		// コライダーの高さを基準に頭上へ置き、体格が違ってもバランスを保つ
+		light.m_offset = core::Vector3{ 0.0f, m_enemyData.getColliderSize().y, 0.0f };
+		light.m_range = LIGHT_RANGE;
+		light.m_r = LIGHT_R;
+		light.m_g = LIGHT_G;
+		light.m_b = LIGHT_B;
+		m_componentManager.add<component::visual::LightComponent>(m_entity.getId(), light);
 	}
 } // namespace game::actor

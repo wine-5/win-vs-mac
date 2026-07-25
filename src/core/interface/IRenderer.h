@@ -20,6 +20,33 @@ namespace core::iface
 		 * @param scale スケール
 		 */
 		virtual void drawModel(int modelHandle, const core::Vector3& position, const::core::Vector3& rotation, const core::Vector3& scale) = 0;
+
+		/**
+		 * @brief モデルのテクスチャ繰り返し回数を設定する
+		 *
+		 * 立方体を引き伸ばして作る配置物は、そのままだと模様が間延びする。
+		 * 実寸に応じて繰り返し回数を上げることで、長い壁に窓が連続して並ぶようになる。
+		 * 描画のたびに設定するため、同じモデルを別サイズで使い回しても混ざらない。
+		 * @param modelHandle モデルハンドル
+		 * @param scaleU 横方向の繰り返し回数（1.0で引き伸ばし）
+		 * @param scaleV 縦方向の繰り返し回数（1.0で引き伸ばし）
+		 */
+		virtual void setTextureTiling(int modelHandle, float scaleU, float scaleV) = 0;
+
+		/**
+		 * @brief モデルのテクスチャをずらして貼る（模様を流す演出に使う）
+		 *
+		 * 繰り返し回数に加えて平行移動を指定する。offsetV を時間で増やし続ければ、
+		 * 壁の模様が流れ続けて「情報が流れるサーバー内部」に見える。
+		 * 描画のたびに設定するため、同じモデルを別の流し方で使い回しても混ざらない。
+		 * @param modelHandle モデルハンドル
+		 * @param scaleU 横方向の繰り返し回数（1.0で引き伸ばし）
+		 * @param scaleV 縦方向の繰り返し回数（1.0で引き伸ばし）
+		 * @param offsetU 横方向のずらし量（1.0でテクスチャ1枚ぶん）
+		 * @param offsetV 縦方向のずらし量（1.0でテクスチャ1枚ぶん）
+		 */
+		virtual void setTextureScroll(int modelHandle, float scaleU, float scaleV,
+		    float offsetU, float offsetV) = 0;
 		/**
 		 * @brief 敵撃破時の赤化＋ディゾルブ（消失）演出をモデルに適用する
 		 *
@@ -45,9 +72,10 @@ namespace core::iface
 		 * @brief デバッグ用にコライダーを可視化する
 		 * @param center 中心座標
 		 * @param size サイズ
+		 * @param rotationY Y軸まわりの向き（ラジアン）
 		 * @param color 色（ARGB）
 		 */
-		virtual void drawCollider(const core::Vector3& center, const core::Vector3& size, unsigned int color) = 0;
+		virtual void drawCollider(const core::Vector3& center, const core::Vector3& size, float rotationY, unsigned int color) = 0;
 
 		/**
 		 * @brief デバッグ用に球（範囲）を可視化する
@@ -110,6 +138,19 @@ namespace core::iface
 		    const core::Vector3& scale, const core::Vector3& centerOffset,
 		    const core::Vector3& faceDir, float spinAngle) = 0;
 
+		/**
+		 * @brief 2D画像を常にカメラへ正対するビルボードとして3D空間に描く
+		 *
+		 * 深度（Zバッファ）を持つので、壁や柱の裏に回れば正しく隠れる。
+		 * プレイヤーのWindow弾のように「板に絵を貼った弾」を描くのに使う。
+		 * @param imageHandle 2D画像ハンドル（loadImageByIdで取得したもの）
+		 * @param position ビルボード中心のワールド座標
+		 * @param size ワールド単位での大きさ（画像のアスペクト比は保たれる）
+		 * @param angle 面内の回転角（ラジアン）
+		 */
+		virtual void drawBillboard(int imageHandle, const core::Vector3& position,
+		    float size, float angle) = 0;
+
 		// 補足: worldToScreen は射影変換であり、厳密には3D描画の責務ではない。
 		//       ただし現状の利用は順変換の2箇所のみで、メソッド1本のために
 		//       IViewProjection を新設しても抽象が増えるだけで得るものが少ない。
@@ -120,5 +161,15 @@ namespace core::iface
 		 * @return x/yはスクリーン座標、zは深度（0.0〜1.0の範囲内なら画面に映っている）
 		 */
 		virtual core::Vector3 worldToScreen(const core::Vector3& worldPos) = 0;
+
+		/**
+		 * @brief DEBUG: 直前の1フレームで発行された描画コール数を取得する
+		 *
+		 * 描画負荷の当たりをつけるための計測用。値は「前々回の画面更新〜前回の画面更新」の
+		 * 区間の集計であり、フレーム中のどこで呼んでも直前フレームの確定値が返る。
+		 * モデル・UI・エフェクトを含めた総数を数える
+		 * @return 描画コール数
+		 */
+		virtual int getDrawCallCount() = 0;
 	};
 } // namespace core::iface

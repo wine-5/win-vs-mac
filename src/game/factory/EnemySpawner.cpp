@@ -4,6 +4,8 @@
 #include "core/interface/ILogger.h"
 #include "core/utility/Log.h"
 #include "game/component/ai/AIComponent.h"
+#include "game/component/movement/TransformComponent.h"
+#include "core/utility/MathConstants.h"
 #include "game/constant/ModelId.h"
 #include "game/event/InGameEvents.h"
 #include <stdexcept>
@@ -48,7 +50,8 @@ namespace game::factory
 		m_target = target;
 	}
 
-	core::ecs::EntityId EnemySpawner::spawn(constant::EnemyType type, const core::Vector3& position)
+	core::ecs::EntityId EnemySpawner::spawn(constant::EnemyType type, const core::Vector3& position,
+	    float rotationY)
 	{
 		const auto modelId{ toModelId(type) };
 
@@ -69,6 +72,10 @@ namespace game::factory
 		// 敵種はスポーン時にしか分からないのでコンポーネントとして持たせる（推測させない）
 		m_componentManager.add<component::EnemyTypeComponent>(enemyId, { type });
 
+		// ステージ定義の向きを反映する。JSONは度数法なのでラジアンへ変換する
+		if (auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(enemyId) })
+			transform->m_rotation.y = rotationY * core::utility::DEG_TO_RAD;
+
 		// 追跡対象が設定されていれば反映する（召喚された敵も即プレイヤーを追う）
 		if (m_target.getId() != 0 && m_componentManager.has<component::ai::AIComponent>(enemyId))
 		{
@@ -86,7 +93,7 @@ namespace game::factory
 	{
 		const auto& stage{ m_resourceManager.getStageMetadata() };
 		for (const auto& spawn : stage.m_spawns)
-			this->spawn(constant::toEnemyType(spawn.m_type), spawn.m_position);
+			this->spawn(constant::toEnemyType(spawn.m_type), spawn.m_position, spawn.m_rotationY);
 	}
 
 	void EnemySpawner::returnEnemy(constant::EnemyType type, core::ecs::EntityId entityId, int modelHandle)

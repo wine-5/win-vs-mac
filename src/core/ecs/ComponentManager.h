@@ -100,13 +100,16 @@ namespace core::ecs
 		}
 
 	private:
-		template<typename T>
-		ComponentArray<T>* getComponentArray()
-		{
-			std::type_index type{typeid(T)};
-			if (m_componentArrays.find(type) == m_componentArrays.end())
-				m_componentArrays[type] = std::make_unique<ComponentArray<T>>();
-			return static_cast<ComponentArray<T>*>(m_componentArrays[type].get());
+	  // find→operator[] と2回ハッシュ検索していたのを1回にまとめる。
+	  // get/has/tryGet は毎フレーム大量に呼ばれるため、ここの1回分がそのまま効いてくる
+	  template <typename T>
+	  ComponentArray<T>* getComponentArray()
+	  {
+		  std::type_index type{ typeid(T) };
+		  auto it{ m_componentArrays.find(type) };
+		  if (it == m_componentArrays.end())
+			  it = m_componentArrays.emplace(type, std::make_unique<ComponentArray<T>>()).first;
+		  return static_cast<ComponentArray<T>*>(it->second.get());
 		}
 
 		std::unordered_map<std::type_index, std::unique_ptr<IComponentArray>> m_componentArrays;

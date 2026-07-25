@@ -83,7 +83,7 @@ namespace game::ui::debug
 
 		bool m_isEnabled{ true };
 		bool m_isColliderEnabled{ false };
-		bool m_isAttackRangeEnabled{ false };
+		bool m_isAttackRangeEnabled{ true };
 		bool m_isDetectionRangeEnabled{ false };
 		bool m_isProjectileRangeEnabled{ false };
 	};

@@ -7,6 +7,11 @@
 #include "core/interface/IScreen.h"
 #include "core/interface/IEffectFactory.h"
 
+namespace game::system::combat
+{
+	class PlayerDeathSystem;
+} // namespace game::system::combat
+
 namespace game::system::visual
 {
 	class PlayerChargeVisualsSystem;
@@ -88,6 +93,12 @@ namespace game::scene
 		void setTelegraphVisualsSystem(system::visual::TelegraphVisualsSystem* system);
 
 		/**
+		 * @brief プレイヤー死亡演出System（暗転の描画元）を設定する
+		 * @param system PlayerDeathSystemのポインタ（所有はSystemManager）
+		 */
+		void setPlayerDeathSystem(system::combat::PlayerDeathSystem* system);
+
+		/**
 		 * @brief DEBUG: ワールド空間デバッグ可視化Viewを設定する（リリース時に削除）
 		 * @param view DebugGizmoViewのポインタ（所有はInGame）
 		 */
@@ -141,6 +152,9 @@ namespace game::scene
 		// 攻撃予兆（地面の攻撃範囲サークル）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::visual::AttackTelegraphVisualsSystem* m_attackTelegraphSystem{ nullptr };
 		system::visual::TelegraphVisualsSystem* m_telegraphSystem{ nullptr };
+
+		// プレイヤー死亡時の暗転の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
+		system::combat::PlayerDeathSystem* m_playerDeathSystem{ nullptr };
 
 		// DEBUG: デバッグ可視化・HUDの描画元（所有はInGame。リリース時に削除）
 		ui::debug::DebugGizmoView* m_debugGizmoView{ nullptr };

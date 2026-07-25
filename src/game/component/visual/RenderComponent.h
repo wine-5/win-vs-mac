@@ -7,7 +7,25 @@ namespace game::component::visual
 	 */
 	struct RenderComponent
 	{
-		int  m_modelHandle{-1}; // -1は未ロード
-		bool m_isVisible{true};
+		int m_modelHandle{ -1 }; // -1は未ロード
+		bool m_isVisible{ true };
+
+		// ビルボード（板に貼った2D画像）で描く場合の画像ハンドルと大きさ。
+		// m_billboardImageが-1以外なら、モデルではなくビルボードとして描画する（プレイヤーのWindow弾など）
+		int m_billboardImage{ -1 };
+		float m_billboardSize{ 0.0f };
+
+		// テクスチャの繰り返し回数。1.0なら引き伸ばし（従来どおり）。
+		// 引き伸ばした配置物で模様が間延びしないよう、実寸に応じて繰り返す
+		float m_uvScaleU{ 1.0f };
+		float m_uvScaleV{ 1.0f };
+
+		// テクスチャを流す速さ（1.0でテクスチャ1枚ぶん/秒）。0なら流れない
+		float m_scrollSpeedU{ 0.0f };
+		float m_scrollSpeedV{ 0.0f };
+
+		// 現在のずらし量。TextureScrollSystemが時間で進める
+		float m_scrollOffsetU{ 0.0f };
+		float m_scrollOffsetV{ 0.0f };
 	};
 } // namespace game::component::visual

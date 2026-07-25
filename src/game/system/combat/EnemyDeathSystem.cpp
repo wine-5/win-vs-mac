@@ -191,6 +191,11 @@ namespace game::system::combat
 				// プールへ返却する前に見た目を元に戻す（次にこのハンドルを使う敵が赤いまま出現しないように）
 				m_renderer.resetModelAppearance(modelHandle);
 				m_enemySpawner.returnEnemy(type, entityId, modelHandle);
+
+				// 破棄する前に「完全に消滅した」ことを通知する（ボス撃破の勝利遷移などが待つ）。
+				// 敵種も渡して、購読側がボス(Mac)かどうかを明示的に判定できるようにする
+				m_eventBus.publish(event::EnemyVanishedEvent{ entityId, type });
+
 				m_componentManager.removeAll(entityId);
 				m_entityManager.destroy(core::ecs::Entity(entityId));
 			}

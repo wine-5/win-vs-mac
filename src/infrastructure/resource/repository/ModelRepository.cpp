@@ -11,6 +11,43 @@ namespace
 {
 	// 腕を広げたポーズだと横幅が実際の胴体より大きく出るため、水平方向を絞って胴体に沿わせる係数
 	constexpr float HORIZONTAL_SHRINK{ 0.5f };
+
+	/**
+	 * @brief モデル全マテリアルの環境光反射を白に揃える
+	 *
+	 * FBX由来のモデルは環境光の反射率が低く（もしくは0）、環境光を上げても暗いままになる。
+	 * 一方こちらで生成したステージ用MQOは amb(1.0) を持つため、同じ光でも明るさが揃わない。
+	 * 読み込み時に一律で白へ正規化し、モデルの出自による明暗のばらつきを無くす。
+	 * @param handle モデルハンドル
+	 */
+	void normalizeMaterialAmbient(int handle)
+	{
+		if (handle == -1)
+			return;
+
+		const COLOR_F white{ GetColorF(1.0f, 1.0f, 1.0f, 1.0f) };
+		const int materialNum{ MV1GetMaterialNum(handle) };
+		for (int i{ 0 }; i < materialNum; ++i)
+			MV1SetMaterialAmbColor(handle, i, white);
+	}
+
+	/**
+	 * @brief モデルの背面カリングを無効にする
+	 *
+	 * 配置物は自前生成の立方体で、DxLibのカリング判定と面の巻き方向が噛み合わず
+	 * 手前の面が消えることがある。カリングを切れば巻き方向に関係なく全面が描かれる。
+	 * 両面ポリゴンを重ねる方式と違い、Zファイティングも起きない。
+	 * @param handle モデルハンドル
+	 */
+	void disableBackCulling(int handle)
+	{
+		if (handle == -1)
+			return;
+
+		const int meshNum{ MV1GetMeshNum(handle) };
+		for (int i{ 0 }; i < meshNum; ++i)
+			MV1SetMeshBackCulling(handle, i, DX_CULLING_NONE);
+	}
 } // namespace
 
 namespace infrastructure::resource::repository
@@ -38,9 +75,14 @@ namespace infrastructure::resource::repository
 
 				int handle{ MV1LoadModel(rawIt->second.c_str()) };
 				if (handle == -1)
+				{
 					core::log::error("モデルの読み込みに失敗しました: {}", rawIt->second.c_str());
+				}
 				else
+				{
+					normalizeMaterialAmbient(handle);
 					m_modelHandles[id] = handle;
+				}
 				return handle;
 			}
 		}
@@ -63,6 +105,8 @@ namespace infrastructure::resource::repository
 			core::log::error("モデルの読み込みに失敗しました: {}", metadata.modelPath.c_str());
 			return -1;
 		}
+
+		normalizeMaterialAmbient(handle);
 
 		VECTOR scale = VGet(metadata.scale.x, metadata.scale.y, metadata.scale.z);
 		MV1SetScale(handle, scale);
@@ -115,6 +159,30 @@ namespace infrastructure::resource::repository
 		return handle;
 	}
 
+	int ModelRepository::loadModelByPath(std::string_view path)
+	{
+		std::string key(path);
+
+		auto handleIt{ m_modelHandles.find(key) };
+		if (handleIt != m_modelHandles.end())
+			return handleIt->second;
+
+		int handle{ MV1LoadModel(key.c_str()) };
+		if (handle == -1)
+		{
+			core::log::error("モデルの読み込みに失敗しました: {}", key.c_str());
+		}
+		else
+		{
+			normalizeMaterialAmbient(handle);
+			// パス指定で読むのは配置物（自前生成の立方体）なので、巻き方向に左右されないよう
+			// カリングを切る。キャラクター等のID指定モデルには適用しない
+			disableBackCulling(handle);
+			m_modelHandles[key] = handle;
+		}
+		return handle;
+	}
+
 	int ModelRepository::duplicateModel(int modelHandle)
 	{
 		if (modelHandle == -1)
@@ -122,7 +190,14 @@ namespace infrastructure::resource::repository
 
 		int duplicated{ MV1DuplicateModel(modelHandle) };
 		if (duplicated == -1)
+		{
 			core::log::error("モデルハンドルの複製に失敗しました: {}", modelHandle);
+			return duplicated;
+		}
+
+		// 複製にはロード時のマテリアル調整が引き継がれないため、ここでも掛け直す。
+		// これを忘れると、複製ハンドルを使う敵だけが暗いまま（プレイヤーは複製しないので明るい）になる
+		normalizeMaterialAmbient(duplicated);
 		return duplicated;
 	}
 
@@ -318,7 +393,8 @@ namespace infrastructure::resource::repository
 			// gameplay配下は「キー名がそのまま floatProperties のキーになる」だけなので、
 			// キーを1箇所の配列で持ち、存在するものだけ取り込む
 			static constexpr std::string_view FLOAT_KEYS[]{
-				"moveSpeed", "dashMultiplier", "detectionRange", "attackRange",
+				"moveSpeed", "dashMultiplier", "jumpForce", "gravity", "maxFallSpeed",
+				"detectionRange", "attackRange",
 				"maxHp", "defence", "attackPower", "attackCooldown", "attackWindup",
 				"hoverHeight", "preferredDistanceMin", "preferredDistanceMax",
 				"fireCooldown", "facingYawOffset"

@@ -23,5 +23,12 @@ namespace infrastructure::graphics
 	   * @param fovRad 視野角（ラジアン）
 	   */
 	  void setFieldOfView(float fovRad) override;
+
+	  /**
+	   * @brief 描画するNear/Farクリップ距離を設定する
+	   * @param nearClip 手前のクリップ距離
+	   * @param farClip 奥のクリップ距離
+	   */
+	  void setNearFar(float nearClip, float farClip) override;
 	};
 } // namespace infrastructure::graphics

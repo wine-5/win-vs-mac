@@ -8,7 +8,6 @@ namespace core::iface
     class IWindow;
     class ISelectWindowManager;
     class IResourceManager;
-	class IProjectileWindowManager;
 
 	/**
      * @brief プラットフォーム層のウィンドウ生成を担当するインターフェース
@@ -48,11 +47,5 @@ namespace core::iface
             std::function<void()> onGameStart,
             std::function<void(int, const std::string&)> onFileSlotChanged,
             IResourceManager& resourceManager) = 0;
-
-		/**
-		 * @brief 弾追従ウィンドウのマネージャを生成する
-		 * @return 生成されたマネージャ
-		 */
-		virtual std::unique_ptr<IProjectileWindowManager> createProjectileWindowManager() = 0;
 	};
 } // namespace core::iface

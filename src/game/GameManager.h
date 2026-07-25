@@ -79,6 +79,25 @@ namespace game
 			return m_debugMode;
 		}
 
+		/**
+		 * @brief 連続ジャンプ（空中でも押し続けで浮上）のON/OFFを切り替える
+		 *
+		 * 通常は接地時の単発ジャンプに制限するが、デバッグで空中移動したいとき用に残す。
+		 */
+		void toggleContinuousJump() noexcept
+		{
+			m_continuousJumpEnabled = !m_continuousJumpEnabled;
+		}
+
+		/**
+		 * @brief 連続ジャンプが有効かどうかを返す
+		 * @return 有効ならtrue（PhysicsSystemが接地・押下エッジ判定を無効化する）
+		 */
+		[[nodiscard]] bool isContinuousJumpEnabled() const noexcept
+		{
+			return m_continuousJumpEnabled;
+		}
+
 		// DEBUG: ここまでデバッグモード関連
 
 		/**
@@ -94,5 +113,7 @@ namespace game
 
 		// DEBUG: デバッグモードの状態（リリース時に削除）
 		bool m_debugMode{ false };
+		// DEBUG: 連続ジャンプ（空中浮上）を許可するか。falseで通常の接地単発ジャンプ（リリース時に削除）
+		bool m_continuousJumpEnabled{ false };
 	};
 } // namespace game

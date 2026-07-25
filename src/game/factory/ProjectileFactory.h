@@ -19,6 +19,11 @@ namespace game::factory
 		float m_scale{ 1.0f };    // 見た目スケール（0だと描画されないため1.0を既定にする）
 		int m_modelHandle{ -1 };  // 3Dモデル描画用のハンドル（-1ならモデル描画なし）
 
+		// ビルボード描画（板に貼った2D画像）用。m_billboardImageが-1以外ならビルボードで描く。
+		// プレイヤーのWindow弾は実OSウィンドウではなくこれで描く（プレイヤーを隠さない・全画面と干渉しない）
+		int m_billboardImage{ -1 };
+		float m_billboardSize{ 0.0f };
+
 		// 0より大きければルーレット回転（画面正対のZ軸スピン）で描画する。
 		// 値は1ワールド単位進むごとの回転量[rad]（レインボーの演出用）
 		float m_spinRollSpeed{ 0.0f };

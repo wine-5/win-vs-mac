@@ -82,7 +82,7 @@ namespace game::ui::debug
 			auto& colliderTf{ m_componentManager.get<component::movement::TransformComponent>(id) };
 			auto& collider{ m_componentManager.get<component::combat::ColliderComponent>(id) };
 			core::Vector3 colliderCenter{ colliderTf.m_position + collider.m_offset };
-			m_renderer.drawCollider(colliderCenter, collider.m_size, core::utility::Color::BLUE);
+			m_renderer.drawCollider(colliderCenter, collider.m_size, collider.m_rotationY, core::utility::Color::BLUE);
 		}
 	}
 

@@ -11,9 +11,10 @@
 namespace game::system::visual
 {
 	/**
-	 * @brief ボス覚醒（フェーズ移行）時のシネマ演出を担うSystem
+	 * @brief ボスへ寄るシネマ演出を担うSystem（出現時・覚醒時に共用）
 	 *
-	 * MacPhaseTransitionEventを購読し、以下のタイムラインを駆動する：
+	 * BossAppearedEvent（雑魚全滅→ボス出現）と MacPhaseTransitionEvent（覚醒）を購読し、
+	 * どちらも同一のタイムラインを駆動する：
 	 *   ①ズームイン（カメラがボスへ寄る）→ ②ホールド（シェイク＋赤ビネット）→ ③ズームアウト → 再開
 	 * 毎フレーム、CameraEffectComponentのシネマ・シェイクチャンネルを書き込み（driver System）、
 	 * 演出中はプレイヤーのInputComponentをロックして操作を無効化する。
@@ -58,6 +59,11 @@ namespace game::system::visual
 		float m_elapsedTime{ 0.0f };   // 演出開始からの経過時間（秒）
 		bool m_isPlaying{ false };     // 演出中かどうか
 		float m_vignetteAlpha{ 0.0f }; // 今フレームの赤ビネットの濃さ（0〜1）
+
+		// 今回の演出の強度。トリガー（出現／覚醒）ごとに別プリセットを起動時に取り込む。
+		// 出現は控えめ、覚醒は強め、というように個別調整できる
+		float m_shakeStrength{ 0.0f };    // ホールド中のシェイクの最大振幅（ワールド単位）
+		float m_vignetteStrength{ 0.0f }; // 赤ビネットの最大濃さ（0〜1）
 
 		std::mt19937 m_rng{ std::random_device{}() }; // ビネットのちらつき用乱数
 

@@ -8,20 +8,86 @@
 namespace
 {
 	constexpr int COLOR_BIT = 32;
+
+	// 描画解像度は常にこの値で固定する。
+	// フルスクリーンでもモニタのネイティブ解像度（4K等）では描かず、この解像度で描いた画面を
+	// デスクトップ解像度へ拡大表示する。ピクセル処理量が青天井にならず、どのモニタでも
+	// 負荷とUIレイアウトが一定になる
+	constexpr int RENDER_WIDTH = 1920;
+	constexpr int RENDER_HEIGHT = 1080;
+
+#ifdef _DEBUG
+	// DEBUG: 開発中のウィンドウが画面に対して占める割合（タスクバーとタイトルバーのぶん余らせる）
+	constexpr double DEBUG_WINDOW_SCREEN_RATIO = 0.8;
+	// DEBUG: 表示倍率の下限・上限（極端な解像度でも常識的なサイズに収める）
+	constexpr double DEBUG_WINDOW_MIN_RATE = 0.5;
+	constexpr double DEBUG_WINDOW_MAX_RATE = 2.0;
+
+	/**
+	 * @brief DEBUG: 開発用ウィンドウの表示倍率を、実際のモニタ解像度から求める
+	 *
+	 * SetWindowSizeExtendRate が扱うのは物理ピクセル数のため、DPIスケーリングの影響を
+	 * 受けない EnumDisplaySettings で実解像度を取得する（GetSystemMetrics はプロセスの
+	 * DPI認識状態によって論理座標を返すことがあり、高DPI機でウィンドウが極端に小さくなる）。
+	 * @return 描画解像度に掛ける表示倍率
+	 */
+	double calcDebugWindowExtendRate()
+	{
+		DEVMODE displayMode{};
+		displayMode.dmSize = sizeof(displayMode);
+		if (EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &displayMode) == 0)
+			return 1.0;
+
+		const double rateX{ DEBUG_WINDOW_SCREEN_RATIO * displayMode.dmPelsWidth / RENDER_WIDTH };
+		const double rateY{ DEBUG_WINDOW_SCREEN_RATIO * displayMode.dmPelsHeight / RENDER_HEIGHT };
+		const double rate{ rateX < rateY ? rateX : rateY };
+
+		if (rate < DEBUG_WINDOW_MIN_RATE)
+			return DEBUG_WINDOW_MIN_RATE;
+		if (rate > DEBUG_WINDOW_MAX_RATE)
+			return DEBUG_WINDOW_MAX_RATE;
+		return rate;
+	}
+#endif
 } // namespace
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
-	int screenWidth{}, screenHeight{};
-#ifdef _DEBUG // DEBUG: 開発中はウインドウモードで起動
-	screenWidth = 1280;
-	screenHeight = 720;
+	// 描画の高さは 1080 に固定し（UIスケールと負荷を端末に依らず一定に保つ）、
+	// 幅だけデスクトップのアスペクト比に合わせる。これで枠なしウィンドウをデスクトップ全体へ
+	// 拡大したとき、余白（レターボックス）も歪み（ストレッチ）も無くどの端末でも全画面になる。
+	// ＝ Unity の Fullscreen Window と同じ考え方
+	int screenWidth{ RENDER_WIDTH };
+	int screenHeight{ RENDER_HEIGHT };
+
+#ifndef _DEBUG
+	double fullscreenRate{ 1.0 }; // 描画バッファをデスクトップ全体へ広げる拡大率
+	{
+		DEVMODE displayMode{};
+		displayMode.dmSize = sizeof(displayMode);
+		if (EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &displayMode) != 0 && displayMode.dmPelsHeight > 0)
+		{
+			// 高さは固定、幅をデスクトップのアスペクト比に合わせる（縦横比が一致するので歪まない）
+			screenWidth = static_cast<int>(RENDER_HEIGHT * static_cast<double>(displayMode.dmPelsWidth) / displayMode.dmPelsHeight);
+			screenHeight = RENDER_HEIGHT;
+			fullscreenRate = static_cast<double>(displayMode.dmPelsHeight) / RENDER_HEIGHT;
+		}
+	}
+#endif
+
 	SetGraphMode(screenWidth, screenHeight, COLOR_BIT);
+
+#ifdef _DEBUG // DEBUG: 開発中はウインドウモードで起動する（画面に収まるよう縮小表示する）
 	ChangeWindowMode(TRUE);
-#else // リリース用（フルサイズ）
-	GetDefaultState(&screenWidth, &screenHeight, nullptr);
-	SetGraphMode(screenWidth, screenHeight, COLOR_BIT);
-	ChangeWindowMode(FALSE);
+	SetWindowSizeExtendRate(calcDebugWindowExtendRate());
+#else // リリース：ボーダーレス全画面（枠なしウィンドウでデスクトップ全体を覆う）
+	// 排他フルスクリーンにすると、セレクト/リザルトのWebViewなど別ウィンドウが前面に出るたびに
+	// 前面を奪い合い、画面が切り替わって入力が他アプリへ行ってしまう。枠なしウィンドウにすれば
+	// 見た目は全画面のまま、他ウィンドウと素直に重なるためこの問題が起きない
+	ChangeWindowMode(TRUE);
+	SetWindowStyleMode(4); // タイトルバー・枠の無いスタイル
+	SetWindowSizeExtendRate(fullscreenRate);
+	SetWindowPosition(0, 0); // デスクトップ左上に合わせて全体を覆う
 #endif
 
 	SetAlwaysRunFlag(TRUE); // ファイルダイアログ等でウィンドウが非アクティブになっても描画を継続する
@@ -40,7 +106,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SetUseZBuffer3D(TRUE);
 	SetWriteZBuffer3D(TRUE);
 
-	SetMouseDispFlag(TRUE); // リリース・デバッグ問わずマウスカーソルを常時表示
 	SetUseLighting(FALSE);
 
 	try
