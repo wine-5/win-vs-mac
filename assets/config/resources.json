@@ -52,7 +52,9 @@
     {"id": "ext-arc",           "path": "assets/images/ui/ingame/ext/arc.png"},
     {"id": "ext-etc",           "path": "assets/images/ui/ingame/ext/etc.png"},
     {"id": "ext-emp",           "path": "assets/images/ui/ingame/ext/emp.png"},
-    {"id": "vignette-lowhp",    "path": "assets/images/ui/ingame/vignette_lowhp.png"}
+    {"id": "vignette-lowhp",    "path": "assets/images/ui/ingame/vignette_lowhp.png"},
+    {"id": "sky-glow",          "path": "assets/images/ingame/sky_glow.png"},
+    {"id": "sky-folder",        "path": "assets/images/ingame/folder.png"}
   ],
   "bgm": [
     { "type": "Title",      "path": "assets/audio/bgm/bgm_title.mp3",         "volume":0.5, "useFade": true  },
