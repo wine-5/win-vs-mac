@@ -2,6 +2,7 @@
 #include "core/utility/Color.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/component/visual/WeaponAttachComponent.h"
 #include "game/component/combat/AimComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
 #include "game/component/combat/DeathComponent.h"
@@ -157,8 +158,27 @@ namespace game::scene
 					m_renderer.setTextureScroll(render.m_modelHandle, render.m_uvScaleU, render.m_uvScaleV,
 					    render.m_scrollOffsetU, render.m_scrollOffsetV);
 				m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
+
+				// 装着武器は本体を描いた直後に描く。ボーンのワールド行列は本体の
+				// 位置・回転・スケールが適用済みでなければ正しい姿勢にならない
+				drawAttachedWeapon(entityId);
 			}
 		}
+	}
+
+	void InGameView::drawAttachedWeapon(core::ecs::EntityId entityId)
+	{
+		if (!m_componentManager.has<component::visual::WeaponAttachComponent>(entityId))
+			return;
+
+		const auto& attach{ m_componentManager.get<component::visual::WeaponAttachComponent>(entityId) };
+		// フレーム番号の解決は WeaponAttachSystem が行う。未解決のうちは描かない
+		if (!attach.m_isVisible || attach.m_modelHandle == -1 || attach.m_frameIndex < 0)
+			return;
+
+		const auto& render{ m_componentManager.get<component::visual::RenderComponent>(entityId) };
+		m_renderer.drawModelOnFrame(attach.m_modelHandle, render.m_modelHandle, attach.m_frameIndex,
+		    attach.m_offsetPosition, attach.m_offsetRotation, attach.m_offsetScale);
 	}
 
 	void InGameView::drawReticle(core::ecs::EntityId playerId)

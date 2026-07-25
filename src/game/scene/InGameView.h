@@ -120,6 +120,16 @@ namespace game::scene
 		void drawModels();
 
 		/**
+		 * @brief Entityが装着している武器を、装着先ボーンへ追従させて描画する
+		 *
+		 * 本体モデルを描いた直後に呼ぶこと（ボーンのワールド行列が確定するため）。
+		 * 装着先ボーンの解決は WeaponAttachSystem が済ませている前提で、
+		 * 未解決のものは描かない
+		 * @param entityId 装着元EntityのID
+		 */
+		void drawAttachedWeapon(core::ecs::EntityId entityId);
+
+		/**
 		 * @brief 画面中央に照準レティクル（クロスヘア）を描画する
 		 * @param playerId 照準状態（AimComponent）を読むプレイヤーのEntityID
 		 */
