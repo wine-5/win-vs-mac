@@ -38,6 +38,7 @@
 #include "game/system/visual/EffectSystem.h"
 #include "game/system/visual/LightSystem.h"
 #include "game/system/visual/TextureScrollSystem.h"
+#include "game/system/visual/WeaponAttachSystem.h"
 #include "game/constant/PropId.h"
 #include "core/interface/IEffectFactory.h"
 #include "game/system/combat/AttackSystem.h"
@@ -397,6 +398,9 @@ namespace game::scene
 
 		// 壁などの模様を流す（貼り方をずらすだけなので描画状態に影響しない）
 		m_systemManager.registerSystem<game::system::visual::TextureScrollSystem>(m_componentManager);
+
+		// 装着武器の装着先ボーンを解決する（解決はEntityごとに一度きり。描画はInGameView）
+		m_systemManager.registerSystem<game::system::visual::WeaponAttachSystem>(m_componentManager, m_renderer);
 
 		// LightComponentを持つエンティティの点光源を生成・追従させる（プレイヤーの携行灯など）
 		if (auto* lighting{ core::base::ServiceLocator::get<core::iface::ILighting>() })
