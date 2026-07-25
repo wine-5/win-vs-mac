@@ -8,7 +8,12 @@ namespace infrastructure::resource::repository
 	{
 		for (const auto& font : loadFontList(j))
 		{
-			AddFontResourceEx(font.m_path.c_str(), FR_PRIVATE, nullptr);
+			// 登録に失敗しても、同名フォントがOSにインストールされていると
+			// CreateFontToHandleが成功してしまい、開発機だけ正常に見えて
+			// 配布先で文字化けする。ここで必ず失敗を検出する
+			if (AddFontResourceEx(font.m_path.c_str(), FR_PRIVATE, nullptr) == 0)
+				throw std::runtime_error{ "フォントの登録に失敗しました: " + font.m_path };
+
 			m_fontNames[font.m_id] = font.m_name;
 			m_fontPaths[font.m_id] = font.m_path;
 		}

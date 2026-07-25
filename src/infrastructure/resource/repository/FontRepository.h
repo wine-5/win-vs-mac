@@ -17,13 +17,14 @@ namespace infrastructure::resource::repository
 	class FontRepository
 	{
 	public:
-		/**
-		 * @brief コンストラクタ
-		 *
-		 * コンストラクト時にresources.jsonからすべてのフォントを読み込み、
-		 * DxLibに登録する
-		 * @throw std::runtime_error ファイルが見つからないか、JSONパースに失敗した場合
-		 */
+	  /**
+	   * @brief コンストラクタ
+	   *
+	   * コンストラクト時にresources.jsonからすべてのフォントを読み込み、
+	   * DxLibに登録する
+	   * @throw std::runtime_error ファイルが見つからない、JSONパースに失敗した、
+	   *        またはフォントの登録に失敗した場合
+	   */
 	  FontRepository(const nlohmann::json& j);
 
 	  /**
