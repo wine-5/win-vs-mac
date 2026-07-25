@@ -67,6 +67,7 @@
 #include "game/system/combat/ProjectileSystem.h"
 #include "game/system/combat/ProjectileReflectSystem.h"
 #include "game/system/combat/PlayerRangedAttackSystem.h"
+#include "game/system/combat/PlayerAttackComboSystem.h"
 #include "game/system/visual/PlayerChargeVisualsSystem.h"
 #include "game/system/camera/ChargeZoomSystem.h"
 #include "game/system/camera/DamageShakeSystem.h"
@@ -399,6 +400,10 @@ namespace game::scene
 
 		// 敵がプレイヤーを発見した瞬間を検知（全敵共通）。発見演出のトリガーになる
 		m_systemManager.registerSystem<game::system::ai::DetectionSystem>(m_componentManager, m_eventBus);
+
+		// プレイヤーの近接攻撃入力をコンボの段数へ振り分ける（攻撃の成立はAttackSystem）
+		m_systemManager.registerSystem<game::system::combat::PlayerAttackComboSystem>(
+		    m_componentManager, m_playerId);
 
 		m_systemManager.registerSystem<game::system::combat::AttackSystem>(
 		    m_componentManager, m_eventBus, core::constant::SeType::AttackPlayer);

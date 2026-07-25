@@ -10,6 +10,7 @@
 #include "game/component/TagComponent.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/combat/AttackComponent.h"
+#include "game/component/combat/AttackComboComponent.h"
 #include "game/component/visual/HitEffectComponent.h"
 #include "game/component/visual/EffectComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
@@ -60,6 +61,12 @@ namespace game::actor
 		attack.m_attackRange = playerData.getAttackRange();
 		attack.m_attackCooldown = playerData.getAttackCooldown();
 		componentManager.add<component::combat::AttackComponent>(m_entity.getId(), attack);
+
+		// 近接攻撃の2段コンボ（斬り→回転斬り）。次段の受付時間はJSONで調整する
+		component::combat::AttackComboComponent combo{};
+		combo.m_inputWindow = playerData.getComboInputWindow();
+		componentManager.add<component::combat::AttackComboComponent>(m_entity.getId(), combo);
+
 		component::combat::ColliderComponent collider;
 		collider.m_size = playerData.getColliderSize();
 		collider.m_offset = playerData.getColliderOffset();
