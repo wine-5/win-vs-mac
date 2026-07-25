@@ -1,5 +1,7 @@
 #include "ObjectiveView.h"
+#include "core/base/ServiceLocator.h"
 #include "core/constant/UI.h"
+#include "core/interface/IStringConverter.h"
 #include "core/utility/Color.h"
 #include <algorithm>
 #include <cstdio>
@@ -46,7 +48,17 @@ namespace game::ui::ingame
 	ObjectiveView::ObjectiveView(core::iface::IUIRenderer& uiRenderer, core::iface::IScreen& screen)
 	    : m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
+	    , m_detailText{ DETAIL_TEXT }
+	    , m_bossText{ BOSS_TEXT }
 	{
+		// DxLibの描画はShift_JISを期待する。ソース上のUTF-8をそのまま渡すと日本語が化けるため、
+		// ここで一度だけ変換しておく（変換結果は毎フレーム同じなので描画時にはやらない）
+		auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+		if (!converter)
+			return;
+
+		m_detailText = converter->utf8ToShiftJis(m_detailText);
+		m_bossText = converter->utf8ToShiftJis(m_bossText);
 	}
 
 	int ObjectiveView::scaled(int value) const
@@ -72,7 +84,7 @@ namespace game::ui::ingame
 		// ボスが出たら残り数は無意味になる。目標そのものを討伐へ差し替える
 		if (isBossAppeared)
 		{
-			m_uiRenderer.drawText(panelX + padding, panelY + scaled(BOSS_LABEL_Y), BOSS_TEXT,
+			m_uiRenderer.drawText(panelX + padding, panelY + scaled(BOSS_LABEL_Y), m_bossText.c_str(),
 			    core::utility::Color::HUD_CRIT_RED, scaled(BOSS_FONT_SIZE));
 			m_uiRenderer.resetFont();
 			return;
@@ -93,7 +105,7 @@ namespace game::ui::ingame
 
 		m_uiRenderer.setFont(UI_FONT_NAME);
 		m_uiRenderer.drawText(panelX + padding + countWidth + scaled(COUNT_DETAIL_GAP),
-		    panelY + scaled(DETAIL_Y), DETAIL_TEXT,
+		    panelY + scaled(DETAIL_Y), m_detailText.c_str(),
 		    core::utility::Color::HUD_INK_FAINT, scaled(DETAIL_FONT_SIZE));
 		m_uiRenderer.resetFont();
 	}

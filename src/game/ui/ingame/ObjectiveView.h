@@ -1,6 +1,12 @@
 #pragma once
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include <string>
+
+namespace core::iface
+{
+	class IStringConverter; // 前方宣言
+} // namespace core::iface
 
 namespace game::ui::ingame
 {
@@ -48,5 +54,10 @@ namespace game::ui::ingame
 
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
+
+		// DxLibの描画はShift_JISを期待するため、ソース上のUTF-8日本語をそのまま渡すと文字化けする。
+		// 変換結果は毎フレーム同じなので生成時に一度だけ変換して保持する
+		std::string m_detailText{};
+		std::string m_bossText{};
 	};
 } // namespace game::ui::ingame
