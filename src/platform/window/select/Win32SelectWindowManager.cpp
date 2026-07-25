@@ -249,7 +249,16 @@ namespace platform::window::select
                 if (m_fileSelectWindow) m_fileSelectWindow->hide();
                 if (m_parameterWindow)  m_parameterWindow->hide();
                 if (m_difficultyWindow) m_difficultyWindow->hide();
-                if (m_onGameStart) m_onGameStart();
+
+				// デスクトップのギミックで開いた実アプリ（cmd.exe等）が前面に残ると、
+				// ボーダーレスのゲーム画面が隠れてしまう。ゲーム本体ウィンドウを前面へ戻す
+				if (HWND gameHwnd{ static_cast<HWND>(m_screen.getNativeWindowHandle()) })
+				{
+					SetForegroundWindow(gameHwnd);
+					SetActiveWindow(gameHwnd);
+				}
+
+				if (m_onGameStart) m_onGameStart();
             }
             else if (type == platform::window::WindowConstants::MESSAGE_TYPE_TOGGLE_WINDOW)
             {
