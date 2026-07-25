@@ -9,16 +9,16 @@ namespace
 	constexpr int BASE_SCREEN_HEIGHT{ 1080 };
 
 	// スロットの配置（右下・1080p基準）
-	constexpr int MARGIN{ 22 };
-	constexpr int SLOT_SIZE{ 64 };
+	constexpr int MARGIN{ 28 };
+	constexpr int SLOT_SIZE{ 92 };
 	constexpr int SLOT_GAP{ 16 };
 	constexpr int SLOT_RADIUS{ 4 }; // Windows 11のボタン・コントロールの角丸
 
 	// スロット内の文字位置（スロット左上からの相対座標・1080p基準）
-	constexpr int TYPE_LABEL_Y{ 18 };
-	constexpr int TYPE_FONT_SIZE{ 15 };
-	constexpr int BONUS_LABEL_Y{ 40 };
-	constexpr int BONUS_FONT_SIZE{ 10 };
+	constexpr int TYPE_LABEL_Y{ 24 };
+	constexpr int TYPE_FONT_SIZE{ 22 };
+	constexpr int BONUS_LABEL_Y{ 56 };
+	constexpr int BONUS_FONT_SIZE{ 14 };
 
 	// スロットの塗りと枠。色と不透明度を分けて持つ（DxLibのブレンドはアルファを別途指定するため）
 	constexpr unsigned int SLOT_FILL_COLOR{ 0xFF0E1420 };

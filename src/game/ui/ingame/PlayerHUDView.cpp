@@ -11,18 +11,18 @@ namespace
 	constexpr int BASE_SCREEN_HEIGHT{ 1080 };
 
 	// パネルの位置とサイズ（左下・1080p基準）
-	constexpr int PANEL_MARGIN{ 22 };
-	constexpr int PANEL_WIDTH{ 270 };
-	constexpr int PANEL_HEIGHT{ 66 };
-	constexpr int PANEL_PADDING{ 14 };
+	constexpr int PANEL_MARGIN{ 28 };
+	constexpr int PANEL_WIDTH{ 380 };
+	constexpr int PANEL_HEIGHT{ 92 };
+	constexpr int PANEL_PADDING{ 20 };
 	constexpr int PANEL_RADIUS{ 8 }; // Windows 11のウィンドウ・パネルの角丸
 
 	// パネル内の各要素の位置（パネル左上からの相対座標・1080p基準）
-	constexpr int LABEL_Y{ 12 };
-	constexpr int LABEL_FONT_SIZE{ 13 };
-	constexpr int VALUE_FONT_SIZE{ 12 };
-	constexpr int BAR_Y{ 38 };
-	constexpr int BAR_HEIGHT{ 12 };
+	constexpr int LABEL_Y{ 16 };
+	constexpr int LABEL_FONT_SIZE{ 19 };
+	constexpr int VALUE_FONT_SIZE{ 18 };
+	constexpr int BAR_Y{ 54 };
+	constexpr int BAR_HEIGHT{ 18 };
 
 	// パネルの塗りと枠。DxLibのブレンドはアルファ値を別途指定するため、色と不透明度を分けて持つ
 	constexpr unsigned int PANEL_FILL_COLOR{ 0xFF0E1420 };
