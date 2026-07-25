@@ -3,6 +3,7 @@
 #include "core/utility/Color.h"
 #include "game/component/combat/HealthComponent.h"
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
 
 namespace
@@ -38,6 +39,13 @@ namespace
 	constexpr int DAMAGE_FLASH_ALPHA{ 190 };                 // 白フラッシュの強さ
 	constexpr float RESIDUAL_HOLD_DURATION{ 0.35f };         // 残像が縮み始めるまでの待ち（秒）
 	constexpr float RESIDUAL_DECAY_PER_SECOND{ 0.55f };      // 残像が縮む速さ（残量比／秒）
+
+	// 低HPの警告脈動
+	constexpr unsigned int LOW_PULSE_COLOR{ 0xFFE81123 };
+	constexpr int LOW_PULSE_ALPHA{ 130 };           // 脈動の最も明るいときの強さ
+	constexpr float LOW_PULSE_PERIOD_SLOW{ 1.20f }; // 警告が始まった直後の1周期（秒）
+	constexpr float LOW_PULSE_PERIOD_FAST{ 0.55f }; // HPが尽きる寸前の1周期（秒）
+	constexpr float TWO_PI{ 6.283185f };
 
 	// フォント。数値・英字は等幅、日本語を含みうるラベルはNoto Sans JPで描く
 	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono" };
@@ -100,6 +108,30 @@ namespace game::ui::ingame
 			return;
 
 		m_displayedRatio = std::max(ratio, m_displayedRatio - RESIDUAL_DECAY_PER_SECOND * deltaTime);
+	}
+
+	void PlayerHUDView::drawLowHealthPulse(int x, int y, int width, int height, int radius, float ratio)
+	{
+		if (ratio > BAR_LOW_THRESHOLD)
+			return;
+
+		// 残りが少ないほど速く点滅させ、切迫していることを速さでも伝える
+		const float danger{ 1.0f - ratio / BAR_LOW_THRESHOLD };
+		const float period{ LOW_PULSE_PERIOD_SLOW + (LOW_PULSE_PERIOD_FAST - LOW_PULSE_PERIOD_SLOW) * danger };
+
+		const float elapsed{ std::chrono::duration<float>(
+			std::chrono::steady_clock::now() - m_startTime)
+			    .count() };
+		// 0.0〜1.0を往復させる。加算合成なので0のときは何も足されず、元の色に戻る
+		const float wave{ 0.5f - 0.5f * std::cos(elapsed / period * TWO_PI) };
+
+		const int alpha{ static_cast<int>(LOW_PULSE_ALPHA * wave) };
+		if (alpha <= 0)
+			return;
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, alpha);
+		m_uiRenderer.drawRoundedBox(x, y, width, height, radius, LOW_PULSE_COLOR, true, 1);
+		m_uiRenderer.resetBlendMode();
 	}
 
 	float PlayerHUDView::getDamageFlashProgress() const
@@ -180,6 +212,8 @@ namespace game::ui::ingame
 			fillColor = BAR_COLOR_MID;
 
 		m_uiRenderer.drawRoundedBox(x, y, fillWidth, height, radius, fillColor, true, 1);
+
+		drawLowHealthPulse(x, y, fillWidth, height, radius, ratio);
 
 		// 被弾直後だけバー全体を白く飛ばす。減ったことに気づく手がかりを残像より前に出す
 		const float flash{ getDamageFlashProgress() };

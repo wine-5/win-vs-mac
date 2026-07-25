@@ -70,6 +70,19 @@ namespace game::ui::ingame
 		 */
 		[[nodiscard]] float getDamageFlashProgress() const;
 
+		/**
+		 * @brief 残りHPが少ないときに、バーを赤く脈動させる
+		 *
+		 * 平常時は光らせない。光っていること自体が危険の合図になるようにする
+		 * @param x バー左上のX座標
+		 * @param y バー左上のY座標
+		 * @param width 塗られている部分の幅
+		 * @param height バーの高さ
+		 * @param radius 角丸の半径
+		 * @param ratio HPの残量比（0.0〜1.0）
+		 */
+		void drawLowHealthPulse(int x, int y, int width, int height, int radius, float ratio);
+
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
 		core::ecs::ComponentManager& m_componentManager;
@@ -78,6 +91,8 @@ namespace game::ui::ingame
 		// 被弾演出の状態。実HPより遅れて縮む残像バーで「今どれだけ削られたか」を見せる
 		float m_displayedRatio{ -1.0f }; // 負の値は未初期化（初回の描画で実HPに合わせる）
 		std::chrono::steady_clock::time_point m_lastDamageTime{};
+		// 低HPの脈動の基準時刻（生成時から連続して進める）
+		std::chrono::steady_clock::time_point m_startTime{ std::chrono::steady_clock::now() };
 		std::chrono::steady_clock::time_point m_lastFrameTime{};
 		bool m_hasLastFrameTime{ false };
 		bool m_isDamageFlashing{ false };
