@@ -134,8 +134,8 @@ namespace game::event
 
 		EnemyVanishedEvent() = default;
 		EnemyVanishedEvent(core::ecs::EntityId id, constant::EnemyType type)
-		    : m_entityId(id)
-		    , m_type(type)
+		    : m_entityId{ id }
+		    , m_type{ type }
 		{
 		}
 	};
