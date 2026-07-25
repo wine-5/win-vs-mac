@@ -489,6 +489,7 @@
     <ClInclude Include="src\game\ui\ingame\EquipmentSlotView.h" />
     <ClInclude Include="src\game\ui\ingame\ObjectiveView.h" />
     <ClInclude Include="src\game\ui\ingame\HudPanel.h" />
+    <ClInclude Include="src\game\ui\ingame\LowHealthPulse.h" />
     <ClInclude Include="src\game\ui\pause\PauseMenuController.h" />
     <ClInclude Include="src\game\ui\pause\PauseMenuView.h" />
   </ItemGroup>

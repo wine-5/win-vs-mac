@@ -1,4 +1,5 @@
 ﻿#include "PlayerHUDView.h"
+#include "LowHealthPulse.h"
 #include "core/constant/UI.h"
 #include "core/utility/Color.h"
 #include "game/component/combat/HealthComponent.h"
@@ -31,7 +32,6 @@ namespace
 	constexpr unsigned int BAR_COLOR_MID{ 0xFFFFC83D };
 	constexpr unsigned int BAR_COLOR_LOW{ 0xFFE81123 };
 	constexpr float BAR_MID_THRESHOLD{ 0.5f };
-	constexpr float BAR_LOW_THRESHOLD{ 0.2f };
 
 	// 被弾演出
 	constexpr unsigned int BAR_RESIDUAL_COLOR{ 0xFFE81123 }; // 削られた分を示す残像
@@ -40,12 +40,9 @@ namespace
 	constexpr float RESIDUAL_HOLD_DURATION{ 0.35f };         // 残像が縮み始めるまでの待ち（秒）
 	constexpr float RESIDUAL_DECAY_PER_SECOND{ 0.55f };      // 残像が縮む速さ（残量比／秒）
 
-	// 低HPの警告脈動
+	// 低HPの警告脈動（点滅のリズムは LowHealthPulse.h と共有する）
 	constexpr unsigned int LOW_PULSE_COLOR{ 0xFFE81123 };
-	constexpr int LOW_PULSE_ALPHA{ 130 };           // 脈動の最も明るいときの強さ
-	constexpr float LOW_PULSE_PERIOD_SLOW{ 1.20f }; // 警告が始まった直後の1周期（秒）
-	constexpr float LOW_PULSE_PERIOD_FAST{ 0.55f }; // HPが尽きる寸前の1周期（秒）
-	constexpr float TWO_PI{ 6.283185f };
+	constexpr int LOW_PULSE_ALPHA{ 130 }; // 脈動の最も明るいときの強さ
 
 	// フォント。数値・英字は等幅、日本語を含みうるラベルはNoto Sans JPで描く
 	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono" };
@@ -114,20 +111,13 @@ namespace game::ui::ingame
 
 	void PlayerHUDView::drawLowHealthPulse(int x, int y, int width, int height, int radius, float ratio)
 	{
-		if (ratio > BAR_LOW_THRESHOLD)
+		if (!low_health::isLow(ratio))
 			return;
-
-		// 残りが少ないほど速く点滅させ、切迫していることを速さでも伝える
-		const float danger{ 1.0f - ratio / BAR_LOW_THRESHOLD };
-		const float period{ LOW_PULSE_PERIOD_SLOW + (LOW_PULSE_PERIOD_FAST - LOW_PULSE_PERIOD_SLOW) * danger };
 
 		const float elapsed{ std::chrono::duration<float>(
 			std::chrono::steady_clock::now() - m_startTime)
 			    .count() };
-		// 0.0〜1.0を往復させる。加算合成なので0のときは何も足されず、元の色に戻る
-		const float wave{ 0.5f - 0.5f * std::cos(elapsed / period * TWO_PI) };
-
-		const int alpha{ static_cast<int>(LOW_PULSE_ALPHA * wave) };
+		const int alpha{ static_cast<int>(LOW_PULSE_ALPHA * low_health::computeWave(ratio, elapsed)) };
 		if (alpha <= 0)
 			return;
 
@@ -208,7 +198,7 @@ namespace game::ui::ingame
 			return;
 
 		unsigned int fillColor{ BAR_COLOR_HIGH };
-		if (ratio <= BAR_LOW_THRESHOLD)
+		if (low_health::isLow(ratio))
 			fillColor = BAR_COLOR_LOW;
 		else if (ratio <= BAR_MID_THRESHOLD)
 			fillColor = BAR_COLOR_MID;

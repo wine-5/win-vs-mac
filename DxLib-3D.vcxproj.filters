@@ -716,6 +716,9 @@
     <ClInclude Include="src\game\ui\ingame\HudPanel.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\game\ui\ingame\LowHealthPulse.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="src\game\ui\pause\PauseMenuController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
