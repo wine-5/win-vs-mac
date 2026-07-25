@@ -16,7 +16,8 @@
     "defence": 10.0,
     "attackPower": 25.0,
     "attackCooldown": 2.0,
-    "attackWindup": 1.5
+    "attackWindup": 1.5,
+    "attackMaxHeight": 30.0
   },
   "behaviors": [ "meleeChase", "patrol" ],
   "animations": [
