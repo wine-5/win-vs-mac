@@ -33,8 +33,9 @@ namespace platform::window
         static constexpr const char* JSON_KEY_BONUS_SPD{ "bonusSpd" };
 
         // JSONキー（FileSelectWindow）
-        static constexpr const char* JSON_KEY_FILE_SLOT{ "slot" };
-        static constexpr const char* JSON_KEY_IS_EMPTY{ "isEmpty" };
+		static constexpr const char* JSON_KEY_FILE_SLOT{ "slot" };   // スロット番号（要素ひとつぶん）
+		static constexpr const char* JSON_KEY_FILE_SLOTS{ "slots" }; // スロット一覧（配列）
+		static constexpr const char* JSON_KEY_IS_EMPTY{ "isEmpty" };
         static constexpr const char* JSON_KEY_FILE_NAME{ "fileName" };
         static constexpr const char* JSON_KEY_FILE_PATH{ "filePath" };
         static constexpr const char* JSON_KEY_EXT_TYPE{ "extType" };

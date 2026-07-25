@@ -120,7 +120,9 @@ namespace platform::window::select
 		{
 			nlohmann::json resp;
 			resp[platform::window::WindowConstants::JSON_KEY_TYPE]  = platform::window::WindowConstants::MESSAGE_TYPE_REFRESH;
-			resp[platform::window::WindowConstants::JSON_KEY_FILE_SLOT] = nlohmann::json::array();
+			// 配列は "slots"、要素内のスロット番号は "slot"。JS側（file-logic.js）が
+			// data.slots / info.slot の組で読むため、ここを取り違えると一覧が更新されない
+			resp[platform::window::WindowConstants::JSON_KEY_FILE_SLOTS] = nlohmann::json::array();
 			for (int i = 0; i < SLOT_COUNT; ++i)
 			{
 				nlohmann::json s;
@@ -140,7 +142,7 @@ namespace platform::window::select
 					s[platform::window::WindowConstants::JSON_KEY_FILE_PATH] = m_filePaths[i];
 					s[platform::window::WindowConstants::JSON_KEY_EXT_TYPE]  = toName(m_extensionTypes[i]);
 				}
-				resp[platform::window::WindowConstants::JSON_KEY_FILE_SLOT].push_back(s);
+				resp[platform::window::WindowConstants::JSON_KEY_FILE_SLOTS].push_back(s);
 			}
 			m_webView.postMessage(resp.dump());
 		}
