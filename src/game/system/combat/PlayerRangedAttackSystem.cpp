@@ -3,6 +3,8 @@
 #include "game/component/camera/CameraComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
+#include "game/component/visual/AnimationComponent.h"
+#include "game/constant/AnimationState.h"
 #include "game/constant/Tag.h"
 #include <algorithm>
 #include <utility>
@@ -87,6 +89,12 @@ namespace game::system::combat
 
 	void PlayerRangedAttackSystem::fire(float chargeRate)
 	{
+		// 投擲モーションを再生する。溜めの有無で動きは変えないため、
+		// 溜め撃ちも通常撃ちも同じクリップを使う
+		if (m_componentManager.has<component::visual::AnimationComponent>(m_playerId))
+			m_componentManager.get<component::visual::AnimationComponent>(m_playerId)
+			    .request(constant::AnimationState::Throw);
+
 		const auto& camera{ m_componentManager.get<component::camera::CameraComponent>(m_playerId) };
 		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_playerId) };
 
