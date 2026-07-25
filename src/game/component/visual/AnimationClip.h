@@ -15,5 +15,6 @@ namespace game::component::visual
 		constant::AnimationState m_onComplete{ constant::AnimationState::Idle }; // 非ループ再生終了後に遷移する状態
 		int m_priority{ 0 }; // 割り込み優先度（大きいほど優先。再生中クリップより低い要求は無視）
 		float m_speed{ 1.0f }; // 再生速度倍率（1.0が等倍、0.5で半分の速さ）
+		float m_startTime{ 0.0f }; // 再生開始オフセット（フレーム）。頭の不要部分をカットしたいときに使う
 	};
 } // namespace game::component::visual

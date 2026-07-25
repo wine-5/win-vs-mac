@@ -120,7 +120,7 @@ namespace game::system::visual
 		}
 
 		m_animator.changeAnimation(modelHandle, anim.m_animIndex, it->second.m_handle, anim.m_animTotalTime);
-		anim.m_animTime = 0.0f;
+		anim.m_animTime = it->second.m_startTime;
 		anim.m_current = newState;
 		anim.m_requested = newState;
 		anim.m_isCompleted = false;
