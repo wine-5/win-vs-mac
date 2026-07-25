@@ -37,10 +37,11 @@ namespace
 
 	// 縁を周回する光の粒（装備中のスロットのみ）
 	constexpr float ORBIT_PERIOD{ 3.2f };          // 一周にかける秒数
-	constexpr int ORBIT_TRAIL_COUNT{ 6 };          // 先頭を含む粒の数（後ろほど淡くなる）
-	constexpr float ORBIT_TRAIL_SPACING{ 0.016f }; // 粒どうしの間隔（周回全体を1.0とした割合）
+	constexpr int ORBIT_COMET_COUNT{ 2 };          // 同時に回る粒の列の数（外周上で等間隔に配置する）
+	constexpr int ORBIT_TRAIL_COUNT{ 16 };         // 1列あたりの粒の数（後ろほど淡くなる）
+	constexpr float ORBIT_TRAIL_SPACING{ 0.011f }; // 粒どうしの間隔（周回全体を1.0とした割合）
 	constexpr int ORBIT_DOT_RADIUS{ 3 };           // 先頭の粒の半径（1080p基準）
-	constexpr int ORBIT_HEAD_ALPHA{ 210 };         // 先頭の粒の明るさ
+	constexpr int ORBIT_ALPHA{ 210 };              // 加算合成の強さ（粒ごとの明暗は色側で付ける）
 	constexpr float ORBIT_PHASE_PER_SLOT{ 0.33f }; // スロットごとに位相をずらして同期させない
 
 	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono" };
@@ -93,6 +94,22 @@ namespace
 		case core::data::FileExtensionType::Archive: return "ALL+";
 		default: return "RNG+";
 		}
+	}
+
+	/**
+	 * @brief 色の明るさを倍率で落とす
+	 *
+	 * 加算合成では色を暗くすることが透明度を下げることと同じ意味になる。
+	 * 粒ごとにブレンドモードを設定し直さずに済ませるため、明暗は色側で付ける
+	 * @param color 元の色（ARGB形式：0xAARRGGBB）
+	 * @param scale 明るさの倍率（0.0〜1.0）
+	 * @return 暗くした色
+	 */
+	unsigned int scaleBrightness(unsigned int color, float scale)
+	{
+		auto channel = [&](int shift)
+		{ return static_cast<int>(((color >> shift) & 0xFFu) * scale); };
+		return core::utility::Color::argb(255, channel(16), channel(8), channel(0));
 	}
 
 	/**
@@ -252,22 +269,27 @@ namespace game::ui::ingame
 
 		const int dotRadius{ std::max(2, scaled(ORBIT_DOT_RADIUS)) };
 
-		// 加算合成で重ねると、粒が枠線の上を通るときに芯が白く抜けて発光して見える
-		for (int i{ 0 }; i < ORBIT_TRAIL_COUNT; ++i)
+		// 加算合成で重ねると、粒が枠線の上を通るときに芯が白く抜けて発光して見える。
+		// 粒ごとの明暗はアルファではなく色で付けるため、ブレンドの設定は1回で済む
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, ORBIT_ALPHA);
+
+		for (int comet{ 0 }; comet < ORBIT_COMET_COUNT; ++comet)
 		{
-			// 後続ほど過去の位置に置き、暗く小さくして尾を引かせる
-			const float fade{ 1.0f - static_cast<float>(i) / ORBIT_TRAIL_COUNT };
-			const int alpha{ static_cast<int>(ORBIT_HEAD_ALPHA * fade * fade) };
-			if (alpha <= 0)
-				continue;
+			// 列を外周上で等間隔に散らす（2列なら向かい合う位置になる）
+			const float cometHead{ head + static_cast<float>(comet) / ORBIT_COMET_COUNT };
 
-			int dotX{ 0 };
-			int dotY{ 0 };
-			pointOnSquarePerimeter(x, y, size, head - i * ORBIT_TRAIL_SPACING, dotX, dotY);
+			for (int i{ 0 }; i < ORBIT_TRAIL_COUNT; ++i)
+			{
+				// 後続ほど過去の位置に置き、暗く小さくして尾を引かせる
+				const float fade{ 1.0f - static_cast<float>(i) / ORBIT_TRAIL_COUNT };
 
-			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, alpha);
-			m_uiRenderer.drawCircle(dotX, dotY, std::max(1, static_cast<int>(dotRadius * fade)),
-			    core::utility::Color::HUD_CHARGE_CYAN, true, 1);
+				int dotX{ 0 };
+				int dotY{ 0 };
+				pointOnSquarePerimeter(x, y, size, cometHead - i * ORBIT_TRAIL_SPACING, dotX, dotY);
+
+				m_uiRenderer.drawCircle(dotX, dotY, std::max(1, static_cast<int>(dotRadius * fade)),
+				    scaleBrightness(core::utility::Color::HUD_CHARGE_CYAN, fade * fade), true, 1);
+			}
 		}
 
 		m_uiRenderer.resetBlendMode();
