@@ -49,6 +49,22 @@ namespace core::iface
 		virtual void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, unsigned int color, bool isFilled) = 0;
 
 		/**
+		 * @brief 角の丸い矩形をアンチエイリアス付きで描画する
+		 *
+		 * Windows 11（Fluent）のパネル・ボタンを再現するための基本形。
+		 * 角丸の半径はパネルなら8px、ボタン等のコントロールなら4pxが実物の値。
+		 * @param x X座標
+		 * @param y Y座標
+		 * @param width 幅
+		 * @param height 高さ
+		 * @param radius 角丸の半径
+		 * @param color 色（ARGB形式：0xAARRGGBB）
+		 * @param isFilled 塗りつぶすかどうか
+		 * @param thickness 線の太さ（塗りつぶしなしのときに有効）
+		 */
+		virtual void drawRoundedBox(int x, int y, int width, int height, int radius, unsigned int color, bool isFilled, int thickness) = 0;
+
+		/**
          * @brief テキストを描画する
          * @param x X座標
          * @param y Y座標
