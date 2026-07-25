@@ -5,6 +5,7 @@
 #include "game/component/movement/FallRecoveryComponent.h"
 #include "game/component/visual/RenderComponent.h"
 #include "game/component/visual/AnimationComponent.h"
+#include "game/component/visual/WeaponAttachComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/combat/HealthComponent.h"
@@ -18,6 +19,7 @@
 #include "game/component/combat/AimComponent.h"
 #include "game/constant/Tag.h"
 #include "game/constant/AnimationId.h"
+#include "game/constant/ModelId.h"
 
 namespace game::actor
 {
@@ -55,6 +57,7 @@ namespace game::actor
 		anim.m_clips[AnimationState::Jump] = { resourceManager.loadAnimationById(anim_id::PLAYER_JUMP), false, AnimationState::Idle, priority::JUMP, 1.0f, JUMP_ANIM_START };
 		componentManager.add<component::visual::AnimationComponent>(m_entity.getId(), anim);
 		componentManager.add<component::visual::RenderComponent>(m_entity.getId(), { modelHandle });
+		attachWeapon(componentManager, resourceManager);
 		componentManager.add<component::visual::HitEffectComponent>(m_entity.getId(), {});
 		componentManager.add<component::visual::EffectComponent>(m_entity.getId(), {});
 
@@ -92,6 +95,31 @@ namespace game::actor
 		component::TagComponent tag{};
 		tag.m_tag = constant::Tag::Player;
 		componentManager.add<component::TagComponent>(m_entity.getId(), tag);
+	}
+
+	void Player::attachWeapon(core::ecs::ComponentManager& componentManager,
+	    core::iface::IResourceManager& resourceManager)
+	{
+		// 剣モデルは制作中のため、暫定でボスの虹色くるくるを仮の剣として使う。
+		// 装着位置・向き・大きさの調整はモデル差し替え後に実機を見ながら行う
+		const int sourceHandle{ resourceManager.loadModelById(constant::model_id::MAC_RAINBOW_WHEEL) };
+		if (sourceHandle == -1)
+			return;
+
+		// 装着描画は行列を直接指定するため、他の描き方と共有すると位置指定が
+		// 効かなくなる。武器専用のハンドルを複製して持たせる
+		const int weaponHandle{ resourceManager.duplicateModel(sourceHandle) };
+		if (weaponHandle == -1)
+			return;
+
+		// 右手のボーン名。リグ依存のため、実際の名前が違えば起動時のログに
+		// 候補一覧が出るので、それを見てここを直す
+		constexpr std::string_view RIGHT_HAND_FRAME{ "mixamorig:RightHand" };
+
+		component::visual::WeaponAttachComponent weapon{};
+		weapon.m_modelHandle = weaponHandle;
+		weapon.m_frameName = RIGHT_HAND_FRAME;
+		componentManager.add<component::visual::WeaponAttachComponent>(m_entity.getId(), weapon);
 	}
 
 	core::ecs::EntityId Player::getId() const noexcept

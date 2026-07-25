@@ -35,6 +35,17 @@ namespace game::actor
 		core::ecs::EntityId getId() const noexcept;
 
 	private:
-		core::ecs::Entity m_entity;
+	  /**
+	   * @brief 剣を右手のボーンへ装着する（WeaponAttachComponentを付与する）
+	   *
+	   * 装着先ボーン名はモデルのリグ依存で、見つからない場合は
+	   * WeaponAttachSystem が実際のボーン名一覧をログへ出力する
+	   * @param componentManager ComponentManagerの参照
+	   * @param resourceManager 剣モデル読み込み用のIResourceManager
+	   */
+	  void attachWeapon(core::ecs::ComponentManager& componentManager,
+		  core::iface::IResourceManager& resourceManager);
+
+	  core::ecs::Entity m_entity;
 	};
 } // namespace game::actor
