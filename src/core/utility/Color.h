@@ -84,5 +84,7 @@ namespace core::utility
 		// 溜め最大の黄色。ステージが青〜シアン基調のため、白では背景に溶けて完了が分からない
 		static constexpr unsigned int HUD_CHARGE_MAX = 0xFFFFC83D;
 		static constexpr unsigned int HUD_CRIT_RED = 0xFFE81123;    // 敵を捕捉中・危険
+		static constexpr unsigned int HUD_ACCENT = 0xFF0078D4;      // Windows 11のアクセント色
+		static constexpr unsigned int HUD_INK_FAINT = 0xFF5E708A;   // 補足情報・未装備などの控えめな文字
 	};
 } // namespace core::utility

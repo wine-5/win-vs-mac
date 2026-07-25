@@ -19,6 +19,7 @@
 #include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
 #include "game/ui/ingame/PlayerHUDView.h"
+#include "game/ui/ingame/EquipmentSlotView.h"
 #include <algorithm>
 #include <cmath>
 
@@ -71,6 +72,10 @@ namespace game::scene
 		// プレイヤーステータス（左下のHP）。演出より手前・レティクルと同じHUD層に描く
 		if (m_playerHUDView)
 			m_playerHUDView->draw(playerId);
+
+		// 装備スロット（右下）
+		if (m_equipmentSlotView)
+			m_equipmentSlotView->draw();
 
 		// 照準レティクル（HUD）は最前面に描く
 		drawReticle(playerId);
@@ -132,6 +137,11 @@ namespace game::scene
 	void InGameView::setPlayerHUDView(ui::ingame::PlayerHUDView* view)
 	{
 		m_playerHUDView = view;
+	}
+
+	void InGameView::setEquipmentSlotView(ui::ingame::EquipmentSlotView* view)
+	{
+		m_equipmentSlotView = view;
 	}
 
 	void InGameView::drawModels()

@@ -74,6 +74,7 @@
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
 #include "game/ui/ingame/PlayerHUDView.h"
+#include "game/ui/ingame/EquipmentSlotView.h"
 #include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
 #include "game/event/InGameEvents.h"
 
@@ -256,6 +257,12 @@ namespace game::scene
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
 		    m_componentManager);
 		m_view.setPlayerHUDView(m_playerHUDView.get());
+
+		m_equipmentSlotView = std::make_unique<ui::ingame::EquipmentSlotView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_fileEquipmentData);
+		m_view.setEquipmentSlotView(m_equipmentSlotView.get());
 	}
 
 	InGame::~InGame() = default;

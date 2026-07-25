@@ -248,6 +248,7 @@
     <ClCompile Include="src\game\ui\debug\DebugGizmoView.cpp" />
     <ClCompile Include="src\game\ui\debug\DebugHUDView.cpp" />
     <ClCompile Include="src\game\ui\ingame\PlayerHUDView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\EquipmentSlotView.cpp" />
     <ClCompile Include="src\game\ui\pause\PauseMenuController.cpp" />
     <ClCompile Include="src\game\ui\pause\PauseMenuView.cpp" />
   </ItemGroup>
@@ -477,6 +478,7 @@
     <ClInclude Include="src\game\ui\debug\DebugGizmoView.h" />
     <ClInclude Include="src\game\ui\debug\DebugHUDView.h" />
     <ClInclude Include="src\game\ui\ingame\PlayerHUDView.h" />
+    <ClInclude Include="src\game\ui\ingame\EquipmentSlotView.h" />
     <ClInclude Include="src\game\ui\pause\PauseMenuController.h" />
     <ClInclude Include="src\game\ui\pause\PauseMenuView.h" />
   </ItemGroup>

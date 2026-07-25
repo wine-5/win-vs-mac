@@ -29,7 +29,8 @@ namespace game::ui::debug
 
 namespace game::ui::ingame
 {
-	class PlayerHUDView; // 前方宣言
+	class PlayerHUDView;     // 前方宣言
+	class EquipmentSlotView; // 前方宣言
 } // namespace game::ui::ingame
 
 namespace game::scene
@@ -121,6 +122,12 @@ namespace game::scene
 		 */
 		void setPlayerHUDView(ui::ingame::PlayerHUDView* view);
 
+		/**
+		 * @brief 装備スロット（右下のHUD）Viewを設定する
+		 * @param view EquipmentSlotViewのポインタ（所有はInGame）
+		 */
+		void setEquipmentSlotView(ui::ingame::EquipmentSlotView* view);
+
 	  private:
 		/**
 		 * @brief RenderComponentを持つ全Entityのモデルを描画する
@@ -188,6 +195,9 @@ namespace game::scene
 
 		// プレイヤーステータス（左下のHUD）の描画元（所有はInGame）
 		ui::ingame::PlayerHUDView* m_playerHUDView{ nullptr };
+
+		// 装備スロット（右下のHUD）の描画元（所有はInGame）
+		ui::ingame::EquipmentSlotView* m_equipmentSlotView{ nullptr };
 
 		// プレイヤー死亡時の暗転の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::combat::PlayerDeathSystem* m_playerDeathSystem{ nullptr };
