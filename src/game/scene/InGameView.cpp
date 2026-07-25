@@ -19,6 +19,7 @@
 #include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
 #include "game/ui/ingame/PlayerHUDView.h"
+#include <algorithm>
 #include <cmath>
 
 namespace game::scene
@@ -238,6 +239,53 @@ namespace game::scene
 		m_uiRenderer.drawBox(centerX - halfThickness, centerY + gap, THICKNESS, tickLength, color, true);
 		// 中心ドット
 		m_uiRenderer.drawCircle(centerX, centerY, DOT_RADIUS, color, true, 1);
+
+		// 溜めの進行度は外周リングに重ねる（視線を動かさずに撃ち時を判断できるようにする）
+		drawChargeGauge(playerId, centerX, centerY, ringRadius);
+	}
+
+	void InGameView::drawChargeGauge(core::ecs::EntityId playerId, int centerX, int centerY, int radius)
+	{
+		if (!m_componentManager.has<component::combat::PlayerChargeComponent>(playerId))
+			return;
+
+		// 溜めていないときは何も出さない。常時表示するとレティクル周りが常に賑やかになり、
+		// 「溜まってきた」という変化そのものが読み取りにくくなる
+		const auto& charge{ m_componentManager.get<component::combat::PlayerChargeComponent>(playerId) };
+		if (!charge.m_isCharging)
+			return;
+
+		// 円弧を描くプリミティブが無いため、外周に点を並べて進行度を表す
+		constexpr int DOT_COUNT{ 24 };
+		constexpr int TRACK_ALPHA{ 46 }; // 未点灯の点（溜めの全体量を示す目盛り）
+		constexpr float TWO_PI{ 6.283185f };
+		constexpr float QUARTER_TURN{ 1.570796f }; // 真上を起点にするための回転量
+
+		const int dotRadius{ std::max(2, static_cast<int>(m_screen.getHeight() * 0.0028f)) };
+		const float rate{ std::clamp(charge.m_chargeRate, 0.0f, 1.0f) };
+		const int litCount{ static_cast<int>(rate * DOT_COUNT) };
+
+		// 未点灯ぶんを薄く敷いてから、点灯ぶんを不透明で上書きする（ブレンド切り替えを1回に抑える）
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, TRACK_ALPHA);
+		for (int i{ litCount }; i < DOT_COUNT; ++i)
+		{
+			const float angle{ i * (TWO_PI / DOT_COUNT) - QUARTER_TURN };
+			const int x{ centerX + static_cast<int>(std::cos(angle) * radius) };
+			const int y{ centerY + static_cast<int>(std::sin(angle) * radius) };
+			m_uiRenderer.drawCircle(x, y, dotRadius, core::utility::Color::WHITE, true, 1);
+		}
+		m_uiRenderer.resetBlendMode();
+
+		// 最大まで溜まったら黄色へ振り切らせ、シアンのままの「溜め途中」と一目で区別できるようにする
+		const unsigned int litColor{ rate >= 1.0f ? core::utility::Color::HUD_CHARGE_MAX
+			                                      : core::utility::Color::HUD_CHARGE_CYAN };
+		for (int i{ 0 }; i < litCount; ++i)
+		{
+			const float angle{ i * (TWO_PI / DOT_COUNT) - QUARTER_TURN };
+			const int x{ centerX + static_cast<int>(std::cos(angle) * radius) };
+			const int y{ centerY + static_cast<int>(std::sin(angle) * radius) };
+			m_uiRenderer.drawCircle(x, y, dotRadius, litColor, true, 1);
+		}
 	}
 
 	void InGameView::drawProjectileModels()

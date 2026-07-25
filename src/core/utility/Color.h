@@ -80,7 +80,9 @@ namespace core::utility
 		// ========== InGame HUD（Windows 11 / Fluent）用の色 ==========
 
 		static constexpr unsigned int HUD_INK = 0xFFEAF1FB;         // 文字・レティクルの基本色（わずかに青みのある白）
-		static constexpr unsigned int HUD_CHARGE_CYAN = 0xFF22D3EE; // 溜め最大のシアン
+		static constexpr unsigned int HUD_CHARGE_CYAN = 0xFF22D3EE; // 溜め中のシアン
+		// 溜め最大の黄色。ステージが青〜シアン基調のため、白では背景に溶けて完了が分からない
+		static constexpr unsigned int HUD_CHARGE_MAX = 0xFFFFC83D;
 		static constexpr unsigned int HUD_CRIT_RED = 0xFFE81123;    // 敵を捕捉中・危険
 	};
 } // namespace core::utility

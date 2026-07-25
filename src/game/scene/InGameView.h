@@ -147,6 +147,18 @@ namespace game::scene
 		void drawReticle(core::ecs::EntityId playerId);
 
 		/**
+		 * @brief 溜め攻撃の進行度をレティクルの外周に描画する
+		 *
+		 * 円弧を描くプリミティブが無いため、外周上に等間隔で並べた点を
+		 * 溜め率のぶんだけ点灯させて進行度を示す。溜め中のみ表示する
+		 * @param playerId 溜め状態（PlayerChargeComponent）を読むプレイヤーのEntityID
+		 * @param centerX レティクル中心のX座標
+		 * @param centerY レティクル中心のY座標
+		 * @param radius 点を並べる円の半径（レティクル外周と揃える）
+		 */
+		void drawChargeGauge(core::ecs::EntityId playerId, int centerX, int centerY, int radius);
+
+		/**
 		 * @brief モデルを持つ弾（Safariのタブ等）を回転させながら描画する
 		 *
 		 * RenderComponentを持つ弾を対象に、進行方向へyawを向けつつ
