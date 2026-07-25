@@ -315,6 +315,9 @@
     <ClCompile Include="src\game\system\visual\MacAwakenEffectSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\system\visual\BackgroundParticleSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="src\game\system\camera\DamageShakeSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -894,6 +897,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\system\visual\MacAwakenEffectSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\system\visual\BackgroundParticleSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\system\camera\DamageShakeSystem.h">
