@@ -1,6 +1,7 @@
 ﻿#include "MacAISystem.h"
 #include "game/component/ai/AIComponent.h"
 #include "game/component/movement/VelocityComponent.h"
+#include "game/component/movement/InputComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/visual/AnimationComponent.h"
@@ -117,6 +118,21 @@ namespace game::system::ai
 				mac.m_state = MacState::Idle;
 				if (hasVelocity)
 					stopHorizontalVelocity(entityId);
+				continue;
+			}
+
+			// プレイヤーの操作がロックされている間（ボス出現・覚醒のシネマ演出中）は
+			// ボスも行動しない。カメラがボスへ寄っていて避けようがない状態で
+			// 攻撃を通してしまうのは理不尽なので、操作が戻るまで待たせる。
+			// アクション抽選のカウントダウンもここで止まるため、演出明けは
+			// 通常の間隔をおいてから最初の攻撃が出る
+			if (m_componentManager.has<component::movement::InputComponent>(ai.m_targetEntity.getId()) &&
+			    m_componentManager.get<component::movement::InputComponent>(ai.m_targetEntity.getId()).m_locked)
+			{
+				if (hasVelocity)
+					stopHorizontalVelocity(entityId);
+				if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+					m_componentManager.get<component::visual::AnimationComponent>(entityId).request(constant::AnimationState::Idle);
 				continue;
 			}
 
