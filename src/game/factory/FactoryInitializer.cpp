@@ -49,6 +49,13 @@ namespace game::factory
 	void FactoryInitializer::initializePlayer(const data::PlayerData& playerData)
 	{
 		int playerHandle{m_resourceManager.loadModelById(constant::model_id::PLAYER)};
+
+		// プレイヤーモデルはハンドルがキャッシュされ、再プレイでも同じ実体を使い回す。
+		// 前回プレイの死亡（Dying）アニメがアタッチされたまま残ると、新しいIdleと重なって
+		// 死亡ポーズが抜けないため、生成前に一度すべてのアニメをデタッチして初期化する。
+		// 敵は複製ハンドル＋プール返却時のデタッチで済むが、プレイヤーは複製しないのでここで行う
+		m_resourceManager.detachAllAnimations(playerHandle);
+
 		m_factoryManager.getPlayerFactory().create(playerHandle, playerData);
 	}
 
