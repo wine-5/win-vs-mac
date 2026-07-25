@@ -1,6 +1,8 @@
 #include "WeaponAttachSystem.h"
 #include "game/component/visual/WeaponAttachComponent.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/component/visual/AnimationComponent.h"
+#include "game/constant/AnimationState.h"
 #include "core/interface/ILogger.h"
 #include "core/utility/Log.h"
 
@@ -19,6 +21,9 @@ namespace game::system::visual
 		for (auto entityId : entities)
 		{
 			auto& attach{ m_componentManager.get<component::visual::WeaponAttachComponent>(entityId) };
+
+			updateVisibility(entityId, attach);
+
 			if (attach.m_isResolved)
 				continue;
 
@@ -43,5 +48,17 @@ namespace game::system::visual
 			for (size_t i{ 0 }; i < frameNames.size(); ++i)
 				core::log::error("[WeaponAttach]   [{}] {}", i, frameNames[i]);
 		}
+	}
+
+	void WeaponAttachSystem::updateVisibility(core::ecs::EntityId entityId,
+	    component::visual::WeaponAttachComponent& attach)
+	{
+		if (!m_componentManager.has<component::visual::AnimationComponent>(entityId))
+			return;
+
+		// 投擲は武器を持つ手で投げるモーションのため、剣を出したままだと
+		// 一緒に振り回されて「剣を投げた」ように見えてしまう。再生中は隠す。
+		const auto& anim{ m_componentManager.get<component::visual::AnimationComponent>(entityId) };
+		attach.m_isVisible = (anim.m_current != constant::AnimationState::Throw);
 	}
 } // namespace game::system::visual

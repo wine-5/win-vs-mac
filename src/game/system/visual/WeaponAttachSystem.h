@@ -3,6 +3,7 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 #include "core/interface/IRenderer.h"
+#include "game/component/visual/WeaponAttachComponent.h"
 
 namespace game::system::visual
 {
@@ -34,6 +35,14 @@ namespace game::system::visual
 		void update(float deltaTime) override;
 
 	  private:
+		/**
+		 * @brief 再生中のアニメーションに応じて武器の表示・非表示を切り替える
+		 * @param entityId 装着元EntityのID
+		 * @param attach 対象のWeaponAttachComponent
+		 */
+		void updateVisibility(core::ecs::EntityId entityId,
+		    component::visual::WeaponAttachComponent& attach);
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IRenderer& m_renderer;
 	};
