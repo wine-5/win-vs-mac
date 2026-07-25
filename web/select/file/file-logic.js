@@ -6,9 +6,9 @@ const FILE_EXT_ICON  = {
     Image:      'https://assets.game.web/images/ui/select/img.png',
     Audio:      'https://assets.game.web/images/ui/select/aud.png',
     Archive:    'https://assets.game.web/images/ui/select/arc.png',
-    Unknown:    'https://assets.game.web/images/ui/select/gameicon.png',
+    Unknown:    'https://assets.game.web/images/ui/select/etc.png',
 };
-const FILE_EXT_LABEL = { Executable: 'EXE', Document: 'DOC', Image: 'IMG', Audio: 'AUD', Archive: 'ARC', Unknown: '???' };
+const FILE_EXT_LABEL = { Executable: 'EXE', Document: 'DOC', Image: 'IMG', Audio: 'AUD', Archive: 'ARC', Unknown: 'ETC' };
 const FILE_EXT_CLASS = { Executable: 'exe', Document: 'doc', Image: 'img', Audio: 'aud', Archive: 'arc', Unknown: 'unk' };
 
 const FileLogic = (function () {
