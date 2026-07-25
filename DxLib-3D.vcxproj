@@ -409,6 +409,7 @@
     <ClInclude Include="src\game\component\visual\AnimationComponent.h" />
     <ClInclude Include="src\game\component\visual\WeaponAttachComponent.h" />
     <ClInclude Include="src\game\component\combat\ColliderComponent.h" />
+    <ClInclude Include="src\game\component\combat\AttackComboComponent.h" />
     <ClInclude Include="src\game\constant\Tag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
     <ClInclude Include="src\game\constant\AnimationId.h" />
