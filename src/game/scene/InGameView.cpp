@@ -71,10 +71,6 @@ namespace game::scene
 		if (m_detectionAlertSystem)
 			m_detectionAlertSystem->draw();
 
-		// 低HP警告のビネット。画面全体を覆うのでHUDのパネル類より奥に描く
-		if (m_lowHealthVignetteView)
-			m_lowHealthVignetteView->draw(playerId);
-
 		// プレイヤーステータス（左下のHP）。演出より手前・レティクルと同じHUD層に描く
 		if (m_playerHUDView)
 			m_playerHUDView->draw(playerId);
@@ -86,6 +82,12 @@ namespace game::scene
 		// 目標（左上）
 		if (m_objectiveView)
 			m_objectiveView->draw(remainingEnemyCount, isBossAppeared);
+
+		// 低HP警告のビネット。四隅を赤く染めるが、下の隅はHUDのパネルが占めているため、
+		// パネルより手前に描かないと下2つの隅が隠れてしまう。
+		// 画面全体が危険な状態なので、HUDごと赤く染まるほうが表現としても正しい
+		if (m_lowHealthVignetteView)
+			m_lowHealthVignetteView->draw(playerId);
 
 		// 照準レティクル（HUD）は最前面に描く
 		drawReticle(playerId);
