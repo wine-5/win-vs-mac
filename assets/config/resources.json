@@ -32,8 +32,10 @@
     {"id": "anim_xcode_dying",       "path": "assets/animations/enemies/xcode/Xcode_Dying.mv1"}
   ],
   "fonts": [
-    {"id": "main",   "path": "assets/fonts/MaruMonica.ttf",  "name": "x12y16pxMaruMonica"},
-    {"id": "normal", "path": "assets/fonts/NotoSansJP.ttf",  "name": "Noto Sans JP"}
+    {"id": "main",   "path": "assets/fonts/MaruMonica.ttf",   "name": "x12y16pxMaruMonica"},
+    {"id": "normal", "path": "assets/fonts/NotoSansJP.ttf",   "name": "Noto Sans JP"},
+    {"id": "mono",   "path": "assets/fonts/CascadiaMono.ttf", "name": "Cascadia Mono"},
+    {"id": "mono_bold", "path": "assets/fonts/CascadiaMonoSemiBold.ttf", "name": "Cascadia Mono SemiBold"}
   ],
   "images": [
     {"id": "lock-bg",           "path": "assets/images/background/LockBG.jpg"},
