@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""ステージ配置物のグレーボックス用テクスチャと、それを貼ったUV付き立方体(.mqo)を生成する。
+"""ステージ配置物のグレーボックス用テクスチャ(PNG)を生成する。
 
-設計方針（docs/design/stage_editor.md 2-4）どおり、配置物はすべて「立方体をXYZに
-引き伸ばしたもの」で表現し、見た目はテクスチャで描き分ける。ゲーム側はライティングを
-無効（Main.cpp の SetUseLighting(FALSE)）にしているため、テクスチャの色がそのまま出る。
-＝「発光して見えるテクスチャ」を明るい色で描けば、そのままネオン風に見える。
+配置物はすべて「立方体をXYZに引き伸ばしたもの」で表現し、見た目はテクスチャで
+描き分ける。ゲーム側はライティングを無効（Main.cpp の SetUseLighting(FALSE)）に
+しているため、テクスチャの色がそのまま出る。
+
+立方体(.mqo)の生成は gen_stage_models.py に分離した。テクスチャを外部（写実的な
+画像）へ移行しても、幾何・UVはそちらで一元管理する。このツールは当面の仮テクスチャや
+プレースホルダを作る用途で残す。
 
 出力（assets/model/stage/ 配下）:
     <Name>.png … 512x512 テクスチャ
-    <Name>.mqo … 上記PNGを貼った 100x100x100 の両面立方体（UV付き）
 
 使い方（リポジトリのルートで実行）:
     python tools/gen_stage_textures.py
@@ -234,70 +236,15 @@ TEXTURES = {
 }
 
 
-# ---- UV付きの両面立方体(.mqo)を出力 ----
-
-# 100x100x100 立方体の頂点
-VERTS = [
-    (-50, -50, -50), (50, -50, -50), (50, 50, -50), (-50, 50, -50),
-    (-50, -50, 50), (50, -50, 50), (50, 50, 50), (-50, 50, 50),
-]
-# 各面の4頂点を「外から見たときの 左上→右上→右下→左下」の順で並べる。
-# UVを面ごとに考えず1組に固定できるので、どの面でも絵が同じ向きで貼られる。
-# 両面にすると裏面のUVが鏡像になって文字が反転し、同一平面の重なりで
-# Zファイティングや法線異常も起きるため、片面のみにする。
-# 巻き方向の条件：連続する2辺の外積 cross(v1-v0, v2-v1) が face の外向きになること。
-# 逆向きだとその面だけカリングされて消える（上下面で実際に起きた）。
-FACES = [
-    (3, 2, 1, 0),  # -Z（正面）
-    (6, 7, 4, 5),  # +Z（背面）
-    (2, 6, 5, 1),  # +X（右）
-    (7, 3, 0, 4),  # -X（左）
-    (7, 6, 2, 3),  # +Y（上：床の天面）
-    (0, 1, 5, 4),  # -Y（下）
-]
-# 面の頂点順（左上→右上→右下→左下）に対してUを反転させて割り当てる。
-# 素直に (0,0)(1,0)(1,1)(0,1) にすると、実機では絵が左右反転して文字が鏡文字になった
-UV = [(1, 0), (0, 0), (0, 1), (1, 1)]
-
-
-def mqo_text(tex_filename):
-    lines = []
-    lines.append("Metasequoia Document")
-    lines.append("Format Text Ver 1.0")
-    lines.append("")
-    lines.append("Material 1 {")
-    lines.append('\t"tex" shader(3) col(1.000 1.000 1.000 1.000) dif(1.000) '
-                 'amb(1.000) emi(0.000) spc(0.000) power(5.00) tex("%s")' % tex_filename)
-    lines.append("}")
-    lines.append('Object "cube" {')
-    lines.append("\tvisible 15")
-    lines.append("\tlocking 0")
-    lines.append("\tshading 1")
-    lines.append("\tcolor 0.6 0.6 0.6")
-    lines.append("\tcolor_type 0")
-    lines.append("\tvertex %d {" % len(VERTS))
-    for v in VERTS:
-        lines.append("\t\t%.4f %.4f %.4f" % v)
-    lines.append("\t}")
-    lines.append("\tface %d {" % len(FACES))
-    uvflat = " ".join("%.4f %.4f" % (UV[i][0], UV[i][1]) for i in range(4))
-    for f in FACES:
-        lines.append("\t\t4 V(%d %d %d %d) M(0) UV(%s)" % (f[0], f[1], f[2], f[3], uvflat))
-    lines.append("\t}")
-    lines.append("}")
-    return "\n".join(lines) + "\n"
-
-
 def main():
+    # このツールはテクスチャ(PNG)のみを生成する。立方体(.mqo)の生成は
+    # gen_stage_models.py に分離した（テクスチャを外部生成へ移行するため）。
     os.makedirs(OUT_DIR, exist_ok=True)
     for name, fn in TEXTURES.items():
         img = fn()
         png_path = os.path.join(OUT_DIR, name + ".png")
         img.convert("RGB").save(png_path)
-        mqo_path = os.path.join(OUT_DIR, name + ".mqo")
-        with open(mqo_path, "w", encoding="utf-8") as f:
-            f.write(mqo_text(name + ".png"))
-        print("generated", png_path, "/", mqo_path)
+        print("generated", png_path)
 
 
 if __name__ == "__main__":
