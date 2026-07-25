@@ -2,6 +2,7 @@
 #include "game/component/camera/CameraComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/camera/CameraEffectComponent.h"
+#include "game/component/movement/InputComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/constant/Tag.h"
@@ -112,11 +113,20 @@ namespace game::system::camera
 		auto& camera{ m_componentManager.get<component::camera::CameraComponent>(m_targetEntityId) };
 		auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_targetEntityId) };
 
-		// マウス移動量で yaw/pitch を更新する
+		// 操作ロック中（ボスのシネマ演出など）は視点も動かさない。
+		// マウス移動量は毎フレーム読み捨てて、ロック解除時に溜まった分が
+		// 一気に反映されないようにする
 		int deltaX{}, deltaY{};
 		m_inputProvider.getMouseDelta(deltaX, deltaY);
-		camera.m_yaw += deltaX * camera.m_sensitivity;
-		camera.m_pitch += deltaY * camera.m_sensitivity;
+
+		const bool isInputLocked{ m_componentManager.has<component::movement::InputComponent>(m_targetEntityId) &&
+			                      m_componentManager.get<component::movement::InputComponent>(m_targetEntityId).m_locked };
+		if (!isInputLocked)
+		{
+			// マウス移動量で yaw/pitch を更新する
+			camera.m_yaw += deltaX * camera.m_sensitivity;
+			camera.m_pitch += deltaY * camera.m_sensitivity;
+		}
 
 		// ピッチを可動範囲に制限する
 		camera.m_pitch = std::clamp(camera.m_pitch, camera.m_pitchMin, camera.m_pitchMax);
