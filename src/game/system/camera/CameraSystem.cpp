@@ -18,6 +18,9 @@ namespace
 	constexpr float MIN_WALL_DISTANCE{ 90.0f };
 	// 壁から離れたあと元の距離へ戻る速さ（毎秒の割合）。寄るときは即座に寄せる
 	constexpr float DISTANCE_RESTORE_PER_SEC{ 4.0f };
+	// カメラを床から浮かせる最低の高さ（プレイヤーの足元基準）。
+	// 下から地面を見ると片面ポリゴンが裏面カリングで消えて真っ黒になるのを防ぐ
+	constexpr float MIN_CAMERA_HEIGHT{ 30.0f };
 } // namespace
 
 namespace game::system::camera
@@ -154,9 +157,17 @@ namespace game::system::camera
 		// 注視点からカメラへ向かう単位ベクトル（水平はyaw、垂直はpitch）
 		const core::Vector3 toCamera{ -sinYaw * cosPitch, sinPitch, -cosYaw * cosPitch };
 
+		// 見上げるほどカメラは注視点より下へ回り込むため、床を突き抜けない距離まで引き寄せる。
+		// カメラ位置のYだけをクランプすると、視線方向（m_forward）は見上げたままなのに
+		// 実際の見た目は水平寄りになり、レティクルと弾の向きがずれてしまう
+		float desiredDistance{ distance };
+		if (toCamera.y < 0.0f)
+			desiredDistance = std::min(desiredDistance,
+			    (MIN_CAMERA_HEIGHT - camera.m_targetHeight) / toCamera.y);
+
 		// 壁に遮られるならその手前まで寄せる。
 		// 寄るのは即座（遮られた瞬間に見えないと困る）、離れて戻るのは緩やかにして画面が跳ねないようにする
-		const float wallDistance{ clampDistanceByWalls(lookTarget, distance, toCamera) };
+		const float wallDistance{ clampDistanceByWalls(lookTarget, desiredDistance, toCamera) };
 		if (m_currentDistance <= 0.0f || wallDistance < m_currentDistance)
 			m_currentDistance = wallDistance;
 		else
@@ -187,11 +198,10 @@ namespace game::system::camera
 			}
 		}
 
-		// カメラが地面を突き抜けないよう、床より少し上に制限する
-		// （下から地面を見ると片面ポリゴンが裏面カリングで消えて真っ黒になるのを防ぐ）
+		// 最後の保険として床より下へ出ないようにする（壁回避の最低距離に押し戻された場合など）。
+		// 通常は上の距離クランプで足りるため、ここは効かない。
 		// 高さはワールド絶対値ではなくプレイヤーの足元基準で見る。
 		// 絶対値にすると坂を下って足元が下がったときにクランプへ張り付き、pitchを動かしても上を向けなくなる。
-		constexpr float MIN_CAMERA_HEIGHT{ 30.0f };
 		const float minCameraY{ lookTarget.y - camera.m_targetHeight + MIN_CAMERA_HEIGHT };
 		if (cameraPos.y < minCameraY)
 			cameraPos.y = minCameraY;
