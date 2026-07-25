@@ -2,6 +2,12 @@
 #include "core/data/FileExtensionType.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include <unordered_map>
+
+namespace core::iface
+{
+	class IResourceManager; // 前方宣言
+} // namespace core::iface
 
 namespace game::data
 {
@@ -27,10 +33,12 @@ namespace game::ui::ingame
 		 * @param uiRenderer UI描画のインターフェース
 		 * @param screen 画面サイズ取得のインターフェース
 		 * @param equipmentData 装備中のファイル情報（所有はGameManager）
+		 * @param resourceManager 拡張子アイコンの読み込みに使うIResourceManager
 		 */
 		EquipmentSlotView(core::iface::IUIRenderer& uiRenderer,
 		    core::iface::IScreen& screen,
-		    const data::FileEquipmentData& equipmentData);
+		    const data::FileEquipmentData& equipmentData,
+		    core::iface::IResourceManager& resourceManager);
 
 		/**
 		 * @brief 装備スロットを描画する
@@ -65,8 +73,20 @@ namespace game::ui::ingame
 		 */
 		void drawCenteredText(int centerX, int y, const char* text, unsigned int color, int fontSize);
 
+		/**
+		 * @brief 拡張子種別に対応するアイコンの画像ハンドルを取得する
+		 * @param type 拡張子種別
+		 * @return 画像ハンドル（読み込めていない場合は-1）
+		 */
+		[[nodiscard]] int getIconHandle(core::data::FileExtensionType type) const;
+
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
 		const data::FileEquipmentData& m_equipmentData;
+
+		// 拡張子種別ごとのアイコン画像ハンドル。生成時に一度だけ読み込む
+		std::unordered_map<int, int> m_iconHandles{};
+		// 空きスロットに描くアイコンの画像ハンドル
+		int m_emptyIconHandle{ -1 };
 	};
 } // namespace game::ui::ingame

@@ -261,7 +261,8 @@ namespace game::scene
 		m_equipmentSlotView = std::make_unique<ui::ingame::EquipmentSlotView>(
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
-		    m_fileEquipmentData);
+		    m_fileEquipmentData,
+		    m_resourceManager);
 		m_view.setEquipmentSlotView(m_equipmentSlotView.get());
 	}
 
