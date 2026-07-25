@@ -90,6 +90,7 @@ namespace game::ui::ingame
 
 		// 被弾演出の状態。実HPより遅れて縮む残像バーで「今どれだけ削られたか」を見せる
 		float m_displayedRatio{ -1.0f }; // 負の値は未初期化（初回の描画で実HPに合わせる）
+		float m_lastRatio{ -1.0f };      // 前フレームの実HP。被弾の瞬間の検知に使う
 		std::chrono::steady_clock::time_point m_lastDamageTime{};
 		// 低HPの脈動の基準時刻（生成時から連続して進める）
 		std::chrono::steady_clock::time_point m_startTime{ std::chrono::steady_clock::now() };

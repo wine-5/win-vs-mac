@@ -1,4 +1,4 @@
-#include "PlayerHUDView.h"
+﻿#include "PlayerHUDView.h"
 #include "core/constant/UI.h"
 #include "core/utility/Color.h"
 #include "game/component/combat/HealthComponent.h"
@@ -84,23 +84,25 @@ namespace game::ui::ingame
 		if (m_displayedRatio < 0.0f)
 		{
 			m_displayedRatio = ratio;
+			m_lastRatio = ratio;
 			return;
 		}
+
+		// 被弾は「実HPが前フレームより減ったか」だけで判定する。
+		// 残像との差で判定すると、残像が追いつくまでの間ずっと被弾扱いになり、
+		// フラッシュが何度も再点火してバーがチカチカしてしまう
+		if (ratio < m_lastRatio)
+		{
+			m_lastDamageTime = now;
+			m_isDamageFlashing = true;
+		}
+		m_lastRatio = ratio;
 
 		// 回復したときは残像を追い越させる（残像は「削られた分」専用の表現なので保持しない）
 		if (ratio >= m_displayedRatio)
 		{
 			m_displayedRatio = ratio;
 			return;
-		}
-
-		// 減った瞬間を被弾とみなす。HealthComponentの値の比較だけで足りるためイベントは購読しない
-		const bool isNewDamage{ !m_isDamageFlashing ||
-			                    std::chrono::duration<float>(now - m_lastDamageTime).count() > DAMAGE_FLASH_DURATION };
-		if (isNewDamage)
-		{
-			m_lastDamageTime = now;
-			m_isDamageFlashing = true;
 		}
 
 		// 削られた直後は残像を止めて「どれだけ減ったか」を見せ、少し置いてから追いつかせる
