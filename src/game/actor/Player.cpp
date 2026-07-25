@@ -51,7 +51,8 @@ namespace game::actor
 		anim.m_clips[AnimationState::Attack2] = { resourceManager.loadAnimationById(anim_id::PLAYER_SPIN),  false, AnimationState::Idle,  priority::ATTACK };
 		anim.m_clips[AnimationState::Hit]     = { resourceManager.loadAnimationById(anim_id::PLAYER_HIT),   false, AnimationState::Idle,  priority::HIT };
 		anim.m_clips[AnimationState::Dying]   = { resourceManager.loadAnimationById(anim_id::PLAYER_DYING), false, AnimationState::Dying, priority::DYING };
-		anim.m_clips[AnimationState::Jump]    = { resourceManager.loadAnimationById(anim_id::PLAYER_JUMP),  false, AnimationState::Idle,  priority::JUMP };
+		constexpr float JUMP_ANIM_START{ 9.0f }; // 頭の溜め約0.3秒（30fps×0.3）をカットして違和感を消す
+		anim.m_clips[AnimationState::Jump] = { resourceManager.loadAnimationById(anim_id::PLAYER_JUMP), false, AnimationState::Idle, priority::JUMP, 1.0f, JUMP_ANIM_START };
 		componentManager.add<component::visual::AnimationComponent>(m_entity.getId(), anim);
 		componentManager.add<component::visual::RenderComponent>(m_entity.getId(), { modelHandle });
 		componentManager.add<component::visual::HitEffectComponent>(m_entity.getId(), {});
