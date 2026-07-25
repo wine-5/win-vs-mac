@@ -106,8 +106,8 @@ namespace game::system::combat
 					// 剣を振るアニメを要求する。優先度がATTACKなので、MoveSystemが毎フレーム出す
 					// 移動系（Idle/Walk/Run）の要求には割り込まれず、振り終わりまで再生される
 					if (m_componentManager.has<component::visual::AnimationComponent>(attackerId))
-						m_componentManager.get<component::visual::AnimationComponent>(attackerId).m_requested =
-						    constant::AnimationState::Attack1;
+						m_componentManager.get<component::visual::AnimationComponent>(attackerId)
+						    .request(constant::AnimationState::Attack1);
 				}
 			}
 			else if (attackerTagForStart.m_tag == constant::Tag::Enemy)

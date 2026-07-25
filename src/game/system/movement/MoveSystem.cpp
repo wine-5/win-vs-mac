@@ -70,11 +70,11 @@ namespace game::system::movement
 		{
 			auto& anim = m_componentManager.get<component::visual::AnimationComponent>(m_entityId);
 			if (!isMoving)
-				anim.m_requested = constant::AnimationState::Idle;
+				anim.request(constant::AnimationState::Idle);
 			else if (isDashing)
-				anim.m_requested = constant::AnimationState::Run;
+				anim.request(constant::AnimationState::Run);
 			else
-				anim.m_requested = constant::AnimationState::Walk;
+				anim.request(constant::AnimationState::Walk);
 
 			// 着地したらジャンプの優先保持を解除し、同フレームで上のlocomotion要求へ移す。
 			// これをしないと接地後もJumpクリップの末尾が再生され続け、ダッシュ中に
