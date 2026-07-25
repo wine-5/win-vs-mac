@@ -3,6 +3,7 @@
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/movement/InputComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
+#include "game/component/visual/AnimationComponent.h"
 
 namespace game::system::movement
 {
@@ -29,7 +30,15 @@ namespace game::system::movement
 					auto& input = m_componentManager.get<component::movement::InputComponent>(entityId);
 					// ジャンプ処理
 					if (input.m_jumpPressed)
+					{
 						velocity.m_velocity.y = m_jumpForce;
+
+						// ジャンプアニメを要求する（MoveSystemの移動要求より後に走るため上書きできる。
+						// Jumpは優先度が高く、着地＝再生完了までlocomotion要求に割り込まれない）
+						if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
+							m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested =
+							    constant::AnimationState::Jump;
+					}
 				}
 
 				// 重力
