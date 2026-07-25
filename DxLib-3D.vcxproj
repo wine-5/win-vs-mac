@@ -204,6 +204,7 @@
     <ClCompile Include="src\game\scene\SceneManager.cpp" />
     <ClCompile Include="src\game\stage\StageProp.cpp" />
     <ClCompile Include="src\game\system\visual\AnimationSystem.cpp" />
+    <ClCompile Include="src\game\system\visual\WeaponAttachSystem.cpp" />
     <ClCompile Include="src\game\system\combat\CollisionSystem.cpp" />
     <ClCompile Include="src\game\ui\Button.cpp" />
     <ClCompile Include="src\game\ui\UIManager.cpp" />
@@ -421,6 +422,7 @@
     <ClInclude Include="src\game\data\PlayerData.h" />
     <ClInclude Include="src\game\stage\StageProp.h" />
     <ClInclude Include="src\game\system\visual\AnimationSystem.h" />
+    <ClInclude Include="src\game\system\visual\WeaponAttachSystem.h" />
     <ClInclude Include="src\game\system\combat\CollisionSystem.h" />
     <ClInclude Include="src\infrastructure\graphics\Animator.h" />
     <ClInclude Include="src\infrastructure\graphics\Camera.h" />
