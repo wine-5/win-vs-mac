@@ -16,6 +16,8 @@
     "moveSpeed":300.0,
     "dashMultiplier": 2.0,
     "jumpForce": 300.0,
+    "gravity": -980.0,
+    "maxFallSpeed": -1500.0,
     "maxHp": 1000.0,
     "defence": 10.0,
     "attackPower": 30.0,

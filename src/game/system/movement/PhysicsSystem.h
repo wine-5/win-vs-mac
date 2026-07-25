@@ -15,8 +15,10 @@ namespace game::system::movement
 	   * @brief PhysicsSystemのコンストラクタ
 	   * @param componentManager ComponentManagerの参照
 	   * @param jumpForce ジャンプの初速（playerData.jsonのgameplay.jumpForce）
+	   * @param gravity 重力加速度（負値。playerData.jsonのgameplay.gravity）
+	   * @param maxFallSpeed 落下速度の下限（負値。playerData.jsonのgameplay.maxFallSpeed）
 	   */
-	  PhysicsSystem(core::ecs::ComponentManager& componentManager, float jumpForce);
+	  PhysicsSystem(core::ecs::ComponentManager& componentManager, float jumpForce, float gravity, float maxFallSpeed);
 
 	  /**
 	   * @brief 速度を元に位置を更新、重力やジャンプを処理する
@@ -25,14 +27,12 @@ namespace game::system::movement
 	  void update(float deltaTime) override;
 
 	private:
-	  static constexpr float DEFAULT_GRAVITY = -980.0f;
-	  static constexpr float DEFAULT_MAX_FALL_SPEED = -200.0f;
-
 	  core::ecs::ComponentManager& m_componentManager;
-	  float m_gravity{ DEFAULT_GRAVITY };
+	  // 重力・落下上限・ジャンプ初速はplayerData.jsonから注入する（値の調整をコード再ビルドなしで行うため）。
 	  // ジャンプするのは今のところプレイヤーだけなので、System共通の設定として持つ。
 	  // 敵もジャンプするようになったらComponent側へ移す
+	  float m_gravity{ -980.0f };
 	  float m_jumpForce{ 0.0f };
-	  float m_maxFallSpeed{ DEFAULT_MAX_FALL_SPEED };
+	  float m_maxFallSpeed{ -200.0f };
 	};
 } // namespace game::system::movement

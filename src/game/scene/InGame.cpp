@@ -349,7 +349,7 @@ namespace game::scene
 		const int windowBillboard{ projectileMeta.m_imageId.empty() ? -1 : m_resourceManager.loadImageById(projectileMeta.m_imageId) };
 		m_systemManager.registerSystem<game::system::combat::PlayerRangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory,
 		    projectileMeta, windowBillboard);
-		m_systemManager.registerSystem<game::system::movement::PhysicsSystem>(m_componentManager, m_playerData.getJumpForce());
+		m_systemManager.registerSystem<game::system::movement::PhysicsSystem>(m_componentManager, m_playerData.getJumpForce(), m_playerData.getGravity(), m_playerData.getMaxFallSpeed());
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
 		m_systemManager.registerSystem<game::system::combat::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);
 		// 敵弾をプレイヤーのWindow弾で跳ね返す（移動後・ダメージ判定AttackSystemより前に判定する）

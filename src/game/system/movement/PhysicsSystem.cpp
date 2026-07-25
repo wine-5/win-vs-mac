@@ -7,9 +7,11 @@
 
 namespace game::system::movement
 {
-	PhysicsSystem::PhysicsSystem(core::ecs::ComponentManager& componentManager, float jumpForce)
+	PhysicsSystem::PhysicsSystem(core::ecs::ComponentManager& componentManager, float jumpForce, float gravity, float maxFallSpeed)
 	    : m_componentManager{ componentManager }
+	    , m_gravity{ gravity }
 	    , m_jumpForce{ jumpForce }
+	    , m_maxFallSpeed{ maxFallSpeed }
 	{
 	}
 
