@@ -78,6 +78,11 @@ namespace game::data
 			if (attackCooldownIt != metadata.floatProperties.end())
 				data.m_attackCooldown = attackCooldownIt->second;
 
+			auto comboInputWindowIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::COMBO_INPUT_WINDOW)) };
+			if (comboInputWindowIt != metadata.floatProperties.end())
+				data.m_comboInputWindow = comboInputWindowIt->second;
+
 			return data;
 		}
 
@@ -113,6 +118,11 @@ namespace game::data
 		[[nodiscard]] float              getAttackRange()    const noexcept { return m_attackRange; }
 		/** @brief 攻撃クールダウンを取得 */
 		[[nodiscard]] float              getAttackCooldown() const noexcept { return m_attackCooldown; }
+		/** @brief コンボの次段入力受付時間を取得（秒。JSON未設定時は従来値） */
+		[[nodiscard]] float getComboInputWindow() const noexcept
+		{
+			return m_comboInputWindow;
+		}
 		/** @brief コライダーサイズを取得 */
 		[[nodiscard]] core::Vector3      getColliderSize()   const noexcept { return m_colliderSize; }
 		/** @brief コライダーオフセットを取得 */
@@ -155,6 +165,7 @@ namespace game::data
 		float         m_attackPower{ 0.0f };
 		float         m_attackRange{ 0.0f };
 		float         m_attackCooldown{ 0.0f };
+		float m_comboInputWindow{ 1.0f }; // コンボの次段入力受付時間（JSON未設定時の既定値）
 		core::Vector3 m_colliderSize;
 		core::Vector3 m_colliderOffset;
 		core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
