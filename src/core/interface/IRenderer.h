@@ -46,6 +46,17 @@ namespace core::iface
 		[[nodiscard]] virtual std::vector<std::string> getModelFrameNames(int modelHandle) = 0;
 
 		/**
+		 * @brief モデルのフレーム（ボーン）のワールド座標を取得する
+		 *
+		 * 手の位置でエフェクトを出すなど、ボーンに合わせた演出に使う。
+		 * @note 座標は直前に描画された姿勢のものになる（描画時に確定するため）
+		 * @param modelHandle モデルハンドル
+		 * @param frameIndex フレーム番号（findModelFrameで取得したもの）
+		 * @return ボーンのワールド座標。失敗時はゼロベクトル
+		 */
+		[[nodiscard]] virtual core::Vector3 getModelFramePosition(int modelHandle, int frameIndex) = 0;
+
+		/**
 		 * @brief モデルを他モデルのフレーム（ボーン）へ追従させて描画する
 		 *
 		 * 親のアニメーションが適用された後のボーン位置へ武器を貼り付ける。

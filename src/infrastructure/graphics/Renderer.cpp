@@ -65,6 +65,15 @@ namespace infrastructure::graphics
 		return names;
 	}
 
+	core::Vector3 Renderer::getModelFramePosition(int modelHandle, int frameIndex)
+	{
+		if (modelHandle == -1 || frameIndex < 0)
+			return core::Vector3{};
+
+		const VECTOR position{ MV1GetFramePosition(modelHandle, frameIndex) };
+		return core::Vector3{ position.x, position.y, position.z };
+	}
+
 	void Renderer::drawModelOnFrame(int modelHandle, int parentModelHandle, int frameIndex,
 	    const core::Vector3& offsetPosition, const core::Vector3& offsetRotation,
 	    const core::Vector3& offsetScale)
