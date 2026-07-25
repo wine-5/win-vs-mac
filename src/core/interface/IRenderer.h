@@ -221,15 +221,5 @@ namespace core::iface
 		// 注意: 仮想関数を追加するときは必ずこの位置（末尾）へ足すこと。
 		// 途中へ挿入すると以降のvtableのスロット番号がずれ、再ビルドが漏れた
 		// 翻訳単位から別の関数が呼ばれてクラッシュする
-		/**
-		 * @brief モデルのフレーム（ボーン）のワールド座標を取得する
-		 *
-		 * 手の位置でエフェクトを出すなど、ボーンに合わせた演出に使う。
-		 * @note 座標は直前に描画された姿勢のものになる（描画時に確定するため）
-		 * @param modelHandle モデルハンドル
-		 * @param frameIndex フレーム番号（findModelFrameで取得したもの）
-		 * @return ボーンのワールド座標。失敗時はゼロベクトル
-		 */
-		[[nodiscard]] virtual core::Vector3 getModelFramePosition(int modelHandle, int frameIndex) = 0;
 	};
 } // namespace core::iface

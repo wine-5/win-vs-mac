@@ -38,14 +38,6 @@ namespace infrastructure::graphics
 		[[nodiscard]] std::vector<std::string> getModelFrameNames(int modelHandle) override;
 
 		/**
-		 * @brief モデルのフレーム（ボーン）のワールド座標を取得する
-		 * @param modelHandle モデルハンドル
-		 * @param frameIndex フレーム番号
-		 * @return ボーンのワールド座標。失敗時はゼロベクトル
-		 */
-		[[nodiscard]] core::Vector3 getModelFramePosition(int modelHandle, int frameIndex) override;
-
-		/**
 		 * @brief モデルを他モデルのフレーム（ボーン）へ追従させて描画する
 		 * @param modelHandle 装着するモデル（武器）のハンドル
 		 * @param parentModelHandle 装着先モデル（キャラクター）のハンドル

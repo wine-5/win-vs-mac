@@ -2,19 +2,15 @@
 #include "core/base/ServiceLocator.h"
 #include "game/component/visual/EffectComponent.h"
 #include "game/component/movement/TransformComponent.h"
-#include "game/component/visual/WeaponAttachComponent.h"
-#include "game/component/visual/RenderComponent.h"
 
 namespace game::system::visual
 {
 	EffectSystem::EffectSystem(core::ecs::ComponentManager& componentManager,
 	    core::base::EventBus& eventBus,
-	    core::iface::IEffectFactory& effectFactory,
-	    core::iface::IRenderer& renderer)
+	    core::iface::IEffectFactory& effectFactory)
 	    : m_componentManager{ componentManager }
 	    , m_eventBus{ eventBus }
 	    , m_effectFactory{ effectFactory }
-	    , m_renderer{ renderer }
 	{
 		setupEventSubscriptions();
 	}
@@ -104,21 +100,13 @@ namespace game::system::visual
 			transform->m_rotation.z + event.m_effectRotationOffset.z
 		};
 
-		// 武器を持っているなら、足元ではなく武器を握っている手の高さで出す。
-		// 足元で出すと斬撃が地面から生えているように見えてしまう
+		// 基準はEntityの原点（足元）。斬撃エフェクトは原点から上方向へ伸びる絵柄で、
+		// 体を通り抜けるように描かれる前提で作られているため、手の高さを基準にすると
+		// そのぶん丸ごと持ち上がって頭より高く出てしまう。高さの微調整はオフセットで行う
 		core::Vector3 position{ transform->m_position };
-		const auto* weapon{ m_componentManager.tryGet<component::visual::WeaponAttachComponent>(event.m_attackerId) };
-		const auto* render{ m_componentManager.tryGet<component::visual::RenderComponent>(event.m_attackerId) };
-		if (weapon != nullptr && render != nullptr && weapon->m_frameIndex >= 0)
-		{
-			const core::Vector3 handPosition{
-				m_renderer.getModelFramePosition(render->m_modelHandle, weapon->m_frameIndex)
-			};
-			// ボーン位置は描画時に確定するため、初回フレームなど未確定の間はゼロが返る。
-			// その場合は足元のままにしておく
-			if (handPosition.x != 0.0f || handPosition.y != 0.0f || handPosition.z != 0.0f)
-				position = handPosition;
-		}
+		position.x += event.m_effectPositionOffset.x;
+		position.y += event.m_effectPositionOffset.y;
+		position.z += event.m_effectPositionOffset.z;
 
 		playAndTrack(event.m_attackerId, event.m_effectType, position, rotation);
 	}

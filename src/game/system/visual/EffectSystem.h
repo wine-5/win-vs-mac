@@ -3,7 +3,6 @@
 #include "core/ecs/ISystem.h"
 #include "core/base/EventBus.h"
 #include "core/interface/IEffectFactory.h"
-#include "core/interface/IRenderer.h"
 #include "game/event/InGameEvents.h"
 #include <vector>
 
@@ -20,12 +19,10 @@ namespace game::system::visual
 	   * @param componentManager ComponentManagerの参照
 	   * @param eventBus イベント購読用のEventBus
 	   * @param effectFactory エフェクト再生のインターフェース
-	   * @param renderer ボーン位置の取得に使うIRendererの参照
 	   */
 	  EffectSystem(core::ecs::ComponentManager& componentManager,
 		  core::base::EventBus& eventBus,
-		  core::iface::IEffectFactory& effectFactory,
-		  core::iface::IRenderer& renderer);
+		  core::iface::IEffectFactory& effectFactory);
 
 	  /**
 	   * @brief システムの更新処理（エフェクト終了スロットの回収）
@@ -61,7 +58,6 @@ namespace game::system::visual
 	  core::ecs::ComponentManager& m_componentManager;
 	  core::base::EventBus& m_eventBus;
 	  core::iface::IEffectFactory& m_effectFactory;
-	  core::iface::IRenderer& m_renderer;
 
 	  // EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
 	  std::vector<core::base::EventBus::Subscription> m_subscriptions{};
