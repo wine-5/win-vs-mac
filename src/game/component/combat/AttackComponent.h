@@ -30,6 +30,10 @@ namespace game::component::combat
 		// 「攻撃した瞬間」を知りたい場合（攻撃アニメの要求など）はこれを見る
 		bool m_justFired{ false };
 
+		// 攻撃開始エフェクトの位置補正（ワールド単位）。手のボーン位置を基準に出すと
+		// エフェクトの絵柄によっては高すぎたり低すぎたりするため、その差を吸収する
+		core::Vector3 m_effectPositionOffset{};
+
 		// 攻撃開始エフェクトの向き補正（ラジアン）。攻撃を要求した側が「どう振ったか」を
 		// ここに入れ、AttackSystem が AttackStartEvent へそのまま載せる。
 		// 同じ斬撃エフェクトを縦振りと水平回転で使い分けるために使う

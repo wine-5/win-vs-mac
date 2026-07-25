@@ -115,7 +115,7 @@ namespace game::system::combat
 
 			if (shouldPlayStartEffect)
 				m_eventBus.publish(event::AttackStartEvent{ attackerId, startEffect,
-				    attack.m_effectRotationOffset });
+				    attack.m_effectRotationOffset, attack.m_effectPositionOffset });
 
 			// ワインドアップ有り：振りが終わる（m_windupDelay秒後）までダメージ判定を遅延させる。
 			// 演出（AttackStartEvent）は今すぐ発行済みなので、アニメの振りとダメージのタイミングが揃う。

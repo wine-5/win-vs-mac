@@ -17,6 +17,10 @@ namespace
 
 	const core::Vector3 STAGE1_EFFECT_ROTATION{ 0.0f, 0.0f, 0.0f };
 	const core::Vector3 STAGE2_EFFECT_ROTATION{ 0.0f, 0.0f, STAGE2_EFFECT_ROLL };
+
+	// 斬撃エフェクトの高さの微調整（ワールド単位）。基準は足元で、絵柄が上方向へ
+	// 伸びるため既定は補正なし。高すぎる／低すぎる場合はここのYを動かす
+	const core::Vector3 EFFECT_POSITION_OFFSET{ 0.0f, 0.0f, 0.0f };
 } // namespace
 
 namespace game::system::combat
@@ -84,6 +88,7 @@ namespace game::system::combat
 		// 斬撃エフェクトの傾きも段に合わせる（AttackSystemがイベントへ載せる）
 		const bool isFinalStage{ combo.m_stage >= MAX_COMBO_STAGE };
 		attack.m_effectRotationOffset = isFinalStage ? STAGE2_EFFECT_ROTATION : STAGE1_EFFECT_ROTATION;
+		attack.m_effectPositionOffset = EFFECT_POSITION_OFFSET;
 
 		auto& anim{ m_componentManager.get<component::visual::AnimationComponent>(m_playerId) };
 		anim.request(isFinalStage

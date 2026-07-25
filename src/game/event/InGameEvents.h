@@ -63,15 +63,24 @@ namespace game::event
 		 */
 		core::Vector3 m_effectRotationOffset{};
 
+		/**
+		 * @brief エフェクトの位置の補正（ワールド単位）
+		 *
+		 * 購読側は「基準位置＋この補正」でエフェクトを出す。
+		 * エフェクトの絵柄が原点からどう伸びるかに合わせて高さを詰めるために持つ
+		 */
+		core::Vector3 m_effectPositionOffset{};
+
 		// 攻撃開始SE（敵・Playerごとに音を変える）は機能追加のため別ブランチで対応する。
 		// 実装する場合は AttackHitEvent と同じく SeType を持たせ、AudioEventListener で購読する
 
 		AttackStartEvent() = default;
 		AttackStartEvent(core::ecs::EntityId attackerId, core::constant::EffectType effectType,
-		    core::Vector3 effectRotationOffset = {})
+		    core::Vector3 effectRotationOffset = {}, core::Vector3 effectPositionOffset = {})
 		    : m_attackerId{ attackerId }
 		    , m_effectType{ effectType }
 		    , m_effectRotationOffset{ effectRotationOffset }
+		    , m_effectPositionOffset{ effectPositionOffset }
 		{
 		}
 	};
