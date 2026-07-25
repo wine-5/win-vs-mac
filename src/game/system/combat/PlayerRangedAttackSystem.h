@@ -28,7 +28,8 @@ namespace game::system::combat
 		PlayerRangedAttackSystem(core::ecs::ComponentManager& componentManager,
 		    core::ecs::EntityId playerId,
 		    factory::ProjectileFactory& projectileFactory,
-		    core::data::ProjectileMetadata metadata);
+		    core::data::ProjectileMetadata metadata,
+		    int billboardImage);
 
 		/**
 		 * @brief 発射入力に応じて弾を発射する
@@ -47,6 +48,7 @@ namespace game::system::combat
 		void fire(float chargeRate);
 
 		core::data::ProjectileMetadata m_metadata{}; // 弾定義（値コピーで保持）
+		int m_billboardImage{ -1 };                  // Window弾の見た目に使う2D画像ハンドル（ビルボード描画）
 		float m_cooldownTimer{ 0.0f };
 		float m_chargeTime{ 0.0f }; // 現在の溜め時間（秒）
 		bool m_isCharging{ false }; // 溜め中かどうか

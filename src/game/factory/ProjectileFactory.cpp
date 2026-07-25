@@ -59,9 +59,16 @@ namespace game::factory
 		projectile.m_startEffect = config.m_startEffect; // Noneならエフェクト無し（Safariのタブ弾）
 		m_componentManager.add<component::combat::ProjectileComponent>(id, projectile);
 
-		// 3Dモデルの弾（Safariのタブ等）はRenderComponentを付与し、InGameViewが回転描画する
-		if (config.m_modelHandle != -1)
-			m_componentManager.add<component::visual::RenderComponent>(id, { config.m_modelHandle, true });
+		// 見た目を付与する。3Dモデルの弾（Safariのタブ等）はモデルハンドル、
+		// プレイヤーのWindow弾はビルボード画像で描く。どちらも無ければ描画なし
+		if (config.m_modelHandle != -1 || config.m_billboardImage != -1)
+		{
+			component::visual::RenderComponent render{};
+			render.m_modelHandle = config.m_modelHandle;
+			render.m_billboardImage = config.m_billboardImage;
+			render.m_billboardSize = config.m_billboardSize;
+			m_componentManager.add<component::visual::RenderComponent>(id, render);
+		}
 
 		return id;
 	}

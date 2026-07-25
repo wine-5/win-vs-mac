@@ -345,22 +345,18 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::movement::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
 		// 照準の敵捕捉判定（カメラ更新後・描画前に走らせる）
 		m_systemManager.registerSystem<game::system::combat::TargetingSystem>(m_componentManager);
-		// 発射入力→弾生成（生成はPhysicsSystemより前でよい）。弾定義はjsonから取得する
+		// 発射入力→弾生成（生成はPhysicsSystemより前でよい）。弾定義はjsonから取得する。
+		// Window弾の見た目はビルボード（板に貼ったWindow画像）で描くので、その画像を先に読む
 		const auto& projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
+		const int windowBillboard{ projectileMeta.m_imageId.empty() ? -1 : m_resourceManager.loadImageById(projectileMeta.m_imageId) };
 		m_systemManager.registerSystem<game::system::combat::PlayerRangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory,
-		    projectileMeta);
+		    projectileMeta, windowBillboard);
 		m_systemManager.registerSystem<game::system::movement::PhysicsSystem>(m_componentManager, m_playerData.getJumpForce());
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
 		m_systemManager.registerSystem<game::system::combat::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);
 		// 敵弾をプレイヤーのWindow弾で跳ね返す（移動後・ダメージ判定AttackSystemより前に判定する）
 		m_systemManager.registerSystem<game::system::combat::ProjectileReflectSystem>(m_componentManager);
 
-		// 弾の見た目として実OSウィンドウを追従させる（移動後の位置を射影するためPhysicsSystemより後）
-		auto* windowFactory{ core::base::ServiceLocator::get<core::iface::IWindowFactory>() };
-		if (windowFactory)
-			m_projectileWindowManager = windowFactory->createProjectileWindowManager();
-		if (m_projectileWindowManager)
-			m_systemManager.registerSystem<game::system::combat::ProjectileWindowSystem>(m_componentManager, m_renderer, *m_projectileWindowManager);
 		m_systemManager.registerSystem<game::system::visual::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
 
 		m_systemManager.registerSystem<game::system::combat::CollisionSystem>(m_componentManager);

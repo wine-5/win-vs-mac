@@ -273,6 +273,17 @@ namespace infrastructure::graphics
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 	}
 
+	void Renderer::drawBillboard(int imageHandle, const core::Vector3& position, float size, float angle)
+	{
+		if (imageHandle == -1)
+			return;
+
+		const VECTOR pos{ VGet(position.x, position.y, position.z) };
+		// cx,cy=0.5,0.5で画像中心を position に合わせる。TransFlag=TRUEで透過を有効にする。
+		// 深度テストが効くので、壁の裏へ回れば自然に隠れる
+		DrawBillboard3D(pos, 0.5f, 0.5f, size, angle, imageHandle, TRUE);
+	}
+
 	void Renderer::drawSpinningModelFacing(int modelHandle, const core::Vector3& position,
 	    const core::Vector3& scale, const core::Vector3& centerOffset,
 	    const core::Vector3& faceDir, float spinAngle)

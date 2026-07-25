@@ -10,6 +10,11 @@ namespace game::component::visual
 		int m_modelHandle{ -1 }; // -1は未ロード
 		bool m_isVisible{ true };
 
+		// ビルボード（板に貼った2D画像）で描く場合の画像ハンドルと大きさ。
+		// m_billboardImageが-1以外なら、モデルではなくビルボードとして描画する（プレイヤーのWindow弾など）
+		int m_billboardImage{ -1 };
+		float m_billboardSize{ 0.0f };
+
 		// テクスチャの繰り返し回数。1.0なら引き伸ばし（従来どおり）。
 		// 引き伸ばした配置物で模様が間延びしないよう、実寸に応じて繰り返す
 		float m_uvScaleU{ 1.0f };

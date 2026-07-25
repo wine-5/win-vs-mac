@@ -110,6 +110,9 @@ namespace infrastructure::graphics
 		 * @param faceDir モデルの正面を向ける方向（正規化不要）
 		 * @param spinAngle 面内回転角（ラジアン）
 		 */
+		void drawBillboard(int imageHandle, const core::Vector3& position,
+		    float size, float angle) override;
+
 		void drawSpinningModelFacing(int modelHandle, const core::Vector3& position,
 		    const core::Vector3& scale, const core::Vector3& centerOffset,
 		    const core::Vector3& faceDir, float spinAngle) override;

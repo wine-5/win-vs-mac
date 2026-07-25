@@ -45,8 +45,7 @@ namespace game::scene
 		if (m_telegraphSystem)
 			m_telegraphSystem->draw();
 
-		// プレイヤー弾の見た目は実OSウィンドウ（ProjectileWindowSystem）が担うため描かない。
-		// 敵のタブ弾など3Dモデルを持つ弾はここで回転描画する
+		// 弾を描く。プレイヤーのWindow弾はビルボード、敵のタブ弾など3Dモデルはモデルで描画する
 		drawProjectileModels();
 
 		// DEBUG: 当たり判定等のワールド空間デバッグ可視化（リリース時に削除）
@@ -218,10 +217,22 @@ namespace game::scene
 				continue;
 
 			const auto& render{ m_componentManager.get<component::visual::RenderComponent>(id) };
-			if (!render.m_isVisible || render.m_modelHandle == -1)
+			if (!render.m_isVisible)
 				continue;
 
 			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(id) };
+
+			// プレイヤーのWindow弾はビルボード（板に貼ったWindow画像）で描く。
+			// 深度を持つので壁の裏では隠れ、実OSウィンドウのようにプレイヤーを覆い隠さない
+			if (render.m_billboardImage != -1)
+			{
+				m_renderer.drawBillboard(render.m_billboardImage, transform.m_position, render.m_billboardSize, 0.0f);
+				continue;
+			}
+
+			if (render.m_modelHandle == -1)
+				continue;
+
 			const auto& projectile{ m_componentManager.get<component::combat::ProjectileComponent>(id) };
 
 			// 発射地点からの移動距離に応じてタンブルさせる（状態を持たず距離から導出する）

@@ -11,11 +11,13 @@ namespace game::system::combat
 	PlayerRangedAttackSystem::PlayerRangedAttackSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId playerId,
 	    factory::ProjectileFactory& projectileFactory,
-	    core::data::ProjectileMetadata metadata)
+	    core::data::ProjectileMetadata metadata,
+	    int billboardImage)
 	    : m_componentManager{ componentManager }
 	    , m_playerId{ playerId }
 	    , m_projectileFactory{ projectileFactory }
 	    , m_metadata{ std::move(metadata) }
+	    , m_billboardImage{ billboardImage }
 	{
 	}
 
@@ -100,6 +102,12 @@ namespace game::system::combat
 		config.m_lifetime = m_metadata.m_lifetime * rangeMultiplier;
 		config.m_radius = m_metadata.m_radius * sizeMultiplier;
 		config.m_scale = m_metadata.m_scale;
+
+		// 見た目は板に貼ったWindow画像（ビルボード）。当たり判定半径に合わせて大きさを決め、
+		// 溜めサイズ倍率も反映する。視認しやすいよう当たり判定より少し大きめにする
+		constexpr float BILLBOARD_SIZE_FACTOR{ 2.5f };
+		config.m_billboardImage = m_billboardImage;
+		config.m_billboardSize = m_metadata.m_radius * BILLBOARD_SIZE_FACTOR * sizeMultiplier;
 
 		m_projectileFactory.spawn(origin, direction, config, constant::Tag::Player);
 	}

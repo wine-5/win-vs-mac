@@ -138,6 +138,19 @@ namespace core::iface
 		    const core::Vector3& scale, const core::Vector3& centerOffset,
 		    const core::Vector3& faceDir, float spinAngle) = 0;
 
+		/**
+		 * @brief 2D画像を常にカメラへ正対するビルボードとして3D空間に描く
+		 *
+		 * 深度（Zバッファ）を持つので、壁や柱の裏に回れば正しく隠れる。
+		 * プレイヤーのWindow弾のように「板に絵を貼った弾」を描くのに使う。
+		 * @param imageHandle 2D画像ハンドル（loadImageByIdで取得したもの）
+		 * @param position ビルボード中心のワールド座標
+		 * @param size ワールド単位での大きさ（画像のアスペクト比は保たれる）
+		 * @param angle 面内の回転角（ラジアン）
+		 */
+		virtual void drawBillboard(int imageHandle, const core::Vector3& position,
+		    float size, float angle) = 0;
+
 		// 補足: worldToScreen は射影変換であり、厳密には3D描画の責務ではない。
 		//       ただし現状の利用は順変換の2箇所のみで、メソッド1本のために
 		//       IViewProjection を新設しても抽象が増えるだけで得るものが少ない。
