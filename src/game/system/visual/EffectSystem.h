@@ -43,9 +43,11 @@ namespace game::system::visual
 	   * @param entityId スロットを持つEntityのID
 	   * @param type 再生するエフェクトの種類
 	   * @param position 再生位置（ワールド座標）
+	   * @param rotation 再生時の向き（ラジアン。向きを問わないエフェクトはゼロ）
 	   */
 	  void playAndTrack(core::ecs::EntityId entityId,
-		  core::constant::EffectType type, const core::Vector3& position);
+		  core::constant::EffectType type, const core::Vector3& position,
+		  const core::Vector3& rotation = {});
 
 	  core::ecs::ComponentManager& m_componentManager;
 	  core::base::EventBus& m_eventBus;

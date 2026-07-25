@@ -55,13 +55,23 @@ namespace game::event
 		/** @brief 再生するエフェクトの種類 */
 		core::constant::EffectType m_effectType{ core::constant::EffectType::None };
 
+		/**
+		 * @brief エフェクトの向きの補正（ラジアン）
+		 *
+		 * 購読側は「攻撃者の向き＋この補正」でエフェクトを出す。
+		 * 同じ斬撃エフェクトを縦振りと水平回転で使い分けるために持つ
+		 */
+		core::Vector3 m_effectRotationOffset{};
+
 		// 攻撃開始SE（敵・Playerごとに音を変える）は機能追加のため別ブランチで対応する。
 		// 実装する場合は AttackHitEvent と同じく SeType を持たせ、AudioEventListener で購読する
 
 		AttackStartEvent() = default;
-		AttackStartEvent(core::ecs::EntityId attackerId, core::constant::EffectType effectType)
+		AttackStartEvent(core::ecs::EntityId attackerId, core::constant::EffectType effectType,
+		    core::Vector3 effectRotationOffset = {})
 		    : m_attackerId{ attackerId }
 		    , m_effectType{ effectType }
+		    , m_effectRotationOffset{ effectRotationOffset }
 		{
 		}
 	};
