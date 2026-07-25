@@ -1,4 +1,5 @@
 ﻿#include "game/actor/EnemyBehaviors.h"
+#include "game/actor/AnimationSetup.h"
 #include "game/data/EnemyData.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/visual/AnimationComponent.h"
@@ -30,46 +31,6 @@ namespace game::actor
 			static std::mt19937 rng{ std::random_device{}() };
 			static std::uniform_int_distribution<int> dist{ 0, 1 };
 			return dist(rng) == 0 ? 1 : -1;
-		}
-
-		/**
-		 * @brief アニメ状態名の文字列をAnimationStateへ変換する（未知はIdle扱い）
-		 */
-		constant::AnimationState toAnimationState(const std::string& name)
-		{
-			using constant::AnimationState;
-			if (name == "Walk")
-				return AnimationState::Walk;
-			if (name == "Run")
-				return AnimationState::Run;
-			if (name == "Attack1")
-				return AnimationState::Attack1;
-			if (name == "Attack2")
-				return AnimationState::Attack2;
-			if (name == "Hit")
-				return AnimationState::Hit;
-			if (name == "Dying")
-				return AnimationState::Dying;
-			if (name == "Jump")
-				return AnimationState::Jump;
-			return AnimationState::Idle;
-		}
-
-		/**
-		 * @brief 優先度名の文字列を割り込み優先度の数値へ変換する（未知はlocomotion扱い）
-		 */
-		int toAnimationPriority(const std::string& name)
-		{
-			namespace priority = constant::animation_priority;
-			if (name == "dying")
-				return priority::DYING;
-			if (name == "hit")
-				return priority::HIT;
-			if (name == "attack")
-				return priority::ATTACK;
-			if (name == "jump")
-				return priority::JUMP;
-			return priority::LOCOMOTION;
 		}
 
 		void installMeleeChase(core::ecs::ComponentManager& cm, core::ecs::EntityId id, const data::EnemyData&)
@@ -140,17 +101,7 @@ namespace game::actor
 		if (defs.empty())
 			return; // アニメーションを持たない敵（Safari等）は何もしない
 
-		component::visual::AnimationComponent anim{};
-		for (const auto& def : defs)
-		{
-			component::visual::AnimationClip clip{};
-			clip.m_handle = resourceManager.loadAnimationById(def.animId);
-			clip.m_isLoop = def.loop;
-			clip.m_onComplete = toAnimationState(def.onComplete);
-			clip.m_priority = toAnimationPriority(def.priority);
-			clip.m_speed = def.speed;
-			anim.m_clips[toAnimationState(def.state)] = clip;
-		}
-		componentManager.add<component::visual::AnimationComponent>(entityId, anim);
+		componentManager.add<component::visual::AnimationComponent>(
+		    entityId, buildAnimationComponent(defs, resourceManager));
 	}
 } // namespace game::actor
