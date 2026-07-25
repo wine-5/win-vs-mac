@@ -393,8 +393,10 @@ namespace game::scene
 		// Window弾の見た目はビルボード（板に貼ったWindow画像）で描くので、その画像を先に読む
 		const auto& projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
 		const int windowBillboard{ projectileMeta.m_imageId.empty() ? -1 : m_resourceManager.loadImageById(projectileMeta.m_imageId) };
-		m_systemManager.registerSystem<game::system::combat::PlayerRangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory,
-		    projectileMeta, windowBillboard);
+		auto* rangedAttack{ m_systemManager.registerSystem<game::system::combat::PlayerRangedAttackSystem>(
+			m_componentManager, m_playerId, m_projectileFactory, projectileMeta, windowBillboard) };
+		// レティクルがクールダウンの残量を読むため、Viewへ参照を渡す
+		m_view.setPlayerRangedAttackSystem(rangedAttack);
 		m_systemManager.registerSystem<game::system::movement::PhysicsSystem>(m_componentManager, m_gameManager, m_playerData.getJumpForce(), m_playerData.getGravity(), m_playerData.getMaxFallSpeed());
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
 		m_systemManager.registerSystem<game::system::combat::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);

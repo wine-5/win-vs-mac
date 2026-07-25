@@ -16,6 +16,8 @@
 #include "game/system/visual/AttackTelegraphVisualsSystem.h"
 #include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/system/combat/PlayerDeathSystem.h"
+#include "game/system/combat/PlayerRangedAttackSystem.h"
+#include "game/component/combat/AttackComponent.h"
 #include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
 #include "game/ui/ingame/PlayerHUDView.h"
@@ -146,6 +148,11 @@ namespace game::scene
 		m_playerDeathSystem = system;
 	}
 
+	void InGameView::setPlayerRangedAttackSystem(system::combat::PlayerRangedAttackSystem* system)
+	{
+		m_playerRangedAttackSystem = system;
+	}
+
 	void InGameView::setDebugGizmoView(ui::debug::DebugGizmoView* view)
 	{
 		m_debugGizmoView = view;
@@ -273,7 +280,11 @@ namespace game::scene
 		const int base{ m_screen.getHeight() };
 		const int ringRadius{ static_cast<int>(base * 0.030f) };
 		const int tickLength{ static_cast<int>(base * 0.018f) };
-		const int gap{ ringRadius + static_cast<int>(base * 0.006f) };
+		// クールダウン中はティックを外へ開き、撃てるようになると閉じる。
+		// 「今は撃てない」を形で示すので、視線を中央から動かさずに判断できる
+		const float cooldownRatio{ getAttackCooldownRatio(playerId) };
+		const int spread{ static_cast<int>(base * 0.022f * cooldownRatio) };
+		const int gap{ ringRadius + static_cast<int>(base * 0.006f) + spread };
 		constexpr int THICKNESS{ 2 };
 		constexpr int DOT_RADIUS{ 3 };
 		const int halfThickness{ THICKNESS / 2 };
@@ -294,6 +305,25 @@ namespace game::scene
 
 		// 溜めの進行度は外周リングに重ねる（視線を動かさずに撃ち時を判断できるようにする）
 		drawChargeGauge(playerId, centerX, centerY, ringRadius);
+	}
+
+	float InGameView::getAttackCooldownRatio(core::ecs::EntityId playerId) const
+	{
+		float ratio{ 0.0f };
+
+		// 近接はAttackComponentが残り時間を持つ
+		if (m_componentManager.has<component::combat::AttackComponent>(playerId))
+		{
+			const auto& attack{ m_componentManager.get<component::combat::AttackComponent>(playerId) };
+			if (attack.m_attackCooldown > 0.0f)
+				ratio = std::clamp(attack.m_currentCooldown / attack.m_attackCooldown, 0.0f, 1.0f);
+		}
+
+		// 遠隔はSystemが内部で持つため、公開されている割合を使う
+		if (m_playerRangedAttackSystem)
+			ratio = std::max(ratio, m_playerRangedAttackSystem->getCooldownRatio());
+
+		return ratio;
 	}
 
 	void InGameView::drawChargeGauge(core::ecs::EntityId playerId, int centerX, int centerY, int radius)

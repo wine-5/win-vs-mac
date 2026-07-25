@@ -10,6 +10,7 @@
 namespace game::system::combat
 {
 	class PlayerDeathSystem;
+	class PlayerRangedAttackSystem;
 } // namespace game::system::combat
 
 namespace game::system::visual
@@ -111,6 +112,12 @@ namespace game::scene
 		void setPlayerDeathSystem(system::combat::PlayerDeathSystem* system);
 
 		/**
+		 * @brief 遠隔攻撃System（クールダウン残量の取得元）を設定する
+		 * @param system PlayerRangedAttackSystemのポインタ（所有はSystemManager）
+		 */
+		void setPlayerRangedAttackSystem(system::combat::PlayerRangedAttackSystem* system);
+
+		/**
 		 * @brief DEBUG: ワールド空間デバッグ可視化Viewを設定する（リリース時に削除）
 		 * @param view DebugGizmoViewのポインタ（所有はInGame）
 		 */
@@ -196,6 +203,15 @@ namespace game::scene
 		void drawChargeGauge(core::ecs::EntityId playerId, int centerX, int centerY, int radius);
 
 		/**
+		 * @brief 攻撃のクールダウン残量を返す
+		 *
+		 * 近接と遠隔で別々に出すと中央が賑やかになるため、残りの長いほうへ一本化する
+		 * @param playerId 近接の状態（AttackComponent）を読むプレイヤーのEntityID
+		 * @return 0.0（撃てる）〜1.0（撃った直後）
+		 */
+		[[nodiscard]] float getAttackCooldownRatio(core::ecs::EntityId playerId) const;
+
+		/**
 		 * @brief モデルを持つ弾（Safariのタブ等）を回転させながら描画する
 		 *
 		 * RenderComponentを持つ弾を対象に、進行方向へyawを向けつつ
@@ -243,6 +259,9 @@ namespace game::scene
 
 		// プレイヤー死亡時の暗転の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::combat::PlayerDeathSystem* m_playerDeathSystem{ nullptr };
+
+		// 遠隔攻撃のクールダウン残量の取得元（所有はSystemManager、InGameがsetupSystemsで設定する）
+		system::combat::PlayerRangedAttackSystem* m_playerRangedAttackSystem{ nullptr };
 
 		// DEBUG: デバッグ可視化・HUDの描画元（所有はInGame。リリース時に削除）
 		ui::debug::DebugGizmoView* m_debugGizmoView{ nullptr };
