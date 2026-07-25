@@ -197,6 +197,21 @@ namespace core::iface
 		virtual void drawBillboard(int imageHandle, const core::Vector3& position,
 		    float size, float angle) = 0;
 
+		/**
+		 * @brief 発光するビルボードを加算合成で描く
+		 *
+		 * 暗闇に浮かぶ星や光跡のように「それ自体が光っている」ものに使う。
+		 * 加算合成なので背景が暗いほど強く光り、重なるほど白熱していく。
+		 * 深度テストは効くが深度は書き込まないため、光同士が互いを消し合わない
+		 * @param imageHandle 2D画像ハンドル（loadImageByIdで取得したもの）
+		 * @param position ビルボード中心のワールド座標
+		 * @param size ワールド単位での大きさ（画像のアスペクト比は保たれる）
+		 * @param angle 面内の回転角（ラジアン）
+		 * @param brightness 明るさ（0〜255。加算量の指定）
+		 */
+		virtual void drawGlowBillboard(int imageHandle, const core::Vector3& position,
+		    float size, float angle, int brightness) = 0;
+
 		// 補足: worldToScreen は射影変換であり、厳密には3D描画の責務ではない。
 		//       ただし現状の利用は順変換の2箇所のみで、メソッド1本のために
 		//       IViewProjection を新設しても抽象が増えるだけで得るものが少ない。

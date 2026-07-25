@@ -334,6 +334,24 @@ namespace infrastructure::graphics
 		DrawBillboard3D(pos, 0.5f, 0.5f, size, angle, imageHandle, TRUE);
 	}
 
+	void Renderer::drawGlowBillboard(int imageHandle, const core::Vector3& position,
+	    float size, float angle, int brightness)
+	{
+		if (imageHandle == -1)
+			return;
+
+		// 深度テストは残したまま書き込みだけ止める。光同士が前後で消し合わなくなり、
+		// 重なったぶんだけ明るくなる（加算合成の効果が正しく出る）
+		SetWriteZBuffer3D(FALSE);
+		SetDrawBlendMode(DX_BLENDMODE_ADD, brightness);
+
+		const VECTOR pos{ VGet(position.x, position.y, position.z) };
+		DrawBillboard3D(pos, 0.5f, 0.5f, size, angle, imageHandle, TRUE);
+
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+		SetWriteZBuffer3D(TRUE);
+	}
+
 	void Renderer::drawSpinningModelFacing(int modelHandle, const core::Vector3& position,
 	    const core::Vector3& scale, const core::Vector3& centerOffset,
 	    const core::Vector3& faceDir, float spinAngle)

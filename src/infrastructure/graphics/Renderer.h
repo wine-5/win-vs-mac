@@ -138,6 +138,17 @@ namespace infrastructure::graphics
 		 * @param faceDir モデルの正面を向ける方向（正規化不要）
 		 * @param spinAngle 面内回転角（ラジアン）
 		 */
+		/**
+		 * @brief 発光するビルボードを加算合成で描く
+		 * @param imageHandle 2D画像ハンドル
+		 * @param position ビルボード中心のワールド座標
+		 * @param size ワールド単位での大きさ
+		 * @param angle 面内の回転角（ラジアン）
+		 * @param brightness 明るさ（0〜255）
+		 */
+		void drawGlowBillboard(int imageHandle, const core::Vector3& position,
+		    float size, float angle, int brightness) override;
+
 		void drawBillboard(int imageHandle, const core::Vector3& position,
 		    float size, float angle) override;
 
