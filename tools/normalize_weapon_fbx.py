@@ -178,6 +178,33 @@ def decimate(target_tris: int):
     print(f"  ポリゴン削減: {before:,} -> {count_tris():,} tris（ratio {ratio:.5f}）")
 
 
+def drop_unused_textures(keep_keywords):
+    """指定のキーワードを名前に含まないテクスチャをマテリアルから外す
+
+    DxLib の mv1 が扱えるのはディフューズとノーマルマップまでで、
+    metallic や roughness を持たせても描画に使われないままメモリを占める
+    """
+    dropped = []
+    for material in bpy.data.materials:
+        if not material.use_nodes:
+            continue
+        for node in list(material.node_tree.nodes):
+            if node.type != 'TEX_IMAGE' or node.image is None:
+                continue
+            name = node.image.name.lower()
+            if any(keyword in name for keyword in keep_keywords):
+                continue
+            dropped.append(node.image.name)
+            material.node_tree.nodes.remove(node)
+
+    for image in list(bpy.data.images):
+        if image.users == 0:
+            bpy.data.images.remove(image)
+
+    for name in dropped:
+        print(f"  テクスチャ除外: {name}")
+
+
 def resize_textures(size: int):
     """テクスチャを指定サイズ以下へ縮小し、FBXへ埋め込めるようパックする"""
     for image in bpy.data.images:
@@ -201,6 +228,9 @@ def main():
                         help="テクスチャの最大辺")
     parser.add_argument("--grip-shift", type=float, default=0.0,
                         help="握り位置の微調整（正で柄頭寄り、負で鍔寄り）")
+    parser.add_argument("--keep-textures", default="",
+                        help="残すテクスチャ名のキーワード（カンマ区切り。例: basecolor,normal）"
+                             "。未指定なら全て残す")
 
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     args = parser.parse_args(argv)
@@ -222,7 +252,9 @@ def main():
     print("[2/3] ポリゴン削減")
     decimate(args.target_tris)
 
-    print("[3/3] テクスチャ縮小")
+    print("[3/3] テクスチャ整理")
+    if args.keep_textures:
+        drop_unused_textures([k.strip().lower() for k in args.keep_textures.split(",") if k.strip()])
     resize_textures(args.texture_size)
 
     # axis_up='Y' で書き出すことで、Blenderの +Z（刃の向き）が FBX の +Y になる
