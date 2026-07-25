@@ -597,7 +597,7 @@ namespace game::scene
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::T))
 		{
 			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_playerId) };
-			m_effectFactory.play(core::constant::EffectType::Enemy_HitWindow, transform.m_position);
+			m_effectFactory.play(core::constant::EffectType::Enemy_HitWindow, transform.m_position, {});
 			core::log::info("エフェクトが再生");
 		}
 	}
