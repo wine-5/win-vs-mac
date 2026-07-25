@@ -83,6 +83,8 @@ namespace game::system::combat
 		// 溜め率に応じて倍率を線形補間する（0で等倍、1で最大倍率）
 		const float damageMultiplier{ 1.0f + (m_metadata.m_chargeDamageMultiplier - 1.0f) * chargeRate };
 		const float sizeMultiplier{ 1.0f + (m_metadata.m_chargeSizeMultiplier - 1.0f) * chargeRate };
+		// 飛距離は速度そのままに寿命を延ばして伸ばす（速度を上げると弾速の見た目が変わるため）
+		const float rangeMultiplier{ 1.0f + (m_metadata.m_chargeRangeMultiplier - 1.0f) * chargeRate };
 
 		// カメラ前方へ、プレイヤーの少し前・目線の高さから発射する
 		const core::Vector3 direction{ camera.m_forward };
@@ -95,7 +97,7 @@ namespace game::system::combat
 		factory::ProjectileConfig config{};
 		config.m_speed = m_metadata.m_speed;
 		config.m_damage = m_metadata.m_damage * damageMultiplier;
-		config.m_lifetime = m_metadata.m_lifetime;
+		config.m_lifetime = m_metadata.m_lifetime * rangeMultiplier;
 		config.m_radius = m_metadata.m_radius * sizeMultiplier;
 		config.m_scale = m_metadata.m_scale;
 

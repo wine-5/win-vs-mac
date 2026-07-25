@@ -32,6 +32,8 @@ namespace
 			metadata.m_chargeDamageMultiplier = j["chargeDamageMultiplier"];
 		if (j.contains("chargeSizeMultiplier"))
 			metadata.m_chargeSizeMultiplier = j["chargeSizeMultiplier"];
+		if (j.contains("chargeRangeMultiplier"))
+			metadata.m_chargeRangeMultiplier = j["chargeRangeMultiplier"];
 		return metadata;
 	}
 } // namespace
