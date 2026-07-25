@@ -450,6 +450,32 @@ namespace infrastructure::resource::repository
 		if (j.contains("mac"))
 			metadata.mac = parseMac(j["mac"]);
 
+		// 手に持たせる武器の装着設定。位置・角度・長さは実機で調整する値なのでJSONに置く
+		if (j.contains("weapon"))
+		{
+			const auto& w = j["weapon"];
+			core::data::WeaponAttachMetadata weapon{};
+			if (w.contains("modelId"))
+				weapon.modelId = w["modelId"].get<std::string>();
+			if (w.contains("frameName"))
+				weapon.frameName = w["frameName"].get<std::string>();
+			if (w.contains("length"))
+				weapon.length = w["length"];
+			if (w.contains("offsetPosition"))
+			{
+				weapon.offsetPosition.x = w["offsetPosition"][0];
+				weapon.offsetPosition.y = w["offsetPosition"][1];
+				weapon.offsetPosition.z = w["offsetPosition"][2];
+			}
+			if (w.contains("offsetRotation"))
+			{
+				weapon.offsetRotation.x = w["offsetRotation"][0];
+				weapon.offsetRotation.y = w["offsetRotation"][1];
+				weapon.offsetRotation.z = w["offsetRotation"][2];
+			}
+			metadata.weapon = weapon;
+		}
+
 		return metadata;
 	}
 

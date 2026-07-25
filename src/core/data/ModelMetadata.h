@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "core/utility/Vector3.h"
 #include "core/data/MacMetadata.h"
+#include "core/data/WeaponAttachMetadata.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -52,5 +53,8 @@ namespace core::data
 		std::vector<AnimationClipDef> animations;
 
 		std::optional<MacMetadata> mac; // ボスの挙動定義（macData.jsonなどにmac要素がある場合のみ）
+
+		// 手に持たせる武器の装着設定（JSONにweapon要素がある場合のみ）
+		std::optional<WeaponAttachMetadata> weapon;
 	};
 } // namespace core::data
