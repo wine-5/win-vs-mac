@@ -138,5 +138,16 @@ namespace core::iface
 		 * @return AABB中心のローカル座標。失敗時はゼロベクトル
 		 */
 		[[nodiscard]] virtual core::Vector3 computeBoundingCenter(int modelHandle) const noexcept = 0;
+
+		/**
+		 * @brief モデルのAABBの大きさ（ローカル座標・スケール未適用）を計算する
+		 *
+		 * モデルの実寸は変換ツールや単位系によって桁が変わるため、
+		 * 「見た目の長さを何ワールド単位にしたいか」から必要な拡大率を
+		 * 逆算するのに使う（武器の装着サイズなど）。
+		 * @param modelHandle モデルハンドル
+		 * @return 各軸の大きさ。失敗時はゼロベクトル
+		 */
+		[[nodiscard]] virtual core::Vector3 computeBoundingSize(int modelHandle) const noexcept = 0;
 	};
 } // namespace core::iface

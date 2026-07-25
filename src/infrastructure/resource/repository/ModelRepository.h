@@ -88,6 +88,13 @@ namespace infrastructure::resource::repository
 	   */
 	  [[nodiscard]] core::Vector3 computeBoundingCenter(int modelHandle) const noexcept;
 
+	  /**
+	   * @brief モデルのAABBの大きさ（ローカル座標・スケール未適用）を計算する
+	   * @param modelHandle モデルハンドル
+	   * @return 各軸の大きさ。失敗時はゼロベクトル
+	   */
+	  [[nodiscard]] core::Vector3 computeBoundingSize(int modelHandle) const noexcept;
+
 	private:
 	  struct ResourceDefinition
 	  {
