@@ -75,6 +75,14 @@ namespace game::system::movement
 				anim.m_requested = constant::AnimationState::Run;
 			else
 				anim.m_requested = constant::AnimationState::Walk;
+
+			// 着地したらジャンプの優先保持を解除し、同フレームで上のlocomotion要求へ移す。
+			// これをしないと接地後もJumpクリップの末尾が再生され続け、ダッシュ中に
+			// 「虚無の時間」（動いているのに棒立ち）が出る。上昇中(vy>0)は跳んだ直後で
+			// 接地判定が残るため解除しない
+			if (anim.m_current == constant::AnimationState::Jump &&
+			    velocity.m_isGrounded && velocity.m_velocity.y <= 0.0f)
+				anim.m_isCompleted = true;
 		}
 	}
 } // namespace game::system::movement
