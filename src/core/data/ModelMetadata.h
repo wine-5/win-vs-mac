@@ -22,6 +22,9 @@ namespace core::data
 		std::string onComplete{ "Idle" };     // 非ループ終了後に遷移する状態名
 		std::string priority{ "locomotion" }; // "dying"/"hit"/"attack"/"jump"/"locomotion"
 		float speed{ 1.0f };                  // 再生速度倍率
+		// 再生開始位置（アニメーションのフレーム数。30fps基準）。
+		// 頭に不要な溜めが入っているクリップの冒頭を捨てるのに使う
+		float startTime{ 0.0f };
 	};
 
 	/**

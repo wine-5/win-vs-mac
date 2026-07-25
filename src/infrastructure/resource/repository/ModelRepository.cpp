@@ -405,6 +405,8 @@ namespace infrastructure::resource::repository
 						def.priority = c["priority"].get<std::string>();
 					if (c.contains("speed"))
 						def.speed = c["speed"].get<float>();
+					if (c.contains("startTime"))
+						def.startTime = c["startTime"].get<float>();
 					metadata.animations.push_back(def);
 				}
 			}
