@@ -9,7 +9,7 @@
   },
   "props": [
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         0,
         -12,
@@ -27,7 +27,7 @@
       ]
     },
     {
-      "type": "wall_window",
+      "type": "wall_explorer",
       "position": [
         0,
         750,
@@ -45,7 +45,7 @@
       ]
     },
     {
-      "type": "block_file",
+      "type": "block_folder",
       "position": [
         -900,
         110,
@@ -63,7 +63,7 @@
       ]
     },
     {
-      "type": "block_file",
+      "type": "block_folder",
       "position": [
         950,
         110,
@@ -99,7 +99,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         0,
         -596.87,
@@ -117,7 +117,7 @@
       ]
     },
     {
-      "type": "wall_window",
+      "type": "wall_explorer",
       "position": [
         -1420,
         115.13,
@@ -135,7 +135,7 @@
       ]
     },
     {
-      "type": "block_file",
+      "type": "block_folder",
       "position": [
         -700,
         -474.87,
@@ -153,7 +153,7 @@
       ]
     },
     {
-      "type": "block_file",
+      "type": "block_folder",
       "position": [
         -450,
         -474.87,
@@ -171,7 +171,7 @@
       ]
     },
     {
-      "type": "block_file",
+      "type": "block_folder",
       "position": [
         -580,
         -254.87,
@@ -189,7 +189,7 @@
       ]
     },
     {
-      "type": "block_file",
+      "type": "block_folder",
       "position": [
         800,
         -474.87,
@@ -207,7 +207,7 @@
       ]
     },
     {
-      "type": "block_file",
+      "type": "block_folder",
       "position": [
         300,
         -474.87,
@@ -225,7 +225,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         2350,
         -596.87,
@@ -243,7 +243,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         3800,
         -596.87,
@@ -279,7 +279,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         3800,
         -1046.77,
@@ -315,7 +315,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         851.26,
         -1496.68,
@@ -333,7 +333,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         851.26,
         -1496.68,
@@ -387,7 +387,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         851.26,
         -1496.68,
@@ -405,7 +405,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         -648.74,
         -1496.68,
@@ -459,7 +459,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         -2148.74,
         -1496.68,
@@ -477,7 +477,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         -2998.74,
         -1496.68,
@@ -495,7 +495,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         -3948.74,
         -1496.68,
@@ -513,7 +513,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         -2148.74,
         -1496.68,
@@ -567,7 +567,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         -2148.74,
         -1496.68,
@@ -603,7 +603,7 @@
       ]
     },
     {
-      "type": "floor_folder",
+      "type": "floor_desktop",
       "position": [
         -2148.74,
         -2081.55,
@@ -621,7 +621,7 @@
       ]
     },
     {
-      "type": "wall_window",
+      "type": "wall_explorer",
       "position": [
         -4068.74,
         -1319.55,
@@ -639,7 +639,7 @@
       ]
     },
     {
-      "type": "wall_window",
+      "type": "wall_explorer",
       "position": [
         -228.74,
         -1319.55,
@@ -657,7 +657,7 @@
       ]
     },
     {
-      "type": "pillar_folder",
+      "type": "pillar_app",
       "position": [
         -3048.74,
         -1759.55,
@@ -675,7 +675,7 @@
       ]
     },
     {
-      "type": "pillar_folder",
+      "type": "pillar_app",
       "position": [
         -1248.74,
         -1759.55,
@@ -693,7 +693,7 @@
       ]
     },
     {
-      "type": "pillar_folder",
+      "type": "pillar_app",
       "position": [
         -2948.74,
         -1759.55,
@@ -711,7 +711,7 @@
       ]
     },
     {
-      "type": "pillar_folder",
+      "type": "pillar_app",
       "position": [
         -1198.74,
         -1759.55,
@@ -729,7 +729,7 @@
       ]
     },
     {
-      "type": "block_file",
+      "type": "block_folder",
       "position": [
         -3548.74,
         -1959.55,
@@ -747,7 +747,7 @@
       ]
     },
     {
-      "type": "block_file",
+      "type": "block_folder",
       "position": [
         -3438.74,
         -1959.55,
@@ -765,7 +765,7 @@
       ]
     },
     {
-      "type": "block_file",
+      "type": "block_folder",
       "position": [
         -3498.74,
         -1739.55,
@@ -783,7 +783,7 @@
       ]
     },
     {
-      "type": "block_file",
+      "type": "block_folder",
       "position": [
         -798.74,
         -1959.55,
@@ -801,7 +801,7 @@
       ]
     },
     {
-      "type": "block_file",
+      "type": "block_folder",
       "position": [
         -728.74,
         -1959.55,
@@ -819,7 +819,7 @@
       ]
     },
     {
-      "type": "block_file",
+      "type": "block_folder",
       "position": [
         -1948.74,
         -1959.55,
