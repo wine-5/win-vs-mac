@@ -73,20 +73,10 @@ namespace core::utility
 
 		// ========== 攻撃予兆（テレグラフ）用の色（ARGB。アルファで半透明度を指定） ==========
 
-		// 敵の攻撃＝危険なので赤オレンジ系
+		// 予兆は敵の攻撃にだけ出すため、危険を示す赤オレンジ系で固定する
 		static constexpr unsigned int TELEGRAPH_BASE = 0x40FF5028; // 危険範囲の下地（薄いオレンジ赤）
 		static constexpr unsigned int TELEGRAPH_FILL = 0x78FF6030; // 満ちていく内側（オレンジ）
 		static constexpr unsigned int TELEGRAPH_RING = 0xC8FF3820; // 外周リング（濃い赤オレンジ）
-
-		// プレイヤー自身の攻撃は敵の予兆と見分けられるようマゼンタ寄りの紫にする。
-		// 床の主力が青系（Desktop壁紙・青い通路）なので青や水色では沈んでしまい、
-		// 赤オレンジでは敵の危険予兆と混同する。紫は青の床から色相が最も遠く、
-		// 剣の差し色（鍔のコア）と同じ色なので「自分の攻撃」の記号として一貫する。
-		// 輝度は中間に置き、ほぼ黒のTerminal床とほぼ白のApple床の両方で輪郭が残るようにする。
-		// 彩度の高い床の上では薄い色が見えないため、不透明度は敵の予兆より高くとる
-		static constexpr unsigned int TELEGRAPH_ALLY_BASE = 0x60C832E6; // 下地（紫）
-		static constexpr unsigned int TELEGRAPH_ALLY_FILL = 0xA0D24BF0; // 満ちていく内側（明るい紫）
-		static constexpr unsigned int TELEGRAPH_ALLY_RING = 0xF0E678FF; // 外周リング（淡く強い紫）
 
 		// ========== InGame HUD（Windows 11 / Fluent）用の色 ==========
 
