@@ -1,0 +1,132 @@
+#include "DamagePopupSystem.h"
+#include "game/component/movement/TransformComponent.h"
+#include "game/component/combat/ColliderComponent.h"
+#include "game/component/TagComponent.h"
+#include "game/constant/Tag.h"
+#include "core/utility/Color.h"
+#include "core/constant/UI.h"
+#include <algorithm>
+#include <string>
+
+namespace
+{
+	// 数値の表示時間（秒）
+	constexpr float POPUP_DURATION{ 0.9f };
+	// 表示終了間際にフェードアウトを始める割合（0.6なら後半40%で薄くなる）
+	constexpr float FADE_START_RATIO{ 0.55f };
+	// 表示中に浮き上がる高さ（ワールド単位）
+	constexpr float RISE_HEIGHT{ 70.0f };
+	// 頭上へ数値を浮かせるマージン（ワールド単位）
+	constexpr float HEAD_MARGIN{ 30.0f };
+	// コライダーが無い相手のフォールバック頭上高さ（ワールド単位）
+	constexpr float FALLBACK_HEAD_HEIGHT{ 180.0f };
+
+	// 文字サイズ（画面高さ比。解像度に依存させないため）
+	constexpr float FONT_HEIGHT_RATIO{ 0.030f };
+	// 影を落とすずらし量（文字サイズ比）。明るい床でも輪郭が残るようにする
+	constexpr float SHADOW_OFFSET_RATIO{ 0.09f };
+
+	// 画面に映っているか（worldToScreenのzが0〜1の範囲内か）の判定境界
+	constexpr float DEPTH_MIN{ 0.0f };
+	constexpr float DEPTH_MAX{ 1.0f };
+
+	// 半透明合成に渡す不透明度の最大値
+	constexpr float ALPHA_MAX{ 255.0f };
+} // namespace
+
+namespace game::system::visual
+{
+	DamagePopupSystem::DamagePopupSystem(core::ecs::ComponentManager& componentManager,
+	    core::base::EventBus& eventBus,
+	    core::iface::IRenderer& renderer,
+	    core::iface::IUIRenderer& uiRenderer,
+	    core::iface::IScreen& screen)
+	    : m_componentManager{ componentManager }
+	    , m_renderer{ renderer }
+	    , m_uiRenderer{ uiRenderer }
+	    , m_screen{ screen }
+	{
+		m_subscriptions.push_back(eventBus.subscribe<game::event::AttackHitEvent>(
+		    [this](const game::event::AttackHitEvent& e)
+		    { onAttackHit(e); }));
+	}
+
+	void DamagePopupSystem::onAttackHit(const game::event::AttackHitEvent& event)
+	{
+		// 数値を出すのは敵に与えたダメージだけ。自分の被弾は画面演出（赤ビネット等）で
+		// 伝えており、そこへ数値を重ねても視界を塞ぐだけになる
+		const auto* tag{ m_componentManager.tryGet<component::TagComponent>(event.m_targetId) };
+		if (tag == nullptr || tag->m_tag != constant::Tag::Enemy)
+			return;
+
+		const auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(event.m_targetId) };
+		if (transform == nullptr)
+			return;
+
+		// 発生位置は相手の頭上。以後は相手に追従せずその場に留まるため、
+		// 敵が移動しても数値が引っ張られない
+		float headHeight{ FALLBACK_HEAD_HEIGHT };
+		if (const auto* collider{ m_componentManager.tryGet<component::combat::ColliderComponent>(event.m_targetId) })
+			headHeight = collider->m_size.y;
+
+		Popup popup{};
+		popup.m_worldPosition = core::Vector3{
+			transform->m_position.x,
+			transform->m_position.y + headHeight + HEAD_MARGIN,
+			transform->m_position.z
+		};
+		// 小数を出しても情報にならないので整数へ丸める。0ダメージでも当たった事実は見せる
+		popup.m_damage = static_cast<int>(event.m_damage + 0.5f);
+		m_popups.push_back(popup);
+	}
+
+	void DamagePopupSystem::update(float deltaTime)
+	{
+		for (auto& popup : m_popups)
+			popup.m_elapsedTime += deltaTime;
+
+		std::erase_if(m_popups, [](const Popup& popup)
+		    { return popup.m_elapsedTime >= POPUP_DURATION; });
+	}
+
+	void DamagePopupSystem::draw()
+	{
+		if (m_popups.empty())
+			return;
+
+		const int fontSize{ static_cast<int>(m_screen.getHeight() * FONT_HEIGHT_RATIO) };
+		const int shadowOffset{ std::max(1, static_cast<int>(fontSize * SHADOW_OFFSET_RATIO)) };
+
+		for (const auto& popup : m_popups)
+		{
+			const float progress{ popup.m_elapsedTime / POPUP_DURATION };
+
+			// 時間とともに浮き上がる（減速しながら上がると軽く見える）
+			core::Vector3 world{ popup.m_worldPosition };
+			world.y += RISE_HEIGHT * (1.0f - (1.0f - progress) * (1.0f - progress));
+
+			const core::Vector3 screen{ m_renderer.worldToScreen(world) };
+			// カメラの背後や描画範囲外は出さない
+			if (screen.z < DEPTH_MIN || screen.z > DEPTH_MAX)
+				continue;
+
+			// 後半だけフェードアウトする（出た瞬間ははっきり見せる）
+			float alpha{ 1.0f };
+			if (progress > FADE_START_RATIO)
+				alpha = 1.0f - (progress - FADE_START_RATIO) / (1.0f - FADE_START_RATIO);
+
+			const std::string text{ std::to_string(popup.m_damage) };
+			const int textWidth{ m_uiRenderer.getTextWidth(text.c_str(), fontSize) };
+			const int x{ static_cast<int>(screen.x) - textWidth / 2 };
+			const int y{ static_cast<int>(screen.y) };
+
+			const int alphaParam{ static_cast<int>(ALPHA_MAX * std::clamp(alpha, 0.0f, 1.0f)) };
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alphaParam);
+			// 床は真っ黒からほぼ白まであるため、影を先に置いてどちらでも輪郭が残るようにする
+			m_uiRenderer.drawText(x + shadowOffset, y + shadowOffset, text.c_str(),
+			    core::utility::Color::BLACK, fontSize);
+			m_uiRenderer.drawText(x, y, text.c_str(), core::utility::Color::WHITE, fontSize);
+			m_uiRenderer.resetBlendMode();
+		}
+	}
+} // namespace game::system::visual

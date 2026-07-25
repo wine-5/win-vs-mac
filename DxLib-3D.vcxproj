@@ -159,6 +159,7 @@
     <ClCompile Include="src\game\system\visual\PlayerChargeVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\camera\ChargeZoomSystem.cpp" />
     <ClCompile Include="src\game\system\visual\MacAwakenEffectSystem.cpp" />
+    <ClCompile Include="src\game\system\visual\BackgroundParticleSystem.cpp" />
     <ClCompile Include="src\game\system\camera\DamageShakeSystem.cpp" />
     <ClCompile Include="src\game\system\ai\MeleeChaseAISystem.cpp" />
     <ClCompile Include="src\game\system\ai\RangeKeepAISystem.cpp" />
@@ -206,6 +207,7 @@
     <ClCompile Include="src\game\stage\StageProp.cpp" />
     <ClCompile Include="src\game\actor\AnimationSetup.cpp" />
     <ClCompile Include="src\game\system\visual\AnimationSystem.cpp" />
+    <ClCompile Include="src\game\system\visual\DamagePopupSystem.cpp" />
     <ClCompile Include="src\game\system\visual\WeaponAttachSystem.cpp" />
     <ClCompile Include="src\game\system\combat\CollisionSystem.cpp" />
     <ClCompile Include="src\game\ui\Button.cpp" />
@@ -373,6 +375,7 @@
     <ClInclude Include="src\game\system\camera\DebugCameraSystem.h" />
     <ClInclude Include="src\game\system\camera\ChargeZoomSystem.h" />
     <ClInclude Include="src\game\system\visual\MacAwakenEffectSystem.h" />
+    <ClInclude Include="src\game\system\visual\BackgroundParticleSystem.h" />
     <ClInclude Include="src\game\system\camera\DamageShakeSystem.h" />
     <ClInclude Include="src\game\system\ai\MeleeChaseAISystem.h" />
     <ClInclude Include="src\game\system\ai\RangeKeepAISystem.h" />
@@ -435,6 +438,7 @@
     <ClInclude Include="src\game\stage\StageProp.h" />
     <ClInclude Include="src\game\actor\AnimationSetup.h" />
     <ClInclude Include="src\game\system\visual\AnimationSystem.h" />
+    <ClInclude Include="src\game\system\visual\DamagePopupSystem.h" />
     <ClInclude Include="src\game\system\visual\WeaponAttachSystem.h" />
     <ClInclude Include="src\game\system\combat\CollisionSystem.h" />
     <ClInclude Include="src\infrastructure\graphics\Animator.h" />
