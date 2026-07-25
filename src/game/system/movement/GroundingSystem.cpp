@@ -180,6 +180,7 @@ namespace game::system::movement
 
 			// 接地している面に応じて滑り速度を更新する（空中では減衰させる）
 			const bool isStanding{ found && foot <= bestHeight + STEP_TOLERANCE };
+			velocity.m_isGrounded = isStanding; // ジャンプの可否判定用にPhysicsSystemへ伝える
 			updateSlide(velocity, isStanding ? bestNormal : core::Vector3{ 0.0f, 1.0f, 0.0f },
 			    isStanding ? bestSlideAccel : 0.0f, deltaTime);
 

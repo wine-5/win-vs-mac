@@ -14,5 +14,9 @@ namespace game::component::movement
 		// MoveSystemが m_velocity を毎フレーム上書きするため、混ぜずに別枠で持ち、
 		// PhysicsSystemが移動時に合算する。歩き速度との大小がそのまま挙動になる
 		core::Vector3 m_externalVelocity{};
+
+		// 足元に床があり立っているか。GroundingSystemが毎フレーム更新し、
+		// PhysicsSystemがジャンプの可否判定に使う（GroundingSystemはPhysicsSystemの後に走るため1フレーム遅れだが、接地判定には十分）
+		bool m_isGrounded{ false };
 	};
 } // namespace game::component::movement

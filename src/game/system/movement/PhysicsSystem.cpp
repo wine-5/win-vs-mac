@@ -7,8 +7,9 @@
 
 namespace game::system::movement
 {
-	PhysicsSystem::PhysicsSystem(core::ecs::ComponentManager& componentManager, float jumpForce, float gravity, float maxFallSpeed)
+	PhysicsSystem::PhysicsSystem(core::ecs::ComponentManager& componentManager, GameManager& gameManager, float jumpForce, float gravity, float maxFallSpeed)
 	    : m_componentManager{ componentManager }
+	    , m_gameManager{ gameManager }
 	    , m_gravity{ gravity }
 	    , m_jumpForce{ jumpForce }
 	    , m_maxFallSpeed{ maxFallSpeed }
@@ -30,8 +31,15 @@ namespace game::system::movement
 				if (m_componentManager.has<component::movement::InputComponent>(entityId))
 				{
 					auto& input = m_componentManager.get<component::movement::InputComponent>(entityId);
-					// ジャンプ処理
-					if (input.m_jumpPressed)
+
+					// ジャンプの可否判定。
+					// 通常は「接地中に押した瞬間」だけ跳ぶ（押しっぱなしでの浮上・空中ジャンプを防ぐ）。
+					// デバッグの連続ジャンプ有効時は毎フレーム跳べるようにして空中移動を許す。
+					const bool jumpEdge{ input.m_jumpPressed && !m_prevJumpPressed };
+					const bool canJump{ m_gameManager.isContinuousJumpEnabled()
+						                    ? input.m_jumpPressed
+						                    : (jumpEdge && velocity.m_isGrounded) };
+					if (canJump)
 					{
 						velocity.m_velocity.y = m_jumpForce;
 
@@ -41,6 +49,7 @@ namespace game::system::movement
 							m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested =
 							    constant::AnimationState::Jump;
 					}
+					m_prevJumpPressed = input.m_jumpPressed;
 				}
 
 				// 重力

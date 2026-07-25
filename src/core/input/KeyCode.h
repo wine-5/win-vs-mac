@@ -14,6 +14,7 @@ namespace core::input
 		T,  // DEBUG: テストエフェクト再生
 		F1, // DEBUG: デバッグモードのON/OFF切り替え
 		F2, // DEBUG: シーンビュー（時間停止＋フリーカメラ）のON/OFF切り替え
+		F3, // DEBUG: 連続ジャンプ（空中浮上）のON/OFF切り替え
 		Space,
 		Enter,  // 決定（ポーズメニュー等）
 		Escape, // ポーズメニューの開閉（Biosではスキップ）
