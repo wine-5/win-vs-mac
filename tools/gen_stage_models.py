@@ -32,14 +32,25 @@ OUT_DIR = os.path.join("assets", "model", "stage")
 # ここに1行足してPNGを置くだけで新しい配置物が増える。
 # idはカタログ(stageCatalog.json)のmodel/textureパスと一致させる（PascalCase）。
 MANIFEST = [
-    # (id,          texture png)
-    ("FloorFolder",  "FloorFolder.png"),
-    ("PathCorridor", "PathCorridor.png"),
-    ("WallWindow",   "WallWindow.png"),
-    ("PillarFolder", "PillarFolder.png"),
-    ("BlockFile",    "BlockFile.png"),
-    ("FloorApple",   "FloorApple.png"),
-    ("WallData",     "WallData.png"),
+    # (id,               texture png)
+    # ① Desktop（入口・ユーザー領域）
+    ("FloorDesktop",     "FloorDesktop.png"),
+    ("BlockFolder",      "BlockFolder.png"),
+    ("BlockRecycleBin",  "BlockRecycleBin.png"),
+    ("WallExplorer",     "WallExplorer.png"),
+    # ② System32（システム深層）
+    ("FloorTerminal",    "FloorTerminal.png"),
+    ("BlockDll",         "BlockDll.png"),
+    ("BlockExe",         "BlockExe.png"),
+    ("WallRegistry",     "WallRegistry.png"),
+    ("WallData",         "WallData.png"),
+    # ③ Program Files（アプリ格納庫・UAC関門）
+    ("GateUac",          "GateUac.png"),
+    ("PillarApp",        "PillarApp.png"),
+    ("BlockZip",         "BlockZip.png"),
+    # ④ Apple アリーナ（ボス戦）
+    ("FloorApple",       "FloorApple.png"),
+    ("WallDanger",       "WallDanger.png"),
 ]
 
 # ---- 100x100x100 立方体の頂点 ----
