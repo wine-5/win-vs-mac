@@ -34,6 +34,7 @@ namespace game::ui::ingame
 	class ObjectiveView;     // 前方宣言
 	class LowHealthVignetteView; // 前方宣言
 	class BossHUDView;           // 前方宣言
+	class EnemyHealthBarView;    // 前方宣言
 } // namespace game::ui::ingame
 
 namespace game::scene
@@ -151,6 +152,12 @@ namespace game::scene
 		 */
 		void setBossHUDView(ui::ingame::BossHUDView* view);
 
+		/**
+		 * @brief 敵の頭上HPバーViewを設定する
+		 * @param view EnemyHealthBarViewのポインタ（所有はInGame）
+		 */
+		void setEnemyHealthBarView(ui::ingame::EnemyHealthBarView* view);
+
 	  private:
 		/**
 		 * @brief RenderComponentを持つ全Entityのモデルを描画する
@@ -230,6 +237,9 @@ namespace game::scene
 
 		// ボスHP（上中央のHUD）の描画元（所有はInGame）
 		ui::ingame::BossHUDView* m_bossHUDView{ nullptr };
+
+		// 敵の頭上HPバーの描画元（所有はInGame）
+		ui::ingame::EnemyHealthBarView* m_enemyHealthBarView{ nullptr };
 
 		// プレイヤー死亡時の暗転の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::combat::PlayerDeathSystem* m_playerDeathSystem{ nullptr };

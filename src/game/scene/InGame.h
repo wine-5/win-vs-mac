@@ -54,6 +54,7 @@ namespace game
 		class ObjectiveView;     // 前方宣言
 		class LowHealthVignetteView; // 前方宣言
 		class BossHUDView;           // 前方宣言
+		class EnemyHealthBarView;    // 前方宣言
 	} // namespace ui::ingame
 } // namespace game
 
@@ -178,6 +179,9 @@ namespace game::scene
 
 		// ボスHP（上中央）のView
 		std::unique_ptr<ui::ingame::BossHUDView> m_bossHUDView;
+
+		// 敵の頭上HPバーのView
+		std::unique_ptr<ui::ingame::EnemyHealthBarView> m_enemyHealthBarView;
 
 		// 進行トラッキング
 		float m_elapsedTime{0.0f};

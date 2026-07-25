@@ -23,6 +23,7 @@
 #include "game/ui/ingame/ObjectiveView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
 #include "game/ui/ingame/BossHUDView.h"
+#include "game/ui/ingame/EnemyHealthBarView.h"
 #include <algorithm>
 #include <cmath>
 
@@ -71,6 +72,10 @@ namespace game::scene
 		// 敵の発見演出（頭上の通知バッジ）。モデルの手前・HUDより奥に描く
 		if (m_detectionAlertSystem)
 			m_detectionAlertSystem->draw();
+
+		// 敵の頭上HPバー。同じ頭上に出る発見バッジより手前に描く
+		if (m_enemyHealthBarView)
+			m_enemyHealthBarView->draw(bossId);
 
 		// プレイヤーステータス（左下のHP）。演出より手前・レティクルと同じHUD層に描く
 		if (m_playerHUDView)
@@ -174,6 +179,11 @@ namespace game::scene
 	void InGameView::setBossHUDView(ui::ingame::BossHUDView* view)
 	{
 		m_bossHUDView = view;
+	}
+
+	void InGameView::setEnemyHealthBarView(ui::ingame::EnemyHealthBarView* view)
+	{
+		m_enemyHealthBarView = view;
 	}
 
 	void InGameView::drawModels()
