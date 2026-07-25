@@ -9,6 +9,14 @@ namespace
 {
 	// コンボの最終段。ここまで進んだら次の入力は1段目へ戻る
 	constexpr int MAX_COMBO_STAGE{ 2 };
+
+	// 段ごとの斬撃エフェクトの傾き（ラジアン）。同じエフェクトを使い回すため、
+	// 1段目は正面への振り下ろし、2段目は水平に寝かせて回転斬りに見せる。
+	// 実機での見た目に合わせた調整値
+	constexpr float STAGE2_EFFECT_ROLL{ 1.5708f }; // 90度
+
+	const core::Vector3 STAGE1_EFFECT_ROTATION{ 0.0f, 0.0f, 0.0f };
+	const core::Vector3 STAGE2_EFFECT_ROTATION{ 0.0f, 0.0f, STAGE2_EFFECT_ROLL };
 } // namespace
 
 namespace game::system::combat
@@ -58,9 +66,13 @@ namespace game::system::combat
 
 		attack.m_attackRequested = true;
 
-		// 2段目は回転斬り（Attack2）、それ以外は通常の斬り（Attack1）
+		// 2段目は回転斬り（Attack2）、それ以外は通常の斬り（Attack1）。
+		// 斬撃エフェクトの傾きも段に合わせる（AttackSystemがイベントへ載せる）
+		const bool isFinalStage{ combo.m_stage >= MAX_COMBO_STAGE };
+		attack.m_effectRotationOffset = isFinalStage ? STAGE2_EFFECT_ROTATION : STAGE1_EFFECT_ROTATION;
+
 		auto& anim{ m_componentManager.get<component::visual::AnimationComponent>(m_playerId) };
-		anim.request(combo.m_stage >= MAX_COMBO_STAGE
+		anim.request(isFinalStage
 		                 ? constant::AnimationState::Attack2
 		                 : constant::AnimationState::Attack1);
 	}
