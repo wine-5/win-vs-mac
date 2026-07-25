@@ -63,7 +63,7 @@
       ]
     },
     {
-      "type": "block_folder",
+      "type": "block_recyclebin",
       "position": [
         950,
         110,
@@ -153,7 +153,7 @@
       ]
     },
     {
-      "type": "block_folder",
+      "type": "block_recyclebin",
       "position": [
         -450,
         -474.87,
@@ -189,7 +189,7 @@
       ]
     },
     {
-      "type": "block_folder",
+      "type": "block_recyclebin",
       "position": [
         800,
         -474.87,
@@ -279,7 +279,7 @@
       ]
     },
     {
-      "type": "floor_desktop",
+      "type": "floor_terminal",
       "position": [
         3800,
         -1046.77,
@@ -315,7 +315,7 @@
       ]
     },
     {
-      "type": "floor_desktop",
+      "type": "floor_terminal",
       "position": [
         851.26,
         -1496.68,
@@ -333,7 +333,7 @@
       ]
     },
     {
-      "type": "floor_desktop",
+      "type": "floor_terminal",
       "position": [
         851.26,
         -1496.68,
@@ -369,7 +369,7 @@
       ]
     },
     {
-      "type": "wall_data",
+      "type": "wall_registry",
       "position": [
         1366.26,
         -1174.68,
@@ -387,7 +387,7 @@
       ]
     },
     {
-      "type": "floor_desktop",
+      "type": "floor_terminal",
       "position": [
         851.26,
         -1496.68,
@@ -405,7 +405,7 @@
       ]
     },
     {
-      "type": "floor_desktop",
+      "type": "floor_terminal",
       "position": [
         -648.74,
         -1496.68,
@@ -441,7 +441,7 @@
       ]
     },
     {
-      "type": "wall_data",
+      "type": "wall_registry",
       "position": [
         -648.74,
         -1174.68,
@@ -459,7 +459,7 @@
       ]
     },
     {
-      "type": "floor_desktop",
+      "type": "floor_terminal",
       "position": [
         -2148.74,
         -1496.68,
@@ -477,7 +477,7 @@
       ]
     },
     {
-      "type": "floor_desktop",
+      "type": "floor_terminal",
       "position": [
         -2998.74,
         -1496.68,
@@ -495,7 +495,7 @@
       ]
     },
     {
-      "type": "floor_desktop",
+      "type": "floor_terminal",
       "position": [
         -3948.74,
         -1496.68,
@@ -513,7 +513,7 @@
       ]
     },
     {
-      "type": "floor_desktop",
+      "type": "floor_terminal",
       "position": [
         -2148.74,
         -1496.68,
@@ -549,7 +549,7 @@
       ]
     },
     {
-      "type": "wall_data",
+      "type": "wall_registry",
       "position": [
         -1633.74,
         -1174.68,
@@ -567,7 +567,7 @@
       ]
     },
     {
-      "type": "floor_desktop",
+      "type": "floor_terminal",
       "position": [
         -2148.74,
         -1496.68,
@@ -603,7 +603,7 @@
       ]
     },
     {
-      "type": "floor_desktop",
+      "type": "floor_terminal",
       "position": [
         -2148.74,
         -2081.55,
@@ -621,7 +621,7 @@
       ]
     },
     {
-      "type": "wall_explorer",
+      "type": "gate_uac",
       "position": [
         -4068.74,
         -1319.55,
@@ -639,7 +639,7 @@
       ]
     },
     {
-      "type": "wall_explorer",
+      "type": "gate_uac",
       "position": [
         -228.74,
         -1319.55,
@@ -729,7 +729,7 @@
       ]
     },
     {
-      "type": "block_folder",
+      "type": "block_zip",
       "position": [
         -3548.74,
         -1959.55,
@@ -747,7 +747,7 @@
       ]
     },
     {
-      "type": "block_folder",
+      "type": "block_zip",
       "position": [
         -3438.74,
         -1959.55,
@@ -765,7 +765,7 @@
       ]
     },
     {
-      "type": "block_folder",
+      "type": "block_zip",
       "position": [
         -3498.74,
         -1739.55,
@@ -783,7 +783,7 @@
       ]
     },
     {
-      "type": "block_folder",
+      "type": "block_zip",
       "position": [
         -798.74,
         -1959.55,
@@ -801,7 +801,7 @@
       ]
     },
     {
-      "type": "block_folder",
+      "type": "block_zip",
       "position": [
         -728.74,
         -1959.55,
@@ -819,7 +819,7 @@
       ]
     },
     {
-      "type": "block_folder",
+      "type": "block_zip",
       "position": [
         -1948.74,
         -1959.55,
@@ -837,7 +837,7 @@
       ]
     },
     {
-      "type": "wall_data",
+      "type": "wall_danger",
       "position": [
         -3373.74,
         -1419.55,
@@ -855,7 +855,7 @@
       ]
     },
     {
-      "type": "wall_data",
+      "type": "wall_danger",
       "position": [
         -923.74,
         -1419.55,
@@ -1054,9 +1054,9 @@
       ],
       "range": 5000,
       "color": [
-        0,
-        164,
-        239
+        63,
+        185,
+        80
       ]
     },
     {
@@ -1067,9 +1067,9 @@
       ],
       "range": 5000,
       "color": [
-        0,
-        164,
-        239
+        63,
+        185,
+        80
       ]
     },
     {
@@ -1093,9 +1093,9 @@
       ],
       "range": 7000,
       "color": [
-        0,
-        164,
-        239
+        232,
+        137,
+        28
       ]
     },
     {
