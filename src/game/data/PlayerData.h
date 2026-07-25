@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include <string>
+#include <vector>
 #include "core/utility/Vector3.h"
 #include "core/data/ModelMetadata.h"
 #include "game/constant/MetadataKeys.h"
@@ -24,6 +25,7 @@ namespace game::data
 			data.m_scale = metadata.scale;
 			data.m_colliderSize = metadata.colliderSize;
 			data.m_colliderOffset = metadata.colliderOffset;
+			data.m_animations = metadata.animations;
 
 			// moveSpeed（floatProperties から取得）
 			auto moveSpeedIt{ metadata.floatProperties.find(
@@ -117,6 +119,11 @@ namespace game::data
 		[[nodiscard]] core::Vector3      getColliderOffset() const noexcept { return m_colliderOffset; }
 		/** @brief モデルスケールを取得 */
 		[[nodiscard]] core::Vector3      getScale()          const noexcept { return m_scale; }
+		/** @brief アニメーションクリップ定義の一覧を取得（JSONの animations 配列） */
+		[[nodiscard]] const std::vector<core::data::AnimationClipDef>& getAnimations() const noexcept
+		{
+			return m_animations;
+		}
 
 		/**
 		 * @brief FileExtensionBonus をパラメータに加算する
@@ -151,5 +158,6 @@ namespace game::data
 		core::Vector3 m_colliderSize;
 		core::Vector3 m_colliderOffset;
 		core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
+		std::vector<core::data::AnimationClipDef> m_animations{}; // アニメーションクリップ定義
 	};
 } // namespace game::data

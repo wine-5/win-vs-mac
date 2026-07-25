@@ -17,8 +17,8 @@
 #include "game/component/visual/LightComponent.h"
 #include "game/component/camera/CameraEffectComponent.h"
 #include "game/component/combat/AimComponent.h"
+#include "game/actor/AnimationSetup.h"
 #include "game/constant/Tag.h"
-#include "game/constant/AnimationId.h"
 #include "game/constant/ModelId.h"
 #include "core/interface/ILogger.h"
 #include "core/utility/Log.h"
@@ -41,24 +41,11 @@ namespace game::actor
 		// 床の縁から落ちても詰まないよう、直前に立っていた場所へ戻せるようにする
 		componentManager.add<component::movement::FallRecoveryComponent>(m_entity.getId(), {});
 
-		// アニメーションクリップの登録（状態→クリップの対応表）
-		using constant::AnimationState;
-		namespace anim_id = constant::animation_id;
-		namespace priority = constant::animation_priority;
-		constexpr float WALK_ANIM_SPEED{ 0.8f }; // 歩行アニメの再生速度（見た目の調整値）
-		constexpr float RUN_ANIM_SPEED{ 1.0f };  // 走りアニメの再生速度（見た目の調整値）
-
-		component::visual::AnimationComponent anim{};
-		anim.m_clips[AnimationState::Idle]    = { resourceManager.loadAnimationById(anim_id::PLAYER_IDLE),  true };
-		anim.m_clips[AnimationState::Walk] = { resourceManager.loadAnimationById(anim_id::PLAYER_WALK), true, AnimationState::Idle, priority::LOCOMOTION, WALK_ANIM_SPEED };
-		anim.m_clips[AnimationState::Run]     = { resourceManager.loadAnimationById(anim_id::PLAYER_RUN),   true, AnimationState::Idle, priority::LOCOMOTION, RUN_ANIM_SPEED };
-		anim.m_clips[AnimationState::Attack1] = { resourceManager.loadAnimationById(anim_id::PLAYER_SLASH), false, AnimationState::Idle,  priority::ATTACK };
-		anim.m_clips[AnimationState::Attack2] = { resourceManager.loadAnimationById(anim_id::PLAYER_SPIN),  false, AnimationState::Idle,  priority::ATTACK };
-		anim.m_clips[AnimationState::Hit]     = { resourceManager.loadAnimationById(anim_id::PLAYER_HIT),   false, AnimationState::Idle,  priority::HIT };
-		anim.m_clips[AnimationState::Dying]   = { resourceManager.loadAnimationById(anim_id::PLAYER_DYING), false, AnimationState::Dying, priority::DYING };
-		constexpr float JUMP_ANIM_START{ 30.0f }; // 頭の溜め約1.0秒（30fps×1.0）をカットして違和感を消す
-		anim.m_clips[AnimationState::Jump] = { resourceManager.loadAnimationById(anim_id::PLAYER_JUMP), false, AnimationState::Idle, priority::JUMP, 1.0f, JUMP_ANIM_START };
-		componentManager.add<component::visual::AnimationComponent>(m_entity.getId(), anim);
+		// アニメーションクリップは playerData.json の animations 配列で定義する。
+		// 再生速度・優先度・開始位置を再ビルドなしで調整できるようにするため、
+		// 敵と同じデータ駆動の形式に揃えている
+		componentManager.add<component::visual::AnimationComponent>(
+		    m_entity.getId(), buildAnimationComponent(playerData.getAnimations(), resourceManager));
 		componentManager.add<component::visual::RenderComponent>(m_entity.getId(), { modelHandle });
 		attachWeapon(componentManager, resourceManager, playerData.getScale().x);
 		componentManager.add<component::visual::HitEffectComponent>(m_entity.getId(), {});

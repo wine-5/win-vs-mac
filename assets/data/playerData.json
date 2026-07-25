@@ -8,10 +8,16 @@
   "collider": {
     "size": [ 50.5, 150.7, 50.5 ]
   },
-  "animations": {
-    "idle": "assets/animations/player/Player_Idle.mv1",
-    "walk": "assets/animations/player/Player_Walking.mv1"
-  },
+  "animations": [
+    { "state": "Idle",    "id": "anim_player_idle",  "loop": true },
+    { "state": "Walk",    "id": "anim_player_walk",  "loop": true, "speed": 0.8 },
+    { "state": "Run",     "id": "anim_player_run",   "loop": true, "speed": 1.0 },
+    { "state": "Attack1", "id": "anim_player_slash", "loop": false, "onComplete": "Idle",  "priority": "attack", "speed": 1.8 },
+    { "state": "Attack2", "id": "anim_player_spin",  "loop": false, "onComplete": "Idle",  "priority": "attack", "speed": 1.5 },
+    { "state": "Hit",     "id": "anim_player_hit",   "loop": false, "onComplete": "Idle",  "priority": "hit" },
+    { "state": "Dying",   "id": "anim_player_dying", "loop": false, "onComplete": "Dying", "priority": "dying" },
+    { "state": "Jump",    "id": "anim_player_jump",  "loop": false, "onComplete": "Idle",  "priority": "jump", "startTime": 30.0 }
+  ],
   "gameplay": {
     "moveSpeed":300.0,
     "dashMultiplier": 2.0,
