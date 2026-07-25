@@ -80,6 +80,11 @@ namespace game::data
 			if (attackCooldownIt != metadata.floatProperties.end())
 				data.m_attackCooldown = attackCooldownIt->second;
 
+			auto attackWindupIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::ATTACK_WINDUP)) };
+			if (attackWindupIt != metadata.floatProperties.end())
+				data.m_attackWindup = attackWindupIt->second;
+
 			auto comboInputWindowIt{ metadata.floatProperties.find(
 				std::string(constant::metadata_keys::COMBO_INPUT_WINDOW)) };
 			if (comboInputWindowIt != metadata.floatProperties.end())
@@ -120,6 +125,17 @@ namespace game::data
 		[[nodiscard]] float              getAttackRange()    const noexcept { return m_attackRange; }
 		/** @brief 攻撃クールダウンを取得 */
 		[[nodiscard]] float              getAttackCooldown() const noexcept { return m_attackCooldown; }
+		/**
+		 * @brief 攻撃のワインドアップ遅延を取得（秒）
+		 *
+		 * 攻撃を出してからダメージ判定が起きるまでの待ち時間。
+		 * アニメーションの振り下ろしと当たりのタイミングを揃えるために使う。
+		 * 0なら即座に判定する
+		 */
+		[[nodiscard]] float getAttackWindup() const noexcept
+		{
+			return m_attackWindup;
+		}
 		/** @brief コンボの次段入力受付時間を取得（秒。JSON未設定時は従来値） */
 		[[nodiscard]] float getComboInputWindow() const noexcept
 		{
@@ -172,6 +188,7 @@ namespace game::data
 		float         m_attackPower{ 0.0f };
 		float         m_attackRange{ 0.0f };
 		float         m_attackCooldown{ 0.0f };
+		float m_attackWindup{ 0.0f };     // 攻撃のワインドアップ遅延（0なら即時判定）
 		float m_comboInputWindow{ 1.0f }; // コンボの次段入力受付時間（JSON未設定時の既定値）
 		core::Vector3 m_colliderSize;
 		core::Vector3 m_colliderOffset;
