@@ -2,15 +2,19 @@
 #include "core/base/ServiceLocator.h"
 #include "game/component/visual/EffectComponent.h"
 #include "game/component/movement/TransformComponent.h"
+#include "game/component/visual/WeaponAttachComponent.h"
+#include "game/component/visual/RenderComponent.h"
 
 namespace game::system::visual
 {
 	EffectSystem::EffectSystem(core::ecs::ComponentManager& componentManager,
-		core::base::EventBus& eventBus,
-		core::iface::IEffectFactory& effectFactory)
-		: m_componentManager{ componentManager }
-		, m_eventBus{ eventBus }
-		, m_effectFactory{ effectFactory }
+	    core::base::EventBus& eventBus,
+	    core::iface::IEffectFactory& effectFactory,
+	    core::iface::IRenderer& renderer)
+	    : m_componentManager{ componentManager }
+	    , m_eventBus{ eventBus }
+	    , m_effectFactory{ effectFactory }
+	    , m_renderer{ renderer }
 	{
 		setupEventSubscriptions();
 	}
@@ -90,15 +94,33 @@ namespace game::system::visual
 		// 攻撃者自身の位置でエフェクトを再生する（斬撃などの演出用）。
 		// 斬撃は「どちらへ振ったか」が分かる必要があるため、攻撃者の向きへ合わせ、
 		// さらに攻撃の種類ごとの傾き（縦振り／水平回転など）をイベントから受けて足す
-		if (const auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(event.m_attackerId) })
+		const auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(event.m_attackerId) };
+		if (transform == nullptr)
+			return;
+
+		const core::Vector3 rotation{
+			transform->m_rotation.x + event.m_effectRotationOffset.x,
+			transform->m_rotation.y + event.m_effectRotationOffset.y,
+			transform->m_rotation.z + event.m_effectRotationOffset.z
+		};
+
+		// 武器を持っているなら、足元ではなく武器を握っている手の高さで出す。
+		// 足元で出すと斬撃が地面から生えているように見えてしまう
+		core::Vector3 position{ transform->m_position };
+		const auto* weapon{ m_componentManager.tryGet<component::visual::WeaponAttachComponent>(event.m_attackerId) };
+		const auto* render{ m_componentManager.tryGet<component::visual::RenderComponent>(event.m_attackerId) };
+		if (weapon != nullptr && render != nullptr && weapon->m_frameIndex >= 0)
 		{
-			const core::Vector3 rotation{
-				transform->m_rotation.x + event.m_effectRotationOffset.x,
-				transform->m_rotation.y + event.m_effectRotationOffset.y,
-				transform->m_rotation.z + event.m_effectRotationOffset.z
+			const core::Vector3 handPosition{
+				m_renderer.getModelFramePosition(render->m_modelHandle, weapon->m_frameIndex)
 			};
-			playAndTrack(event.m_attackerId, event.m_effectType, transform->m_position, rotation);
+			// ボーン位置は描画時に確定するため、初回フレームなど未確定の間はゼロが返る。
+			// その場合は足元のままにしておく
+			if (handPosition.x != 0.0f || handPosition.y != 0.0f || handPosition.z != 0.0f)
+				position = handPosition;
 		}
+
+		playAndTrack(event.m_attackerId, event.m_effectType, position, rotation);
 	}
 
 	void EffectSystem::onEnemyDead(const game::event::EnemyDeadEvent& event)

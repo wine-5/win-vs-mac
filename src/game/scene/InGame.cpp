@@ -428,7 +428,8 @@ namespace game::scene
 			m_playerId) };
 		m_view.setPlayerDeathSystem(playerDeath);
 
-		m_systemManager.registerSystem<game::system::visual::EffectSystem>(m_componentManager, m_eventBus, m_effectFactory);
+		m_systemManager.registerSystem<game::system::visual::EffectSystem>(
+		    m_componentManager, m_eventBus, m_effectFactory, m_renderer);
 
 		// 壁などの模様を流す（貼り方をずらすだけなので描画状態に影響しない）
 		m_systemManager.registerSystem<game::system::visual::TextureScrollSystem>(m_componentManager);
