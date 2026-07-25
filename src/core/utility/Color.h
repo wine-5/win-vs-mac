@@ -76,5 +76,11 @@ namespace core::utility
 		static constexpr unsigned int TELEGRAPH_BASE = 0x40FF5028; // 危険範囲の下地（薄いオレンジ赤）
 		static constexpr unsigned int TELEGRAPH_FILL = 0x78FF6030; // 満ちていく内側（オレンジ）
 		static constexpr unsigned int TELEGRAPH_RING = 0xC8FF3820; // 外周リング（濃い赤オレンジ）
+
+		// ========== InGame HUD（Windows 11 / Fluent）用の色 ==========
+
+		static constexpr unsigned int HUD_INK = 0xFFEAF1FB;         // 文字・レティクルの基本色（わずかに青みのある白）
+		static constexpr unsigned int HUD_CHARGE_CYAN = 0xFF22D3EE; // 溜め最大のシアン
+		static constexpr unsigned int HUD_CRIT_RED = 0xFFE81123;    // 敵を捕捉中・危険
 	};
 } // namespace core::utility

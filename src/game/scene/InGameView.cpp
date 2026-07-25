@@ -1,5 +1,6 @@
 ﻿#include "InGameView.h"
 #include "core/utility/Color.h"
+#include "core/constant/UI.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/visual/RenderComponent.h"
 #include "game/component/visual/WeaponAttachComponent.h"
@@ -183,7 +184,7 @@ namespace game::scene
 
 	void InGameView::drawReticle(core::ecs::EntityId playerId)
 	{
-		// 敵を捕捉していれば赤、最大溜め完了ならWindowsロゴの水色、通常は黒
+		// 敵を捕捉していれば赤、最大溜め完了ならシアン、通常は白
 		// （捕捉＝発射判断に直結する情報なので最優先で表示する）
 		bool onTarget{ false };
 		if (m_componentManager.has<component::combat::AimComponent>(playerId))
@@ -196,11 +197,11 @@ namespace game::scene
 			isMaxCharged = charge.m_isCharging && charge.m_chargeRate >= 1.0f;
 		}
 
-		unsigned int color{ core::utility::Color::BLACK };
+		unsigned int color{ core::utility::Color::HUD_INK };
 		if (onTarget)
-			color = core::utility::Color::rgb(255, 48, 48);
+			color = core::utility::Color::HUD_CRIT_RED;
 		else if (isMaxCharged)
-			color = core::utility::Color::WINDOWS_LOGO_BLUE;
+			color = core::utility::Color::HUD_CHARGE_CYAN;
 
 		const int centerX{ m_screen.getWidth() / 2 };
 		const int centerY{ m_screen.getHeight() / 2 };
@@ -214,8 +215,12 @@ namespace game::scene
 		constexpr int DOT_RADIUS{ 3 };
 		const int halfThickness{ THICKNESS / 2 };
 
-		// 外周リング
-		m_uiRenderer.drawCircle(centerX, centerY, ringRadius, color, false, THICKNESS);
+		// 外周リングは白を薄く敷くだけに留める。中央の十字とドットだけが状態色で光り、
+		// リングは「当たりの目安」として背景に溶ける（プロトタイプの rgba(255,255,255,.16) 相当）
+		constexpr int RING_ALPHA{ 41 };
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, RING_ALPHA);
+		m_uiRenderer.drawCircle(centerX, centerY, ringRadius, core::utility::Color::WHITE, false, THICKNESS);
+		m_uiRenderer.resetBlendMode();
 		// 上下左右のティック
 		m_uiRenderer.drawBox(centerX - gap - tickLength, centerY - halfThickness, tickLength, THICKNESS, color, true);
 		m_uiRenderer.drawBox(centerX + gap, centerY - halfThickness, tickLength, THICKNESS, color, true);
