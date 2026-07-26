@@ -50,6 +50,10 @@ const DesktopLogic = (function () {
             if (onWindowChangeCallback) {
                 onWindowChangeCallback(data.window, data.visible);
             }
+        } else if (data.type === 'tutorialHighlight') {
+            // 初回ガイドの締めで「ルール説明.txt」へ送り出す段。
+            // ガイドを閉じるまでアイコンを脈打たせ、次に開く場所を体で覚えてもらう
+            document.body.classList.toggle('tutorial-highlight-rules', data.show === true);
         }
     }
 

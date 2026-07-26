@@ -235,3 +235,23 @@ body {
     border-color: var(--accent-hover);
     color: #fff;
 }
+
+/* ── 初回ガイドの締め：ルール説明.txt への誘導 ─────────────
+   ファイル選択画面のSTEP3の間だけ、アイコンを脈打たせて場所を知らせる。
+   transformは周りのアイコンの配置に影響しない */
+body.tutorial-highlight-rules #icon-rules {
+    position: relative;
+    z-index: 2;
+    animation: rules-icon-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes rules-icon-pulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 0 rgba(0, 120, 212, 0));
+    }
+    50% {
+        transform: scale(1.18);
+        filter: drop-shadow(0 0 16px rgba(0, 150, 255, 0.9));
+    }
+}
