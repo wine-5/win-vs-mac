@@ -94,6 +94,17 @@ namespace platform::window::select
 		 */
 		[[nodiscard]] bool confirmStartWithEmptySlots() noexcept;
 
+		// DEBUG: セレクト画面を一時的に引っ込めるキー（裏のコンソールやダイアログを読むため）
+		static constexpr int DEBUG_HIDE_KEY{ VK_F4 };
+
+		/**
+		 * @brief DEBUG: F4でセレクト画面の表示/非表示を切り替える（リリース時に削除）
+		 *
+		 * デスクトップは常時最前面のため、その裏のコンソールや例外ダイアログが読めない。
+		 * 押した瞬間だけを拾って引っ込められるようにする
+		 */
+		void updateDebugOverlayToggle() noexcept;
+
 		void handleDesktopMessage(const std::string& json) noexcept;
         void notifyWindowState(const std::string& name, bool visible) noexcept;
 
@@ -108,7 +119,11 @@ namespace platform::window::select
         bool m_diffVisible{true};
         bool m_rulesVisible{false};
 
-        std::array<std::string, 3> m_slotPaths{};
+		// DEBUG: F4での一時退避の状態（リリース時に削除）
+		bool m_debugOverlayHidden{ false };
+		bool m_debugHideKeyDown{ false };
+
+		std::array<std::string, 3> m_slotPaths{};
 		std::array<core::data::FileExtensionType, 3> m_slotExtTypes{
 			core::data::FileExtensionType::Unknown,
 			core::data::FileExtensionType::Unknown,

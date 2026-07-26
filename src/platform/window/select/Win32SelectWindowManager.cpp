@@ -192,7 +192,37 @@ namespace platform::window::select
             ::TranslateMessage(&msg);
             ::DispatchMessageW(&msg);
         }
-    }
+
+		updateDebugOverlayToggle(); // DEBUG: リリース時に削除
+	}
+
+	// DEBUG: ここからセレクト画面の一時退避（リリース時に削除する）
+
+	void Win32SelectWindowManager::updateDebugOverlayToggle() noexcept
+	{
+#ifdef _DEBUG
+		// セレクト画面のデスクトップは常時最前面なので、その裏にあるコンソールや
+		// 例外ダイアログを読むことができない。F4で一時的に引っ込められるようにする。
+		// GetAsyncKeyState は押しっぱなしでも真になるため、押した瞬間だけを拾う
+		const bool isDown{ (GetAsyncKeyState(DEBUG_HIDE_KEY) & 0x8000) != 0 };
+		const bool isPressed{ isDown && !m_debugHideKeyDown };
+		m_debugHideKeyDown = isDown;
+
+		if (!isPressed)
+			return;
+
+		m_debugOverlayHidden = !m_debugOverlayHidden;
+
+		// 子ウィンドウは親（デスクトップ）を隠せば一緒に消える
+		if (m_desktopWindow && m_desktopWindow->getHwnd())
+			ShowWindow(m_desktopWindow->getHwnd(), m_debugOverlayHidden ? SW_HIDE : SW_SHOW);
+
+		core::log::info("DEBUG: セレクト画面の表示を{}にしました",
+		    m_debugOverlayHidden ? "非表示" : "表示");
+#endif
+	}
+
+	// DEBUG: ここまで
 
 	int Win32SelectWindowManager::countEquippedSlots() const noexcept
 	{
@@ -224,6 +254,7 @@ namespace platform::window::select
 			read(game::constant::metadata_keys::ATTACK_POWER, stats.m_atk.m_base);
 			read(game::constant::metadata_keys::DEFENCE, stats.m_def.m_base);
 			read(game::constant::metadata_keys::MOVE_SPEED, stats.m_spd.m_base);
+			read(game::constant::metadata_keys::ATTACK_RANGE, stats.m_attackRange.m_base);
 
 			// 会心率は0.0〜1.0の確率で持っているが、そのままでは0.2などと出て読みにくい。
 			// 表示だけ%へ直す（ボーナス側も同じ倍率を掛ける）
@@ -257,6 +288,7 @@ namespace platform::window::select
 				stats.m_atk.m_bonus += bonus.atk;
 				stats.m_def.m_bonus += bonus.def;
 				stats.m_spd.m_bonus += bonus.spd;
+				stats.m_attackRange.m_bonus += bonus.attackRange;
 				stats.m_crit.m_bonus += bonus.criticalRate * PERCENT_SCALE;
 				stats.m_projectileSpeed.m_bonus += bonus.projectileSpeed;
 				stats.m_projectileRange.m_bonus += bonus.projectileRange;
