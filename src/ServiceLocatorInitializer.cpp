@@ -3,6 +3,7 @@
 #include "core/interface/ILogger.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IResourceManager.h"
+#include "core/interface/IResourcePreloader.h"
 #include "core/interface/IStringConverter.h"
 #include "core/interface/IWindowFactory.h"
 #include "core/interface/IUIRenderer.h"
@@ -15,6 +16,7 @@
 #include "infrastructure/graphics/Screen.h"
 #include "platform/utility/LogUtil.h"
 #include "infrastructure/resource/ResourceManager.h"
+#include "infrastructure/resource/ResourcePreloader.h"
 #include "infrastructure/graphics/UIRenderer.h"
 #include "infrastructure/InputManager.h"
 #include "infrastructure/graphics/Camera.h"
@@ -43,8 +45,13 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 	// ResourceManager を生成して登録（Facade パターン：内部でリポジトリが管理）
 	// 失敗時は握りつぶさず伝播させる。リソースが欠けたまま起動すると
 	// 「モデルが出ない・音が鳴らない」状態で原因究明が遅れるため（Fail Fast）
-	core::base::ServiceLocator::provide<core::iface::IResourceManager>(
-	    std::make_unique<infrastructure::resource::ResourceManager>());
+	auto resourceManager{ std::make_unique<infrastructure::resource::ResourceManager>() };
+	auto* resourceManagerPtr{ resourceManager.get() };
+	core::base::ServiceLocator::provide<core::iface::IResourceManager>(std::move(resourceManager));
+
+	// リソース先読みを登録（キューを積むのは Application 側）
+	core::base::ServiceLocator::provide<core::iface::IResourcePreloader>(
+	    std::make_unique<infrastructure::resource::ResourcePreloader>(*resourceManagerPtr));
 
 	// デバッグ用ロガーを登録
 	core::base::ServiceLocator::provide<core::iface::ILogger>(
