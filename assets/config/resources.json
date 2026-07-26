@@ -84,8 +84,8 @@
     { "type": "EnemySlam",        "path": "assets/audio/se/se_xcode_slam.mp3",        "volume":0.9 },
     { "type": "BattleReady",      "path": "assets/audio/se/se_battle_ready.mp3",      "volume":0.9 },
     { "type": "BattleFight",      "path": "assets/audio/se/se_battle_fight.mp3",      "volume":1.0 },
-    { "type": "UiClick",          "path": "assets/audio/se/se_ui_clicked.mp3",        "volume":0.6 },
+    { "type": "UiClick",          "path": "assets/audio/se/se_ui_clicked.mp3",        "volume":1.0 },
     { "type": "UiKeyPress",       "path": "assets/audio/se/se_ui_key_press.mp3",      "volume":0.5 },
-    { "type": "UiFileSelect",     "path": "assets/audio/se/se_file_select.mp3",       "volume":0.8 }
+    { "type": "UiFileSelect",     "path": "assets/audio/se/se_file_select.mp3",       "volume":1.0 }
   ]
 }
