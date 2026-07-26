@@ -66,6 +66,13 @@ namespace infrastructure::resource::repository
 	const core::data::FileExtensionBonus& ExtensionBonusRepository::getBonus(
 	    core::data::FileExtensionType type) const noexcept
 	{
-		return m_bonuses[static_cast<std::size_t>(type)];
+		// 範囲外は「ボーナス無し」で返す。
+		const auto index{ static_cast<std::size_t>(type) };
+		if (index >= m_bonuses.size())
+		{
+			static constexpr core::data::FileExtensionBonus EMPTY_BONUS{};
+			return EMPTY_BONUS;
+		}
+		return m_bonuses[index];
 	}
 } // namespace infrastructure::resource::repository
