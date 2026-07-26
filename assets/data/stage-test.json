@@ -81,7 +81,7 @@
       ]
     },
     {
-      "type": "path_corridor",
+      "type": "path_conveyor",
       "position": [
         0,
         -304.44,
@@ -261,7 +261,7 @@
       ]
     },
     {
-      "type": "path_corridor",
+      "type": "path_conveyor",
       "position": [
         3800,
         -821.82,
@@ -585,7 +585,7 @@
       ]
     },
     {
-      "type": "path_corridor",
+      "type": "path_conveyor",
       "position": [
         -2148.74,
         -1789.11,
@@ -873,7 +873,7 @@
       ]
     },
     {
-      "type": "path_corridor",
+      "type": "path_conveyor",
       "position": [
         -2148.74,
         -2373.99,
@@ -909,7 +909,7 @@
       ]
     },
     {
-      "type": "path_corridor",
+      "type": "path_conveyor",
       "position": [
         0,
         -304.44,
