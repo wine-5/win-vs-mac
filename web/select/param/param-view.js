@@ -12,12 +12,13 @@ const ParamView = (function () {
 
     /** 初回表示時: バーを 0 リセット → 時間差でスライドイン + アニメーション */
     function animateEntrance(state) {
-        const stats = [
-            { id: 'hp',  base: state.baseHp,  bonus: state.bonusHp  },
-            { id: 'atk', base: state.baseAtk, bonus: state.bonusAtk },
-            { id: 'def', base: state.baseDef, bonus: state.bonusDef },
-            { id: 'spd', base: state.baseSpd, bonus: state.bonusSpd },
-        ];
+        const stats = ParamLogic.STAT_IDS.map(function (id) {
+            return {
+                id: id,
+                base: state[ParamLogic.toBaseKey(id)],
+                bonus: state[ParamLogic.toBonusKey(id)]
+            };
+        });
 
         stats.forEach(function (s, i) {
             const baseBar  = document.getElementById('bar-base-'  + s.id);
@@ -100,10 +101,9 @@ const ParamView = (function () {
             // 初回表示: 時間差スライドイン演出
             animateEntrance(state);
         } else {
-            setBar('hp',  state.baseHp,  state.bonusHp);
-            setBar('atk', state.baseAtk, state.bonusAtk);
-            setBar('def', state.baseDef, state.bonusDef);
-            setBar('spd', state.baseSpd, state.bonusSpd);
+            ParamLogic.STAT_IDS.forEach(function (id) {
+                setBar(id, state[ParamLogic.toBaseKey(id)], state[ParamLogic.toBonusKey(id)]);
+            });
         }
 
         const set = function (id, val) {

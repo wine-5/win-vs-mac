@@ -2,6 +2,8 @@
 #include "core/data/ModelMetadata.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/MetadataKeys.h"
+#include "game/constant/ProjectileId.h"
+#include "core/data/ProjectileMetadata.h"
 #include "platform/window/WindowConstants.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
@@ -215,9 +217,22 @@ namespace platform::window::select
 			read(game::constant::metadata_keys::ATTACK_POWER, stats.m_atk.m_base);
 			read(game::constant::metadata_keys::DEFENCE, stats.m_def.m_base);
 			read(game::constant::metadata_keys::MOVE_SPEED, stats.m_spd.m_base);
+
+			// 会心率は0.0〜1.0の確率で持っているが、そのままでは0.2などと出て読みにくい。
+			// 表示だけ%へ直す（ボーナス側も同じ倍率を掛ける）
+			float criticalRate{};
+			read(game::constant::metadata_keys::CRITICAL_RATE, criticalRate);
+			stats.m_crit.m_base = criticalRate * PERCENT_SCALE;
 		}
 
-        for (int i = 0; i < FILE_SLOT_COUNT; ++i)
+		// Window弾の基礎値は playerData.json ではなく projectileData.json 側が持つ。
+		// 飛距離は定義に無いため「弾速×寿命」で求める
+		const auto& projectileMeta{ m_resourceManager.getProjectileMetadata(
+			game::constant::projectile_id::PLAYER_WINDOW) };
+		stats.m_projectileSpeed.m_base = projectileMeta.m_speed;
+		stats.m_projectileRange.m_base = projectileMeta.m_speed * projectileMeta.m_lifetime;
+
+		for (int i = 0; i < FILE_SLOT_COUNT; ++i)
         {
             if (!m_slotPaths[i].empty())
             {
@@ -226,6 +241,9 @@ namespace platform::window::select
 				stats.m_atk.m_bonus += bonus.atk;
 				stats.m_def.m_bonus += bonus.def;
 				stats.m_spd.m_bonus += bonus.spd;
+				stats.m_crit.m_bonus += bonus.criticalRate * PERCENT_SCALE;
+				stats.m_projectileSpeed.m_bonus += bonus.projectileSpeed;
+				stats.m_projectileRange.m_bonus += bonus.projectileRange;
 			}
         }
 

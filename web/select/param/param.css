@@ -93,6 +93,10 @@ body {
 .bar-atk   { background: #e8a030; }
 .bar-def   { background: #5090d0; }
 .bar-spd   { background: #c050e0; }
+/* 新3項目はアイコンのタイル色に合わせる（会心=紫 / 弾速=シアン / 飛距離=マゼンタ） */
+.bar-crit  { background: #8b5cf6; }
+.bar-bspd  { background: #22d3ee; }
+.bar-brng  { background: #e255a1; }
 .bar-bonus { background: #f0c040; }
 
 /* ── flash animation on increase ── */

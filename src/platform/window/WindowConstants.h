@@ -31,8 +31,15 @@ namespace platform::window
         static constexpr const char* JSON_KEY_BONUS_ATK{ "bonusAtk" };
         static constexpr const char* JSON_KEY_BONUS_DEF{ "bonusDef" };
         static constexpr const char* JSON_KEY_BONUS_SPD{ "bonusSpd" };
+		// crit は会心率（%表記）、bspd/brng は Window弾の弾速と飛距離
+		static constexpr const char* JSON_KEY_BASE_CRIT{ "baseCrit" };
+		static constexpr const char* JSON_KEY_BASE_BSPD{ "baseBspd" };
+		static constexpr const char* JSON_KEY_BASE_BRNG{ "baseBrng" };
+		static constexpr const char* JSON_KEY_BONUS_CRIT{ "bonusCrit" };
+		static constexpr const char* JSON_KEY_BONUS_BSPD{ "bonusBspd" };
+		static constexpr const char* JSON_KEY_BONUS_BRNG{ "bonusBrng" };
 
-        // JSONキー（FileSelectWindow）
+		// JSONキー（FileSelectWindow）
 		static constexpr const char* JSON_KEY_FILE_SLOT{ "slot" };   // スロット番号（要素ひとつぶん）
 		static constexpr const char* JSON_KEY_FILE_SLOTS{ "slots" }; // スロット一覧（配列）
 		static constexpr const char* JSON_KEY_IS_EMPTY{ "isEmpty" };

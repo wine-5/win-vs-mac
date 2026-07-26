@@ -28,6 +28,12 @@ namespace platform::window::select
 			j[platform::window::WindowConstants::JSON_KEY_BONUS_ATK] = stats.m_atk.m_bonus;
 			j[platform::window::WindowConstants::JSON_KEY_BONUS_DEF] = stats.m_def.m_bonus;
 			j[platform::window::WindowConstants::JSON_KEY_BONUS_SPD] = stats.m_spd.m_bonus;
+			j[platform::window::WindowConstants::JSON_KEY_BASE_CRIT] = stats.m_crit.m_base;
+			j[platform::window::WindowConstants::JSON_KEY_BASE_BSPD] = stats.m_projectileSpeed.m_base;
+			j[platform::window::WindowConstants::JSON_KEY_BASE_BRNG] = stats.m_projectileRange.m_base;
+			j[platform::window::WindowConstants::JSON_KEY_BONUS_CRIT] = stats.m_crit.m_bonus;
+			j[platform::window::WindowConstants::JSON_KEY_BONUS_BSPD] = stats.m_projectileSpeed.m_bonus;
+			j[platform::window::WindowConstants::JSON_KEY_BONUS_BRNG] = stats.m_projectileRange.m_bonus;
 			j[platform::window::WindowConstants::JSON_KEY_SLOT] = stats.m_equippedSlots;
 			m_webView.postMessage(j.dump());
         }

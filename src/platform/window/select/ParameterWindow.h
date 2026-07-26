@@ -28,6 +28,9 @@ namespace platform::window::select
 		ParameterEntry m_atk{};
 		ParameterEntry m_def{};
 		ParameterEntry m_spd{};
+		ParameterEntry m_crit{};            // 会心率（%表記。0.2なら20を入れる）
+		ParameterEntry m_projectileSpeed{}; // Window弾の弾速
+		ParameterEntry m_projectileRange{}; // Window弾の飛距離
 		int m_equippedSlots{ 0 };
 	};
 

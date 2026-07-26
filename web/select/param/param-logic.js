@@ -2,12 +2,24 @@
 
 const BAR_CAP = 150;
 
+// 表示する項目のID。C++側から届くキーは base/bonus + 先頭を大文字にしたID。
+// 項目を増やすときはここへ足せば、状態の保持も更新も自動で追従する
+const STAT_IDS = ['hp', 'atk', 'def', 'spd', 'crit', 'bspd', 'brng'];
+
 const ParamLogic = (function () {
-    const state = {
-        slot: null,
-        baseHp: 0, baseAtk: 0, baseDef: 0, baseSpd: 0,
-        bonusHp: 0, bonusAtk: 0, bonusDef: 0, bonusSpd: 0,
-    };
+    function toBaseKey(id) {
+        return 'base' + id.charAt(0).toUpperCase() + id.slice(1);
+    }
+
+    function toBonusKey(id) {
+        return 'bonus' + id.charAt(0).toUpperCase() + id.slice(1);
+    }
+
+    const state = { slot: null };
+    STAT_IDS.forEach(function (id) {
+        state[toBaseKey(id)] = 0;
+        state[toBonusKey(id)] = 0;
+    });
 
     let onStateChangeCallback = null;
     let firstRender = true;
@@ -22,14 +34,12 @@ const ParamLogic = (function () {
 
     function updateState(data) {
         if (data.slot != null) state.slot = data.slot;
-        if (data.baseHp != null) state.baseHp = data.baseHp;
-        if (data.baseAtk != null) state.baseAtk = data.baseAtk;
-        if (data.baseDef != null) state.baseDef = data.baseDef;
-        if (data.baseSpd != null) state.baseSpd = data.baseSpd;
-        if (data.bonusHp != null) state.bonusHp = data.bonusHp;
-        if (data.bonusAtk != null) state.bonusAtk = data.bonusAtk;
-        if (data.bonusDef != null) state.bonusDef = data.bonusDef;
-        if (data.bonusSpd != null) state.bonusSpd = data.bonusSpd;
+        STAT_IDS.forEach(function (id) {
+            const baseKey = toBaseKey(id);
+            const bonusKey = toBonusKey(id);
+            if (data[baseKey] != null) state[baseKey] = data[baseKey];
+            if (data[bonusKey] != null) state[bonusKey] = data[bonusKey];
+        });
 
         if (onStateChangeCallback) {
             onStateChangeCallback();
@@ -52,9 +62,7 @@ const ParamLogic = (function () {
     }
 
     function getBarData(id) {
-        const baseKey = 'base' + id.charAt(0).toUpperCase() + id.slice(1);
-        const bonusKey = 'bonus' + id.charAt(0).toUpperCase() + id.slice(1);
-        return calculateBar(state[baseKey], state[bonusKey]);
+        return calculateBar(state[toBaseKey(id)], state[toBonusKey(id)]);
     }
 
     function onMessageFromGame(data) {
@@ -76,6 +84,9 @@ const ParamLogic = (function () {
 
     return {
         BAR_CAP: BAR_CAP,
+        STAT_IDS: STAT_IDS,
+        toBaseKey: toBaseKey,
+        toBonusKey: toBonusKey,
         getState: getState,
         updateState: updateState,
         calculateBar: calculateBar,
