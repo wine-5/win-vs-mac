@@ -21,6 +21,7 @@ namespace game::system::visual
 	class AttackTelegraphVisualsSystem;
 	class TelegraphVisualsSystem;
 	class BackgroundParticleSystem;
+	class HardAuraVisualsSystem;
 	class DamagePopupSystem;
 } // namespace game::system::visual
 
@@ -35,6 +36,7 @@ namespace game::ui::ingame
 	class PlayerHUDView;     // 前方宣言
 	class EquipmentSlotView; // 前方宣言
 	class ObjectiveView;     // 前方宣言
+	class InGameStatusView;  // 前方宣言
 	class LowHealthVignetteView; // 前方宣言
 	class BossHUDView;           // 前方宣言
 	class EnemyHealthBarView;    // 前方宣言
@@ -74,8 +76,10 @@ namespace game::scene
 		 * @param playerId プレイヤーのEntityID
 		 * @param remainingEnemyCount 残っている開始時配置の雑魚の数（左上の目標表示に使う）
 		 * @param bossId ボスのEntityID（未出現ならINVALID_ENTITY_ID）
+		 * @param elapsedTime インゲーム開始からの経過時間（秒。右上の状況表示に使う）
 		 */
-		void draw(core::ecs::EntityId playerId, int remainingEnemyCount, core::ecs::EntityId bossId);
+		void draw(core::ecs::EntityId playerId, int remainingEnemyCount, core::ecs::EntityId bossId,
+		    float elapsedTime);
 
 		/**
 		 * @brief 溜め攻撃の演出System（集中線の描画元）を設定する
@@ -120,6 +124,12 @@ namespace game::scene
 		void setBackgroundParticleSystem(system::visual::BackgroundParticleSystem* system);
 
 		/**
+		 * @brief Hardの敵を包む赤いオーラのSystemを設定する
+		 * @param system HardAuraVisualsSystemのポインタ（所有はSystemManager）
+		 */
+		void setHardAuraVisualsSystem(system::visual::HardAuraVisualsSystem* system);
+
+		/**
 		 * @brief プレイヤー死亡演出System（暗転の描画元）を設定する
 		 * @param system PlayerDeathSystemのポインタ（所有はSystemManager）
 		 */
@@ -160,6 +170,12 @@ namespace game::scene
 		 * @param view ObjectiveViewのポインタ（所有はInGame）
 		 */
 		void setObjectiveView(ui::ingame::ObjectiveView* view);
+
+		/**
+		 * @brief 状況表示（右上のHUD：難易度・経過時間）Viewを設定する
+		 * @param view InGameStatusViewのポインタ（所有はInGame）
+		 */
+		void setInGameStatusView(ui::ingame::InGameStatusView* view);
 
 		/**
 		 * @brief 低HP警告のビネットViewを設定する
@@ -259,6 +275,9 @@ namespace game::scene
 		// 背景パーティクルの描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::visual::BackgroundParticleSystem* m_backgroundParticleSystem{ nullptr };
 
+		// Hardの敵を包む赤いオーラの描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
+		system::visual::HardAuraVisualsSystem* m_hardAuraVisualsSystem{ nullptr };
+
 		// プレイヤーステータス（左下のHUD）の描画元（所有はInGame）
 		ui::ingame::PlayerHUDView* m_playerHUDView{ nullptr };
 
@@ -267,6 +286,9 @@ namespace game::scene
 
 		// 目標表示（左上のHUD）の描画元（所有はInGame）
 		ui::ingame::ObjectiveView* m_objectiveView{ nullptr };
+
+		// 状況表示（右上のHUD：難易度・経過時間）の描画元（所有はInGame）
+		ui::ingame::InGameStatusView* m_statusView{ nullptr };
 
 		// 低HP警告のビネットの描画元（所有はInGame）
 		ui::ingame::LowHealthVignetteView* m_lowHealthVignetteView{ nullptr };

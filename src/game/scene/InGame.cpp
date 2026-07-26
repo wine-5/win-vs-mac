@@ -74,11 +74,13 @@
 #include "game/system/camera/DamageShakeSystem.h"
 #include "game/system/visual/MacAwakenEffectSystem.h"
 #include "game/system/visual/BackgroundParticleSystem.h"
+#include "game/system/visual/HardAuraVisualsSystem.h"
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
 #include "game/ui/ingame/PlayerHUDView.h"
 #include "game/ui/ingame/EquipmentSlotView.h"
 #include "game/ui/ingame/ObjectiveView.h"
+#include "game/ui/ingame/InGameStatusView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
 #include "game/ui/ingame/BossHUDView.h"
 #include "game/ui/ingame/EnemyHealthBarView.h"
@@ -278,6 +280,12 @@ namespace game::scene
 		    *core::base::ServiceLocator::get<core::iface::IScreen>());
 		m_view.setObjectiveView(m_objectiveView.get());
 
+		m_statusView = std::make_unique<ui::ingame::InGameStatusView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_gameManager.getDifficulty());
+		m_view.setInGameStatusView(m_statusView.get());
+
 		m_lowHealthVignetteView = std::make_unique<ui::ingame::LowHealthVignetteView>(
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
@@ -316,10 +324,25 @@ namespace game::scene
 		m_playerData = game::data::PlayerData::fromMetadata(playerMeta.value());
 	}
 
+	void InGame::logPlayerParameters(const char* label) const
+	{
+		core::log::info("Player[{}] HP={} ATK={} DEF={} SPD={} 攻撃範囲={} クールダウン={}",
+		    label,
+		    m_playerData.getMaxHp(),
+		    m_playerData.getAttackPower(),
+		    m_playerData.getDefence(),
+		    m_playerData.getMoveSpeed(),
+		    m_playerData.getAttackRange(),
+		    m_playerData.getAttackCooldown());
+	}
+
 	void InGame::spawnEntities()
 	{
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager,
 		    m_entityManager, m_componentManager);
+
+		// 装備で実際にパラメータが動いたかを追えるよう、反映の前後をログに出す
+		logPlayerParameters("装備前");
 
 		// 拡張子ボーナスをPlayerDataに反映
 		for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
@@ -330,6 +353,8 @@ namespace game::scene
 				    m_resourceManager.getExtensionBonus(m_fileEquipmentData.getExtensionType(i)));
 			}
 		}
+
+		logPlayerParameters("装備後");
 
 		initializer.initializePlayer(m_playerData);
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
@@ -474,6 +499,12 @@ namespace game::scene
 		auto* backgroundParticles{ m_systemManager.registerSystem<game::system::visual::BackgroundParticleSystem>(
 			m_componentManager, m_playerId, m_renderer, m_resourceManager) };
 		m_view.setBackgroundParticleSystem(backgroundParticles);
+
+		// Hardの敵を包む赤いオーラ（強化されていることを戦闘中に伝える）
+		auto* hardAura{ m_systemManager.registerSystem<game::system::visual::HardAuraVisualsSystem>(
+			m_componentManager, m_renderer, m_resourceManager,
+			m_gameManager.getDifficulty() == core::data::Difficulty::Hard) };
+		m_view.setHardAuraVisualsSystem(hardAura);
 
 		// 敵の発見演出（頭上の通知バッジ）。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
 		auto* detectionAlert{ m_systemManager.registerSystem<game::system::visual::DetectionAlertVisualsSystem>(
@@ -655,7 +686,7 @@ namespace game::scene
 		// スポーン時のスナップショットではなく EnemyFactory が持つ最新の敵一覧を渡す
 		// 残り雑魚はボス出現条件そのものなので、開始時スナップショットの生き残り数を渡す
 		// （ボスが召喚する雑魚は条件に含めない）
-		m_view.draw(m_playerId, static_cast<int>(m_stageEnemyIds.size()), m_macId);
+		m_view.draw(m_playerId, static_cast<int>(m_stageEnemyIds.size()), m_macId, m_elapsedTime);
 	}
 
 	void InGame::saveResultData	(bool isVictory) noexcept

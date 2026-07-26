@@ -17,6 +17,7 @@
 #include "game/system/visual/AttackTelegraphVisualsSystem.h"
 #include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/system/visual/BackgroundParticleSystem.h"
+#include "game/system/visual/HardAuraVisualsSystem.h"
 #include "game/system/combat/PlayerDeathSystem.h"
 #include "game/system/combat/PlayerRangedAttackSystem.h"
 #include "game/component/combat/AttackComponent.h"
@@ -25,6 +26,7 @@
 #include "game/ui/ingame/PlayerHUDView.h"
 #include "game/ui/ingame/EquipmentSlotView.h"
 #include "game/ui/ingame/ObjectiveView.h"
+#include "game/ui/ingame/InGameStatusView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
 #include "game/ui/ingame/BossHUDView.h"
 #include "game/ui/ingame/EnemyHealthBarView.h"
@@ -46,7 +48,8 @@ namespace game::scene
 	{
 	}
 
-	void InGameView::draw(core::ecs::EntityId playerId, int remainingEnemyCount, core::ecs::EntityId bossId)
+	void InGameView::draw(core::ecs::EntityId playerId, int remainingEnemyCount, core::ecs::EntityId bossId,
+	    float elapsedTime)
 	{
 		// 虚空を流れるデータの光跡。壁や床に隠れてほしいのでモデルと同じ3D描画フェーズで、
 		// かつ最初に描いて他の要素の背景に回す
@@ -54,6 +57,10 @@ namespace game::scene
 			m_backgroundParticleSystem->draw();
 
 		drawModels();
+
+		// Hardの敵を包む赤いオーラ。敵モデルの直後に重ねて「体から漏れる光」に見せる
+		if (m_hardAuraVisualsSystem)
+			m_hardAuraVisualsSystem->draw();
 
 		// 攻撃予兆（地面の攻撃範囲サークル）。地面の上・敵の足元に3Dで描く（3D描画フェーズ）
 		if (m_attackTelegraphSystem)
@@ -101,6 +108,10 @@ namespace game::scene
 		// 目標（左上）
 		if (m_objectiveView)
 			m_objectiveView->draw(remainingEnemyCount, bossId != core::ecs::INVALID_ENTITY_ID);
+
+		// 難易度と経過時間（右上）
+		if (m_statusView)
+			m_statusView->draw(elapsedTime);
 
 		// ボスHP（上中央）。出現していなければ描かれない
 		if (m_bossHUDView)
@@ -164,6 +175,11 @@ namespace game::scene
 		m_backgroundParticleSystem = system;
 	}
 
+	void InGameView::setHardAuraVisualsSystem(system::visual::HardAuraVisualsSystem* system)
+	{
+		m_hardAuraVisualsSystem = system;
+	}
+
 	void InGameView::setPlayerDeathSystem(system::combat::PlayerDeathSystem* system)
 	{
 		m_playerDeathSystem = system;
@@ -192,6 +208,11 @@ namespace game::scene
 	void InGameView::setEquipmentSlotView(ui::ingame::EquipmentSlotView* view)
 	{
 		m_equipmentSlotView = view;
+	}
+
+	void InGameView::setInGameStatusView(ui::ingame::InGameStatusView* view)
+	{
+		m_statusView = view;
 	}
 
 	void InGameView::setObjectiveView(ui::ingame::ObjectiveView* view)

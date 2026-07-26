@@ -52,6 +52,7 @@ namespace game
 		class PlayerHUDView;     // 前方宣言
 		class EquipmentSlotView; // 前方宣言
 		class ObjectiveView;     // 前方宣言
+		class InGameStatusView;  // 前方宣言
 		class LowHealthVignetteView; // 前方宣言
 		class BossHUDView;           // 前方宣言
 		class EnemyHealthBarView;    // 前方宣言
@@ -107,6 +108,15 @@ namespace game::scene
 		void spawnEntities();
 		void setupSystems();
 		void setupEvents();
+
+		/**
+		 * @brief プレイヤーの現在のパラメータをログへ出力する
+		 *
+		 * 装備ファイルのボーナスが実際にパラメータへ乗っているかを、
+		 * 反映の前後で見比べて確かめるために使う
+		 * @param label ログの先頭に付ける見出し（"装備前" / "装備後"）
+		 */
+		void logPlayerParameters(const char* label) const;
 
 		/**
 		 * @brief GameManager にリザルトデータを保存する
@@ -173,6 +183,7 @@ namespace game::scene
 
 		// 目標表示（左上）のView
 		std::unique_ptr<ui::ingame::ObjectiveView> m_objectiveView;
+		std::unique_ptr<ui::ingame::InGameStatusView> m_statusView;
 
 		// 低HP警告のビネットのView
 		std::unique_ptr<ui::ingame::LowHealthVignetteView> m_lowHealthVignetteView;

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -160,6 +160,8 @@
     <ClCompile Include="src\game\system\camera\ChargeZoomSystem.cpp" />
     <ClCompile Include="src\game\system\visual\MacAwakenEffectSystem.cpp" />
     <ClCompile Include="src\game\system\visual\BackgroundParticleSystem.cpp" />
+    <ClCompile Include="src\game\system\visual\HardAuraVisualsSystem.cpp" />
+    <ClCompile Include="src\game\ui\ingame\InGameStatusView.cpp" />
     <ClCompile Include="src\game\system\camera\DamageShakeSystem.cpp" />
     <ClCompile Include="src\game\system\ai\MeleeChaseAISystem.cpp" />
     <ClCompile Include="src\game\system\ai\RangeKeepAISystem.cpp" />
@@ -377,6 +379,8 @@
     <ClInclude Include="src\game\system\camera\ChargeZoomSystem.h" />
     <ClInclude Include="src\game\system\visual\MacAwakenEffectSystem.h" />
     <ClInclude Include="src\game\system\visual\BackgroundParticleSystem.h" />
+    <ClInclude Include="src\game\system\visual\HardAuraVisualsSystem.h" />
+    <ClInclude Include="src\game\ui\ingame\InGameStatusView.h" />
     <ClInclude Include="src\game\system\camera\DamageShakeSystem.h" />
     <ClInclude Include="src\game\system\ai\MeleeChaseAISystem.h" />
     <ClInclude Include="src\game\system\ai\RangeKeepAISystem.h" />

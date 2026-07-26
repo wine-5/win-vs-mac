@@ -22,6 +22,7 @@ namespace game::constant
 		constexpr std::string_view ATTACK_WINDUP = "attackWindup";
 		constexpr std::string_view ATTACK_MAX_HEIGHT = "attackMaxHeight";
 		constexpr std::string_view COMBO_INPUT_WINDOW = "comboInputWindow";
+		constexpr std::string_view COMBO_STAGE2_MULTIPLIER = "comboStage2Multiplier";
 		constexpr std::string_view HOVER_HEIGHT = "hoverHeight";
 		constexpr std::string_view PREFERRED_DISTANCE_MIN = "preferredDistanceMin";
 		constexpr std::string_view PREFERRED_DISTANCE_MAX = "preferredDistanceMax";
