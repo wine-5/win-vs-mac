@@ -12,16 +12,16 @@
     "moveSpeed": 240.0,
     "detectionRange": 3000.0,
     "attackRange": 180.0,
-    "maxHp": 1000.0,
+    "maxHp": 1450.0,
     "defence": 15.0,
-    "attackPower": 35.0,
+    "attackPower": 40.0,
     "attackCooldown": 0.0
   },
   "hard": {
     "moveSpeed": 300.0,
-    "maxHp": 1600.0,
+    "maxHp": 2320.0,
     "defence": 30.0,
-    "attackPower": 60.0
+    "attackPower": 68.0
   },
   "behaviors": [ "boss" ],
   "animations": [
