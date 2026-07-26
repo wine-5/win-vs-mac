@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -160,6 +160,7 @@
     <ClCompile Include="src\game\system\visual\PlayerChargeVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\visual\CriticalVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\camera\ChargeZoomSystem.cpp" />
+    <ClCompile Include="src\game\system\visual\BattleStartSystem.cpp" />
     <ClCompile Include="src\game\system\visual\MacAwakenEffectSystem.cpp" />
     <ClCompile Include="src\game\system\visual\BackgroundParticleSystem.cpp" />
     <ClCompile Include="src\game\system\visual\HardAuraVisualsSystem.cpp" />
@@ -382,6 +383,7 @@
     <ClInclude Include="src\game\system\camera\CameraSystem.h" />
     <ClInclude Include="src\game\system\camera\DebugCameraSystem.h" />
     <ClInclude Include="src\game\system\camera\ChargeZoomSystem.h" />
+    <ClInclude Include="src\game\system\visual\BattleStartSystem.h" />
     <ClInclude Include="src\game\system\visual\MacAwakenEffectSystem.h" />
     <ClInclude Include="src\game\system\visual\BackgroundParticleSystem.h" />
     <ClInclude Include="src\game\system\visual\HardAuraVisualsSystem.h" />
