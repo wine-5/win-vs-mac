@@ -20,13 +20,13 @@ namespace game
 		/** @brief クリティカルが出た瞬間に止める */
 		void requestOnCritical() noexcept
 		{
-			request(CRITICAL_DURATION, FULL_STOP_SCALE);
+			request(CRITICAL_DURATION, CRITICAL_SCALE);
 		}
 
 		/** @brief 雑魚を撃破した瞬間に止める */
 		void requestOnEnemyKilled() noexcept
 		{
-			request(ENEMY_KILL_DURATION, FULL_STOP_SCALE);
+			request(ENEMY_KILL_DURATION, ENEMY_KILL_SCALE);
 		}
 
 		/** @brief ボスを撃破した瞬間にスローで見せる */
@@ -71,13 +71,17 @@ namespace game
 	  private:
 		// 場面ごとの効き方。手応えを作るのが目的なので、操作不能に感じない範囲に収める。
 		// 呼び出し側は「何が起きたか」だけを伝え、どれだけ止めるかはここで決める
-		static constexpr float FULL_STOP_SCALE{ 0.0f };
-		// DEBUG: 効きを確かめるため大幅に長くしている。実用値はクリティカル0.07／撃破0.12／ボス0.40
-		static constexpr float CRITICAL_DURATION{ 0.30f };
-		static constexpr float ENEMY_KILL_DURATION{ 0.60f };
-		// ボス撃破だけは決着の区切り。完全停止だと固まって見えるためスローで長めに見せる
-		static constexpr float BOSS_KILL_DURATION{ 1.50f };
-		static constexpr float BOSS_KILL_SCALE{ 0.15f };
+		// 倍率は0.0で完全停止、0.15なら通常の15%の速さで進む（スローモーション）。
+		// 完全停止は画面が固まったように見えるため、いずれもスローで見せる
+		// 長さは「手応えを返すが操作の邪魔にならない」範囲に収める。
+		// クリティカルは連発されるため最も短く、撃破は一体につき一度なので少し長く取れる
+		static constexpr float CRITICAL_DURATION{ 0.10f };
+		static constexpr float CRITICAL_SCALE{ 0.15f };
+		static constexpr float ENEMY_KILL_DURATION{ 0.20f };
+		static constexpr float ENEMY_KILL_SCALE{ 0.12f };
+		// ボス撃破は決着の区切りなので、最も長く・最も遅く見せる
+		static constexpr float BOSS_KILL_DURATION{ 0.60f };
+		static constexpr float BOSS_KILL_SCALE{ 0.08f };
 
 		/**
 		 * @brief ヒットストップを開始する
