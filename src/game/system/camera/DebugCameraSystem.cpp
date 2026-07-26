@@ -34,9 +34,8 @@ namespace game::system::camera
 
 	void DebugCameraSystem::update(float deltaTime)
 	{
-		// F1のフリーカメラ中、またはF2のシーンビュー（時間停止）中に動作する
-		const bool debugMode{ m_gameManager.isDebugMode() ||
-			                  m_pauseManager.isPausedBy(PauseReason::DebugSceneView) };
+		// F1のフリーカメラ中のみ動作する
+		const bool debugMode{ m_gameManager.isDebugMode() };
 
 		// デバッグOFF時は何もしない（通常のCameraSystemに任せる）
 		if (!debugMode)

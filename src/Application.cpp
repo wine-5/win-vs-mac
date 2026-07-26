@@ -127,7 +127,7 @@ void Application::updatePauseMenu()
 {
 	const auto sceneType{ m_sceneManager->getCurrentSceneType() };
 
-	// Escで開閉する（別の理由（シーンビュー等）でポーズ中は何もしない）
+	// Escで開閉する（別の理由でポーズ中は何もしない）
 	if (m_inputProvider->isKeyPressed(core::input::KeyCode::Escape))
 	{
 		if (m_pauseManager.isPausedBy(game::PauseReason::Menu))

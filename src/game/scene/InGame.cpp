@@ -682,24 +682,6 @@ namespace game::scene
 				core::log::info("DEBUG: デバッグモードOFF");
 		}
 
-		// DEBUG: F2キーでシーンビュー（時間停止＋フリーカメラ）のON/OFFを切り替える（リリース時に削除）
-		if (m_inputProvider.isKeyPressed(core::input::KeyCode::F2))
-		{
-			m_pauseManager.toggle(PauseReason::DebugSceneView);
-			if (m_pauseManager.isPausedBy(PauseReason::DebugSceneView))
-				core::log::info("DEBUG: シーンビューON（時間停止）");
-			else
-				core::log::info("DEBUG: シーンビューOFF");
-		}
-
-		// DEBUG: シーンビュー凍結中はゲームロジックを止め、フリーカメラだけを更新する（リリース時に削除）
-		if (m_pauseManager.isPausedBy(PauseReason::DebugSceneView))
-		{
-			if (m_debugCameraSystem)
-				m_debugCameraSystem->update(deltaTime);
-			return;
-		}
-
 		// ヒットストップ中はSystemへ渡す時間に倍率を掛ける（0なら何も進まない）。
 		// 経過時間の計測もここへ揃える。止まっている間もタイマーだけ進むと、
 		// 画面が止まっているのに右上の秒数だけ動いて不自然になる
