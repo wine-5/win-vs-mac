@@ -157,7 +157,11 @@ namespace platform::window::select
         m_fileSelectWindow->show();
         m_parameterWindow->show();
         m_difficultyWindow->show();
-    }
+
+		// 何も装備していない状態の基礎値を最初から見せる。
+		// ファイルを1つ選ぶまで全項目が「—」のままだと、何が伸びるのか比較できない
+		updateParameterWindow();
+	}
 
     void Win32SelectWindowManager::destroyAllWindows()
     {

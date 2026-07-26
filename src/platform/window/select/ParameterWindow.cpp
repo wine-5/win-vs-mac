@@ -14,10 +14,11 @@ namespace platform::window::select
 
 	void ParameterWindow::refresh(const ParameterStats& stats) noexcept
 	{
-        if (!m_webView.isReady()) return;
-
-        try
-        {
+		// 準備完了を待たずに送る。WebView2Host が未読み込みの間はキューへ積み、
+		// ページの読み込み完了時にまとめて流してくれる。
+		// ここで捨てると、画面を開いた直後の初期値が一度も表示されない
+		try
+		{
             nlohmann::json j;
 			j[platform::window::WindowConstants::JSON_KEY_TYPE] = platform::window::WindowConstants::MESSAGE_TYPE_REFRESH;
 			j[platform::window::WindowConstants::JSON_KEY_BASE_HP] = stats.m_hp.m_base;
