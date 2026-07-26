@@ -141,31 +141,39 @@ body {
    面・アイコン・文字をゆっくり同じ周期で明滅させ、行そのものが呼吸しているように見せる。
    3行を少しずつ遅らせて波にすると、並んだスロット全体へ視線が動く */
 @keyframes emptySlotBreath {
-    0%, 100% { background: rgba(0, 120, 212, 0); }
-    50%      { background: rgba(0, 120, 212, 0.10); }
+    0%, 100% {
+        background: rgba(0, 120, 212, 0.04);
+        box-shadow: inset 0 0 0 1px rgba(0, 120, 212, 0.12);
+    }
+    50% {
+        background: rgba(0, 120, 212, 0.22);
+        box-shadow: inset 0 0 0 1px rgba(0, 120, 212, 0.65);
+    }
 }
 
 @keyframes emptyIconFloat {
-    0%, 100% { transform: translateY(0);    opacity: 0.5; }
-    50%      { transform: translateY(-3px); opacity: 1; }
+    0%, 100% { transform: translateY(0) scale(1);       opacity: 0.5; }
+    50%      { transform: translateY(-6px) scale(1.08); opacity: 1; }
 }
 
 @keyframes emptyTextPulse {
-    0%, 100% { opacity: 0.6; }
-    50%      { opacity: 0.95; }
+    0%, 100% { opacity: 0.5; }
+    50%      { opacity: 1; }
 }
 
-.file-row.is-empty            { animation: emptySlotBreath 2.4s ease-in-out infinite; }
-.file-row.is-empty .file-icon { animation: emptyIconFloat  2.4s ease-in-out infinite; }
-.file-row.is-empty .file-name.empty { animation: emptyTextPulse 2.4s ease-in-out infinite; }
+.file-row.is-empty            { animation: emptySlotBreath 1.8s ease-in-out infinite; }
+.file-row.is-empty .file-icon { animation: emptyIconFloat  1.8s ease-in-out infinite; }
+.file-row.is-empty .file-name.empty { animation: emptyTextPulse 1.8s ease-in-out infinite; }
 
-.file-row.is-empty:nth-of-type(2),
-.file-row.is-empty:nth-of-type(2) .file-icon,
-.file-row.is-empty:nth-of-type(2) .file-name.empty { animation-delay: 0.35s; }
+/* 遅延はスロット（親）側に付ける。行は各スロットに1つずつしか無いため、
+   行に nth-of-type を書いても常に1番目扱いになり段差が出ない */
+.file-slot:nth-child(2) .file-row.is-empty,
+.file-slot:nth-child(2) .file-row.is-empty .file-icon,
+.file-slot:nth-child(2) .file-row.is-empty .file-name.empty { animation-delay: 0.3s; }
 
-.file-row.is-empty:nth-of-type(3),
-.file-row.is-empty:nth-of-type(3) .file-icon,
-.file-row.is-empty:nth-of-type(3) .file-name.empty { animation-delay: 0.7s; }
+.file-slot:nth-child(3) .file-row.is-empty,
+.file-slot:nth-child(3) .file-row.is-empty .file-icon,
+.file-slot:nth-child(3) .file-row.is-empty .file-name.empty { animation-delay: 0.6s; }
 
 /* カーソルが乗っている行は誘導をやめ、通常のホバー表示に任せる
    （明滅し続けると「今どこを指しているか」が分かりにくくなるため） */
@@ -242,6 +250,38 @@ body {
     font-weight: 700;
     font-size: 14px;
     white-space: nowrap;
+}
+
+/* ボーナス内訳：ステータスアイコン＋名前＋数値をひとかたまりで並べる */
+.bonus-stat-list {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.bonus-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.bonus-stat-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.bonus-stat-name {
+    color: var(--text);
+    font-weight: 400;
+}
+
+.bonus-stat-val {
+    color: #f0c040;
+    font-weight: 700;
 }
 
 .bonus-entry-val.atk   { color: #e8a030; }
