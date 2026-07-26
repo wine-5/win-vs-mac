@@ -41,7 +41,9 @@ namespace platform::window::select
 
 	  void showWarningMessage(const std::string& message) noexcept override;
 
-    private:
+	  void setWindowsVisible(bool visible) noexcept override;
+
+	private:
         // レイアウト定数
         static constexpr int TASKBAR_HEIGHT{ 48 };
         static constexpr int GAP_Y{ 8 };

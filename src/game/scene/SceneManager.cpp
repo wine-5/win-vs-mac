@@ -31,6 +31,12 @@ namespace game::scene
 			m_currentScene->draw();
 	}
 
+	void SceneManager::notifyPauseChanged(bool isPaused)
+	{
+		if (m_currentScene)
+			m_currentScene->onPauseChanged(isPaused);
+	}
+
 	void SceneManager::changeScene(SceneType sceneType)
 	{
 		// 現在シーンが存在する場合のみ、翌フレームでの遅延リセットを予約する

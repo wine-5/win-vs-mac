@@ -181,7 +181,14 @@ namespace platform::window::select
         m_desktopWindow.reset();
     }
 
-    void Win32SelectWindowManager::pumpMessages()
+	void Win32SelectWindowManager::setWindowsVisible(bool visible) noexcept
+	{
+		// 子ウィンドウは親（デスクトップ）に従うので、親だけ切り替えれば足りる
+		if (m_desktopWindow && m_desktopWindow->getHwnd())
+			ShowWindow(m_desktopWindow->getHwnd(), visible ? SW_SHOW : SW_HIDE);
+	}
+
+	void Win32SelectWindowManager::pumpMessages()
     {
         MSG msg{};
         while (::PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE))

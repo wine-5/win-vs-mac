@@ -68,6 +68,12 @@ namespace game::scene
 			m_fade->draw();
 	}
 
+	void Select::onPauseChanged(bool isPaused)
+	{
+		if (m_windowManager)
+			m_windowManager->setWindowsVisible(!isPaused);
+	}
+
 	void Select::startFadeOut()
 	{
 		if (m_state == State::FadeOut)
