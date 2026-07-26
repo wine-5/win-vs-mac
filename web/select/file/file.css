@@ -62,8 +62,10 @@ body {
     flex-shrink: 0;
 }
 
+/* 装備スロットとボーナス一覧を縦半分ずつに分ける。
+   スロット側を大きく取ると一覧が潰れて、どの拡張子が何を上げるのか読めなくなる */
 .file-list {
-    flex: 2;
+    flex: 1;
     min-height: 0;
     overflow-y: auto;
     display: flex;
