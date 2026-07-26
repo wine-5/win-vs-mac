@@ -234,15 +234,17 @@ body {
     gap: 6px;
 }
 
+/* バッジ / 対象拡張子 / ボーナス内訳 の3列。
+   内訳の列幅を固定して、どの行でもアイコンが同じ位置から始まるようにする */
 .bonus-entry {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr 230px;
     align-items: center;
     gap: 8px;
     font-size: 14px;
 }
 
 .bonus-entry-name {
-    flex: 1;
     color: var(--text-muted);
 }
 
@@ -252,19 +254,33 @@ body {
     white-space: nowrap;
 }
 
-/* ボーナス内訳：ステータスアイコン＋名前＋数値をひとかたまりで並べる */
+/* ボーナス内訳：アイコン・名前・数値をそれぞれ固定の列に置く。
+   行ごとに名前の長さが違っても、パラメータウィンドウと同じように
+   アイコンと数値が縦に揃う */
 .bonus-stat-list {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .bonus-stat {
-    display: inline-flex;
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
+}
+
+/* アーカイブのように項目が多い行は、1行1項目だと縦に伸びすぎる。
+   名前を省いてアイコンと数値だけを横に流す */
+.bonus-stat-list.compact {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.bonus-stat-list.compact .bonus-stat {
+    display: inline-flex;
 }
 
 .bonus-stat-icon {

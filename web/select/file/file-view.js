@@ -223,7 +223,8 @@ const FileView = (function () {
                 '<span class="bonus-stat-val">+' + value + meta.suffix + '</span>' +
                 '</span>';
         });
-        return '<span class="bonus-entry-val bonus-stat-list">' + parts.join('') + '</span>';
+        return '<span class="bonus-entry-val bonus-stat-list' + (showName ? '' : ' compact') + '">' +
+            parts.join('') + '</span>';
     }
 
     /**
