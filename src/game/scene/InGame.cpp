@@ -659,8 +659,20 @@ namespace game::scene
 		if (macSpawn.m_type.empty())
 			return; // ボス未定義のステージなら何もしない（勝利条件が成立しなくなる点は許容）
 
+		// 出現シネマの間はAIが止まっており向きを追従しない。登場の瞬間に背中を見せないよう、
+		// 湧いた時点でプレイヤーの方を向かせる。プレイヤーの進入方向に依らず正しくなるので、
+		// ステージデータの向き（m_rotationY）はボスに限り使わない
+		float spawnYawDegrees{ macSpawn.m_rotationY };
+		if (const auto* playerTransform{ m_componentManager.tryGet<component::movement::TransformComponent>(m_playerId) })
+		{
+			const float toPlayerX{ playerTransform->m_position.x - macSpawn.m_position.x };
+			const float toPlayerZ{ playerTransform->m_position.z - macSpawn.m_position.z };
+			if (toPlayerX != 0.0f || toPlayerZ != 0.0f)
+				spawnYawDegrees = std::atan2f(-toPlayerX, -toPlayerZ) * core::utility::RAD_TO_DEG;
+		}
+
 		m_macId = m_enemySpawner.spawn(constant::toEnemyType(macSpawn.m_type), macSpawn.m_position,
-		    macSpawn.m_rotationY);
+		    spawnYawDegrees);
 		core::log::info("雑魚を全滅：ボスが出現しました (EntityId={})", m_macId);
 
 		// 出現シネマ（カメラをボスへ寄せてシェイク→プレイヤーへ戻す）を起動する。
