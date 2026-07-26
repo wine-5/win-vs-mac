@@ -111,6 +111,9 @@ namespace platform::window::select
 			case core::data::FileExtensionType::Document: return EXT_TYPE_NAME_DOCUMENT;
 			case core::data::FileExtensionType::Image: return EXT_TYPE_NAME_IMAGE;
 			case core::data::FileExtensionType::Audio: return EXT_TYPE_NAME_AUDIO;
+			case core::data::FileExtensionType::SourceCode: return EXT_TYPE_NAME_SOURCE_CODE;
+			case core::data::FileExtensionType::Shortcut: return EXT_TYPE_NAME_SHORTCUT;
+			case core::data::FileExtensionType::Video: return EXT_TYPE_NAME_VIDEO;
 			case core::data::FileExtensionType::Archive: return EXT_TYPE_NAME_ARCHIVE;
 			default:                                        return EXT_TYPE_NAME_UNKNOWN;
 			}
