@@ -42,6 +42,11 @@ namespace game
 		class DebugCameraSystem; // DEBUG: 前方宣言（リリース時に削除）
 	} // namespace system::camera
 
+	namespace system::visual
+	{
+		class BattleStartSystem; // 前方宣言
+	} // namespace system::visual
+
 	namespace ui::debug
 	{
 		class DebugGizmoView; // DEBUG: 前方宣言（リリース時に削除）
@@ -168,6 +173,10 @@ namespace game::scene
 		std::unordered_set<core::ecs::EntityId> m_stageEnemyIds{};
 
 		std::unique_ptr<game::event::AudioEventListener> m_audioEventListener;
+
+		// 開始演出（READY / FIGHT!）の参照。クリアタイムの計測開始を遅らせるために読む
+		// （所有はSystemManager）
+		system::visual::BattleStartSystem* m_battleStartSystem{ nullptr };
 
 		// DEBUG: シーンビュー凍結中に単独更新するための参照（所有はSystemManager。リリース時に削除）
 		system::camera::DebugCameraSystem* m_debugCameraSystem{ nullptr };

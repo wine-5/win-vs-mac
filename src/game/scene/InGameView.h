@@ -24,6 +24,7 @@ namespace game::system::visual
 	class BackgroundParticleSystem;
 	class HardAuraVisualsSystem;
 	class DamagePopupSystem;
+	class BattleStartSystem;
 } // namespace game::system::visual
 
 namespace game::ui::debug
@@ -135,6 +136,12 @@ namespace game::scene
 		 * @param system HardAuraVisualsSystemのポインタ（所有はSystemManager）
 		 */
 		void setHardAuraVisualsSystem(system::visual::HardAuraVisualsSystem* system);
+
+		/**
+		 * @brief 開始演出System（READY / FIGHT! の描画元）を設定する
+		 * @param system BattleStartSystemのポインタ（所有はSystemManager）
+		 */
+		void setBattleStartSystem(system::visual::BattleStartSystem* system);
 
 		/**
 		 * @brief プレイヤー死亡演出System（暗転の描画元）を設定する
@@ -308,6 +315,9 @@ namespace game::scene
 
 		// 敵の頭上HPバーの描画元（所有はInGame）
 		ui::ingame::EnemyHealthBarView* m_enemyHealthBarView{ nullptr };
+
+		// 開始演出（READY / FIGHT!）の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
+		system::visual::BattleStartSystem* m_battleStartSystem{ nullptr };
 
 		// プレイヤー死亡時の暗転の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::combat::PlayerDeathSystem* m_playerDeathSystem{ nullptr };

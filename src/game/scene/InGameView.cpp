@@ -19,6 +19,7 @@
 #include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/system/visual/HardAuraVisualsSystem.h"
+#include "game/system/visual/BattleStartSystem.h"
 #include "game/system/combat/PlayerDeathSystem.h"
 #include "game/system/combat/PlayerRangedAttackSystem.h"
 #include "game/component/combat/AttackComponent.h"
@@ -140,6 +141,11 @@ namespace game::scene
 		// Effekseerエフェクトの描画（3Dモデル描画後・UI手前に呼び出す）
 		m_effectFactory.draw();
 
+		// 開始演出（READY / FIGHT!）。この間は操作できないので、HUDより手前に大きく出して
+		// 「まだ始まっていない」ことを画面の中心で伝える
+		if (m_battleStartSystem)
+			m_battleStartSystem->draw();
+
 		// プレイヤー死亡時の暗転。画面の全てを覆って暗くするため最後に描く
 		if (m_playerDeathSystem)
 			m_playerDeathSystem->draw();
@@ -188,6 +194,11 @@ namespace game::scene
 	void InGameView::setHardAuraVisualsSystem(system::visual::HardAuraVisualsSystem* system)
 	{
 		m_hardAuraVisualsSystem = system;
+	}
+
+	void InGameView::setBattleStartSystem(system::visual::BattleStartSystem* system)
+	{
+		m_battleStartSystem = system;
 	}
 
 	void InGameView::setPlayerDeathSystem(system::combat::PlayerDeathSystem* system)

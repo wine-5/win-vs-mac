@@ -76,6 +76,7 @@
 #include "game/system/visual/MacAwakenEffectSystem.h"
 #include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/system/visual/HardAuraVisualsSystem.h"
+#include "game/system/visual/BattleStartSystem.h"
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
 #include "game/ui/ingame/PlayerHUDView.h"
@@ -247,7 +248,7 @@ namespace game::scene
 
 		// DEBUG: 何かと不便なためリリースするときにfalseに変更すること
 		// 3人称マウス視点のためカーソルを非表示にする
-		m_inputProvider.setMouseCursorVisible(true);
+		m_inputProvider.setMouseCursorVisible(false);
 
 		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（リリース時にまとめて削除）
 		m_debugGizmoView = std::make_unique<ui::debug::DebugGizmoView>(m_componentManager, m_renderer);
@@ -403,6 +404,15 @@ namespace game::scene
 	void InGame::setupSystems()
 	{
 		// システム登録
+		// 開始演出（READY → FIGHT!）。構築時点で操作と敵AIを止めるため、
+		// 入力を読むInputSystemより先に登録して解禁も同じフレーム内で先に済ませる
+		m_battleStartSystem = m_systemManager.registerSystem<game::system::visual::BattleStartSystem>(
+		    m_componentManager,
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_playerId);
+		m_view.setBattleStartSystem(m_battleStartSystem);
+
 		m_systemManager.registerSystem<game::system::movement::InputSystem>(m_componentManager, m_playerId, m_inputProvider, m_gameManager);
 		// カメラ演出（Zoom/Shake）はCameraSystemより前に走らせ、合成結果をCameraEffectComponentへ書いておく
 		m_systemManager.registerSystem<game::system::camera::ChargeZoomSystem>(m_componentManager, m_playerId);
@@ -699,7 +709,9 @@ namespace game::scene
 		// 画面が止まっているのに右上の秒数だけ動いて不自然になる
 		const float scaledDeltaTime{ m_hitStop.apply(deltaTime) };
 
-		m_elapsedTime += scaledDeltaTime;
+		// 開始演出（READY）の間はまだ動けないので、クリアタイムの計測も始めない
+		if (m_battleStartSystem == nullptr || !m_battleStartSystem->isPreparing())
+			m_elapsedTime += scaledDeltaTime;
 		m_systemManager.update(scaledDeltaTime);
 
 		// DEBUG: Tキーでプレイヤー位置にテストエフェクト（Enemy_Spawn）を再生する（テスト後に削除）
