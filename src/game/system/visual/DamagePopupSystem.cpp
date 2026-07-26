@@ -137,8 +137,8 @@ namespace game::system::visual
 			const int fontSize{ popup.m_isCritical ? criticalFontSize : normalFontSize };
 			const int shadowOffset{ std::max(1, static_cast<int>(fontSize * SHADOW_OFFSET_RATIO)) };
 			const unsigned int textColor{ popup.m_isCritical
-				? core::utility::Color::HUD_CHARGE_MAX
-				: core::utility::Color::WHITE };
+				                              ? core::utility::Color::HUD_CRITICAL_ORANGE
+				                              : core::utility::Color::WHITE };
 
 			const std::string text{ std::to_string(popup.m_damage) };
 			const int textWidth{ m_uiRenderer.getTextWidth(text.c_str(), fontSize) };
@@ -160,7 +160,7 @@ namespace game::system::visual
 				m_uiRenderer.drawCircle(static_cast<int>(screen.x),
 				    static_cast<int>(screen.y) + fontSize / 2,
 				    static_cast<int>(fontSize * radiusRatio),
-				    core::utility::Color::HUD_CHARGE_MAX, false, CRITICAL_BURST_THICKNESS);
+				    core::utility::Color::HUD_CRITICAL_ORANGE, false, CRITICAL_BURST_THICKNESS);
 				m_uiRenderer.resetBlendMode();
 			}
 
