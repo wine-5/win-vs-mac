@@ -111,8 +111,10 @@ namespace game::scene
 		if (m_equipmentSlotView)
 			m_equipmentSlotView->draw();
 
-		// 目標（左上）
-		if (m_objectiveView)
+		// 目標（左上）。開始演出のミッションが中央から流れ着くまでは伏せておく
+		// （同じ内容が中央と左上に同時に出ていると、どちらを見ればよいのか分からない）
+		if (m_objectiveView &&
+		    (m_battleStartSystem == nullptr || m_battleStartSystem->isObjectiveRevealed()))
 			m_objectiveView->draw(remainingEnemyCount, bossId != core::ecs::INVALID_ENTITY_ID);
 
 		// 難易度と経過時間（右上）
