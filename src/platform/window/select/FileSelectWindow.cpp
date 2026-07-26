@@ -64,6 +64,12 @@ namespace platform::window::select
 			{
 				sendBonusInfo();
 			}
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_SLOTS)
+			{
+				// ページが読み込み直された直後はJS側の装備状態が空に戻っている。
+				// 装備そのものはC++が持ち続けているので、要求に応じて送り直す
+				sendSlotsRefresh();
+			}
 		}
 		catch (const std::exception& e)
 		{
@@ -187,27 +193,57 @@ namespace platform::window::select
 			return oss.str();
 		};
 
+		// ボーナスの項目定義。JS側はここで渡す m_statId でアイコンと日本語名を引く。
+		// 略称（m_label）は装備スロット行の狭い欄に出す短い表記に使う
+		struct StatField
+		{
+			const char* m_statId;
+			const char* m_label;
+			float core::data::FileExtensionBonus::* m_member;
+			float m_scale; // 会心率は確率なので%へ直してから見せる
+		};
+		constexpr StatField STAT_FIELDS[] = {
+			{ "hp", "HP", &core::data::FileExtensionBonus::hp, 1.0f },
+			{ "atk", "ATK", &core::data::FileExtensionBonus::atk, 1.0f },
+			{ "def", "DEF", &core::data::FileExtensionBonus::def, 1.0f },
+			{ "spd", "SPD", &core::data::FileExtensionBonus::spd, 1.0f },
+			{ "rng", "Range", &core::data::FileExtensionBonus::attackRange, 1.0f },
+			{ "crit", "CRIT", &core::data::FileExtensionBonus::criticalRate, PERCENT_SCALE },
+			{ "bspd", "B.SPD", &core::data::FileExtensionBonus::projectileSpeed, 1.0f },
+			{ "brng", "B.RNG", &core::data::FileExtensionBonus::projectileRange, 1.0f },
+		};
+
+		// 短い説明文（装備スロット行の「ボーナス」欄用）
 		auto describe = [&](core::data::FileExtensionType t) -> std::string
 		{
 			const auto& b = m_resourceManager.getExtensionBonus(t);
 			std::string result{};
-			auto append = [&](const char* label, float val) {
-				if (val == 0.0f) return;
+			for (const auto& f : STAT_FIELDS)
+			{
+				const float value{ b.*(f.m_member) * f.m_scale };
+				if (value == 0.0f)
+					continue;
 				if (!result.empty()) result += ' ';
-				result += label;
+				result += f.m_label;
 				result += '+';
-				result += fmt(val);
-			};
-			append("HP",    b.hp);
-			append("ATK",   b.atk);
-			append("DEF",   b.def);
-			append("SPD",   b.spd);
-			append("Range", b.attackRange);
-			// 会心率は確率なので%表記へ直す（0.05なら CRIT+5）
-			append("CRIT", b.criticalRate * PERCENT_SCALE);
-			append("B.SPD", b.projectileSpeed);
-			append("B.RNG", b.projectileRange);
+				result += fmt(value);
+			}
 			return result;
+		};
+
+		// 項目ごとの内訳（拡張子ボーナス一覧でアイコン付きに描くため）
+		auto breakdown = [&](core::data::FileExtensionType t) -> nlohmann::json
+		{
+			const auto& b = m_resourceManager.getExtensionBonus(t);
+			nlohmann::json list = nlohmann::json::array();
+			for (const auto& f : STAT_FIELDS)
+			{
+				const float value{ b.*(f.m_member) * f.m_scale };
+				if (value == 0.0f)
+					continue;
+				list.push_back({ { "stat", f.m_statId }, { "value", value } });
+			}
+			return list;
 		};
 
 		try
@@ -216,9 +252,11 @@ namespace platform::window::select
 			resp[platform::window::WindowConstants::JSON_KEY_TYPE]  = platform::window::WindowConstants::MESSAGE_TYPE_BONUS_INFO;
 			resp[platform::window::WindowConstants::JSON_KEY_DESCRIPTIONS] = nlohmann::json::object();
 			resp[platform::window::WindowConstants::JSON_KEY_EXTENSIONS] = nlohmann::json::object();
+			resp[platform::window::WindowConstants::JSON_KEY_BONUS_STATS] = nlohmann::json::object();
 			for (const auto& e : ENTRIES)
 			{
 				resp[platform::window::WindowConstants::JSON_KEY_DESCRIPTIONS][e.m_key] = describe(e.m_type);
+				resp[platform::window::WindowConstants::JSON_KEY_BONUS_STATS][e.m_key] = breakdown(e.m_type);
 				// 対象の拡張子も判定表から取り出して送る。
 				// 「.exe など」と省略すると、どの拡張子が該当するのか確かめる手段が無くなる
 				resp[platform::window::WindowConstants::JSON_KEY_EXTENSIONS][e.m_key] =

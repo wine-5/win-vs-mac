@@ -49,6 +49,8 @@ namespace platform::window
         static constexpr const char* JSON_KEY_DESCRIPTIONS{ "descs" };
 		// 種別ごとの対象拡張子一覧（例 ".exe, .dll, .bat"）
 		static constexpr const char* JSON_KEY_EXTENSIONS{ "exts" };
+		// 種別ごとのボーナス内訳（[{ stat, value }, ...]）。アイコン付き表示に使う
+		static constexpr const char* JSON_KEY_BONUS_STATS{ "bonusStats" };
 
 		// JSONメッセージタイプ（Win32SelectWindowManager）
         static constexpr const char* MESSAGE_TYPE_START_GAME{ "startGame" };
@@ -59,7 +61,9 @@ namespace platform::window
         // JSONメッセージタイプ（FileSelectWindow）
         static constexpr const char* MESSAGE_TYPE_SLOT_SELECTED{ "slotSelected" };
         static constexpr const char* MESSAGE_TYPE_REQUEST_BONUS_INFO{ "requestBonusInfo" };
-        static constexpr const char* MESSAGE_TYPE_REFRESH{ "refresh" };
+		// ページ読み込み時にJS側から現在の装備状態を要求する（再読み込みで表示が消えるのを防ぐ）
+		static constexpr const char* MESSAGE_TYPE_REQUEST_SLOTS{ "requestSlots" };
+		static constexpr const char* MESSAGE_TYPE_REFRESH{ "refresh" };
         static constexpr const char* MESSAGE_TYPE_BONUS_INFO{ "bonusInfo" };
 
         // JSONメッセージタイプ（ResultWindow）

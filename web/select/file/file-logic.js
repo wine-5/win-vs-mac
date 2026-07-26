@@ -25,6 +25,19 @@ const FILE_EXT_ORDER = [
 // 対象の拡張子はC++（FileExtensionTypeResolverの判定表が正）から exts で届く。
 // ここに持つのは、拡張子を列挙できない Unknown の文言だけ
 const FILE_EXT_FALLBACK_NAME = { Unknown: '上記以外のすべて' };
+// ステータスの見せ方。アイコンはパラメータウィンドウと同じ画像を使い、
+// 「どの行が伸びるのか」を絵で結びつける。値そのものはC++から届く
+const STAT_META = {
+    hp:   { name: '体力',             icon: 'https://assets.game.web/images/ui/select/hp.png',   suffix: '' },
+    atk:  { name: '攻撃力',           icon: 'https://assets.game.web/images/ui/select/atk.png',  suffix: '' },
+    def:  { name: '防御力',           icon: 'https://assets.game.web/images/ui/select/def.png',  suffix: '' },
+    spd:  { name: '移動速度',         icon: 'https://assets.game.web/images/ui/select/spd.png',  suffix: '' },
+    rng:  { name: '攻撃範囲',         icon: 'https://assets.game.web/images/ui/select/rng.png',  suffix: '' },
+    crit: { name: 'クリティカル確率', icon: 'https://assets.game.web/images/ui/select/crit.png', suffix: '%' },
+    bspd: { name: '弾速',             icon: 'https://assets.game.web/images/ui/select/bspd.png', suffix: '' },
+    brng: { name: '弾の飛距離',       icon: 'https://assets.game.web/images/ui/select/brng.png', suffix: '' }
+};
+
 const FILE_EXT_CLASS = {
     Executable: 'exe', Document: 'doc', Image: 'img', Audio: 'aud',
     SourceCode: 'src', Shortcut: 'lnk', Video: 'vid',
@@ -42,6 +55,7 @@ const FileLogic = (function () {
     let selectedSlot = null;
     let extBonusDescs = {};
     let extBonusExtensions = {};
+    let extBonusStats = {};
     let onSlotChangeCallback = null;
     let onBonusUpdateCallback = null;
     let onSlotsUpdateCallback = null;
@@ -85,9 +99,10 @@ const FileLogic = (function () {
         return activeExts;
     }
 
-    function updateBonusDescs(descs, exts) {
+    function updateBonusDescs(descs, exts, stats) {
         extBonusDescs = descs;
         if (exts) extBonusExtensions = exts;
+        if (stats) extBonusStats = stats;
         if (onBonusUpdateCallback) {
             onBonusUpdateCallback();
         }
@@ -101,6 +116,11 @@ const FileLogic = (function () {
         return extBonusDescs;
     }
 
+    /** 種別のボーナス内訳（[{stat, value}, ...]）を返す */
+    function getBonusStats(extType) {
+        return extBonusStats[extType] || [];
+    }
+
     /** 種別に属する拡張子の一覧文字列を返す（Unknownは列挙できないので固定文言） */
     function getBonusExtensions(extType) {
         return extBonusExtensions[extType] || FILE_EXT_FALLBACK_NAME[extType] || '';
@@ -108,7 +128,7 @@ const FileLogic = (function () {
 
     function onMessageFromGame(data) {
         if (data.type === 'bonusInfo' && data.descs) {
-            updateBonusDescs(data.descs, data.exts);
+            updateBonusDescs(data.descs, data.exts, data.bonusStats);
         } else if (data.type === 'refresh' && Array.isArray(data.slots)) {
             updateSlots(data.slots);
         }
@@ -116,6 +136,11 @@ const FileLogic = (function () {
 
     function requestBonusInfo() {
         sendToGame({ type: 'requestBonusInfo' });
+    }
+
+    /** 現在の装備状態を要求する（ページ読み込み直後は状態が空のため） */
+    function requestSlots() {
+        sendToGame({ type: 'requestSlots' });
     }
 
     function onSlotChange(callback) {
@@ -136,6 +161,8 @@ const FileLogic = (function () {
         EXT_CLASS: FILE_EXT_CLASS,
         EXT_ORDER: FILE_EXT_ORDER,
         getBonusExtensions: getBonusExtensions,
+        getBonusStats: getBonusStats,
+        STAT_META: STAT_META,
         selectSlot: selectSlot,
         getSelectedSlot: getSelectedSlot,
         getSlots: getSlots,
@@ -147,6 +174,7 @@ const FileLogic = (function () {
         getBonusDescs: getBonusDescs,
         onMessageFromGame: onMessageFromGame,
         requestBonusInfo: requestBonusInfo,
+        requestSlots: requestSlots,
         onSlotChange: onSlotChange,
         onBonusUpdate: onBonusUpdate,
         onSlotsUpdate: onSlotsUpdate

@@ -200,6 +200,33 @@ const FileView = (function () {
     }
 
     /**
+     * ボーナス内訳をアイコン付きで組み立てる
+     *
+     * 略称だけではパラメータ画面のどの行が伸びるのか結びつかないため、
+     * 向こうと同じアイコンを並べる。項目が多い行（アーカイブ）は
+     * 日本語名まで出すと折り返してしまうので、アイコンと数値だけにする
+     * @param stats [{ stat, value }, ...]
+     * @param fallbackText 内訳が届いていないときに出す短い説明文
+     */
+    function buildStatsHtml(stats, fallbackText) {
+        if (!stats || stats.length === 0)
+            return '<span class="bonus-entry-val multi">' + (fallbackText || '') + '</span>';
+
+        const showName = stats.length <= 2;
+        const parts = stats.map(function (s) {
+            const meta = FileLogic.STAT_META[s.stat];
+            if (!meta) return '';
+            const value = Number.isInteger(s.value) ? s.value : Math.round(s.value * 10) / 10;
+            return '<span class="bonus-stat">' +
+                '<img class="bonus-stat-icon" src="' + meta.icon + '" alt="' + meta.name + '">' +
+                (showName ? '<span class="bonus-stat-name">' + meta.name + '</span>' : '') +
+                '<span class="bonus-stat-val">+' + value + meta.suffix + '</span>' +
+                '</span>';
+        });
+        return '<span class="bonus-entry-val bonus-stat-list">' + parts.join('') + '</span>';
+    }
+
+    /**
      * 拡張子ボーナス一覧を組み立てる。
      * 行そのものを descs（C++が extensionBonus.json から生成）で作るので、
      * 拡張子を増やしても値を変えてもHTMLを触らずに追従する
@@ -223,7 +250,7 @@ const FileView = (function () {
                 '<img class="ext-badge" src="' + (FileLogic.EXT_ICON[ext] || FileLogic.EXT_ICON.Unknown) +
                     '" alt="' + (FileLogic.EXT_LABEL[ext] || '?') + '">' +
                 '<span class="bonus-entry-name">' + FileLogic.getBonusExtensions(ext) + '</span>' +
-                '<span class="bonus-entry-val multi">' + desc + '</span>';
+                buildStatsHtml(FileLogic.getBonusStats(ext), desc);
             listEl.appendChild(entry);
         });
 
@@ -248,5 +275,6 @@ window.onMessageFromGame = function (data) {
     if (FileView.initialize()) {
         FileView.renderSlots();
         FileLogic.requestBonusInfo();
+        FileLogic.requestSlots();
     }
 }());
