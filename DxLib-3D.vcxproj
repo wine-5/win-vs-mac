@@ -302,6 +302,7 @@
   <ItemGroup>
     <ClInclude Include="src\core\base\Singleton.h" />
     <ClInclude Include="src\core\data\Difficulty.h" />
+    <ClInclude Include="src\game\HitStop.h" />
     <ClInclude Include="src\core\data\StageMetadata.h" />
     <ClInclude Include="src\core\data\PropDefinition.h" />
     <ClInclude Include="src\core\utility\Rotation.h" />
