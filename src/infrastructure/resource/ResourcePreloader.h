@@ -74,5 +74,8 @@ namespace infrastructure::resource
 		// 進捗計算用。分母は enqueue のたびに増える（途中で積み増しても破綻しないように）
 		int m_totalCount{ 0 };
 		int m_doneCount{ 0 };
+
+		// 実際の読み込みに費やした合計時間。リソースが増えた際の予算再調整の判断材料にする
+		long long m_totalLoadMilliseconds{ 0 };
 	};
 } // namespace infrastructure::resource
