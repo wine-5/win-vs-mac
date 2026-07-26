@@ -25,12 +25,14 @@ namespace platform::window::select
 	    std::function<void(int, const std::string&)> onFileSlotChanged,
 	    std::function<void(const std::string&)> onDifficultyChanged,
 	    core::iface::IResourceManager& resourceManager,
-	    core::iface::IScreen& screen) noexcept
+	    core::iface::IScreen& screen,
+	    bool showTutorial) noexcept
 	    : m_onGameStart{ std::move(onGameStart) }
 	    , m_onFileSlotChanged{ std::move(onFileSlotChanged) }
 	    , m_onDifficultyChanged{ std::move(onDifficultyChanged) }
 	    , m_resourceManager{ resourceManager }
 	    , m_screen{ screen }
+	    , m_showTutorial{ showTutorial }
 	{
     }
 
@@ -76,6 +78,8 @@ namespace platform::window::select
 		    colWidth,
 		    availH,
 		    m_resourceManager);
+		// 初回ガイドの有無はページ読み込み時に問い合わせられるため、create() より前に渡しておく
+		m_fileSelectWindow->setShowTutorial(m_showTutorial);
 		if (!m_fileSelectWindow->create(m_desktopWindow->getHwnd())) return;
 		// noexcept にしない。文字列の代入などで例外が出た場合、noexcept だと
 		// std::terminate になってログも残らず即死する。

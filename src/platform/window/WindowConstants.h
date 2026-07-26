@@ -72,8 +72,12 @@ namespace platform::window
 		static constexpr const char* JSON_KEY_SAME_FILE{ "sameFile" };
 		static constexpr const char* MESSAGE_TYPE_REFRESH{ "refresh" };
         static constexpr const char* MESSAGE_TYPE_BONUS_INFO{ "bonusInfo" };
+		// 初回だけ出す操作ガイドを表示してよいかをJS側から問い合わせる／その返答
+		static constexpr const char* MESSAGE_TYPE_REQUEST_TUTORIAL{ "requestTutorial" };
+		static constexpr const char* MESSAGE_TYPE_TUTORIAL{ "tutorial" };
+		static constexpr const char* JSON_KEY_SHOW{ "show" };
 
-        // JSONメッセージタイプ（ResultWindow）
+		// JSONメッセージタイプ（ResultWindow）
         static constexpr const char* MESSAGE_TYPE_REQUEST_RESULT{ "requestResult" };
         static constexpr const char* MESSAGE_TYPE_RESULT_DATA{ "resultData" };
         static constexpr const char* MESSAGE_TYPE_RETRY{ "retry" };

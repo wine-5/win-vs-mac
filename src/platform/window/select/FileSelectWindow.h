@@ -45,6 +45,14 @@ namespace platform::window::select
 	  void setOnFileSlotChanged(std::function<void(int, const std::string&)> callback) noexcept;
 
 	  /**
+	   * @brief 初回だけ出す操作ガイドを表示するかを設定する
+	   *
+	   * ページ読み込み直後にJS側から問い合わせが来るので、create() より前に呼ぶこと
+	   * @param showTutorial 表示するならtrue
+	   */
+	  void setShowTutorial(bool showTutorial) noexcept;
+
+	  /**
 	   * @brief ファイルパスを取得
 	   * @param slot スロットインデックス（0-2）
 	   * @return ファイルパス
@@ -90,7 +98,10 @@ namespace platform::window::select
 		};
 		std::function<void(int, const std::string&)> m_onFileSlotChanged{};
 
-        void handleMessage(const std::string& json) noexcept;
+		// 初回だけ出す操作ガイドを表示するか
+		bool m_showTutorial{ false };
+
+		void handleMessage(const std::string& json) noexcept;
 		/**
 		 * @brief ファイル選択ダイアログを開き、選ばれたファイルをスロットへ入れる
 		 * @param slotIndex 対象のスロット番号
@@ -108,6 +119,10 @@ namespace platform::window::select
 		 */
 		[[nodiscard]] static std::string toUtf8(const char* ansi) noexcept;
 		void sendSlotsRefresh() noexcept;
-        void sendBonusInfo() noexcept;
+
+		/** @brief 初回ガイドを出してよいかをJS側へ返す */
+		void sendTutorialState() noexcept;
+
+		void sendBonusInfo() noexcept;
     };
 } // namespace platform::window::select

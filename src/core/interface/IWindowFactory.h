@@ -44,12 +44,14 @@ namespace core::iface
 		 * @param onFileSlotChanged ファイルスロット変更時のコールバック
 		 * @param onDifficultyChanged 難易度変更時のコールバック（"NORMAL" | "HARD"）
 		 * @param resourceManager リソースマネージャ
+		 * @param showTutorial 初回の操作ガイドを表示するか
 		 * @return 生成されたセレクトウィンドウマネージャ
 		 */
 		virtual std::unique_ptr<ISelectWindowManager> createSelectWindowManager(
 		    std::function<void()> onGameStart,
 		    std::function<void(int, const std::string&)> onFileSlotChanged,
 		    std::function<void(const std::string&)> onDifficultyChanged,
-		    IResourceManager& resourceManager) = 0;
+		    IResourceManager& resourceManager,
+		    bool showTutorial) = 0;
 	};
 } // namespace core::iface

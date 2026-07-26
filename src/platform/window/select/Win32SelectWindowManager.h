@@ -31,7 +31,8 @@ namespace platform::window::select
 		  std::function<void(int, const std::string&)> onFileSlotChanged,
 		  std::function<void(const std::string&)> onDifficultyChanged,
 		  core::iface::IResourceManager& resourceManager,
-		  core::iface::IScreen& screen) noexcept;
+		  core::iface::IScreen& screen,
+		  bool showTutorial) noexcept;
 
 	  virtual ~Win32SelectWindowManager() noexcept = default;
 
@@ -146,5 +147,8 @@ namespace platform::window::select
 
 		core::iface::IResourceManager& m_resourceManager;
         core::iface::IScreen& m_screen;
-    };
+
+		// 初回だけ出す操作ガイドを表示するか（ファイル選択ウィンドウへ引き渡す）
+		bool m_showTutorial{ false };
+	};
 } // namespace platform::window::select

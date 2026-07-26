@@ -44,13 +44,15 @@ namespace platform::window
 		 * @param onFileSlotChanged ファイルスロット変更時のコールバック
 		 * @param onDifficultyChanged 難易度変更時のコールバック
 		 * @param resourceManager リソースマネージャ
+		 * @param showTutorial 初回の操作ガイドを表示するか
 		 * @return 生成されたセレクトウィンドウマネージャ
 		 */
 		std::unique_ptr<core::iface::ISelectWindowManager> createSelectWindowManager(
 		    std::function<void()> onGameStart,
 		    std::function<void(int, const std::string&)> onFileSlotChanged,
 		    std::function<void(const std::string&)> onDifficultyChanged,
-		    core::iface::IResourceManager& resourceManager) override;
+		    core::iface::IResourceManager& resourceManager,
+		    bool showTutorial) override;
 
 	  private:
         // ローディングウィンドウのサイズ比率（スクリーンサイズに対する割合）

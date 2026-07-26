@@ -27,6 +27,31 @@ namespace platform::window::select
 		m_onFileSlotChanged = std::move(callback);
 	}
 
+	void FileSelectWindow::setShowTutorial(bool showTutorial) noexcept
+	{
+		m_showTutorial = showTutorial;
+	}
+
+	void FileSelectWindow::sendTutorialState() noexcept
+	{
+		try
+		{
+			nlohmann::json j;
+			j[platform::window::WindowConstants::JSON_KEY_TYPE] =
+			    platform::window::WindowConstants::MESSAGE_TYPE_TUTORIAL;
+			j[platform::window::WindowConstants::JSON_KEY_SHOW] = m_showTutorial;
+			postMessage(j.dump());
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("FileSelectWindow::sendTutorialState: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("FileSelectWindow::sendTutorialState: 不明な例外が発生しました");
+		}
+	}
+
 	std::string FileSelectWindow::getFilePath(int slot) const noexcept
 	{
 		if (slot < 0 || slot >= SLOT_COUNT) return "";
@@ -68,6 +93,10 @@ namespace platform::window::select
 			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_BONUS_INFO)
 			{
 				sendBonusInfo();
+			}
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_TUTORIAL)
+			{
+				sendTutorialState();
 			}
 			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_SLOTS)
 			{

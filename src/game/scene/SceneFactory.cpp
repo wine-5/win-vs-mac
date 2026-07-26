@@ -104,7 +104,9 @@ namespace game::scene
 				    m_gameManager.setDifficulty(core::data::toDifficulty(difficulty));
 				    core::log::info("難易度を選択しました: {}", difficulty.c_str());
 			    },
-			    *resourceManager);
+			    *resourceManager,
+			    // 初見の「何をすればいいのか分からない」を解くための案内。起動後の1回だけ出す
+			    m_gameManager.consumeSelectTutorial());
 
 			m_selectScene->setWindowManager(std::move(windowManager));
 			return m_selectScene.get();
