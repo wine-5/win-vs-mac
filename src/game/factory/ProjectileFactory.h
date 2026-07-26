@@ -3,6 +3,7 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/utility/Vector3.h"
 #include "core/constant/EffectType.h"
+#include "core/constant/SeType.h"
 #include "game/constant/Tag.h"
 
 namespace game::factory
@@ -38,6 +39,9 @@ namespace game::factory
 
 		// 発射時に再生する演出エフェクト。Noneならエフェクト無し（既定）
 		core::constant::EffectType m_startEffect{ core::constant::EffectType::None };
+
+		// 命中時に鳴らすSE。Noneなら弾のヒット音は無し（既定）
+		core::constant::SeType m_hitSeType{ core::constant::SeType::None };
 	};
 
 	/**

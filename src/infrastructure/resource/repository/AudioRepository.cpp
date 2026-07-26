@@ -91,7 +91,6 @@ namespace infrastructure::resource::repository
 		if (!json.contains("se")) return;
 
 		const std::unordered_map<std::string, core::constant::SeType> typeMap{
-			{ "AttackPlayer", core::constant::SeType::AttackPlayer },
 			{ "PlayerSwing1", core::constant::SeType::PlayerSwing1 },
 			{ "PlayerSwing2", core::constant::SeType::PlayerSwing2 },
 			{ "PlayerCharge", core::constant::SeType::PlayerCharge },

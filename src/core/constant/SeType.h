@@ -10,7 +10,6 @@ namespace core::constant
         None,
 
 		// ---- プレイヤーの攻撃 ----
-		AttackPlayer,    // プレイヤーの攻撃
 		PlayerSwing1,    // 近接コンボ1段目の振り
 		PlayerSwing2,    // 近接コンボ2段目の振り
 		PlayerCharge,    // 溜め撃ちの溜め開始

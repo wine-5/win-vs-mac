@@ -60,6 +60,7 @@ namespace game::factory
 		projectile.m_spinRollSpeed = config.m_spinRollSpeed;
 		projectile.m_spinCenter = config.m_spinCenter;
 		projectile.m_startEffect = config.m_startEffect; // Noneならエフェクト無し（Safariのタブ弾）
+		projectile.m_hitSeType = config.m_hitSeType;     // Noneならヒット音は本体の攻撃音に任せる
 		m_componentManager.add<component::combat::ProjectileComponent>(id, projectile);
 
 		// 見た目を付与する。3Dモデルの弾（Safariのタブ等）はモデルハンドル、

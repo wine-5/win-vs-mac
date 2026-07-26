@@ -1,6 +1,7 @@
 #pragma once
 #include "core/utility/Vector3.h"
 #include "core/constant/EffectType.h"
+#include "core/constant/SeType.h"
 
 namespace game::component::combat
 {
@@ -30,5 +31,9 @@ namespace game::component::combat
 		// 発射時の演出（AttackStartEvent）を再生済みか。ProjectileSystemが毎フレーム
 		// m_attackRequestedを立て直すため、AttackSystem側でこれを見て初回の1回だけに絞る
 		bool m_hasPlayedStartEffect{ false };
+
+		// 命中したときに鳴らすSE。本体の近接とは音を分けたいので弾自身が持つ。
+		// プレイヤーのWindow弾は溜めの有無でここが変わる。Noneなら弾のヒット音は無し
+		core::constant::SeType m_hitSeType{ core::constant::SeType::None };
 	};
 } // namespace game::component::combat

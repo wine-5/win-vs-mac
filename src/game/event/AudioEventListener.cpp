@@ -38,12 +38,9 @@ namespace game::event
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (!audio) return;
 
-		// 攻撃SEの再生（プレイヤーがジョブに応じた攻撃音）
+		// 命中音。何が当たったか（近接か・どの弾か）に応じてAttackSystemが種別を決めている
 		if (e.m_seType != core::constant::SeType::None)
-		{
 			audio->playSe(e.m_seType);
-			audio->playSe(core::constant::SeType::HitEnemy);
-		}
 
 		// プレイヤーが被弾したときのSE
 		if (e.m_targetId == m_playerId)

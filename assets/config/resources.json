@@ -68,7 +68,6 @@
     { "type": "ResultLose", "path": "assets/audio/bgm/bgm_result_bad.mp3",    "volume":1.0, "useFade": false }
   ],
   "se": [
-    { "type": "AttackPlayer",     "path": "assets/audio/se/se_attack_warrior.mp3",    "volume":1.0 },
     { "type": "PlayerSwing1",     "path": "assets/audio/se/se_swing1.mp3",            "volume":0.7 },
     { "type": "PlayerSwing2",     "path": "assets/audio/se/se_swing2.mp3",            "volume":0.7 },
     { "type": "PlayerCharge",     "path": "assets/audio/se/se_charge.mp3",            "volume":0.6 },

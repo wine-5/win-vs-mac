@@ -127,6 +127,13 @@ namespace game::system::combat
 		config.m_billboardImage = m_billboardImage;
 		config.m_billboardSize = m_metadata.m_radius * BILLBOARD_SIZE_FACTOR * sizeMultiplier;
 
+		// 溜め切って撃った弾だけ重い着弾音にする。溜めた甲斐を音でも返すため、
+		// 見た目（サイズ）と同じく「溜め切ったか」で切り替える
+		constexpr float CHARGED_SE_THRESHOLD{ 0.99f };
+		config.m_hitSeType = chargeRate >= CHARGED_SE_THRESHOLD
+		                         ? core::constant::SeType::HitChargedWindow
+		                         : core::constant::SeType::HitWindow;
+
 		// 近接と同じようにクリティカルが出るよう、プレイヤーの会心設定を弾へ引き継ぐ
 		if (auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(m_playerId) })
 		{

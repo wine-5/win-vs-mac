@@ -18,11 +18,9 @@
 
 namespace game::system::combat
 {
-	AttackSystem::AttackSystem(core::ecs::ComponentManager& componentManager, core::base::EventBus& eventBus,
-	    core::constant::SeType playerAttackSeType)
+	AttackSystem::AttackSystem(core::ecs::ComponentManager& componentManager, core::base::EventBus& eventBus)
 	    : m_componentManager{ componentManager }
 	    , m_eventBus{ eventBus }
-	    , m_playerAttackSeType{ playerAttackSeType }
 	{
 		// 攻撃力 → 防御力の減算 → クリティカルの倍化 の順で組む。
 		// クリティカルを防御より後ろに置くのは、先に倍化すると防御の高い相手ほど
@@ -239,10 +237,13 @@ namespace game::system::combat
 			                            ? core::constant::EffectType::Enemy_HitWindow
 			                            : core::constant::EffectType::Enemy_HitSword;
 
-			// 攻撃者がプレイヤーの場合、ジョブに応じた攻撃SEをセット
+			// ヒット音は「何が当たったか」で決める。弾は弾自身が持つ音（Window弾・溜め撃ちで別）、
+			// プレイヤーの近接は敵が斬られた音。振り音は AttackStartEvent 側が担う
 			const auto& attackerTag{ m_componentManager.get<component::TagComponent>(attackerId) };
-			if (attackerTag.m_tag == constant::Tag::Player)
-				hitEvent.m_seType = m_playerAttackSeType;
+			if (const auto* projectile{ m_componentManager.tryGet<component::combat::ProjectileComponent>(attackerId) })
+				hitEvent.m_seType = projectile->m_hitSeType;
+			else if (attackerTag.m_tag == constant::Tag::Player)
+				hitEvent.m_seType = core::constant::SeType::HitEnemy;
 
 			m_eventBus.publish(hitEvent);
 		}

@@ -248,7 +248,7 @@ namespace game::scene
 
 		// DEBUG: 何かと不便なためリリースするときにfalseに変更すること
 		// 3人称マウス視点のためカーソルを非表示にする
-		m_inputProvider.setMouseCursorVisible(false);
+		m_inputProvider.setMouseCursorVisible(true);
 
 		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（リリース時にまとめて削除）
 		m_debugGizmoView = std::make_unique<ui::debug::DebugGizmoView>(m_componentManager, m_renderer);
@@ -486,7 +486,7 @@ namespace game::scene
 		    m_componentManager, m_playerId);
 
 		m_systemManager.registerSystem<game::system::combat::AttackSystem>(
-		    m_componentManager, m_eventBus, core::constant::SeType::AttackPlayer);
+		    m_componentManager, m_eventBus);
 		m_systemManager.registerSystem<game::system::visual::HitEffectSystem>(m_componentManager, m_eventBus);
 		// 死亡した敵の後始末（赤化＋ディゾルブ演出→Entity破棄＋モデルハンドルのプール返却）
 		m_systemManager.registerSystem<game::system::combat::EnemyDeathSystem>(m_componentManager, m_entityManager, m_eventBus, m_enemySpawner, m_renderer);
