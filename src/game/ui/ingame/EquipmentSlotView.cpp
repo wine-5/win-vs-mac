@@ -49,11 +49,14 @@ namespace
 
 	// 拡張子アイコンの画像ID（resources.json）。セレクト画面と同じ絵柄を128pxへ縮小したもの
 	constexpr const char* EMPTY_ICON_IMAGE_ID{ "ext-emp" };
-	constexpr std::array<std::pair<core::data::FileExtensionType, const char*>, 6> ICON_IMAGE_IDS{ {
+	constexpr std::array<std::pair<core::data::FileExtensionType, const char*>, 9> ICON_IMAGE_IDS{ {
 		{ core::data::FileExtensionType::Executable, "ext-exe" },
 		{ core::data::FileExtensionType::Document, "ext-doc" },
 		{ core::data::FileExtensionType::Image, "ext-img" },
 		{ core::data::FileExtensionType::Audio, "ext-aud" },
+		{ core::data::FileExtensionType::SourceCode, "ext-src" },
+		{ core::data::FileExtensionType::Shortcut, "ext-lnk" },
+		{ core::data::FileExtensionType::Video, "ext-vid" },
 		{ core::data::FileExtensionType::Archive, "ext-arc" },
 		{ core::data::FileExtensionType::Unknown, "ext-etc" },
 	} };
@@ -71,6 +74,9 @@ namespace
 		case core::data::FileExtensionType::Document: return "DOC";
 		case core::data::FileExtensionType::Image: return "IMG";
 		case core::data::FileExtensionType::Audio: return "AUD";
+		case core::data::FileExtensionType::SourceCode: return "SRC";
+		case core::data::FileExtensionType::Shortcut: return "LNK";
+		case core::data::FileExtensionType::Video: return "VID";
 		case core::data::FileExtensionType::Archive: return "ARC";
 		default: return "ETC";
 		}
@@ -92,6 +98,11 @@ namespace
 		case core::data::FileExtensionType::Document: return "SPD+";
 		case core::data::FileExtensionType::Image: return "DEF+";
 		case core::data::FileExtensionType::Audio: return "HP+";
+		// このViewはShift_JIS変換を通していないため、表記はASCIIに限る。
+		// B.は弾（Window弾）のこと。SPD+（移動速度）・RNG+（攻撃範囲）と紛れないよう区別する
+		case core::data::FileExtensionType::SourceCode: return "CRIT+";
+		case core::data::FileExtensionType::Shortcut: return "B.SPD+";
+		case core::data::FileExtensionType::Video: return "B.RNG+";
 		case core::data::FileExtensionType::Archive: return "ALL+";
 		default: return "RNG+";
 		}
