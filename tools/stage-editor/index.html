@@ -96,6 +96,11 @@
     font-family: var(--mono); font-size: 11px; color: var(--yellow);
     pointer-events: none; display: none;
   }
+  #edgeSnapBadge {
+    position: absolute; right: 8px; top: 24px;
+    font-family: var(--mono); font-size: 11px; color: var(--accent);
+    pointer-events: none; display: none;
+  }
 
   /* ---------- inspector ---------- */
   #inspector {
@@ -187,6 +192,7 @@
   <button id="btnScale" title="拡縮 (R)">拡縮</button>
   <span class="sep"></span>
   <button id="btnSpace" title="ギズモの軸を切り替え">Global</button>
+  <button id="btnEdgeSnap" title="端スナップ (V)：近くのオブジェクトの面へぴったり吸着">端スナップ</button>
   <span class="sep"></span>
   <button id="btnUndo" title="Ctrl+Z">Undo</button>
   <button id="btnRedo" title="Ctrl+Y">Redo</button>
@@ -197,7 +203,7 @@
   <button id="btnLoad">stageData 読込</button>
   <button id="btnCatalog">カタログ読込</button>
   <button id="btnSave" title="Ctrl+S">保存 (上書き)</button>
-  <span class="hint">Ctrl+S: 保存 / 右ドラッグ+WASD: 移動 / Q,E: 上下 / Shift: 加速 / F: フォーカス / Ctrl: スナップ</span>
+  <span class="hint">Ctrl+S: 保存 / 右ドラッグ+WASD: 移動 / Q,E: 上下 / Shift: 加速 / F: フォーカス / Ctrl: グリッドスナップ / V: 端スナップ</span>
 </div>
 
 <div id="hierarchy"></div>
@@ -205,6 +211,7 @@
 <div id="viewport">
   <div id="status"></div>
   <div id="snapBadge">SNAP: 移動100 / 回転15° / 拡縮100</div>
+  <div id="edgeSnapBadge">EDGE SNAP: 面を吸着</div>
 </div>
 
 <div id="inspector"><div class="insp-empty">オブジェクトを選択してください</div></div>
@@ -245,6 +252,10 @@ const GRID_UNIT = 100;
 const SNAP_MOVE = 100;
 const SNAP_ROTATE_DEG = 15;
 const SNAP_SCALE = 100;
+/* 端スナップ：この距離まで近づいた面同士を吸着させる（ユニット） */
+const EDGE_SNAP_DISTANCE = 200;
+/* 吸着を許す「他2軸が重なっているか」の判定の甘さ。角合わせを拾うため少し緩める */
+const EDGE_SNAP_OVERLAP_TOLERANCE = 1;
 const UNDO_LIMIT = 50;
 const LS_KEY = 'stageEditor.autosave.v1';
 /* 編集対象のステージ。serve_editor.py の保存先と一致させること */
@@ -282,6 +293,7 @@ let undoStack = [];
 let redoStack = [];
 let gizmoMode = 'translate';
 let gizmoSpace = 'world';
+let edgeSnap = false;           // 端スナップ（オブジェクト同士の面を吸着）
 
 function defaultState() {
   return {
@@ -701,6 +713,102 @@ renderer.domElement.addEventListener('pointerup', (e) => {
 });
 
 /* =========================================================
+ * 端スナップ（Unity のスナップ配置相当）
+ * ======================================================= */
+const AXES = ['x', 'y', 'z'];
+/* 単位ボックスの8頂点。メッシュは 1x1x1 の箱を scale で実寸にしているのでこれで足りる */
+const UNIT_CORNERS = [];
+for (const sx of [-0.5, 0.5]) for (const sy of [-0.5, 0.5]) for (const sz of [-0.5, 0.5])
+  UNIT_CORNERS.push(new THREE.Vector3(sx, sy, sz));
+
+/** 箱メッシュとして扱えるか（光源は球なので対象外） */
+function isBoxMesh(m) { return !m.userData.rangeSphere; }
+
+/**
+ * world グループ内でのAABBを求める。回転していても外接箱で扱う。
+ * @returns {THREE.Box3} world グループのローカル座標（＝DxLib座標）でのAABB
+ */
+function localAabb(mesh) {
+  mesh.updateMatrix();
+  const box = new THREE.Box3();
+  for (const c of UNIT_CORNERS) box.expandByPoint(c.clone().applyMatrix4(mesh.matrix));
+  return box;
+}
+
+/** 軸 axis 以外の2軸で2つのAABBが重なっているか（面を合わせる相手かの判定） */
+function overlapsOnOtherAxes(a, b, axis) {
+  for (let i = 0; i < 3; i++) {
+    if (i === axis) continue;
+    const k = AXES[i];
+    if (a.min[k] > b.max[k] + EDGE_SNAP_OVERLAP_TOLERANCE) return false;
+    if (a.max[k] < b.min[k] - EDGE_SNAP_OVERLAP_TOLERANCE) return false;
+  }
+  return true;
+}
+
+/** 吸着先となるAABB一覧（選択中でない箱メッシュ）を集める */
+function edgeSnapTargets() {
+  const targets = [];
+  for (const m of meshByKey.values()) {
+    if (!isBoxMesh(m)) continue;
+    if (m.userData.sel && isSelected(m.userData.sel)) continue;   /* 選択中同士は吸着させない */
+    targets.push(localAabb(m));
+  }
+  return targets;
+}
+
+/**
+ * 動かしている箱を近くのオブジェクトの面へ合わせるための補正量を求める。
+ * 各軸ごとに「隣接（min↔max）」と「面ぞろえ（min↔min / max↔max）」の候補から
+ * 最も近いものを選び、EDGE_SNAP_DISTANCE 以内のものだけ採用する。
+ * @returns {THREE.Vector3} 位置へ加える補正量（吸着先が無ければゼロ）
+ */
+function edgeSnapDelta(box, targets) {
+  const delta = new THREE.Vector3();
+  for (let axis = 0; axis < 3; axis++) {
+    const k = AXES[axis];
+    let best = null;
+    for (const t of targets) {
+      if (!overlapsOnOtherAxes(box, t, axis)) continue;
+      const candidates = [
+        t.max[k] - box.min[k],   /* 相手の手前側に隣接 */
+        t.min[k] - box.max[k],   /* 相手の奥側に隣接 */
+        t.min[k] - box.min[k],   /* 面ぞろえ（手前） */
+        t.max[k] - box.max[k]    /* 面ぞろえ（奥） */
+      ];
+      for (const d of candidates) {
+        if (Math.abs(d) > EDGE_SNAP_DISTANCE) continue;
+        if (best === null || Math.abs(d) < Math.abs(best)) best = d;
+      }
+    }
+    if (best !== null) delta[k] = best;
+  }
+  return delta;
+}
+
+/** 単一選択のメッシュを近くの面へ吸着させる */
+function applyEdgeSnap(mesh) {
+  if (!isBoxMesh(mesh)) return;
+  const targets = edgeSnapTargets();
+  if (!targets.length) return;
+  mesh.position.add(edgeSnapDelta(localAabb(mesh), targets));
+}
+
+/**
+ * 複数選択をまとめて吸着させる。選択全体の外接箱を1つの箱とみなし、
+ * 同じ補正量を全メンバーへ配る（相対位置を崩さないため）。
+ */
+function applyEdgeSnapToGroup(meshes) {
+  const boxes = meshes.filter(isBoxMesh).map(localAabb);
+  if (!boxes.length) return;
+  const targets = edgeSnapTargets();
+  if (!targets.length) return;
+  const union = boxes.reduce((acc, b) => acc.union(b), new THREE.Box3().copy(boxes[0]));
+  const delta = edgeSnapDelta(union, targets);
+  for (const m of meshes) m.position.add(delta);
+}
+
+/* =========================================================
  * ギズモ ↔ state 同期
  * ======================================================= */
 gizmo.addEventListener('objectChange', () => {
@@ -708,19 +816,24 @@ gizmo.addEventListener('objectChange', () => {
     /* ピボットの移動量を各メンバーの開始位置へ加えて、まとめて動かす */
     if (!groupDragStart) return;
     const delta = new THREE.Vector3().subVectors(groupPivot.position, groupDragStart.pivot);
+    const moved = [];
     for (const s of selection) {
       const m = meshByKey.get(keyOf(s));
       const start = groupDragStart.members.get(keyOf(s));
       if (!m || !start) continue;
       m.position.copy(start).add(delta);
-      syncStateFromMesh(m);
+      moved.push(m);
     }
+    if (edgeSnap) applyEdgeSnapToGroup(moved);
+    for (const m of moved) syncStateFromMesh(m);
     renderInspector();
     scheduleAutosave();
     return;
   }
   const m = gizmo.object;
   if (!m || !selected) return;
+  /* 吸着は移動のときだけ。回転・拡縮中に位置を動かすと操作が暴れる */
+  if (edgeSnap && gizmoMode === 'translate') applyEdgeSnap(m);
   syncStateFromMesh(m);
   renderInspector();
   scheduleAutosave();
@@ -800,6 +913,13 @@ btn('btnSpace').onclick = () => {
   gizmo.setSpace(gizmoSpace);
   btn('btnSpace').textContent = gizmoSpace === 'world' ? 'Global' : 'Local';
 };
+/** 端スナップの ON/OFF を切り替え、ボタンとバッジの表示を合わせる */
+function setEdgeSnap(on) {
+  edgeSnap = on;
+  btn('btnEdgeSnap').classList.toggle('active', on);
+  document.getElementById('edgeSnapBadge').style.display = on ? 'block' : 'none';
+}
+btn('btnEdgeSnap').onclick = () => setEdgeSnap(!edgeSnap);
 btn('btnUndo').onclick = doUndo;
 btn('btnRedo').onclick = doRedo;
 btn('btnDup').onclick = duplicateSelected;
@@ -958,6 +1078,7 @@ window.addEventListener('keydown', (e) => {
 
   if (e.code === 'Delete') { deleteSelected(); return; }
   if (e.code === 'KeyF') { focusSelected(); return; }
+  if (e.code === 'KeyV') { setEdgeSnap(!edgeSnap); return; }
 
   /* W/E/R：右ドラッグ中はカメラ移動キーとして扱うためモード切替しない */
   if (!rmbDown && !e.ctrlKey) {
