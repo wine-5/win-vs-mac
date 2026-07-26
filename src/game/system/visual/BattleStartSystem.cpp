@@ -72,8 +72,9 @@ namespace
 	constexpr int MISSION_PROMPT_PADDING_X{ 32 };
 	constexpr int MISSION_PROMPT_PADDING_Y{ 14 };
 	constexpr int MISSION_PROMPT_BAND_ALPHA{ 200 };
-	constexpr float MISSION_PROMPT_BLINK_CYCLE{ 1.6f };
-	constexpr int MISSION_PROMPT_MIN_ALPHA{ 190 };
+	constexpr int MISSION_PROMPT_BAND_MIN_ALPHA{ 60 };
+	constexpr float MISSION_PROMPT_BLINK_CYCLE{ 1.8f };
+	constexpr int MISSION_PROMPT_MIN_ALPHA{ 70 };
 
 	// 流れていく間の縮小率（流れ着いた時点の大きさ）
 	constexpr float MISSION_FLY_END_SCALE{ 0.42f };
@@ -336,10 +337,15 @@ namespace game::system::visual
 		const float promptTime{ m_phaseTime - MISSION_PROMPT_DELAY };
 		const float promptFade{ smoothstep(promptTime / MISSION_PROMPT_FADE_IN) };
 
-		// ゆっくり明滅させて「入力を待っている」ことを示す（読めなくなるほどは落とさない）
+		// ゆっくりフェードイン・フェードアウトを繰り返して「入力を待っている」ことを示す。
+		// 帯も文字と一緒に濃さを変える（帯だけ残ると黒い箱が貼り付いて見える）
 		const float blink{ 0.5f + 0.5f * std::cos(promptTime / MISSION_PROMPT_BLINK_CYCLE * core::utility::TWO_PI) };
 		const int promptAlpha{ static_cast<int>(
 			(MISSION_PROMPT_MIN_ALPHA + (255 - MISSION_PROMPT_MIN_ALPHA) * blink) * promptFade) };
+		const int bandAlpha{ static_cast<int>(
+			(MISSION_PROMPT_BAND_MIN_ALPHA +
+			    (MISSION_PROMPT_BAND_ALPHA - MISSION_PROMPT_BAND_MIN_ALPHA) * blink) *
+			promptFade) };
 
 		const int promptFontSize{ scaled(MISSION_PROMPT_FONT_SIZE) };
 
@@ -353,8 +359,7 @@ namespace game::system::visual
 		const int bandHeight{ promptFontSize + paddingY * 2 };
 		const int bandY{ centerY + scaled(MISSION_CARD_HEIGHT) / 2 + scaled(MISSION_PROMPT_GAP) };
 
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
-		    static_cast<int>(MISSION_PROMPT_BAND_ALPHA * promptFade));
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, bandAlpha);
 		m_uiRenderer.drawBox(centerX - bandWidth / 2, bandY, bandWidth, bandHeight,
 		    core::utility::Color::BLACK, true);
 
