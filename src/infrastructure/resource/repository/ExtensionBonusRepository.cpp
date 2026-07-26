@@ -16,6 +16,9 @@ namespace
 		{ "document", core::data::FileExtensionType::Document },
 		{ "image", core::data::FileExtensionType::Image },
 		{ "audio", core::data::FileExtensionType::Audio },
+		{ "sourceCode", core::data::FileExtensionType::SourceCode },
+		{ "shortcut", core::data::FileExtensionType::Shortcut },
+		{ "video", core::data::FileExtensionType::Video },
 		{ "archive", core::data::FileExtensionType::Archive },
 		{ "unknown", core::data::FileExtensionType::Unknown },
 	};
