@@ -68,6 +68,8 @@ namespace platform::window
         static constexpr const char* MESSAGE_TYPE_REQUEST_BONUS_INFO{ "requestBonusInfo" };
 		// ページ読み込み時にJS側から現在の装備状態を要求する（再読み込みで表示が消えるのを防ぐ）
 		static constexpr const char* MESSAGE_TYPE_REQUEST_SLOTS{ "requestSlots" };
+		// 1つ選ぶだけで3スロットすべてに同じファイルを入れるかどうか
+		static constexpr const char* JSON_KEY_SAME_FILE{ "sameFile" };
 		static constexpr const char* MESSAGE_TYPE_REFRESH{ "refresh" };
         static constexpr const char* MESSAGE_TYPE_BONUS_INFO{ "bonusInfo" };
 

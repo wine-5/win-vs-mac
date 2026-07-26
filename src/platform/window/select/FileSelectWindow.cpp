@@ -57,8 +57,10 @@ namespace platform::window::select
 			if (type == platform::window::WindowConstants::MESSAGE_TYPE_SLOT_SELECTED)
 			{
 				int slot = j.value("slot", 0);
+				// 「同一ファイル」チェックがオンなら、1回選ぶだけで3枠すべてに同じものを入れる
+				const bool sameFile{ j.value(platform::window::WindowConstants::JSON_KEY_SAME_FILE, false) };
 				if (slot >= 0 && slot < SLOT_COUNT)
-					openFileDialog(slot);
+					openFileDialog(slot, sameFile);
 			}
 			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_BONUS_INFO)
 			{
@@ -81,7 +83,7 @@ namespace platform::window::select
 		}
 	}
 
-	void FileSelectWindow::openFileDialog(int slotIndex)
+	void FileSelectWindow::openFileDialog(int slotIndex, bool applyToAllSlots)
 	{
 		// ワイド文字版（GetOpenFileNameW）は comdlg32 の内部で __debugbreak() に当たるため使わない。
 		// ANSI版が返すのは日本語環境ではShift_JIS（システム既定のコードページ）のパスで、
@@ -101,12 +103,22 @@ namespace platform::window::select
 		if (!GetOpenFileNameA(&ofn))
 			return;
 
-		m_filePaths[slotIndex] = toUtf8(fileBuffer);
+		const std::string path{ toUtf8(fileBuffer) };
+		const auto extensionType{ game::utility::FileExtensionTypeResolver::fromPath(path) };
 
-		m_extensionTypes[slotIndex] = game::utility::FileExtensionTypeResolver::fromPath(m_filePaths[slotIndex]);
+		// 同一ファイル指定なら全スロットへ、そうでなければ選んだスロットだけへ入れる。
+		// 同じ拡張子を3枠に積む特化ビルドを組むとき、同じファイルを3回選ぶ手間を省く
+		for (int i = 0; i < SLOT_COUNT; ++i)
+		{
+			if (!applyToAllSlots && i != slotIndex)
+				continue;
 
-		if (m_onFileSlotChanged)
-			m_onFileSlotChanged(slotIndex, m_filePaths[slotIndex]);
+			m_filePaths[i] = path;
+			m_extensionTypes[i] = extensionType;
+
+			if (m_onFileSlotChanged)
+				m_onFileSlotChanged(i, path);
+		}
 
 		sendSlotsRefresh();
 	}

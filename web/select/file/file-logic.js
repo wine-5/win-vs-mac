@@ -56,6 +56,8 @@ const FileLogic = (function () {
     let extBonusDescs = {};
     let extBonusExtensions = {};
     let extBonusStats = {};
+    // 「同一ファイル」チェックの状態。オンなら1つ選ぶだけで3枠すべてに入る
+    let sameFileMode = false;
     let onSlotChangeCallback = null;
     let onBonusUpdateCallback = null;
     let onSlotsUpdateCallback = null;
@@ -65,7 +67,12 @@ const FileLogic = (function () {
         if (onSlotChangeCallback) {
             onSlotChangeCallback(i);
         }
-        sendToGame({ type: 'slotSelected', slot: i });
+        sendToGame({ type: 'slotSelected', slot: i, sameFile: sameFileMode });
+    }
+
+    /** 「同一ファイル」チェックの状態を切り替える */
+    function setSameFileMode(enabled) {
+        sameFileMode = enabled;
     }
 
     function getSelectedSlot() {
@@ -164,6 +171,7 @@ const FileLogic = (function () {
         getBonusStats: getBonusStats,
         STAT_META: STAT_META,
         selectSlot: selectSlot,
+        setSameFileMode: setSameFileMode,
         getSelectedSlot: getSelectedSlot,
         getSlots: getSlots,
         getPrevEmpty: getPrevEmpty,

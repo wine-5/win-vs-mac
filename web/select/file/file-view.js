@@ -40,6 +40,14 @@ const FileView = (function () {
 
         if (!fileListEl || !statusEl) return false;
 
+        // 「同一ファイル」チェック。オンにすると1つ選ぶだけで3枠すべてに同じものが入る
+        const sameFileCheck = document.getElementById('same-file-check');
+        if (sameFileCheck) {
+            sameFileCheck.addEventListener('change', function () {
+                FileLogic.setSameFileMode(sameFileCheck.checked);
+            });
+        }
+
         FileLogic.onSlotChange(function () {
             updateSelection();
             updateStatus();
@@ -126,6 +134,12 @@ const FileView = (function () {
         const slots = FileLogic.getSlots();
         const prevEmpty = FileLogic.getPrevEmpty();
 
+        // 「同一ファイル」で3枠まとめて埋まったとき、全部が同時に現れると
+        // 何が起きたのか読み取れない。今回新しく埋まった行だけを数えて、
+        // 上から順に少しずつ遅らせて出す
+        const SLOT_STAGGER_MS = 260;
+        let loadedOrder = 0;
+
         slots.forEach(function (s, i) {
             const et = s.extType || 'Unknown';
             const isEmpty = s.isEmpty;
@@ -135,10 +149,17 @@ const FileView = (function () {
             const wrap = document.createElement('div');
             wrap.className = 'file-slot';
 
+            // 今回埋まった行の中での順番。上の行ほど先に現れる
+            const appearDelayMs = justLoaded ? loadedOrder * SLOT_STAGGER_MS : 0;
+            if (justLoaded) loadedOrder++;
+
             const row = document.createElement('div');
             // 未選択の行は is-empty を付けてCSS側の誘導アニメーションを走らせる
             row.className = 'file-row' + (isSelected ? ' selected' : '') +
                 (justLoaded ? ' anim-in' : '') + (isEmpty ? ' is-empty' : '');
+            // 遅延中も「出現前」の見た目を保つため、CSS側で animation-fill-mode: backwards を指定している
+            if (appearDelayMs > 0)
+                row.style.animationDelay = appearDelayMs + 'ms';
             row.dataset.slot = i;
             row.onclick = function () { FileLogic.selectSlot(i); };
 
@@ -178,7 +199,7 @@ const FileView = (function () {
                             nameEl.textContent += fileName[idx];
                             idx++;
                         }, 18);
-                    }, 290);
+                    }, 290 + appearDelayMs);
                 } else {
                     const nameEl = row.querySelector('#fname-' + i);
                     if (nameEl) nameEl.textContent = fileName;

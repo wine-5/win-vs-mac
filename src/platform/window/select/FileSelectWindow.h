@@ -91,7 +91,12 @@ namespace platform::window::select
 		std::function<void(int, const std::string&)> m_onFileSlotChanged{};
 
         void handleMessage(const std::string& json) noexcept;
-        void openFileDialog(int slotIndex);
+		/**
+		 * @brief ファイル選択ダイアログを開き、選ばれたファイルをスロットへ入れる
+		 * @param slotIndex 対象のスロット番号
+		 * @param applyToAllSlots trueなら全スロットへ同じファイルを入れる（同一ファイル指定）
+		 */
+		void openFileDialog(int slotIndex, bool applyToAllSlots);
 
 		/**
 		 * @brief システム既定のコードページの文字列を UTF-8 へ変換する

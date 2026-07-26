@@ -352,8 +352,10 @@ body {
     to   { opacity: 1; transform: translateX(0); }
 }
 
+/* backwards を付けて、開始を遅らせている間も「出現前」の状態で待たせる。
+   これが無いと、3枠同時に埋まったときに遅延中の行だけ先に見えてしまう */
 .file-row.anim-in {
-    animation: rowSlideIn 0.28s ease-out;
+    animation: rowSlideIn 0.28s ease-out backwards;
 }
 
 /* ボーナス一覧：装備中の拡張子行をハイライト */
@@ -376,4 +378,29 @@ body {
 
 .bonus-entry.active .bonus-entry-val {
     text-shadow: 0 0 8px currentColor;
+}
+/* ── 同一ファイルチェック ──
+   同じ拡張子を3枠に積む「特化ビルド」を組むとき、
+   同じファイルを3回選ぶ手間を省くための切り替え */
+.same-file-toggle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    padding: 0 6px;
+    height: 22px;
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.same-file-toggle:hover { color: var(--text); }
+
+.same-file-toggle input {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--accent);
+    cursor: pointer;
 }
