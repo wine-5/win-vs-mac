@@ -25,6 +25,11 @@ namespace game::component::combat
 		// 元の値へ戻せなくなるため、段ごとの強弱はこちらで表す。1.0なら等倍
 		float m_damageMultiplier{ 1.0f };
 
+		// クリティカルの発生率（0.0〜1.0）と、発生したときのダメージ倍率。
+		// 0なら一度も発生しないので、値を持たない敵は自動的にクリティカルしない
+		float m_criticalRate{ 0.0f };
+		float m_criticalMultiplier{ 1.0f };
+
 		// 攻撃が届く高さの上限（攻撃者の足元からの相対Y）。地面を叩きつける攻撃のように
 		// 「跳んでいれば当たらない」攻撃で使う。0なら高さ無制限（従来動作）
 		float m_attackMaxHeight{ 0.0f };

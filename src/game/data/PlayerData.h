@@ -95,6 +95,16 @@ namespace game::data
 			if (comboStage2MultiplierIt != metadata.floatProperties.end())
 				data.m_comboStage2Multiplier = comboStage2MultiplierIt->second;
 
+			auto criticalRateIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::CRITICAL_RATE)) };
+			if (criticalRateIt != metadata.floatProperties.end())
+				data.m_criticalRate = criticalRateIt->second;
+
+			auto criticalMultiplierIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::CRITICAL_MULTIPLIER)) };
+			if (criticalMultiplierIt != metadata.floatProperties.end())
+				data.m_criticalMultiplier = criticalMultiplierIt->second;
+
 			return data;
 		}
 
@@ -175,6 +185,18 @@ namespace game::data
 		{
 			return m_comboStage2Multiplier;
 		}
+
+		/** @brief クリティカルの発生率（0.0〜1.0）を取得。0なら発生しない */
+		[[nodiscard]] float getCriticalRate() const noexcept
+		{
+			return m_criticalRate;
+		}
+
+		/** @brief クリティカル発生時のダメージ倍率を取得。JSON未設定時は等倍 */
+		[[nodiscard]] float getCriticalMultiplier() const noexcept
+		{
+			return m_criticalMultiplier;
+		}
 		/** @brief コライダーサイズを取得 */
 		[[nodiscard]] core::Vector3 getColliderSize() const noexcept
 		{
@@ -234,6 +256,8 @@ namespace game::data
 		float m_attackWindup{ 0.0f };          // 攻撃のワインドアップ遅延（0なら即時判定）
 		float m_comboInputWindow{ 1.0f };      // コンボの次段入力受付時間（JSON未設定時の既定値）
 		float m_comboStage2Multiplier{ 1.0f }; // 2段目のダメージ倍率（JSON未設定時は等倍）
+		float m_criticalRate{ 0.0f };          // クリティカルの発生率（0.0〜1.0。0なら発生しない）
+		float m_criticalMultiplier{ 1.0f };    // クリティカル時のダメージ倍率（JSON未設定時は等倍）
 		core::Vector3 m_colliderSize;
 		core::Vector3 m_colliderOffset;
 		core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
