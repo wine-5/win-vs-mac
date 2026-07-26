@@ -337,6 +337,10 @@ namespace game::scene
 		    m_playerData.getAttackCooldown(),
 		    m_playerData.getCriticalRate(),
 		    m_playerData.getCriticalMultiplier());
+		core::log::info("Player[{}] 弾速ボーナス={} 飛距離ボーナス={}",
+		    label,
+		    m_playerData.getProjectileSpeedBonus(),
+		    m_playerData.getProjectileRangeBonus());
 	}
 
 	void InGame::spawnEntities()
@@ -422,8 +426,18 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::combat::TargetingSystem>(m_componentManager);
 		// 発射入力→弾生成（生成はPhysicsSystemより前でよい）。弾定義はjsonから取得する。
 		// Window弾の見た目はビルボード（板に貼ったWindow画像）で描くので、その画像を先に読む
-		const auto& projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
+		auto projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
 		const int windowBillboard{ projectileMeta.m_imageId.empty() ? -1 : m_resourceManager.loadImageById(projectileMeta.m_imageId) };
+
+		// 装備ファイルのボーナスを弾定義へ反映する。
+		// 飛距離は「弾速×寿命」で決まるため、弾速だけを上げると距離まで一緒に伸びてしまう。
+		// 元の飛距離にボーナスを足したうえで、新しい弾速から寿命を逆算し、
+		// 「速さ」と「距離」を別々のボーナスとして独立に効かせる
+		const float baseProjectileRange{ projectileMeta.m_speed * projectileMeta.m_lifetime };
+		projectileMeta.m_speed += m_playerData.getProjectileSpeedBonus();
+		if (projectileMeta.m_speed > 0.0f)
+			projectileMeta.m_lifetime = (baseProjectileRange + m_playerData.getProjectileRangeBonus()) / projectileMeta.m_speed;
+
 		auto* rangedAttack{ m_systemManager.registerSystem<game::system::combat::PlayerRangedAttackSystem>(
 			m_componentManager, m_playerId, m_projectileFactory, projectileMeta, windowBillboard) };
 		// レティクルがクールダウンの残量を読むため、Viewへ参照を渡す
