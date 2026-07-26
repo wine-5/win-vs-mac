@@ -5,6 +5,7 @@
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IAudioManager.h"
+#include "core/interface/IResourcePreloader.h"
 #include "core/input/KeyCode.h"
 #include "game/scene/SceneManager.h"
 #include <DxLib.h>
@@ -20,6 +21,12 @@ namespace
 	// 制限しないとその分だけupdateを連打して復帰できなくなる（death spiral）。
 	// 上限に当たった分の時間は切り捨て、ゲーム内時間が遅れることを許容する
 	constexpr int MAX_UPDATES_PER_FRAME{ 5 };
+
+	// 1フレームで先読みに使ってよい時間（ミリ秒）。シーンの性質で使い分ける。
+	// モデル1件が予算を超えることもあるため、これは上限ではなく「これを超えたら次のフレームに回す」目安
+	constexpr int LOOSE_PRELOAD_BUDGET_MS{ 8 };
+	constexpr int HEAVY_PRELOAD_BUDGET_MS{ 12 };
+	constexpr int TIGHT_PRELOAD_BUDGET_MS{ 3 };
 } // namespace
 
 Application::Application(int screenWidth, int screenHeight)
@@ -29,6 +36,11 @@ Application::Application(int screenWidth, int screenHeight)
 
 	m_sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
 	m_inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
+	m_preloader = core::base::ServiceLocator::get<core::iface::IResourcePreloader>();
+
+	// 起動直後から全リソースの先読みを始める。BIOS〜Selectの間にほぼ読み終わるため、
+	// InGame生成時の loadXxxById() はキャッシュヒットになりロード待ちが消える
+	m_preloader->enqueueAll();
 
 	// ポーズメニューを生成する（UIサービスの初期化後に行う）
 	m_pauseMenuController = std::make_unique<game::ui::pause::PauseMenuController>(
@@ -93,6 +105,13 @@ void Application::run()
 
 			m_sceneManager->draw();
 		}
+
+		// リソースの先読みは描画の後・ScreenFlipの前に行う。
+		// 1件で数百ms掛かることがあり、その時間を次フレームのelapsedTimeに混ぜると
+		// accumulatorがMAX_UPDATES_PER_FRAMEに張り付いて処理落ちが連鎖するため、
+		// 実際に読み込んだ場合はlastFrameTimeを取り直して先読み時間を計測から外す
+		if (m_preloader->step(preloadBudgetMs(m_sceneManager->getCurrentSceneType())) > 0)
+			lastFrameTime = std::chrono::steady_clock::now();
 
 		// 入力の「前回状態」はフレームに1回だけ更新する。
 		// updateの実行回数（0〜MAX_UPDATES_PER_FRAME回）に関わらず、押した瞬間の判定が
@@ -163,4 +182,28 @@ bool Application::allowBackToTitle(game::scene::SceneType sceneType) const noexc
 	// タイトルより後のシーンでのみ「タイトルへ戻る」を表示する
 	return sceneType == game::scene::SceneType::Select ||
 	       sceneType == game::scene::SceneType::InGame;
+}
+
+int Application::preloadBudgetMs(game::scene::SceneType sceneType) const noexcept
+{
+	switch (sceneType)
+	{
+	// 演出を眺めるだけのシーン。カクついても気付かれにくいので多めに割く
+	case game::scene::SceneType::Bios:
+	case game::scene::SceneType::Title:
+	case game::scene::SceneType::Lockscreen:
+		return LOOSE_PRELOAD_BUDGET_MS;
+
+	// ローディング中は残りを一気に片付けたい
+	case game::scene::SceneType::Loading:
+		return HEAVY_PRELOAD_BUDGET_MS;
+
+	// WebViewの操作に追従する必要があるため絞る
+	case game::scene::SceneType::Select:
+		return TIGHT_PRELOAD_BUDGET_MS;
+
+	// ゲーム中の先読みは論外（1フレームでも詰まらせない）
+	default:
+		return 0;
+	}
 }

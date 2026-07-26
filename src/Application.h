@@ -12,8 +12,9 @@ namespace game::scene
 
 namespace core::iface
 {
-	class IInputProvider; // 前方宣言
-}
+	class IInputProvider;     // 前方宣言
+	class IResourcePreloader; // 前方宣言
+} // namespace core::iface
 
 /**
  * @brief アプリケーション全体を統括する最上位クラス（コンポジションルート）
@@ -64,6 +65,16 @@ class Application
 	 */
 	[[nodiscard]] bool allowBackToTitle(game::scene::SceneType sceneType) const noexcept;
 
+	/**
+	 * @brief 指定シーンで1フレームあたり先読みに使ってよい時間を返す
+	 *
+	 * 静止画面のシーンほど多く割き、操作に追従する必要があるシーンでは絞る。
+	 * InGameは0（＝先読みを止める）。
+	 * @param sceneType 判定するシーンの種類
+	 * @return フレーム予算（ミリ秒）
+	 */
+	[[nodiscard]] int preloadBudgetMs(game::scene::SceneType sceneType) const noexcept;
+
 	game::GameManager m_gameManager{};
 	game::PauseManager m_pauseManager{};
 
@@ -73,6 +84,7 @@ class Application
 	// ServiceLocatorが所有するサービスへの参照（初期化後に取得する）
 	game::scene::SceneManager* m_sceneManager{ nullptr };
 	core::iface::IInputProvider* m_inputProvider{ nullptr };
+	core::iface::IResourcePreloader* m_preloader{ nullptr };
 
 	bool m_isRunning{ true };
 };
