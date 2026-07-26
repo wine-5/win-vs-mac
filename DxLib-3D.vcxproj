@@ -310,6 +310,8 @@
     <ClInclude Include="src\core\data\PropDefinition.h" />
     <ClInclude Include="src\core\utility\Rotation.h" />
     <ClInclude Include="src\game\constant\PropCollision.h" />
+    <ClInclude Include="src\game\constant\PropRole.h" />
+    <ClInclude Include="src\game\component\stage\BossGateComponent.h" />
     <ClInclude Include="src\game\component\movement\GroundSurfaceComponent.h" />
     <ClInclude Include="src\game\component\movement\FallRecoveryComponent.h" />
     <ClInclude Include="src\game\system\movement\FootstepSystem.h" />
