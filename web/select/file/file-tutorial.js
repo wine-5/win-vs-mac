@@ -9,18 +9,20 @@
  * 「ルール説明.txt」へ送り出す形にしている。
  */
 const FileTutorial = (function () {
+    // 注目させる対象は body のクラスで切り替える。装備するたびに一覧は作り直されるため、
+    // 要素へ直接クラスを付けると光る枠が消えてしまう
     const STEPS = [
         {
-            targetSelector: '#file-list',
-            title: 'まず、装備するファイルを選ぼう',
-            body: 'ここに並んでいる3つの枠が装備スロットです。' +
-                  '枠をクリックするとPC内のファイルを選べます。まずは1つ選んでみてください。',
+            bodyClass: 'tutorial-focus-first-slot',
+            title: 'まず、この枠をクリック',
+            body: '光っている枠が1つ目の装備スロットです。' +
+                  'クリックするとPC内のファイルを選べます。まずは好きなファイルを1つ選んでみてください。',
             // ファイルが1つ入った時点で自動的に次へ進む（「次へ」は出さない）
             advancesOnEquip: true,
             atTop: false
         },
         {
-            targetSelector: '.bonus-panel',
+            bodyClass: 'tutorial-focus-bonus',
             title: '選んだ拡張子で能力が上がる',
             body: '装備したファイルの拡張子に応じて、キャラクターのステータスが伸びます。' +
                   'この一覧が対応表で、今装備している拡張子の行が光ります。' +
@@ -30,7 +32,7 @@ const FileTutorial = (function () {
             atTop: true
         },
         {
-            targetSelector: null,
+            bodyClass: null,
             title: '詳しい操作は「ルール説明.txt」へ',
             body: 'デスクトップにある「ルール説明.txt」をダブルクリックすると、' +
                   '操作方法とゲームの目的が読めます。' +
@@ -50,8 +52,8 @@ const FileTutorial = (function () {
     let isActive = false;
 
     function clearTarget() {
-        document.querySelectorAll('.tutorial-target').forEach(function (el) {
-            el.classList.remove('tutorial-target');
+        STEPS.forEach(function (step) {
+            if (step.bodyClass) document.body.classList.remove(step.bodyClass);
         });
     }
 
@@ -71,10 +73,7 @@ const FileTutorial = (function () {
         const step = STEPS[index];
 
         clearTarget();
-        if (step.targetSelector) {
-            const target = document.querySelector(step.targetSelector);
-            if (target) target.classList.add('tutorial-target');
-        }
+        if (step.bodyClass) document.body.classList.add(step.bodyClass);
 
         stepEl.textContent = 'STEP ' + (index + 1) + ' / ' + STEPS.length;
         titleEl.textContent = step.title;

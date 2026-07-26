@@ -407,33 +407,53 @@ body {
 
 /* ── 初回だけ出る操作ガイド ───────────────────────────────
    「急にこの画面に来て何をすればいいのか分からない」への対処。
-   ウィンドウは互いに別のWebViewで重ねられないため、案内はこのウィンドウ内で完結させる */
+   各ウィンドウは別々のWebViewで互いに重ねられないため、案内はこのウィンドウ内で完結させる。
 
-/* 案内中の対象を光る枠で囲む。操作は妨げたくないので枠だけを載せる */
-.tutorial-target {
+   注目させる対象は body のクラスで指定する。装備するたびにファイル一覧は
+   作り直されるので、要素へ直接クラスを付けると光る枠が消えてしまう。
+   覆うオーバーレイではなく透明度を落とす方式にしているのは、
+   案内中でも対象を普通にクリックできるようにするため */
+
+/* 注目していない箇所は薄く落として、目線が対象へ向くようにする */
+body.tutorial-focus-first-slot .file-list .file-slot:not(:first-child),
+body.tutorial-focus-first-slot .bonus-panel,
+body.tutorial-focus-bonus .file-list {
+    opacity: 0.28;
+    transition: opacity 0.25s ease;
+}
+
+/* 光らせる対象。枠と内側の光だけを載せ、操作は妨げない */
+body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row,
+body.tutorial-focus-bonus .bonus-panel {
     position: relative;
-    outline: 2px solid var(--accent);
-    outline-offset: -2px;
-    animation: tutorial-glow 1.6s ease-in-out infinite;
+    outline: 3px solid var(--accent);
+    outline-offset: -3px;
+    animation: tutorial-glow 1.5s ease-in-out infinite;
 }
 
 @keyframes tutorial-glow {
     0%, 100% { box-shadow: inset 0 0 0 0 rgba(0, 120, 212, 0); }
-    50%      { box-shadow: inset 0 0 24px 0 rgba(0, 120, 212, 0.45); }
+    50%      { box-shadow: inset 0 0 30px 0 rgba(0, 120, 212, 0.55); }
 }
 
 .tutorial-tip {
     position: fixed;
-    left: 12px;
-    right: 12px;
-    bottom: 34px;
+    left: 16px;
+    right: 16px;
+    bottom: 40px;
     z-index: 50;
     background: rgba(20, 20, 22, 0.97);
-    border: 1px solid var(--accent);
-    border-radius: 6px;
-    padding: 12px 14px;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    padding: 20px 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
     animation: tutorial-tip-in 0.28s ease-out;
+}
+
+/* 案内の対象が画面下端の一覧そのものになる段では、隠さないよう上へ回す */
+.tutorial-tip.at-top {
+    top: 64px;
+    bottom: auto;
 }
 
 @keyframes tutorial-tip-in {
@@ -442,38 +462,38 @@ body {
 }
 
 .tutorial-step {
-    font-size: 12px;
-    letter-spacing: 0.08em;
+    font-size: 15px;
+    letter-spacing: 0.1em;
     color: var(--accent);
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .tutorial-title {
-    font-size: 17px;
+    font-size: 26px;
     font-weight: 600;
     color: var(--text);
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .tutorial-body {
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 19px;
+    line-height: 1.6;
     color: var(--text-muted);
 }
 
 .tutorial-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
-    margin-top: 10px;
+    gap: 12px;
+    margin-top: 16px;
 }
 
 .tutorial-skip,
 .tutorial-next {
     border-radius: var(--radius);
     font-family: inherit;
-    font-size: 13px;
-    padding: 5px 14px;
+    font-size: 17px;
+    padding: 9px 22px;
     cursor: pointer;
 }
 
@@ -495,9 +515,3 @@ body {
 }
 
 .tutorial-next:hover { background: var(--accent-hover); }
-
-/* 案内の対象が画面下端の一覧そのものになる段では、隠さないよう上へ回す */
-.tutorial-tip.at-top {
-    top: 64px;
-    bottom: auto;
-}
