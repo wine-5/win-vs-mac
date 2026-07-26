@@ -225,6 +225,7 @@
     <ClCompile Include="src\infrastructure\InputManager.cpp" />
     <ClCompile Include="src\infrastructure\graphics\Renderer.cpp" />
     <ClCompile Include="src\infrastructure\resource\ResourceManager.cpp" />
+    <ClCompile Include="src\infrastructure\resource\ResourcePreloader.cpp" />
     <ClCompile Include="src\game\scene\InGame.cpp" />
     <ClCompile Include="src\game\scene\InGameView.cpp" />
     <ClCompile Include="src\game\actor\Player.cpp" />
@@ -465,6 +466,7 @@
     <ClInclude Include="src\infrastructure\InputManager.h" />
     <ClInclude Include="src\infrastructure\graphics\Renderer.h" />
     <ClInclude Include="src\infrastructure\resource\ResourceManager.h" />
+    <ClInclude Include="src\infrastructure\resource\ResourcePreloader.h" />
     <ClInclude Include="src\game\scene\InGame.h" />
     <ClInclude Include="src\game\scene\InGameView.h" />
     <ClInclude Include="src\game\scene\IScene.h" />
