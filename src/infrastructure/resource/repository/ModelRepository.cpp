@@ -1,8 +1,10 @@
 ﻿#include "ModelRepository.h"
 #include <DxLib.h>
 #include <fstream>
+#include <string>
 #include <string_view>
 #include <stdexcept>
+#include <unordered_map>
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
 #include "core/utility/Log.h"
@@ -420,28 +422,36 @@ namespace infrastructure::resource::repository
 			}
 		}
 
-		if (j.contains("gameplay"))
-		{
-			// gameplay配下は「キー名がそのまま floatProperties のキーになる」だけなので、
-			// キーを1箇所の配列で持ち、存在するものだけ取り込む
-			static constexpr std::string_view FLOAT_KEYS[]{
-				"moveSpeed", "dashMultiplier", "jumpForce", "gravity", "maxFallSpeed",
-				"detectionRange", "attackRange",
-				"maxHp", "defence", "attackPower", "attackCooldown", "attackWindup",
-				"attackMaxHeight",
-				"comboInputWindow",
-				"hoverHeight", "preferredDistanceMin", "preferredDistanceMax",
-				"fireCooldown", "facingYawOffset"
-			};
+		// gameplay配下は「キー名がそのまま floatProperties のキーになる」だけなので、
+		// キーを1箇所の配列で持ち、存在するものだけ取り込む
+		static constexpr std::string_view FLOAT_KEYS[]{
+			"moveSpeed", "dashMultiplier", "jumpForce", "gravity", "maxFallSpeed",
+			"detectionRange", "attackRange",
+			"maxHp", "defence", "attackPower", "attackCooldown", "attackWindup",
+			"attackMaxHeight",
+			"comboInputWindow",
+			"hoverHeight", "preferredDistanceMin", "preferredDistanceMax",
+			"fireCooldown", "facingYawOffset"
+		};
 
-			const auto& gp = j["gameplay"];
+		auto readFloatProperties = [](const nlohmann::json& source,
+		                               std::unordered_map<std::string, float>& destination)
+		{
 			for (const auto key : FLOAT_KEYS)
 			{
 				const std::string name{ key };
-				if (gp.contains(name))
-					metadata.floatProperties[name] = gp[name];
+				if (source.contains(name))
+					destination[name] = source[name];
 			}
-		}
+		};
+
+		if (j.contains("gameplay"))
+			readFloatProperties(j["gameplay"], metadata.floatProperties);
+
+		// hard配下はgameplayと同じキー名で書いた値だけを持つ。
+		// 難易度Hardのときに game::data::EnemyData が gameplay の上へ被せる
+		if (j.contains("hard"))
+			readFloatProperties(j["hard"], metadata.hardFloatProperties);
 
 		// 敵の振る舞いレシピ（積むAI振る舞いの名前リスト）。データの組み合わせで敵を定義するために使う
 		if (j.contains("behaviors"))

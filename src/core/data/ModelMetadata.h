@@ -43,6 +43,9 @@ namespace core::data
 		core::Vector3 colliderOffset{ 0.0f, 0.0f, 0.0f }; // コライダー中心オフセット（size自動算出時にAABB中心から併せて算出される）
 
 		std::unordered_map<std::string, float> floatProperties;
+		// 難易度Hardのときだけ floatProperties へ上書きする値（JSONの hard 要素）。
+		// gameplay と同じキー名で書いたものだけが入る。空ならHardでもパラメータは変わらない
+		std::unordered_map<std::string, float> hardFloatProperties;
 		std::unordered_map<std::string, std::string> stringProperties; // 例: {"idleAnim": "path/to/anim.mv1"}
 
 		// 敵の振る舞いレシピ：積むAI振る舞いの名前リスト（例: ["rangeKeep","patrol"]）。
