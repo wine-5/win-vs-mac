@@ -18,5 +18,12 @@ namespace game::component::movement
 		// 足元に床があり立っているか。GroundingSystemが毎フレーム更新し、
 		// PhysicsSystemがジャンプの可否判定に使う（GroundingSystemはPhysicsSystemの後に走るため1フレーム遅れだが、接地判定には十分）
 		bool m_isGrounded{ false };
+
+		// 足元にある床の高さ（ワールドY）。GroundingSystemが毎フレーム更新する。
+		// 浮遊敵が「地面から一定の高さ」を保つために使う（絶対高度だと階層ごとに浮き方が変わるため）
+		float m_groundHeight{ 0.0f };
+
+		// m_groundHeight が有効か。足元に床が1つも無ければ false（奈落の上など）
+		bool m_hasGroundHeight{ false };
 	};
 } // namespace game::component::movement

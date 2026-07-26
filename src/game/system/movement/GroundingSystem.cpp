@@ -178,6 +178,10 @@ namespace game::system::movement
 				}
 			}
 
+			// 足元の床の高さを共有する。浮遊敵はこれを基準にホバー高度を決める
+			velocity.m_hasGroundHeight = found;
+			velocity.m_groundHeight = found ? bestHeight : 0.0f;
+
 			// 接地している面に応じて滑り速度を更新する（空中では減衰させる）
 			const bool isStanding{ found && foot <= bestHeight + STEP_TOLERANCE };
 			velocity.m_isGrounded = isStanding; // ジャンプの可否判定用にPhysicsSystemへ伝える
