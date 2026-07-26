@@ -20,6 +20,10 @@ namespace game::event
 		m_subscriptions.push_back(m_eventBus.subscribe<EnemyDeadEvent>(
 		    [this](const EnemyDeadEvent& e)
 		    { onEnemyDead(e); }));
+
+		m_subscriptions.push_back(m_eventBus.subscribe<PlayerDeadEvent>(
+		    [this](const PlayerDeadEvent& e)
+		    { onPlayerDead(e); }));
 	}
 
 	void AudioEventListener::onAttackStart(const AttackStartEvent& e)
@@ -56,5 +60,14 @@ namespace game::event
 	{
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio) audio->playSe(core::constant::SeType::DeadEnemy);
+	}
+
+	void AudioEventListener::onPlayerDead(const PlayerDeadEvent& /*e*/)
+	{
+		// HPが尽きた瞬間に鳴らす。死亡演出（アニメ→暗転）の頭に音を置きたいので、
+		// 演出完了（PlayerDeathSequenceFinishedEvent）ではなくこちらを使う
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio)
+			audio->playSe(core::constant::SeType::DeadPlayer);
 	}
 } // namespace game::event
