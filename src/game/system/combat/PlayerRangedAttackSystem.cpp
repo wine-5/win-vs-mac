@@ -12,6 +12,13 @@
 #include <algorithm>
 #include <utility>
 
+namespace
+{
+	// 溜め切ったとみなす溜め率。溜め時間は最大値で頭打ちにしてから割るので理屈上は1.0ちょうどだが、
+	// 浮動小数の誤差で1.0をわずかに下回ることがあるため手前で判定する
+	constexpr float FULL_CHARGE_THRESHOLD{ 0.99f };
+} // namespace
+
 namespace game::system::combat
 {
 	PlayerRangedAttackSystem::PlayerRangedAttackSystem(core::ecs::ComponentManager& componentManager,
@@ -55,6 +62,8 @@ namespace game::system::combat
 				playerCharge.m_chargeRate = m_chargeTime / m_metadata.m_chargeMaxTime;
 			else
 				playerCharge.m_chargeRate = 0.0f;
+
+			playerCharge.m_isFullyCharged = m_isCharging && playerCharge.m_chargeRate >= FULL_CHARGE_THRESHOLD;
 		}
 
 		// 押している間は溜める（クールダウン中は溜め開始しない）
@@ -136,8 +145,7 @@ namespace game::system::combat
 
 		// 溜め切って撃った弾だけ重い着弾音にする。溜めた甲斐を音でも返すため、
 		// 見た目（サイズ）と同じく「溜め切ったか」で切り替える
-		constexpr float CHARGED_SE_THRESHOLD{ 0.99f };
-		config.m_hitSeType = chargeRate >= CHARGED_SE_THRESHOLD
+		config.m_hitSeType = chargeRate >= FULL_CHARGE_THRESHOLD
 		                         ? core::constant::SeType::HitChargedWindow
 		                         : core::constant::SeType::HitWindow;
 

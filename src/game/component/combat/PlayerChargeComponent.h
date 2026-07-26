@@ -12,5 +12,9 @@ namespace game::component::combat
 	{
 		bool m_isCharging{};  // 溜め中かどうか
 		float m_chargeRate{}; // 溜め率（0.0 ~ 1.0）
+
+		// 最大まで溜め切ったか。溜め率の比較を各所で書くと閾値がずれるため、
+		// 判定はPlayerRangedAttackSystemに一本化してここへ結果だけを載せる
+		bool m_isFullyCharged{};
 	};
 } // namespace game::component::combat
