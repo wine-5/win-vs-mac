@@ -215,8 +215,15 @@ namespace platform::window::select
 			nlohmann::json resp;
 			resp[platform::window::WindowConstants::JSON_KEY_TYPE]  = platform::window::WindowConstants::MESSAGE_TYPE_BONUS_INFO;
 			resp[platform::window::WindowConstants::JSON_KEY_DESCRIPTIONS] = nlohmann::json::object();
+			resp[platform::window::WindowConstants::JSON_KEY_EXTENSIONS] = nlohmann::json::object();
 			for (const auto& e : ENTRIES)
+			{
 				resp[platform::window::WindowConstants::JSON_KEY_DESCRIPTIONS][e.m_key] = describe(e.m_type);
+				// 対象の拡張子も判定表から取り出して送る。
+				// 「.exe など」と省略すると、どの拡張子が該当するのか確かめる手段が無くなる
+				resp[platform::window::WindowConstants::JSON_KEY_EXTENSIONS][e.m_key] =
+				    game::utility::FileExtensionTypeResolver::joinExtensions(e.m_type);
+			}
 			m_webView.postMessage(resp.dump());
 		}
 		catch (const std::exception& e)

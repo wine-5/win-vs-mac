@@ -47,8 +47,10 @@ namespace platform::window
         static constexpr const char* JSON_KEY_FILE_PATH{ "filePath" };
         static constexpr const char* JSON_KEY_EXT_TYPE{ "extType" };
         static constexpr const char* JSON_KEY_DESCRIPTIONS{ "descs" };
+		// 種別ごとの対象拡張子一覧（例 ".exe, .dll, .bat"）
+		static constexpr const char* JSON_KEY_EXTENSIONS{ "exts" };
 
-        // JSONメッセージタイプ（Win32SelectWindowManager）
+		// JSONメッセージタイプ（Win32SelectWindowManager）
         static constexpr const char* MESSAGE_TYPE_START_GAME{ "startGame" };
         static constexpr const char* MESSAGE_TYPE_TOGGLE_WINDOW{ "toggleWindow" };
         static constexpr const char* MESSAGE_TYPE_LAUNCH_APP{ "launchApp" };

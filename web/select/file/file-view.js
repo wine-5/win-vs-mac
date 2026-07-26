@@ -222,7 +222,7 @@ const FileView = (function () {
             entry.innerHTML =
                 '<img class="ext-badge" src="' + (FileLogic.EXT_ICON[ext] || FileLogic.EXT_ICON.Unknown) +
                     '" alt="' + (FileLogic.EXT_LABEL[ext] || '?') + '">' +
-                '<span class="bonus-entry-name">' + (FileLogic.EXT_EXAMPLE[ext] || '') + '</span>' +
+                '<span class="bonus-entry-name">' + FileLogic.getBonusExtensions(ext) + '</span>' +
                 '<span class="bonus-entry-val multi">' + desc + '</span>';
             listEl.appendChild(entry);
         });

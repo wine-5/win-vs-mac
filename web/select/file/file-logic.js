@@ -22,17 +22,9 @@ const FILE_EXT_ORDER = [
     'Executable', 'Document', 'Image', 'Audio',
     'SourceCode', 'Shortcut', 'Video', 'Archive', 'Unknown'
 ];
-const FILE_EXT_EXAMPLE = {
-    Executable: '.exe など',
-    Document:   '.txt, .pdf など',
-    Image:      '.png, .jpg など',
-    Audio:      '.mp3, .wav など',
-    SourceCode: '.cpp, .py など',
-    Shortcut:   '.lnk, .url など',
-    Video:      '.mp4, .avi など',
-    Archive:    '.zip, .rar など',
-    Unknown:    '不明な拡張子'
-};
+// 対象の拡張子はC++（FileExtensionTypeResolverの判定表が正）から exts で届く。
+// ここに持つのは、拡張子を列挙できない Unknown の文言だけ
+const FILE_EXT_FALLBACK_NAME = { Unknown: '上記以外のすべて' };
 const FILE_EXT_CLASS = {
     Executable: 'exe', Document: 'doc', Image: 'img', Audio: 'aud',
     SourceCode: 'src', Shortcut: 'lnk', Video: 'vid',
@@ -49,6 +41,7 @@ const FileLogic = (function () {
     const prevEmpty = [true, true, true];
     let selectedSlot = null;
     let extBonusDescs = {};
+    let extBonusExtensions = {};
     let onSlotChangeCallback = null;
     let onBonusUpdateCallback = null;
     let onSlotsUpdateCallback = null;
@@ -92,8 +85,9 @@ const FileLogic = (function () {
         return activeExts;
     }
 
-    function updateBonusDescs(descs) {
+    function updateBonusDescs(descs, exts) {
         extBonusDescs = descs;
+        if (exts) extBonusExtensions = exts;
         if (onBonusUpdateCallback) {
             onBonusUpdateCallback();
         }
@@ -107,9 +101,14 @@ const FileLogic = (function () {
         return extBonusDescs;
     }
 
+    /** 種別に属する拡張子の一覧文字列を返す（Unknownは列挙できないので固定文言） */
+    function getBonusExtensions(extType) {
+        return extBonusExtensions[extType] || FILE_EXT_FALLBACK_NAME[extType] || '';
+    }
+
     function onMessageFromGame(data) {
         if (data.type === 'bonusInfo' && data.descs) {
-            updateBonusDescs(data.descs);
+            updateBonusDescs(data.descs, data.exts);
         } else if (data.type === 'refresh' && Array.isArray(data.slots)) {
             updateSlots(data.slots);
         }
@@ -136,7 +135,7 @@ const FileLogic = (function () {
         EXT_LABEL: FILE_EXT_LABEL,
         EXT_CLASS: FILE_EXT_CLASS,
         EXT_ORDER: FILE_EXT_ORDER,
-        EXT_EXAMPLE: FILE_EXT_EXAMPLE,
+        getBonusExtensions: getBonusExtensions,
         selectSlot: selectSlot,
         getSelectedSlot: getSelectedSlot,
         getSlots: getSlots,
