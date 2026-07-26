@@ -5,11 +5,39 @@ const FILE_EXT_ICON  = {
     Document:   'https://assets.game.web/images/ui/select/doc.png',
     Image:      'https://assets.game.web/images/ui/select/img.png',
     Audio:      'https://assets.game.web/images/ui/select/aud.png',
+    SourceCode: 'https://assets.game.web/images/ui/select/src.png',
+    Shortcut:   'https://assets.game.web/images/ui/select/lnk.png',
+    Video:      'https://assets.game.web/images/ui/select/vid.png',
     Archive:    'https://assets.game.web/images/ui/select/arc.png',
     Unknown:    'https://assets.game.web/images/ui/select/etc.png',
 };
-const FILE_EXT_LABEL = { Executable: 'EXE', Document: 'DOC', Image: 'IMG', Audio: 'AUD', Archive: 'ARC', Unknown: 'ETC' };
-const FILE_EXT_CLASS = { Executable: 'exe', Document: 'doc', Image: 'img', Audio: 'aud', Archive: 'arc', Unknown: 'unk' };
+const FILE_EXT_LABEL = {
+    Executable: 'EXE', Document: 'DOC', Image: 'IMG', Audio: 'AUD',
+    SourceCode: 'SRC', Shortcut: 'LNK', Video: 'VID',
+    Archive: 'ARC', Unknown: 'ETC'
+};
+// 拡張子ボーナス一覧に出す並び順と、その行に書く対象ファイルの例。
+// ボーナスの値そのものは C++（extensionBonus.json が正）から descs で届くので持たない
+const FILE_EXT_ORDER = [
+    'Executable', 'Document', 'Image', 'Audio',
+    'SourceCode', 'Shortcut', 'Video', 'Archive', 'Unknown'
+];
+const FILE_EXT_EXAMPLE = {
+    Executable: '.exe など',
+    Document:   '.txt, .pdf など',
+    Image:      '.png, .jpg など',
+    Audio:      '.mp3, .wav など',
+    SourceCode: '.cpp, .py など',
+    Shortcut:   '.lnk, .url など',
+    Video:      '.mp4, .avi など',
+    Archive:    '.zip, .rar など',
+    Unknown:    '不明な拡張子'
+};
+const FILE_EXT_CLASS = {
+    Executable: 'exe', Document: 'doc', Image: 'img', Audio: 'aud',
+    SourceCode: 'src', Shortcut: 'lnk', Video: 'vid',
+    Archive: 'arc', Unknown: 'unk'
+};
 
 const FileLogic = (function () {
     const slots = [
@@ -107,6 +135,8 @@ const FileLogic = (function () {
         EXT_ICON: FILE_EXT_ICON,
         EXT_LABEL: FILE_EXT_LABEL,
         EXT_CLASS: FILE_EXT_CLASS,
+        EXT_ORDER: FILE_EXT_ORDER,
+        EXT_EXAMPLE: FILE_EXT_EXAMPLE,
         selectSlot: selectSlot,
         getSelectedSlot: getSelectedSlot,
         getSlots: getSlots,

@@ -169,6 +169,9 @@ namespace platform::window::select
 			{ EXT_TYPE_NAME_DOCUMENT, core::data::FileExtensionType::Document },
 			{ EXT_TYPE_NAME_IMAGE, core::data::FileExtensionType::Image },
 			{ EXT_TYPE_NAME_AUDIO, core::data::FileExtensionType::Audio },
+			{ EXT_TYPE_NAME_SOURCE_CODE, core::data::FileExtensionType::SourceCode },
+			{ EXT_TYPE_NAME_SHORTCUT, core::data::FileExtensionType::Shortcut },
+			{ EXT_TYPE_NAME_VIDEO, core::data::FileExtensionType::Video },
 			{ EXT_TYPE_NAME_ARCHIVE, core::data::FileExtensionType::Archive },
 			{ EXT_TYPE_NAME_UNKNOWN, core::data::FileExtensionType::Unknown },
 		};
@@ -197,6 +200,10 @@ namespace platform::window::select
 			append("DEF",   b.def);
 			append("SPD",   b.spd);
 			append("Range", b.attackRange);
+			// 会心率は確率なので%表記へ直す（0.05なら CRIT+5）
+			append("CRIT", b.criticalRate * PERCENT_SCALE);
+			append("B.SPD", b.projectileSpeed);
+			append("B.RNG", b.projectileRange);
 			return result;
 		};
 

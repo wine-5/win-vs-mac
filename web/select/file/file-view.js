@@ -197,13 +197,35 @@ const FileView = (function () {
         updateBonusHighlights();
     }
 
+    /**
+     * 拡張子ボーナス一覧を組み立てる。
+     * 行そのものを descs（C++が extensionBonus.json から生成）で作るので、
+     * 拡張子を増やしても値を変えてもHTMLを触らずに追従する
+     */
     function renderBonusPanel() {
+        const listEl = document.getElementById('bonus-list');
+        if (!listEl) return;
+
         const descs = FileLogic.getBonusDescs();
-        document.querySelectorAll('.bonus-entry[data-ext]').forEach(function (el) {
-            const desc = descs[el.dataset.ext];
-            const valEl = el.querySelector('.bonus-entry-val');
-            if (valEl && desc) valEl.textContent = desc;
+        listEl.innerHTML = '';
+
+        FileLogic.EXT_ORDER.forEach(function (ext) {
+            const desc = descs[ext];
+            // ボーナスが1つも設定されていない拡張子は行ごと出さない
+            if (!desc) return;
+
+            const entry = document.createElement('div');
+            entry.className = 'bonus-entry';
+            entry.dataset.ext = ext;
+            entry.innerHTML =
+                '<img class="ext-badge" src="' + (FileLogic.EXT_ICON[ext] || FileLogic.EXT_ICON.Unknown) +
+                    '" alt="' + (FileLogic.EXT_LABEL[ext] || '?') + '">' +
+                '<span class="bonus-entry-name">' + (FileLogic.EXT_EXAMPLE[ext] || '') + '</span>' +
+                '<span class="bonus-entry-val multi">' + desc + '</span>';
+            listEl.appendChild(entry);
         });
+
+        updateBonusHighlights();
     }
 
     return {
