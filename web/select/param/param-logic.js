@@ -8,6 +8,7 @@ const STAT_CAPS = {
     atk:  100,
     def:  50,
     spd:  600,
+    rng:  400,
     crit: 100,   // 会心率は%表記なので100が理論上限
     bspd: 1200,
     brng: 3600
@@ -18,7 +19,7 @@ const BAR_CAP = 150;
 
 // 表示する項目のID。C++側から届くキーは base/bonus + 先頭を大文字にしたID。
 // 項目を増やすときはここへ足せば、状態の保持も更新も自動で追従する
-const STAT_IDS = ['hp', 'atk', 'def', 'spd', 'crit', 'bspd', 'brng'];
+const STAT_IDS = ['hp', 'atk', 'def', 'spd', 'rng', 'crit', 'bspd', 'brng'];
 
 const ParamLogic = (function () {
     function toBaseKey(id) {

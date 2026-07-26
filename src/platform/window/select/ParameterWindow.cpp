@@ -29,6 +29,8 @@ namespace platform::window::select
 			j[platform::window::WindowConstants::JSON_KEY_BONUS_ATK] = stats.m_atk.m_bonus;
 			j[platform::window::WindowConstants::JSON_KEY_BONUS_DEF] = stats.m_def.m_bonus;
 			j[platform::window::WindowConstants::JSON_KEY_BONUS_SPD] = stats.m_spd.m_bonus;
+			j[platform::window::WindowConstants::JSON_KEY_BASE_RNG] = stats.m_attackRange.m_base;
+			j[platform::window::WindowConstants::JSON_KEY_BONUS_RNG] = stats.m_attackRange.m_bonus;
 			j[platform::window::WindowConstants::JSON_KEY_BASE_CRIT] = stats.m_crit.m_base;
 			j[platform::window::WindowConstants::JSON_KEY_BASE_BSPD] = stats.m_projectileSpeed.m_base;
 			j[platform::window::WindowConstants::JSON_KEY_BASE_BRNG] = stats.m_projectileRange.m_base;
