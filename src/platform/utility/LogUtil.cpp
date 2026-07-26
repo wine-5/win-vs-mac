@@ -10,22 +10,8 @@ namespace
 	constexpr WORD COLOR_YELLOW{ FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY };
 	constexpr WORD COLOR_RED{ FOREGROUND_RED | FOREGROUND_INTENSITY };
 
-	/**
-	 * @brief 指定色でコンソールへ1行出力する
-	 * @param handle コンソールハンドル
-	 * @param color 文字色
-	 * @param prefix 行頭のラベル
-	 * @param message 本文
-	 */
-	void writeLine(void* handle, WORD color, const char* prefix, const char* message)
-	{
-		if (handle == nullptr)
-			return;
-
-		SetConsoleTextAttribute(static_cast<HANDLE>(handle), color);
-		std::printf("%s %s\n", prefix, message);
-		SetConsoleTextAttribute(static_cast<HANDLE>(handle), COLOR_WHITE);
-	}
+	// ログの控えを書き出すファイル。DxLibが出力する Log.txt とは別にする
+	constexpr const char* LOG_FILE_PATH{ "game_log.txt" };
 #endif
 } // namespace
 
@@ -56,6 +42,9 @@ namespace platform::utility
 
 		SetConsoleTitleA("DxLib-3D Debug Console");
 
+		// 起動ごとに作り直す（前回の内容が混ざるとどの実行のログか分からなくなる）
+		m_logFile.open(LOG_FILE_PATH, std::ios::out | std::ios::trunc);
+
 		if (previousForeground != nullptr)
 			SetForegroundWindow(previousForeground);
 #endif
@@ -69,24 +58,42 @@ namespace platform::utility
 #endif
 	}
 
+	void LogUtil::writeLine([[maybe_unused]] unsigned short color,
+	    [[maybe_unused]] const char* prefix, [[maybe_unused]] const char* message)
+	{
+#ifdef _DEBUG
+		if (m_consoleHandle != nullptr)
+		{
+			SetConsoleTextAttribute(static_cast<HANDLE>(m_consoleHandle), color);
+			std::printf("%s %s\n", prefix, message);
+			SetConsoleTextAttribute(static_cast<HANDLE>(m_consoleHandle), COLOR_WHITE);
+		}
+
+		// 1行ごとに書き出す。落ちた直前の行まで残さないと原因を追えない
+		if (m_logFile.is_open())
+			m_logFile << prefix << ' ' << message << '\n'
+			          << std::flush;
+#endif
+	}
+
 	void LogUtil::log([[maybe_unused]] const char* message)
 	{
 #ifdef _DEBUG
-		writeLine(m_consoleHandle, COLOR_WHITE, "[INFO]", message);
+		writeLine(COLOR_WHITE, "[INFO]", message);
 #endif
 	}
 
 	void LogUtil::warning([[maybe_unused]] const char* message)
 	{
 #ifdef _DEBUG
-		writeLine(m_consoleHandle, COLOR_YELLOW, "[WARN]", message);
+		writeLine(COLOR_YELLOW, "[WARN]", message);
 #endif
 	}
 
 	void LogUtil::error([[maybe_unused]] const char* message)
 	{
 #ifdef _DEBUG
-		writeLine(m_consoleHandle, COLOR_RED, "[ERROR]", message);
+		writeLine(COLOR_RED, "[ERROR]", message);
 #endif
 	}
 } // namespace platform::utility

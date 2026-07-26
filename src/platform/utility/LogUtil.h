@@ -1,5 +1,6 @@
 #pragma once
 #include "core/interface/ILogger.h"
+#include <fstream>
 
 namespace platform::utility
 {
@@ -44,7 +45,19 @@ namespace platform::utility
 		void error(const char* message) override;
 
 	  private:
+		/**
+		 * @brief 1行をコンソールとファイルの両方へ書き出す
+		 * @param color コンソールの文字色（実体は WORD）
+		 * @param prefix 行頭のラベル
+		 * @param message 本文
+		 */
+		void writeLine(unsigned short color, const char* prefix, const char* message);
+
 		// コンソールのハンドル（実体は HANDLE。Windows.h をヘッダへ出さないため void* で持つ）
 		void* m_consoleHandle{ nullptr };
+
+		// ログの控え。フルスクリーンやフリーズ中はコンソールを前面に出せず読めないため、
+		// 後から確認できるようファイルにも同じ内容を残す
+		std::ofstream m_logFile{};
 	};
 } // namespace platform::utility
