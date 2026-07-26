@@ -92,9 +92,25 @@ namespace infrastructure::resource::repository
 
 		const std::unordered_map<std::string, core::constant::SeType> typeMap{
 			{ "AttackPlayer", core::constant::SeType::AttackPlayer },
+			{ "PlayerSwing1", core::constant::SeType::PlayerSwing1 },
+			{ "PlayerSwing2", core::constant::SeType::PlayerSwing2 },
+			{ "PlayerCharge", core::constant::SeType::PlayerCharge },
+			{ "HitWindow", core::constant::SeType::HitWindow },
+			{ "HitChargedWindow", core::constant::SeType::HitChargedWindow },
+			{ "Critical", core::constant::SeType::Critical },
 			{ "HitEnemy", core::constant::SeType::HitEnemy },
 			{ "HitPlayer", core::constant::SeType::HitPlayer },
 			{ "DeadEnemy", core::constant::SeType::DeadEnemy },
+			{ "DeadPlayer", core::constant::SeType::DeadPlayer },
+			{ "PlayerJump", core::constant::SeType::PlayerJump },
+			{ "PlayerFootstep", core::constant::SeType::PlayerFootstep },
+			{ "EnemyAlert", core::constant::SeType::EnemyAlert },
+			{ "EnemySlam", core::constant::SeType::EnemySlam },
+			{ "BattleReady", core::constant::SeType::BattleReady },
+			{ "BattleFight", core::constant::SeType::BattleFight },
+			{ "UiClick", core::constant::SeType::UiClick },
+			{ "UiKeyPress", core::constant::SeType::UiKeyPress },
+			{ "UiFileSelect", core::constant::SeType::UiFileSelect },
 		};
 
 		for (const auto& entry : json["se"])
