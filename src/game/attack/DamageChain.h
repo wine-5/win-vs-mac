@@ -16,5 +16,8 @@ namespace game::attack
 
 		/** @brief 計算中のダメージ値(各ハンドラが段階的に加工する) */
 		float m_damage{};
+
+		/** @brief クリティカルが発生したか(CriticalHandlerが立て、演出側が見る) */
+		bool m_isCritical{ false };
 	};
 } // namespace game::attack

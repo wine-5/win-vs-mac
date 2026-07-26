@@ -3,6 +3,7 @@
 #include "game/component/camera/CameraComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
+#include "game/component/combat/AttackComponent.h"
 #include "game/component/visual/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
 #include "game/constant/Tag.h"
@@ -124,6 +125,13 @@ namespace game::system::combat
 		constexpr float BILLBOARD_SIZE_FACTOR{ 2.5f };
 		config.m_billboardImage = m_billboardImage;
 		config.m_billboardSize = m_metadata.m_radius * BILLBOARD_SIZE_FACTOR * sizeMultiplier;
+
+		// 近接と同じようにクリティカルが出るよう、プレイヤーの会心設定を弾へ引き継ぐ
+		if (auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(m_playerId) })
+		{
+			config.m_criticalRate = attack->m_criticalRate;
+			config.m_criticalMultiplier = attack->m_criticalMultiplier;
+		}
 
 		m_projectileFactory.spawn(origin, direction, config, constant::Tag::Player);
 	}

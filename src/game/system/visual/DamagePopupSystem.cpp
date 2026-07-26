@@ -23,6 +23,14 @@ namespace
 
 	// 文字サイズ（画面高さ比。解像度に依存させないため）
 	constexpr float FONT_HEIGHT_RATIO{ 0.030f };
+	// クリティカル時の文字サイズ倍率。通常の数値に紛れないよう一回り大きく出す
+	constexpr float CRITICAL_FONT_SCALE{ 1.6f };
+	// 数値の上に添える「CRITICAL」ラベル。数値の大きさと色だけでは何が起きたか伝わらないため
+	constexpr const char* CRITICAL_LABEL{ "CRITICAL" };
+	// ラベルの文字サイズ（クリティカル数値に対する比）。主役は数値なので小さく置く
+	constexpr float CRITICAL_LABEL_SCALE{ 0.45f };
+	// ラベルと数値の縦の間隔（ラベルの文字サイズ比）
+	constexpr float CRITICAL_LABEL_GAP_RATIO{ 0.25f };
 	// 影を落とすずらし量（文字サイズ比）。明るい床でも輪郭が残るようにする
 	constexpr float SHADOW_OFFSET_RATIO{ 0.09f };
 
@@ -77,6 +85,7 @@ namespace game::system::visual
 		};
 		// 小数を出しても情報にならないので整数へ丸める。0ダメージでも当たった事実は見せる
 		popup.m_damage = static_cast<int>(event.m_damage + 0.5f);
+		popup.m_isCritical = event.m_isCritical;
 		m_popups.push_back(popup);
 	}
 
@@ -94,8 +103,8 @@ namespace game::system::visual
 		if (m_popups.empty())
 			return;
 
-		const int fontSize{ static_cast<int>(m_screen.getHeight() * FONT_HEIGHT_RATIO) };
-		const int shadowOffset{ std::max(1, static_cast<int>(fontSize * SHADOW_OFFSET_RATIO)) };
+		const int normalFontSize{ static_cast<int>(m_screen.getHeight() * FONT_HEIGHT_RATIO) };
+		const int criticalFontSize{ static_cast<int>(normalFontSize * CRITICAL_FONT_SCALE) };
 
 		for (const auto& popup : m_popups)
 		{
@@ -115,6 +124,14 @@ namespace game::system::visual
 			if (progress > FADE_START_RATIO)
 				alpha = 1.0f - (progress - FADE_START_RATIO) / (1.0f - FADE_START_RATIO);
 
+			// クリティカルは大きさ・色・上に添えるラベルの3点で通常の数値と区別する。
+			// どれか1つだけだと、数値が飛び交う中では見落とす
+			const int fontSize{ popup.m_isCritical ? criticalFontSize : normalFontSize };
+			const int shadowOffset{ std::max(1, static_cast<int>(fontSize * SHADOW_OFFSET_RATIO)) };
+			const unsigned int textColor{ popup.m_isCritical
+				? core::utility::Color::HUD_CHARGE_MAX
+				: core::utility::Color::WHITE };
+
 			const std::string text{ std::to_string(popup.m_damage) };
 			const int textWidth{ m_uiRenderer.getTextWidth(text.c_str(), fontSize) };
 			const int x{ static_cast<int>(screen.x) - textWidth / 2 };
@@ -125,7 +142,7 @@ namespace game::system::visual
 			// 床は真っ黒からほぼ白まであるため、影を先に置いてどちらでも輪郭が残るようにする
 			m_uiRenderer.drawText(x + shadowOffset, y + shadowOffset, text.c_str(),
 			    core::utility::Color::BLACK, fontSize);
-			m_uiRenderer.drawText(x, y, text.c_str(), core::utility::Color::WHITE, fontSize);
+			m_uiRenderer.drawText(x, y, text.c_str(), textColor, fontSize);
 			m_uiRenderer.resetBlendMode();
 		}
 	}

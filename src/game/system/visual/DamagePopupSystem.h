@@ -58,6 +58,7 @@ namespace game::system::visual
 			core::Vector3 m_worldPosition{}; // 発生位置（ワールド座標。ここから浮き上がる）
 			int m_damage{ 0 };               // 表示する数値
 			float m_elapsedTime{ 0.0f };     // 表示開始からの経過時間（秒）
+			bool m_isCritical{ false };      // クリティカルか（大きく黄色く出す）
 		};
 
 		/**

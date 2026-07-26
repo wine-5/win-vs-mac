@@ -30,6 +30,9 @@ namespace game::event
 		/** @brief 再生するSEの種類 */
 		core::constant::SeType m_seType{ core::constant::SeType::None };
 
+		/** @brief クリティカルだったか（ダメージ数値の見せ方を変えるのに使う） */
+		bool m_isCritical{ false };
+
 		AttackHitEvent() = default;
 		AttackHitEvent(core::ecs::EntityId atkId, core::ecs::EntityId tgtId, float dmg,
 		    core::constant::EffectType effectType = core::constant::EffectType::Enemy_HitSword,
