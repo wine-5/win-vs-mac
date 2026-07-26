@@ -4,6 +4,9 @@
 #include "game/component/movement/InputComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
 #include "game/component/visual/AnimationComponent.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IAudioManager.h"
+#include "core/constant/SeType.h"
 
 namespace game::system::movement
 {
@@ -48,6 +51,11 @@ namespace game::system::movement
 						if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
 							m_componentManager.get<component::visual::AnimationComponent>(entityId)
 							    .request(constant::AnimationState::Jump);
+
+						// 跳んだ本人にしか関係しない音なので、跳んだ瞬間にそのまま鳴らす
+						auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+						if (audio)
+							audio->playSe(core::constant::SeType::PlayerJump);
 					}
 					m_prevJumpPressed = input.m_jumpPressed;
 				}
