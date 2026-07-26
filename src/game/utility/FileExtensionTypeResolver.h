@@ -27,6 +27,12 @@ namespace game::utility
 			  return core::data::FileExtensionType::Image;
 		  if (ext == ".mp3" || ext == ".wav" || ext == ".flac")
 			  return core::data::FileExtensionType::Audio;
+		  if (ext == ".cpp" || ext == ".h" || ext == ".py" || ext == ".js" || ext == ".cs")
+			  return core::data::FileExtensionType::SourceCode;
+		  if (ext == ".lnk" || ext == ".url")
+			  return core::data::FileExtensionType::Shortcut;
+		  if (ext == ".mp4" || ext == ".avi" || ext == ".mkv" || ext == ".mov")
+			  return core::data::FileExtensionType::Video;
 		  if (ext == ".zip" || ext == ".7z" || ext == ".rar")
 			  return core::data::FileExtensionType::Archive;
 		  return core::data::FileExtensionType::Unknown;
