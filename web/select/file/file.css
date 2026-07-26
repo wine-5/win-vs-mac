@@ -458,23 +458,28 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
     }
 }
 
+/* 文字と余白はウィンドウ幅（vw）に追従させる。
+   Debugの小さいウィンドウとリリースのフルスクリーンで同じ見え方にするため、
+   固定pxではなく clamp(最小, ウィンドウ比, 最大) で指定する */
 .tutorial-tip {
     position: fixed;
-    left: 16px;
-    right: 16px;
-    bottom: 40px;
+    left: 1.5vw;
+    right: 1.5vw;
+    bottom: 4vh;
     z-index: 50;
+    max-height: 56vh;
+    overflow-y: auto;
     background: rgba(20, 20, 22, 0.98);
-    border: 3px solid var(--accent);
-    border-radius: 10px;
-    padding: 28px 32px;
+    border: clamp(2px, 0.35vw, 3px) solid var(--accent);
+    border-radius: clamp(6px, 1vw, 10px);
+    padding: clamp(10px, 2.2vw, 28px) clamp(12px, 2.6vw, 32px);
     box-shadow: 0 10px 44px rgba(0, 0, 0, 0.8);
     animation: tutorial-tip-in 0.28s ease-out;
 }
 
 /* 案内の対象が画面下端の一覧そのものになる段では、隠さないよう上へ回す */
 .tutorial-tip.at-top {
-    top: 64px;
+    top: 8vh;
     bottom: auto;
 }
 
@@ -484,22 +489,22 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
 }
 
 .tutorial-step {
-    font-size: 22px;
+    font-size: clamp(10px, 2.3vw, 22px);
     letter-spacing: 0.1em;
     color: var(--accent);
-    margin-bottom: 10px;
+    margin-bottom: clamp(4px, 0.9vw, 10px);
 }
 
 .tutorial-title {
-    font-size: 42px;
+    font-size: clamp(15px, 4.4vw, 42px);
     font-weight: 700;
     line-height: 1.25;
     color: var(--text);
-    margin-bottom: 12px;
+    margin-bottom: clamp(5px, 1.1vw, 12px);
 }
 
 .tutorial-body {
-    font-size: 28px;
+    font-size: clamp(11px, 2.9vw, 28px);
     line-height: 1.55;
     color: var(--text);
 }
@@ -507,16 +512,16 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
 .tutorial-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 14px;
-    margin-top: 22px;
+    gap: clamp(6px, 1.3vw, 14px);
+    margin-top: clamp(8px, 2vw, 22px);
 }
 
 .tutorial-skip,
 .tutorial-next {
     border-radius: var(--radius);
     font-family: inherit;
-    font-size: 24px;
-    padding: 12px 28px;
+    font-size: clamp(11px, 2.5vw, 24px);
+    padding: clamp(5px, 1.1vw, 12px) clamp(10px, 2.4vw, 28px);
     cursor: pointer;
 }
 
