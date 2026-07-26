@@ -42,9 +42,10 @@ namespace infrastructure::resource
 		/**
 		 * @brief キューを予算の範囲で消化する
 		 * @param budgetMilliseconds このフレームで先読みに使ってよい時間（ミリ秒）
+		 * @param contextName ログに残す呼び出し元の名前（どのシーン中に読めたかの記録用）
 		 * @return 実際に処理した件数
 		 */
-		int step(int budgetMilliseconds) override;
+		int step(int budgetMilliseconds, std::string_view contextName) override;
 
 		/**
 		 * @brief キューが空になったかどうかを返す

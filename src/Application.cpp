@@ -50,7 +50,7 @@ Application::Application(int screenWidth, int screenHeight)
 
 	// 初期シーンを設定する
 	// DEBUG: リリース時はBIOSからスタートすること
-	m_sceneManager->changeScene(game::scene::SceneType::InGame);
+	m_sceneManager->changeScene(game::scene::SceneType::Bios);
 }
 
 void Application::run()
@@ -110,7 +110,8 @@ void Application::run()
 		// 1件で数百ms掛かることがあり、その時間を次フレームのelapsedTimeに混ぜると
 		// accumulatorがMAX_UPDATES_PER_FRAMEに張り付いて処理落ちが連鎖するため、
 		// 実際に読み込んだ場合はlastFrameTimeを取り直して先読み時間を計測から外す
-		if (m_preloader->step(preloadBudgetMs(m_sceneManager->getCurrentSceneType())) > 0)
+		const auto sceneType{ m_sceneManager->getCurrentSceneType() };
+		if (m_preloader->step(preloadBudgetMs(sceneType), game::scene::toString(sceneType)) > 0)
 			lastFrameTime = std::chrono::steady_clock::now();
 
 		// 入力の「前回状態」はフレームに1回だけ更新する。

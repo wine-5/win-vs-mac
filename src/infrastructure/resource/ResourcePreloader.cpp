@@ -1,6 +1,26 @@
 #include "ResourcePreloader.h"
 #include <chrono>
 #include "core/interface/IResourceManager.h"
+#include "core/utility/Log.h"
+
+namespace
+{
+	/**
+	 * @brief リソース種別をログ表示用の名前へ変換する
+	 * @param kind リソース種別
+	 * @return 種別名
+	 */
+	[[nodiscard]] constexpr std::string_view toString(core::iface::PreloadKind kind) noexcept
+	{
+		switch (kind)
+		{
+		case core::iface::PreloadKind::Model: return "Model";
+		case core::iface::PreloadKind::Animation: return "Animation";
+		case core::iface::PreloadKind::Image: return "Image";
+		default: return "Unknown";
+		}
+	}
+} // namespace
 
 namespace infrastructure::resource
 {
@@ -29,7 +49,7 @@ namespace infrastructure::resource
 			enqueue(PreloadKind::Animation, id);
 	}
 
-	int ResourcePreloader::step(int budgetMilliseconds)
+	int ResourcePreloader::step(int budgetMilliseconds, std::string_view contextName)
 	{
 		const auto start{ std::chrono::steady_clock::now() };
 		int processed{ 0 };
@@ -38,6 +58,9 @@ namespace infrastructure::resource
 		{
 			const Request request{ m_queue.front() };
 			m_queue.pop_front();
+
+			// 1件あたりの所要時間はどれが重いかの特定に直結するので個別に測る
+			const auto itemStart{ std::chrono::steady_clock::now() };
 
 			switch (request.m_kind)
 			{
@@ -54,6 +77,16 @@ namespace infrastructure::resource
 
 			++m_doneCount;
 			++processed;
+
+			const auto itemElapsed{ std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::steady_clock::now() - itemStart)
+				    .count() };
+			core::log::info("[Preload][{}] {} '{}' ({}/{}) {}ms",
+			    contextName, toString(request.m_kind), request.m_id,
+			    m_doneCount, m_totalCount, itemElapsed);
+
+			if (m_queue.empty())
+				core::log::info("[Preload][{}] 先読み完了（全{}件）", contextName, m_totalCount);
 
 			// 予算判定はループ末尾で行う（＝1回のstepで最低1件は必ず処理する）。
 			// 先頭で判定すると、単体で予算を超えるリソースが永久に消化されない

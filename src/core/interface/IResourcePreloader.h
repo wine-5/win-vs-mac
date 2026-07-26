@@ -48,9 +48,10 @@ namespace core::iface
 		 * 1件あたりの所要時間は事前に分からないため、予算判定は「1件処理した後」に行う。
 		 * 先に判定すると、予算より重いリソースが永久に処理されなくなる。
 		 * @param budgetMilliseconds このフレームで先読みに使ってよい時間（ミリ秒）
+		 * @param contextName ログに残す呼び出し元の名前（どのシーン中に読めたかの記録用）
 		 * @return 実際に処理した件数
 		 */
-		virtual int step(int budgetMilliseconds) = 0;
+		virtual int step(int budgetMilliseconds, std::string_view contextName) = 0;
 
 		/**
 		 * @brief キューが空になったかどうかを返す
