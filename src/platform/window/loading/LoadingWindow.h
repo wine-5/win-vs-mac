@@ -36,6 +36,14 @@ namespace platform::window::loading
 		void setOnLoadingComplete(std::function<void()> callback) noexcept;
 
 		/**
+		 * @brief 演出の再生速度を設定する
+		 *
+		 * JS側はページ読み込み時にこの値を要求してくるため、create() より前に設定しておく。
+		 * @param speedMultiplier 再生速度の倍率（1.0で等速）
+		 */
+		void setSpeedMultiplier(float speedMultiplier) noexcept;
+
+		/**
 		 * @brief メッセージポンプ（毎フレーム呼び出し）
 		 */
 		void pumpMessages() noexcept override;
@@ -57,6 +65,7 @@ namespace platform::window::loading
 		static constexpr const wchar_t* LOADING_HTML_URL{ L"https://game.web/loading/loading.html" };
 
 		std::function<void()> m_onLoadingComplete{};
+		float m_speedMultiplier{ 1.0f };
 
 		void handleMessage(const std::string& json) noexcept;
 	};

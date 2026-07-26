@@ -81,8 +81,12 @@ namespace platform::window
 
         // JSONメッセージタイプ（LoadingWindow）
         static constexpr const char* MESSAGE_TYPE_LOADING_COMPLETE{ "loadingComplete" };
+		// ページ読み込み時にJS側から演出速度を要求する（起動時の先読みが済んでいれば倍速で流す）
+		static constexpr const char* MESSAGE_TYPE_REQUEST_LOADING_SPEED{ "requestLoadingSpeed" };
+		static constexpr const char* MESSAGE_TYPE_LOADING_SPEED{ "loadingSpeed" };
+		static constexpr const char* JSON_KEY_SPEED{ "speed" };
 
-    private:
+	  private:
         WindowConstants() = delete;
     };
 } // namespace platform::window

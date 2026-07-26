@@ -34,6 +34,8 @@ const LoadingLogic = (function () {
     let isFinished = false;
     let onLineReadyCallback = null;
     let onLoadingCompleteCallback = null;
+    // 演出の再生速度。ゲーム側の先読みが済んでいれば倍速などに引き上げられる
+    let speedMultiplier = 1.0;
 
     function initialize() {
         // メッセージキューのセットアップ
@@ -54,7 +56,7 @@ const LoadingLogic = (function () {
     function update(deltaTime) {
         if (isFinished) return;
 
-        elapsedTime += deltaTime;
+        elapsedTime += deltaTime * speedMultiplier;
 
         // 表示する行数を更新
         while (visibleCount < messageQueue.length &&
@@ -78,6 +80,8 @@ const LoadingLogic = (function () {
     function onMessageFromGame(data) {
         if (data.type === 'startLoading') {
             initialize();
+        } else if (data.type === 'loadingSpeed' && typeof data.speed === 'number' && data.speed > 0) {
+            speedMultiplier = data.speed;
         }
     }
 
@@ -97,6 +101,12 @@ const LoadingLogic = (function () {
         return isFinished;
     }
 
+    // 再生速度をゲーム側へ要求する（C++から一方的に送るとWebView2の
+    // 初期化前に投げてしまい取りこぼすため、こちらから要求する）
+    function requestSpeed() {
+        sendToGame({ type: 'requestLoadingSpeed' });
+    }
+
     // 初期化を実行
     initialize();
 
@@ -108,6 +118,7 @@ const LoadingLogic = (function () {
 
     return {
         update: update,
+        requestSpeed: requestSpeed,
         onMessageFromGame: onMessageFromGame,
         onLineReady: onLineReady,
         onLoadingComplete: onLoadingComplete,

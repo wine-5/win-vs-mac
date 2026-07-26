@@ -17,6 +17,15 @@
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
 
+namespace
+{
+	/// @brief ローディング演出の再生速度（先読みが間に合っていない場合）
+	constexpr float NORMAL_LOADING_SPEED{ 1.0f };
+
+	/// @brief ローディング演出の再生速度（先読みが完了済みの場合）
+	constexpr float PRELOADED_LOADING_SPEED{ 2.0f };
+} // namespace
+
 namespace game::scene
 {
 	SceneFactory::SceneFactory(GameManager& gameManager, PauseManager& pauseManager)
@@ -106,13 +115,20 @@ namespace game::scene
 			auto* uiRenderer = core::base::ServiceLocator::get<core::iface::IUIRenderer>();
 			auto* windowFactory = core::base::ServiceLocator::get<core::iface::IWindowFactory>();
 
+			auto* preloader = core::base::ServiceLocator::get<core::iface::IResourcePreloader>();
+
+			// 起動時からの先読みが済んでいれば待つ理由が無いので演出を倍速で流す
+			const float loadingSpeed{ preloader->isComplete()
+				                          ? PRELOADED_LOADING_SPEED
+				                          : NORMAL_LOADING_SPEED };
+
 			auto loadingWindow = windowFactory->createLoadingWindow(
-				[this]() {
+			    [this]()
+			    {
 					if (m_loadingScene)
 						m_loadingScene->notifyLoadingComplete();
-				});
-
-			auto* preloader = core::base::ServiceLocator::get<core::iface::IResourcePreloader>();
+			    },
+			    loadingSpeed);
 
 			m_loadingScene = std::make_unique<Loading>(
 			    *uiRenderer,

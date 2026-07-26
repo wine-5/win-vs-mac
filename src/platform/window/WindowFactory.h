@@ -18,15 +18,17 @@ namespace platform::window
          */
         explicit WindowFactory(core::iface::IScreen& screen);
 
-        /**
-         * @brief ローディングウィンドウを生成・初期化
-         * @param onLoadingComplete ローディング完了時のコールバック
-         * @return 生成されたローディングウィンドウ（既に初期化済み）
-         */
-        std::unique_ptr<core::iface::IWindow> createLoadingWindow(
-            std::function<void()> onLoadingComplete) override;
+		/**
+		 * @brief ローディングウィンドウを生成・初期化
+		 * @param onLoadingComplete ローディング完了時のコールバック
+		 * @param speedMultiplier 演出の再生速度倍率（1.0で等速）
+		 * @return 生成されたローディングウィンドウ（既に初期化済み）
+		 */
+		std::unique_ptr<core::iface::IWindow> createLoadingWindow(
+		    std::function<void()> onLoadingComplete,
+		    float speedMultiplier) override;
 
-        /**
+		/**
          * @brief リザルトウィンドウを生成・初期化
          * @param onRetry リトライボタン押下時のコールバック
          * @param onTitle タイトルボタン押下時のコールバック
