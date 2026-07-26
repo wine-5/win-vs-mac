@@ -131,10 +131,14 @@ void Application::updatePauseMenu()
 	if (m_inputProvider->isKeyPressed(core::input::KeyCode::Escape))
 	{
 		if (m_pauseManager.isPausedBy(game::PauseReason::Menu))
+		{
 			m_pauseManager.resume();
+			m_sceneManager->notifyPauseChanged(false);
+		}
 		else if (!m_pauseManager.isPaused() && canOpenPauseMenu(sceneType))
 		{
 			m_pauseManager.pause(game::PauseReason::Menu);
+			m_sceneManager->notifyPauseChanged(true);
 			m_pauseMenuController->open(allowBackToTitle(sceneType));
 		}
 	}
@@ -147,10 +151,12 @@ void Application::updatePauseMenu()
 	{
 	case game::ui::pause::PauseMenuAction::Resume:
 		m_pauseManager.resume();
+		m_sceneManager->notifyPauseChanged(false);
 		break;
 
 	case game::ui::pause::PauseMenuAction::BackToTitle:
 		m_pauseManager.resume();
+		m_sceneManager->notifyPauseChanged(false);
 		m_sceneManager->changeScene(game::scene::SceneType::Title);
 		break;
 
