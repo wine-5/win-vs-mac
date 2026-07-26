@@ -309,7 +309,19 @@ namespace game::scene
 		m_view.setEnemyHealthBarView(m_enemyHealthBarView.get());
 	}
 
-	InGame::~InGame() = default;
+	InGame::~InGame()
+	{
+		// カーソルを戻す最後の砦。onPauseChanged は「ポーズ中だけ出す」可逆な切り替えなので、
+		// ポーズからタイトルへ戻る経路では resume() が先に走って再び隠れてしまう。
+		// 抜け方（死亡・勝利・タイトルへ）ごとに書くと漏れるため、終了地点に一本化する
+		m_inputProvider.setMouseCursorVisible(true);
+	}
+
+	void InGame::onPauseChanged(bool isPaused)
+	{
+		// ポーズ中はメニューをマウスで操作できるように出し、再開したら戦闘用に隠す
+		m_inputProvider.setMouseCursorVisible(isPaused);
+	}
 
 	void InGame::loadResources()
 	{
@@ -593,8 +605,6 @@ namespace game::scene
 		    [this](const event::PlayerDeathSequenceFinishedEvent&)
 		    {
 			    saveResultData(false);
-			    // メニュー操作用にカーソルを戻してからシーンを切り替える
-			    m_inputProvider.setMouseCursorVisible(true);
 			    auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 			    sceneManager->changeScene(game::scene::SceneType::Result);
 		    }));
@@ -638,8 +648,6 @@ namespace game::scene
 			    if (e.m_type != constant::EnemyType::Mac)
 				    return;
 			    saveResultData(true);
-			    // メニュー操作用にカーソルを戻してからシーンを切り替える
-			    m_inputProvider.setMouseCursorVisible(true);
 			    auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 			    sceneManager->changeScene(game::scene::SceneType::Result);
 		    }));

@@ -103,6 +103,14 @@ namespace game::scene
 	   */
 	  void draw() override;
 
+	  /**
+	   * @brief ポーズ状態の変化に応じてマウスカーソルの表示を切り替える
+	   *
+	   * 戦闘中は隠しているが、ポーズメニューはマウスでも操作できる必要がある
+	   * @param isPaused ポーズ中ならtrue
+	   */
+	  void onPauseChanged(bool isPaused) override;
+
 	private:
 		/* コンストラクタで参照する関数 */
 		void loadResources();
