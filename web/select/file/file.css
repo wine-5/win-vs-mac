@@ -151,7 +151,7 @@ body {
 }
 
 @keyframes emptyTextPulse {
-    0%, 100% { opacity: 0.45; }
+    0%, 100% { opacity: 0.6; }
     50%      { opacity: 0.95; }
 }
 

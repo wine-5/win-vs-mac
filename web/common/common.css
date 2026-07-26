@@ -20,8 +20,9 @@
     --accent-hover: #106ebe;
     --danger: #c42b1c;
     --danger-hover: #a42018;
-    --text: #cccccc;
-    --text-muted: #888888;
+    /* 暗い背景の上で読みづらかったため、本文・補足とも明度を上げている */
+    --text: #f0f0f0;
+    --text-muted: #b4b4b4;
     --radius: 4px;
 }
 
