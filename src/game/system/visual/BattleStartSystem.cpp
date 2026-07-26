@@ -3,6 +3,9 @@
 #include "game/component/ai/AIComponent.h"
 #include "core/utility/Color.h"
 #include "core/constant/UI.h"
+#include "core/constant/SeType.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IAudioManager.h"
 #include <algorithm>
 #include <cmath>
 
@@ -74,6 +77,10 @@ namespace game::system::visual
 	{
 		// Systemの登録順に関係なく初回フレームから止めたいので、update待ちではなくここでロックする
 		setGameplayLocked(true);
+
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio)
+			audio->playSe(core::constant::SeType::BattleReady);
 	}
 
 	bool BattleStartSystem::isPreparing() const noexcept
@@ -127,7 +134,13 @@ namespace game::system::visual
 		// FIGHT!が出た瞬間に操作と敵AIを解禁する。文字が消えるのを待たせると、
 		// もう動けるのか分からない空白の時間ができる
 		if (m_isLocked && m_elapsedTime >= FIGHT_TIME)
+		{
 			setGameplayLocked(false);
+
+			auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+			if (audio)
+				audio->playSe(core::constant::SeType::BattleFight);
+		}
 
 		if (m_elapsedTime >= TOTAL_TIME)
 			m_isPlaying = false;
