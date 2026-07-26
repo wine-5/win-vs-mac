@@ -69,9 +69,23 @@ namespace game::ui::debug
 
 		/**
 		 * @brief HUDを描画する
+		 *
+		 * 非表示のときは何も描かない（FPS等の計測自体は続ける）
 		 * @param enemyCount 現在の敵の数（EnemyFactoryが管理する一覧のサイズ）
 		 */
 		void draw(int enemyCount);
+
+		/**
+		 * @brief 表示するかどうかを設定する
+		 * @param visible 表示するならtrue
+		 */
+		void setVisible(bool visible) noexcept;
+
+		/**
+		 * @brief 表示中かどうかを返す
+		 * @return 表示中ならtrue
+		 */
+		[[nodiscard]] bool isVisible() const noexcept;
 
 	  private:
 		/**
@@ -107,6 +121,9 @@ namespace game::ui::debug
 
 		// パフォーマンスデータ（CPU/メモリ）の更新間隔管理
 		float m_perfUpdateTimer{ 0.0f };
+
+		// 表示するかどうか。右上は難易度・経過時間のHUDが使うため、既定では出さない
+		bool m_isVisible{ false };
 
 		static constexpr float FPS_UPDATE_INTERVAL{ 0.5f };  // FPS表示の更新間隔（秒）
 		static constexpr float PERF_UPDATE_INTERVAL{ 1.0f }; // CPU/メモリ取得の更新間隔（秒）
