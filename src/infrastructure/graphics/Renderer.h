@@ -145,9 +145,10 @@ namespace infrastructure::graphics
 		 * @param size ワールド単位での大きさ
 		 * @param angle 面内の回転角（ラジアン）
 		 * @param brightness 明るさ（0〜255）
+		 * @param color 光の色（0xRRGGBB）
 		 */
 		void drawGlowBillboard(int imageHandle, const core::Vector3& position,
-		    float size, float angle, int brightness) override;
+		    float size, float angle, int brightness, unsigned int color = 0xFFFFFFu) override;
 
 		void drawBillboard(int imageHandle, const core::Vector3& position,
 		    float size, float angle) override;

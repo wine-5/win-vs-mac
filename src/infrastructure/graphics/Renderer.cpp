@@ -335,7 +335,7 @@ namespace infrastructure::graphics
 	}
 
 	void Renderer::drawGlowBillboard(int imageHandle, const core::Vector3& position,
-	    float size, float angle, int brightness)
+	    float size, float angle, int brightness, unsigned int color)
 	{
 		if (imageHandle == -1)
 			return;
@@ -345,8 +345,20 @@ namespace infrastructure::graphics
 		SetWriteZBuffer3D(FALSE);
 		SetDrawBlendMode(DX_BLENDMODE_ADD, brightness);
 
+		// 描画輝度は画像の色に乗算される。白い光の画像を色付きの光として使うために掛ける
+		const bool isTinted{ color != 0xFFFFFFu };
+		if (isTinted)
+		{
+			SetDrawBright(static_cast<int>((color >> 16) & 0xFFu),
+			    static_cast<int>((color >> 8) & 0xFFu),
+			    static_cast<int>(color & 0xFFu));
+		}
+
 		const VECTOR pos{ VGet(position.x, position.y, position.z) };
 		DrawBillboard3D(pos, 0.5f, 0.5f, size, angle, imageHandle, TRUE);
+
+		if (isTinted)
+			SetDrawBright(255, 255, 255);
 
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 		SetWriteZBuffer3D(TRUE);

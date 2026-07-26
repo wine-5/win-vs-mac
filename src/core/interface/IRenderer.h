@@ -208,9 +208,10 @@ namespace core::iface
 		 * @param size ワールド単位での大きさ（画像のアスペクト比は保たれる）
 		 * @param angle 面内の回転角（ラジアン）
 		 * @param brightness 明るさ（0〜255。加算量の指定）
+		 * @param color 光の色（0xRRGGBB。画像の色に乗算する。白なら画像のまま）
 		 */
 		virtual void drawGlowBillboard(int imageHandle, const core::Vector3& position,
-		    float size, float angle, int brightness) = 0;
+		    float size, float angle, int brightness, unsigned int color = 0xFFFFFFu) = 0;
 
 		// 補足: worldToScreen は射影変換であり、厳密には3D描画の責務ではない。
 		//       ただし現状の利用は順変換の2箇所のみで、メソッド1本のために
