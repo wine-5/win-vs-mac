@@ -1,5 +1,6 @@
 ﻿#include "PlayerChargeVisualsSystem.h"
 #include "game/component/combat/PlayerChargeComponent.h"
+#include "core/constant/UI.h"
 #include "core/utility/Color.h"
 #include <cmath>
 #include "core/utility/MathConstants.h"
@@ -15,6 +16,13 @@ namespace
 	constexpr float WEDGE_HALF_WIDTH_MIN{ 0.002f };   // くさびの根本半幅の最小（画面高さ比）
 	constexpr float WEDGE_HALF_WIDTH_RAND{ 0.006f };  // くさびの根本半幅の乱数幅（画面高さ比）
 	constexpr float WEDGE_WIDTH_GROWTH_BASE{ 0.35f }; // 溜め開始時の太さ倍率（ここから1.0へ育つ）
+
+	// ---- 溜め切ったときの縁の演出（低HPの赤ビネットと同じ形で、色だけ溜め最大の黄色に変える）----
+	constexpr float MAX_VIGNETTE_BAND_RATIO{ 0.14f };  // 画面端から内側へ染める幅（画面高さ比）
+	constexpr int MAX_VIGNETTE_STEP{ 4 };              // 帯を描く刻み幅（px）
+	constexpr float MAX_VIGNETTE_ALPHA{ 0.45f };       // 縁のいちばん濃いところの不透明度
+	constexpr float MAX_VIGNETTE_PULSE_FREQ{ 7.0f };   // 脈動の速さ（回/秒）
+	constexpr float MAX_VIGNETTE_PULSE_AMOUNT{ 0.3f }; // 脈動で濃さが揺れる割合
 
 	/**
 	 * @brief 整数の種から0.0〜1.0の疑似乱数を返す（毎フレーム同じ種なら同じ値になる決定的な乱数）
@@ -114,5 +122,38 @@ namespace game::system::visual
 
 			m_uiRenderer.drawTriangle(apexX, apexY, base1X, base1Y, base2X, base2Y, lineColor, true);
 		}
+
+		// 溜め切ったら縁も染める。集中線は中央へ向かうので視線が中心にないと気づきにくいが、
+		// 縁なら視界のどこを見ていても入る（低HPの赤ビネットと同じ理屈で、色だけ役割に合わせて変える）
+		if (charge.m_isFullyCharged)
+			drawMaxChargeVignette();
+	}
+
+	void PlayerChargeVisualsSystem::drawMaxChargeVignette()
+	{
+		const int screenW{ m_screen.getWidth() };
+		const int screenH{ m_screen.getHeight() };
+
+		const int band{ static_cast<int>(screenH * MAX_VIGNETTE_BAND_RATIO) };
+		if (band <= 0)
+			return;
+
+		// 溜め切ってからも脈打たせる。止まった絵だと「溜め終わって固まった」ようにしか見えない
+		const float pulse{ 1.0f - MAX_VIGNETTE_PULSE_AMOUNT * (0.5f + 0.5f * std::sin(m_animationTime * MAX_VIGNETTE_PULSE_FREQ)) };
+
+		// 画面端から内側へ枠を重ね、端から離れるほど薄くしてビネットにする
+		for (int inset{ 0 }; inset < band; inset += MAX_VIGNETTE_STEP)
+		{
+			const float edgeFactor{ 1.0f - static_cast<float>(inset) / static_cast<float>(band) };
+			const int alpha{ static_cast<int>(MAX_VIGNETTE_ALPHA * pulse * edgeFactor * 255.0f) };
+			if (alpha <= 0)
+				continue;
+
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+			m_uiRenderer.drawBox(inset, inset, screenW - 2 * inset, screenH - 2 * inset,
+			    core::utility::Color::HUD_CHARGE_MAX, false);
+		}
+
+		m_uiRenderer.resetBlendMode();
 	}
 } // namespace game::system::visual
