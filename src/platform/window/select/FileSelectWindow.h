@@ -64,8 +64,7 @@ namespace platform::window::select
         static constexpr int SLOT_COUNT{ 3 };
 
 		// ファイルダイアログフィルター
-		// ワイド文字版のダイアログを使う（日本語パスをUTF-8で受け取るため）
-		static constexpr const wchar_t* FILE_DIALOG_FILTER_W{ L"All Files\0*.*\0" };
+		static constexpr const char* FILE_DIALOG_FILTER{ "All Files\0*.*\0" };
 
 		// ファイル拡張子タイプ名
         static constexpr const char* EXT_TYPE_NAME_EXECUTABLE{ "Executable" };
@@ -95,14 +94,14 @@ namespace platform::window::select
         void openFileDialog(int slotIndex);
 
 		/**
-		 * @brief ワイド文字列を UTF-8 へ変換する
+		 * @brief システム既定のコードページの文字列を UTF-8 へ変換する
 		 *
 		 * WebViewへ渡すJSONはUTF-8でなければ例外になるため、
 		 * ファイルダイアログから受け取ったパスは必ずここを通す
-		 * @param wide 変換元のワイド文字列
+		 * @param ansi 変換元の文字列（日本語環境ではShift_JIS）
 		 * @return UTF-8 の文字列（空やnullptrなら空文字）
 		 */
-		[[nodiscard]] static std::string toUtf8(const wchar_t* wide) noexcept;
+		[[nodiscard]] static std::string toUtf8(const char* ansi) noexcept;
 		void sendSlotsRefresh() noexcept;
         void sendBonusInfo() noexcept;
     };

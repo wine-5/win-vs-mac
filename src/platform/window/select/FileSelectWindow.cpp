@@ -83,21 +83,22 @@ namespace platform::window::select
 
 	void FileSelectWindow::openFileDialog(int slotIndex)
 	{
-		// ANSI版（GetOpenFileNameA）だと日本語環境ではShift_JISのパスが返り、
+		// ワイド文字版（GetOpenFileNameW）は comdlg32 の内部で __debugbreak() に当たるため使わない。
+		// ANSI版が返すのは日本語環境ではShift_JIS（システム既定のコードページ）のパスで、
 		// そのままJSONへ載せると「不正なUTF-8」で例外になりスロットが送信されない。
-		// ワイド文字で受け取り、UTF-8へ変換してから保持する
-		OPENFILENAMEW ofn{};
-		wchar_t fileBuffer[MAX_PATH]{};
+		// 受け取ったあとにUTF-8へ変換してから保持する
+		OPENFILENAMEA ofn{};
+		char fileBuffer[MAX_PATH]{};
 
 		ofn.lStructSize = sizeof(ofn);
 		ofn.hwndOwner = getHwnd();
 		ofn.lpstrFile = fileBuffer;
 		ofn.nMaxFile = MAX_PATH;
-		ofn.lpstrFilter = FILE_DIALOG_FILTER_W;
+		ofn.lpstrFilter = FILE_DIALOG_FILTER;
 		ofn.nFilterIndex = 1;
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
-		if (!GetOpenFileNameW(&ofn))
+		if (!GetOpenFileNameA(&ofn))
 			return;
 
 		m_filePaths[slotIndex] = toUtf8(fileBuffer);
@@ -110,17 +111,27 @@ namespace platform::window::select
 		sendSlotsRefresh();
 	}
 
-	std::string FileSelectWindow::toUtf8(const wchar_t* wide) noexcept
+	std::string FileSelectWindow::toUtf8(const char* ansi) noexcept
 	{
-		if (wide == nullptr || wide[0] == L'\0')
+		if (ansi == nullptr || ansi[0] == '\0')
 			return {};
 
-		const int length{ WideCharToMultiByte(CP_UTF8, 0, wide, -1, nullptr, 0, nullptr, nullptr) };
-		if (length <= 1)
+		// システム既定のコードページ（日本語環境ならShift_JIS）→ UTF-16 → UTF-8 と二段で変換する。
+		// 直接ANSI→UTF-8に変換するAPIは無いため、UTF-16を経由するのが定石
+		const int wideLength{ MultiByteToWideChar(CP_ACP, 0, ansi, -1, nullptr, 0) };
+		if (wideLength <= 1)
 			return {};
 
-		std::string utf8(static_cast<std::size_t>(length) - 1, '\0');
-		WideCharToMultiByte(CP_UTF8, 0, wide, -1, utf8.data(), length, nullptr, nullptr);
+		std::wstring wide(static_cast<std::size_t>(wideLength) - 1, L'\0');
+		MultiByteToWideChar(CP_ACP, 0, ansi, -1, wide.data(), wideLength);
+
+		const int utf8Length{ WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1,
+			nullptr, 0, nullptr, nullptr) };
+		if (utf8Length <= 1)
+			return {};
+
+		std::string utf8(static_cast<std::size_t>(utf8Length) - 1, '\0');
+		WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, utf8.data(), utf8Length, nullptr, nullptr);
 		return utf8;
 	}
 
