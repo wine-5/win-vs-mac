@@ -429,7 +429,7 @@ namespace infrastructure::resource::repository
 			"detectionRange", "attackRange",
 			"maxHp", "defence", "attackPower", "attackCooldown", "attackWindup",
 			"attackMaxHeight",
-			"comboInputWindow",
+			"comboInputWindow", "comboStage2Multiplier",
 			"hoverHeight", "preferredDistanceMin", "preferredDistanceMax",
 			"fireCooldown", "facingYawOffset"
 		};

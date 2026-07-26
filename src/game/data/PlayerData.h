@@ -14,7 +14,7 @@ namespace game::data
 	 */
 	class PlayerData
 	{
-	public:
+	  public:
 		/**
 		 * @brief ModelMetadataからPlayerDataを生成
 		 * @param metadata ResourceManagerから取得したメタデータ
@@ -90,11 +90,19 @@ namespace game::data
 			if (comboInputWindowIt != metadata.floatProperties.end())
 				data.m_comboInputWindow = comboInputWindowIt->second;
 
+			auto comboStage2MultiplierIt{ metadata.floatProperties.find(
+				std::string(constant::metadata_keys::COMBO_STAGE2_MULTIPLIER)) };
+			if (comboStage2MultiplierIt != metadata.floatProperties.end())
+				data.m_comboStage2Multiplier = comboStage2MultiplierIt->second;
+
 			return data;
 		}
 
 		/** @brief 移動速度を取得 */
-		[[nodiscard]] float              getMoveSpeed()      const noexcept { return m_moveSpeed; }
+		[[nodiscard]] float getMoveSpeed() const noexcept
+		{
+			return m_moveSpeed;
+		}
 		/** @brief ダッシュ速度倍率を取得 */
 		[[nodiscard]] float getDashMultiplier() const noexcept
 		{
@@ -116,15 +124,30 @@ namespace game::data
 			return m_maxFallSpeed;
 		}
 		/** @brief 最大HPを取得 */
-		[[nodiscard]] float              getMaxHp()          const noexcept { return m_maxHp; }
+		[[nodiscard]] float getMaxHp() const noexcept
+		{
+			return m_maxHp;
+		}
 		/** @brief 防御力を取得 */
-		[[nodiscard]] float              getDefence()        const noexcept { return m_defence; }
+		[[nodiscard]] float getDefence() const noexcept
+		{
+			return m_defence;
+		}
 		/** @brief 攻撃力を取得 */
-		[[nodiscard]] float              getAttackPower()    const noexcept { return m_attackPower; }
+		[[nodiscard]] float getAttackPower() const noexcept
+		{
+			return m_attackPower;
+		}
 		/** @brief 攻撃範囲を取得 */
-		[[nodiscard]] float              getAttackRange()    const noexcept { return m_attackRange; }
+		[[nodiscard]] float getAttackRange() const noexcept
+		{
+			return m_attackRange;
+		}
 		/** @brief 攻撃クールダウンを取得 */
-		[[nodiscard]] float              getAttackCooldown() const noexcept { return m_attackCooldown; }
+		[[nodiscard]] float getAttackCooldown() const noexcept
+		{
+			return m_attackCooldown;
+		}
 		/**
 		 * @brief 攻撃のワインドアップ遅延を取得（秒）
 		 *
@@ -141,12 +164,32 @@ namespace game::data
 		{
 			return m_comboInputWindow;
 		}
+		/**
+		 * @brief 近接コンボ2段目（回転斬り）のダメージ倍率を取得
+		 *
+		 * 攻撃力そのものではなく倍率で持つのは、拡張子ボーナスで上がった
+		 * attackPower がそのまま2段目にも反映されるようにするため。
+		 * JSON未設定時は1段目と同じ威力（等倍）
+		 */
+		[[nodiscard]] float getComboStage2Multiplier() const noexcept
+		{
+			return m_comboStage2Multiplier;
+		}
 		/** @brief コライダーサイズを取得 */
-		[[nodiscard]] core::Vector3      getColliderSize()   const noexcept { return m_colliderSize; }
+		[[nodiscard]] core::Vector3 getColliderSize() const noexcept
+		{
+			return m_colliderSize;
+		}
 		/** @brief コライダーオフセットを取得 */
-		[[nodiscard]] core::Vector3      getColliderOffset() const noexcept { return m_colliderOffset; }
+		[[nodiscard]] core::Vector3 getColliderOffset() const noexcept
+		{
+			return m_colliderOffset;
+		}
 		/** @brief モデルスケールを取得 */
-		[[nodiscard]] core::Vector3      getScale()          const noexcept { return m_scale; }
+		[[nodiscard]] core::Vector3 getScale() const noexcept
+		{
+			return m_scale;
+		}
 		/** @brief 武器の装着設定を取得（JSONに weapon 要素が無ければ nullopt） */
 		[[nodiscard]] const std::optional<core::data::WeaponAttachMetadata>& getWeapon() const noexcept
 		{
@@ -177,23 +220,24 @@ namespace game::data
 			m_attackRange += bonus.attackRange;
 		}
 
-	private:
-		float         m_moveSpeed{ 0.0f };
-		float m_dashMultiplier{ 1.0f }; // JSON未設定時はダッシュしても等速
-		float m_jumpForce{ 50.0f };     // ジャンプの初速（JSON未設定時の従来値）
-		float m_gravity{ -980.0f };     // 重力加速度（JSON未設定時の従来値）
+	  private:
+		float m_moveSpeed{ 0.0f };
+		float m_dashMultiplier{ 1.0f };  // JSON未設定時はダッシュしても等速
+		float m_jumpForce{ 50.0f };      // ジャンプの初速（JSON未設定時の従来値）
+		float m_gravity{ -980.0f };      // 重力加速度（JSON未設定時の従来値）
 		float m_maxFallSpeed{ -200.0f }; // 落下速度の下限（JSON未設定時の従来値）
-		float         m_maxHp{ 0.0f };
-		float         m_defence{ 0.0f };
-		float         m_attackPower{ 0.0f };
-		float         m_attackRange{ 0.0f };
-		float         m_attackCooldown{ 0.0f };
-		float m_attackWindup{ 0.0f };     // 攻撃のワインドアップ遅延（0なら即時判定）
-		float m_comboInputWindow{ 1.0f }; // コンボの次段入力受付時間（JSON未設定時の既定値）
+		float m_maxHp{ 0.0f };
+		float m_defence{ 0.0f };
+		float m_attackPower{ 0.0f };
+		float m_attackRange{ 0.0f };
+		float m_attackCooldown{ 0.0f };
+		float m_attackWindup{ 0.0f };          // 攻撃のワインドアップ遅延（0なら即時判定）
+		float m_comboInputWindow{ 1.0f };      // コンボの次段入力受付時間（JSON未設定時の既定値）
+		float m_comboStage2Multiplier{ 1.0f }; // 2段目のダメージ倍率（JSON未設定時は等倍）
 		core::Vector3 m_colliderSize;
 		core::Vector3 m_colliderOffset;
 		core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };
-		std::vector<core::data::AnimationClipDef> m_animations{}; // アニメーションクリップ定義
+		std::vector<core::data::AnimationClipDef> m_animations{};   // アニメーションクリップ定義
 		std::optional<core::data::WeaponAttachMetadata> m_weapon{}; // 武器の装着設定
 	};
 } // namespace game::data

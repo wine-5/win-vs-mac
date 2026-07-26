@@ -87,6 +87,11 @@ namespace game::system::combat
 		// 2段目は回転斬り（Attack2）、それ以外は通常の斬り（Attack1）。
 		// 斬撃エフェクトの傾きも段に合わせる（AttackSystemがイベントへ載せる）
 		const bool isFinalStage{ combo.m_stage >= MAX_COMBO_STAGE };
+
+		// 締めの回転斬りだけ威力を上げる。攻撃力自体は書き換えず倍率で渡すので、
+		// 1段目へ戻ったときに元の威力へ自然に戻る
+		attack.m_damageMultiplier = isFinalStage ? combo.m_stage2DamageMultiplier : 1.0f;
+
 		attack.m_effectRotationOffset = isFinalStage ? STAGE2_EFFECT_ROTATION : STAGE1_EFFECT_ROTATION;
 		attack.m_effectPositionOffset = EFFECT_POSITION_OFFSET;
 

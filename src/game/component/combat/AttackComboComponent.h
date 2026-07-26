@@ -16,6 +16,10 @@ namespace game::component::combat
 		// クールダウンより長い値にすること
 		float m_inputWindow{ 1.0f };
 
+		// 2段目（回転斬り）のダメージ倍率。1段目は常に等倍で、締めだけ強くしたいので
+		// 段ごとの攻撃力ではなく倍率で持つ（1.0なら1段目と同じ威力）
+		float m_stage2DamageMultiplier{ 1.0f };
+
 		// 現在の段数（0=攻撃していない、1=1段目、2=2段目）
 		int m_stage{ 0 };
 

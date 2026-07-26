@@ -38,6 +38,7 @@
     "attackRange": 200.0,
     "attackCooldown": 0.5,
     "attackWindup": 0.25,
-    "comboInputWindow": 1.5
+    "comboInputWindow": 1.5,
+    "comboStage2Multiplier": 1.8
   }
 }

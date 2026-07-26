@@ -68,6 +68,7 @@ namespace game::actor
 		// 近接攻撃の2段コンボ（斬り→回転斬り）。次段の受付時間はJSONで調整する
 		component::combat::AttackComboComponent combo{};
 		combo.m_inputWindow = playerData.getComboInputWindow();
+		combo.m_stage2DamageMultiplier = playerData.getComboStage2Multiplier();
 		componentManager.add<component::combat::AttackComboComponent>(m_entity.getId(), combo);
 
 		component::combat::ColliderComponent collider;
