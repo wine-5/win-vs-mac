@@ -11,7 +11,6 @@ namespace core::input
         A,
         S,
         D,
-		T, // DEBUG: テストエフェクト再生
 		Space,
 		Enter,  // 決定（ポーズメニュー等）
 		Escape, // ポーズメニューの開閉（Biosではスキップ）

@@ -10,7 +10,6 @@ namespace infrastructure
 		{ core::input::KeyCode::A, KEY_INPUT_A },
 		{ core::input::KeyCode::S, KEY_INPUT_S },
 		{ core::input::KeyCode::D, KEY_INPUT_D },
-		{ core::input::KeyCode::T, KEY_INPUT_T },
 		{ core::input::KeyCode::Space, KEY_INPUT_SPACE },
 		{ core::input::KeyCode::Enter, KEY_INPUT_RETURN },
 		{ core::input::KeyCode::Escape, KEY_INPUT_ESCAPE },

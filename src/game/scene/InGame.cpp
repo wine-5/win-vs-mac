@@ -676,14 +676,6 @@ namespace game::scene
 		if (m_battleStartSystem == nullptr || !m_battleStartSystem->isPreparing())
 			m_elapsedTime += scaledDeltaTime;
 		m_systemManager.update(scaledDeltaTime);
-
-		// DEBUG: Tキーでプレイヤー位置にテストエフェクト（Enemy_Spawn）を再生する（テスト後に削除）
-		if (m_inputProvider.isKeyPressed(core::input::KeyCode::T))
-		{
-			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_playerId) };
-			m_effectFactory.play(core::constant::EffectType::Enemy_HitWindow, transform.m_position, {});
-			core::log::info("エフェクトが再生");
-		}
 	}
 
 	void InGame::draw()
