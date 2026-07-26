@@ -147,14 +147,16 @@ namespace platform::window::select
             notifyWindowState(WINDOW_NAME_DIFF, false);
         });
 
-        // RulesWindow（センタリング・初期非表示）
-        m_rulesWindow = std::make_unique<RulesWindow>(
-            originX + (screenWidth  - RULES_WINDOW_WIDTH) / 2,
-            originY + (screenHeight - RULES_WINDOW_HEIGHT) / 2,
-            RULES_WINDOW_WIDTH,
-            RULES_WINDOW_HEIGHT
-        );
-        if (!m_rulesWindow->create(m_desktopWindow->getHwnd())) return;
+		// RulesWindow（センタリング・初期非表示）。
+		// 操作方法をまとめて読ませる場所なので、画面の大部分を占める大きさで開く
+		const int rulesWidth{ screenWidth * RULES_WINDOW_WIDTH_PERCENT / 100 };
+		const int rulesHeight{ screenHeight * RULES_WINDOW_HEIGHT_PERCENT / 100 };
+		m_rulesWindow = std::make_unique<RulesWindow>(
+		    originX + (screenWidth - rulesWidth) / 2,
+		    originY + (screenHeight - rulesHeight) / 2,
+		    rulesWidth,
+		    rulesHeight);
+		if (!m_rulesWindow->create(m_desktopWindow->getHwnd())) return;
         m_rulesWindow->setOnMinimize([this]() noexcept {
             m_rulesWindow->hide();
             m_rulesVisible = false;

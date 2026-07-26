@@ -54,11 +54,13 @@ namespace platform::window::select
 		static constexpr int ICON_AREA_RATIO{ 11 };
 		static constexpr int ICON_AREA_RATIO_BASE{ 20 };
 
-		// RulesWindowのサイズ
-        static constexpr int RULES_WINDOW_WIDTH{ 920 };
-        static constexpr int RULES_WINDOW_HEIGHT{ 660 };
+		// RulesWindowのサイズ（クライアント領域に対する割合）。
+		// 固定サイズだと、Debugの小さいウィンドウでは画面を覆い、
+		// フルスクリーンでは読ませたい説明文が小さく浮くだけになる
+		static constexpr int RULES_WINDOW_WIDTH_PERCENT{ 76 };
+		static constexpr int RULES_WINDOW_HEIGHT_PERCENT{ 84 };
 
-        // ウィンドウのアルファ値
+		// ウィンドウのアルファ値
         static constexpr BYTE WINDOW_ALPHA{ 250 };
 
         // ファイルスロット数
