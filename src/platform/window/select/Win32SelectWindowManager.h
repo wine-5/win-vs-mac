@@ -116,6 +116,18 @@ namespace platform::window::select
 		 */
 		void broadcastDifficulty(const std::string& difficulty) noexcept;
 
+		// 初回ガイドの段番号（file-tutorial.js の並びと対）
+		static constexpr int TUTORIAL_STEP_BONUS{ 2 }; // 拡張子で能力が上がる（パラメータを強調）
+		static constexpr int TUTORIAL_STEP_RULES{ 3 }; // ルール説明.txtへ誘導（デスクトップを強調）
+
+		/**
+		 * @brief 初回ガイドの段を各ウィンドウへ配り、強調表示を切り替えさせる
+		 *
+		 * ウィンドウは互いに直接やり取りできないため、ここが中継役になる
+		 * @param step 段番号（1始まり・0はガイド終了）
+		 */
+		void broadcastTutorialStep(int step) noexcept;
+
 		void handleDesktopMessage(const std::string& json) noexcept;
         void notifyWindowState(const std::string& name, bool visible) noexcept;
 

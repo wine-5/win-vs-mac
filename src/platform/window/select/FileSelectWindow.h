@@ -53,6 +53,15 @@ namespace platform::window::select
 	  void setShowTutorial(bool showTutorial) noexcept;
 
 	  /**
+	   * @brief ガイドの段が変わったことを受け取るコールバックを設定する
+	   *
+	   * 段によってはパラメータやデスクトップ側を強調する必要があるが、
+	   * ウィンドウは互いに直接やり取りできないため、管理側へ中継してもらう
+	   * @param callback 段番号（1始まり・0は終了）を受け取るコールバック
+	   */
+	  void setOnTutorialStepChanged(std::function<void(int)> callback) noexcept;
+
+	  /**
 	   * @brief ファイルパスを取得
 	   * @param slot スロットインデックス（0-2）
 	   * @return ファイルパス
@@ -100,6 +109,7 @@ namespace platform::window::select
 
 		// 初回だけ出す操作ガイドを表示するか
 		bool m_showTutorial{ false };
+		std::function<void(int)> m_onTutorialStepChanged{};
 
 		void handleMessage(const std::string& json) noexcept;
 		/**

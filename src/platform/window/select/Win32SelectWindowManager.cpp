@@ -93,6 +93,10 @@ namespace platform::window::select
 				m_slotExtTypes[slot] = game::utility::FileExtensionTypeResolver::fromPath(path);
 			}
 			updateParameterWindow(); });
+		// ガイドの段に応じて他ウィンドウの強調表示を切り替える。
+		// ウィンドウ同士は直接やり取りできないので、ここが中継役になる
+		m_fileSelectWindow->setOnTutorialStepChanged([this](int step) noexcept
+		    { broadcastTutorialStep(step); });
 		m_fileSelectWindow->setOnMinimize([this]() noexcept {
             m_fileSelectWindow->hide();
             m_fileVisible = false;
@@ -471,6 +475,38 @@ namespace platform::window::select
 		catch (...)
 		{
 			core::log::error("Win32SelectWindowManager::broadcastDifficulty: 不明な例外が発生しました");
+		}
+	}
+
+	void Win32SelectWindowManager::broadcastTutorialStep(int step) noexcept
+	{
+		try
+		{
+			nlohmann::json j;
+			j[platform::window::WindowConstants::JSON_KEY_TYPE] =
+			    platform::window::WindowConstants::MESSAGE_TYPE_TUTORIAL_HIGHLIGHT;
+
+			// パラメータ：伸びた項目だけを残す段（拡張子で能力が上がる、の説明中）
+			if (m_parameterWindow)
+			{
+				j[platform::window::WindowConstants::JSON_KEY_SHOW] = (step == TUTORIAL_STEP_BONUS);
+				m_parameterWindow->postMessage(j.dump());
+			}
+
+			// デスクトップ：ルール説明のアイコンを目立たせる段（最後の締め）
+			if (m_desktopWindow)
+			{
+				j[platform::window::WindowConstants::JSON_KEY_SHOW] = (step == TUTORIAL_STEP_RULES);
+				m_desktopWindow->postMessage(j.dump());
+			}
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("Win32SelectWindowManager::broadcastTutorialStep: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("Win32SelectWindowManager::broadcastTutorialStep: 不明な例外が発生しました");
 		}
 	}
 

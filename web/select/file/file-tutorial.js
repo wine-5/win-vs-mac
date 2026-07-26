@@ -57,9 +57,20 @@ const FileTutorial = (function () {
         });
     }
 
+    /**
+     * 今の段を他のウィンドウへ知らせる。
+     * パラメータ（伸びた項目の強調）やデスクトップ（ルール説明アイコンの強調）は
+     * 別のWebViewなので、C++を経由して伝えてもらう
+     * @param step 段番号（1始まり・0はガイド終了）
+     */
+    function notifyStep(step) {
+        sendToGame({ type: 'tutorialStep', step: step });
+    }
+
     function finish() {
         isActive = false;
         clearTarget();
+        notifyStep(0);
         if (tipEl) tipEl.hidden = true;
     }
 
@@ -74,6 +85,7 @@ const FileTutorial = (function () {
 
         clearTarget();
         if (step.bodyClass) document.body.classList.add(step.bodyClass);
+        notifyStep(index + 1);
 
         stepEl.textContent = 'STEP ' + (index + 1) + ' / ' + STEPS.length;
         titleEl.textContent = step.title;

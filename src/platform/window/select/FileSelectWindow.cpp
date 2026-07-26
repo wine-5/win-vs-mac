@@ -32,6 +32,11 @@ namespace platform::window::select
 		m_showTutorial = showTutorial;
 	}
 
+	void FileSelectWindow::setOnTutorialStepChanged(std::function<void(int)> callback) noexcept
+	{
+		m_onTutorialStepChanged = std::move(callback);
+	}
+
 	void FileSelectWindow::sendTutorialState() noexcept
 	{
 		try
@@ -97,6 +102,11 @@ namespace platform::window::select
 			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_TUTORIAL)
 			{
 				sendTutorialState();
+			}
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_TUTORIAL_STEP)
+			{
+				if (m_onTutorialStepChanged)
+					m_onTutorialStepChanged(j.value(platform::window::WindowConstants::JSON_KEY_STEP, 0));
 			}
 			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_SLOTS)
 			{

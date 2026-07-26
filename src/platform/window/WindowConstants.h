@@ -76,6 +76,11 @@ namespace platform::window
 		static constexpr const char* MESSAGE_TYPE_REQUEST_TUTORIAL{ "requestTutorial" };
 		static constexpr const char* MESSAGE_TYPE_TUTORIAL{ "tutorial" };
 		static constexpr const char* JSON_KEY_SHOW{ "show" };
+		// ガイドがどの段に進んだかをファイル選択から他ウィンドウへ配る（0は終了）。
+		// 各ウィンドウは自分に関係する段だけ強調表示に切り替える
+		static constexpr const char* MESSAGE_TYPE_TUTORIAL_STEP{ "tutorialStep" };
+		static constexpr const char* MESSAGE_TYPE_TUTORIAL_HIGHLIGHT{ "tutorialHighlight" };
+		static constexpr const char* JSON_KEY_STEP{ "step" };
 
 		// JSONメッセージタイプ（ResultWindow）
         static constexpr const char* MESSAGE_TYPE_REQUEST_RESULT{ "requestResult" };
