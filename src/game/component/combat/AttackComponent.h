@@ -53,5 +53,10 @@ namespace game::component::combat
 		// AttackSystem が AttackStartEvent へそのまま載せる。Noneなら無音。
 		// 近接コンボの段ごとに振り音を変えるために使う
 		core::constant::SeType m_startSeType{ core::constant::SeType::None };
+
+		// ダメージ判定が成立する瞬間に鳴らすSE。ワインドアップ有りの攻撃では振り終わり、
+		// 無しの攻撃では発動と同時に鳴る。地面を叩きつける攻撃の着弾音のように、
+		// 「振り始め」ではなく「当たる瞬間」に置きたい音のために持つ。Noneなら無音
+		core::constant::SeType m_impactSeType{ core::constant::SeType::None };
 	};
 } // namespace game::component::combat

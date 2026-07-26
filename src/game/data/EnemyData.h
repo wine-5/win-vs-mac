@@ -7,6 +7,7 @@
 #include "core/data/Difficulty.h"
 #include "core/data/ModelMetadata.h"
 #include "core/data/MacMetadata.h"
+#include "core/constant/SeType.h"
 #include "game/constant/MetadataKeys.h"
 
 namespace game::data
@@ -116,6 +117,11 @@ namespace game::data
 			  std::string(constant::metadata_keys::FACING_YAW_OFFSET)) };
 		  if (facingYawOffsetIt != properties.end())
 			  data.m_facingYawOffset = facingYawOffsetIt->second;
+
+		  // 攻撃が当たる瞬間に鳴らすSE。書かれていなければNone（＝無音）のまま
+		  auto attackImpactSeIt{ metadata.stringProperties.find("attackImpactSe") };
+		  if (attackImpactSeIt != metadata.stringProperties.end())
+			  data.m_attackImpactSe = core::constant::toSeType(attackImpactSeIt->second);
 
 		  return data;
         }
@@ -246,6 +252,12 @@ namespace game::data
 			return m_mac;
 		}
 
+		/** @brief 攻撃が当たる瞬間に鳴らすSEを取得（未設定の敵ではNone＝無音） */
+		[[nodiscard]] core::constant::SeType getAttackImpactSe() const noexcept
+		{
+			return m_attackImpactSe;
+		}
+
 		/** @brief アニメーションクリップ定義の一覧を取得（アニメ無しの敵では空） */
 		[[nodiscard]] const std::vector<core::data::AnimationClipDef>& getAnimations() const noexcept
 		{
@@ -267,6 +279,7 @@ namespace game::data
 	  float m_preferredDistanceMax{ 0.0f };
 	  float m_fireCooldown{ 0.0f };
 	  float m_facingYawOffset{ 0.0f };
+	  core::constant::SeType m_attackImpactSe{ core::constant::SeType::None }; // 攻撃が当たる瞬間のSE
 	  core::Vector3 m_colliderSize;
 	  core::Vector3 m_colliderOffset;
 	  core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };

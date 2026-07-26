@@ -22,6 +22,7 @@ namespace game::event
 
 	private:
 	  void onAttackStart(const AttackStartEvent& e);
+	  void onAttackImpact(const AttackImpactEvent& e);
 	  void onAttackHit(const AttackHitEvent& e);
 	  void onEnemyDead(const EnemyDeadEvent& e);
 	  void onPlayerDead(const PlayerDeadEvent& e);

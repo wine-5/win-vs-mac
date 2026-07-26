@@ -68,6 +68,7 @@ namespace game::actor
 		attack.m_attackCooldown = m_enemyData.getAttackCooldown();
 		attack.m_windupDelay = m_enemyData.getAttackWindup();
 		attack.m_attackMaxHeight = m_enemyData.getAttackMaxHeight();
+		attack.m_impactSeType = m_enemyData.getAttackImpactSe();
 		m_componentManager.add<component::combat::AttackComponent>(m_entity.getId(), attack);
 
 		component::combat::ColliderComponent collider{};

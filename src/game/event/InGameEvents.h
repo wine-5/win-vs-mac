@@ -96,6 +96,29 @@ namespace game::event
 	};
 
 	/**
+	 * @brief 攻撃のダメージ判定が成立する瞬間に発行されるイベント
+	 *
+	 * 振り始め（AttackStartEvent）とは別に、「当たる瞬間」に合わせたい演出のために持つ。
+	 * ワインドアップ有りの攻撃では振り終わり、無しの攻撃では発動と同時に発行される。
+	 * 相手に当たったかどうかは問わない（空振りでも地面を叩く音は鳴ってほしいため）
+	 */
+	struct AttackImpactEvent : public core::iface::IGameEvent
+	{
+		/** @brief 攻撃者のEntityId */
+		core::ecs::EntityId m_attackerId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief 再生するSEの種類（Noneなら無音） */
+		core::constant::SeType m_seType{ core::constant::SeType::None };
+
+		AttackImpactEvent() = default;
+		AttackImpactEvent(core::ecs::EntityId attackerId, core::constant::SeType seType)
+		    : m_attackerId{ attackerId }
+		    , m_seType{ seType }
+		{
+		}
+	};
+
+	/**
 	 * @brief 非ループアニメーションが再生完了したときに発行されるイベント
 	 */
 	struct AnimationFinishedEvent : public core::iface::IGameEvent

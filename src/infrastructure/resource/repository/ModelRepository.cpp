@@ -447,7 +447,14 @@ namespace infrastructure::resource::repository
 		};
 
 		if (j.contains("gameplay"))
+		{
 			readFloatProperties(j["gameplay"], metadata.floatProperties);
+
+			// 攻撃が当たる瞬間に鳴らすSEの名前（SeType.h の SE_TYPE_NAMES に対応）。
+			// 敵ごとに攻撃音を変えられるようにするため、数値ではなく文字列で持つ
+			if (j["gameplay"].contains("attackImpactSe"))
+				metadata.stringProperties["attackImpactSe"] = j["gameplay"]["attackImpactSe"];
+		}
 
 		// hard配下はgameplayと同じキー名で書いた値だけを持つ。
 		// 難易度Hardのときに game::data::EnemyData が gameplay の上へ被せる

@@ -13,6 +13,10 @@ namespace game::event
 		    [this](const AttackStartEvent& e)
 		    { onAttackStart(e); }));
 
+		m_subscriptions.push_back(m_eventBus.subscribe<AttackImpactEvent>(
+		    [this](const AttackImpactEvent& e)
+		    { onAttackImpact(e); }));
+
 		m_subscriptions.push_back(m_eventBus.subscribe<AttackHitEvent>(
 		    [this](const AttackHitEvent& e)
 		    { onAttackHit(e); }));
@@ -33,6 +37,17 @@ namespace game::event
 	void AudioEventListener::onAttackStart(const AttackStartEvent& e)
 	{
 		// 振り始めの音。当たったかどうかに関係なく、振った事実そのものを返す
+		if (e.m_seType == core::constant::SeType::None)
+			return;
+
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio)
+			audio->playSe(e.m_seType);
+	}
+
+	void AudioEventListener::onAttackImpact(const AttackImpactEvent& e)
+	{
+		// 当たる瞬間の音（地面の叩きつけなど）。空振りでも鳴らす
 		if (e.m_seType == core::constant::SeType::None)
 			return;
 

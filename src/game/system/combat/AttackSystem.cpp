@@ -57,6 +57,11 @@ namespace game::system::combat
 				{
 					attack.m_windupPending = false;
 
+					// 振り終わり＝地面を叩く瞬間。当たったかどうかに関係なく鳴らしたいので、
+					// ヒット判定（resolveAttack）より前に発行する
+					if (attack.m_impactSeType != core::constant::SeType::None)
+						m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType });
+
 					// 溜め中に攻撃者が倒された場合は、振り終わりのダメージを不発にする
 					const bool attackerDead{ m_componentManager.has<component::combat::HealthComponent>(attackerId) &&
 						                     m_componentManager.get<component::combat::HealthComponent>(attackerId).m_isDead };
@@ -136,7 +141,11 @@ namespace game::system::combat
 				continue;
 			}
 
-			// ワインドアップ無し（従来動作）：即座にダメージを解決する
+			// ワインドアップ無し（従来動作）：発動と同時が当たる瞬間になる
+			if (attack.m_impactSeType != core::constant::SeType::None)
+				m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType });
+
+			// 即座にダメージを解決する
 			resolveAttack(attackerId, attack);
 
 			// クールダウンをリセット
