@@ -78,6 +78,7 @@ Log.txt
 DxLib_Log.txt
 # ゲーム側のログ（LogUtilが出力する控え）
 game_log.txt
+assert_log.txt
 
 # -------------------------------------------------------
 # CMake

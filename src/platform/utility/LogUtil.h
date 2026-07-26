@@ -56,6 +56,9 @@ namespace platform::utility
 		// コンソールのハンドル（実体は HANDLE。Windows.h をヘッダへ出さないため void* で持つ）
 		void* m_consoleHandle{ nullptr };
 
+		// CRTアサーションの書き出し先ファイル（実体は HANDLE）
+		void* m_assertFileHandle{ nullptr };
+
 		// ログの控え。フルスクリーンやフリーズ中はコンソールを前面に出せず読めないため、
 		// 後から確認できるようファイルにも同じ内容を残す
 		std::ofstream m_logFile{};
