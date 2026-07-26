@@ -692,16 +692,6 @@ namespace game::scene
 				core::log::info("DEBUG: シーンビューOFF");
 		}
 
-		// DEBUG: F3キーで連続ジャンプ（空中浮上）のON/OFFを切り替える（リリース時に削除）
-		if (m_inputProvider.isKeyPressed(core::input::KeyCode::F3))
-		{
-			m_gameManager.toggleContinuousJump();
-			if (m_gameManager.isContinuousJumpEnabled())
-				core::log::info("DEBUG: 連続ジャンプON（空中浮上可）");
-			else
-				core::log::info("DEBUG: 連続ジャンプOFF（接地単発）");
-		}
-
 		// DEBUG: シーンビュー凍結中はゲームロジックを止め、フリーカメラだけを更新する（リリース時に削除）
 		if (m_pauseManager.isPausedBy(PauseReason::DebugSceneView))
 		{
