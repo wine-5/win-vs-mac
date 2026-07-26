@@ -248,9 +248,8 @@ namespace game::scene
 			lighting->setDirectionalLight(core::Vector3{ -0.3f, -1.0f, 0.4f }, 255, 255, 255);
 		}
 
-		// DEBUG: 何かと不便なためリリースするときにfalseに変更すること
 		// 3人称マウス視点のためカーソルを非表示にする
-		m_inputProvider.setMouseCursorVisible(true);
+		m_inputProvider.setMouseCursorVisible(false);
 
 		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（リリース時にまとめて削除）
 		m_debugGizmoView = std::make_unique<ui::debug::DebugGizmoView>(m_componentManager, m_renderer);
