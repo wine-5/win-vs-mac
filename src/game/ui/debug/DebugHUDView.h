@@ -89,11 +89,6 @@ namespace game::ui::debug
 
 	  private:
 		/**
-		 * @brief デバッグカメラ（F1）・シーンビュー（F2）の状態と操作方法を左上に表示する
-		 */
-		void drawCameraLabel();
-
-		/**
 		 * @brief FPS・Entity数・CPU/メモリ使用率を右上に表示する
 		 * @param enemyCount 現在の敵の数
 		 */

@@ -84,23 +84,6 @@ namespace game
 		// DEBUG: ここからデバッグモード関連（リリース時にまとめて削除する）
 
 		/**
-		 * @brief デバッグモードのON/OFFを切り替える
-		 */
-		void toggleDebugMode() noexcept
-		{
-			m_debugMode = !m_debugMode;
-		}
-
-		/**
-		 * @brief デバッグモードが有効かどうかを返す
-		 * @return 有効ならtrue
-		 */
-		[[nodiscard]] bool isDebugMode() const noexcept
-		{
-			return m_debugMode;
-		}
-
-		/**
 		 * @brief 連続ジャンプが有効かどうかを返す
 		 * @return 有効ならtrue（PhysicsSystemが接地・押下エッジ判定を無効化する）
 		 */
@@ -123,8 +106,6 @@ namespace game
 		core::data::Difficulty m_difficulty{ core::data::Difficulty::Normal };
 		bool m_quitRequested{ false };
 
-		// DEBUG: デバッグモードの状態（リリース時に削除）
-		bool m_debugMode{ false };
 		// DEBUG: 連続ジャンプ（空中浮上）を許可するか。falseで通常の接地単発ジャンプ。
 		// 空中移動して動作確認したいときにここをtrueにする（リリース時に削除）
 		bool m_continuousJumpEnabled{ false };

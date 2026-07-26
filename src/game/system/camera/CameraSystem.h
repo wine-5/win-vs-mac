@@ -7,7 +7,6 @@
 
 namespace game
 {
-	class GameManager; // DEBUG: デバッグモード参照用の前方宣言（リリース時に削除）
 } // namespace game
 
 namespace game::system::camera
@@ -27,13 +26,11 @@ namespace game::system::camera
 		 * @param targetEntityId 追従対象（プレイヤー）のEntityID
 		 * @param inputProvider 入力のインターフェース
 		 * @param camera カメラ装置のインターフェース
-		 * @param gameManager デバッグモード状態の参照（DEBUG: リリース時に削除）
 		 */
 		CameraSystem(core::ecs::ComponentManager& componentManager,
 		    core::ecs::EntityId targetEntityId,
 		    core::iface::IInputProvider& inputProvider,
-		    core::iface::ICamera& camera,
-		    GameManager& gameManager);
+		    core::iface::ICamera& camera);
 
 		/**
 		 * @brief マウス入力に応じてカメラを更新する
@@ -59,7 +56,6 @@ namespace game::system::camera
 		core::ecs::EntityId m_targetEntityId{};
 		core::iface::IInputProvider& m_inputProvider;
 		core::iface::ICamera& m_camera;
-		GameManager& m_gameManager; // DEBUG: デバッグモード状態の参照（リリース時に削除）
 
 		// 壁で寄せた距離。寄るのは即座、戻るのは緩やかにするため前フレームの値を持つ
 		float m_currentDistance{ 0.0f };

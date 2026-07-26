@@ -6,7 +6,6 @@
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/constant/Tag.h"
-#include "game/GameManager.h"
 #include "core/utility/Rotation.h"
 #include <cmath>
 #include <algorithm>
@@ -29,13 +28,11 @@ namespace game::system::camera
 	CameraSystem::CameraSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId targetEntityId,
 	    core::iface::IInputProvider& inputProvider,
-	    core::iface::ICamera& camera,
-	    GameManager& gameManager)
+	    core::iface::ICamera& camera)
 	    : m_componentManager{ componentManager }
 	    , m_targetEntityId{ targetEntityId }
 	    , m_inputProvider{ inputProvider }
 	    , m_camera{ camera }
-	    , m_gameManager{ gameManager }
 	{
 	}
 
@@ -103,10 +100,6 @@ namespace game::system::camera
 
 	void CameraSystem::update(float deltaTime)
 	{
-		// DEBUG: デバッグモード中はDebugCameraSystemがカメラを制御するため通常追従を止める（リリース時に削除）
-		if (m_gameManager.isDebugMode())
-			return;
-
 		if (!m_componentManager.has<component::camera::CameraComponent>(m_targetEntityId))
 			return;
 
