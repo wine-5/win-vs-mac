@@ -9,6 +9,7 @@
 #include "SceneManager.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IResourceManager.h"
+#include "core/interface/IResourcePreloader.h"
 #include "core/interface/IWindowFactory.h"
 #include "core/interface/ISelectWindowManager.h"
 #include "core/data/Difficulty.h"
@@ -111,10 +112,13 @@ namespace game::scene
 						m_loadingScene->notifyLoadingComplete();
 				});
 
+			auto* preloader = core::base::ServiceLocator::get<core::iface::IResourcePreloader>();
+
 			m_loadingScene = std::make_unique<Loading>(
-				*uiRenderer,
-				*screen,
-				std::move(loadingWindow));
+			    *uiRenderer,
+			    *screen,
+			    std::move(loadingWindow),
+			    *preloader);
 			return m_loadingScene.get();
 		}
 
