@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <optional>
@@ -240,6 +241,25 @@ namespace game::data
 			m_defence += bonus.def;
 			m_maxHp += bonus.hp;
 			m_attackRange += bonus.attackRange;
+			// 発生率は確率なので1.0（必ず出る）を超えないよう頭打ちにする
+			m_criticalRate = std::min(m_criticalRate + bonus.criticalRate, 1.0f);
+
+			// Window弾の基準値は projectileData.json 側が持つため、
+			// ここでは加算ぶんだけを貯めて、弾定義へ乗せるのは発射Systemの組み立て時に行う
+			m_projectileSpeedBonus += bonus.projectileSpeed;
+			m_projectileRangeBonus += bonus.projectileRange;
+		}
+
+		/** @brief 装備で加算されたWindow弾の弾速ボーナスを取得（基準値は弾定義側が持つ） */
+		[[nodiscard]] float getProjectileSpeedBonus() const noexcept
+		{
+			return m_projectileSpeedBonus;
+		}
+
+		/** @brief 装備で加算されたWindow弾の飛距離ボーナスを取得（基準値は弾定義側が持つ） */
+		[[nodiscard]] float getProjectileRangeBonus() const noexcept
+		{
+			return m_projectileRangeBonus;
 		}
 
 	  private:
@@ -258,6 +278,9 @@ namespace game::data
 		float m_comboStage2Multiplier{ 1.0f }; // 2段目のダメージ倍率（JSON未設定時は等倍）
 		float m_criticalRate{ 0.0f };          // クリティカルの発生率（0.0〜1.0。0なら発生しない）
 		float m_criticalMultiplier{ 1.0f };    // クリティカル時のダメージ倍率（JSON未設定時は等倍）
+		// Window弾への装備ボーナス。基準値は projectileData.json が持つので加算ぶんだけを貯める
+		float m_projectileSpeedBonus{ 0.0f };
+		float m_projectileRangeBonus{ 0.0f };
 		core::Vector3 m_colliderSize;
 		core::Vector3 m_colliderOffset;
 		core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };

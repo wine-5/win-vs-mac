@@ -54,6 +54,9 @@ namespace infrastructure::resource::repository
 			read("def", bonus.def);
 			read("hp", bonus.hp);
 			read("attackRange", bonus.attackRange);
+			read("criticalRate", bonus.criticalRate);
+			read("projectileSpeed", bonus.projectileSpeed);
+			read("projectileRange", bonus.projectileRange);
 		}
 	}
 
