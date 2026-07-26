@@ -11,6 +11,8 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IWindowFactory.h"
 #include "core/interface/ISelectWindowManager.h"
+#include "core/data/Difficulty.h"
+#include "core/utility/Log.h"
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
 
@@ -86,6 +88,11 @@ namespace game::scene
 			    [this](int slot, const std::string& path)
 			    {
 				    m_gameManager.getFileEquipmentData().setFilePath(slot, path);
+			    },
+			    [this](const std::string& difficulty)
+			    {
+				    m_gameManager.setDifficulty(core::data::toDifficulty(difficulty));
+				    core::log::info("難易度を選択しました: {}", difficulty.c_str());
 			    },
 			    *resourceManager);
 

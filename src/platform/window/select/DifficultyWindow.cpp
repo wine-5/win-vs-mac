@@ -17,7 +17,27 @@ namespace platform::window::select
         return m_selectedDifficulty;
     }
 
-    void DifficultyWindow::onCreateControls(HWND hwnd)
+	void DifficultyWindow::setOnDifficultyChanged(
+	    std::function<void(const std::string&)> callback) noexcept
+	{
+		m_onDifficultyChanged = std::move(callback);
+
+		// 既定値（NORMAL）もゲーム側と食い違わないよう、登録した時点で一度通知しておく
+		if (m_onDifficultyChanged)
+			m_onDifficultyChanged(m_selectedDifficulty);
+	}
+
+	void DifficultyWindow::applyDifficulty(const std::string& difficulty) noexcept
+	{
+		if (difficulty == m_selectedDifficulty)
+			return;
+
+		m_selectedDifficulty = difficulty;
+		if (m_onDifficultyChanged)
+			m_onDifficultyChanged(m_selectedDifficulty);
+	}
+
+	void DifficultyWindow::onCreateControls(HWND hwnd)
     {
         setIcon(hwnd, ICON_PATH);
         m_webView.setOnMessage([this](const std::string& json) noexcept {
@@ -47,8 +67,8 @@ namespace platform::window::select
             {
                 const std::string diff{ j.value("difficulty", DIFFICULTY_NORMAL) };
 				if (diff == DIFFICULTY_NORMAL || diff == DIFFICULTY_HARD)
-					m_selectedDifficulty = diff;
-            }
+					applyDifficulty(diff);
+			}
             else if (type == MESSAGE_TYPE_CONFIRM_HARD)
             {
                 const int result{ MessageBoxW(
@@ -59,8 +79,8 @@ namespace platform::window::select
                 ) };
                 if (result == IDOK)
                 {
-                    m_selectedDifficulty = DIFFICULTY_HARD;
-                    nlohmann::json resp;
+					applyDifficulty(DIFFICULTY_HARD);
+					nlohmann::json resp;
                     resp[platform::window::WindowConstants::JSON_KEY_TYPE] = MESSAGE_TYPE_HARD_CONFIRMED;
                     m_webView.postMessage(resp.dump());
                 }

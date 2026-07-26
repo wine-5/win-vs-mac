@@ -36,17 +36,19 @@ namespace platform::window
             std::function<void()> onRetry,
             std::function<void()> onTitle) override;
 
-        /**
-         * @brief セレクト画面のウィンドウマネージャを生成・初期化
-         * @param onGameStart ゲーム開始時のコールバック
-         * @param onFileSlotChanged ファイルスロット変更時のコールバック
-         * @param resourceManager リソースマネージャ
-         * @return 生成されたセレクトウィンドウマネージャ
-         */
-        std::unique_ptr<core::iface::ISelectWindowManager> createSelectWindowManager(
-            std::function<void()> onGameStart,
-            std::function<void(int, const std::string&)> onFileSlotChanged,
-            core::iface::IResourceManager& resourceManager) override;
+		/**
+		 * @brief セレクト画面のウィンドウマネージャを生成・初期化
+		 * @param onGameStart ゲーム開始時のコールバック
+		 * @param onFileSlotChanged ファイルスロット変更時のコールバック
+		 * @param onDifficultyChanged 難易度変更時のコールバック
+		 * @param resourceManager リソースマネージャ
+		 * @return 生成されたセレクトウィンドウマネージャ
+		 */
+		std::unique_ptr<core::iface::ISelectWindowManager> createSelectWindowManager(
+		    std::function<void()> onGameStart,
+		    std::function<void(int, const std::string&)> onFileSlotChanged,
+		    std::function<void(const std::string&)> onDifficultyChanged,
+		    core::iface::IResourceManager& resourceManager) override;
 
 	  private:
         // ローディングウィンドウのサイズ比率（スクリーンサイズに対する割合）

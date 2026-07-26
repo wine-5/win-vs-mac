@@ -32,7 +32,13 @@ namespace platform::window::select
 		 */
 		[[nodiscard]] std::string getSelectedDifficulty() const noexcept;
 
-    protected:
+		/**
+		 * @brief 難易度が変わったときに呼ばれるコールバックを設定する
+		 * @param callback 難易度文字列（"NORMAL" | "HARD"）を受け取るコールバック
+		 */
+		void setOnDifficultyChanged(std::function<void(const std::string&)> callback) noexcept;
+
+	  protected:
         void onCreateControls(HWND hwnd) override;
         LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
 
@@ -62,7 +68,14 @@ namespace platform::window::select
         static constexpr const wchar_t* HARD_WARNING_TITLE{ L"警告 - Win vs Mac.exe" };
 
         std::string m_selectedDifficulty{ DIFFICULTY_NORMAL };
+		std::function<void(const std::string&)> m_onDifficultyChanged{};
 
-        void handleMessage(const std::string& json) noexcept;
-    };
+		void handleMessage(const std::string& json) noexcept;
+
+		/**
+		 * @brief 選択中の難易度を差し替え、変わっていれば通知する
+		 * @param difficulty 難易度文字列（"NORMAL" | "HARD"）
+		 */
+		void applyDifficulty(const std::string& difficulty) noexcept;
+	};
 } // namespace platform::window::select

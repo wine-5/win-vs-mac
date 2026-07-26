@@ -29,6 +29,7 @@ namespace platform::window::select
 	  Win32SelectWindowManager(
 		  std::function<void()> onGameStart,
 		  std::function<void(int, const std::string&)> onFileSlotChanged,
+		  std::function<void(const std::string&)> onDifficultyChanged,
 		  core::iface::IResourceManager& resourceManager,
 		  core::iface::IScreen& screen) noexcept;
 
@@ -108,8 +109,9 @@ namespace platform::window::select
 
 		std::function<void()> m_onGameStart{};
         std::function<void(int, const std::string&)> m_onFileSlotChanged{};
+		std::function<void(const std::string&)> m_onDifficultyChanged{};
 
-        core::iface::IResourceManager& m_resourceManager;
+		core::iface::IResourceManager& m_resourceManager;
         core::iface::IScreen& m_screen;
     };
 } // namespace platform::window::select

@@ -18,10 +18,12 @@ namespace platform::window::select
 	Win32SelectWindowManager::Win32SelectWindowManager(
 	    std::function<void()> onGameStart,
 	    std::function<void(int, const std::string&)> onFileSlotChanged,
+	    std::function<void(const std::string&)> onDifficultyChanged,
 	    core::iface::IResourceManager& resourceManager,
 	    core::iface::IScreen& screen) noexcept
 	    : m_onGameStart{ std::move(onGameStart) }
 	    , m_onFileSlotChanged{ std::move(onFileSlotChanged) }
+	    , m_onDifficultyChanged{ std::move(onDifficultyChanged) }
 	    , m_resourceManager{ resourceManager }
 	    , m_screen{ screen }
 	{
@@ -114,7 +116,10 @@ namespace platform::window::select
 		    colWidth,
 		    diffH);
 		if (!m_difficultyWindow->create(m_desktopWindow->getHwnd())) return;
-        m_difficultyWindow->setOnMinimize([this]() noexcept {
+		m_difficultyWindow->setOnDifficultyChanged([this](const std::string& difficulty) noexcept
+		    {
+            if (m_onDifficultyChanged) m_onDifficultyChanged(difficulty); });
+		m_difficultyWindow->setOnMinimize([this]() noexcept {
             m_difficultyWindow->hide();
             m_diffVisible = false;
             notifyWindowState(WINDOW_NAME_DIFF, false);
