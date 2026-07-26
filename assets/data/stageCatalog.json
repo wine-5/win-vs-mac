@@ -23,6 +23,29 @@
       "scrollV": 0.0
     },
     {
+      "id": "path_conveyor",
+      "displayName": "動く歩道",
+      "model": "assets/model/stage/PathCorridor.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#00B7C3",
+      "collider": "ground",
+      "defaultSize": [
+        1000,
+        20,
+        2000
+      ],
+      "texture": "assets/model/stage/PathCorridor.png",
+      "textureTile": 800,
+      "slideAccel": 0.0,
+      "conveyorSpeed": 400.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
       "id": "floor_apple",
       "displayName": "アリーナ床",
       "model": "assets/model/stage/FloorApple.mqo",
