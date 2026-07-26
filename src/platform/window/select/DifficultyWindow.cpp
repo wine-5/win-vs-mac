@@ -1,6 +1,9 @@
 ﻿#include <windows.h>
 #include "DifficultyWindow.h"
 #include "platform/window/WindowConstants.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IAudioManager.h"
+#include "core/constant/SeType.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include "core/utility/Log.h"
 #include <exception>
@@ -65,7 +68,11 @@ namespace platform::window::select
 
             if (type == MESSAGE_TYPE_DIFFICULTY_CHANGED)
             {
-                const std::string diff{ j.value("difficulty", DIFFICULTY_NORMAL) };
+				auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+				if (audio)
+					audio->playSe(core::constant::SeType::UiClick);
+
+				const std::string diff{ j.value("difficulty", DIFFICULTY_NORMAL) };
 				if (diff == DIFFICULTY_NORMAL || diff == DIFFICULTY_HARD)
 					applyDifficulty(diff);
 			}

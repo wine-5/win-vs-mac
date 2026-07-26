@@ -7,6 +7,9 @@
 #include "platform/window/WindowConstants.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IAudioManager.h"
+#include "core/constant/SeType.h"
 #include "platform/utility/StringConverter.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include <shellapi.h>
@@ -315,7 +318,18 @@ namespace platform::window::select
             auto j = nlohmann::json::parse(json);
             const std::string type{ j.value(platform::window::WindowConstants::JSON_KEY_TYPE, "") };
 
-            if (type == platform::window::WindowConstants::MESSAGE_TYPE_START_GAME)
+			// デスクトップ上のボタン操作はここに集まる。押した手応えを1か所で返す
+			// （状態の問い合わせなど、押していないメッセージでは鳴らさない）
+			if (type == platform::window::WindowConstants::MESSAGE_TYPE_START_GAME ||
+			    type == platform::window::WindowConstants::MESSAGE_TYPE_TOGGLE_WINDOW ||
+			    type == platform::window::WindowConstants::MESSAGE_TYPE_LAUNCH_APP)
+			{
+				auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+				if (audio)
+					audio->playSe(core::constant::SeType::UiClick);
+			}
+
+			if (type == platform::window::WindowConstants::MESSAGE_TYPE_START_GAME)
             {
 				// ファイル装備は任意。ただし埋まっていないスロットがある場合は確認を挟む
 				if (countEquippedSlots() < FILE_SLOT_COUNT && !confirmStartWithEmptySlots())

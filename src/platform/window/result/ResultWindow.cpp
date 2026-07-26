@@ -1,5 +1,8 @@
 ﻿#include <windows.h>
 #include "ResultWindow.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IAudioManager.h"
+#include "core/constant/SeType.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include "core/utility/Log.h"
 #include <exception>
@@ -104,8 +107,17 @@ namespace platform::window::result
                 if (m_pendingData.has_value())
                     sendResultData(m_pendingData.value());
             }
-            else if (type == WindowConstants::MESSAGE_TYPE_RETRY)
-            {
+			else if (type == WindowConstants::MESSAGE_TYPE_RETRY ||
+			         type == WindowConstants::MESSAGE_TYPE_TITLE)
+			{
+				// リトライもタイトルも同じ「ボタンを押した」操作なので音は共通にする
+				auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+				if (audio)
+					audio->playSe(core::constant::SeType::UiClick);
+			}
+
+			if (type == WindowConstants::MESSAGE_TYPE_RETRY)
+			{
                 // シーン遷移前にウィンドウを非表示にし、DxLib ウィンドウにフォーカスを戻す
                 hide();
                 SetForegroundWindow(static_cast<HWND>(m_screen.getNativeWindowHandle()));
