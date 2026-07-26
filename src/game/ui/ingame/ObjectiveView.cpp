@@ -37,7 +37,7 @@ namespace
 	constexpr float COUNT_REACTION_DURATION{ 0.45f };
 	constexpr int COUNT_REACTION_POP{ 7 }; // 跳ね上がる最大量（1080p基準・上方向）
 
-	constexpr const char* CAPTION_TEXT{ "OBJECTIVE" };
+	constexpr const char* CAPTION_TEXT{ "目標" };
 	constexpr const char* DETAIL_TEXT{ "体 倒すと Mac が出現" };
 	constexpr const char* BOSS_TEXT{ "Mac を破壊せよ" };
 
@@ -68,6 +68,7 @@ namespace game::ui::ingame
 	    : m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_panel{ uiRenderer, screen }
+	    , m_captionText{ CAPTION_TEXT }
 	    , m_detailText{ DETAIL_TEXT }
 	    , m_bossText{ BOSS_TEXT }
 	{
@@ -77,6 +78,7 @@ namespace game::ui::ingame
 		if (!converter)
 			return;
 
+		m_captionText = converter->utf8ToShiftJis(m_captionText);
 		m_detailText = converter->utf8ToShiftJis(m_detailText);
 		m_bossText = converter->utf8ToShiftJis(m_bossText);
 	}
@@ -127,7 +129,7 @@ namespace game::ui::ingame
 		const int padding{ scaled(PANEL_PADDING) };
 
 		m_uiRenderer.setFont(UI_FONT_NAME);
-		m_uiRenderer.drawText(panelX + padding, panelY + scaled(CAPTION_Y), CAPTION_TEXT,
+		m_uiRenderer.drawText(panelX + padding, panelY + scaled(CAPTION_Y), m_captionText.c_str(),
 		    core::utility::Color::HUD_INK_FAINT, scaled(CAPTION_FONT_SIZE));
 
 		// ボスが出たら残り数は無意味になる。目標そのものを討伐へ差し替える

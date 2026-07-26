@@ -55,22 +55,25 @@ namespace
 	constexpr const char* MISSION_PROMPT_TEXT{ "クリック / Enter / Space で開始" };
 
 	// ミッションのカード（中央・1080p基準）
-	constexpr int MISSION_CARD_WIDTH{ 780 };
-	constexpr int MISSION_CARD_HEIGHT{ 190 };
-	constexpr int MISSION_CAPTION_FONT_SIZE{ 20 };
-	constexpr int MISSION_FONT_SIZE{ 40 };
-	constexpr int MISSION_DETAIL_FONT_SIZE{ 20 };
-	constexpr int MISSION_CAPTION_OFFSET_Y{ -62 }; // カード中心からの相対位置
-	constexpr int MISSION_TEXT_OFFSET_Y{ -18 };
-	constexpr int MISSION_DETAIL_OFFSET_Y{ 42 };
-	constexpr int MISSION_CARD_ALPHA{ 190 };
+	constexpr int MISSION_CARD_WIDTH{ 1000 };
+	constexpr int MISSION_CARD_HEIGHT{ 250 };
+	constexpr int MISSION_CAPTION_FONT_SIZE{ 24 };
+	constexpr int MISSION_FONT_SIZE{ 60 };
+	constexpr int MISSION_DETAIL_FONT_SIZE{ 27 };
+	constexpr int MISSION_CAPTION_OFFSET_Y{ -92 }; // カード中心からの相対位置
+	constexpr int MISSION_TEXT_OFFSET_Y{ -34 };
+	constexpr int MISSION_DETAIL_OFFSET_Y{ 50 };
+	constexpr int MISSION_CARD_ALPHA{ 205 };
 	constexpr int MISSION_ACCENT_THICKNESS{ 3 }; // 見出しの下に引くアクセント線
 
-	// プロンプト（カードの下）
-	constexpr int MISSION_PROMPT_FONT_SIZE{ 22 };
-	constexpr int MISSION_PROMPT_GAP{ 46 }; // カード下端からの間隔
+	// プロンプト（カードの下）。明るい床の上でも読めるよう、暗い帯を敷いた上に載せる
+	constexpr int MISSION_PROMPT_FONT_SIZE{ 30 };
+	constexpr int MISSION_PROMPT_GAP{ 40 }; // カード下端から帯の上端までの間隔
+	constexpr int MISSION_PROMPT_PADDING_X{ 32 };
+	constexpr int MISSION_PROMPT_PADDING_Y{ 14 };
+	constexpr int MISSION_PROMPT_BAND_ALPHA{ 200 };
 	constexpr float MISSION_PROMPT_BLINK_CYCLE{ 1.6f };
-	constexpr int MISSION_PROMPT_MIN_ALPHA{ 110 };
+	constexpr int MISSION_PROMPT_MIN_ALPHA{ 190 };
 
 	// 流れていく間の縮小率（流れ着いた時点の大きさ）
 	constexpr float MISSION_FLY_END_SCALE{ 0.42f };
@@ -333,18 +336,30 @@ namespace game::system::visual
 		const float promptTime{ m_phaseTime - MISSION_PROMPT_DELAY };
 		const float promptFade{ smoothstep(promptTime / MISSION_PROMPT_FADE_IN) };
 
-		// ゆっくり明滅させて「入力を待っている」ことを示す（完全には消さない）
+		// ゆっくり明滅させて「入力を待っている」ことを示す（読めなくなるほどは落とさない）
 		const float blink{ 0.5f + 0.5f * std::cos(promptTime / MISSION_PROMPT_BLINK_CYCLE * core::utility::TWO_PI) };
 		const int promptAlpha{ static_cast<int>(
 			(MISSION_PROMPT_MIN_ALPHA + (255 - MISSION_PROMPT_MIN_ALPHA) * blink) * promptFade) };
 
 		const int promptFontSize{ scaled(MISSION_PROMPT_FONT_SIZE) };
-		const int promptY{ centerY + scaled(MISSION_CARD_HEIGHT) / 2 + scaled(MISSION_PROMPT_GAP) };
 
 		m_uiRenderer.setFont(UI_FONT_NAME);
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, promptAlpha);
 		const int promptWidth{ m_uiRenderer.getTextWidth(m_promptText.c_str(), promptFontSize) };
-		m_uiRenderer.drawText(centerX - promptWidth / 2, promptY, m_promptText.c_str(),
+
+		// 床が明るいステージでは文字だけだと沈む。文字の後ろに暗い帯を敷いて必ず読めるようにする
+		const int paddingX{ scaled(MISSION_PROMPT_PADDING_X) };
+		const int paddingY{ scaled(MISSION_PROMPT_PADDING_Y) };
+		const int bandWidth{ promptWidth + paddingX * 2 };
+		const int bandHeight{ promptFontSize + paddingY * 2 };
+		const int bandY{ centerY + scaled(MISSION_CARD_HEIGHT) / 2 + scaled(MISSION_PROMPT_GAP) };
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+		    static_cast<int>(MISSION_PROMPT_BAND_ALPHA * promptFade));
+		m_uiRenderer.drawBox(centerX - bandWidth / 2, bandY, bandWidth, bandHeight,
+		    core::utility::Color::BLACK, true);
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, promptAlpha);
+		m_uiRenderer.drawText(centerX - promptWidth / 2, bandY + paddingY, m_promptText.c_str(),
 		    core::utility::Color::HUD_CHARGE_CYAN, promptFontSize);
 		m_uiRenderer.resetBlendMode();
 		m_uiRenderer.resetFont();
