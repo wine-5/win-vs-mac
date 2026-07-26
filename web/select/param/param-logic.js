@@ -1,5 +1,19 @@
 'use strict';
 
+// バーの上限。項目ごとに桁が違う（会心率20 / 攻撃30 / HP1000 / 飛距離1800）ため、
+// 共通の上限だと HP のように最初から振り切って伸びしろが見えなくなる。
+// 基礎値の2倍前後を上限にして、フル強化でも半分より少し上に収まるようにしてある
+const STAT_CAPS = {
+    hp:   2000,
+    atk:  100,
+    def:  50,
+    spd:  600,
+    crit: 100,   // 会心率は%表記なので100が理論上限
+    bspd: 1200,
+    brng: 3600
+};
+
+// STAT_CAPS に無い項目のための既定値
 const BAR_CAP = 150;
 
 // 表示する項目のID。C++側から届くキーは base/bonus + 先頭を大文字にしたID。
@@ -46,10 +60,12 @@ const ParamLogic = (function () {
         }
     }
 
-    function calculateBar(baseVal, bonusVal) {
+    function calculateBar(baseVal, bonusVal, id) {
         const base = Math.max(0, baseVal || 0);
         const bonus = Math.max(0, bonusVal || 0);
-        const cap = Math.max(BAR_CAP, base + bonus);
+        // 上限を超える値が来てもバーが溢れないよう、合計のほうが大きければそちらを上限にする
+        const statCap = (id && STAT_CAPS[id] != null) ? STAT_CAPS[id] : BAR_CAP;
+        const cap = Math.max(statCap, base + bonus);
         return {
             base: base,
             bonus: bonus,
@@ -62,7 +78,7 @@ const ParamLogic = (function () {
     }
 
     function getBarData(id) {
-        return calculateBar(state[toBaseKey(id)], state[toBonusKey(id)]);
+        return calculateBar(state[toBaseKey(id)], state[toBonusKey(id)], id);
     }
 
     function onMessageFromGame(data) {

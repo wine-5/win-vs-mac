@@ -77,7 +77,7 @@ const ParamView = (function () {
     }
 
     function setBar(id, baseVal, bonusVal) {
-        const barData = ParamLogic.calculateBar(baseVal, bonusVal);
+        const barData = ParamLogic.calculateBar(baseVal, bonusVal, id);
         const valEl = document.getElementById('v-' + id);
         const prevTotal = firstRender ? barData.total : (parseFloat(valEl.textContent) || 0);
         const diff = barData.total - prevTotal;
