@@ -19,6 +19,7 @@
 #include "game/system/movement/MoveSystem.h"
 #include "game/system/movement/PhysicsSystem.h"
 #include "game/system/movement/GroundingSystem.h"
+#include "game/system/movement/FootstepSystem.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/actor/Player.h"
 #include "game/GameManager.h"
@@ -463,6 +464,8 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::combat::CollisionSystem>(m_componentManager);
 		// 障害物の押し返し後に、床・坂の傾いた面へ足を乗せる（坂はAABBで表せないため専用処理）
 		m_systemManager.registerSystem<game::system::movement::GroundingSystem>(m_componentManager);
+		// 足音は「進んだ距離」で数えるため、押し返しと接地が終わって位置が確定してから走らせる
+		m_systemManager.registerSystem<game::system::movement::FootstepSystem>(m_componentManager, m_playerId);
 		// AI行動分割：近接追跡型敵を駆動
 		m_systemManager.registerSystem<game::system::ai::MeleeChaseAISystem>(m_componentManager);
 		// AI行動分割：遠距離維持型敵を駆動

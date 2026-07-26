@@ -27,6 +27,9 @@
     <ClCompile Include="src\game\system\movement\MoveSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\game\system\movement\FootstepSystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="src\game\system\movement\PhysicsSystem.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -411,6 +414,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\system\movement\MoveSystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game\system\movement\FootstepSystem.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\game\system\movement\PhysicsSystem.h">
