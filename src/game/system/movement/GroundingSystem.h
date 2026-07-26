@@ -76,6 +76,26 @@ namespace game::system::movement
 		void updateSlide(component::movement::VelocityComponent& velocity,
 		    const core::Vector3& normal, float slideAccel, float deltaTime) const;
 
+		/**
+		 * @brief 動く歩道に運ばれる速度を更新する
+		 *
+		 * 坂を滑る力が加速度なのに対し、こちらは一定速度で運ぶ。乗っている間は
+		 * 常にこの速度が加わるので、歩き速度との大小がそのまま「逆走できる／できない」になる。
+		 * 高さは接地処理が面に合わせて追従させるため、水平成分だけを扱う。
+		 * @param velocity 対象のVelocityComponent
+		 * @param conveyorVelocity 面が運ぶワールド速度
+		 * @param deltaTime フレーム間の時間差
+		 */
+		void updateConveyor(component::movement::VelocityComponent& velocity,
+		    const core::Vector3& conveyorVelocity, float deltaTime) const;
+
+		/**
+		 * @brief 面が乗っている者を運ぶワールド速度を求める
+		 * @param surfaceId 面のEntityID
+		 * @return 運ぶ速度。動く歩道でなければゼロベクトル
+		 */
+		core::Vector3 conveyorVelocityOf(core::ecs::EntityId surfaceId) const;
+
 		core::ecs::ComponentManager& m_componentManager;
 	};
 } // namespace game::system::movement

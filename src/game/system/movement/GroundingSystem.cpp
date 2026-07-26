@@ -27,6 +27,9 @@ namespace
 	constexpr float MAX_SLIDE_SPEED{ 1800.0f };
 	// 滑らない足場に移ったとき、残った滑り速度が減衰する割合（毎秒）
 	constexpr float SLIDE_DECAY_PER_SEC{ 6.0f };
+	// 動く歩道に乗ったとき、運ぶ速度へ寄っていく割合（毎秒）。
+	// 即座に合わせると乗った瞬間に弾かれたように見えるので少しだけ滑らかにする
+	constexpr float CONVEYOR_BLEND_PER_SEC{ 8.0f };
 	// 最後に立っていた場所からこれ以上下がったら、奈落へ落ちたとみなして引き戻す。
 	// 坂や段差による正規の落差より十分大きくとる
 	constexpr float FALL_LIMIT{ 1200.0f };
@@ -87,6 +90,29 @@ namespace game::system::movement
 			velocity.m_externalVelocity.x *= scale;
 			velocity.m_externalVelocity.z *= scale;
 		}
+	}
+
+	void GroundingSystem::updateConveyor(component::movement::VelocityComponent& velocity,
+	    const core::Vector3& conveyorVelocity, float deltaTime) const
+	{
+		const float blend{ std::min(CONVEYOR_BLEND_PER_SEC * deltaTime, 1.0f) };
+		velocity.m_externalVelocity.x += (conveyorVelocity.x - velocity.m_externalVelocity.x) * blend;
+		velocity.m_externalVelocity.z += (conveyorVelocity.z - velocity.m_externalVelocity.z) * blend;
+	}
+
+	core::Vector3 GroundingSystem::conveyorVelocityOf(core::ecs::EntityId surfaceId) const
+	{
+		const auto& surface{ m_componentManager.get<component::movement::GroundSurfaceComponent>(surfaceId) };
+		if (surface.m_conveyorSpeed == 0.0f)
+			return core::Vector3{};
+
+		// 運ぶ向きは面のローカル+Z（配置物の長辺）をワールドへ回したもの。
+		// 「坂を下る向き」ではなく面自身の向きなので、配置をY180度回すだけで逆走にできる。
+		// テクスチャの流れる向きもローカル+Zに合わせてあるため、見た目と一致する
+		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(surfaceId) };
+		const core::Vector3 forward{ core::utility::rotateEulerXYZ(
+			core::Vector3{ 0.0f, 0.0f, 1.0f }, transform.m_rotation) };
+		return forward * surface.m_conveyorSpeed;
 	}
 
 	bool GroundingSystem::surfaceHeightAt(core::ecs::EntityId surfaceId, float x, float z,
@@ -159,6 +185,7 @@ namespace game::system::movement
 			float bestHeight{ 0.0f };
 			core::Vector3 bestNormal{ 0.0f, 1.0f, 0.0f };
 			float bestSlideAccel{ 0.0f };
+			core::Vector3 bestConveyor{};
 			for (const auto surfaceId : surfaces)
 			{
 				float height{ 0.0f };
@@ -175,6 +202,7 @@ namespace game::system::movement
 					bestSlideAccel = m_componentManager
 					                     .get<component::movement::GroundSurfaceComponent>(surfaceId)
 					                     .m_slideAccel;
+					bestConveyor = conveyorVelocityOf(surfaceId);
 				}
 			}
 
@@ -182,11 +210,18 @@ namespace game::system::movement
 			velocity.m_hasGroundHeight = found;
 			velocity.m_groundHeight = found ? bestHeight : 0.0f;
 
-			// 接地している面に応じて滑り速度を更新する（空中では減衰させる）
+			// 接地している面に応じて外力を更新する（空中では減衰させる）
 			const bool isStanding{ found && foot <= bestHeight + STEP_TOLERANCE };
 			velocity.m_isGrounded = isStanding; // ジャンプの可否判定用にPhysicsSystemへ伝える
-			updateSlide(velocity, isStanding ? bestNormal : core::Vector3{ 0.0f, 1.0f, 0.0f },
-			    isStanding ? bestSlideAccel : 0.0f, deltaTime);
+
+			// 動く歩道は運ぶ速度そのものが外力になるため、滑りとは併用せず排他にする。
+			// 両方効かせると坂の下り勾配ぶんだけ速度が上乗せされ、データの値と挙動が合わなくなる
+			const bool onConveyor{ isStanding && (bestConveyor.x != 0.0f || bestConveyor.z != 0.0f) };
+			if (onConveyor)
+				updateConveyor(velocity, bestConveyor, deltaTime);
+			else
+				updateSlide(velocity, isStanding ? bestNormal : core::Vector3{ 0.0f, 1.0f, 0.0f },
+				    isStanding ? bestSlideAccel : 0.0f, deltaTime);
 
 			// 面より下に沈んでいるときだけ持ち上げる。引き下げないので
 			// 障害物（Box）の上に立っている状態を壊さない
