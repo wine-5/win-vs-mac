@@ -430,6 +430,7 @@ namespace infrastructure::resource::repository
 			"maxHp", "defence", "attackPower", "attackCooldown", "attackWindup",
 			"attackMaxHeight",
 			"comboInputWindow", "comboStage2Multiplier",
+			"criticalRate", "criticalMultiplier",
 			"hoverHeight", "preferredDistanceMin", "preferredDistanceMax",
 			"fireCooldown", "facingYawOffset"
 		};

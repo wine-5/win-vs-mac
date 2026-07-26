@@ -39,6 +39,8 @@
     "attackCooldown": 0.5,
     "attackWindup": 0.25,
     "comboInputWindow": 1.5,
-    "comboStage2Multiplier": 1.8
+    "comboStage2Multiplier": 1.8,
+    "criticalRate": 0.2,
+    "criticalMultiplier": 2.0
   }
 }

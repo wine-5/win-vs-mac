@@ -149,6 +149,7 @@
     <ClCompile Include="src\game\actor\EnemyBehaviors.cpp" />
     <ClCompile Include="src\game\attack\BaseAttackHandler.cpp" />
     <ClCompile Include="src\game\attack\DefenseHandler.cpp" />
+    <ClCompile Include="src\game\attack\CriticalHandler.cpp" />
     <ClCompile Include="src\game\factory\EnemyFactory.cpp" />
     <ClCompile Include="src\game\factory\EnemySpawner.cpp" />
     <ClCompile Include="src\game\factory\ProjectileFactory.cpp" />
@@ -339,6 +340,7 @@
     <ClInclude Include="src\game\attack\BaseAttackHandler.h" />
     <ClInclude Include="src\game\attack\DamageChain.h" />
     <ClInclude Include="src\game\attack\DefenseHandler.h" />
+    <ClInclude Include="src\game\attack\CriticalHandler.h" />
     <ClInclude Include="src\game\attack\IDamageHandler.h" />
     <ClInclude Include="src\game\component\ai\AIComponent.h" />
     <ClInclude Include="src\game\component\EnemyTypeComponent.h" />

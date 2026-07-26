@@ -31,6 +31,11 @@ namespace game::factory
 		// モデルのAABB中心（ローカル・スケール未適用）。原点ズレを打ち消して中心まわりに回すために使う
 		core::Vector3 m_spinCenter{ 0.0f, 0.0f, 0.0f };
 
+		// クリティカルの発生率と倍率（AttackComponent へそのまま入る）。
+		// 発射者の値を引き継がせるために持つ。0なら弾はクリティカルしない（敵の弾の既定）
+		float m_criticalRate{ 0.0f };
+		float m_criticalMultiplier{ 1.0f };
+
 		// 発射時に再生する演出エフェクト。Noneならエフェクト無し（既定）
 		core::constant::EffectType m_startEffect{ core::constant::EffectType::None };
 	};

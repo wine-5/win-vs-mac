@@ -11,18 +11,26 @@
 #include "game/attack/DamageChain.h"
 #include "game/attack/BaseAttackHandler.h"
 #include "game/attack/DefenseHandler.h"
+#include "game/attack/CriticalHandler.h"
 #include "core/interface/ILogger.h"
 #include "core/utility/Log.h"
 #include "game/event/InGameEvents.h"
 
 namespace game::system::combat
 {
-	AttackSystem::AttackSystem(core::ecs::ComponentManager &componentManager, core::base::EventBus &eventBus,
-		core::constant::SeType playerAttackSeType)
-		: m_componentManager{componentManager}, m_eventBus{eventBus}, m_playerAttackSeType{playerAttackSeType}
+	AttackSystem::AttackSystem(core::ecs::ComponentManager& componentManager, core::base::EventBus& eventBus,
+	    core::constant::SeType playerAttackSeType)
+	    : m_componentManager{ componentManager }
+	    , m_eventBus{ eventBus }
+	    , m_playerAttackSeType{ playerAttackSeType }
 	{
-		auto base{std::make_unique<attack::BaseAttackHandler>(m_componentManager)};
-		auto defense{std::make_unique<attack::DefenseHandler>(m_componentManager)};
+		// 攻撃力 → 防御力の減算 → クリティカルの倍化 の順で組む。
+		// クリティカルを防御より後ろに置くのは、先に倍化すると防御の高い相手ほど
+		// 減算で旨味が消えてしまい「会心が出た手応え」が無くなるため
+		auto base{ std::make_unique<attack::BaseAttackHandler>(m_componentManager) };
+		auto defense{ std::make_unique<attack::DefenseHandler>(m_componentManager) };
+		auto critical{ std::make_unique<attack::CriticalHandler>(m_componentManager) };
+		defense->setNext(std::move(critical));
 		base->setNext(std::move(defense));
 		m_damageChain = std::move(base);
 	}
@@ -219,6 +227,7 @@ namespace game::system::combat
 			hitEvent.m_attackerId = attackerId;
 			hitEvent.m_targetId = targetId;
 			hitEvent.m_damage = chain.m_damage;
+			hitEvent.m_isCritical = chain.m_isCritical;
 
 			// 攻撃者がProjectileComponentを持つ（=弾＝Window投撃などの遠距離攻撃）ならEnemy_HitWindow、
 			// そうでなければ（=本体による近接攻撃）Enemy_HitSwordを再生する
