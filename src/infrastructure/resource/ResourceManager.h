@@ -65,6 +65,24 @@ namespace infrastructure::resource
 		int loadAnimationById(std::string_view animationId) override;
 
 		/**
+		 * @brief 登録されている全モデルIDを取得する
+		 * @return モデルIDの一覧
+		 */
+		[[nodiscard]] std::vector<std::string> getAllModelIds() const override;
+
+		/**
+		 * @brief 登録されている全アニメーションIDを取得する
+		 * @return アニメーションIDの一覧
+		 */
+		[[nodiscard]] std::vector<std::string> getAllAnimationIds() const override;
+
+		/**
+		 * @brief 登録されている全画像IDを取得する
+		 * @return 画像IDの一覧
+		 */
+		[[nodiscard]] std::vector<std::string> getAllImageIds() const override;
+
+		/**
 		 * @brief ステージの配置定義を取得する
 		 * @return ステージ配置定義
 		 */
