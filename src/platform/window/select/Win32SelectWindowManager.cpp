@@ -230,11 +230,20 @@ namespace platform::window::select
 		}
 
 		// Window弾の基礎値は playerData.json ではなく projectileData.json 側が持つ。
-		// 飛距離は定義に無いため「弾速×寿命」で求める
-		const auto& projectileMeta{ m_resourceManager.getProjectileMetadata(
-			game::constant::projectile_id::PLAYER_WINDOW) };
-		stats.m_projectileSpeed.m_base = projectileMeta.m_speed;
-		stats.m_projectileRange.m_base = projectileMeta.m_speed * projectileMeta.m_lifetime;
+		// 飛距離は定義に無いため「弾速×寿命」で求める。
+		// getProjectileMetadata は弾IDが無いと例外を投げる。この関数は noexcept なので、
+		// 素通しすると std::terminate になりゲームごと落ちる。必ずここで受け止める
+		try
+		{
+			const auto& projectileMeta{ m_resourceManager.getProjectileMetadata(
+				game::constant::projectile_id::PLAYER_WINDOW) };
+			stats.m_projectileSpeed.m_base = projectileMeta.m_speed;
+			stats.m_projectileRange.m_base = projectileMeta.m_speed * projectileMeta.m_lifetime;
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("updateParameterWindow: Window弾の定義を取得できませんでした: {}", e.what());
+		}
 
 		for (int i = 0; i < FILE_SLOT_COUNT; ++i)
         {
