@@ -7,6 +7,8 @@
 #include "game/component/visual/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
 #include "game/constant/Tag.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IAudioManager.h"
 #include <algorithm>
 #include <utility>
 
@@ -62,6 +64,11 @@ namespace game::system::combat
 			{
 				m_isCharging = true;
 				m_chargeTime = 0.0f;
+
+				// 溜め始めた合図。集中線が出るより先に音で分かるようにする
+				auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+				if (audio)
+					audio->playSe(core::constant::SeType::PlayerCharge);
 			}
 
 			if (m_isCharging)
