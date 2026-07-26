@@ -54,6 +54,12 @@ namespace game::scene
 	   * @brief 現在のシーンの種類を返す
 	   * @return 現在のシーンの種類
 	   */
+	  /**
+	   * @brief 現在のシーンへポーズの開始・解除を伝える
+	   * @param isPaused ポーズ中ならtrue
+	   */
+	  void notifyPauseChanged(bool isPaused);
+
 	  [[nodiscard]] SceneType getCurrentSceneType() const noexcept
 	  {
 		  return m_currentSceneType;

@@ -4,6 +4,7 @@
 #include "core/interface/IResourceManager.h"
 #include "core/utility/Vector3.h"
 #include "core/base/EventBus.h"
+#include "core/data/Difficulty.h"
 #include "game/constant/EnemyType.h"
 #include <unordered_map>
 #include <vector>
@@ -34,12 +35,14 @@ namespace game::factory
 		 * @param componentManager ComponentManagerの参照
 		 * @param resourceManager IResourceManagerの参照
 		 * @param eventBus スポーン時にEnemySpawnedEventを発行するEventBusの参照
+		 * @param difficulty 敵のパラメータへ適用する難易度
 		 */
 		EnemySpawner(
 		    FactoryManager& factoryManager,
 		    core::ecs::ComponentManager& componentManager,
 		    core::iface::IResourceManager& resourceManager,
-		    core::base::EventBus& eventBus);
+		    core::base::EventBus& eventBus,
+		    core::data::Difficulty difficulty);
 
 		/**
 		 * @brief 生成する敵の追跡対象（通常はプレイヤー）を設定する
@@ -88,6 +91,9 @@ namespace game::factory
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IResourceManager& m_resourceManager;
 		core::base::EventBus& m_eventBus;
+
+		// 生成する敵のパラメータに適用する難易度（セレクト画面で選ばれた値）
+		core::data::Difficulty m_difficulty{ core::data::Difficulty::Normal };
 
 		// 生成した敵に設定する追跡対象。未設定(0)なら設定しない
 		core::ecs::Entity m_target{ 0 };

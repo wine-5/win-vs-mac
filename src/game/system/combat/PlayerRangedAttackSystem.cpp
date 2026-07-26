@@ -3,7 +3,13 @@
 #include "game/component/camera/CameraComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
+#include "game/component/combat/AttackComponent.h"
+#include "game/component/visual/AnimationComponent.h"
+#include "game/constant/AnimationState.h"
 #include "game/constant/Tag.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IAudioManager.h"
+#include <algorithm>
 #include <utility>
 
 namespace game::system::combat
@@ -19,6 +25,13 @@ namespace game::system::combat
 	    , m_metadata{ std::move(metadata) }
 	    , m_billboardImage{ billboardImage }
 	{
+	}
+
+	float PlayerRangedAttackSystem::getCooldownRatio() const
+	{
+		if (m_metadata.m_cooldown <= 0.0f)
+			return 0.0f;
+		return std::clamp(m_cooldownTimer / m_metadata.m_cooldown, 0.0f, 1.0f);
 	}
 
 	void PlayerRangedAttackSystem::update(float deltaTime)
@@ -51,6 +64,11 @@ namespace game::system::combat
 			{
 				m_isCharging = true;
 				m_chargeTime = 0.0f;
+
+				// 溜め始めた合図。集中線が出るより先に音で分かるようにする
+				auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+				if (audio)
+					audio->playSe(core::constant::SeType::PlayerCharge);
 			}
 
 			if (m_isCharging)
@@ -79,14 +97,21 @@ namespace game::system::combat
 
 	void PlayerRangedAttackSystem::fire(float chargeRate)
 	{
+		// 投擲モーションを再生する。溜めの有無で動きは変えないため、
+		// 溜め撃ちも通常撃ちも同じクリップを使う
+		if (m_componentManager.has<component::visual::AnimationComponent>(m_playerId))
+			m_componentManager.get<component::visual::AnimationComponent>(m_playerId)
+			    .request(constant::AnimationState::Throw);
+
 		const auto& camera{ m_componentManager.get<component::camera::CameraComponent>(m_playerId) };
 		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_playerId) };
 
 		// 溜め率に応じて倍率を線形補間する（0で等倍、1で最大倍率）
 		const float damageMultiplier{ 1.0f + (m_metadata.m_chargeDamageMultiplier - 1.0f) * chargeRate };
 		const float sizeMultiplier{ 1.0f + (m_metadata.m_chargeSizeMultiplier - 1.0f) * chargeRate };
-		// 飛距離は速度そのままに寿命を延ばして伸ばす（速度を上げると弾速の見た目が変わるため）
-		const float rangeMultiplier{ 1.0f + (m_metadata.m_chargeRangeMultiplier - 1.0f) * chargeRate };
+		// 弾速と寿命は個別に設定できる（飛距離は両者の積で決まる）
+		const float speedMultiplier{ 1.0f + (m_metadata.m_chargeSpeedMultiplier - 1.0f) * chargeRate };
+		const float lifetimeMultiplier{ 1.0f + (m_metadata.m_chargeLifetimeMultiplier - 1.0f) * chargeRate };
 
 		// カメラ前方へ、プレイヤーの少し前・目線の高さから発射する
 		const core::Vector3 direction{ camera.m_forward };
@@ -97,9 +122,9 @@ namespace game::system::combat
 		};
 
 		factory::ProjectileConfig config{};
-		config.m_speed = m_metadata.m_speed;
+		config.m_speed = m_metadata.m_speed * speedMultiplier;
 		config.m_damage = m_metadata.m_damage * damageMultiplier;
-		config.m_lifetime = m_metadata.m_lifetime * rangeMultiplier;
+		config.m_lifetime = m_metadata.m_lifetime * lifetimeMultiplier;
 		config.m_radius = m_metadata.m_radius * sizeMultiplier;
 		config.m_scale = m_metadata.m_scale;
 
@@ -108,6 +133,20 @@ namespace game::system::combat
 		constexpr float BILLBOARD_SIZE_FACTOR{ 2.5f };
 		config.m_billboardImage = m_billboardImage;
 		config.m_billboardSize = m_metadata.m_radius * BILLBOARD_SIZE_FACTOR * sizeMultiplier;
+
+		// 溜め切って撃った弾だけ重い着弾音にする。溜めた甲斐を音でも返すため、
+		// 見た目（サイズ）と同じく「溜め切ったか」で切り替える
+		constexpr float CHARGED_SE_THRESHOLD{ 0.99f };
+		config.m_hitSeType = chargeRate >= CHARGED_SE_THRESHOLD
+		                         ? core::constant::SeType::HitChargedWindow
+		                         : core::constant::SeType::HitWindow;
+
+		// 近接と同じようにクリティカルが出るよう、プレイヤーの会心設定を弾へ引き継ぐ
+		if (auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(m_playerId) })
+		{
+			config.m_criticalRate = attack->m_criticalRate;
+			config.m_criticalMultiplier = attack->m_criticalMultiplier;
+		}
 
 		m_projectileFactory.spawn(origin, direction, config, constant::Tag::Player);
 	}

@@ -139,27 +139,34 @@ namespace platform::webview
 
     void WebView2Host::postMessage(const std::wstring& json) noexcept
     {
-        if (!m_webview) return;
-        // WebView2 の初期化が完了していない場合はキューに積んで後で一括送信する
-        if (!m_ready) { m_pendingMessages.push_back(json); return; }
-        m_webview->PostWebMessageAsString(json.c_str());
+		// WebView2 の生成もページ読み込みも非同期に進む。どちらも終わっていない間は
+		// キューに積み、読み込み完了時に一括送信する。
+		// m_webview が未生成のうちに捨ててしまうと、ウィンドウを作った直後に送る
+		// 初期値が届かなくなる
+		if (!m_ready || !m_webview)
+		{
+			m_pendingMessages.push_back(json);
+			return;
+		}
+		m_webview->PostWebMessageAsString(json.c_str());
     }
 
     void WebView2Host::postMessage(const std::string& utf8Json) noexcept
     {
-        if (!m_webview) return;
         // UTF-8 → UTF-16 に変換してから送信する
         int len{ MultiByteToWideChar(CP_UTF8, 0, utf8Json.c_str(), -1, nullptr, 0) };
         if (len <= 0) return;
         std::wstring wide(len - 1, L'\0');
         MultiByteToWideChar(CP_UTF8, 0, utf8Json.c_str(), -1, wide.data(), len);
-        if (!m_ready) { m_pendingMessages.push_back(std::move(wide)); return; }
-        m_webview->PostWebMessageAsString(wide.c_str());
-    }
+		postMessage(wide);
+	}
 
     void WebView2Host::flushPendingMessages() noexcept
     {
-        for (const auto& msg : m_pendingMessages)
+		if (!m_webview)
+			return;
+
+		for (const auto& msg : m_pendingMessages)
             m_webview->PostWebMessageAsString(msg.c_str());
         m_pendingMessages.clear();
     }

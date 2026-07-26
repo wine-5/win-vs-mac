@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "core/utility/Vector3.h"
 #include "core/data/MacMetadata.h"
+#include "core/data/WeaponAttachMetadata.h"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -22,6 +23,9 @@ namespace core::data
 		std::string onComplete{ "Idle" };     // 非ループ終了後に遷移する状態名
 		std::string priority{ "locomotion" }; // "dying"/"hit"/"attack"/"jump"/"locomotion"
 		float speed{ 1.0f };                  // 再生速度倍率
+		// 再生開始位置（アニメーションのフレーム数。30fps基準）。
+		// 頭に不要な溜めが入っているクリップの冒頭を捨てるのに使う
+		float startTime{ 0.0f };
 	};
 
 	/**
@@ -39,6 +43,9 @@ namespace core::data
 		core::Vector3 colliderOffset{ 0.0f, 0.0f, 0.0f }; // コライダー中心オフセット（size自動算出時にAABB中心から併せて算出される）
 
 		std::unordered_map<std::string, float> floatProperties;
+		// 難易度Hardのときだけ floatProperties へ上書きする値（JSONの hard 要素）。
+		// gameplay と同じキー名で書いたものだけが入る。空ならHardでもパラメータは変わらない
+		std::unordered_map<std::string, float> hardFloatProperties;
 		std::unordered_map<std::string, std::string> stringProperties; // 例: {"idleAnim": "path/to/anim.mv1"}
 
 		// 敵の振る舞いレシピ：積むAI振る舞いの名前リスト（例: ["rangeKeep","patrol"]）。
@@ -49,5 +56,8 @@ namespace core::data
 		std::vector<AnimationClipDef> animations;
 
 		std::optional<MacMetadata> mac; // ボスの挙動定義（macData.jsonなどにmac要素がある場合のみ）
+
+		// 手に持たせる武器の装着設定（JSONにweapon要素がある場合のみ）
+		std::optional<WeaponAttachMetadata> weapon;
 	};
 } // namespace core::data

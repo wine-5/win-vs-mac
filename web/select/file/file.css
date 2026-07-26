@@ -20,7 +20,7 @@ body {
     border: 1px solid transparent;
     border-radius: 3px;
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: 15px;
     padding: 2px 6px;
     cursor: pointer;
     height: 22px;
@@ -42,7 +42,7 @@ body {
     border-radius: 3px;
     height: 22px;
     padding: 0 8px;
-    font-size: 11px;
+    font-size: 15px;
     color: var(--text-muted);
     display: flex;
     align-items: center;
@@ -55,15 +55,17 @@ body {
     display: grid;
     grid-template-columns: 1fr 52px 100px;
     padding: 4px 12px;
-    font-size: 11px;
+    font-size: 14px;
     color: var(--text-muted);
     font-weight: 600;
     letter-spacing: 0.04em;
     flex-shrink: 0;
 }
 
+/* 装備スロットとボーナス一覧を縦半分ずつに分ける。
+   スロット側を大きく取ると一覧が潰れて、どの拡張子が何を上げるのか読めなくなる */
 .file-list {
-    flex: 2;
+    flex: 1;
     min-height: 0;
     overflow-y: auto;
     display: flex;
@@ -89,6 +91,8 @@ body {
     transition: background 0.1s;
     flex: 1;
     min-height: 0;
+    /* 装備中に周回する光の粒（.orbit-dot）の基準にする */
+    position: relative;
 }
 
 .file-row:hover { background: var(--surface-hover); }
@@ -98,7 +102,7 @@ body {
     max-height: 0;
     overflow: hidden;
     padding: 0 12px 0 52px;
-    font-size: 10px;
+    font-size: 13px;
     font-family: Consolas, monospace;
     color: var(--text-muted);
     white-space: nowrap;
@@ -123,16 +127,90 @@ body {
     min-width: 0;
 }
 
-.file-icon { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+.file-icon { width: 38px; height: 38px; object-fit: contain; flex-shrink: 0; }
+
+/* ── 装備中の行を回る光の粒 ──
+   インゲーム右下の装備スロット（EquipmentSlotView）と同じ演出で、
+   「このファイルが起動している」ことを止まらない動きで示す。
+   行の大きさは画面に合わせて変わるため、軌道は固定座標ではなく割合で置く。
+   四隅を等分の時刻（25%刻み）で通るので、行の縦横比が変わっても破綻しない */
+@keyframes orbitRow {
+    0%   { left: 0%;   top: 0%; }
+    25%  { left: 100%; top: 0%; }
+    50%  { left: 100%; top: 100%; }
+    75%  { left: 0%;   top: 100%; }
+    100% { left: 0%;   top: 0%; }
+}
+
+.orbit-dot {
+    position: absolute;
+    border-radius: 50%;
+    background: #22d3ee;
+    box-shadow: 0 0 6px #22d3ee;
+    transform: translate(-50%, -50%);
+    /* 粒の大きさ・不透明度・開始位置はJS側で1粒ずつ指定する（尾を引かせるため） */
+    animation: orbitRow 3.2s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+}
 
 .file-name {
-    font-size: 12px;
+    font-size: 16px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .file-name.empty { color: var(--text-muted); font-style: italic; }
+
+/* ── 未選択スロットの「押せる」誘導 ──
+   何も装備していない状態は見た目が静かすぎて、クリックできる場所だと気づけない。
+   面・アイコン・文字をゆっくり同じ周期で明滅させ、行そのものが呼吸しているように見せる。
+   3行を少しずつ遅らせて波にすると、並んだスロット全体へ視線が動く */
+@keyframes emptySlotBreath {
+    0%, 100% {
+        background: rgba(0, 120, 212, 0.04);
+        box-shadow: inset 0 0 0 1px rgba(0, 120, 212, 0.12);
+    }
+    50% {
+        background: rgba(0, 120, 212, 0.22);
+        box-shadow: inset 0 0 0 1px rgba(0, 120, 212, 0.65);
+    }
+}
+
+@keyframes emptyIconFloat {
+    0%, 100% { transform: translateY(0) scale(1);       opacity: 0.5; }
+    50%      { transform: translateY(-6px) scale(1.08); opacity: 1; }
+}
+
+@keyframes emptyTextPulse {
+    0%, 100% { opacity: 0.5; }
+    50%      { opacity: 1; }
+}
+
+.file-row.is-empty            { animation: emptySlotBreath 1.8s ease-in-out infinite; }
+.file-row.is-empty .file-icon { animation: emptyIconFloat  1.8s ease-in-out infinite; }
+.file-row.is-empty .file-name.empty { animation: emptyTextPulse 1.8s ease-in-out infinite; }
+
+/* 遅延はスロット（親）側に付ける。行は各スロットに1つずつしか無いため、
+   行に nth-of-type を書いても常に1番目扱いになり段差が出ない */
+.file-slot:nth-child(2) .file-row.is-empty,
+.file-slot:nth-child(2) .file-row.is-empty .file-icon,
+.file-slot:nth-child(2) .file-row.is-empty .file-name.empty { animation-delay: 0.3s; }
+
+.file-slot:nth-child(3) .file-row.is-empty,
+.file-slot:nth-child(3) .file-row.is-empty .file-icon,
+.file-slot:nth-child(3) .file-row.is-empty .file-name.empty { animation-delay: 0.6s; }
+
+/* カーソルが乗っている行は誘導をやめ、通常のホバー表示に任せる
+   （明滅し続けると「今どこを指しているか」が分かりにくくなるため） */
+.file-row.is-empty:hover,
+.file-row.is-empty:hover .file-icon,
+.file-row.is-empty:hover .file-name.empty {
+    animation: none;
+    opacity: 1;
+    transform: none;
+}
 
 .ext-badge {
     width: 32px;
@@ -141,7 +219,7 @@ body {
     flex-shrink: 0;
 }
 
-.bonus-text { font-size: 11px; color: var(--text-muted); }
+.bonus-text { font-size: 15px; color: var(--text-muted); }
 .bonus-text.has-bonus { color: #f0c040; font-weight: 600; }
 
 .exp-statusbar {
@@ -151,7 +229,7 @@ body {
     flex-shrink: 0;
 }
 
-.status-text { font-size: 11px; color: var(--text-muted); }
+.status-text { font-size: 14px; color: var(--text-muted); }
 
 /* ── 拡張子ボーナス一覧パネル ── */
 .bonus-panel {
@@ -164,7 +242,7 @@ body {
 }
 
 .bonus-panel-header {
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -183,22 +261,70 @@ body {
     gap: 6px;
 }
 
+/* バッジ / 対象拡張子 / ボーナス内訳 の3列。
+   内訳の列幅を固定して、どの行でもアイコンが同じ位置から始まるようにする */
 .bonus-entry {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr 230px;
     align-items: center;
     gap: 8px;
-    font-size: 11px;
+    font-size: 14px;
 }
 
 .bonus-entry-name {
-    flex: 1;
     color: var(--text-muted);
 }
 
 .bonus-entry-val {
     font-weight: 700;
-    font-size: 11px;
+    font-size: 14px;
     white-space: nowrap;
+}
+
+/* ボーナス内訳：アイコン・名前・数値をそれぞれ固定の列に置く。
+   行ごとに名前の長さが違っても、パラメータウィンドウと同じように
+   アイコンと数値が縦に揃う */
+.bonus-stat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bonus-stat {
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
+    align-items: center;
+    gap: 6px;
+}
+
+/* アーカイブのように項目が多い行は、1行1項目だと縦に伸びすぎる。
+   名前を省いてアイコンと数値だけを横に流す */
+.bonus-stat-list.compact {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+.bonus-stat-list.compact .bonus-stat {
+    display: inline-flex;
+}
+
+.bonus-stat-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.bonus-stat-name {
+    color: var(--text);
+    font-weight: 400;
+}
+
+.bonus-stat-val {
+    color: #f0c040;
+    font-weight: 700;
 }
 
 .bonus-entry-val.atk   { color: #e8a030; }
@@ -226,8 +352,10 @@ body {
     to   { opacity: 1; transform: translateX(0); }
 }
 
+/* backwards を付けて、開始を遅らせている間も「出現前」の状態で待たせる。
+   これが無いと、3枠同時に埋まったときに遅延中の行だけ先に見えてしまう */
 .file-row.anim-in {
-    animation: rowSlideIn 0.28s ease-out;
+    animation: rowSlideIn 0.28s ease-out backwards;
 }
 
 /* ボーナス一覧：装備中の拡張子行をハイライト */
@@ -250,4 +378,29 @@ body {
 
 .bonus-entry.active .bonus-entry-val {
     text-shadow: 0 0 8px currentColor;
+}
+/* ── 同一ファイルチェック ──
+   同じ拡張子を3枠に積む「特化ビルド」を組むとき、
+   同じファイルを3回選ぶ手間を省くための切り替え */
+.same-file-toggle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    padding: 0 6px;
+    height: 22px;
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.same-file-toggle:hover { color: var(--text); }
+
+.same-file-toggle input {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--accent);
+    cursor: pointer;
 }

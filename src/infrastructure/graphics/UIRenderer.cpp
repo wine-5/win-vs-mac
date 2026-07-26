@@ -33,6 +33,17 @@ namespace infrastructure::graphics
 		DrawTriangle(x1, y1, x2, y2, x3, y3, color, isFilled ? TRUE : FALSE);
 	}
 
+	void UIRenderer::drawRoundedBox(int x, int y, int width, int height, int radius, unsigned int color, bool isFilled, int thickness)
+	{
+		// 角の円弧を何分割して描くか。Windows 11の角丸（4〜8px）ならこの程度で十分滑らかになる
+		constexpr int CORNER_SEGMENTS{ 12 };
+
+		DrawRoundRectAA(static_cast<float>(x), static_cast<float>(y),
+		    static_cast<float>(x + width), static_cast<float>(y + height),
+		    static_cast<float>(radius), static_cast<float>(radius),
+		    CORNER_SEGMENTS, color, isFilled ? TRUE : FALSE, static_cast<float>(thickness));
+	}
+
 	void UIRenderer::drawText(int x, int y, const char *text, unsigned int color, int fontSize)
 	{
 		const auto key{std::make_pair(m_currentFontName, fontSize)};

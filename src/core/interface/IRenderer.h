@@ -1,4 +1,7 @@
 ﻿#pragma once
+#include <string>
+#include <string_view>
+#include <vector>
 #include "core/utility/Vector3.h"
 
 namespace core::iface
@@ -20,6 +23,49 @@ namespace core::iface
 		 * @param scale スケール
 		 */
 		virtual void drawModel(int modelHandle, const core::Vector3& position, const::core::Vector3& rotation, const core::Vector3& scale) = 0;
+
+		/**
+		 * @brief モデルのフレーム（ボーン）を名前から検索する
+		 *
+		 * 武器をキャラクターの手へ装着する際、装着先のボーン番号を得るのに使う。
+		 * ボーン名はモデルの作り（リグ）によって異なるため、見つからない場合は
+		 * getModelFrameNames() で実際の候補を確認すること
+		 * @param modelHandle モデルハンドル
+		 * @param frameName フレーム（ボーン）名
+		 * @return フレーム番号。見つからない場合は -1
+		 */
+		[[nodiscard]] virtual int findModelFrame(int modelHandle, std::string_view frameName) = 0;
+
+		/**
+		 * @brief モデルが持つ全フレーム（ボーン）の名前を取得する
+		 *
+		 * 装着先のボーン名が分からないときに候補を列挙するために使う
+		 * @param modelHandle モデルハンドル
+		 * @return フレーム名の一覧（フレーム番号順）。失敗時は空
+		 */
+		[[nodiscard]] virtual std::vector<std::string> getModelFrameNames(int modelHandle) = 0;
+
+		/**
+		 * @brief モデルを他モデルのフレーム（ボーン）へ追従させて描画する
+		 *
+		 * 親のアニメーションが適用された後のボーン位置へ武器を貼り付ける。
+		 * オフセットは装着先ボーンのローカル空間で解釈されるため、握りの位置・
+		 * 角度の微調整に使える。
+		 *
+		 * @note 親のボーン行列にはアニメーションと親のスケールが反映済みである必要が
+		 *       あるため、必ず親モデルを描画した後に呼ぶこと
+		 * @note modelHandle には武器専用のハンドルを渡すこと。行列を直接指定して描く
+		 *       ため、以後このハンドルには位置・回転・スケール指定が効かなくなる
+		 * @param modelHandle 装着するモデル（武器）のハンドル
+		 * @param parentModelHandle 装着先モデル（キャラクター）のハンドル
+		 * @param frameIndex 装着先のフレーム番号（findModelFrameで取得したもの）
+		 * @param offsetPosition ボーンのローカル空間での位置オフセット
+		 * @param offsetRotation ボーンのローカル空間での回転オフセット（ラジアン）
+		 * @param offsetScale 武器自体のスケール（親のスケールに乗算される）
+		 */
+		virtual void drawModelOnFrame(int modelHandle, int parentModelHandle, int frameIndex,
+		    const core::Vector3& offsetPosition, const core::Vector3& offsetRotation,
+		    const core::Vector3& offsetScale) = 0;
 
 		/**
 		 * @brief モデルのテクスチャ繰り返し回数を設定する
@@ -151,6 +197,22 @@ namespace core::iface
 		virtual void drawBillboard(int imageHandle, const core::Vector3& position,
 		    float size, float angle) = 0;
 
+		/**
+		 * @brief 発光するビルボードを加算合成で描く
+		 *
+		 * 暗闇に浮かぶ星や光跡のように「それ自体が光っている」ものに使う。
+		 * 加算合成なので背景が暗いほど強く光り、重なるほど白熱していく。
+		 * 深度テストは効くが深度は書き込まないため、光同士が互いを消し合わない
+		 * @param imageHandle 2D画像ハンドル（loadImageByIdで取得したもの）
+		 * @param position ビルボード中心のワールド座標
+		 * @param size ワールド単位での大きさ（画像のアスペクト比は保たれる）
+		 * @param angle 面内の回転角（ラジアン）
+		 * @param brightness 明るさ（0〜255。加算量の指定）
+		 * @param color 光の色（0xRRGGBB。画像の色に乗算する。白なら画像のまま）
+		 */
+		virtual void drawGlowBillboard(int imageHandle, const core::Vector3& position,
+		    float size, float angle, int brightness, unsigned int color = 0xFFFFFFu) = 0;
+
 		// 補足: worldToScreen は射影変換であり、厳密には3D描画の責務ではない。
 		//       ただし現状の利用は順変換の2箇所のみで、メソッド1本のために
 		//       IViewProjection を新設しても抽象が増えるだけで得るものが少ない。
@@ -171,5 +233,9 @@ namespace core::iface
 		 * @return 描画コール数
 		 */
 		virtual int getDrawCallCount() = 0;
+
+		// 注意: 仮想関数を追加するときは必ずこの位置（末尾）へ足すこと。
+		// 途中へ挿入すると以降のvtableのスロット番号がずれ、再ビルドが漏れた
+		// 翻訳単位から別の関数が呼ばれてクラッシュする
 	};
 } // namespace core::iface

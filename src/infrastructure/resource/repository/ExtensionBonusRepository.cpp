@@ -16,6 +16,9 @@ namespace
 		{ "document", core::data::FileExtensionType::Document },
 		{ "image", core::data::FileExtensionType::Image },
 		{ "audio", core::data::FileExtensionType::Audio },
+		{ "sourceCode", core::data::FileExtensionType::SourceCode },
+		{ "shortcut", core::data::FileExtensionType::Shortcut },
+		{ "video", core::data::FileExtensionType::Video },
 		{ "archive", core::data::FileExtensionType::Archive },
 		{ "unknown", core::data::FileExtensionType::Unknown },
 	};
@@ -54,12 +57,22 @@ namespace infrastructure::resource::repository
 			read("def", bonus.def);
 			read("hp", bonus.hp);
 			read("attackRange", bonus.attackRange);
+			read("criticalRate", bonus.criticalRate);
+			read("projectileSpeed", bonus.projectileSpeed);
+			read("projectileRange", bonus.projectileRange);
 		}
 	}
 
 	const core::data::FileExtensionBonus& ExtensionBonusRepository::getBonus(
 	    core::data::FileExtensionType type) const noexcept
 	{
-		return m_bonuses[static_cast<std::size_t>(type)];
+		// 範囲外は「ボーナス無し」で返す。
+		const auto index{ static_cast<std::size_t>(type) };
+		if (index >= m_bonuses.size())
+		{
+			static constexpr core::data::FileExtensionBonus EMPTY_BONUS{};
+			return EMPTY_BONUS;
+		}
+		return m_bonuses[index];
 	}
 } // namespace infrastructure::resource::repository

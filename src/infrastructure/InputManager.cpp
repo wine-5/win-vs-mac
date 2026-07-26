@@ -33,12 +33,18 @@ namespace infrastructure
 
 	void InputManager::captureFrameInput()
 	{
-		// ゲームウィンドウが非アクティブな間はキー入力を無視する。
+		// 自分のウィンドウが非アクティブな間はキー入力を無視する。
 		// これが無いと、起動直後やAlt+Tab等でウィンドウの前面/フォーカスが
 		// 遷移している最中に CheckHitKey が誤ってキーが押されたままの状態を
 		// 返すことがあり、以後 isKeyPressed のエッジ検出が働かなくなる
 		// （Escでポーズが開かない等）。
-		const bool focused{ GetForegroundWindow() == GetMainWindowHandle() };
+		//
+		// ゲーム本体のHWNDと直接比べないのは、セレクト画面がWin32のサブウィンドウ
+		// （デスクトップ・ファイル選択など）を前面に出すため。それらが前面のときも
+		// 「自分のアプリが操作されている」状態なので、同一プロセスかどうかで判定する
+		DWORD foregroundProcessId{};
+		GetWindowThreadProcessId(GetForegroundWindow(), &foregroundProcessId);
+		const bool focused{ foregroundProcessId == GetCurrentProcessId() };
 
 		// KEY_MAP内の全キーについて、このフレームで使う状態を一括でスナップショットする。
 		// isKeyDownは以後この値を返すだけになるため、フレーム内のどこで何度チェックしても

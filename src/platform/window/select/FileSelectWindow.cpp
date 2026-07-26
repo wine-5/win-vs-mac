@@ -5,6 +5,9 @@
 #include "core/interface/IResourceManager.h"
 #include "platform/window/WindowConstants.h"
 #include "core/interface/ILogger.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IAudioManager.h"
+#include "core/constant/SeType.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include "core/utility/Log.h"
 #include <exception>
@@ -57,12 +60,20 @@ namespace platform::window::select
 			if (type == platform::window::WindowConstants::MESSAGE_TYPE_SLOT_SELECTED)
 			{
 				int slot = j.value("slot", 0);
+				// 「同一ファイル」チェックがオンなら、1回選ぶだけで3枠すべてに同じものを入れる
+				const bool sameFile{ j.value(platform::window::WindowConstants::JSON_KEY_SAME_FILE, false) };
 				if (slot >= 0 && slot < SLOT_COUNT)
-					openFileDialog(slot);
+					openFileDialog(slot, sameFile);
 			}
 			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_BONUS_INFO)
 			{
 				sendBonusInfo();
+			}
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_SLOTS)
+			{
+				// ページが読み込み直された直後はJS側の装備状態が空に戻っている。
+				// 装備そのものはC++が持ち続けているので、要求に応じて送り直す
+				sendSlotsRefresh();
 			}
 		}
 		catch (const std::exception& e)
@@ -75,30 +86,73 @@ namespace platform::window::select
 		}
 	}
 
-	void FileSelectWindow::openFileDialog(int slotIndex)
+	void FileSelectWindow::openFileDialog(int slotIndex, bool applyToAllSlots)
 	{
+		// ワイド文字版（GetOpenFileNameW）は comdlg32 の内部で __debugbreak() に当たるため使わない。
+		// ANSI版が返すのは日本語環境ではShift_JIS（システム既定のコードページ）のパスで、
+		// そのままJSONへ載せると「不正なUTF-8」で例外になりスロットが送信されない。
+		// 受け取ったあとにUTF-8へ変換してから保持する
 		OPENFILENAMEA ofn{};
-		char szFile[MAX_PATH]{};
+		char fileBuffer[MAX_PATH]{};
 
 		ofn.lStructSize = sizeof(ofn);
 		ofn.hwndOwner = getHwnd();
-		ofn.lpstrFile = szFile;
+		ofn.lpstrFile = fileBuffer;
 		ofn.nMaxFile = MAX_PATH;
 		ofn.lpstrFilter = FILE_DIALOG_FILTER;
 		ofn.nFilterIndex = 1;
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
-		if (GetOpenFileNameA(&ofn))
-		{
-			m_filePaths[slotIndex] = szFile;
+		if (!GetOpenFileNameA(&ofn))
+			return;
 
-			m_extensionTypes[slotIndex] = game::utility::FileExtensionTypeResolver::fromPath(m_filePaths[slotIndex]);
+		const std::string path{ toUtf8(fileBuffer) };
+		const auto extensionType{ game::utility::FileExtensionTypeResolver::fromPath(path) };
+
+		// 同一ファイル指定なら全スロットへ、そうでなければ選んだスロットだけへ入れる。
+		// 同じ拡張子を3枠に積む特化ビルドを組むとき、同じファイルを3回選ぶ手間を省く
+		for (int i = 0; i < SLOT_COUNT; ++i)
+		{
+			if (!applyToAllSlots && i != slotIndex)
+				continue;
+
+			m_filePaths[i] = path;
+			m_extensionTypes[i] = extensionType;
 
 			if (m_onFileSlotChanged)
-				m_onFileSlotChanged(slotIndex, m_filePaths[slotIndex]);
-
-			sendSlotsRefresh();
+				m_onFileSlotChanged(i, path);
 		}
+
+		sendSlotsRefresh();
+
+		// 装備が決まった合図。ダイアログを閉じた直後なので、画面の更新と同じ拍で鳴る
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio)
+			audio->playSe(core::constant::SeType::UiFileSelect);
+	}
+
+	std::string FileSelectWindow::toUtf8(const char* ansi) noexcept
+	{
+		if (ansi == nullptr || ansi[0] == '\0')
+			return {};
+
+		// システム既定のコードページ（日本語環境ならShift_JIS）→ UTF-16 → UTF-8 と二段で変換する。
+		// 直接ANSI→UTF-8に変換するAPIは無いため、UTF-16を経由するのが定石
+		const int wideLength{ MultiByteToWideChar(CP_ACP, 0, ansi, -1, nullptr, 0) };
+		if (wideLength <= 1)
+			return {};
+
+		std::wstring wide(static_cast<std::size_t>(wideLength) - 1, L'\0');
+		MultiByteToWideChar(CP_ACP, 0, ansi, -1, wide.data(), wideLength);
+
+		const int utf8Length{ WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1,
+			nullptr, 0, nullptr, nullptr) };
+		if (utf8Length <= 1)
+			return {};
+
+		std::string utf8(static_cast<std::size_t>(utf8Length) - 1, '\0');
+		WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, utf8.data(), utf8Length, nullptr, nullptr);
+		return utf8;
 	}
 
 	void FileSelectWindow::sendSlotsRefresh() noexcept
@@ -111,6 +165,9 @@ namespace platform::window::select
 			case core::data::FileExtensionType::Document: return EXT_TYPE_NAME_DOCUMENT;
 			case core::data::FileExtensionType::Image: return EXT_TYPE_NAME_IMAGE;
 			case core::data::FileExtensionType::Audio: return EXT_TYPE_NAME_AUDIO;
+			case core::data::FileExtensionType::SourceCode: return EXT_TYPE_NAME_SOURCE_CODE;
+			case core::data::FileExtensionType::Shortcut: return EXT_TYPE_NAME_SHORTCUT;
+			case core::data::FileExtensionType::Video: return EXT_TYPE_NAME_VIDEO;
 			case core::data::FileExtensionType::Archive: return EXT_TYPE_NAME_ARCHIVE;
 			default:                                        return EXT_TYPE_NAME_UNKNOWN;
 			}
@@ -120,7 +177,9 @@ namespace platform::window::select
 		{
 			nlohmann::json resp;
 			resp[platform::window::WindowConstants::JSON_KEY_TYPE]  = platform::window::WindowConstants::MESSAGE_TYPE_REFRESH;
-			resp[platform::window::WindowConstants::JSON_KEY_FILE_SLOT] = nlohmann::json::array();
+			// 配列は "slots"、要素内のスロット番号は "slot"。JS側（file-logic.js）が
+			// data.slots / info.slot の組で読むため、ここを取り違えると一覧が更新されない
+			resp[platform::window::WindowConstants::JSON_KEY_FILE_SLOTS] = nlohmann::json::array();
 			for (int i = 0; i < SLOT_COUNT; ++i)
 			{
 				nlohmann::json s;
@@ -140,7 +199,7 @@ namespace platform::window::select
 					s[platform::window::WindowConstants::JSON_KEY_FILE_PATH] = m_filePaths[i];
 					s[platform::window::WindowConstants::JSON_KEY_EXT_TYPE]  = toName(m_extensionTypes[i]);
 				}
-				resp[platform::window::WindowConstants::JSON_KEY_FILE_SLOT].push_back(s);
+				resp[platform::window::WindowConstants::JSON_KEY_FILE_SLOTS].push_back(s);
 			}
 			m_webView.postMessage(resp.dump());
 		}
@@ -167,6 +226,9 @@ namespace platform::window::select
 			{ EXT_TYPE_NAME_DOCUMENT, core::data::FileExtensionType::Document },
 			{ EXT_TYPE_NAME_IMAGE, core::data::FileExtensionType::Image },
 			{ EXT_TYPE_NAME_AUDIO, core::data::FileExtensionType::Audio },
+			{ EXT_TYPE_NAME_SOURCE_CODE, core::data::FileExtensionType::SourceCode },
+			{ EXT_TYPE_NAME_SHORTCUT, core::data::FileExtensionType::Shortcut },
+			{ EXT_TYPE_NAME_VIDEO, core::data::FileExtensionType::Video },
 			{ EXT_TYPE_NAME_ARCHIVE, core::data::FileExtensionType::Archive },
 			{ EXT_TYPE_NAME_UNKNOWN, core::data::FileExtensionType::Unknown },
 		};
@@ -179,23 +241,57 @@ namespace platform::window::select
 			return oss.str();
 		};
 
+		// ボーナスの項目定義。JS側はここで渡す m_statId でアイコンと日本語名を引く。
+		// 略称（m_label）は装備スロット行の狭い欄に出す短い表記に使う
+		struct StatField
+		{
+			const char* m_statId;
+			const char* m_label;
+			float core::data::FileExtensionBonus::* m_member;
+			float m_scale; // 会心率は確率なので%へ直してから見せる
+		};
+		constexpr StatField STAT_FIELDS[] = {
+			{ "hp", "HP", &core::data::FileExtensionBonus::hp, 1.0f },
+			{ "atk", "ATK", &core::data::FileExtensionBonus::atk, 1.0f },
+			{ "def", "DEF", &core::data::FileExtensionBonus::def, 1.0f },
+			{ "spd", "SPD", &core::data::FileExtensionBonus::spd, 1.0f },
+			{ "rng", "Range", &core::data::FileExtensionBonus::attackRange, 1.0f },
+			{ "crit", "CRIT", &core::data::FileExtensionBonus::criticalRate, PERCENT_SCALE },
+			{ "bspd", "B.SPD", &core::data::FileExtensionBonus::projectileSpeed, 1.0f },
+			{ "brng", "B.RNG", &core::data::FileExtensionBonus::projectileRange, 1.0f },
+		};
+
+		// 短い説明文（装備スロット行の「ボーナス」欄用）
 		auto describe = [&](core::data::FileExtensionType t) -> std::string
 		{
 			const auto& b = m_resourceManager.getExtensionBonus(t);
 			std::string result{};
-			auto append = [&](const char* label, float val) {
-				if (val == 0.0f) return;
+			for (const auto& f : STAT_FIELDS)
+			{
+				const float value{ b.*(f.m_member) * f.m_scale };
+				if (value == 0.0f)
+					continue;
 				if (!result.empty()) result += ' ';
-				result += label;
+				result += f.m_label;
 				result += '+';
-				result += fmt(val);
-			};
-			append("HP",    b.hp);
-			append("ATK",   b.atk);
-			append("DEF",   b.def);
-			append("SPD",   b.spd);
-			append("Range", b.attackRange);
+				result += fmt(value);
+			}
 			return result;
+		};
+
+		// 項目ごとの内訳（拡張子ボーナス一覧でアイコン付きに描くため）
+		auto breakdown = [&](core::data::FileExtensionType t) -> nlohmann::json
+		{
+			const auto& b = m_resourceManager.getExtensionBonus(t);
+			nlohmann::json list = nlohmann::json::array();
+			for (const auto& f : STAT_FIELDS)
+			{
+				const float value{ b.*(f.m_member) * f.m_scale };
+				if (value == 0.0f)
+					continue;
+				list.push_back({ { "stat", f.m_statId }, { "value", value } });
+			}
+			return list;
 		};
 
 		try
@@ -203,8 +299,17 @@ namespace platform::window::select
 			nlohmann::json resp;
 			resp[platform::window::WindowConstants::JSON_KEY_TYPE]  = platform::window::WindowConstants::MESSAGE_TYPE_BONUS_INFO;
 			resp[platform::window::WindowConstants::JSON_KEY_DESCRIPTIONS] = nlohmann::json::object();
+			resp[platform::window::WindowConstants::JSON_KEY_EXTENSIONS] = nlohmann::json::object();
+			resp[platform::window::WindowConstants::JSON_KEY_BONUS_STATS] = nlohmann::json::object();
 			for (const auto& e : ENTRIES)
+			{
 				resp[platform::window::WindowConstants::JSON_KEY_DESCRIPTIONS][e.m_key] = describe(e.m_type);
+				resp[platform::window::WindowConstants::JSON_KEY_BONUS_STATS][e.m_key] = breakdown(e.m_type);
+				// 対象の拡張子も判定表から取り出して送る。
+				// 「.exe など」と省略すると、どの拡張子が該当するのか確かめる手段が無くなる
+				resp[platform::window::WindowConstants::JSON_KEY_EXTENSIONS][e.m_key] =
+				    game::utility::FileExtensionTypeResolver::joinExtensions(e.m_type);
+			}
 			m_webView.postMessage(resp.dump());
 		}
 		catch (const std::exception& e)

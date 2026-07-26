@@ -57,7 +57,11 @@ namespace infrastructure::resource::repository
 		};
 
 		// BGM は同時に1曲しか鳴らないため、全曲を PCM 展開してメモリに載せる必要がない。
-		// ストリーミング再生にすることで mp3 6曲分（展開後 約285MB）の常駐を避ける。
+		// ストリーミング再生にすることで6曲分の常駐を避ける。
+		//
+		// 重要：BGM は必ず ogg で持つこと。DxLib のストリーミングが対応するのは wav と ogg だけで、
+		// mp3 を渡すとこの指定を無視して全曲フル PCM 展開される。
+		// 指定は効いているように見えるのに効かないため、気づきにくい。
 		SetCreateSoundDataType(DX_SOUNDDATATYPE_FILE);
 
 		for (const auto& entry : json["bgm"])
@@ -90,20 +94,15 @@ namespace infrastructure::resource::repository
 	{
 		if (!json.contains("se")) return;
 
-		const std::unordered_map<std::string, core::constant::SeType> typeMap{
-			{ "AttackPlayer", core::constant::SeType::AttackPlayer },
-			{ "HitEnemy", core::constant::SeType::HitEnemy },
-			{ "HitPlayer", core::constant::SeType::HitPlayer },
-			{ "DeadEnemy", core::constant::SeType::DeadEnemy },
-		};
-
 		for (const auto& entry : json["se"])
 		{
 			const std::string key  { entry["type"] };
 			const std::string path { entry["path"] };
 
-			auto it{ typeMap.find(key) };
-			if (it == typeMap.end()) continue;
+			// 名前と種別の対応は SeType.h の SE_TYPE_NAMES に一本化している
+			const core::constant::SeType type{ core::constant::toSeType(key) };
+			if (type == core::constant::SeType::None)
+				continue;
 
 			if (!entry.contains("volume"))
 				throw std::runtime_error{ "se '" + key + "' に必須フィールド (volume) が設定されていません" };
@@ -115,7 +114,7 @@ namespace infrastructure::resource::repository
 			config.m_handle = handle;
 			config.m_volume = entry["volume"].get<float>();
 
-			m_seConfigs[it->second] = config;
+			m_seConfigs[type] = config;
 		}
 	}
 } // namespace infrastructure::resource::repository

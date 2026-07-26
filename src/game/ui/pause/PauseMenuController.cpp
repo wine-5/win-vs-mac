@@ -1,5 +1,8 @@
 #include "PauseMenuController.h"
 #include "core/input/KeyCode.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IAudioManager.h"
+#include "core/constant/SeType.h"
 
 namespace game::ui::pause
 {
@@ -31,6 +34,7 @@ namespace game::ui::pause
 			return PauseMenuAction::None;
 
 		const int itemCount{ static_cast<int>(m_items.size()) };
+		const int previousIndex{ m_selectedIndex };
 
 		// キーボード：↑↓で選択を移動する（端で止める）
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::Up) && m_selectedIndex > 0)
@@ -45,6 +49,13 @@ namespace game::ui::pause
 		if (hoveredIndex >= 0)
 			m_selectedIndex = hoveredIndex;
 
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+
+		// 選択が動いたときだけ鳴らす。キーとマウスホバーのどちらで動いても同じ音にして、
+		// 「今どこを選んでいるか」を操作方法によらず同じ手応えで返す
+		if (audio && m_selectedIndex != previousIndex)
+			audio->playSe(core::constant::SeType::UiKeyPress);
+
 		// マウス左クリックのエッジ検出（押した瞬間のみ）
 		const bool mouseLeft{ m_inputProvider.isMouseLeftPressed() };
 		const bool mouseClicked{ mouseLeft && !m_prevMouseLeft };
@@ -54,7 +65,11 @@ namespace game::ui::pause
 		const bool decided{ m_inputProvider.isKeyPressed(core::input::KeyCode::Enter) ||
 			                (mouseClicked && hoveredIndex >= 0) };
 		if (decided)
+		{
+			if (audio)
+				audio->playSe(core::constant::SeType::UiClick);
 			return m_items[m_selectedIndex];
+		}
 
 		return PauseMenuAction::None;
 	}

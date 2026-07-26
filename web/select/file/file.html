@@ -14,6 +14,10 @@
             <span>&#9881;&#65039;</span>
             <span>装備ファイルを選択</span>
         </div>
+        <label class="same-file-toggle" title="1つ選ぶと3スロットすべて同じファイルになります">
+            <input type="checkbox" id="same-file-check">
+            <span>同一ファイル</span>
+        </label>
     </div>
     <div class="file-list-header">
         <span>ファイル名</span>
@@ -23,38 +27,7 @@
     <div id="file-list" class="file-list"></div>
     <div class="bonus-panel">
         <div class="bonus-panel-header">拡張子ボーナス一覧</div>
-        <div class="bonus-panel-list">
-            <div class="bonus-entry" data-ext="Executable">
-                <img class="ext-badge" src="https://assets.game.web/images/ui/select/exe.png" alt="EXE">
-                <span class="bonus-entry-name">.exe など</span>
-                <span class="bonus-entry-val atk">ATK +10</span>
-            </div>
-            <div class="bonus-entry" data-ext="Document">
-                <img class="ext-badge" src="https://assets.game.web/images/ui/select/doc.png" alt="DOC">
-                <span class="bonus-entry-name">.txt, .pdf など</span>
-                <span class="bonus-entry-val spd">SPD +1.5</span>
-            </div>
-            <div class="bonus-entry" data-ext="Image">
-                <img class="ext-badge" src="https://assets.game.web/images/ui/select/img.png" alt="IMG">
-                <span class="bonus-entry-name">.png, .jpg など</span>
-                <span class="bonus-entry-val def">DEF +8</span>
-            </div>
-            <div class="bonus-entry" data-ext="Audio">
-                <img class="ext-badge" src="https://assets.game.web/images/ui/select/aud.png" alt="AUD">
-                <span class="bonus-entry-name">.mp3, .wav など</span>
-                <span class="bonus-entry-val hp">HP +20</span>
-            </div>
-            <div class="bonus-entry" data-ext="Archive">
-                <img class="ext-badge" src="https://assets.game.web/images/ui/select/arc.png" alt="ARC">
-                <span class="bonus-entry-name">.zip, .rar など</span>
-                <span class="bonus-entry-val multi">ATK+3 &nbsp;HP+5 &nbsp;DEF+3</span>
-            </div>
-            <div class="bonus-entry" data-ext="Unknown">
-                <img class="ext-badge" src="https://assets.game.web/images/ui/select/gameicon.png" alt="???">
-                <span class="bonus-entry-name">不明な拡張子</span>
-                <span class="bonus-entry-val range">射程 +20</span>
-            </div>
-        </div>
+        <div class="bonus-panel-list" id="bonus-list"></div>
     </div>
     <div class="exp-statusbar">
         <span id="status-text" class="status-text">ファイルをクリックして選択</span>

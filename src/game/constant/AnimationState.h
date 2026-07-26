@@ -17,6 +17,7 @@ namespace game::constant
 		Run,
 		Attack1,
 		Attack2,
+		Throw, // 遠距離攻撃（Windowを投げる）。溜めの有無に関わらず発射時に再生する
 		Hit,
 		Dying,
 		Jump,
@@ -51,6 +52,7 @@ namespace game::constant
 		case AnimationState::Run:     return "Run";
 		case AnimationState::Attack1: return "Attack1";
 		case AnimationState::Attack2: return "Attack2";
+		case AnimationState::Throw: return "Throw";
 		case AnimationState::Hit:     return "Hit";
 		case AnimationState::Dying:   return "Dying";
 		case AnimationState::Jump:    return "Jump";

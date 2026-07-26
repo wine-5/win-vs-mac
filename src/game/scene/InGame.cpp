@@ -19,6 +19,8 @@
 #include "game/system/movement/MoveSystem.h"
 #include "game/system/movement/PhysicsSystem.h"
 #include "game/system/movement/GroundingSystem.h"
+#include "game/system/stage/BossGateSystem.h"
+#include "game/system/movement/FootstepSystem.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/actor/Player.h"
 #include "game/GameManager.h"
@@ -33,11 +35,13 @@
 #include "game/system/combat/PlayerDeathSystem.h"
 #include "game/system/ai/DetectionSystem.h"
 #include "game/system/visual/DetectionAlertVisualsSystem.h"
+#include "game/system/visual/DamagePopupSystem.h"
 #include "game/system/visual/AttackTelegraphVisualsSystem.h"
 #include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/system/visual/EffectSystem.h"
 #include "game/system/visual/LightSystem.h"
 #include "game/system/visual/TextureScrollSystem.h"
+#include "game/system/visual/WeaponAttachSystem.h"
 #include "game/constant/PropId.h"
 #include "core/interface/IEffectFactory.h"
 #include "game/system/combat/AttackSystem.h"
@@ -66,12 +70,24 @@
 #include "game/system/combat/ProjectileSystem.h"
 #include "game/system/combat/ProjectileReflectSystem.h"
 #include "game/system/combat/PlayerRangedAttackSystem.h"
+#include "game/system/combat/PlayerAttackComboSystem.h"
 #include "game/system/visual/PlayerChargeVisualsSystem.h"
+#include "game/system/visual/CriticalVisualsSystem.h"
 #include "game/system/camera/ChargeZoomSystem.h"
 #include "game/system/camera/DamageShakeSystem.h"
 #include "game/system/visual/MacAwakenEffectSystem.h"
+#include "game/system/visual/BackgroundParticleSystem.h"
+#include "game/system/visual/HardAuraVisualsSystem.h"
+#include "game/system/visual/BattleStartSystem.h"
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
+#include "game/ui/ingame/PlayerHUDView.h"
+#include "game/ui/ingame/EquipmentSlotView.h"
+#include "game/ui/ingame/ObjectiveView.h"
+#include "game/ui/ingame/InGameStatusView.h"
+#include "game/ui/ingame/LowHealthVignetteView.h"
+#include "game/ui/ingame/BossHUDView.h"
+#include "game/ui/ingame/EnemyHealthBarView.h"
 #include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
 #include "game/event/InGameEvents.h"
 
@@ -182,7 +198,8 @@ namespace game::scene
 	    , m_fileEquipmentData{ gameManager.getFileEquipmentData() }
 	    , m_effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() }
 	    , m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }
-	    , m_enemySpawner{ m_factoryManager, m_componentManager, m_resourceManager, m_eventBus }
+	    , m_enemySpawner{ m_factoryManager, m_componentManager, m_resourceManager, m_eventBus,
+		    gameManager.getDifficulty() }
 	    , m_projectileFactory{ m_entityManager, m_componentManager }
 	    // 実データは loadResources() で設定する（コライダー自動計算がモデルロード後に確定するため）
 	    , m_playerData{}
@@ -248,6 +265,50 @@ namespace game::scene
 		    m_renderer);
 		m_view.setDebugGizmoView(m_debugGizmoView.get());
 		m_view.setDebugHUDView(m_debugHUDView.get());
+
+		m_playerHUDView = std::make_unique<ui::ingame::PlayerHUDView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager);
+		m_view.setPlayerHUDView(m_playerHUDView.get());
+
+		m_equipmentSlotView = std::make_unique<ui::ingame::EquipmentSlotView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_fileEquipmentData,
+		    m_resourceManager);
+		m_view.setEquipmentSlotView(m_equipmentSlotView.get());
+
+		m_objectiveView = std::make_unique<ui::ingame::ObjectiveView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>());
+		m_view.setObjectiveView(m_objectiveView.get());
+
+		m_statusView = std::make_unique<ui::ingame::InGameStatusView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_gameManager.getDifficulty());
+		m_view.setInGameStatusView(m_statusView.get());
+
+		m_lowHealthVignetteView = std::make_unique<ui::ingame::LowHealthVignetteView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager,
+		    m_resourceManager);
+		m_view.setLowHealthVignetteView(m_lowHealthVignetteView.get());
+
+		m_bossHUDView = std::make_unique<ui::ingame::BossHUDView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager);
+		m_view.setBossHUDView(m_bossHUDView.get());
+
+		m_enemyHealthBarView = std::make_unique<ui::ingame::EnemyHealthBarView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager,
+		    m_renderer);
+		m_view.setEnemyHealthBarView(m_enemyHealthBarView.get());
 	}
 
 	InGame::~InGame() = default;
@@ -267,10 +328,31 @@ namespace game::scene
 		m_playerData = game::data::PlayerData::fromMetadata(playerMeta.value());
 	}
 
+	void InGame::logPlayerParameters(const char* label) const
+	{
+		core::log::info("Player[{}] HP={} ATK={} DEF={} SPD={} 攻撃範囲={} クールダウン={} 会心率={} 会心倍率={}",
+		    label,
+		    m_playerData.getMaxHp(),
+		    m_playerData.getAttackPower(),
+		    m_playerData.getDefence(),
+		    m_playerData.getMoveSpeed(),
+		    m_playerData.getAttackRange(),
+		    m_playerData.getAttackCooldown(),
+		    m_playerData.getCriticalRate(),
+		    m_playerData.getCriticalMultiplier());
+		core::log::info("Player[{}] 弾速ボーナス={} 飛距離ボーナス={}",
+		    label,
+		    m_playerData.getProjectileSpeedBonus(),
+		    m_playerData.getProjectileRangeBonus());
+	}
+
 	void InGame::spawnEntities()
 	{
 		game::factory::FactoryInitializer initializer(m_factoryManager, m_resourceManager,
 		    m_entityManager, m_componentManager);
+
+		// 装備で実際にパラメータが動いたかを追えるよう、反映の前後をログに出す
+		logPlayerParameters("装備前");
 
 		// 拡張子ボーナスをPlayerDataに反映
 		for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
@@ -281,6 +363,8 @@ namespace game::scene
 				    m_resourceManager.getExtensionBonus(m_fileEquipmentData.getExtensionType(i)));
 			}
 		}
+
+		logPlayerParameters("装備後");
 
 		initializer.initializePlayer(m_playerData);
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
@@ -322,6 +406,15 @@ namespace game::scene
 	void InGame::setupSystems()
 	{
 		// システム登録
+		// 開始演出（READY → FIGHT!）。構築時点で操作と敵AIを止めるため、
+		// 入力を読むInputSystemより先に登録して解禁も同じフレーム内で先に済ませる
+		m_battleStartSystem = m_systemManager.registerSystem<game::system::visual::BattleStartSystem>(
+		    m_componentManager,
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_playerId);
+		m_view.setBattleStartSystem(m_battleStartSystem);
+
 		m_systemManager.registerSystem<game::system::movement::InputSystem>(m_componentManager, m_playerId, m_inputProvider, m_gameManager);
 		// カメラ演出（Zoom/Shake）はCameraSystemより前に走らせ、合成結果をCameraEffectComponentへ書いておく
 		m_systemManager.registerSystem<game::system::camera::ChargeZoomSystem>(m_componentManager, m_playerId);
@@ -345,10 +438,22 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::combat::TargetingSystem>(m_componentManager);
 		// 発射入力→弾生成（生成はPhysicsSystemより前でよい）。弾定義はjsonから取得する。
 		// Window弾の見た目はビルボード（板に貼ったWindow画像）で描くので、その画像を先に読む
-		const auto& projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
+		auto projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
 		const int windowBillboard{ projectileMeta.m_imageId.empty() ? -1 : m_resourceManager.loadImageById(projectileMeta.m_imageId) };
-		m_systemManager.registerSystem<game::system::combat::PlayerRangedAttackSystem>(m_componentManager, m_playerId, m_projectileFactory,
-		    projectileMeta, windowBillboard);
+
+		// 装備ファイルのボーナスを弾定義へ反映する。
+		// 飛距離は「弾速×寿命」で決まるため、弾速だけを上げると距離まで一緒に伸びてしまう。
+		// 元の飛距離にボーナスを足したうえで、新しい弾速から寿命を逆算し、
+		// 「速さ」と「距離」を別々のボーナスとして独立に効かせる
+		const float baseProjectileRange{ projectileMeta.m_speed * projectileMeta.m_lifetime };
+		projectileMeta.m_speed += m_playerData.getProjectileSpeedBonus();
+		if (projectileMeta.m_speed > 0.0f)
+			projectileMeta.m_lifetime = (baseProjectileRange + m_playerData.getProjectileRangeBonus()) / projectileMeta.m_speed;
+
+		auto* rangedAttack{ m_systemManager.registerSystem<game::system::combat::PlayerRangedAttackSystem>(
+			m_componentManager, m_playerId, m_projectileFactory, projectileMeta, windowBillboard) };
+		// レティクルがクールダウンの残量を読むため、Viewへ参照を渡す
+		m_view.setPlayerRangedAttackSystem(rangedAttack);
 		m_systemManager.registerSystem<game::system::movement::PhysicsSystem>(m_componentManager, m_gameManager, m_playerData.getJumpForce(), m_playerData.getGravity(), m_playerData.getMaxFallSpeed());
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
 		m_systemManager.registerSystem<game::system::combat::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);
@@ -357,9 +462,14 @@ namespace game::scene
 
 		m_systemManager.registerSystem<game::system::visual::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
 
+		// ボス出現で入り口を塞ぐ扉。押し返しの前に動かして、その位置で当たり判定させる
+		m_systemManager.registerSystem<game::system::stage::BossGateSystem>(m_componentManager, m_eventBus);
+
 		m_systemManager.registerSystem<game::system::combat::CollisionSystem>(m_componentManager);
 		// 障害物の押し返し後に、床・坂の傾いた面へ足を乗せる（坂はAABBで表せないため専用処理）
 		m_systemManager.registerSystem<game::system::movement::GroundingSystem>(m_componentManager);
+		// 足音は「進んだ距離」で数えるため、押し返しと接地が終わって位置が確定してから走らせる
+		m_systemManager.registerSystem<game::system::movement::FootstepSystem>(m_componentManager, m_playerId);
 		// AI行動分割：近接追跡型敵を駆動
 		m_systemManager.registerSystem<game::system::ai::MeleeChaseAISystem>(m_componentManager);
 		// AI行動分割：遠距離維持型敵を駆動
@@ -378,8 +488,12 @@ namespace game::scene
 		// 敵がプレイヤーを発見した瞬間を検知（全敵共通）。発見演出のトリガーになる
 		m_systemManager.registerSystem<game::system::ai::DetectionSystem>(m_componentManager, m_eventBus);
 
+		// プレイヤーの近接攻撃入力をコンボの段数へ振り分ける（攻撃の成立はAttackSystem）
+		m_systemManager.registerSystem<game::system::combat::PlayerAttackComboSystem>(
+		    m_componentManager, m_playerId);
+
 		m_systemManager.registerSystem<game::system::combat::AttackSystem>(
-		    m_componentManager, m_eventBus, core::constant::SeType::AttackPlayer);
+		    m_componentManager, m_eventBus);
 		m_systemManager.registerSystem<game::system::visual::HitEffectSystem>(m_componentManager, m_eventBus);
 		// 死亡した敵の後始末（赤化＋ディゾルブ演出→Entity破棄＋モデルハンドルのプール返却）
 		m_systemManager.registerSystem<game::system::combat::EnemyDeathSystem>(m_componentManager, m_entityManager, m_eventBus, m_enemySpawner, m_renderer);
@@ -398,6 +512,9 @@ namespace game::scene
 		// 壁などの模様を流す（貼り方をずらすだけなので描画状態に影響しない）
 		m_systemManager.registerSystem<game::system::visual::TextureScrollSystem>(m_componentManager);
 
+		// 装着武器の装着先ボーンを解決する（解決はEntityごとに一度きり。描画はInGameView）
+		m_systemManager.registerSystem<game::system::visual::WeaponAttachSystem>(m_componentManager, m_renderer);
+
 		// LightComponentを持つエンティティの点光源を生成・追従させる（プレイヤーの携行灯など）
 		if (auto* lighting{ core::base::ServiceLocator::get<core::iface::ILighting>() })
 			m_systemManager.registerSystem<game::system::visual::LightSystem>(m_componentManager, *lighting);
@@ -412,6 +529,26 @@ namespace game::scene
 			m_playerId) };
 		m_view.setPlayerChargeVisualsSystem(chargeVisuals);
 
+		// クリティカルの瞬間に弾ける集中線
+		auto* criticalVisuals{ m_systemManager.registerSystem<game::system::visual::CriticalVisualsSystem>(
+			m_componentManager,
+			m_eventBus,
+			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+			*core::base::ServiceLocator::get<core::iface::IScreen>(),
+			m_playerId) };
+		m_view.setCriticalVisualsSystem(criticalVisuals);
+
+		// 虚空を流れるデータの光跡（背景の奥行きと動きを作る）
+		auto* backgroundParticles{ m_systemManager.registerSystem<game::system::visual::BackgroundParticleSystem>(
+			m_componentManager, m_playerId, m_renderer, m_resourceManager) };
+		m_view.setBackgroundParticleSystem(backgroundParticles);
+
+		// Hardの敵を包む赤いオーラ（強化されていることを戦闘中に伝える）
+		auto* hardAura{ m_systemManager.registerSystem<game::system::visual::HardAuraVisualsSystem>(
+			m_componentManager, m_renderer, m_resourceManager,
+			m_gameManager.getDifficulty() == core::data::Difficulty::Hard) };
+		m_view.setHardAuraVisualsSystem(hardAura);
+
 		// 敵の発見演出（頭上の通知バッジ）。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
 		auto* detectionAlert{ m_systemManager.registerSystem<game::system::visual::DetectionAlertVisualsSystem>(
 			m_componentManager,
@@ -421,6 +558,15 @@ namespace game::scene
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
 			m_resourceManager) };
 		m_view.setDetectionAlertVisualsSystem(detectionAlert);
+
+		// 敵に与えたダメージ量の表示。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
+		auto* damagePopup{ m_systemManager.registerSystem<game::system::visual::DamagePopupSystem>(
+			m_componentManager,
+			m_eventBus,
+			m_renderer,
+			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+			*core::base::ServiceLocator::get<core::iface::IScreen>()) };
+		m_view.setDamagePopupSystem(damagePopup);
 
 		// 攻撃予兆（地面の攻撃範囲サークル）。描画内容はSystemが持ち、Viewが3D描画フェーズで呼ぶ
 		auto* attackTelegraph{ m_systemManager.registerSystem<game::system::visual::AttackTelegraphVisualsSystem>(
@@ -440,7 +586,12 @@ namespace game::scene
 		    {
 				// 被ダメージ追跡（プレイヤーが攻撃を受けた場合）
 				if (e.m_targetId == m_playerId)
-					m_totalDamageTaken += e.m_damage; }));
+					m_totalDamageTaken += e.m_damage;
+
+				// クリティカルの瞬間に一拍止めて会心の手応えを作る。
+				// 与えたときだけで、被弾側では止めない（操作不能時間は理不尽に感じるため）
+				if (e.m_isCritical && e.m_targetId != m_playerId)
+					m_hitStop.requestOnCritical(); }));
 		// プレイヤー死亡演出の完了イベントの購読。
 		// HPが尽きた瞬間（PlayerDeadEvent）ではなく、死亡アニメと暗転を見せ終えてから遷移する。
 		// 演出中もモデルは表示し続ける（非表示にすると死亡アニメが見えなくなる）
@@ -560,14 +711,21 @@ namespace game::scene
 			return;
 		}
 
-		m_elapsedTime += deltaTime;
-		m_systemManager.update(deltaTime);
+		// ヒットストップ中はSystemへ渡す時間に倍率を掛ける（0なら何も進まない）。
+		// 経過時間の計測もここへ揃える。止まっている間もタイマーだけ進むと、
+		// 画面が止まっているのに右上の秒数だけ動いて不自然になる
+		const float scaledDeltaTime{ m_hitStop.apply(deltaTime) };
+
+		// 開始演出（READY）の間はまだ動けないので、クリアタイムの計測も始めない
+		if (m_battleStartSystem == nullptr || !m_battleStartSystem->isPreparing())
+			m_elapsedTime += scaledDeltaTime;
+		m_systemManager.update(scaledDeltaTime);
 
 		// DEBUG: Tキーでプレイヤー位置にテストエフェクト（Enemy_Spawn）を再生する（テスト後に削除）
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::T))
 		{
 			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_playerId) };
-			m_effectFactory.play(core::constant::EffectType::Enemy_HitWindow, transform.m_position);
+			m_effectFactory.play(core::constant::EffectType::Enemy_HitWindow, transform.m_position, {});
 			core::log::info("エフェクトが再生");
 		}
 	}
@@ -581,7 +739,9 @@ namespace game::scene
 
 		// 描画は InGameView へ委譲する。ボスが召喚する雑魚も実行時に増えるため、
 		// スポーン時のスナップショットではなく EnemyFactory が持つ最新の敵一覧を渡す
-		m_view.draw(m_playerId);
+		// 残り雑魚はボス出現条件そのものなので、開始時スナップショットの生き残り数を渡す
+		// （ボスが召喚する雑魚は条件に含めない）
+		m_view.draw(m_playerId, static_cast<int>(m_stageEnemyIds.size()), m_macId, m_elapsedTime);
 	}
 
 	void InGame::saveResultData	(bool isVictory) noexcept

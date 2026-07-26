@@ -2,9 +2,14 @@
 #include "core/data/ModelMetadata.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/MetadataKeys.h"
+#include "game/constant/ProjectileId.h"
+#include "core/data/ProjectileMetadata.h"
 #include "platform/window/WindowConstants.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IAudioManager.h"
+#include "core/constant/SeType.h"
 #include "platform/utility/StringConverter.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include <shellapi.h>
@@ -18,10 +23,12 @@ namespace platform::window::select
 	Win32SelectWindowManager::Win32SelectWindowManager(
 	    std::function<void()> onGameStart,
 	    std::function<void(int, const std::string&)> onFileSlotChanged,
+	    std::function<void(const std::string&)> onDifficultyChanged,
 	    core::iface::IResourceManager& resourceManager,
 	    core::iface::IScreen& screen) noexcept
 	    : m_onGameStart{ std::move(onGameStart) }
 	    , m_onFileSlotChanged{ std::move(onFileSlotChanged) }
+	    , m_onDifficultyChanged{ std::move(onDifficultyChanged) }
 	    , m_resourceManager{ resourceManager }
 	    , m_screen{ screen }
 	{
@@ -70,16 +77,19 @@ namespace platform::window::select
 		    availH,
 		    m_resourceManager);
 		if (!m_fileSelectWindow->create(m_desktopWindow->getHwnd())) return;
-        m_fileSelectWindow->setOnFileSlotChanged([this](int slot, const std::string& path) noexcept {
+		// noexcept にしない。文字列の代入などで例外が出た場合、noexcept だと
+		// std::terminate になってログも残らず即死する。
+		// ここで投げれば FileSelectWindow::handleMessage の catch がログに残す
+		m_fileSelectWindow->setOnFileSlotChanged([this](int slot, const std::string& path)
+		    {
             if (m_onFileSlotChanged) m_onFileSlotChanged(slot, path);
             if (slot >= 0 && slot < FILE_SLOT_COUNT)
             {
                 m_slotPaths[slot] = path;
 				m_slotExtTypes[slot] = game::utility::FileExtensionTypeResolver::fromPath(path);
 			}
-			updateParameterWindow();
-        });
-        m_fileSelectWindow->setOnMinimize([this]() noexcept {
+			updateParameterWindow(); });
+		m_fileSelectWindow->setOnMinimize([this]() noexcept {
             m_fileSelectWindow->hide();
             m_fileVisible = false;
             notifyWindowState(WINDOW_NAME_FILE, false);
@@ -114,7 +124,12 @@ namespace platform::window::select
 		    colWidth,
 		    diffH);
 		if (!m_difficultyWindow->create(m_desktopWindow->getHwnd())) return;
-        m_difficultyWindow->setOnMinimize([this]() noexcept {
+		m_difficultyWindow->setOnDifficultyChanged([this](const std::string& difficulty) noexcept
+		    {
+			    if (m_onDifficultyChanged) m_onDifficultyChanged(difficulty);
+			    // HARDでは全ウィンドウの配色を警告色へ切り替える
+			    broadcastDifficulty(difficulty); });
+		m_difficultyWindow->setOnMinimize([this]() noexcept {
             m_difficultyWindow->hide();
             m_diffVisible = false;
             notifyWindowState(WINDOW_NAME_DIFF, false);
@@ -150,7 +165,11 @@ namespace platform::window::select
         m_fileSelectWindow->show();
         m_parameterWindow->show();
         m_difficultyWindow->show();
-    }
+
+		// 何も装備していない状態の基礎値を最初から見せる。
+		// ファイルを1つ選ぶまで全項目が「—」のままだと、何が伸びるのか比較できない
+		updateParameterWindow();
+	}
 
     void Win32SelectWindowManager::destroyAllWindows()
     {
@@ -167,7 +186,14 @@ namespace platform::window::select
         m_desktopWindow.reset();
     }
 
-    void Win32SelectWindowManager::pumpMessages()
+	void Win32SelectWindowManager::setWindowsVisible(bool visible) noexcept
+	{
+		// 子ウィンドウは親（デスクトップ）に従うので、親だけ切り替えれば足りる
+		if (m_desktopWindow && m_desktopWindow->getHwnd())
+			ShowWindow(m_desktopWindow->getHwnd(), visible ? SW_SHOW : SW_HIDE);
+	}
+
+	void Win32SelectWindowManager::pumpMessages()
     {
         MSG msg{};
         while (::PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -178,7 +204,37 @@ namespace platform::window::select
             ::TranslateMessage(&msg);
             ::DispatchMessageW(&msg);
         }
-    }
+
+		updateDebugOverlayToggle(); // DEBUG: リリース時に削除
+	}
+
+	// DEBUG: ここからセレクト画面の一時退避（リリース時に削除する）
+
+	void Win32SelectWindowManager::updateDebugOverlayToggle() noexcept
+	{
+#ifdef _DEBUG
+		// セレクト画面のデスクトップは常時最前面なので、その裏にあるコンソールや
+		// 例外ダイアログを読むことができない。F4で一時的に引っ込められるようにする。
+		// GetAsyncKeyState は押しっぱなしでも真になるため、押した瞬間だけを拾う
+		const bool isDown{ (GetAsyncKeyState(DEBUG_HIDE_KEY) & 0x8000) != 0 };
+		const bool isPressed{ isDown && !m_debugHideKeyDown };
+		m_debugHideKeyDown = isDown;
+
+		if (!isPressed)
+			return;
+
+		m_debugOverlayHidden = !m_debugOverlayHidden;
+
+		// 子ウィンドウは親（デスクトップ）を隠せば一緒に消える
+		if (m_desktopWindow && m_desktopWindow->getHwnd())
+			ShowWindow(m_desktopWindow->getHwnd(), m_debugOverlayHidden ? SW_HIDE : SW_SHOW);
+
+		core::log::info("DEBUG: セレクト画面の表示を{}にしました",
+		    m_debugOverlayHidden ? "非表示" : "表示");
+#endif
+	}
+
+	// DEBUG: ここまで
 
 	int Win32SelectWindowManager::countEquippedSlots() const noexcept
 	{
@@ -191,12 +247,13 @@ namespace platform::window::select
 		return count;
 	}
 
-	void Win32SelectWindowManager::updateParameterWindow() noexcept
+	void Win32SelectWindowManager::updateParameterWindow()
 	{
         if (!m_parameterWindow) return;
 
+		ParameterStats stats{};
+
 		// 基礎ステータスは playerData.json のメタデータを唯一の情報源とする
-		float baseHp{}, baseAtk{}, baseDef{}, baseSpd{};
 		if (const auto meta{ m_resourceManager.getMetadata(game::constant::model_id::PLAYER) })
 		{
 			const auto& props{ meta->floatProperties };
@@ -205,29 +262,53 @@ namespace platform::window::select
 				    if (const auto it{ props.find(std::string{ key }) }; it != props.end())
 					    out = it->second;
 				} };
-			read(game::constant::metadata_keys::MAX_HP, baseHp);
-			read(game::constant::metadata_keys::ATTACK_POWER, baseAtk);
-			read(game::constant::metadata_keys::DEFENCE, baseDef);
-			read(game::constant::metadata_keys::MOVE_SPEED, baseSpd);
+			read(game::constant::metadata_keys::MAX_HP, stats.m_hp.m_base);
+			read(game::constant::metadata_keys::ATTACK_POWER, stats.m_atk.m_base);
+			read(game::constant::metadata_keys::DEFENCE, stats.m_def.m_base);
+			read(game::constant::metadata_keys::MOVE_SPEED, stats.m_spd.m_base);
+			read(game::constant::metadata_keys::ATTACK_RANGE, stats.m_attackRange.m_base);
+
+			// 会心率は0.0〜1.0の確率で持っているが、そのままでは0.2などと出て読みにくい。
+			// 表示だけ%へ直す（ボーナス側も同じ倍率を掛ける）
+			float criticalRate{};
+			read(game::constant::metadata_keys::CRITICAL_RATE, criticalRate);
+			stats.m_crit.m_base = criticalRate * PERCENT_SCALE;
 		}
 
-		float bonusHp{}, bonusAtk{}, bonusDef{}, bonusSpd{};
-        for (int i = 0; i < FILE_SLOT_COUNT; ++i)
+		// Window弾の基礎値は playerData.json ではなく projectileData.json 側が持つ。
+		// 飛距離は定義に無いため「弾速×寿命」で求める。
+		// getProjectileMetadata は弾IDが無いと例外を投げる。この関数は noexcept なので、
+		// 素通しすると std::terminate になりゲームごと落ちる。必ずここで受け止める
+		try
+		{
+			const auto& projectileMeta{ m_resourceManager.getProjectileMetadata(
+				game::constant::projectile_id::PLAYER_WINDOW) };
+			stats.m_projectileSpeed.m_base = projectileMeta.m_speed;
+			stats.m_projectileRange.m_base = projectileMeta.m_speed * projectileMeta.m_lifetime;
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("updateParameterWindow: Window弾の定義を取得できませんでした: {}", e.what());
+		}
+
+		for (int i = 0; i < FILE_SLOT_COUNT; ++i)
         {
             if (!m_slotPaths[i].empty())
             {
 				const auto& bonus = m_resourceManager.getExtensionBonus(m_slotExtTypes[i]);
-				bonusHp  += bonus.hp;
-                bonusAtk += bonus.atk;
-                bonusDef += bonus.def;
-                bonusSpd += bonus.spd;
-            }
+				stats.m_hp.m_bonus += bonus.hp;
+				stats.m_atk.m_bonus += bonus.atk;
+				stats.m_def.m_bonus += bonus.def;
+				stats.m_spd.m_bonus += bonus.spd;
+				stats.m_attackRange.m_bonus += bonus.attackRange;
+				stats.m_crit.m_bonus += bonus.criticalRate * PERCENT_SCALE;
+				stats.m_projectileSpeed.m_bonus += bonus.projectileSpeed;
+				stats.m_projectileRange.m_bonus += bonus.projectileRange;
+			}
         }
 
-		m_parameterWindow->refresh(
-		    baseHp, baseAtk, baseDef, baseSpd,
-		    bonusHp, bonusAtk, bonusDef, bonusSpd,
-		    countEquippedSlots());
+		stats.m_equippedSlots = countEquippedSlots();
+		m_parameterWindow->refresh(stats);
 	}
 
     void Win32SelectWindowManager::handleDesktopMessage(const std::string& json) noexcept
@@ -237,7 +318,18 @@ namespace platform::window::select
             auto j = nlohmann::json::parse(json);
             const std::string type{ j.value(platform::window::WindowConstants::JSON_KEY_TYPE, "") };
 
-            if (type == platform::window::WindowConstants::MESSAGE_TYPE_START_GAME)
+			// デスクトップ上のボタン操作はここに集まる。押した手応えを1か所で返す
+			// （状態の問い合わせなど、押していないメッセージでは鳴らさない）
+			if (type == platform::window::WindowConstants::MESSAGE_TYPE_START_GAME ||
+			    type == platform::window::WindowConstants::MESSAGE_TYPE_TOGGLE_WINDOW ||
+			    type == platform::window::WindowConstants::MESSAGE_TYPE_LAUNCH_APP)
+			{
+				auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+				if (audio)
+					audio->playSe(core::constant::SeType::UiClick);
+			}
+
+			if (type == platform::window::WindowConstants::MESSAGE_TYPE_START_GAME)
             {
 				// ファイル装備は任意。ただし埋まっていないスロットがある場合は確認を挟む
 				if (countEquippedSlots() < FILE_SLOT_COUNT && !confirmStartWithEmptySlots())
@@ -345,7 +437,40 @@ namespace platform::window::select
 		}
 	}
 
-    void Win32SelectWindowManager::showWarningMessage(const std::string& message) noexcept
+	void Win32SelectWindowManager::broadcastDifficulty(const std::string& difficulty) noexcept
+	{
+		// 難易度は配色にも効くため、全ウィンドウへ同じ内容を配る。
+		// 難易度ウィンドウ自身は選択元なので送らなくてよいが、
+		// 再読み込みで見た目が戻るのを防ぐため同じ扱いにしておく
+		try
+		{
+			nlohmann::json j;
+			j[platform::window::WindowConstants::JSON_KEY_TYPE] = platform::window::WindowConstants::MESSAGE_TYPE_DIFFICULTY_CHANGED;
+			j[platform::window::WindowConstants::JSON_KEY_DIFFICULTY] = difficulty;
+			const std::string payload{ j.dump() };
+
+			if (m_desktopWindow)
+				m_desktopWindow->postMessage(payload);
+			if (m_fileSelectWindow)
+				m_fileSelectWindow->postMessage(payload);
+			if (m_parameterWindow)
+				m_parameterWindow->postMessage(payload);
+			if (m_difficultyWindow)
+				m_difficultyWindow->postMessage(payload);
+			if (m_rulesWindow)
+				m_rulesWindow->postMessage(payload);
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("Win32SelectWindowManager::broadcastDifficulty: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("Win32SelectWindowManager::broadcastDifficulty: 不明な例外が発生しました");
+		}
+	}
+
+	void Win32SelectWindowManager::showWarningMessage(const std::string& message) noexcept
     {
         HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
 

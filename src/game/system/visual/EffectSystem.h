@@ -14,15 +14,21 @@ namespace game::system::visual
     class EffectSystem : public core::ecs::ISystem
     {
     public:
-        EffectSystem(core::ecs::ComponentManager& componentManager,
-            core::base::EventBus& eventBus,
-            core::iface::IEffectFactory& effectFactory);
+	  /**
+	   * @brief EffectSystemのコンストラクタ
+	   * @param componentManager ComponentManagerの参照
+	   * @param eventBus イベント購読用のEventBus
+	   * @param effectFactory エフェクト再生のインターフェース
+	   */
+	  EffectSystem(core::ecs::ComponentManager& componentManager,
+		  core::base::EventBus& eventBus,
+		  core::iface::IEffectFactory& effectFactory);
 
-        /**
-         * @brief システムの更新処理（エフェクト終了スロットの回収）
-         * @param deltaTime フレーム間の時間差
-         */
-        void update(float deltaTime) override;
+	  /**
+	   * @brief システムの更新処理（エフェクト終了スロットの回収）
+	   * @param deltaTime フレーム間の時間差
+	   */
+	  void update(float deltaTime) override;
 
     private:
         /**
@@ -43,9 +49,11 @@ namespace game::system::visual
 	   * @param entityId スロットを持つEntityのID
 	   * @param type 再生するエフェクトの種類
 	   * @param position 再生位置（ワールド座標）
+	   * @param rotation 再生時の向き（ラジアン。向きを問わないエフェクトはゼロ）
 	   */
 	  void playAndTrack(core::ecs::EntityId entityId,
-		  core::constant::EffectType type, const core::Vector3& position);
+		  core::constant::EffectType type, const core::Vector3& position,
+		  const core::Vector3& rotation = {});
 
 	  core::ecs::ComponentManager& m_componentManager;
 	  core::base::EventBus& m_eventBus;

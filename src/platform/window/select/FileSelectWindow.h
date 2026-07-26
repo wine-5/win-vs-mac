@@ -63,15 +63,21 @@ namespace platform::window::select
         static constexpr const wchar_t* FILE_SELECT_HTML_URL{ L"https://game.web/select/file/file.html" };
         static constexpr int SLOT_COUNT{ 3 };
 
-        // ファイルダイアログフィルター
-        static constexpr const char* FILE_DIALOG_FILTER{ "All Files\0*.*\0" };
+		// ファイルダイアログフィルター
+		static constexpr const char* FILE_DIALOG_FILTER{ "All Files\0*.*\0" };
 
-        // ファイル拡張子タイプ名
+		// ファイル拡張子タイプ名
         static constexpr const char* EXT_TYPE_NAME_EXECUTABLE{ "Executable" };
         static constexpr const char* EXT_TYPE_NAME_DOCUMENT{ "Document" };
         static constexpr const char* EXT_TYPE_NAME_IMAGE{ "Image" };
         static constexpr const char* EXT_TYPE_NAME_AUDIO{ "Audio" };
-        static constexpr const char* EXT_TYPE_NAME_ARCHIVE{ "Archive" };
+		// 0.0〜1.0の確率を%表記へ直すための倍率（会心率の説明文に使う）
+		static constexpr float PERCENT_SCALE{ 100.0f };
+
+		static constexpr const char* EXT_TYPE_NAME_SOURCE_CODE{ "SourceCode" };
+		static constexpr const char* EXT_TYPE_NAME_SHORTCUT{ "Shortcut" };
+		static constexpr const char* EXT_TYPE_NAME_VIDEO{ "Video" };
+		static constexpr const char* EXT_TYPE_NAME_ARCHIVE{ "Archive" };
         static constexpr const char* EXT_TYPE_NAME_UNKNOWN{ "Unknown" };
 
         std::array<std::string, SLOT_COUNT> m_filePaths{};
@@ -85,8 +91,23 @@ namespace platform::window::select
 		std::function<void(int, const std::string&)> m_onFileSlotChanged{};
 
         void handleMessage(const std::string& json) noexcept;
-        void openFileDialog(int slotIndex);
-        void sendSlotsRefresh() noexcept;
+		/**
+		 * @brief ファイル選択ダイアログを開き、選ばれたファイルをスロットへ入れる
+		 * @param slotIndex 対象のスロット番号
+		 * @param applyToAllSlots trueなら全スロットへ同じファイルを入れる（同一ファイル指定）
+		 */
+		void openFileDialog(int slotIndex, bool applyToAllSlots);
+
+		/**
+		 * @brief システム既定のコードページの文字列を UTF-8 へ変換する
+		 *
+		 * WebViewへ渡すJSONはUTF-8でなければ例外になるため、
+		 * ファイルダイアログから受け取ったパスは必ずここを通す
+		 * @param ansi 変換元の文字列（日本語環境ではShift_JIS）
+		 * @return UTF-8 の文字列（空やnullptrなら空文字）
+		 */
+		[[nodiscard]] static std::string toUtf8(const char* ansi) noexcept;
+		void sendSlotsRefresh() noexcept;
         void sendBonusInfo() noexcept;
     };
 } // namespace platform::window::select

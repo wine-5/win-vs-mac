@@ -43,6 +43,9 @@ namespace game::factory
 		attack.m_attackRange = config.m_radius;
 		attack.m_attackCooldown = 0.0f;
 		attack.m_attackRequested = true;
+		// 発射者のクリティカルを弾へ引き継ぐ（弾は発射後に撃った本人を参照できないため）
+		attack.m_criticalRate = config.m_criticalRate;
+		attack.m_criticalMultiplier = config.m_criticalMultiplier;
 		m_componentManager.add<component::combat::AttackComponent>(id, attack);
 
 		// 発射者の陣営（AttackSystemが同陣営を弾く＝誤爆防止）
@@ -57,6 +60,7 @@ namespace game::factory
 		projectile.m_spinRollSpeed = config.m_spinRollSpeed;
 		projectile.m_spinCenter = config.m_spinCenter;
 		projectile.m_startEffect = config.m_startEffect; // Noneならエフェクト無し（Safariのタブ弾）
+		projectile.m_hitSeType = config.m_hitSeType;     // Noneならヒット音は本体の攻撃音に任せる
 		m_componentManager.add<component::combat::ProjectileComponent>(id, projectile);
 
 		// 見た目を付与する。3Dモデルの弾（Safariのタブ等）はモデルハンドル、

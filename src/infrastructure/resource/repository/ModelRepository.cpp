@@ -1,8 +1,10 @@
 ﻿#include "ModelRepository.h"
 #include <DxLib.h>
 #include <fstream>
+#include <string>
 #include <string_view>
 #include <stdexcept>
+#include <unordered_map>
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
 #include "core/utility/Log.h"
@@ -282,6 +284,36 @@ namespace infrastructure::resource::repository
 		return center;
 	}
 
+	core::Vector3 ModelRepository::computeBoundingSize(int modelHandle) const noexcept
+	{
+		if (modelHandle == -1)
+			return core::Vector3{};
+
+		MV1SetupReferenceMesh(modelHandle, -1, TRUE);
+		const MV1_REF_POLYGONLIST refPoly{ MV1GetReferenceMesh(modelHandle, -1, TRUE) };
+
+		core::Vector3 size{};
+		if (refPoly.VertexNum > 0)
+		{
+			VECTOR vMin{ refPoly.Vertexs[0].Position };
+			VECTOR vMax{ refPoly.Vertexs[0].Position };
+			for (int i{ 1 }; i < refPoly.VertexNum; ++i)
+			{
+				const VECTOR& p{ refPoly.Vertexs[i].Position };
+				vMin.x = (p.x < vMin.x) ? p.x : vMin.x;
+				vMin.y = (p.y < vMin.y) ? p.y : vMin.y;
+				vMin.z = (p.z < vMin.z) ? p.z : vMin.z;
+				vMax.x = (p.x > vMax.x) ? p.x : vMax.x;
+				vMax.y = (p.y > vMax.y) ? p.y : vMax.y;
+				vMax.z = (p.z > vMax.z) ? p.z : vMax.z;
+			}
+			size = core::Vector3{ vMax.x - vMin.x, vMax.y - vMin.y, vMax.z - vMin.z };
+		}
+
+		MV1TerminateReferenceMesh(modelHandle, -1, TRUE);
+		return size;
+	}
+
 	std::optional<core::data::ModelMetadata> ModelRepository::getMetadata(std::string_view modelId) const
 	{
 		auto it{ m_metadata.find(std::string(modelId)) };
@@ -375,6 +407,8 @@ namespace infrastructure::resource::repository
 						def.priority = c["priority"].get<std::string>();
 					if (c.contains("speed"))
 						def.speed = c["speed"].get<float>();
+					if (c.contains("startTime"))
+						def.startTime = c["startTime"].get<float>();
 					metadata.animations.push_back(def);
 				}
 			}
@@ -388,26 +422,44 @@ namespace infrastructure::resource::repository
 			}
 		}
 
-		if (j.contains("gameplay"))
-		{
-			// gameplay配下は「キー名がそのまま floatProperties のキーになる」だけなので、
-			// キーを1箇所の配列で持ち、存在するものだけ取り込む
-			static constexpr std::string_view FLOAT_KEYS[]{
-				"moveSpeed", "dashMultiplier", "jumpForce", "gravity", "maxFallSpeed",
-				"detectionRange", "attackRange",
-				"maxHp", "defence", "attackPower", "attackCooldown", "attackWindup",
-				"hoverHeight", "preferredDistanceMin", "preferredDistanceMax",
-				"fireCooldown", "facingYawOffset"
-			};
+		// gameplay配下は「キー名がそのまま floatProperties のキーになる」だけなので、
+		// キーを1箇所の配列で持ち、存在するものだけ取り込む
+		static constexpr std::string_view FLOAT_KEYS[]{
+			"moveSpeed", "dashMultiplier", "jumpForce", "gravity", "maxFallSpeed",
+			"detectionRange", "attackRange",
+			"maxHp", "defence", "attackPower", "attackCooldown", "attackWindup",
+			"attackMaxHeight",
+			"comboInputWindow", "comboStage2Multiplier",
+			"criticalRate", "criticalMultiplier",
+			"hoverHeight", "preferredDistanceMin", "preferredDistanceMax",
+			"fireCooldown", "facingYawOffset"
+		};
 
-			const auto& gp = j["gameplay"];
+		auto readFloatProperties = [](const nlohmann::json& source,
+		                               std::unordered_map<std::string, float>& destination)
+		{
 			for (const auto key : FLOAT_KEYS)
 			{
 				const std::string name{ key };
-				if (gp.contains(name))
-					metadata.floatProperties[name] = gp[name];
+				if (source.contains(name))
+					destination[name] = source[name];
 			}
+		};
+
+		if (j.contains("gameplay"))
+		{
+			readFloatProperties(j["gameplay"], metadata.floatProperties);
+
+			// 攻撃が当たる瞬間に鳴らすSEの名前（SeType.h の SE_TYPE_NAMES に対応）。
+			// 敵ごとに攻撃音を変えられるようにするため、数値ではなく文字列で持つ
+			if (j["gameplay"].contains("attackImpactSe"))
+				metadata.stringProperties["attackImpactSe"] = j["gameplay"]["attackImpactSe"];
 		}
+
+		// hard配下はgameplayと同じキー名で書いた値だけを持つ。
+		// 難易度Hardのときに game::data::EnemyData が gameplay の上へ被せる
+		if (j.contains("hard"))
+			readFloatProperties(j["hard"], metadata.hardFloatProperties);
 
 		// 敵の振る舞いレシピ（積むAI振る舞いの名前リスト）。データの組み合わせで敵を定義するために使う
 		if (j.contains("behaviors"))
@@ -416,6 +468,32 @@ namespace infrastructure::resource::repository
 
 		if (j.contains("mac"))
 			metadata.mac = parseMac(j["mac"]);
+
+		// 手に持たせる武器の装着設定。位置・角度・長さは実機で調整する値なのでJSONに置く
+		if (j.contains("weapon"))
+		{
+			const auto& w = j["weapon"];
+			core::data::WeaponAttachMetadata weapon{};
+			if (w.contains("modelId"))
+				weapon.modelId = w["modelId"].get<std::string>();
+			if (w.contains("frameName"))
+				weapon.frameName = w["frameName"].get<std::string>();
+			if (w.contains("length"))
+				weapon.length = w["length"];
+			if (w.contains("offsetPosition"))
+			{
+				weapon.offsetPosition.x = w["offsetPosition"][0];
+				weapon.offsetPosition.y = w["offsetPosition"][1];
+				weapon.offsetPosition.z = w["offsetPosition"][2];
+			}
+			if (w.contains("offsetRotation"))
+			{
+				weapon.offsetRotation.x = w["offsetRotation"][0];
+				weapon.offsetRotation.y = w["offsetRotation"][1];
+				weapon.offsetRotation.z = w["offsetRotation"][2];
+			}
+			metadata.weapon = weapon;
+		}
 
 		return metadata;
 	}

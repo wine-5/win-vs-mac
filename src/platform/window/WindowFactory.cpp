@@ -55,15 +55,17 @@ namespace platform::window
             std::move(onTitle));
     }
 
-    std::unique_ptr<core::iface::ISelectWindowManager> WindowFactory::createSelectWindowManager(
-        std::function<void()> onGameStart,
-        std::function<void(int, const std::string&)> onFileSlotChanged,
-        core::iface::IResourceManager& resourceManager)
-    {
-        return std::make_unique<select::Win32SelectWindowManager>(
-            std::move(onGameStart),
-            std::move(onFileSlotChanged),
-            resourceManager,
-            m_screen);
-    }
+	std::unique_ptr<core::iface::ISelectWindowManager> WindowFactory::createSelectWindowManager(
+	    std::function<void()> onGameStart,
+	    std::function<void(int, const std::string&)> onFileSlotChanged,
+	    std::function<void(const std::string&)> onDifficultyChanged,
+	    core::iface::IResourceManager& resourceManager)
+	{
+		return std::make_unique<select::Win32SelectWindowManager>(
+		    std::move(onGameStart),
+		    std::move(onFileSlotChanged),
+		    std::move(onDifficultyChanged),
+		    resourceManager,
+		    m_screen);
+	}
 } // namespace platform::window

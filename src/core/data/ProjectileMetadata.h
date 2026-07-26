@@ -26,6 +26,7 @@ namespace core::data
 		float m_chargeMaxTime{ 0.0f };          // 最大溜め時間（秒）。これ以上溜めても効果は頭打ち
 		float m_chargeDamageMultiplier{ 1.0f }; // 最大溜め時のダメージ倍率
 		float m_chargeSizeMultiplier{ 1.0f };   // 最大溜め時のサイズ（接触半径・見た目）倍率
-		float m_chargeRangeMultiplier{ 1.0f };  // 最大溜め時の飛距離倍率（寿命を延ばして距離を伸ばす）
+		float m_chargeSpeedMultiplier{ 1.0f };  // 最大溜め時の弾速倍率
+		float m_chargeLifetimeMultiplier{ 1.0f }; // 最大溜め時の寿命倍率（弾速と合わせて飛距離が決まる）
 	};
 } // namespace core::data

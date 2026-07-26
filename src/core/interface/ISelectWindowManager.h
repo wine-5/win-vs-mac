@@ -31,5 +31,14 @@ namespace core::iface
 		 * @param message メッセージ内容
 		 */
 		virtual void showWarningMessage(const std::string& message) = 0;
+
+		/**
+		 * @brief すべてのWindowの表示/非表示をまとめて切り替える
+		 *
+		 * セレクト画面のWindowは常時最前面のため、ポーズメニューのような
+		 * ゲーム本体側の描画が裏に隠れてしまう。開いている間は引っ込める
+		 * @param visible 表示するならtrue
+		 */
+		virtual void setWindowsVisible(bool visible) = 0;
 	};
 } // namespace core::iface

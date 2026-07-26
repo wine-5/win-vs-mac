@@ -1,10 +1,14 @@
 {
+  "_comment": "archive以外は1拡張子につき1つの能力だけを上げる（どのファイルを装備すると何が伸びるかを覚えられるようにするため）。値はプレイヤー基準値(HP1000/防御10/攻撃30/速度300/射程200、Window弾は弾速600/飛距離1800)の約+30%に揃えている。3枠フル積みで基準値のほぼ2倍まで伸びるので、どの拡張子を積むかがビルドの選択になる。防御だけはダメージが減算式(攻撃力-防御力)で、比率どおりに上げると敵の攻撃をほぼ無効化してしまうため+3に絞っている。criticalRateも確率なので比率ではなくポイントで指定し、フル積みで10%→34%になるようにしてある",
   "bonuses": {
-    "executable": { "atk": 10.0 },
-    "document":   { "spd": 1.5 },
-    "image":      { "def": 8.0 },
-    "audio":      { "hp": 20.0 },
-    "archive":    { "atk": 3.0, "spd": 0.5, "def": 3.0, "hp": 5.0, "attackRange": 0.5 },
-    "unknown":    { "attackRange": 20.0 }
+    "executable": { "atk": 9.0 },
+    "document":   { "spd": 90.0 },
+    "image":      { "def": 3.0 },
+    "audio":      { "hp": 300.0 },
+    "sourceCode": { "criticalRate": 0.08 },
+    "shortcut":   { "projectileSpeed": 180.0 },
+    "video":      { "projectileRange": 540.0 },
+    "archive":    { "atk": 3.2, "spd": 32.0, "def": 1.0, "hp": 105.0, "attackRange": 21.0, "criticalRate": 0.03, "projectileSpeed": 63.0, "projectileRange": 190.0 },
+    "unknown":    { "attackRange": 60.0 }
   }
 }

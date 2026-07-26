@@ -19,6 +19,18 @@ namespace platform::window
 	  public:
 		using WindowBase::WindowBase;
 
+		/**
+		 * @brief JS側へJSONメッセージを送る
+		 *
+		 * 難易度の配色切り替えのように、複数のウィンドウへ同じ内容を配りたい場面があるため
+		 * ここへ用意する。読み込みが終わっていなければWebView2Host側でキューに積まれる
+		 * @param utf8Json 送信するJSON（UTF-8）
+		 */
+		void postMessage(const std::string& utf8Json) noexcept
+		{
+			m_webView.postMessage(utf8Json);
+		}
+
 	  protected:
 		/**
 		 * @brief WebViewの標準メッセージ処理（サイズ追従・可視追従）

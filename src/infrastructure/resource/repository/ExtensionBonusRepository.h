@@ -28,8 +28,11 @@ namespace infrastructure::resource::repository
 		    core::data::FileExtensionType type) const noexcept;
 
 	  private:
-		/// @brief FileExtensionType の値数（Executable〜Unknownの6種）
-		static constexpr std::size_t TYPE_COUNT{ 6 };
+		// 種別を追加したときに配列サイズを直し忘れて範囲外アクセスになるのを防ぐため、
+		// 値をここに書かず enum の番兵から導く
+		static constexpr std::size_t TYPE_COUNT{
+			static_cast<std::size_t>(core::data::FileExtensionType::Count)
+		};
 
 		// FileExtensionType の値を添字にして引く
 		std::array<core::data::FileExtensionBonus, TYPE_COUNT> m_bonuses{};

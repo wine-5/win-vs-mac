@@ -83,8 +83,21 @@ namespace game::ui::debug
 
 	void DebugHUDView::draw(int enemyCount)
 	{
+		if (!m_isVisible)
+			return;
+
 		drawCameraLabel();
 		drawStats(enemyCount);
+	}
+
+	void DebugHUDView::setVisible(bool visible) noexcept
+	{
+		m_isVisible = visible;
+	}
+
+	bool DebugHUDView::isVisible() const noexcept
+	{
+		return m_isVisible;
 	}
 
 	void DebugHUDView::drawCameraLabel()

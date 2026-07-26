@@ -12,10 +12,16 @@
     "moveSpeed": 240.0,
     "detectionRange": 3000.0,
     "attackRange": 180.0,
-    "maxHp": 1000.0,
+    "maxHp": 1450.0,
     "defence": 15.0,
-    "attackPower": 35.0,
+    "attackPower": 40.0,
     "attackCooldown": 0.0
+  },
+  "hard": {
+    "moveSpeed": 300.0,
+    "maxHp": 2320.0,
+    "defence": 30.0,
+    "attackPower": 68.0
   },
   "behaviors": [ "boss" ],
   "animations": [
@@ -40,14 +46,14 @@
       "rangedTelegraphRange": 800.0
     },
     "phase1": {
-      "moveSpeed": 240.0,
+      "moveSpeed": 300.0,
       "actionInterval": 4.0,
       "meleeRange": 180.0,
-      "weights": { "melee": 0, "ranged": 2, "summon": 0 },
+      "weights": { "melee": 1, "ranged": 3, "summon": 1 },
       "rainbowCount": 3,
       "rainbowSpreadDeg": 40.0,
-      "rainbowSpeed": 50.0,
-      "rainbowSpinSpeed": 0.10,
+      "rainbowSpeed": 600.0,
+      "rainbowSpinSpeed": 0.05,
       "summonTypes": [ "xcode", "safari" ],
       "summonCount": 1,
       "summonMax": 4,
@@ -55,18 +61,18 @@
       "summonRadiusMax": 400.0
     },
     "phase2": {
-      "moveSpeed": 380.0,
+      "moveSpeed": 400.0,
       "actionInterval": 2.0,
       "meleeRange": 180.0,
-      "weights": { "melee": 2, "ranged": 3, "summon": 3, "nova": 2 },
+      "weights": { "melee": 2, "ranged": 1, "summon": 3, "nova": 2 },
       "rainbowCount": 6,
       "rainbowSpreadDeg": 70.0,
-      "rainbowSpeed": 100.0,
-      "rainbowSpinSpeed": 0.15,
+      "rainbowSpeed": 1000.0,
+      "rainbowSpinSpeed": 0.05,
       "novaCount": 16,
       "summonTypes": [ "xcode", "safari" ],
       "summonCount": 2,
-      "summonMax": 6,
+      "summonMax": 10,
       "summonRadiusMin": 200.0,
       "summonRadiusMax": 400.0
     }

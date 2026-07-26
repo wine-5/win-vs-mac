@@ -53,31 +53,40 @@ body {
 }
 
 .metric-key {
-    width: 28px;
-    height: 28px;
+    width: 34px;
+    height: 34px;
     object-fit: contain;
 }
 
 .metric-key-label {
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.08em;
     color: var(--text-muted);
     text-transform: uppercase;
-    min-width: 24px;
+    min-width: 34px;
 }
 
-.metric-val { font-size: 12px; font-weight: 700; color: var(--text); }
+/* 英字の略称だけでは何の値か伝わらないため、日本語の呼び名を小さく添える。
+   主役は数値なので、略称よりさらに落としたトーンにする */
+.metric-key-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    opacity: 0.85;
+    white-space: nowrap;
+}
+
+.metric-val { font-size: 17px; font-weight: 700; color: var(--text); }
 
 .metric-bonus {
-    font-size: 11px;
+    font-size: 15px;
     font-weight: 600;
     color: #f0c040;
     margin-left: 4px;
 }
 
 .bar-bg {
-    height: 6px;
+    height: 8px;
     background: #2a2a2a;
     border-radius: 3px;
     display: flex;
@@ -93,6 +102,11 @@ body {
 .bar-atk   { background: #e8a030; }
 .bar-def   { background: #5090d0; }
 .bar-spd   { background: #c050e0; }
+.bar-rng   { background: #3fb950; }
+/* 新3項目はアイコンのタイル色に合わせる（会心=紫 / 弾速=シアン / 飛距離=マゼンタ） */
+.bar-crit  { background: #8b5cf6; }
+.bar-bspd  { background: #22d3ee; }
+.bar-brng  { background: #e255a1; }
 .bar-bonus { background: #f0c040; }
 
 /* ── flash animation on increase ── */
@@ -129,7 +143,7 @@ body {
     right: 0;
     top: -2px;
     color: #f0c040;
-    font-size: 11px;
+    font-size: 15px;
     font-weight: 700;
     pointer-events: none;
     white-space: nowrap;
@@ -142,7 +156,7 @@ body {
     right: 0;
     top: -2px;
     color: #f04040;
-    font-size: 11px;
+    font-size: 15px;
     font-weight: 700;
     pointer-events: none;
     white-space: nowrap;
@@ -163,8 +177,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
-    padding: 7px 0;
+    font-size: 16px;
+    padding: 9px 0;
     border-bottom: 1px solid var(--border);
 }
 

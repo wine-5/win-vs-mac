@@ -26,7 +26,8 @@ namespace infrastructure::effect
 		 * @param position 再生位置
 		 * @return エフェクトのプレイハンドル（失敗時は -1）
 		 */
-		int play(core::constant::EffectType type, core::Vector3 position) override;
+		int play(core::constant::EffectType type, core::Vector3 position,
+		    core::Vector3 rotation) override;
 
 		/**
 		 * @brief エフェクトを強制停止する

@@ -29,6 +29,7 @@ namespace platform::window::select
 	  Win32SelectWindowManager(
 		  std::function<void()> onGameStart,
 		  std::function<void(int, const std::string&)> onFileSlotChanged,
+		  std::function<void(const std::string&)> onDifficultyChanged,
 		  core::iface::IResourceManager& resourceManager,
 		  core::iface::IScreen& screen) noexcept;
 
@@ -40,7 +41,9 @@ namespace platform::window::select
 
 	  void showWarningMessage(const std::string& message) noexcept override;
 
-    private:
+	  void setWindowsVisible(bool visible) noexcept override;
+
+	private:
         // レイアウト定数
         static constexpr int TASKBAR_HEIGHT{ 48 };
         static constexpr int GAP_Y{ 8 };
@@ -60,7 +63,10 @@ namespace platform::window::select
         // ファイルスロット数
         static constexpr int FILE_SLOT_COUNT{ 3 };
 
-        // ウィンドウ名
+		// 0.0〜1.0の確率を%表記へ直すための倍率（会心率の表示に使う）
+		static constexpr float PERCENT_SCALE{ 100.0f };
+
+		// ウィンドウ名
         static constexpr const char* WINDOW_NAME_FILE{ "file" };
         static constexpr const char* WINDOW_NAME_PARAM{ "param" };
         static constexpr const char* WINDOW_NAME_DIFF{ "diff" };
@@ -73,8 +79,13 @@ namespace platform::window::select
         static constexpr const wchar_t* APP_RECYCLEBIN_PATH{ L"shell:RecycleBinFolder" };
         static constexpr const wchar_t* APP_NOTEPAD_PATH{ L"notepad.exe" };
 
-		/** @brief パラメータウィンドウを最新の装備内容で更新する */
-		void updateParameterWindow() noexcept;
+		/**
+		 * @brief パラメータウィンドウを最新の装備内容で更新する
+		 *
+		 * noexcept にはしない。ここで例外を握りつぶすと std::terminate になり、
+		 * 原因がログにも残らないまま落ちるため、呼び出し元の catch まで通す
+		 */
+		void updateParameterWindow();
 
 		/** @brief 装備済みスロット数を数える */
 		[[nodiscard]] int countEquippedSlots() const noexcept;
@@ -84,6 +95,25 @@ namespace platform::window::select
 		 * @return 開始してよい場合true
 		 */
 		[[nodiscard]] bool confirmStartWithEmptySlots() noexcept;
+
+		// DEBUG: セレクト画面を一時的に引っ込めるキー（裏のコンソールやダイアログを読むため）
+		static constexpr int DEBUG_HIDE_KEY{ VK_F4 };
+
+		/**
+		 * @brief DEBUG: F4でセレクト画面の表示/非表示を切り替える（リリース時に削除）
+		 *
+		 * デスクトップは常時最前面のため、その裏のコンソールや例外ダイアログが読めない。
+		 * 押した瞬間だけを拾って引っ込められるようにする
+		 */
+		void updateDebugOverlayToggle() noexcept;
+
+		/**
+		 * @brief 選択中の難易度を全ウィンドウへ配る
+		 *
+		 * HARDでは配色を警告色へ切り替えるため、デスクトップも含めた全画面が知る必要がある
+		 * @param difficulty 難易度文字列（"NORMAL" | "HARD"）
+		 */
+		void broadcastDifficulty(const std::string& difficulty) noexcept;
 
 		void handleDesktopMessage(const std::string& json) noexcept;
         void notifyWindowState(const std::string& name, bool visible) noexcept;
@@ -99,7 +129,11 @@ namespace platform::window::select
         bool m_diffVisible{true};
         bool m_rulesVisible{false};
 
-        std::array<std::string, 3> m_slotPaths{};
+		// DEBUG: F4での一時退避の状態（リリース時に削除）
+		bool m_debugOverlayHidden{ false };
+		bool m_debugHideKeyDown{ false };
+
+		std::array<std::string, 3> m_slotPaths{};
 		std::array<core::data::FileExtensionType, 3> m_slotExtTypes{
 			core::data::FileExtensionType::Unknown,
 			core::data::FileExtensionType::Unknown,
@@ -108,8 +142,9 @@ namespace platform::window::select
 
 		std::function<void()> m_onGameStart{};
         std::function<void(int, const std::string&)> m_onFileSlotChanged{};
+		std::function<void(const std::string&)> m_onDifficultyChanged{};
 
-        core::iface::IResourceManager& m_resourceManager;
+		core::iface::IResourceManager& m_resourceManager;
         core::iface::IScreen& m_screen;
     };
 } // namespace platform::window::select

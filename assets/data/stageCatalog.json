@@ -265,6 +265,29 @@
       "scrollV": 0.0
     },
     {
+      "id": "gate_boss",
+      "displayName": "ボス扉(出現で閉)",
+      "model": "assets/model/stage/GateUac.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#E81123",
+      "collider": "box",
+      "role": "bossGate",
+      "defaultSize": [
+        1600,
+        900,
+        40
+      ],
+      "texture": "assets/model/stage/GateUac.png",
+      "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
       "id": "pillar_app",
       "displayName": "アプリ柱",
       "model": "assets/model/stage/PillarApp.mqo",

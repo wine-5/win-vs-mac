@@ -5,10 +5,19 @@
 #include "core/data/PropDefinition.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/PropCollision.h"
+#include "game/constant/PropRole.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/visual/LightComponent.h"
+#include "game/component/stage/BossGateComponent.h"
 #include <cmath>
 #include <algorithm>
+
+namespace
+{
+	// ボス扉を開状態で沈める際、自分の高さに加えて余分に下げる量。
+	// 床の厚みぶん余計に沈めて、閉じる前に上端がのぞかないようにする
+	constexpr float BOSS_GATE_SINK_MARGIN{ 100.0f };
+} // namespace
 
 namespace game::factory
 {
@@ -116,7 +125,21 @@ namespace game::factory
 				params.m_uvScaleV = std::max(1.0f, vertical / def.m_textureTile);
 			}
 
-			factory.create(params);
+			// ボス扉は「閉じた状態」で置かれているので、開いた状態（床下）から始める。
+			// 沈める量は自分の高さぶん＋余白で、隙間から見えないようにする
+			const bool isBossGate{ def.m_role == constant::prop_role::BOSS_GATE };
+			if (isBossGate)
+				params.m_position.y -= prop.m_size.y + BOSS_GATE_SINK_MARGIN;
+
+			const auto propId{ factory.create(params) };
+
+			if (isBossGate)
+			{
+				component::stage::BossGateComponent gate{};
+				gate.m_closedY = prop.m_position.y;
+				gate.m_openY = params.m_position.y;
+				m_componentManager.add<component::stage::BossGateComponent>(propId, gate);
+			}
 		}
 	}
 } // namespace game::factory

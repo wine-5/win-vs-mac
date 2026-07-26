@@ -2,9 +2,12 @@
 #include <string>
 #include <vector>
 #include <optional>
+#include <unordered_map>
 #include "core/utility/Vector3.h"
+#include "core/data/Difficulty.h"
 #include "core/data/ModelMetadata.h"
 #include "core/data/MacMetadata.h"
+#include "core/constant/SeType.h"
 #include "game/constant/MetadataKeys.h"
 
 namespace game::data
@@ -15,88 +18,112 @@ namespace game::data
     class EnemyData
     {
     public:
-        /**
-        * @brief ModelMetadataからEnemyDataを生成
-        * @param metadata ResourceManagerから取得したメタデータ
-        * @return EnemyDataインスタンス
-        */
-        static EnemyData fromMetadata(const core::data::ModelMetadata& metadata)
-        {
-            EnemyData data;
-            data.m_scale = metadata.scale;
-            data.m_position = metadata.position;
-            data.m_colliderSize = metadata.colliderSize;
-            data.m_colliderOffset = metadata.colliderOffset;
-			data.m_behaviors = metadata.behaviors;   // 積むAI振る舞いのレシピ
-			data.m_animations = metadata.animations; // アニメーションクリップ定義
-			data.m_mac = metadata.mac;               // ボス挙動定義（あれば）
+	  /**
+	   * @brief ModelMetadataからEnemyDataを生成
+	   *
+	   * 難易度がHardのときは、JSONの hard 要素で書かれたキーだけを gameplay の上へ被せる。
+	   * hard に書かれていないキーは Normal と同じ値のままになる。
+	   * @param metadata ResourceManagerから取得したメタデータ
+	   * @param difficulty 適用する難易度
+	   * @return EnemyDataインスタンス
+	   */
+	  static EnemyData fromMetadata(const core::data::ModelMetadata& metadata,
+		  core::data::Difficulty difficulty = core::data::Difficulty::Normal)
+	  {
+		  EnemyData data;
+		  data.m_scale = metadata.scale;
+		  data.m_position = metadata.position;
+		  data.m_colliderSize = metadata.colliderSize;
+		  data.m_colliderOffset = metadata.colliderOffset;
+		  data.m_behaviors = metadata.behaviors;   // 積むAI振る舞いのレシピ
+		  data.m_animations = metadata.animations; // アニメーションクリップ定義
+		  data.m_mac = metadata.mac;               // ボス挙動定義（あれば）
 
-            auto moveSpeedIt{metadata.floatProperties.find(
-                std::string(constant::metadata_keys::MOVE_SPEED))};
-            if (moveSpeedIt != metadata.floatProperties.end())
-                data.m_moveSpeed = moveSpeedIt->second;
+		  // Hardのときだけ hard 要素を gameplay の上へ被せる。
+		  // 以降の読み出しは合成後のこのマップだけを見る
+		  std::unordered_map<std::string, float> properties{ metadata.floatProperties };
+		  if (difficulty == core::data::Difficulty::Hard)
+		  {
+			  for (const auto& [key, value] : metadata.hardFloatProperties)
+				  properties[key] = value;
+		  }
 
-            auto detectionRangeIt{metadata.floatProperties.find(
-                std::string(constant::metadata_keys::DETECTION_RANGE))};
-            if (detectionRangeIt != metadata.floatProperties.end())
-                data.m_detectionRange = detectionRangeIt->second;
+		  auto moveSpeedIt{ properties.find(
+			  std::string(constant::metadata_keys::MOVE_SPEED)) };
+		  if (moveSpeedIt != properties.end())
+			  data.m_moveSpeed = moveSpeedIt->second;
 
-            auto attackRangeIt{metadata.floatProperties.find(
-                std::string(constant::metadata_keys::ATTACK_RANGE))};
-            if (attackRangeIt != metadata.floatProperties.end())
-                data.m_attackRange = attackRangeIt->second;
+		  auto detectionRangeIt{ properties.find(
+			  std::string(constant::metadata_keys::DETECTION_RANGE)) };
+		  if (detectionRangeIt != properties.end())
+			  data.m_detectionRange = detectionRangeIt->second;
 
-            auto maxHpIt{metadata.floatProperties.find(
-                std::string(constant::metadata_keys::MAX_HP))};
-            if (maxHpIt != metadata.floatProperties.end())
-                data.m_maxHp = maxHpIt->second;
+		  auto attackRangeIt{ properties.find(
+			  std::string(constant::metadata_keys::ATTACK_RANGE)) };
+		  if (attackRangeIt != properties.end())
+			  data.m_attackRange = attackRangeIt->second;
 
-            auto defenceIt{metadata.floatProperties.find(
-                std::string(constant::metadata_keys::DEFENCE))};
-            if (defenceIt != metadata.floatProperties.end())
-                data.m_defence = defenceIt->second;
+		  auto maxHpIt{ properties.find(
+			  std::string(constant::metadata_keys::MAX_HP)) };
+		  if (maxHpIt != properties.end())
+			  data.m_maxHp = maxHpIt->second;
 
-            auto attackPowerIt{metadata.floatProperties.find(
-                std::string(constant::metadata_keys::ATTACK_POWER))};
-            if (attackPowerIt != metadata.floatProperties.end())
-                data.m_attackPower = attackPowerIt->second;
+		  auto defenceIt{ properties.find(
+			  std::string(constant::metadata_keys::DEFENCE)) };
+		  if (defenceIt != properties.end())
+			  data.m_defence = defenceIt->second;
 
-            auto attackCooldownIt{metadata.floatProperties.find(
-                std::string(constant::metadata_keys::ATTACK_COOLDOWN))};
-            if (attackCooldownIt != metadata.floatProperties.end())
-                data.m_attackCooldown = attackCooldownIt->second;
+		  auto attackPowerIt{ properties.find(
+			  std::string(constant::metadata_keys::ATTACK_POWER)) };
+		  if (attackPowerIt != properties.end())
+			  data.m_attackPower = attackPowerIt->second;
 
-			auto attackWindupIt{ metadata.floatProperties.find(
-				std::string(constant::metadata_keys::ATTACK_WINDUP)) };
-			if (attackWindupIt != metadata.floatProperties.end())
-				data.m_attackWindup = attackWindupIt->second;
+		  auto attackCooldownIt{ properties.find(
+			  std::string(constant::metadata_keys::ATTACK_COOLDOWN)) };
+		  if (attackCooldownIt != properties.end())
+			  data.m_attackCooldown = attackCooldownIt->second;
 
-			auto hoverHeightIt{ metadata.floatProperties.find(
-				std::string(constant::metadata_keys::HOVER_HEIGHT)) };
-			if (hoverHeightIt != metadata.floatProperties.end())
-				data.m_hoverHeight = hoverHeightIt->second;
+		  auto attackWindupIt{ properties.find(
+			  std::string(constant::metadata_keys::ATTACK_WINDUP)) };
+		  if (attackWindupIt != properties.end())
+			  data.m_attackWindup = attackWindupIt->second;
 
-			auto preferredDistanceMinIt{ metadata.floatProperties.find(
-				std::string(constant::metadata_keys::PREFERRED_DISTANCE_MIN)) };
-			if (preferredDistanceMinIt != metadata.floatProperties.end())
-				data.m_preferredDistanceMin = preferredDistanceMinIt->second;
+		  auto attackMaxHeightIt{ properties.find(
+			  std::string(constant::metadata_keys::ATTACK_MAX_HEIGHT)) };
+		  if (attackMaxHeightIt != properties.end())
+			  data.m_attackMaxHeight = attackMaxHeightIt->second;
 
-			auto preferredDistanceMaxIt{ metadata.floatProperties.find(
-				std::string(constant::metadata_keys::PREFERRED_DISTANCE_MAX)) };
-			if (preferredDistanceMaxIt != metadata.floatProperties.end())
-				data.m_preferredDistanceMax = preferredDistanceMaxIt->second;
+		  auto hoverHeightIt{ properties.find(
+			  std::string(constant::metadata_keys::HOVER_HEIGHT)) };
+		  if (hoverHeightIt != properties.end())
+			  data.m_hoverHeight = hoverHeightIt->second;
 
-			auto fireCooldownIt{ metadata.floatProperties.find(
-				std::string(constant::metadata_keys::FIRE_COOLDOWN)) };
-			if (fireCooldownIt != metadata.floatProperties.end())
-				data.m_fireCooldown = fireCooldownIt->second;
+		  auto preferredDistanceMinIt{ properties.find(
+			  std::string(constant::metadata_keys::PREFERRED_DISTANCE_MIN)) };
+		  if (preferredDistanceMinIt != properties.end())
+			  data.m_preferredDistanceMin = preferredDistanceMinIt->second;
 
-			auto facingYawOffsetIt{ metadata.floatProperties.find(
-				std::string(constant::metadata_keys::FACING_YAW_OFFSET)) };
-			if (facingYawOffsetIt != metadata.floatProperties.end())
-				data.m_facingYawOffset = facingYawOffsetIt->second;
+		  auto preferredDistanceMaxIt{ properties.find(
+			  std::string(constant::metadata_keys::PREFERRED_DISTANCE_MAX)) };
+		  if (preferredDistanceMaxIt != properties.end())
+			  data.m_preferredDistanceMax = preferredDistanceMaxIt->second;
 
-			return data;
+		  auto fireCooldownIt{ properties.find(
+			  std::string(constant::metadata_keys::FIRE_COOLDOWN)) };
+		  if (fireCooldownIt != properties.end())
+			  data.m_fireCooldown = fireCooldownIt->second;
+
+		  auto facingYawOffsetIt{ properties.find(
+			  std::string(constant::metadata_keys::FACING_YAW_OFFSET)) };
+		  if (facingYawOffsetIt != properties.end())
+			  data.m_facingYawOffset = facingYawOffsetIt->second;
+
+		  // 攻撃が当たる瞬間に鳴らすSE。書かれていなければNone（＝無音）のまま
+		  auto attackImpactSeIt{ metadata.stringProperties.find("attackImpactSe") };
+		  if (attackImpactSeIt != metadata.stringProperties.end())
+			  data.m_attackImpactSe = core::constant::toSeType(attackImpactSeIt->second);
+
+		  return data;
         }
 
 		/** @brief 移動速度を取得 */
@@ -145,6 +172,12 @@ namespace game::data
 		[[nodiscard]] float getAttackWindup() const noexcept
 		{
 			return m_attackWindup;
+		}
+
+		/** @brief 攻撃が届く高さの上限（攻撃者の足元からの相対Y）を取得。0なら高さ無制限 */
+		[[nodiscard]] float getAttackMaxHeight() const noexcept
+		{
+			return m_attackMaxHeight;
 		}
 
 		/** @brief 浮遊高度を取得（0なら地上型） */
@@ -219,6 +252,12 @@ namespace game::data
 			return m_mac;
 		}
 
+		/** @brief 攻撃が当たる瞬間に鳴らすSEを取得（未設定の敵ではNone＝無音） */
+		[[nodiscard]] core::constant::SeType getAttackImpactSe() const noexcept
+		{
+			return m_attackImpactSe;
+		}
+
 		/** @brief アニメーションクリップ定義の一覧を取得（アニメ無しの敵では空） */
 		[[nodiscard]] const std::vector<core::data::AnimationClipDef>& getAnimations() const noexcept
 		{
@@ -234,11 +273,13 @@ namespace game::data
 	  float m_attackPower{ 0.0f };
 	  float m_attackCooldown{ 0.0f };
 	  float m_attackWindup{ 0.0f };
+	  float m_attackMaxHeight{ 0.0f };
 	  float m_hoverHeight{ 0.0f };
 	  float m_preferredDistanceMin{ 0.0f };
 	  float m_preferredDistanceMax{ 0.0f };
 	  float m_fireCooldown{ 0.0f };
 	  float m_facingYawOffset{ 0.0f };
+	  core::constant::SeType m_attackImpactSe{ core::constant::SeType::None }; // 攻撃が当たる瞬間のSE
 	  core::Vector3 m_colliderSize;
 	  core::Vector3 m_colliderOffset;
 	  core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };

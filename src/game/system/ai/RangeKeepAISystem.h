@@ -24,7 +24,7 @@ namespace game::system::ai
 	 * RangeKeepAIComponentを持つ敵に対して毎フレーム処理を実行する。
 	 * プレイヤーから一定距離（preferredDistanceMin/Max）を保つように移動する。
 	 * 推奨距離より遠ければ接近、近ければ後退する。
-	 * ホバー高度（hoverHeight）が指定されていればその高さを保つ。
+	 * ホバー高度（hoverHeight）が指定されていれば、足元の床からその高さを保つ。
 	 */
 	class RangeKeepAISystem : public core::ecs::ISystem
 	{

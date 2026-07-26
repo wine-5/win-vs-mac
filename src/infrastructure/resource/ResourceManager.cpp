@@ -103,4 +103,9 @@ namespace infrastructure::resource
 	{
 		return m_modelRepo->computeBoundingCenter(modelHandle);
 	}
+
+	core::Vector3 ResourceManager::computeBoundingSize(int modelHandle) const noexcept
+	{
+		return m_modelRepo->computeBoundingSize(modelHandle);
+	}
 } // namespace infrastructure::resource

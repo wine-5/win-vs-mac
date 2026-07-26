@@ -7,7 +7,35 @@
 
 namespace platform::window::select
 {
-    /**
+	/**
+	 * @brief パラメータ1項目分の表示値
+	 */
+	struct ParameterEntry
+	{
+		float m_base{ 0.0f };  // 基礎値（playerData.json などの定義値）
+		float m_bonus{ 0.0f }; // 装備ファイルによる加算ぶん
+	};
+
+	/**
+	 * @brief パラメータウィンドウに表示する内容一式
+	 *
+	 * 項目を増やすたびに refresh() の引数が2つずつ増えるのを避けるためまとめて渡す。
+	 * 呼び出し側が値の対応を取り違えないようにする狙いもある
+	 */
+	struct ParameterStats
+	{
+		ParameterEntry m_hp{};
+		ParameterEntry m_atk{};
+		ParameterEntry m_def{};
+		ParameterEntry m_spd{};
+		ParameterEntry m_attackRange{};     // 攻撃範囲（近接の届く距離）
+		ParameterEntry m_crit{};            // 会心率（%表記。0.2なら20を入れる）
+		ParameterEntry m_projectileSpeed{}; // Window弾の弾速
+		ParameterEntry m_projectileRange{}; // Window弾の飛距離
+		int m_equippedSlots{ 0 };
+	};
+
+	/**
      * @class ParameterWindow
      * @brief ステータス表示ウィンドウ
      */
@@ -26,24 +54,13 @@ namespace platform::window::select
         /// @brief デストラクタ
         virtual ~ParameterWindow() noexcept = default;
 
-        /**
-         * @brief ステータス情報を更新
-         * @param baseHp 基礎 HP
-         * @param baseAtk 基礎 ATK
-         * @param baseDef 基礎 DEF
-         * @param baseSpd 基礎 SPD
-         * @param bonusHp ファイル装備ボーナス HP
-         * @param bonusAtk ファイル装備ボーナス ATK
-         * @param bonusDef ファイル装備ボーナス DEF
-         * @param bonusSpd ファイル装備ボーナス SPD
-         * @param equippedSlots 装備中スロット数
-         */
-        void refresh(
-            float baseHp, float baseAtk, float baseDef, float baseSpd,
-            float bonusHp, float bonusAtk, float bonusDef, float bonusSpd,
-            int equippedSlots) noexcept;
+		/**
+		 * @brief ステータス情報を更新
+		 * @param stats 表示するパラメータ一式
+		 */
+		void refresh(const ParameterStats& stats) noexcept;
 
-    protected:
+	  protected:
         void onCreateControls(HWND hwnd) override;
         LRESULT onMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept override;
 

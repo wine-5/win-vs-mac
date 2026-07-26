@@ -22,6 +22,7 @@
 #include "game/data/PlayerData.h"
 #include "game/data/FileEquipmentData.h"
 #include "game/event/AudioEventListener.h"
+#include "game/HitStop.h"
 #include "game/factory/ProjectileFactory.h"
 #include "game/scene/InGameView.h"
 #include <memory>
@@ -41,11 +42,27 @@ namespace game
 		class DebugCameraSystem; // DEBUG: 前方宣言（リリース時に削除）
 	} // namespace system::camera
 
+	namespace system::visual
+	{
+		class BattleStartSystem; // 前方宣言
+	} // namespace system::visual
+
 	namespace ui::debug
 	{
 		class DebugGizmoView; // DEBUG: 前方宣言（リリース時に削除）
 		class DebugHUDView;   // DEBUG: 前方宣言（リリース時に削除）
 	} // namespace ui::debug
+
+	namespace ui::ingame
+	{
+		class PlayerHUDView;     // 前方宣言
+		class EquipmentSlotView; // 前方宣言
+		class ObjectiveView;     // 前方宣言
+		class InGameStatusView;  // 前方宣言
+		class LowHealthVignetteView; // 前方宣言
+		class BossHUDView;           // 前方宣言
+		class EnemyHealthBarView;    // 前方宣言
+	} // namespace ui::ingame
 } // namespace game
 
 namespace game::scene
@@ -99,6 +116,15 @@ namespace game::scene
 		void setupEvents();
 
 		/**
+		 * @brief プレイヤーの現在のパラメータをログへ出力する
+		 *
+		 * 装備ファイルのボーナスが実際にパラメータへ乗っているかを、
+		 * 反映の前後で見比べて確かめるために使う
+		 * @param label ログの先頭に付ける見出し（"装備前" / "装備後"）
+		 */
+		void logPlayerParameters(const char* label) const;
+
+		/**
 		 * @brief GameManager にリザルトデータを保存する
 		 * @param isVictory 勝利かどうか
 		 */
@@ -148,12 +174,38 @@ namespace game::scene
 
 		std::unique_ptr<game::event::AudioEventListener> m_audioEventListener;
 
+		// 開始演出（READY / FIGHT!）の参照。クリアタイムの計測開始を遅らせるために読む
+		// （所有はSystemManager）
+		system::visual::BattleStartSystem* m_battleStartSystem{ nullptr };
+
 		// DEBUG: シーンビュー凍結中に単独更新するための参照（所有はSystemManager。リリース時に削除）
 		system::camera::DebugCameraSystem* m_debugCameraSystem{ nullptr };
 
 		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（リリース時にまとめて削除）
 		std::unique_ptr<ui::debug::DebugGizmoView> m_debugGizmoView;
 		std::unique_ptr<ui::debug::DebugHUDView> m_debugHUDView;
+
+		// プレイヤーステータス（左下のHP）のView
+		std::unique_ptr<ui::ingame::PlayerHUDView> m_playerHUDView;
+
+		// 装備スロット（右下）のView
+		std::unique_ptr<ui::ingame::EquipmentSlotView> m_equipmentSlotView;
+
+		// 目標表示（左上）のView
+		std::unique_ptr<ui::ingame::ObjectiveView> m_objectiveView;
+		std::unique_ptr<ui::ingame::InGameStatusView> m_statusView;
+
+		// 低HP警告のビネットのView
+		std::unique_ptr<ui::ingame::LowHealthVignetteView> m_lowHealthVignetteView;
+
+		// ボスHP（上中央）のView
+		std::unique_ptr<ui::ingame::BossHUDView> m_bossHUDView;
+
+		// 敵の頭上HPバーのView
+		std::unique_ptr<ui::ingame::EnemyHealthBarView> m_enemyHealthBarView;
+
+		// クリティカル・撃破の瞬間に時間を止める
+		HitStop m_hitStop{};
 
 		// 進行トラッキング
 		float m_elapsedTime{0.0f};

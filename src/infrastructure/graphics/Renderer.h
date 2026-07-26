@@ -23,6 +23,34 @@ namespace infrastructure::graphics
 		void drawModel(int modelHandle, const core::Vector3& position, const core::Vector3& rotation, const core::Vector3& scale) override;
 
 		/**
+		 * @brief モデルのフレーム（ボーン）を名前から検索する
+		 * @param modelHandle モデルハンドル
+		 * @param frameName フレーム（ボーン）名
+		 * @return フレーム番号。見つからない場合は -1
+		 */
+		[[nodiscard]] int findModelFrame(int modelHandle, std::string_view frameName) override;
+
+		/**
+		 * @brief モデルが持つ全フレーム（ボーン）の名前を取得する
+		 * @param modelHandle モデルハンドル
+		 * @return フレーム名の一覧（フレーム番号順）。失敗時は空
+		 */
+		[[nodiscard]] std::vector<std::string> getModelFrameNames(int modelHandle) override;
+
+		/**
+		 * @brief モデルを他モデルのフレーム（ボーン）へ追従させて描画する
+		 * @param modelHandle 装着するモデル（武器）のハンドル
+		 * @param parentModelHandle 装着先モデル（キャラクター）のハンドル
+		 * @param frameIndex 装着先のフレーム番号
+		 * @param offsetPosition ボーンのローカル空間での位置オフセット
+		 * @param offsetRotation ボーンのローカル空間での回転オフセット（ラジアン）
+		 * @param offsetScale 武器自体のスケール（親のスケールに乗算される）
+		 */
+		void drawModelOnFrame(int modelHandle, int parentModelHandle, int frameIndex,
+		    const core::Vector3& offsetPosition, const core::Vector3& offsetRotation,
+		    const core::Vector3& offsetScale) override;
+
+		/**
 		 * @brief モデルのテクスチャ繰り返し回数を設定する
 		 * @param modelHandle モデルハンドル
 		 * @param scaleU 横方向の繰り返し回数（1.0で引き伸ばし）
@@ -110,6 +138,18 @@ namespace infrastructure::graphics
 		 * @param faceDir モデルの正面を向ける方向（正規化不要）
 		 * @param spinAngle 面内回転角（ラジアン）
 		 */
+		/**
+		 * @brief 発光するビルボードを加算合成で描く
+		 * @param imageHandle 2D画像ハンドル
+		 * @param position ビルボード中心のワールド座標
+		 * @param size ワールド単位での大きさ
+		 * @param angle 面内の回転角（ラジアン）
+		 * @param brightness 明るさ（0〜255）
+		 * @param color 光の色（0xRRGGBB）
+		 */
+		void drawGlowBillboard(int imageHandle, const core::Vector3& position,
+		    float size, float angle, int brightness, unsigned int color = 0xFFFFFFu) override;
+
 		void drawBillboard(int imageHandle, const core::Vector3& position,
 		    float size, float angle) override;
 

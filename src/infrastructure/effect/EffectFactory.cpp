@@ -30,7 +30,8 @@ namespace infrastructure::effect
 		}
 	}
 
-	int EffectFactory::play(core::constant::EffectType type, core::Vector3 position)
+	int EffectFactory::play(core::constant::EffectType type, core::Vector3 position,
+	    core::Vector3 rotation)
 	{
 		// 対応するプールを検索する
 		auto it{ m_pools.find(type) };
@@ -39,6 +40,11 @@ namespace infrastructure::effect
 		// プールからスロットを取得してエフェクトを再生する
 		int handle{ it->second.getEffect(position) };
 		if (handle == -1) return -1;
+
+		// 斬撃のように向きに意味があるエフェクトは、再生開始後に向きを上書きする。
+		// プールは同じエフェクトを使い回すため、前回の向きが残らないよう
+		// ゼロ指定でも必ず設定する
+		SetRotationPlayingEffekseer3DEffect(handle, rotation.x, rotation.y, rotation.z);
 
 		// stop()で正しいプールに返却できるようハンドルを記録する
 		m_handleToType[handle] = type;

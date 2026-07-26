@@ -4,6 +4,9 @@
 #include "game/component/movement/InputComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
 #include "game/component/visual/AnimationComponent.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IAudioManager.h"
+#include "core/constant/SeType.h"
 
 namespace game::system::movement
 {
@@ -43,11 +46,16 @@ namespace game::system::movement
 					{
 						velocity.m_velocity.y = m_jumpForce;
 
-						// ジャンプアニメを要求する（MoveSystemの移動要求より後に走るため上書きできる。
-						// Jumpは優先度が高く、着地＝再生完了までlocomotion要求に割り込まれない）
+						// ジャンプアニメを要求する（Jumpは優先度が高く、着地＝再生完了まで
+						// locomotion要求に割り込まれない）
 						if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
-							m_componentManager.get<component::visual::AnimationComponent>(entityId).m_requested =
-							    constant::AnimationState::Jump;
+							m_componentManager.get<component::visual::AnimationComponent>(entityId)
+							    .request(constant::AnimationState::Jump);
+
+						// 跳んだ本人にしか関係しない音なので、跳んだ瞬間にそのまま鳴らす
+						auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+						if (audio)
+							audio->playSe(core::constant::SeType::PlayerJump);
 					}
 					m_prevJumpPressed = input.m_jumpPressed;
 				}

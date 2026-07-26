@@ -32,6 +32,24 @@ namespace
 	constexpr float RECOIL_KICK{ 90.0f }; // リコイルの押し上げ量係数（m_attackAnimTimer[秒]に掛ける）
 
 	/**
+	 * @brief ホバーの基準高度（足元の床 + 浮遊高度）を返す
+	 *
+	 * hoverHeightを絶対高度として扱うと、階層ごとに床の高さが違うステージでは
+	 * 深い階層の敵が床から大きく浮き上がってしまう。足元の床を基準にして地形へ追従させる。
+	 * @param velocity 足元の床の高さを持つ速度コンポーネント
+	 * @param transform 敵の現在位置
+	 * @param hoverHeight 床からの浮遊高度
+	 * @return 揺らぎを乗せる前の基準高度。床が無ければ現在の高さ（その場を保つ）
+	 */
+	float hoverBaseHeight(const game::component::movement::VelocityComponent& velocity,
+	    const game::component::movement::TransformComponent& transform, float hoverHeight)
+	{
+		if (!velocity.m_hasGroundHeight)
+			return transform.m_position.y;
+		return velocity.m_groundHeight + hoverHeight;
+	}
+
+	/**
 	 * @brief ホバーの目標高度に、アイドル揺らぎと発射リコイルを重ねた値を返す
 	 * @param baseHeight 基準のホバー高度
 	 * @param elapsedTime 揺らぎの位相計算用の経過時間
@@ -145,18 +163,16 @@ namespace game::system::ai
 				velocity.m_velocity.z = moveDirection.z * ai.m_moveSpeed;
 			}
 
-			// ホバー高度を保つ（浮遊敵用）。基準高度にアイドル揺らぎ＋発射リコイルを重ねる
-			if (rangeKeep.m_hoverHeight > 0.0f)
+			// ホバー高度を保つ（浮遊敵用）。足元の床を基準にアイドル揺らぎ＋発射リコイルを重ねる
+			if (rangeKeep.m_hoverHeight > 0.0f &&
+			    m_componentManager.has<component::movement::VelocityComponent>(entityId))
 			{
 				// 目標高度（揺らぎ・リコイル込み）と現在位置の差を垂直速度に反映させる
 				// （重力があれば、重力で下がるので、その分を補正）
-				const float target{ hoverTargetHeight(rangeKeep.m_hoverHeight, m_elapsedTime, swayPhase, rangeKeep.m_attackAnimTimer) };
-				const float heightDiff{ target - transform.m_position.y };
-				if (m_componentManager.has<component::movement::VelocityComponent>(entityId))
-				{
-					auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
-					velocity.m_velocity.y += heightDiff * HOVER_RESTORE_SPEED * deltaTime;
-				}
+				auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
+				const float base{ hoverBaseHeight(velocity, transform, rangeKeep.m_hoverHeight) };
+				const float target{ hoverTargetHeight(base, m_elapsedTime, swayPhase, rangeKeep.m_attackAnimTimer) };
+				velocity.m_velocity.y += (target - transform.m_position.y) * HOVER_RESTORE_SPEED * deltaTime;
 			}
 
 			// 向きを更新（プレイヤーの方を向く、水平面のみ）。
@@ -196,7 +212,8 @@ namespace game::system::ai
 			{
 			    if (rangeKeep.m_hoverHeight > 0.0f)
 			    {
-				    const float target{ hoverTargetHeight(rangeKeep.m_hoverHeight, m_elapsedTime, swayPhase, rangeKeep.m_attackAnimTimer) };
+				    const float base{ hoverBaseHeight(velocity, transform, rangeKeep.m_hoverHeight) };
+				    const float target{ hoverTargetHeight(base, m_elapsedTime, swayPhase, rangeKeep.m_attackAnimTimer) };
 				    velocity.m_velocity.y = (target - transform.m_position.y) * HOVER_RESTORE_SPEED * deltaTime;
 			    }
 			    else

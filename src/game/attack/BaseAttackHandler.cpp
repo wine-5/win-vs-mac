@@ -17,7 +17,7 @@ namespace game::attack
 	void BaseAttackHandler::handle(DamageChain& chain)
 	{
 		auto& attack{ m_componentManager.get<component::combat::AttackComponent>(chain.m_attackId) };
-		chain.m_damage = attack.m_attackPower;
+		chain.m_damage = attack.m_attackPower * attack.m_damageMultiplier;
 
 		if (m_next)
 			m_next->handle(chain);

@@ -2,6 +2,8 @@
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
+#include "game/component/TagComponent.h"
+#include "game/constant/Tag.h"
 #include "core/utility/Color.h"
 #include <algorithm>
 
@@ -40,6 +42,12 @@ namespace game::system::visual
 			if (m_componentManager.has<component::combat::ProjectileComponent>(attackerId))
 				continue;
 			if (!m_componentManager.has<component::movement::TransformComponent>(attackerId))
+				continue;
+
+			// 予兆は「相手の攻撃を避けるための情報」なので敵の攻撃にだけ出す。
+			// 自分の攻撃範囲を常時足元に描いても操作の判断材料にならず、視界を塞ぐだけになる
+			if (m_componentManager.has<component::TagComponent>(attackerId) &&
+			    m_componentManager.get<component::TagComponent>(attackerId).m_tag == constant::Tag::Player)
 				continue;
 
 			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(attackerId) };

@@ -149,15 +149,22 @@
     <ClCompile Include="src\game\actor\EnemyBehaviors.cpp" />
     <ClCompile Include="src\game\attack\BaseAttackHandler.cpp" />
     <ClCompile Include="src\game\attack\DefenseHandler.cpp" />
+    <ClCompile Include="src\game\attack\CriticalHandler.cpp" />
     <ClCompile Include="src\game\factory\EnemyFactory.cpp" />
     <ClCompile Include="src\game\factory\EnemySpawner.cpp" />
     <ClCompile Include="src\game\factory\ProjectileFactory.cpp" />
     <ClCompile Include="src\game\system\combat\ProjectileReflectSystem.cpp" />
     <ClCompile Include="src\game\system\combat\ProjectileSystem.cpp" />
     <ClCompile Include="src\game\system\combat\PlayerRangedAttackSystem.cpp" />
+    <ClCompile Include="src\game\system\combat\PlayerAttackComboSystem.cpp" />
     <ClCompile Include="src\game\system\visual\PlayerChargeVisualsSystem.cpp" />
+    <ClCompile Include="src\game\system\visual\CriticalVisualsSystem.cpp" />
     <ClCompile Include="src\game\system\camera\ChargeZoomSystem.cpp" />
+    <ClCompile Include="src\game\system\visual\BattleStartSystem.cpp" />
     <ClCompile Include="src\game\system\visual\MacAwakenEffectSystem.cpp" />
+    <ClCompile Include="src\game\system\visual\BackgroundParticleSystem.cpp" />
+    <ClCompile Include="src\game\system\visual\HardAuraVisualsSystem.cpp" />
+    <ClCompile Include="src\game\ui\ingame\InGameStatusView.cpp" />
     <ClCompile Include="src\game\system\camera\DamageShakeSystem.cpp" />
     <ClCompile Include="src\game\system\ai\MeleeChaseAISystem.cpp" />
     <ClCompile Include="src\game\system\ai\RangeKeepAISystem.cpp" />
@@ -203,7 +210,10 @@
     <ClCompile Include="src\game\factory\PlayerFactory.cpp" />
     <ClCompile Include="src\game\scene\SceneManager.cpp" />
     <ClCompile Include="src\game\stage\StageProp.cpp" />
+    <ClCompile Include="src\game\actor\AnimationSetup.cpp" />
     <ClCompile Include="src\game\system\visual\AnimationSystem.cpp" />
+    <ClCompile Include="src\game\system\visual\DamagePopupSystem.cpp" />
+    <ClCompile Include="src\game\system\visual\WeaponAttachSystem.cpp" />
     <ClCompile Include="src\game\system\combat\CollisionSystem.cpp" />
     <ClCompile Include="src\game\ui\Button.cpp" />
     <ClCompile Include="src\game\ui\UIManager.cpp" />
@@ -221,7 +231,9 @@
     <ClCompile Include="src\game\system\movement\InputSystem.cpp" />
     <ClCompile Include="src\game\system\movement\MoveSystem.cpp" />
     <ClCompile Include="src\game\system\movement\PhysicsSystem.cpp" />
+    <ClCompile Include="src\game\system\movement\FootstepSystem.cpp" />
     <ClCompile Include="src\game\system\movement\GroundingSystem.cpp" />
+    <ClCompile Include="src\game\system\stage\BossGateSystem.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageRepository.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageCatalogRepository.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\ExtensionBonusRepository.cpp" />
@@ -246,6 +258,13 @@
     <ClCompile Include="src\ServiceLocatorInitializer.cpp" />
     <ClCompile Include="src\game\ui\debug\DebugGizmoView.cpp" />
     <ClCompile Include="src\game\ui\debug\DebugHUDView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\PlayerHUDView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\EquipmentSlotView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\ObjectiveView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\HudPanel.cpp" />
+    <ClCompile Include="src\game\ui\ingame\LowHealthVignetteView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\BossHUDView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\EnemyHealthBarView.cpp" />
     <ClCompile Include="src\game\ui\pause\PauseMenuController.cpp" />
     <ClCompile Include="src\game\ui\pause\PauseMenuView.cpp" />
   </ItemGroup>
@@ -286,13 +305,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\core\base\Singleton.h" />
+    <ClInclude Include="src\core\data\Difficulty.h" />
+    <ClInclude Include="src\game\HitStop.h" />
     <ClInclude Include="src\core\data\StageMetadata.h" />
     <ClInclude Include="src\core\data\PropDefinition.h" />
     <ClInclude Include="src\core\utility\Rotation.h" />
     <ClInclude Include="src\game\constant\PropCollision.h" />
+    <ClInclude Include="src\game\constant\PropRole.h" />
+    <ClInclude Include="src\game\component\stage\BossGateComponent.h" />
     <ClInclude Include="src\game\component\movement\GroundSurfaceComponent.h" />
     <ClInclude Include="src\game\component\movement\FallRecoveryComponent.h" />
+    <ClInclude Include="src\game\system\movement\FootstepSystem.h" />
     <ClInclude Include="src\game\system\movement\GroundingSystem.h" />
+    <ClInclude Include="src\game\system\stage\BossGateSystem.h" />
     <ClInclude Include="src\core\data\ProjectileMetadata.h" />
     <ClInclude Include="src\game\actor\EnemyBehaviors.h" />
     <ClInclude Include="src\game\component\combat\ProjectileComponent.h" />
@@ -324,6 +349,7 @@
     <ClInclude Include="src\game\attack\BaseAttackHandler.h" />
     <ClInclude Include="src\game\attack\DamageChain.h" />
     <ClInclude Include="src\game\attack\DefenseHandler.h" />
+    <ClInclude Include="src\game\attack\CriticalHandler.h" />
     <ClInclude Include="src\game\attack\IDamageHandler.h" />
     <ClInclude Include="src\game\component\ai\AIComponent.h" />
     <ClInclude Include="src\game\component\EnemyTypeComponent.h" />
@@ -347,7 +373,9 @@
     <ClInclude Include="src\game\system\combat\ProjectileReflectSystem.h" />
     <ClInclude Include="src\game\system\combat\ProjectileSystem.h" />
     <ClInclude Include="src\game\system\combat\PlayerRangedAttackSystem.h" />
+    <ClInclude Include="src\game\system\combat\PlayerAttackComboSystem.h" />
     <ClInclude Include="src\game\system\visual\PlayerChargeVisualsSystem.h" />
+    <ClInclude Include="src\game\system\visual\CriticalVisualsSystem.h" />
     <ClInclude Include="src\game\GameManager.h" />
     <ClInclude Include="src\game\scene\Loading.h" />
     <ClInclude Include="src\game\scene\Lockscreen.h" />
@@ -361,7 +389,11 @@
     <ClInclude Include="src\game\system\camera\CameraSystem.h" />
     <ClInclude Include="src\game\system\camera\DebugCameraSystem.h" />
     <ClInclude Include="src\game\system\camera\ChargeZoomSystem.h" />
+    <ClInclude Include="src\game\system\visual\BattleStartSystem.h" />
     <ClInclude Include="src\game\system\visual\MacAwakenEffectSystem.h" />
+    <ClInclude Include="src\game\system\visual\BackgroundParticleSystem.h" />
+    <ClInclude Include="src\game\system\visual\HardAuraVisualsSystem.h" />
+    <ClInclude Include="src\game\ui\ingame\InGameStatusView.h" />
     <ClInclude Include="src\game\system\camera\DamageShakeSystem.h" />
     <ClInclude Include="src\game\system\ai\MeleeChaseAISystem.h" />
     <ClInclude Include="src\game\system\ai\RangeKeepAISystem.h" />
@@ -402,7 +434,10 @@
     <ClInclude Include="src\core\utility\Log.h" />
     <ClInclude Include="src\core\utility\Vector3.h" />
     <ClInclude Include="src\game\component\visual\AnimationComponent.h" />
+    <ClInclude Include="src\game\component\visual\WeaponAttachComponent.h" />
     <ClInclude Include="src\game\component\combat\ColliderComponent.h" />
+    <ClInclude Include="src\game\component\combat\AttackComboComponent.h" />
+    <ClInclude Include="src\core\data\WeaponAttachMetadata.h" />
     <ClInclude Include="src\game\constant\Tag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
     <ClInclude Include="src\game\constant\AnimationId.h" />
@@ -419,7 +454,10 @@
     <ClInclude Include="src\game\constant\PlayerAnimationState.h" />
     <ClInclude Include="src\game\data\PlayerData.h" />
     <ClInclude Include="src\game\stage\StageProp.h" />
+    <ClInclude Include="src\game\actor\AnimationSetup.h" />
     <ClInclude Include="src\game\system\visual\AnimationSystem.h" />
+    <ClInclude Include="src\game\system\visual\DamagePopupSystem.h" />
+    <ClInclude Include="src\game\system\visual\WeaponAttachSystem.h" />
     <ClInclude Include="src\game\system\combat\CollisionSystem.h" />
     <ClInclude Include="src\infrastructure\graphics\Animator.h" />
     <ClInclude Include="src\infrastructure\graphics\Camera.h" />
@@ -472,6 +510,14 @@
     <ClInclude Include="src\game\PauseManager.h" />
     <ClInclude Include="src\game\ui\debug\DebugGizmoView.h" />
     <ClInclude Include="src\game\ui\debug\DebugHUDView.h" />
+    <ClInclude Include="src\game\ui\ingame\PlayerHUDView.h" />
+    <ClInclude Include="src\game\ui\ingame\EquipmentSlotView.h" />
+    <ClInclude Include="src\game\ui\ingame\ObjectiveView.h" />
+    <ClInclude Include="src\game\ui\ingame\HudPanel.h" />
+    <ClInclude Include="src\game\ui\ingame\LowHealthPulse.h" />
+    <ClInclude Include="src\game\ui\ingame\LowHealthVignetteView.h" />
+    <ClInclude Include="src\game\ui\ingame\BossHUDView.h" />
+    <ClInclude Include="src\game\ui\ingame\EnemyHealthBarView.h" />
     <ClInclude Include="src\game\ui\pause\PauseMenuController.h" />
     <ClInclude Include="src\game\ui\pause\PauseMenuView.h" />
   </ItemGroup>

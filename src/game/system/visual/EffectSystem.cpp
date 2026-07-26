@@ -6,11 +6,11 @@
 namespace game::system::visual
 {
 	EffectSystem::EffectSystem(core::ecs::ComponentManager& componentManager,
-		core::base::EventBus& eventBus,
-		core::iface::IEffectFactory& effectFactory)
-		: m_componentManager{ componentManager }
-		, m_eventBus{ eventBus }
-		, m_effectFactory{ effectFactory }
+	    core::base::EventBus& eventBus,
+	    core::iface::IEffectFactory& effectFactory)
+	    : m_componentManager{ componentManager }
+	    , m_eventBus{ eventBus }
+	    , m_effectFactory{ effectFactory }
 	{
 		setupEventSubscriptions();
 	}
@@ -63,9 +63,10 @@ namespace game::system::visual
 	}
 
 	void EffectSystem::playAndTrack(core::ecs::EntityId entityId,
-	    core::constant::EffectType type, const core::Vector3& position)
+	    core::constant::EffectType type, const core::Vector3& position,
+	    const core::Vector3& rotation)
 	{
-		const int handle{ m_effectFactory.play(type, position) };
+		const int handle{ m_effectFactory.play(type, position, rotation) };
 		if (handle == -1)
 			return;
 
@@ -86,9 +87,32 @@ namespace game::system::visual
 
 	void EffectSystem::onAttackStart(const game::event::AttackStartEvent& event)
 	{
-		// 攻撃者自身の位置でエフェクトを再生する（斬撃などの演出用）
-		if (const auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(event.m_attackerId) })
-			playAndTrack(event.m_attackerId, event.m_effectType, transform->m_position);
+		// 攻撃者自身の位置でエフェクトを再生する（斬撃などの演出用）。
+		// 斬撃は「どちらへ振ったか」が分かる必要があるため、攻撃者の向きへ合わせ、
+		// さらに攻撃の種類ごとの傾き（縦振り／水平回転など）をイベントから受けて足す
+		// 音だけを鳴らす攻撃（絵を持たない振り）ではエフェクト種別がNoneで届く
+		if (event.m_effectType == core::constant::EffectType::None)
+			return;
+
+		const auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(event.m_attackerId) };
+		if (transform == nullptr)
+			return;
+
+		const core::Vector3 rotation{
+			transform->m_rotation.x + event.m_effectRotationOffset.x,
+			transform->m_rotation.y + event.m_effectRotationOffset.y,
+			transform->m_rotation.z + event.m_effectRotationOffset.z
+		};
+
+		// 基準はEntityの原点（足元）。斬撃エフェクトは原点から上方向へ伸びる絵柄で、
+		// 体を通り抜けるように描かれる前提で作られているため、手の高さを基準にすると
+		// そのぶん丸ごと持ち上がって頭より高く出てしまう。高さの微調整はオフセットで行う
+		core::Vector3 position{ transform->m_position };
+		position.x += event.m_effectPositionOffset.x;
+		position.y += event.m_effectPositionOffset.y;
+		position.z += event.m_effectPositionOffset.z;
+
+		playAndTrack(event.m_attackerId, event.m_effectType, position, rotation);
 	}
 
 	void EffectSystem::onEnemyDead(const game::event::EnemyDeadEvent& event)

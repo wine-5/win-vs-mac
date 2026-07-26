@@ -9,7 +9,8 @@
     {"id": "tab_storage_full",   "path": "assets/model/enemies/safari/TabStorageFull.mv1"},
     {"id": "tab_safari_error",   "path": "assets/model/enemies/safari/TabSafariError.mv1"},
     {"id": "tab_xcode_building", "path": "assets/model/enemies/safari/TabXcodeBuilding.mv1"},
-    {"id": "mac_rainbow_wheel", "path": "assets/model/enemies/mac/RainbowWheel.mv1"}
+    {"id": "mac_rainbow_wheel", "path": "assets/model/enemies/mac/RainbowWheel.mv1"},
+    {"id": "player_sword",      "path": "assets/model/player/PlayerSword.mv1"}
   ],
   "animations": [
     {"id": "anim_player_idle",       "path": "assets/animations/player/Player_Idle.mv1"},
@@ -20,6 +21,7 @@
     {"id": "anim_player_hit",        "path": "assets/animations/player/Player_HitReaction.mv1"},
     {"id": "anim_player_dying",      "path": "assets/animations/player/Player_Dying.mv1"},
     {"id": "anim_player_jump",       "path": "assets/animations/player/Player_Jump.mv1"},
+    {"id": "anim_player_throw",      "path": "assets/animations/player/Player_Throw.mv1"},
     {"id": "anim_mac_idle",          "path": "assets/animations/enemies/mac/Mac_Idle.mv1"},
     {"id": "anim_mac_walk",          "path": "assets/animations/enemies/mac/Mac_Walk.mv1"},
     {"id": "anim_mac_run",           "path": "assets/animations/enemies/mac/Mac_Run.mv1"},
@@ -32,28 +34,58 @@
     {"id": "anim_xcode_dying",       "path": "assets/animations/enemies/xcode/Xcode_Dying.mv1"}
   ],
   "fonts": [
-    {"id": "main",   "path": "assets/fonts/MaruMonica.ttf",  "name": "x12y16pxMaruMonica"},
-    {"id": "normal", "path": "assets/fonts/NotoSansJP.ttf",  "name": "Noto Sans JP"}
+    {"id": "main",   "path": "assets/fonts/MaruMonica.ttf",   "name": "x12y16pxMaruMonica"},
+    {"id": "normal", "path": "assets/fonts/NotoSansJP.ttf",   "name": "Noto Sans JP"},
+    {"id": "mono",   "path": "assets/fonts/CascadiaMono.ttf", "name": "Cascadia Mono"},
+    {"id": "mono_bold", "path": "assets/fonts/CascadiaMonoSemiBold.ttf", "name": "Cascadia Mono SemiBold"}
   ],
   "images": [
     {"id": "lock-bg",           "path": "assets/images/background/LockBG.jpg"},
     {"id": "desktop-bg",        "path": "assets/images/background/DesktopBG.jpg"},
     {"id": "projectile-window", "path": "assets/images/ingame/projectile_window.png"},
     {"id": "alert-icon",        "path": "assets/images/ui/ingame/alert_icon.png"},
-    {"id": "alert-bar",         "path": "assets/images/ui/ingame/alert_bar.png"}
+    {"id": "alert-bar",         "path": "assets/images/ui/ingame/alert_bar.png"},
+    {"id": "ext-exe",           "path": "assets/images/ui/ingame/ext/exe.png"},
+    {"id": "ext-doc",           "path": "assets/images/ui/ingame/ext/doc.png"},
+    {"id": "ext-img",           "path": "assets/images/ui/ingame/ext/img.png"},
+    {"id": "ext-aud",           "path": "assets/images/ui/ingame/ext/aud.png"},
+    {"id": "ext-src",           "path": "assets/images/ui/ingame/ext/src.png"},
+    {"id": "ext-lnk",           "path": "assets/images/ui/ingame/ext/lnk.png"},
+    {"id": "ext-vid",           "path": "assets/images/ui/ingame/ext/vid.png"},
+    {"id": "ext-arc",           "path": "assets/images/ui/ingame/ext/arc.png"},
+    {"id": "ext-etc",           "path": "assets/images/ui/ingame/ext/etc.png"},
+    {"id": "ext-emp",           "path": "assets/images/ui/ingame/ext/emp.png"},
+    {"id": "vignette-lowhp",    "path": "assets/images/ui/ingame/vignette_lowhp.png"},
+    {"id": "sky-glow",          "path": "assets/images/ingame/sky_glow.png"},
+    {"id": "sky-folder",        "path": "assets/images/ingame/folder.png"}
   ],
   "bgm": [
-    { "type": "Title",      "path": "assets/audio/bgm/bgm_title.mp3",         "volume":0.5, "useFade": true  },
-    { "type": "Select",     "path": "assets/audio/bgm/bgm_select.mp3",        "volume":0.5, "useFade": true  },
-    { "type": "InGame",     "path": "assets/audio/bgm/bgm_ingame_normal.mp3", "volume":0.4, "useFade": true  },
-    { "type": "Boss",       "path": "assets/audio/bgm/bgm_ingame_boss.mp3",   "volume":0.45, "useFade": true  },
-    { "type": "ResultWin",  "path": "assets/audio/bgm/bgm_result_good.mp3",   "volume":0.5, "useFade": false },
-    { "type": "ResultLose", "path": "assets/audio/bgm/bgm_result_bad.mp3",    "volume":0.5, "useFade": false }
+    { "type": "Title",      "path": "assets/audio/bgm/bgm_title.ogg",         "volume":0.8, "useFade": true  },
+    { "type": "Select",     "path": "assets/audio/bgm/bgm_select.ogg",        "volume":0.8, "useFade": true  },
+    { "type": "InGame",     "path": "assets/audio/bgm/bgm_ingame_normal.ogg", "volume":0.8, "useFade": true  },
+    { "type": "Boss",       "path": "assets/audio/bgm/bgm_ingame_boss.ogg",   "volume":0.8, "useFade": true  },
+    { "type": "ResultWin",  "path": "assets/audio/bgm/bgm_result_good.ogg",   "volume":0.8, "useFade": false },
+    { "type": "ResultLose", "path": "assets/audio/bgm/bgm_result_bad.ogg",    "volume":0.8, "useFade": false }
   ],
   "se": [
-    { "type": "AttackPlayer",  "path": "assets/audio/se/se_attack_warrior.mp3", "volume":0.7 },
-    { "type": "HitEnemy",      "path": "assets/audio/se/se_hit_enemy.mp3",      "volume":0.7 },
-    { "type": "HitPlayer",     "path": "assets/audio/se/se_hit_player.mp3",     "volume":0.8 },
-    { "type": "DeadEnemy",     "path": "assets/audio/se/se_dead_enemy.mp3",     "volume":0.7 }
+    { "type": "PlayerSwing1",     "path": "assets/audio/se/se_swing1.mp3",            "volume":0.7 },
+    { "type": "PlayerSwing2",     "path": "assets/audio/se/se_swing2.mp3",            "volume":0.7 },
+    { "type": "PlayerCharge",     "path": "assets/audio/se/se_charge.mp3",            "volume":0.6 },
+    { "type": "HitWindow",        "path": "assets/audio/se/se_hit_window.mp3",        "volume":0.8 },
+    { "type": "HitChargedWindow", "path": "assets/audio/se/se_hit_charged_window.mp3","volume":1.0 },
+    { "type": "Critical",         "path": "assets/audio/se/se_critical.mp3",          "volume":1.0 },
+    { "type": "HitEnemy",         "path": "assets/audio/se/se_hit_enemy.mp3",         "volume":1.0 },
+    { "type": "HitPlayer",        "path": "assets/audio/se/se_hit_player.mp3",        "volume":1.0 },
+    { "type": "DeadEnemy",        "path": "assets/audio/se/se_dead_enemy.mp3",        "volume":1.0 },
+    { "type": "DeadPlayer",       "path": "assets/audio/se/se_dead_player.mp3",       "volume":1.0 },
+    { "type": "PlayerJump",       "path": "assets/audio/se/se_jump.mp3",              "volume":0.6 },
+    { "type": "PlayerFootstep",   "path": "assets/audio/se/se_walk.mp3",              "volume":0.35 },
+    { "type": "EnemyAlert",       "path": "assets/audio/se/se_enemy_alert.mp3",       "volume":0.8 },
+    { "type": "EnemySlam",        "path": "assets/audio/se/se_xcode_slam.mp3",        "volume":0.9 },
+    { "type": "BattleReady",      "path": "assets/audio/se/se_battle_ready.mp3",      "volume":0.9 },
+    { "type": "BattleFight",      "path": "assets/audio/se/se_battle_fight.mp3",      "volume":1.0 },
+    { "type": "UiClick",          "path": "assets/audio/se/se_ui_clicked.mp3",        "volume":1.0 },
+    { "type": "UiKeyPress",       "path": "assets/audio/se/se_ui_key_press.mp3",      "volume":0.5 },
+    { "type": "UiFileSelect",     "path": "assets/audio/se/se_file_select.mp3",       "volume":1.0 }
   ]
 }

@@ -1,4 +1,4 @@
-{
+﻿{
   "id": "enemy_safari",
   "category": "enemy",
   "model": {
@@ -9,18 +9,27 @@
     "size": [ 0, 0, 0 ]
   },
   "gameplay": {
-    "moveSpeed": 260.0,
-    "detectionRange": 1200.0,
+    "moveSpeed": 350.0,
+    "detectionRange": 1600.0,
     "attackRange": 350.0,
-    "maxHp": 100.0,
+    "maxHp": 145.0,
     "defence": 0.0,
-    "attackPower": 10.0,
+    "attackPower": 24.0,
     "attackCooldown": 4.0,
     "hoverHeight": 300.0,
     "preferredDistanceMin": 400.0,
     "preferredDistanceMax": 600.0,
     "fireCooldown": 5.0,
     "facingYawOffset": 90.0
+  },
+  "hard": {
+    "moveSpeed": 400.0,
+    "detectionRange": 2000.0,
+    "maxHp": 232.0,
+    "defence": 5.0,
+    "attackPower": 41.0,
+    "attackCooldown": 2.6,
+    "fireCooldown": 3.2
   },
   "behaviors": [ "rangeKeep", "patrol" ]
 }

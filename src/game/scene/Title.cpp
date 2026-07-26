@@ -94,6 +94,11 @@ namespace game::scene
 	void Title::goToSelect()
 	{
 		if (m_state != State::Idle) return;
+
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio)
+			audio->playSe(core::constant::SeType::UiClick);
+
 		m_fade = std::make_unique<ui::FadeTransition>(
 			m_uiRenderer, m_screen, FADE_DURATION, false);
 		m_state = State::FadingOut;
@@ -102,6 +107,11 @@ namespace game::scene
 	void Title::exitApp()
 	{
 		if (m_state != State::Idle) return;
+
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio)
+			audio->playSe(core::constant::SeType::UiClick);
+
 		// デストラクタとDxLib_Endを通すため、Applicationのループ終了要求として伝える
 		m_gameManager.requestQuit();
 	}

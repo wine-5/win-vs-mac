@@ -40,6 +40,14 @@ const FileView = (function () {
 
         if (!fileListEl || !statusEl) return false;
 
+        // 「同一ファイル」チェック。オンにすると1つ選ぶだけで3枠すべてに同じものが入る
+        const sameFileCheck = document.getElementById('same-file-check');
+        if (sameFileCheck) {
+            sameFileCheck.addEventListener('change', function () {
+                FileLogic.setSameFileMode(sameFileCheck.checked);
+            });
+        }
+
         FileLogic.onSlotChange(function () {
             updateSelection();
             updateStatus();
@@ -126,6 +134,12 @@ const FileView = (function () {
         const slots = FileLogic.getSlots();
         const prevEmpty = FileLogic.getPrevEmpty();
 
+        // 「同一ファイル」で3枠まとめて埋まったとき、全部が同時に現れると
+        // 何が起きたのか読み取れない。今回新しく埋まった行だけを数えて、
+        // 上から順に少しずつ遅らせて出す
+        const SLOT_STAGGER_MS = 260;
+        let loadedOrder = 0;
+
         slots.forEach(function (s, i) {
             const et = s.extType || 'Unknown';
             const isEmpty = s.isEmpty;
@@ -135,8 +149,17 @@ const FileView = (function () {
             const wrap = document.createElement('div');
             wrap.className = 'file-slot';
 
+            // 今回埋まった行の中での順番。上の行ほど先に現れる
+            const appearDelayMs = justLoaded ? loadedOrder * SLOT_STAGGER_MS : 0;
+            if (justLoaded) loadedOrder++;
+
             const row = document.createElement('div');
-            row.className = 'file-row' + (isSelected ? ' selected' : '') + (justLoaded ? ' anim-in' : '');
+            // 未選択の行は is-empty を付けてCSS側の誘導アニメーションを走らせる
+            row.className = 'file-row' + (isSelected ? ' selected' : '') +
+                (justLoaded ? ' anim-in' : '') + (isEmpty ? ' is-empty' : '');
+            // 遅延中も「出現前」の見た目を保つため、CSS側で animation-fill-mode: backwards を指定している
+            if (appearDelayMs > 0)
+                row.style.animationDelay = appearDelayMs + 'ms';
             row.dataset.slot = i;
             row.onclick = function () { FileLogic.selectSlot(i); };
 
@@ -159,7 +182,9 @@ const FileView = (function () {
                         (isEmpty ? '─ 未選択 ─' : '') +
                     '</span>' +
                 '</div>' +
-                badge + bonus;
+                badge + bonus +
+                // 装備中の行だけ、外周を光の粒が回り続ける（起動中であることの表現）
+                (isEmpty ? '' : buildOrbitDots());
 
             // 新規ロード時: anim-in(280ms)完了後にタイプライター演出
             if (!isEmpty) {
@@ -174,7 +199,7 @@ const FileView = (function () {
                             nameEl.textContent += fileName[idx];
                             idx++;
                         }, 18);
-                    }, 290);
+                    }, 290 + appearDelayMs);
                 } else {
                     const nameEl = row.querySelector('#fname-' + i);
                     if (nameEl) nameEl.textContent = fileName;
@@ -197,13 +222,92 @@ const FileView = (function () {
         updateBonusHighlights();
     }
 
-    function renderBonusPanel() {
-        const descs = FileLogic.getBonusDescs();
-        document.querySelectorAll('.bonus-entry[data-ext]').forEach(function (el) {
-            const desc = descs[el.dataset.ext];
-            const valEl = el.querySelector('.bonus-entry-val');
-            if (valEl && desc) valEl.textContent = desc;
+    /**
+     * 装備中の行の外周を回る光の粒を組み立てる
+     *
+     * インゲームの装備スロットに合わせ、2列の粒が向かい合って周回し、
+     * 後続ほど小さく淡くして尾を引かせる。値の意味はCSSの .orbit-dot 側と対
+     */
+    function buildOrbitDots() {
+        const PERIOD = 3.2;      // 一周にかける秒数（CSSのanimationと合わせる）
+        const COMET_COUNT = 2;   // 同時に回る列の数
+        const TRAIL_COUNT = 8;   // 1列あたりの粒の数
+        const TRAIL_SPACING = 0.035; // 粒どうしの間隔（一周を1.0とした割合）
+        const HEAD_SIZE = 6;     // 先頭の粒の直径（px）
+
+        let html = '';
+        for (let comet = 0; comet < COMET_COUNT; comet++) {
+            for (let i = 0; i < TRAIL_COUNT; i++) {
+                const fade = 1 - i / TRAIL_COUNT;
+                // 負の遅延で「すでに進んだ状態」から始める。列は一周を等分した位置へずらす
+                const delay = -(comet * PERIOD / COMET_COUNT + i * TRAIL_SPACING * PERIOD);
+                const size = (HEAD_SIZE * fade).toFixed(1);
+                html += '<span class="orbit-dot" style="' +
+                    'animation-delay:' + delay.toFixed(3) + 's;' +
+                    'width:' + size + 'px;height:' + size + 'px;' +
+                    'opacity:' + (fade * fade).toFixed(2) + '"></span>';
+            }
+        }
+        return html;
+    }
+
+    /**
+     * ボーナス内訳をアイコン付きで組み立てる
+     *
+     * 略称だけではパラメータ画面のどの行が伸びるのか結びつかないため、
+     * 向こうと同じアイコンを並べる。項目が多い行（アーカイブ）は
+     * 日本語名まで出すと折り返してしまうので、アイコンと数値だけにする
+     * @param stats [{ stat, value }, ...]
+     * @param fallbackText 内訳が届いていないときに出す短い説明文
+     */
+    function buildStatsHtml(stats, fallbackText) {
+        if (!stats || stats.length === 0)
+            return '<span class="bonus-entry-val multi">' + (fallbackText || '') + '</span>';
+
+        const showName = stats.length <= 2;
+        const parts = stats.map(function (s) {
+            const meta = FileLogic.STAT_META[s.stat];
+            if (!meta) return '';
+            const value = Number.isInteger(s.value) ? s.value : Math.round(s.value * 10) / 10;
+            return '<span class="bonus-stat">' +
+                '<img class="bonus-stat-icon" src="' + meta.icon + '" alt="' + meta.name + '">' +
+                (showName ? '<span class="bonus-stat-name">' + meta.name + '</span>' : '') +
+                '<span class="bonus-stat-val">+' + value + meta.suffix + '</span>' +
+                '</span>';
         });
+        return '<span class="bonus-entry-val bonus-stat-list' + (showName ? '' : ' compact') + '">' +
+            parts.join('') + '</span>';
+    }
+
+    /**
+     * 拡張子ボーナス一覧を組み立てる。
+     * 行そのものを descs（C++が extensionBonus.json から生成）で作るので、
+     * 拡張子を増やしても値を変えてもHTMLを触らずに追従する
+     */
+    function renderBonusPanel() {
+        const listEl = document.getElementById('bonus-list');
+        if (!listEl) return;
+
+        const descs = FileLogic.getBonusDescs();
+        listEl.innerHTML = '';
+
+        FileLogic.EXT_ORDER.forEach(function (ext) {
+            const desc = descs[ext];
+            // ボーナスが1つも設定されていない拡張子は行ごと出さない
+            if (!desc) return;
+
+            const entry = document.createElement('div');
+            entry.className = 'bonus-entry';
+            entry.dataset.ext = ext;
+            entry.innerHTML =
+                '<img class="ext-badge" src="' + (FileLogic.EXT_ICON[ext] || FileLogic.EXT_ICON.Unknown) +
+                    '" alt="' + (FileLogic.EXT_LABEL[ext] || '?') + '">' +
+                '<span class="bonus-entry-name">' + FileLogic.getBonusExtensions(ext) + '</span>' +
+                buildStatsHtml(FileLogic.getBonusStats(ext), desc);
+            listEl.appendChild(entry);
+        });
+
+        updateBonusHighlights();
     }
 
     return {
@@ -217,6 +321,8 @@ const FileView = (function () {
 }());
 
 window.onMessageFromGame = function (data) {
+    // HARDでは配色を警告色へ切り替える（common.jsの共通処理）
+    applyDifficultyTheme(data);
     FileLogic.onMessageFromGame(data);
 };
 
@@ -224,5 +330,6 @@ window.onMessageFromGame = function (data) {
     if (FileView.initialize()) {
         FileView.renderSlots();
         FileLogic.requestBonusInfo();
+        FileLogic.requestSlots();
     }
 }());

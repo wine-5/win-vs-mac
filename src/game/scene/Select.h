@@ -44,6 +44,14 @@ namespace game::scene
 		void draw() override;
 
 		/**
+		 * @brief ポーズ中はセレクト画面のWindowを引っ込める
+		 *
+		 * Windowは常時最前面のため、出したままだとポーズメニューが裏に隠れて見えない
+		 * @param isPaused ポーズ中ならtrue
+		 */
+		void onPauseChanged(bool isPaused) override;
+
+		/**
 		 * @brief ウィンドウマネージャーを設定し、ウィンドウを作成する
 		 * @param windowManager セレクトウィンドウ管理インターフェース
 		 */

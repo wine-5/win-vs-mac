@@ -30,6 +30,9 @@ namespace game::event
 		/** @brief 再生するSEの種類 */
 		core::constant::SeType m_seType{ core::constant::SeType::None };
 
+		/** @brief クリティカルだったか（ダメージ数値の見せ方を変えるのに使う） */
+		bool m_isCritical{ false };
+
 		AttackHitEvent() = default;
 		AttackHitEvent(core::ecs::EntityId atkId, core::ecs::EntityId tgtId, float dmg,
 		    core::constant::EffectType effectType = core::constant::EffectType::Enemy_HitSword,
@@ -55,13 +58,62 @@ namespace game::event
 		/** @brief 再生するエフェクトの種類 */
 		core::constant::EffectType m_effectType{ core::constant::EffectType::None };
 
-		// 攻撃開始SE（敵・Playerごとに音を変える）は機能追加のため別ブランチで対応する。
-		// 実装する場合は AttackHitEvent と同じく SeType を持たせ、AudioEventListener で購読する
+		/**
+		 * @brief エフェクトの向きの補正（ラジアン）
+		 *
+		 * 購読側は「攻撃者の向き＋この補正」でエフェクトを出す。
+		 * 同じ斬撃エフェクトを縦振りと水平回転で使い分けるために持つ
+		 */
+		core::Vector3 m_effectRotationOffset{};
+
+		/**
+		 * @brief エフェクトの位置の補正（ワールド単位）
+		 *
+		 * 購読側は「基準位置＋この補正」でエフェクトを出す。
+		 * エフェクトの絵柄が原点からどう伸びるかに合わせて高さを詰めるために持つ
+		 */
+		core::Vector3 m_effectPositionOffset{};
+
+		/**
+		 * @brief 振り始めに鳴らすSEの種類
+		 *
+		 * エフェクトとは独立に指定できる（音だけ・絵だけの攻撃があるため）。
+		 * Noneなら無音。AudioEventListenerが購読して鳴らす
+		 */
+		core::constant::SeType m_seType{ core::constant::SeType::None };
 
 		AttackStartEvent() = default;
-		AttackStartEvent(core::ecs::EntityId attackerId, core::constant::EffectType effectType)
+		AttackStartEvent(core::ecs::EntityId attackerId, core::constant::EffectType effectType,
+		    core::Vector3 effectRotationOffset = {}, core::Vector3 effectPositionOffset = {},
+		    core::constant::SeType seType = core::constant::SeType::None)
 		    : m_attackerId{ attackerId }
 		    , m_effectType{ effectType }
+		    , m_effectRotationOffset{ effectRotationOffset }
+		    , m_effectPositionOffset{ effectPositionOffset }
+		    , m_seType{ seType }
+		{
+		}
+	};
+
+	/**
+	 * @brief 攻撃のダメージ判定が成立する瞬間に発行されるイベント
+	 *
+	 * 振り始め（AttackStartEvent）とは別に、「当たる瞬間」に合わせたい演出のために持つ。
+	 * ワインドアップ有りの攻撃では振り終わり、無しの攻撃では発動と同時に発行される。
+	 * 相手に当たったかどうかは問わない（空振りでも地面を叩く音は鳴ってほしいため）
+	 */
+	struct AttackImpactEvent : public core::iface::IGameEvent
+	{
+		/** @brief 攻撃者のEntityId */
+		core::ecs::EntityId m_attackerId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief 再生するSEの種類（Noneなら無音） */
+		core::constant::SeType m_seType{ core::constant::SeType::None };
+
+		AttackImpactEvent() = default;
+		AttackImpactEvent(core::ecs::EntityId attackerId, core::constant::SeType seType)
+		    : m_attackerId{ attackerId }
+		    , m_seType{ seType }
 		{
 		}
 	};

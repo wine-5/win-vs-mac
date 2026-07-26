@@ -18,15 +18,20 @@ namespace core::iface
          */
         virtual void initialize() = 0;
 
-        /**
-         * @brief エフェクトを再生する
-         * @param type エフェクトの種別
-         * @param position 再生位置
-         * @return エフェクトの識別ハンドル（stop に使用）
-         */
-        virtual int play(core::constant::EffectType type, core::Vector3 position) = 0;
+		/**
+		 * @brief エフェクトを再生する
+		 *
+		 * 斬撃のように「出る方向」に意味があるエフェクトは rotation で向きを与える。
+		 * 爆発や着弾のように向きを問わないものはゼロベクトルを渡せばよい
+		 * @param type エフェクトの種別
+		 * @param position 再生位置
+		 * @param rotation 再生時の向き（ラジアン。ゼロならエフェクト本来の向き）
+		 * @return エフェクトの識別ハンドル（stop に使用）
+		 */
+		virtual int play(core::constant::EffectType type, core::Vector3 position,
+		    core::Vector3 rotation) = 0;
 
-        /**
+		/**
          * @brief エフェクトを停止する
          * @param handle play() が返したハンドル
          */

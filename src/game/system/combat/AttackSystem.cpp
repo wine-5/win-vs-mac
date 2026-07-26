@@ -11,18 +11,24 @@
 #include "game/attack/DamageChain.h"
 #include "game/attack/BaseAttackHandler.h"
 #include "game/attack/DefenseHandler.h"
+#include "game/attack/CriticalHandler.h"
 #include "core/interface/ILogger.h"
 #include "core/utility/Log.h"
 #include "game/event/InGameEvents.h"
 
 namespace game::system::combat
 {
-	AttackSystem::AttackSystem(core::ecs::ComponentManager &componentManager, core::base::EventBus &eventBus,
-		core::constant::SeType playerAttackSeType)
-		: m_componentManager{componentManager}, m_eventBus{eventBus}, m_playerAttackSeType{playerAttackSeType}
+	AttackSystem::AttackSystem(core::ecs::ComponentManager& componentManager, core::base::EventBus& eventBus)
+	    : m_componentManager{ componentManager }
+	    , m_eventBus{ eventBus }
 	{
-		auto base{std::make_unique<attack::BaseAttackHandler>(m_componentManager)};
-		auto defense{std::make_unique<attack::DefenseHandler>(m_componentManager)};
+		// 攻撃力 → 防御力の減算 → クリティカルの倍化 の順で組む。
+		// クリティカルを防御より後ろに置くのは、先に倍化すると防御の高い相手ほど
+		// 減算で旨味が消えてしまい「会心が出た手応え」が無くなるため
+		auto base{ std::make_unique<attack::BaseAttackHandler>(m_componentManager) };
+		auto defense{ std::make_unique<attack::DefenseHandler>(m_componentManager) };
+		auto critical{ std::make_unique<attack::CriticalHandler>(m_componentManager) };
+		defense->setNext(std::move(critical));
 		base->setNext(std::move(defense));
 		m_damageChain = std::move(base);
 	}
@@ -51,6 +57,11 @@ namespace game::system::combat
 				{
 					attack.m_windupPending = false;
 
+					// 振り終わり＝地面を叩く瞬間。当たったかどうかに関係なく鳴らしたいので、
+					// ヒット判定（resolveAttack）より前に発行する
+					if (attack.m_impactSeType != core::constant::SeType::None)
+						m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType });
+
 					// 溜め中に攻撃者が倒された場合は、振り終わりのダメージを不発にする
 					const bool attackerDead{ m_componentManager.has<component::combat::HealthComponent>(attackerId) &&
 						                     m_componentManager.get<component::combat::HealthComponent>(attackerId).m_isDead };
@@ -69,14 +80,9 @@ namespace game::system::combat
 			if (attack.m_attackRange <= 0.0f)
 				continue;
 
-			if (m_componentManager.has<component::movement::InputComponent>(attackerId))
-			{
-
-				auto& input{ m_componentManager.get<component::movement::InputComponent>(attackerId) };
-				if (input.m_attackPressed)
-					attack.m_attackRequested = true;
-			}
-
+			// プレイヤーの攻撃入力は PlayerAttackComboSystem が段数へ振り分けたうえで
+			// m_attackRequested を立てる。敵はAI Systemが立てる。
+			// 本Systemは要求を受けて成立させるだけで、入力そのものは見ない
 			if (!attack.m_attackRequested)
 				continue;
 
@@ -100,14 +106,9 @@ namespace game::system::combat
 				// プレイヤーは近接（剣）のときだけ斬撃エフェクト。弾（遠距離）は出さない
 				if (!isProjectile)
 				{
+					// 剣を振るアニメーションは段数に応じて PlayerAttackComboSystem が要求する
 					shouldPlayStartEffect = true;
 					startEffect = core::constant::EffectType::Player_Slash;
-
-					// 剣を振るアニメを要求する。優先度がATTACKなので、MoveSystemが毎フレーム出す
-					// 移動系（Idle/Walk/Run）の要求には割り込まれず、振り終わりまで再生される
-					if (m_componentManager.has<component::visual::AnimationComponent>(attackerId))
-						m_componentManager.get<component::visual::AnimationComponent>(attackerId).m_requested =
-						    constant::AnimationState::Attack1;
 				}
 			}
 			else if (attackerTagForStart.m_tag == constant::Tag::Enemy)
@@ -123,8 +124,13 @@ namespace game::system::combat
 				}
 			}
 
-			if (shouldPlayStartEffect)
-				m_eventBus.publish(event::AttackStartEvent{ attackerId, startEffect });
+			// 音と絵は別々に指定できる（振り音だけ鳴らす攻撃があるため）。
+			// どちらか一方でも出すものがあればイベントを発行する
+			if (shouldPlayStartEffect || attack.m_startSeType != core::constant::SeType::None)
+				m_eventBus.publish(event::AttackStartEvent{ attackerId,
+				    shouldPlayStartEffect ? startEffect : core::constant::EffectType::None,
+				    attack.m_effectRotationOffset, attack.m_effectPositionOffset,
+				    attack.m_startSeType });
 
 			// ワインドアップ有り：振りが終わる（m_windupDelay秒後）までダメージ判定を遅延させる。
 			// 演出（AttackStartEvent）は今すぐ発行済みなので、アニメの振りとダメージのタイミングが揃う。
@@ -135,7 +141,11 @@ namespace game::system::combat
 				continue;
 			}
 
-			// ワインドアップ無し（従来動作）：即座にダメージを解決する
+			// ワインドアップ無し（従来動作）：発動と同時が当たる瞬間になる
+			if (attack.m_impactSeType != core::constant::SeType::None)
+				m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType });
+
+			// 即座にダメージを解決する
 			resolveAttack(attackerId, attack);
 
 			// クールダウンをリセット
@@ -187,6 +197,12 @@ namespace game::system::combat
 			if (distanceSq > rangeSq) // 攻撃範囲外の場合
 				continue;
 
+			// 高さ制限のある攻撃（地面叩きつけ等）は、相手が上限より高く浮いていたら当たらない。
+			// 0なら高さ無制限なのでこのチェックは行わない
+			if (attack.m_attackMaxHeight > 0.0f &&
+			    targetTransform.m_position.y - attackerTransform.m_position.y > attack.m_attackMaxHeight)
+				continue;
+
 			// CORチェーンでダメージ計算を行う
 			attack::DamageChain chain{};
 			chain.m_attackId = attackerId;
@@ -222,6 +238,7 @@ namespace game::system::combat
 			hitEvent.m_attackerId = attackerId;
 			hitEvent.m_targetId = targetId;
 			hitEvent.m_damage = chain.m_damage;
+			hitEvent.m_isCritical = chain.m_isCritical;
 
 			// 攻撃者がProjectileComponentを持つ（=弾＝Window投撃などの遠距離攻撃）ならEnemy_HitWindow、
 			// そうでなければ（=本体による近接攻撃）Enemy_HitSwordを再生する
@@ -229,10 +246,13 @@ namespace game::system::combat
 			                            ? core::constant::EffectType::Enemy_HitWindow
 			                            : core::constant::EffectType::Enemy_HitSword;
 
-			// 攻撃者がプレイヤーの場合、ジョブに応じた攻撃SEをセット
+			// ヒット音は「何が当たったか」で決める。弾は弾自身が持つ音（Window弾・溜め撃ちで別）、
+			// プレイヤーの近接は敵が斬られた音。振り音は AttackStartEvent 側が担う
 			const auto& attackerTag{ m_componentManager.get<component::TagComponent>(attackerId) };
-			if (attackerTag.m_tag == constant::Tag::Player)
-				hitEvent.m_seType = m_playerAttackSeType;
+			if (const auto* projectile{ m_componentManager.tryGet<component::combat::ProjectileComponent>(attackerId) })
+				hitEvent.m_seType = projectile->m_hitSeType;
+			else if (attackerTag.m_tag == constant::Tag::Player)
+				hitEvent.m_seType = core::constant::SeType::HitEnemy;
 
 			m_eventBus.publish(hitEvent);
 		}

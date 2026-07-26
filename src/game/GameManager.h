@@ -1,6 +1,7 @@
 #pragma once
 #include "game/data/FileEquipmentData.h"
 #include "core/base/NonCopyable.h"
+#include "core/data/Difficulty.h"
 #include "core/data/ResultData.h"
 
 namespace game
@@ -21,6 +22,26 @@ namespace game
         {
             return m_fileEquipmentData;
         }
+
+		/**
+		 * @brief 難易度を設定する
+		 *
+		 * セレクト画面の難易度ウィンドウで選択が変わるたびに呼ばれる。
+		 * @param difficulty 選択された難易度
+		 */
+		void setDifficulty(core::data::Difficulty difficulty) noexcept
+		{
+			m_difficulty = difficulty;
+		}
+
+		/**
+		 * @brief 現在の難易度を取得する
+		 * @return 選択されている難易度（未選択なら Normal）
+		 */
+		[[nodiscard]] core::data::Difficulty getDifficulty() const noexcept
+		{
+			return m_difficulty;
+		}
 
 		/**
 		 * @brief アプリケーションの終了を要求する
@@ -109,11 +130,12 @@ namespace game
 
         data::FileEquipmentData m_fileEquipmentData{};
         core::data::ResultData m_resultData{};
+		core::data::Difficulty m_difficulty{ core::data::Difficulty::Normal };
 		bool m_quitRequested{ false };
 
 		// DEBUG: デバッグモードの状態（リリース時に削除）
 		bool m_debugMode{ false };
 		// DEBUG: 連続ジャンプ（空中浮上）を許可するか。falseで通常の接地単発ジャンプ（リリース時に削除）
-		bool m_continuousJumpEnabled{ false };
+		bool m_continuousJumpEnabled{ true };
 	};
 } // namespace game

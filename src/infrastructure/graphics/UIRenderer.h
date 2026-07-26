@@ -56,6 +56,19 @@ namespace infrastructure::graphics
 		void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, unsigned int color, bool isFilled) override;
 
 		/**
+		 * @brief 角の丸い矩形をアンチエイリアス付きで描画する
+		 * @param x X座標
+		 * @param y Y座標
+		 * @param width 幅
+		 * @param height 高さ
+		 * @param radius 角丸の半径
+		 * @param color 色（ARGB形式：0xAARRGGBB）
+		 * @param isFilled 塗りつぶすかどうか
+		 * @param thickness 線の太さ（塗りつぶしなしのときに有効）
+		 */
+		void drawRoundedBox(int x, int y, int width, int height, int radius, unsigned int color, bool isFilled, int thickness) override;
+
+		/**
          * @brief テキストを描画する
          * @param x X座標
          * @param y Y座標

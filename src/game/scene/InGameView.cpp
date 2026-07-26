@@ -1,7 +1,9 @@
 ﻿#include "InGameView.h"
 #include "core/utility/Color.h"
+#include "core/constant/UI.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/component/visual/WeaponAttachComponent.h"
 #include "game/component/combat/AimComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
 #include "game/component/combat/DeathComponent.h"
@@ -9,13 +11,28 @@
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
 #include "game/system/visual/PlayerChargeVisualsSystem.h"
+#include "game/system/visual/CriticalVisualsSystem.h"
 #include "game/system/visual/MacAwakenEffectSystem.h"
 #include "game/system/visual/DetectionAlertVisualsSystem.h"
+#include "game/system/visual/DamagePopupSystem.h"
 #include "game/system/visual/AttackTelegraphVisualsSystem.h"
 #include "game/system/visual/TelegraphVisualsSystem.h"
+#include "game/system/visual/BackgroundParticleSystem.h"
+#include "game/system/visual/HardAuraVisualsSystem.h"
+#include "game/system/visual/BattleStartSystem.h"
 #include "game/system/combat/PlayerDeathSystem.h"
+#include "game/system/combat/PlayerRangedAttackSystem.h"
+#include "game/component/combat/AttackComponent.h"
 #include "game/ui/debug/DebugGizmoView.h" // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"   // DEBUG: リリース時に削除
+#include "game/ui/ingame/PlayerHUDView.h"
+#include "game/ui/ingame/EquipmentSlotView.h"
+#include "game/ui/ingame/ObjectiveView.h"
+#include "game/ui/ingame/InGameStatusView.h"
+#include "game/ui/ingame/LowHealthVignetteView.h"
+#include "game/ui/ingame/BossHUDView.h"
+#include "game/ui/ingame/EnemyHealthBarView.h"
+#include <algorithm>
 #include <cmath>
 
 namespace game::scene
@@ -33,9 +50,19 @@ namespace game::scene
 	{
 	}
 
-	void InGameView::draw(core::ecs::EntityId playerId)
+	void InGameView::draw(core::ecs::EntityId playerId, int remainingEnemyCount, core::ecs::EntityId bossId,
+	    float elapsedTime)
 	{
+		// 虚空を流れるデータの光跡。壁や床に隠れてほしいのでモデルと同じ3D描画フェーズで、
+		// かつ最初に描いて他の要素の背景に回す
+		if (m_backgroundParticleSystem)
+			m_backgroundParticleSystem->draw();
+
 		drawModels();
+
+		// Hardの敵を包む赤いオーラ。敵モデルの直後に重ねて「体から漏れる光」に見せる
+		if (m_hardAuraVisualsSystem)
+			m_hardAuraVisualsSystem->draw();
 
 		// 攻撃予兆（地面の攻撃範囲サークル）。地面の上・敵の足元に3Dで描く（3D描画フェーズ）
 		if (m_attackTelegraphSystem)
@@ -56,6 +83,10 @@ namespace game::scene
 		if (m_playerChargeVisualsSystem)
 			m_playerChargeVisualsSystem->draw();
 
+		// クリティカルの集中線。溜めの集中線と同じ層に、その手前で重ねる
+		if (m_criticalVisualsSystem)
+			m_criticalVisualsSystem->draw();
+
 		// ボス覚醒の赤ビネット（画面全体の演出。HUDより奥に描く）
 		if (m_macAwakenEffectSystem)
 			m_macAwakenEffectSystem->draw();
@@ -63,6 +94,40 @@ namespace game::scene
 		// 敵の発見演出（頭上の通知バッジ）。モデルの手前・HUDより奥に描く
 		if (m_detectionAlertSystem)
 			m_detectionAlertSystem->draw();
+
+		// 敵の頭上HPバー。同じ頭上に出る発見バッジより手前に描く
+		if (m_enemyHealthBarView)
+			m_enemyHealthBarView->draw(bossId);
+
+		// ダメージ数値。HPバーと重なる位置に出るため、必ず読めるようその手前に描く
+		if (m_damagePopupSystem)
+			m_damagePopupSystem->draw();
+
+		// プレイヤーステータス（左下のHP）。演出より手前・レティクルと同じHUD層に描く
+		if (m_playerHUDView)
+			m_playerHUDView->draw(playerId);
+
+		// 装備スロット（右下）
+		if (m_equipmentSlotView)
+			m_equipmentSlotView->draw();
+
+		// 目標（左上）
+		if (m_objectiveView)
+			m_objectiveView->draw(remainingEnemyCount, bossId != core::ecs::INVALID_ENTITY_ID);
+
+		// 難易度と経過時間（右上）
+		if (m_statusView)
+			m_statusView->draw(elapsedTime);
+
+		// ボスHP（上中央）。出現していなければ描かれない
+		if (m_bossHUDView)
+			m_bossHUDView->draw(bossId);
+
+		// 低HP警告のビネット。四隅を赤く染めるが、下の隅はHUDのパネルが占めているため、
+		// パネルより手前に描かないと下2つの隅が隠れてしまう。
+		// 画面全体が危険な状態なので、HUDごと赤く染まるほうが表現としても正しい
+		if (m_lowHealthVignetteView)
+			m_lowHealthVignetteView->draw(playerId);
 
 		// 照準レティクル（HUD）は最前面に描く
 		drawReticle(playerId);
@@ -76,6 +141,11 @@ namespace game::scene
 		// Effekseerエフェクトの描画（3Dモデル描画後・UI手前に呼び出す）
 		m_effectFactory.draw();
 
+		// 開始演出（READY / FIGHT!）。この間は操作できないので、HUDより手前に大きく出して
+		// 「まだ始まっていない」ことを画面の中心で伝える
+		if (m_battleStartSystem)
+			m_battleStartSystem->draw();
+
 		// プレイヤー死亡時の暗転。画面の全てを覆って暗くするため最後に描く
 		if (m_playerDeathSystem)
 			m_playerDeathSystem->draw();
@@ -84,6 +154,11 @@ namespace game::scene
 	void InGameView::setPlayerChargeVisualsSystem(system::visual::PlayerChargeVisualsSystem* system)
 	{
 		m_playerChargeVisualsSystem = system;
+	}
+
+	void InGameView::setCriticalVisualsSystem(system::visual::CriticalVisualsSystem* system)
+	{
+		m_criticalVisualsSystem = system;
 	}
 
 	void InGameView::setMacAwakenEffectSystem(system::visual::MacAwakenEffectSystem* system)
@@ -96,6 +171,11 @@ namespace game::scene
 		m_detectionAlertSystem = system;
 	}
 
+	void InGameView::setDamagePopupSystem(system::visual::DamagePopupSystem* system)
+	{
+		m_damagePopupSystem = system;
+	}
+
 	void InGameView::setAttackTelegraphVisualsSystem(system::visual::AttackTelegraphVisualsSystem* system)
 	{
 		m_attackTelegraphSystem = system;
@@ -106,9 +186,29 @@ namespace game::scene
 		m_telegraphSystem = system;
 	}
 
+	void InGameView::setBackgroundParticleSystem(system::visual::BackgroundParticleSystem* system)
+	{
+		m_backgroundParticleSystem = system;
+	}
+
+	void InGameView::setHardAuraVisualsSystem(system::visual::HardAuraVisualsSystem* system)
+	{
+		m_hardAuraVisualsSystem = system;
+	}
+
+	void InGameView::setBattleStartSystem(system::visual::BattleStartSystem* system)
+	{
+		m_battleStartSystem = system;
+	}
+
 	void InGameView::setPlayerDeathSystem(system::combat::PlayerDeathSystem* system)
 	{
 		m_playerDeathSystem = system;
+	}
+
+	void InGameView::setPlayerRangedAttackSystem(system::combat::PlayerRangedAttackSystem* system)
+	{
+		m_playerRangedAttackSystem = system;
 	}
 
 	void InGameView::setDebugGizmoView(ui::debug::DebugGizmoView* view)
@@ -119,6 +219,41 @@ namespace game::scene
 	void InGameView::setDebugHUDView(ui::debug::DebugHUDView* view)
 	{
 		m_debugHUDView = view;
+	}
+
+	void InGameView::setPlayerHUDView(ui::ingame::PlayerHUDView* view)
+	{
+		m_playerHUDView = view;
+	}
+
+	void InGameView::setEquipmentSlotView(ui::ingame::EquipmentSlotView* view)
+	{
+		m_equipmentSlotView = view;
+	}
+
+	void InGameView::setInGameStatusView(ui::ingame::InGameStatusView* view)
+	{
+		m_statusView = view;
+	}
+
+	void InGameView::setObjectiveView(ui::ingame::ObjectiveView* view)
+	{
+		m_objectiveView = view;
+	}
+
+	void InGameView::setLowHealthVignetteView(ui::ingame::LowHealthVignetteView* view)
+	{
+		m_lowHealthVignetteView = view;
+	}
+
+	void InGameView::setBossHUDView(ui::ingame::BossHUDView* view)
+	{
+		m_bossHUDView = view;
+	}
+
+	void InGameView::setEnemyHealthBarView(ui::ingame::EnemyHealthBarView* view)
+	{
+		m_enemyHealthBarView = view;
 	}
 
 	void InGameView::drawModels()
@@ -157,13 +292,32 @@ namespace game::scene
 					m_renderer.setTextureScroll(render.m_modelHandle, render.m_uvScaleU, render.m_uvScaleV,
 					    render.m_scrollOffsetU, render.m_scrollOffsetV);
 				m_renderer.drawModel(render.m_modelHandle, transform.m_position, transform.m_rotation, transform.m_scale);
+
+				// 装着武器は本体を描いた直後に描く。ボーンのワールド行列は本体の
+				// 位置・回転・スケールが適用済みでなければ正しい姿勢にならない
+				drawAttachedWeapon(entityId);
 			}
 		}
 	}
 
+	void InGameView::drawAttachedWeapon(core::ecs::EntityId entityId)
+	{
+		if (!m_componentManager.has<component::visual::WeaponAttachComponent>(entityId))
+			return;
+
+		const auto& attach{ m_componentManager.get<component::visual::WeaponAttachComponent>(entityId) };
+		// フレーム番号の解決は WeaponAttachSystem が行う。未解決のうちは描かない
+		if (!attach.m_isVisible || attach.m_modelHandle == -1 || attach.m_frameIndex < 0)
+			return;
+
+		const auto& render{ m_componentManager.get<component::visual::RenderComponent>(entityId) };
+		m_renderer.drawModelOnFrame(attach.m_modelHandle, render.m_modelHandle, attach.m_frameIndex,
+		    attach.m_offsetPosition, attach.m_offsetRotation, attach.m_offsetScale);
+	}
+
 	void InGameView::drawReticle(core::ecs::EntityId playerId)
 	{
-		// 敵を捕捉していれば赤、最大溜め完了ならWindowsロゴの水色、通常は黒
+		// 敵を捕捉していれば赤、最大溜め完了ならシアン、通常は白
 		// （捕捉＝発射判断に直結する情報なので最優先で表示する）
 		bool onTarget{ false };
 		if (m_componentManager.has<component::combat::AimComponent>(playerId))
@@ -176,11 +330,11 @@ namespace game::scene
 			isMaxCharged = charge.m_isCharging && charge.m_chargeRate >= 1.0f;
 		}
 
-		unsigned int color{ core::utility::Color::BLACK };
+		unsigned int color{ core::utility::Color::HUD_INK };
 		if (onTarget)
-			color = core::utility::Color::rgb(255, 48, 48);
+			color = core::utility::Color::HUD_CRIT_RED;
 		else if (isMaxCharged)
-			color = core::utility::Color::WINDOWS_LOGO_BLUE;
+			color = core::utility::Color::HUD_CHARGE_CYAN;
 
 		const int centerX{ m_screen.getWidth() / 2 };
 		const int centerY{ m_screen.getHeight() / 2 };
@@ -189,13 +343,21 @@ namespace game::scene
 		const int base{ m_screen.getHeight() };
 		const int ringRadius{ static_cast<int>(base * 0.030f) };
 		const int tickLength{ static_cast<int>(base * 0.018f) };
-		const int gap{ ringRadius + static_cast<int>(base * 0.006f) };
+		// クールダウン中はティックを外へ開き、撃てるようになると閉じる。
+		// 「今は撃てない」を形で示すので、視線を中央から動かさずに判断できる
+		const float cooldownRatio{ getAttackCooldownRatio(playerId) };
+		const int spread{ static_cast<int>(base * 0.022f * cooldownRatio) };
+		const int gap{ ringRadius + static_cast<int>(base * 0.006f) + spread };
 		constexpr int THICKNESS{ 2 };
 		constexpr int DOT_RADIUS{ 3 };
 		const int halfThickness{ THICKNESS / 2 };
 
-		// 外周リング
-		m_uiRenderer.drawCircle(centerX, centerY, ringRadius, color, false, THICKNESS);
+		// 外周リングは白を薄く敷くだけに留める。中央の十字とドットだけが状態色で光り、
+		// リングは「当たりの目安」として背景に溶ける（プロトタイプの rgba(255,255,255,.16) 相当）
+		constexpr int RING_ALPHA{ 41 };
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, RING_ALPHA);
+		m_uiRenderer.drawCircle(centerX, centerY, ringRadius, core::utility::Color::WHITE, false, THICKNESS);
+		m_uiRenderer.resetBlendMode();
 		// 上下左右のティック
 		m_uiRenderer.drawBox(centerX - gap - tickLength, centerY - halfThickness, tickLength, THICKNESS, color, true);
 		m_uiRenderer.drawBox(centerX + gap, centerY - halfThickness, tickLength, THICKNESS, color, true);
@@ -203,6 +365,72 @@ namespace game::scene
 		m_uiRenderer.drawBox(centerX - halfThickness, centerY + gap, THICKNESS, tickLength, color, true);
 		// 中心ドット
 		m_uiRenderer.drawCircle(centerX, centerY, DOT_RADIUS, color, true, 1);
+
+		// 溜めの進行度は外周リングに重ねる（視線を動かさずに撃ち時を判断できるようにする）
+		drawChargeGauge(playerId, centerX, centerY, ringRadius);
+	}
+
+	float InGameView::getAttackCooldownRatio(core::ecs::EntityId playerId) const
+	{
+		float ratio{ 0.0f };
+
+		// 近接はAttackComponentが残り時間を持つ
+		if (m_componentManager.has<component::combat::AttackComponent>(playerId))
+		{
+			const auto& attack{ m_componentManager.get<component::combat::AttackComponent>(playerId) };
+			if (attack.m_attackCooldown > 0.0f)
+				ratio = std::clamp(attack.m_currentCooldown / attack.m_attackCooldown, 0.0f, 1.0f);
+		}
+
+		// 遠隔はSystemが内部で持つため、公開されている割合を使う
+		if (m_playerRangedAttackSystem)
+			ratio = std::max(ratio, m_playerRangedAttackSystem->getCooldownRatio());
+
+		return ratio;
+	}
+
+	void InGameView::drawChargeGauge(core::ecs::EntityId playerId, int centerX, int centerY, int radius)
+	{
+		if (!m_componentManager.has<component::combat::PlayerChargeComponent>(playerId))
+			return;
+
+		// 溜めていないときは何も出さない。常時表示するとレティクル周りが常に賑やかになり、
+		// 「溜まってきた」という変化そのものが読み取りにくくなる
+		const auto& charge{ m_componentManager.get<component::combat::PlayerChargeComponent>(playerId) };
+		if (!charge.m_isCharging)
+			return;
+
+		// 円弧を描くプリミティブが無いため、外周に点を並べて進行度を表す
+		constexpr int DOT_COUNT{ 24 };
+		constexpr int TRACK_ALPHA{ 46 }; // 未点灯の点（溜めの全体量を示す目盛り）
+		constexpr float TWO_PI{ 6.283185f };
+		constexpr float QUARTER_TURN{ 1.570796f }; // 真上を起点にするための回転量
+
+		const int dotRadius{ std::max(2, static_cast<int>(m_screen.getHeight() * 0.0028f)) };
+		const float rate{ std::clamp(charge.m_chargeRate, 0.0f, 1.0f) };
+		const int litCount{ static_cast<int>(rate * DOT_COUNT) };
+
+		// 未点灯ぶんを薄く敷いてから、点灯ぶんを不透明で上書きする（ブレンド切り替えを1回に抑える）
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, TRACK_ALPHA);
+		for (int i{ litCount }; i < DOT_COUNT; ++i)
+		{
+			const float angle{ i * (TWO_PI / DOT_COUNT) - QUARTER_TURN };
+			const int x{ centerX + static_cast<int>(std::cos(angle) * radius) };
+			const int y{ centerY + static_cast<int>(std::sin(angle) * radius) };
+			m_uiRenderer.drawCircle(x, y, dotRadius, core::utility::Color::WHITE, true, 1);
+		}
+		m_uiRenderer.resetBlendMode();
+
+		// 最大まで溜まったら黄色へ振り切らせ、シアンのままの「溜め途中」と一目で区別できるようにする
+		const unsigned int litColor{ rate >= 1.0f ? core::utility::Color::HUD_CHARGE_MAX
+			                                      : core::utility::Color::HUD_CHARGE_CYAN };
+		for (int i{ 0 }; i < litCount; ++i)
+		{
+			const float angle{ i * (TWO_PI / DOT_COUNT) - QUARTER_TURN };
+			const int x{ centerX + static_cast<int>(std::cos(angle) * radius) };
+			const int y{ centerY + static_cast<int>(std::sin(angle) * radius) };
+			m_uiRenderer.drawCircle(x, y, dotRadius, litColor, true, 1);
+		}
 	}
 
 	void InGameView::drawProjectileModels()

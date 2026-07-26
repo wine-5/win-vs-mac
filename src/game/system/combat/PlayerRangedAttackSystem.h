@@ -37,6 +37,14 @@ namespace game::system::combat
 		 */
 		void update(float deltaTime) override;
 
+		/**
+		 * @brief 連射待ちの残り割合を返す
+		 *
+		 * クールダウンはこのSystemが内部で持つため、HUDから見えるようにここで公開する
+		 * @return 0.0（撃てる）〜1.0（撃った直後）
+		 */
+		[[nodiscard]] float getCooldownRatio() const;
+
 	  private:
 		core::ecs::ComponentManager& m_componentManager;
 		core::ecs::EntityId m_playerId{};
