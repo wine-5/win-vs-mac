@@ -31,6 +31,14 @@ namespace
 	constexpr float CRITICAL_LABEL_SCALE{ 0.45f };
 	// ラベルと数値の縦の間隔（ラベルの文字サイズ比）
 	constexpr float CRITICAL_LABEL_GAP_RATIO{ 0.25f };
+
+	// クリティカル時に数値の背後で弾ける円。
+	// 文字の大きさや色だけでは通常ダメージと見分けにくいため、「動き」で気づかせる。
+	// 文字サイズを動かすとサイズごとにフォントハンドルが増えてしまうので、円で表現する
+	constexpr float CRITICAL_BURST_DURATION{ 0.28f };   // 弾けきるまでの時間（秒）
+	constexpr float CRITICAL_BURST_START_RATIO{ 0.3f }; // 開始半径（数値の文字サイズ比）
+	constexpr float CRITICAL_BURST_END_RATIO{ 1.9f };   // 終了半径（数値の文字サイズ比）
+	constexpr int CRITICAL_BURST_THICKNESS{ 3 };        // 円の線の太さ
 	// 影を落とすずらし量（文字サイズ比）。明るい床でも輪郭が残るようにする
 	constexpr float SHADOW_OFFSET_RATIO{ 0.09f };
 
@@ -138,11 +146,45 @@ namespace game::system::visual
 			const int y{ static_cast<int>(screen.y) };
 
 			const int alphaParam{ static_cast<int>(ALPHA_MAX * std::clamp(alpha, 0.0f, 1.0f)) };
+
+			// 弾ける円は数値より先に描いて背後へ回す。数値本体より短命で、独自に薄れていく
+			if (popup.m_isCritical && popup.m_elapsedTime < CRITICAL_BURST_DURATION)
+			{
+				const float burst{ popup.m_elapsedTime / CRITICAL_BURST_DURATION };
+				// 一気に広がって減速する（勢いよく弾けたように見せる）
+				const float eased{ 1.0f - (1.0f - burst) * (1.0f - burst) };
+				const float radiusRatio{ CRITICAL_BURST_START_RATIO + (CRITICAL_BURST_END_RATIO - CRITICAL_BURST_START_RATIO) * eased };
+				const int burstAlpha{ static_cast<int>(ALPHA_MAX * (1.0f - burst)) };
+
+				m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, burstAlpha);
+				m_uiRenderer.drawCircle(static_cast<int>(screen.x),
+				    static_cast<int>(screen.y) + fontSize / 2,
+				    static_cast<int>(fontSize * radiusRatio),
+				    core::utility::Color::HUD_CHARGE_MAX, false, CRITICAL_BURST_THICKNESS);
+				m_uiRenderer.resetBlendMode();
+			}
+
 			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alphaParam);
 			// 床は真っ黒からほぼ白まであるため、影を先に置いてどちらでも輪郭が残るようにする
 			m_uiRenderer.drawText(x + shadowOffset, y + shadowOffset, text.c_str(),
 			    core::utility::Color::BLACK, fontSize);
 			m_uiRenderer.drawText(x, y, text.c_str(), textColor, fontSize);
+
+			// クリティカルのみ、数値の真上に「CRITICAL」を添える。
+			// 数値と同じ色・同じフェードで動かし、ひとかたまりに見せる
+			if (popup.m_isCritical)
+			{
+				const int labelFontSize{ static_cast<int>(fontSize * CRITICAL_LABEL_SCALE) };
+				const int labelWidth{ m_uiRenderer.getTextWidth(CRITICAL_LABEL, labelFontSize) };
+				const int labelX{ static_cast<int>(screen.x) - labelWidth / 2 };
+				const int labelY{ y - labelFontSize - static_cast<int>(labelFontSize * CRITICAL_LABEL_GAP_RATIO) };
+				const int labelShadow{ std::max(1, static_cast<int>(labelFontSize * SHADOW_OFFSET_RATIO)) };
+
+				m_uiRenderer.drawText(labelX + labelShadow, labelY + labelShadow, CRITICAL_LABEL,
+				    core::utility::Color::BLACK, labelFontSize);
+				m_uiRenderer.drawText(labelX, labelY, CRITICAL_LABEL, textColor, labelFontSize);
+			}
+
 			m_uiRenderer.resetBlendMode();
 		}
 	}
