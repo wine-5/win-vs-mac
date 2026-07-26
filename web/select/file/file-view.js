@@ -161,7 +161,9 @@ const FileView = (function () {
                         (isEmpty ? '─ 未選択 ─' : '') +
                     '</span>' +
                 '</div>' +
-                badge + bonus;
+                badge + bonus +
+                // 装備中の行だけ、外周を光の粒が回り続ける（起動中であることの表現）
+                (isEmpty ? '' : buildOrbitDots());
 
             // 新規ロード時: anim-in(280ms)完了後にタイプライター演出
             if (!isEmpty) {
@@ -197,6 +199,35 @@ const FileView = (function () {
 
         updateStatus();
         updateBonusHighlights();
+    }
+
+    /**
+     * 装備中の行の外周を回る光の粒を組み立てる
+     *
+     * インゲームの装備スロットに合わせ、2列の粒が向かい合って周回し、
+     * 後続ほど小さく淡くして尾を引かせる。値の意味はCSSの .orbit-dot 側と対
+     */
+    function buildOrbitDots() {
+        const PERIOD = 3.2;      // 一周にかける秒数（CSSのanimationと合わせる）
+        const COMET_COUNT = 2;   // 同時に回る列の数
+        const TRAIL_COUNT = 8;   // 1列あたりの粒の数
+        const TRAIL_SPACING = 0.035; // 粒どうしの間隔（一周を1.0とした割合）
+        const HEAD_SIZE = 6;     // 先頭の粒の直径（px）
+
+        let html = '';
+        for (let comet = 0; comet < COMET_COUNT; comet++) {
+            for (let i = 0; i < TRAIL_COUNT; i++) {
+                const fade = 1 - i / TRAIL_COUNT;
+                // 負の遅延で「すでに進んだ状態」から始める。列は一周を等分した位置へずらす
+                const delay = -(comet * PERIOD / COMET_COUNT + i * TRAIL_SPACING * PERIOD);
+                const size = (HEAD_SIZE * fade).toFixed(1);
+                html += '<span class="orbit-dot" style="' +
+                    'animation-delay:' + delay.toFixed(3) + 's;' +
+                    'width:' + size + 'px;height:' + size + 'px;' +
+                    'opacity:' + (fade * fade).toFixed(2) + '"></span>';
+            }
+        }
+        return html;
     }
 
     /**
