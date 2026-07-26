@@ -57,7 +57,11 @@ namespace infrastructure::resource::repository
 		};
 
 		// BGM は同時に1曲しか鳴らないため、全曲を PCM 展開してメモリに載せる必要がない。
-		// ストリーミング再生にすることで mp3 6曲分（展開後 約285MB）の常駐を避ける。
+		// ストリーミング再生にすることで6曲分の常駐を避ける。
+		//
+		// 重要：BGM は必ず ogg で持つこと。DxLib のストリーミングが対応するのは wav と ogg だけで、
+		// mp3 を渡すとこの指定を無視して全曲フル PCM 展開される。
+		// 指定は効いているように見えるのに効かないため、気づきにくい。
 		SetCreateSoundDataType(DX_SOUNDDATATYPE_FILE);
 
 		for (const auto& entry : json["bgm"])
