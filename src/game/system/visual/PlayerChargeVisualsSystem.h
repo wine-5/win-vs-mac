@@ -12,6 +12,7 @@ namespace game::system::visual
 	 *
 	 * PlayerChargeComponentの溜め状態を読み取り、画面端から中心へ向かう
 	 * 漫画風のくさび形集中線を描画する（中央は空けて視界を確保する）。
+	 * 溜め切ったら線を溜め最大色へ振り切らせて完了を知らせる。
 	 * updateで演出用の時間（ちらつきアニメーション）を進め、
 	 * drawはInGameViewの描画フェーズから呼ばれる（描画順はViewが管理し、描画内容は本Systemが持つ）。
 	 */

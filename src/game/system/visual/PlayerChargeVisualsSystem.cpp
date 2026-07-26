@@ -77,7 +77,10 @@ namespace game::system::visual
 		const int lineCount{ LINE_COUNT_BASE + static_cast<int>(charge.m_chargeRate * LINE_COUNT_GROWTH) };
 
 		// 溜めはWindow弾を飛ばす技なので、レティクルの溜めゲージと同じシアンで揃える。
-		const unsigned int lineColor{ core::utility::Color::HUD_CHARGE_CYAN };
+		// 溜め切ったらゲージと同じ黄色へ振り切らせ、画面中央を見ていなくても完了が分かるようにする
+		const unsigned int lineColor{ charge.m_isFullyCharged
+			                              ? core::utility::Color::HUD_CHARGE_MAX
+			                              : core::utility::Color::HUD_CHARGE_CYAN };
 
 		// 一定間隔で乱数の種を切り替え、手描きの集中線が揺れているようなちらつきを出す
 		const int flickerStep{ static_cast<int>(m_animationTime * FLICKER_FREQUENCY) };
