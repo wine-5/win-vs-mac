@@ -74,16 +74,23 @@ namespace game::event
 		 */
 		core::Vector3 m_effectPositionOffset{};
 
-		// 攻撃開始SE（敵・Playerごとに音を変える）は機能追加のため別ブランチで対応する。
-		// 実装する場合は AttackHitEvent と同じく SeType を持たせ、AudioEventListener で購読する
+		/**
+		 * @brief 振り始めに鳴らすSEの種類
+		 *
+		 * エフェクトとは独立に指定できる（音だけ・絵だけの攻撃があるため）。
+		 * Noneなら無音。AudioEventListenerが購読して鳴らす
+		 */
+		core::constant::SeType m_seType{ core::constant::SeType::None };
 
 		AttackStartEvent() = default;
 		AttackStartEvent(core::ecs::EntityId attackerId, core::constant::EffectType effectType,
-		    core::Vector3 effectRotationOffset = {}, core::Vector3 effectPositionOffset = {})
+		    core::Vector3 effectRotationOffset = {}, core::Vector3 effectPositionOffset = {},
+		    core::constant::SeType seType = core::constant::SeType::None)
 		    : m_attackerId{ attackerId }
 		    , m_effectType{ effectType }
 		    , m_effectRotationOffset{ effectRotationOffset }
 		    , m_effectPositionOffset{ effectPositionOffset }
+		    , m_seType{ seType }
 		{
 		}
 	};

@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "core/utility/Vector3.h"
+#include "core/constant/SeType.h"
 
 namespace game::component::combat
 {
@@ -47,5 +48,10 @@ namespace game::component::combat
 		// ここに入れ、AttackSystem が AttackStartEvent へそのまま載せる。
 		// 同じ斬撃エフェクトを縦振りと水平回転で使い分けるために使う
 		core::Vector3 m_effectRotationOffset{};
+
+		// 振り始めに鳴らすSE。攻撃を要求した側が「どう振ったか」に応じて入れ、
+		// AttackSystem が AttackStartEvent へそのまま載せる。Noneなら無音。
+		// 近接コンボの段ごとに振り音を変えるために使う
+		core::constant::SeType m_startSeType{ core::constant::SeType::None };
 	};
 } // namespace game::component::combat

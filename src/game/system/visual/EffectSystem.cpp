@@ -90,6 +90,10 @@ namespace game::system::visual
 		// 攻撃者自身の位置でエフェクトを再生する（斬撃などの演出用）。
 		// 斬撃は「どちらへ振ったか」が分かる必要があるため、攻撃者の向きへ合わせ、
 		// さらに攻撃の種類ごとの傾き（縦振り／水平回転など）をイベントから受けて足す
+		// 音だけを鳴らす攻撃（絵を持たない振り）ではエフェクト種別がNoneで届く
+		if (event.m_effectType == core::constant::EffectType::None)
+			return;
+
 		const auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(event.m_attackerId) };
 		if (transform == nullptr)
 			return;

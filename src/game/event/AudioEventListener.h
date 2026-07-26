@@ -21,13 +21,14 @@ namespace game::event
 		AudioEventListener(core::base::EventBus& eventBus, core::ecs::EntityId playerId);
 
 	private:
-		void onAttackHit(const AttackHitEvent& e);
-		void onEnemyDead(const EnemyDeadEvent& e);
+	  void onAttackStart(const AttackStartEvent& e);
+	  void onAttackHit(const AttackHitEvent& e);
+	  void onEnemyDead(const EnemyDeadEvent& e);
 
-		core::base::EventBus&  m_eventBus;
-		core::ecs::EntityId    m_playerId{};
+	  core::base::EventBus& m_eventBus;
+	  core::ecs::EntityId m_playerId{};
 
-		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
-		std::vector<core::base::EventBus::Subscription> m_subscriptions{};
+	  // EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
+	  std::vector<core::base::EventBus::Subscription> m_subscriptions{};
 	};
 } // namespace game::event

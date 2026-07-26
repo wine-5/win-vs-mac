@@ -121,9 +121,13 @@ namespace game::system::combat
 				}
 			}
 
-			if (shouldPlayStartEffect)
-				m_eventBus.publish(event::AttackStartEvent{ attackerId, startEffect,
-				    attack.m_effectRotationOffset, attack.m_effectPositionOffset });
+			// 音と絵は別々に指定できる（振り音だけ鳴らす攻撃があるため）。
+			// どちらか一方でも出すものがあればイベントを発行する
+			if (shouldPlayStartEffect || attack.m_startSeType != core::constant::SeType::None)
+				m_eventBus.publish(event::AttackStartEvent{ attackerId,
+				    shouldPlayStartEffect ? startEffect : core::constant::EffectType::None,
+				    attack.m_effectRotationOffset, attack.m_effectPositionOffset,
+				    attack.m_startSeType });
 
 			// ワインドアップ有り：振りが終わる（m_windupDelay秒後）までダメージ判定を遅延させる。
 			// 演出（AttackStartEvent）は今すぐ発行済みなので、アニメの振りとダメージのタイミングが揃う。

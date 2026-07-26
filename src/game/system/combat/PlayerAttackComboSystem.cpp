@@ -95,6 +95,11 @@ namespace game::system::combat
 		attack.m_effectRotationOffset = isFinalStage ? STAGE2_EFFECT_ROTATION : STAGE1_EFFECT_ROTATION;
 		attack.m_effectPositionOffset = EFFECT_POSITION_OFFSET;
 
+		// 振り音も段で変える。1段目と2段目が同じ音だと、コンボが繋がった手応えが出ない
+		attack.m_startSeType = isFinalStage
+		                           ? core::constant::SeType::PlayerSwing2
+		                           : core::constant::SeType::PlayerSwing1;
+
 		auto& anim{ m_componentManager.get<component::visual::AnimationComponent>(m_playerId) };
 		anim.request(isFinalStage
 		                 ? constant::AnimationState::Attack2

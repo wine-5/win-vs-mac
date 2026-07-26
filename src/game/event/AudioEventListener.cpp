@@ -9,6 +9,10 @@ namespace game::event
 		: m_eventBus{ eventBus }
 		, m_playerId{ playerId }
 	{
+		m_subscriptions.push_back(m_eventBus.subscribe<AttackStartEvent>(
+		    [this](const AttackStartEvent& e)
+		    { onAttackStart(e); }));
+
 		m_subscriptions.push_back(m_eventBus.subscribe<AttackHitEvent>(
 		    [this](const AttackHitEvent& e)
 		    { onAttackHit(e); }));
@@ -16,6 +20,17 @@ namespace game::event
 		m_subscriptions.push_back(m_eventBus.subscribe<EnemyDeadEvent>(
 		    [this](const EnemyDeadEvent& e)
 		    { onEnemyDead(e); }));
+	}
+
+	void AudioEventListener::onAttackStart(const AttackStartEvent& e)
+	{
+		// 振り始めの音。当たったかどうかに関係なく、振った事実そのものを返す
+		if (e.m_seType == core::constant::SeType::None)
+			return;
+
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio)
+			audio->playSe(e.m_seType);
 	}
 
 	void AudioEventListener::onAttackHit(const AttackHitEvent& e)
