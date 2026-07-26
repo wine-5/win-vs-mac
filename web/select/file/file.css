@@ -467,7 +467,7 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
     right: 1.5vw;
     bottom: 4vh;
     z-index: 50;
-    max-height: 56vh;
+    max-height: 62vh;
     overflow-y: auto;
     background: rgba(20, 20, 22, 0.98);
     border: clamp(2px, 0.35vw, 3px) solid var(--accent);
@@ -489,14 +489,14 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
 }
 
 .tutorial-step {
-    font-size: clamp(10px, 2.3vw, 22px);
+    font-size: clamp(12px, 2.8vw, 24px);
     letter-spacing: 0.1em;
     color: var(--accent);
     margin-bottom: clamp(4px, 0.9vw, 10px);
 }
 
 .tutorial-title {
-    font-size: clamp(15px, 4.4vw, 42px);
+    font-size: clamp(20px, 5.4vw, 48px);
     font-weight: 700;
     line-height: 1.25;
     color: var(--text);
@@ -504,7 +504,7 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
 }
 
 .tutorial-body {
-    font-size: clamp(11px, 2.9vw, 28px);
+    font-size: clamp(15px, 3.8vw, 34px);
     line-height: 1.55;
     color: var(--text);
 }
@@ -520,8 +520,8 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
 .tutorial-next {
     border-radius: var(--radius);
     font-family: inherit;
-    font-size: clamp(11px, 2.5vw, 24px);
-    padding: clamp(5px, 1.1vw, 12px) clamp(10px, 2.4vw, 28px);
+    font-size: clamp(13px, 3vw, 27px);
+    padding: clamp(6px, 1.3vw, 13px) clamp(12px, 2.7vw, 30px);
     cursor: pointer;
 }
 
