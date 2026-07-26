@@ -135,7 +135,7 @@ namespace game::system::visual
 			const int base2Y{ static_cast<int>(centerY + dirY * outerRadius - perpY * halfWidth) };
 
 			m_uiRenderer.drawTriangle(apexX, apexY, base1X, base1Y, base2X, base2Y,
-			    core::utility::Color::HUD_CHARGE_MAX, true);
+			    core::utility::Color::HUD_CRITICAL_ORANGE, true);
 		}
 
 		m_uiRenderer.resetBlendMode();

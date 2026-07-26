@@ -84,6 +84,9 @@ namespace core::utility
 		static constexpr unsigned int HUD_CHARGE_CYAN = 0xFF22D3EE; // 溜め中のシアン
 		// 溜め最大の黄色。ステージが青〜シアン基調のため、白では背景に溶けて完了が分からない
 		static constexpr unsigned int HUD_CHARGE_MAX = 0xFFFFC83D;
+		// クリティカル（会心）のオレンジ。溜め完了の黄色より赤に寄せて役割を分ける。
+		// シアン＝プレイヤーの技、オレンジ＝会心、赤＝危険、で色の意味を重複させない
+		static constexpr unsigned int HUD_CRITICAL_ORANGE = 0xFFFF7A18;
 		static constexpr unsigned int HUD_CRIT_RED = 0xFFE81123;    // 敵を捕捉中・危険
 		static constexpr unsigned int HUD_ACCENT = 0xFF0078D4;      // Windows 11のアクセント色
 		static constexpr unsigned int HUD_INK_FAINT = 0xFF5E708A;   // 補足情報・未装備などの控えめな文字

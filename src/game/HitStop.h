@@ -23,18 +23,6 @@ namespace game
 			request(CRITICAL_DURATION, CRITICAL_SCALE);
 		}
 
-		/** @brief 雑魚を撃破した瞬間に止める */
-		void requestOnEnemyKilled() noexcept
-		{
-			request(ENEMY_KILL_DURATION, ENEMY_KILL_SCALE);
-		}
-
-		/** @brief ボスを撃破した瞬間にスローで見せる */
-		void requestOnBossKilled() noexcept
-		{
-			request(BOSS_KILL_DURATION, BOSS_KILL_SCALE);
-		}
-
 		/**
 		 * @brief 残り時間を消化し、Systemへ渡すべき時間を返す
 		 *
@@ -74,14 +62,10 @@ namespace game
 		// 倍率は0.0で完全停止、0.15なら通常の15%の速さで進む（スローモーション）。
 		// 完全停止は画面が固まったように見えるため、いずれもスローで見せる
 		// 長さは「手応えを返すが操作の邪魔にならない」範囲に収める。
-		// クリティカルは連発されるため最も短く、撃破は一体につき一度なので少し長く取れる
+		// クリティカルは連発されるので短く、倍率は0.0（完全停止）ではなく
+		// スローにする。完全に止めると画面が固まったように見えるため
 		static constexpr float CRITICAL_DURATION{ 0.10f };
 		static constexpr float CRITICAL_SCALE{ 0.15f };
-		static constexpr float ENEMY_KILL_DURATION{ 0.20f };
-		static constexpr float ENEMY_KILL_SCALE{ 0.12f };
-		// ボス撃破は決着の区切りなので、最も長く・最も遅く見せる
-		static constexpr float BOSS_KILL_DURATION{ 0.60f };
-		static constexpr float BOSS_KILL_SCALE{ 0.08f };
 
 		/**
 		 * @brief ヒットストップを開始する

@@ -594,13 +594,6 @@ namespace game::scene
 
 			    m_killCount++;
 
-			    // 撃破の瞬間に時間を止めて「仕留めた」手応えを返す。
-			    // 止め方（長さ・スロー具合）はHitStopが決めるので、ここは何が起きたかだけを伝える
-			    if (e.m_entityId == m_macId)
-				    m_hitStop.requestOnBossKilled();
-			    else
-				    m_hitStop.requestOnEnemyKilled();
-
 			    // 開始時の雑魚を全滅させたらボスを出現させる。
 			    // 集合に無いID（ボスの召喚した雑魚・ボス自身）はここでは無視される
 			    if (m_stageEnemyIds.erase(e.m_entityId) > 0 &&
