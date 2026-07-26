@@ -9,8 +9,8 @@
     "size": [ 0, 0, 0 ]
   },
   "gameplay": {
-    "moveSpeed": 260.0,
-    "detectionRange": 1200.0,
+    "moveSpeed": 350.0,
+    "detectionRange": 1600.0,
     "attackRange": 350.0,
     "maxHp": 145.0,
     "defence": 0.0,
@@ -23,8 +23,8 @@
     "facingYawOffset": 90.0
   },
   "hard": {
-    "moveSpeed": 300.0,
-    "detectionRange": 1700.0,
+    "moveSpeed": 400.0,
+    "detectionRange": 2000.0,
     "maxHp": 232.0,
     "defence": 5.0,
     "attackPower": 41.0,
