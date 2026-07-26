@@ -16,6 +16,7 @@ namespace core::constant
 		PlayerSwing1,    // 近接コンボ1段目の振り
 		PlayerSwing2,    // 近接コンボ2段目の振り
 		PlayerCharge,    // 溜め撃ちの溜め開始
+		PlayerChargeReady, // 溜め撃ちが最大まで溜まった（ここから先は溜めても無駄という合図）
 		HitWindow,       // Window弾が命中した
 		HitChargedWindow, // 溜め撃ちのWindow弾が命中した
 		Critical,         // 会心の一撃が出た
@@ -52,10 +53,11 @@ namespace core::constant
 	 * resources.json の音源定義と、敵の定義JSON（叩きつけ音など）の両方がこの名前を使う。
 	 * 対応表を1つに保つことで、書ける名前がファイルごとにずれないようにする
 	 */
-	inline constexpr std::array<std::pair<std::string_view, SeType>, 19> SE_TYPE_NAMES{ {
+	inline constexpr std::array<std::pair<std::string_view, SeType>, 20> SE_TYPE_NAMES{ {
 		{ "PlayerSwing1", SeType::PlayerSwing1 },
 		{ "PlayerSwing2", SeType::PlayerSwing2 },
 		{ "PlayerCharge", SeType::PlayerCharge },
+		{ "PlayerChargeReady", SeType::PlayerChargeReady },
 		{ "HitWindow", SeType::HitWindow },
 		{ "HitChargedWindow", SeType::HitChargedWindow },
 		{ "Critical", SeType::Critical },

@@ -10,10 +10,6 @@ namespace infrastructure
 		{ core::input::KeyCode::A, KEY_INPUT_A },
 		{ core::input::KeyCode::S, KEY_INPUT_S },
 		{ core::input::KeyCode::D, KEY_INPUT_D },
-		{ core::input::KeyCode::T, KEY_INPUT_T },
-		{ core::input::KeyCode::F1, KEY_INPUT_F1 }, // DEBUG: デバッグモード切り替え（リリース時に削除）
-		{ core::input::KeyCode::F2, KEY_INPUT_F2 }, // DEBUG: シーンビュー切り替え（リリース時に削除）
-		{ core::input::KeyCode::F3, KEY_INPUT_F3 }, // DEBUG: 連続ジャンプ切り替え（リリース時に削除）
 		{ core::input::KeyCode::Space, KEY_INPUT_SPACE },
 		{ core::input::KeyCode::Enter, KEY_INPUT_RETURN },
 		{ core::input::KeyCode::Escape, KEY_INPUT_ESCAPE },

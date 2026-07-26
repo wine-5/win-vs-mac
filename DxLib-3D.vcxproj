@@ -182,7 +182,6 @@
     <ClCompile Include="src\game\scene\TitleView.cpp" />
     <ClCompile Include="src\game\system\combat\AttackSystem.cpp" />
     <ClCompile Include="src\game\system\camera\CameraSystem.cpp" />
-    <ClCompile Include="src\game\system\camera\DebugCameraSystem.cpp" />
     <ClCompile Include="src\game\system\combat\TargetingSystem.cpp" />
     <ClCompile Include="src\game\event\AudioEventListener.cpp" />
     <ClCompile Include="src\game\system\visual\EffectSystem.cpp" />
@@ -225,6 +224,7 @@
     <ClCompile Include="src\infrastructure\InputManager.cpp" />
     <ClCompile Include="src\infrastructure\graphics\Renderer.cpp" />
     <ClCompile Include="src\infrastructure\resource\ResourceManager.cpp" />
+    <ClCompile Include="src\infrastructure\resource\ResourcePreloader.cpp" />
     <ClCompile Include="src\game\scene\InGame.cpp" />
     <ClCompile Include="src\game\scene\InGameView.cpp" />
     <ClCompile Include="src\game\actor\Player.cpp" />
@@ -336,6 +336,7 @@
     <ClInclude Include="src\core\interface\IPerformanceDataProvider.h" />
     <ClInclude Include="src\core\interface\IRenderer.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
+    <ClInclude Include="src\core\interface\IResourcePreloader.h" />
     <ClInclude Include="src\core\interface\IStringConverter.h" />
     <ClInclude Include="src\core\input\KeyCode.h" />
     <ClInclude Include="src\core\interface\IScreen.h" />
@@ -387,7 +388,6 @@
     <ClInclude Include="src\game\scene\TitleView.h" />
     <ClInclude Include="src\game\system\combat\AttackSystem.h" />
     <ClInclude Include="src\game\system\camera\CameraSystem.h" />
-    <ClInclude Include="src\game\system\camera\DebugCameraSystem.h" />
     <ClInclude Include="src\game\system\camera\ChargeZoomSystem.h" />
     <ClInclude Include="src\game\system\visual\BattleStartSystem.h" />
     <ClInclude Include="src\game\system\visual\MacAwakenEffectSystem.h" />
@@ -464,6 +464,7 @@
     <ClInclude Include="src\infrastructure\InputManager.h" />
     <ClInclude Include="src\infrastructure\graphics\Renderer.h" />
     <ClInclude Include="src\infrastructure\resource\ResourceManager.h" />
+    <ClInclude Include="src\infrastructure\resource\ResourcePreloader.h" />
     <ClInclude Include="src\game\scene\InGame.h" />
     <ClInclude Include="src\game\scene\InGameView.h" />
     <ClInclude Include="src\game\scene\IScene.h" />

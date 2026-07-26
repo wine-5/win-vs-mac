@@ -53,6 +53,15 @@ namespace infrastructure::resource::repository
 	  [[nodiscard]] std::optional<core::data::ModelMetadata> getMetadata(std::string_view modelId) const;
 
 	  /**
+	   * @brief 登録されている全モデルIDを取得する
+	   *
+	   * 「resources.jsonに載っているモデルを全部先読みする」用途で使う。
+	   * メタデータ定義のモデルとrawModelの両方を含む。
+	   * @return モデルIDの一覧
+	   */
+	  [[nodiscard]] std::vector<std::string> getAllIds() const;
+
+	  /**
 	   * @brief モデルハンドルを複製する
 	   *
 	   * 同じモデルを複数体で使う場合、アニメーションやスケールの状態が

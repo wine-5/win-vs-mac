@@ -60,5 +60,9 @@ namespace game::system::combat
 		float m_cooldownTimer{ 0.0f };
 		float m_chargeTime{ 0.0f }; // 現在の溜め時間（秒）
 		bool m_isCharging{ false }; // 溜め中かどうか
+
+		// 今回の溜めで「溜め切った合図」を鳴らし終えたか。
+		// 最大到達後も押し続けられるため、毎フレーム鳴らさないよう1回に絞る
+		bool m_hasNotifiedFullCharge{ false };
 	};
 } // namespace game::system::combat

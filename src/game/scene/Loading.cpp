@@ -6,13 +6,15 @@
 
 namespace game::scene
 {
-    Loading::Loading(core::iface::IUIRenderer& uiRenderer,
-        core::iface::IScreen& screen,
-        std::unique_ptr<core::iface::IWindow> loadingWindow)
-        : m_uiRenderer{ uiRenderer }
-        , m_screen{ screen }
-        , m_loadingWindow{ std::move(loadingWindow) }
-    {
+	Loading::Loading(core::iface::IUIRenderer& uiRenderer,
+	    core::iface::IScreen& screen,
+	    std::unique_ptr<core::iface::IWindow> loadingWindow,
+	    core::iface::IResourcePreloader& preloader)
+	    : m_uiRenderer{ uiRenderer }
+	    , m_screen{ screen }
+	    , m_loadingWindow{ std::move(loadingWindow) }
+	    , m_preloader{ preloader }
+	{
     }
 
     Loading::~Loading() noexcept = default;
@@ -26,8 +28,11 @@ namespace game::scene
             break;
 
         case State::Loading:
-            // ローディング画面の完了を待つ
-            break;
+			// 演出と先読みの両方が終わるのを待つ。
+			// 先読みはApplicationのメインループが進めているのでここでは監視するだけ
+			if (m_isAnimationFinished && m_preloader.isComplete())
+				startFadeOut();
+			break;
 
         case State::FadeOut:
             m_fade->update(deltaTime);
@@ -53,9 +58,9 @@ namespace game::scene
 
     void Loading::notifyLoadingComplete() noexcept
     {
-        if (m_state == State::Loading)
-            startFadeOut();
-    }
+		// 実際の遷移判定はupdate()に任せる（先読みが残っている場合があるため）
+		m_isAnimationFinished = true;
+	}
 
     void Loading::startFadeOut() noexcept
     {

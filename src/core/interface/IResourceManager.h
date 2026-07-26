@@ -2,6 +2,7 @@
 #include <string>
 #include <string_view>
 #include <optional>
+#include <vector>
 #include "core/data/ModelMetadata.h"
 #include "core/data/StageMetadata.h"
 #include "core/data/PropDefinition.h"
@@ -67,6 +68,26 @@ namespace core::iface
 		 * @return DxLib モデルハンドル、失敗時は -1
 		 */
 		virtual int loadAnimationById(std::string_view animationId) = 0;
+
+		/**
+		 * @brief 登録されている全モデルIDを取得する
+		 *
+		 * 先読み（プリロード）で「resources.jsonに載っているものを全部読む」ために使う。
+		 * @return モデルIDの一覧
+		 */
+		[[nodiscard]] virtual std::vector<std::string> getAllModelIds() const = 0;
+
+		/**
+		 * @brief 登録されている全アニメーションIDを取得する
+		 * @return アニメーションIDの一覧
+		 */
+		[[nodiscard]] virtual std::vector<std::string> getAllAnimationIds() const = 0;
+
+		/**
+		 * @brief 登録されている全画像IDを取得する
+		 * @return 画像IDの一覧
+		 */
+		[[nodiscard]] virtual std::vector<std::string> getAllImageIds() const = 0;
 
 		/**
 		 * @brief ステージの配置定義を取得する

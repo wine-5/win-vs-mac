@@ -63,7 +63,6 @@
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/MacAIComponent.h"
 #include "game/system/camera/CameraSystem.h"
-#include "game/system/camera/DebugCameraSystem.h" // DEBUG: フリーカメラ（リリース時に削除）
 #include "game/component/camera/CameraComponent.h"
 #include "game/system/combat/TargetingSystem.h"
 #include "game/component/combat/AimComponent.h"
@@ -248,9 +247,8 @@ namespace game::scene
 			lighting->setDirectionalLight(core::Vector3{ -0.3f, -1.0f, 0.4f }, 255, 255, 255);
 		}
 
-		// DEBUG: 何かと不便なためリリースするときにfalseに変更すること
 		// 3人称マウス視点のためカーソルを非表示にする
-		m_inputProvider.setMouseCursorVisible(true);
+		m_inputProvider.setMouseCursorVisible(false);
 
 		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（リリース時にまとめて削除）
 		m_debugGizmoView = std::make_unique<ui::debug::DebugGizmoView>(m_componentManager, m_renderer);
@@ -415,7 +413,7 @@ namespace game::scene
 		    m_playerId);
 		m_view.setBattleStartSystem(m_battleStartSystem);
 
-		m_systemManager.registerSystem<game::system::movement::InputSystem>(m_componentManager, m_playerId, m_inputProvider, m_gameManager);
+		m_systemManager.registerSystem<game::system::movement::InputSystem>(m_componentManager, m_playerId, m_inputProvider);
 		// カメラ演出（Zoom/Shake）はCameraSystemより前に走らせ、合成結果をCameraEffectComponentへ書いておく
 		m_systemManager.registerSystem<game::system::camera::ChargeZoomSystem>(m_componentManager, m_playerId);
 		m_systemManager.registerSystem<game::system::camera::DamageShakeSystem>(m_componentManager, m_eventBus, m_playerId);
@@ -428,11 +426,7 @@ namespace game::scene
 			m_playerId) };
 		m_view.setMacAwakenEffectSystem(macAwakenEffect);
 		// カメラはMoveSystemより前に更新し、最新のyawで移動方向を計算させる
-		m_systemManager.registerSystem<game::system::camera::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera, m_gameManager);
-		// DEBUG: デバッグモード時のフリーカメラ。CameraSystem直後・MoveSystemより前に走らせる（リリース時に削除）
-		// シーンビュー凍結中に単独更新するためポインタも保持する
-		m_debugCameraSystem = m_systemManager.registerSystem<game::system::camera::DebugCameraSystem>(
-		    m_componentManager, m_playerId, m_inputProvider, m_camera, m_gameManager, m_pauseManager);
+		m_systemManager.registerSystem<game::system::camera::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera);
 		m_systemManager.registerSystem<game::system::movement::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
 		// 照準の敵捕捉判定（カメラ更新後・描画前に走らせる）
 		m_systemManager.registerSystem<game::system::combat::TargetingSystem>(m_componentManager);
@@ -673,44 +667,6 @@ namespace game::scene
 		if (m_debugHUDView)
 			m_debugHUDView->countGameUpdate();
 
-		// DEBUG: F1キーでデバッグモード（フリーカメラ）のON/OFFを切り替える（リリース時に削除）
-		if (m_inputProvider.isKeyPressed(core::input::KeyCode::F1))
-		{
-			m_gameManager.toggleDebugMode();
-			if (m_gameManager.isDebugMode())
-				core::log::info("DEBUG: デバッグモードON");
-			else
-				core::log::info("DEBUG: デバッグモードOFF");
-		}
-
-		// DEBUG: F2キーでシーンビュー（時間停止＋フリーカメラ）のON/OFFを切り替える（リリース時に削除）
-		if (m_inputProvider.isKeyPressed(core::input::KeyCode::F2))
-		{
-			m_pauseManager.toggle(PauseReason::DebugSceneView);
-			if (m_pauseManager.isPausedBy(PauseReason::DebugSceneView))
-				core::log::info("DEBUG: シーンビューON（時間停止）");
-			else
-				core::log::info("DEBUG: シーンビューOFF");
-		}
-
-		// DEBUG: F3キーで連続ジャンプ（空中浮上）のON/OFFを切り替える（リリース時に削除）
-		if (m_inputProvider.isKeyPressed(core::input::KeyCode::F3))
-		{
-			m_gameManager.toggleContinuousJump();
-			if (m_gameManager.isContinuousJumpEnabled())
-				core::log::info("DEBUG: 連続ジャンプON（空中浮上可）");
-			else
-				core::log::info("DEBUG: 連続ジャンプOFF（接地単発）");
-		}
-
-		// DEBUG: シーンビュー凍結中はゲームロジックを止め、フリーカメラだけを更新する（リリース時に削除）
-		if (m_pauseManager.isPausedBy(PauseReason::DebugSceneView))
-		{
-			if (m_debugCameraSystem)
-				m_debugCameraSystem->update(deltaTime);
-			return;
-		}
-
 		// ヒットストップ中はSystemへ渡す時間に倍率を掛ける（0なら何も進まない）。
 		// 経過時間の計測もここへ揃える。止まっている間もタイマーだけ進むと、
 		// 画面が止まっているのに右上の秒数だけ動いて不自然になる
@@ -720,14 +676,6 @@ namespace game::scene
 		if (m_battleStartSystem == nullptr || !m_battleStartSystem->isPreparing())
 			m_elapsedTime += scaledDeltaTime;
 		m_systemManager.update(scaledDeltaTime);
-
-		// DEBUG: Tキーでプレイヤー位置にテストエフェクト（Enemy_Spawn）を再生する（テスト後に削除）
-		if (m_inputProvider.isKeyPressed(core::input::KeyCode::T))
-		{
-			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(m_playerId) };
-			m_effectFactory.play(core::constant::EffectType::Enemy_HitWindow, transform.m_position, {});
-			core::log::info("エフェクトが再生");
-		}
 	}
 
 	void InGame::draw()

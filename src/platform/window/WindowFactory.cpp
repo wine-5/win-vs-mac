@@ -11,9 +11,10 @@ namespace platform::window
     {
     }
 
-    std::unique_ptr<core::iface::IWindow> WindowFactory::createLoadingWindow(
-        std::function<void()> onLoadingComplete)
-    {
+	std::unique_ptr<core::iface::IWindow> WindowFactory::createLoadingWindow(
+	    std::function<void()> onLoadingComplete,
+	    float speedMultiplier)
+	{
         // DxLib のクライアント領域を取得
         HWND dxlibHwnd = static_cast<HWND>(m_screen.getNativeWindowHandle());
 
@@ -39,7 +40,9 @@ namespace platform::window
 
         // ウィンドウを初期化・表示
         loadingWindow->setOnLoadingComplete(std::move(onLoadingComplete));
-        if (loadingWindow->create())
+		// 速度はページ読み込み時に要求されるため、create() より前に渡しておく
+		loadingWindow->setSpeedMultiplier(speedMultiplier);
+		if (loadingWindow->create())
             loadingWindow->show();
 
         return loadingWindow;

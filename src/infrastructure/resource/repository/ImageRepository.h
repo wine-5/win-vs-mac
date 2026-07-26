@@ -3,6 +3,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <vector>
 #include "thirdparty/nlohmann/json.hpp"
 
 namespace infrastructure::resource::repository
@@ -34,7 +35,15 @@ namespace infrastructure::resource::repository
 	   */
 	  int loadImageById(std::string_view imageId);
 
-    private:
+	  /**
+	   * @brief 登録されている全画像IDを取得する
+	   *
+	   * 「resources.jsonに載っている画像を全部先読みする」用途で使う。
+	   * @return 画像IDの一覧
+	   */
+	  [[nodiscard]] std::vector<std::string> getAllIds() const;
+
+	private:
         std::unordered_map<std::string, std::string> m_paths{};
         std::unordered_map<std::string, int>         m_handles{};
     };

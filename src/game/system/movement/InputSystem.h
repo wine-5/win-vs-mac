@@ -6,7 +6,6 @@
 
 namespace game
 {
-	class GameManager; // DEBUG: デバッグモード参照用の前方宣言（リリース時に削除）
 } // namespace game
 
 namespace game::system::movement
@@ -26,12 +25,10 @@ namespace game::system::movement
 		 * @param componentManager ComponentManagerの参照
 		 * @param entityId 対象EntityのID
 		 * @param inputProvider IInputProviderの参照
-		 * @param gameManager デバッグモード状態の参照（DEBUG: リリース時に削除）
 		 */
 		InputSystem(core::ecs::ComponentManager& componentManager,
 		    core::ecs::EntityId entityId,
-		    core::iface::IInputProvider& inputProvider,
-		    GameManager& gameManager);
+		    core::iface::IInputProvider& inputProvider);
 
 		/**
 		 * @brief 入力を取得しInputComponentを更新する
@@ -43,6 +40,5 @@ namespace game::system::movement
 		core::ecs::ComponentManager& m_componentManager;
 		core::ecs::EntityId m_entityId{};
 		core::iface::IInputProvider& m_inputProvider;
-		GameManager& m_gameManager; // DEBUG: デバッグモード状態の参照（リリース時に削除）
 	};
 } // namespace game::system::movement

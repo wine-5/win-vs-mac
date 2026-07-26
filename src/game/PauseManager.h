@@ -10,7 +10,6 @@ namespace game
 	{
 		None,           // ポーズしていない
 		Menu,           // ポーズメニュー（Esc）を開いている
-		DebugSceneView, // DEBUG: シーンビュー（F2・時間停止＋フリーカメラ）。リリース時に削除
 	};
 
 	/**
@@ -41,19 +40,6 @@ namespace game
 		void resume() noexcept
 		{
 			m_reason = PauseReason::None;
-		}
-
-		/**
-		 * @brief 指定した理由でポーズのON/OFFを切り替える
-		 * 別の理由でポーズ中の場合は何もしない（例：メニュー中にF2を無効化）
-		 * @param reason ポーズの理由
-		 */
-		void toggle(PauseReason reason) noexcept
-		{
-			if (m_reason == PauseReason::None)
-				m_reason = reason;
-			else if (m_reason == reason)
-				m_reason = PauseReason::None;
 		}
 
 		/**

@@ -17,9 +17,12 @@ const FILE_EXT_LABEL = {
     Archive: 'ARC', Unknown: 'ETC'
 };
 // 拡張子ボーナス一覧に出す並び順と、その行に書く対象ファイルの例。
+// 並びはパラメータウィンドウのステータス順（HP→ATK→DEF→SPD→CRIT→B.SPD→B.RNG）に合わせ、
+// 「どの行がどのステータスを伸ばすのか」を上から目で追えるようにする。
+// 複数ステータスを伸ばす Archive と、文言が「上記以外のすべて」になる Unknown だけは末尾に置く
 // ボーナスの値そのものは C++（extensionBonus.json が正）から descs で届くので持たない
 const FILE_EXT_ORDER = [
-    'Executable', 'Document', 'Image', 'Audio',
+    'Audio', 'Executable', 'Image', 'Document',
     'SourceCode', 'Shortcut', 'Video', 'Archive', 'Unknown'
 ];
 // 対象の拡張子はC++（FileExtensionTypeResolverの判定表が正）から exts で届く。

@@ -19,6 +19,11 @@ namespace platform::window::loading
 		m_onLoadingComplete = std::move(callback);
 	}
 
+	void LoadingWindow::setSpeedMultiplier(float speedMultiplier) noexcept
+	{
+		m_speedMultiplier = speedMultiplier;
+	}
+
 	void LoadingWindow::pumpMessages() noexcept
 	{
 		// メッセージポンプ処理（現在は WebView2 が自動的に処理を行うため不要）
@@ -57,11 +62,24 @@ namespace platform::window::loading
 		{
 			auto data = nlohmann::json::parse(json);
 
-			if (data.contains(WindowConstants::JSON_KEY_TYPE) &&
-				data[WindowConstants::JSON_KEY_TYPE] == WindowConstants::MESSAGE_TYPE_LOADING_COMPLETE)
+			if (!data.contains(WindowConstants::JSON_KEY_TYPE))
+				return;
+
+			const auto& type = data[WindowConstants::JSON_KEY_TYPE];
+
+			if (type == WindowConstants::MESSAGE_TYPE_LOADING_COMPLETE)
 			{
 				if (m_onLoadingComplete)
 					m_onLoadingComplete();
+			}
+			else if (type == WindowConstants::MESSAGE_TYPE_REQUEST_LOADING_SPEED)
+			{
+				// ページ側から要求された時点で返す。C++から一方的に送ると
+				// WebView2の初期化が終わる前に投げてしまい取りこぼす
+				nlohmann::json response{};
+				response[WindowConstants::JSON_KEY_TYPE] = WindowConstants::MESSAGE_TYPE_LOADING_SPEED;
+				response[WindowConstants::JSON_KEY_SPEED] = m_speedMultiplier;
+				postMessage(response.dump());
 			}
 		}
 		catch (const std::exception&)

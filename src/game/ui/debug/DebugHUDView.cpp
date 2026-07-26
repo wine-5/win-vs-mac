@@ -86,7 +86,6 @@ namespace game::ui::debug
 		if (!m_isVisible)
 			return;
 
-		drawCameraLabel();
 		drawStats(enemyCount);
 	}
 
@@ -98,27 +97,6 @@ namespace game::ui::debug
 	bool DebugHUDView::isVisible() const noexcept
 	{
 		return m_isVisible;
-	}
-
-	void DebugHUDView::drawCameraLabel()
-	{
-		const bool isSceneView{ m_pauseManager.isPausedBy(PauseReason::DebugSceneView) };
-		if (!m_gameManager.isDebugMode() && !isSceneView)
-			return;
-
-		constexpr int LABEL_X{ 16 };
-		constexpr int LABEL_Y{ 16 };
-		constexpr int FONT_SIZE{ 28 };
-		constexpr unsigned int TEXT_COLOR{ 0xFFFFFF00 }; // 黄色（ARGB）
-
-		m_uiRenderer.drawText(LABEL_X, LABEL_Y,
-		    isSceneView ? "SceneView (Time Stopped)" : "DebugCamera",
-		    TEXT_COLOR, FONT_SIZE);
-
-		// 操作方法を併記する（WASD=カメラ、矢印キー=Player）
-		m_uiRenderer.drawText(LABEL_X, LABEL_Y + FONT_SIZE + 4,
-		    isSceneView ? "WASD/Space/Shift: Camera" : "WASD/Space/Shift: Camera   Arrows: Player",
-		    TEXT_COLOR, FONT_SIZE);
 	}
 
 	void DebugHUDView::drawStats(int enemyCount)

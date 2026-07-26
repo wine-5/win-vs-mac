@@ -18,15 +18,17 @@ namespace core::iface
     public:
         virtual ~IWindowFactory() = default;
 
-        /**
-         * @brief ローディングウィンドウを生成・初期化
-         * @param onLoadingComplete ローディング完了時のコールバック
-         * @return 生成されたローディングウィンドウ（既に初期化済み）
-         */
-        virtual std::unique_ptr<IWindow> createLoadingWindow(
-            std::function<void()> onLoadingComplete) = 0;
+		/**
+		 * @brief ローディングウィンドウを生成・初期化
+		 * @param onLoadingComplete ローディング完了時のコールバック
+		 * @param speedMultiplier 演出の再生速度倍率（1.0で等速）
+		 * @return 生成されたローディングウィンドウ（既に初期化済み）
+		 */
+		virtual std::unique_ptr<IWindow> createLoadingWindow(
+		    std::function<void()> onLoadingComplete,
+		    float speedMultiplier) = 0;
 
-        /**
+		/**
          * @brief リザルトウィンドウを生成・初期化
          * @param onRetry リトライボタン押下時のコールバック
          * @param onTitle タイトルボタン押下時のコールバック

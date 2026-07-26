@@ -20,6 +20,9 @@
         };
 
         LoadingView.initialize();
+
+        // 受信ハンドラを登録してから速度を要求する（先に投げると応答を取りこぼす）
+        LoadingLogic.requestSpeed();
     </script>
 </body>
 

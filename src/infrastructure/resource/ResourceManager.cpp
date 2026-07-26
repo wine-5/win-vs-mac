@@ -63,6 +63,21 @@ namespace infrastructure::resource
 		return m_animRepo->loadAnimationById(animationId);
 	}
 
+	std::vector<std::string> ResourceManager::getAllModelIds() const
+	{
+		return m_modelRepo->getAllIds();
+	}
+
+	std::vector<std::string> ResourceManager::getAllAnimationIds() const
+	{
+		return m_animRepo->getAllIds();
+	}
+
+	std::vector<std::string> ResourceManager::getAllImageIds() const
+	{
+		return m_imageRepo->getAllIds();
+	}
+
 	const core::data::StageMetadata& ResourceManager::getStageMetadata() const noexcept
 	{
 		return m_stageRepo->getStageMetadata();

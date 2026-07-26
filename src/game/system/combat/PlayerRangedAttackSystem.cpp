@@ -12,6 +12,13 @@
 #include <algorithm>
 #include <utility>
 
+namespace
+{
+	// 溜め切ったとみなす溜め率。溜め時間は最大値で頭打ちにしてから割るので理屈上は1.0ちょうどだが、
+	// 浮動小数の誤差で1.0をわずかに下回ることがあるため手前で判定する
+	constexpr float FULL_CHARGE_THRESHOLD{ 0.99f };
+} // namespace
+
 namespace game::system::combat
 {
 	PlayerRangedAttackSystem::PlayerRangedAttackSystem(core::ecs::ComponentManager& componentManager,
@@ -55,6 +62,8 @@ namespace game::system::combat
 				playerCharge.m_chargeRate = m_chargeTime / m_metadata.m_chargeMaxTime;
 			else
 				playerCharge.m_chargeRate = 0.0f;
+
+			playerCharge.m_isFullyCharged = m_isCharging && playerCharge.m_chargeRate >= FULL_CHARGE_THRESHOLD;
 		}
 
 		// 押している間は溜める（クールダウン中は溜め開始しない）
@@ -64,6 +73,7 @@ namespace game::system::combat
 			{
 				m_isCharging = true;
 				m_chargeTime = 0.0f;
+				m_hasNotifiedFullCharge = false;
 
 				// 溜め始めた合図。集中線が出るより先に音で分かるようにする
 				auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
@@ -77,6 +87,18 @@ namespace game::system::combat
 				// 最大溜め時間で頭打ちにする
 				if (m_chargeTime > m_metadata.m_chargeMaxTime)
 					m_chargeTime = m_metadata.m_chargeMaxTime;
+
+				// 溜め切った瞬間に1回だけ合図を鳴らす。ここから先は溜めても強くならないため、
+				// 画面を見ていなくても「今離せば最大」が耳で分かるようにする
+				const bool isFull{ m_metadata.m_chargeMaxTime > 0.0f &&
+					               m_chargeTime / m_metadata.m_chargeMaxTime >= FULL_CHARGE_THRESHOLD };
+				if (isFull && !m_hasNotifiedFullCharge)
+				{
+					m_hasNotifiedFullCharge = true;
+					auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+					if (audio)
+						audio->playSe(core::constant::SeType::PlayerChargeReady);
+				}
 			}
 			return;
 		}
@@ -91,6 +113,7 @@ namespace game::system::combat
 			fire(chargeRate);
 			m_isCharging = false;
 			m_chargeTime = 0.0f;
+			m_hasNotifiedFullCharge = false;
 			m_cooldownTimer = m_metadata.m_cooldown;
 		}
 	}
@@ -136,8 +159,7 @@ namespace game::system::combat
 
 		// 溜め切って撃った弾だけ重い着弾音にする。溜めた甲斐を音でも返すため、
 		// 見た目（サイズ）と同じく「溜め切ったか」で切り替える
-		constexpr float CHARGED_SE_THRESHOLD{ 0.99f };
-		config.m_hitSeType = chargeRate >= CHARGED_SE_THRESHOLD
+		config.m_hitSeType = chargeRate >= FULL_CHARGE_THRESHOLD
 		                         ? core::constant::SeType::HitChargedWindow
 		                         : core::constant::SeType::HitWindow;
 
