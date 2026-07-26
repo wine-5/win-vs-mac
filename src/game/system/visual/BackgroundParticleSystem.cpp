@@ -2,6 +2,7 @@
 #include "core/interface/IRenderer.h"
 #include "core/interface/IResourceManager.h"
 #include "core/utility/Log.h"
+#include "core/utility/MathConstants.h"
 #include "game/component/movement/TransformComponent.h"
 #include <algorithm>
 #include <cmath>
@@ -39,9 +40,6 @@ namespace
 
 	// 星は空を見上げたときに見えてほしいので、水平より下にはほとんど置かない
 	constexpr float STAR_LOWEST_HEIGHT_RATIO{ -0.08f };
-
-	constexpr float TWO_PI{ 6.283185f };
-	constexpr float PI{ 3.141593f };
 
 	// ---- フォルダ間のファイル転送 ----
 	// 空のあちこちに置き、どちらを向いても1組は目に入るようにする
@@ -130,7 +128,7 @@ namespace game::system::visual
 		for (int i{ 0 }; i < TRANSFER_COUNT; ++i)
 		{
 			// 方角を等分して置く。どちらを向いても1組は視界に入りやすくする
-			placeTransfer(m_transfers[i], TWO_PI * i / TRANSFER_COUNT + randomRange(m_rng, -0.3f, 0.3f));
+			placeTransfer(m_transfers[i], core::utility::TWO_PI * i / TRANSFER_COUNT + randomRange(m_rng, -0.3f, 0.3f));
 
 			auto& files{ m_transfers[i].m_files };
 			files.resize(FILES_PER_TRANSFER);
@@ -171,7 +169,7 @@ namespace game::system::visual
 	{
 		// 直線ではなく弧を描かせる。Windowsのコピー中アニメーションと同じ動きで、
 		// 「投げ渡している」ことが直感的に分かる
-		const float arc{ std::sin(progress * PI) * TRANSFER_ARC_HEIGHT };
+		const float arc{ std::sin(progress * core::utility::PI) * TRANSFER_ARC_HEIGHT };
 		return core::Vector3{
 			center.x + transfer.m_fromPosition.x + (transfer.m_toPosition.x - transfer.m_fromPosition.x) * progress,
 			center.y + transfer.m_fromPosition.y + (transfer.m_toPosition.y - transfer.m_fromPosition.y) * progress + arc,
@@ -195,7 +193,7 @@ namespace game::system::visual
 	void BackgroundParticleSystem::placeStar(Star& star)
 	{
 		// 上半球寄りの球面へばら撒く。yを下限で切ることで、見上げたときに空が埋まる
-		const float theta{ randomRange(m_rng, 0.0f, TWO_PI) };
+		const float theta{ randomRange(m_rng, 0.0f, core::utility::TWO_PI) };
 		const float height{ randomRange(m_rng, STAR_LOWEST_HEIGHT_RATIO, 1.0f) };
 		const float radius{ std::sqrt(std::max(0.0f, 1.0f - height * height)) };
 
@@ -206,7 +204,7 @@ namespace game::system::visual
 		const float sizeBias{ randomUnit(m_rng) * randomUnit(m_rng) * randomUnit(m_rng) };
 		star.m_size = STAR_SIZE_MIN + (STAR_SIZE_MAX - STAR_SIZE_MIN) * sizeBias;
 
-		star.m_twinklePhase = randomRange(m_rng, 0.0f, TWO_PI);
+		star.m_twinklePhase = randomRange(m_rng, 0.0f, core::utility::TWO_PI);
 		star.m_twinkleSpeed = randomRange(m_rng, STAR_TWINKLE_SPEED_MIN, STAR_TWINKLE_SPEED_MAX);
 		star.m_brightness = static_cast<int>(randomRange(m_rng, STAR_BRIGHTNESS_MIN, STAR_BRIGHTNESS_MAX));
 	}
@@ -290,7 +288,7 @@ namespace game::system::visual
 					continue;
 
 				// 出入り口では小さく、中間で大きく。フォルダへ吸い込まれるように見える
-				const float scale{ 0.45f + 0.55f * std::sin(file.m_progress * PI) };
+				const float scale{ 0.45f + 0.55f * std::sin(file.m_progress * core::utility::PI) };
 				m_renderer.drawBillboard(file.m_imageHandle, position, FILE_SIZE * scale, file.m_spin);
 			}
 		}

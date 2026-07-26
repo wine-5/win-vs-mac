@@ -1,6 +1,7 @@
 #include "HudPanel.h"
 #include "core/constant/UI.h"
 #include "core/utility/Color.h"
+#include "core/utility/MathConstants.h"
 #include <cmath>
 
 namespace
@@ -22,7 +23,6 @@ namespace
 	constexpr int SWEEP_BAND_WIDTH{ 110 };  // 帯の幅（1080p基準）
 	constexpr int SWEEP_SLICE_COUNT{ 20 };  // 帯を何枚の短冊に分けて濃淡を付けるか
 	constexpr int SWEEP_ALPHA{ 26 };        // 短冊1枚あたりの明るさ（重なって帯になる）
-	constexpr float PI{ 3.141593f };
 } // namespace
 
 namespace game::ui::ingame
@@ -95,7 +95,7 @@ namespace game::ui::ingame
 			const int clippedRight{ sliceX + sliceWidth > x + width ? x + width : sliceX + sliceWidth };
 
 			// 山の形はsinで作る。明るさは短冊を重ねる回数で表現する
-			const int repeat{ static_cast<int>(std::sin(t * PI) * 3.0f) };
+			const int repeat{ static_cast<int>(std::sin(t * core::utility::PI) * 3.0f) };
 			for (int n{ 0 }; n < repeat; ++n)
 				m_uiRenderer.drawBox(clippedLeft, bandTop, clippedRight - clippedLeft, bandHeight,
 				    core::utility::Color::WHITE, true);

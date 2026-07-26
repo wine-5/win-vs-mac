@@ -3,6 +3,7 @@
 #include "core/constant/UI.h"
 #include "core/interface/IStringConverter.h"
 #include "core/utility/Color.h"
+#include "core/utility/MathConstants.h"
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -31,8 +32,6 @@ namespace
 
 	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono SemiBold" };
 	constexpr const char* UI_FONT_NAME{ "Noto Sans JP" };
-
-	constexpr float PI{ 3.141593f };
 
 	// 残り数が減ったときの反応
 	constexpr float COUNT_REACTION_DURATION{ 0.45f };
@@ -153,7 +152,7 @@ namespace game::ui::ingame
 			core::utility::Color::HUD_INK, reaction) };
 		// sinで上へ跳ねて戻る。開始と終了がどちらも0になるので継ぎ目が出ない
 		const int popOffset{ static_cast<int>(
-			-scaled(COUNT_REACTION_POP) * std::sin(reaction * PI)) };
+			-scaled(COUNT_REACTION_POP) * std::sin(reaction * core::utility::PI)) };
 
 		m_uiRenderer.setFont(MONO_FONT_NAME);
 		const int countFontSize{ scaled(COUNT_FONT_SIZE) };
