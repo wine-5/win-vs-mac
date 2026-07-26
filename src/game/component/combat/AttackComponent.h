@@ -21,6 +21,10 @@ namespace game::component::combat
 		float m_windupTimer{ 0.0f };
 		bool m_windupPending{ false };
 
+		// このEntityが次に与えるダメージの倍率。攻撃力そのものを書き換えると
+		// 元の値へ戻せなくなるため、段ごとの強弱はこちらで表す。1.0なら等倍
+		float m_damageMultiplier{ 1.0f };
+
 		// 攻撃が届く高さの上限（攻撃者の足元からの相対Y）。地面を叩きつける攻撃のように
 		// 「跳んでいれば当たらない」攻撃で使う。0なら高さ無制限（従来動作）
 		float m_attackMaxHeight{ 0.0f };
