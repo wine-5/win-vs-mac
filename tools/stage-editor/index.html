@@ -271,7 +271,8 @@ const DEFAULT_CATALOG = {
     { id: 'wall_window',   displayName: 'ウィンドウ壁',   model: 'assets/model/stage/WallWindow.mqo',   texture: 'assets/model/stage/WallWindow.png',   baseSize: [100,100,100], editorColor: '#3A4A5E', collider: 'box', defaultSize: [1600, 900, 40] },
     { id: 'pillar_folder', displayName: 'フォルダ柱',     model: 'assets/model/stage/PillarFolder.mqo', texture: 'assets/model/stage/PillarFolder.png', baseSize: [100,100,100], editorColor: '#FFC83D', collider: 'box', defaultSize: [200, 500, 200] },
     { id: 'block_file',    displayName: 'ファイルブロック', model: 'assets/model/stage/BlockFile.mqo',  texture: 'assets/model/stage/BlockFile.png',    baseSize: [100,100,100], editorColor: '#8FA6BF', collider: 'box', defaultSize: [200, 200, 200] },
-    { id: 'floor_apple',   displayName: 'アリーナ床',     model: 'assets/model/stage/FloorApple.mqo',   texture: 'assets/model/stage/FloorApple.png',   baseSize: [100,100,100], editorColor: '#E8E8ED', collider: 'ground', defaultSize: [3000, 20, 3000] }
+    { id: 'floor_apple',   displayName: 'アリーナ床',     model: 'assets/model/stage/FloorApple.mqo',   texture: 'assets/model/stage/FloorApple.png',   baseSize: [100,100,100], editorColor: '#E8E8ED', collider: 'ground', defaultSize: [3000, 20, 3000] },
+    { id: 'gate_boss',     displayName: 'ボス扉(出現で閉)', model: 'assets/model/stage/GateUac.mqo',    texture: 'assets/model/stage/GateUac.png',      baseSize: [100,100,100], editorColor: '#E81123', collider: 'box', role: 'bossGate', defaultSize: [1600, 900, 40] }
   ],
   enemies: [
     { id: 'safari', displayName: 'Safari', editorColor: '#4DA6FF', editorSize: [200, 300, 200] },
@@ -1287,7 +1288,10 @@ function renderInspector() {
       vec('Size', p.size, a => p.size = a.map(v => Math.max(v, 1)))
     );
     const note = document.createElement('div'); note.className = 'note';
-    note.textContent = '坂は Rotation の X / Z を傾けて作成（Local 軸推奨）。Size は実寸ユニット。';
+    /* 役割を持つ配置物は置き方の意味が変わるので、専用の説明に差し替える */
+    note.textContent = (c && c.role === 'bossGate')
+      ? 'ボス出現時にせり上がって入り口を塞ぐ扉。ここには「閉じた状態」の位置とサイズを置く（ゲーム開始時は床下に隠れている）。'
+      : '坂は Rotation の X / Z を傾けて作成（Local 軸推奨）。Size は実寸ユニット。';
     root.appendChild(note);
   } else if (selected.kind === 'light') {
     const l = state.lights.find(x => x.uid === selected.uid);
