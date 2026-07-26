@@ -19,6 +19,7 @@
 #include "game/system/movement/MoveSystem.h"
 #include "game/system/movement/PhysicsSystem.h"
 #include "game/system/movement/GroundingSystem.h"
+#include "game/system/stage/BossGateSystem.h"
 #include "game/system/movement/FootstepSystem.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/actor/Player.h"
@@ -249,7 +250,7 @@ namespace game::scene
 
 		// DEBUG: 何かと不便なためリリースするときにfalseに変更すること
 		// 3人称マウス視点のためカーソルを非表示にする
-		m_inputProvider.setMouseCursorVisible(true);
+		m_inputProvider.setMouseCursorVisible(false);
 
 		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（リリース時にまとめて削除）
 		m_debugGizmoView = std::make_unique<ui::debug::DebugGizmoView>(m_componentManager, m_renderer);
@@ -460,6 +461,9 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::combat::ProjectileReflectSystem>(m_componentManager);
 
 		m_systemManager.registerSystem<game::system::visual::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
+
+		// ボス出現で入り口を塞ぐ扉。押し返しの前に動かして、その位置で当たり判定させる
+		m_systemManager.registerSystem<game::system::stage::BossGateSystem>(m_componentManager, m_eventBus);
 
 		m_systemManager.registerSystem<game::system::combat::CollisionSystem>(m_componentManager);
 		// 障害物の押し返し後に、床・坂の傾いた面へ足を乗せる（坂はAABBで表せないため専用処理）
