@@ -24,6 +24,10 @@ namespace game::event
 		m_subscriptions.push_back(m_eventBus.subscribe<PlayerDeadEvent>(
 		    [this](const PlayerDeadEvent& e)
 		    { onPlayerDead(e); }));
+
+		m_subscriptions.push_back(m_eventBus.subscribe<EnemyAlertedEvent>(
+		    [this](const EnemyAlertedEvent& e)
+		    { onEnemyAlerted(e); }));
 	}
 
 	void AudioEventListener::onAttackStart(const AttackStartEvent& e)
@@ -69,5 +73,14 @@ namespace game::event
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio)
 			audio->playSe(core::constant::SeType::DeadPlayer);
+	}
+
+	void AudioEventListener::onEnemyAlerted(const EnemyAlertedEvent& /*e*/)
+	{
+		// 頭上の通知バッジと同じ瞬間に鳴らす。画面の外にいる敵に気づかれたことも
+		// 音なら分かるので、視界に頼らず「見つかった」を伝えられる
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio)
+			audio->playSe(core::constant::SeType::EnemyAlert);
 	}
 } // namespace game::event
