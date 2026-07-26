@@ -22,5 +22,14 @@
     "fireCooldown": 5.0,
     "facingYawOffset": 90.0
   },
+  "hard": {
+    "moveSpeed": 300.0,
+    "detectionRange": 1700.0,
+    "maxHp": 160.0,
+    "defence": 5.0,
+    "attackPower": 34.0,
+    "attackCooldown": 2.6,
+    "fireCooldown": 3.2
+  },
   "behaviors": [ "rangeKeep", "patrol" ]
 }
