@@ -25,6 +25,8 @@ namespace
 			def.m_textureTile = j["textureTile"];
 		if (j.contains("slideAccel"))
 			def.m_slideAccel = j["slideAccel"];
+		if (j.contains("conveyorSpeed"))
+			def.m_conveyorSpeed = j["conveyorSpeed"];
 		if (j.contains("scrollU"))
 			def.m_scrollU = j["scrollU"];
 		if (j.contains("scrollV"))

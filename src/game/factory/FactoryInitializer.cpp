@@ -109,6 +109,14 @@ namespace game::factory
 			{
 				params.m_collisionSize = prop.m_size;
 				params.m_slideAccel = def.m_slideAccel;
+				params.m_conveyorSpeed = def.m_conveyorSpeed;
+
+				// 動く歩道は模様の流れる向き・速さを運ぶ力から導く。
+				// テクスチャ1枚がtextureTileぶんの実寸を受け持ち、V軸はローカルZに沿うので、
+				// 速さ÷1枚の実寸がそのまま「1秒あたり何枚ぶん流すか」になる。
+				// JSONへ別々に書くと片方だけ直したときに見た目と力が食い違うため、ここで揃える
+				if (def.m_conveyorSpeed != 0.0f && def.m_textureTile > 0.0f)
+					params.m_scrollSpeedV = def.m_conveyorSpeed / def.m_textureTile;
 			}
 
 			// テクスチャ1枚が受け持つ実寸から繰り返し回数を決める。
