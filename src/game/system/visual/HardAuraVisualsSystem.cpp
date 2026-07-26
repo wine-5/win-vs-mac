@@ -53,8 +53,6 @@ namespace game::system::visual
 		m_glowHandle = resourceManager.loadImageById(GLOW_IMAGE_ID);
 		if (m_glowHandle == -1)
 			core::log::error("Hardオーラの光の画像 '{}' の読み込みに失敗しました", GLOW_IMAGE_ID);
-		else
-			core::log::info("難易度Hard：敵の赤いオーラを有効にしました");
 	}
 
 	void HardAuraVisualsSystem::update(float deltaTime)
