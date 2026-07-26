@@ -580,4 +580,15 @@ namespace infrastructure::resource::repository
 
 		return phase;
 	}
+
+	std::vector<std::string> ModelRepository::getAllIds() const
+	{
+		std::vector<std::string> ids{};
+		ids.reserve(m_metadata.size() + m_rawModelPaths.size());
+		for (const auto& [id, metadata] : m_metadata)
+			ids.push_back(id);
+		for (const auto& [id, path] : m_rawModelPaths)
+			ids.push_back(id);
+		return ids;
+	}
 } // namespace infrastructure::resource::repository

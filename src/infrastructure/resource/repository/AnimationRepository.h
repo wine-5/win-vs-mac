@@ -2,6 +2,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <vector>
 #include "thirdparty/nlohmann/json.hpp"
 
 namespace infrastructure::resource::repository
@@ -32,6 +33,14 @@ namespace infrastructure::resource::repository
 	   * @return DxLib モデルハンドル、失敗時は -1
 	   */
 	  int loadAnimationById(std::string_view animationId);
+
+	  /**
+	   * @brief 登録されている全アニメーションIDを取得する
+	   *
+	   * 「resources.jsonに載っているアニメーションを全部先読みする」用途で使う。
+	   * @return アニメーションIDの一覧
+	   */
+	  [[nodiscard]] std::vector<std::string> getAllIds() const;
 
 	private:
 		std::unordered_map<std::string, std::string> m_paths{};

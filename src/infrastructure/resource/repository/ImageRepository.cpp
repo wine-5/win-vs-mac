@@ -47,4 +47,13 @@ namespace infrastructure::resource::repository
         m_handles[id] = handle;
         return handle;
     }
+
+	std::vector<std::string> ImageRepository::getAllIds() const
+	{
+		std::vector<std::string> ids{};
+		ids.reserve(m_paths.size());
+		for (const auto& [id, path] : m_paths)
+			ids.push_back(id);
+		return ids;
+	}
 } // namespace infrastructure::resource::repository
