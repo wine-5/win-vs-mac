@@ -123,7 +123,9 @@ namespace platform::window::select
 		if (!m_difficultyWindow->create(m_desktopWindow->getHwnd())) return;
 		m_difficultyWindow->setOnDifficultyChanged([this](const std::string& difficulty) noexcept
 		    {
-            if (m_onDifficultyChanged) m_onDifficultyChanged(difficulty); });
+			    if (m_onDifficultyChanged) m_onDifficultyChanged(difficulty);
+			    // HARDでは全ウィンドウの配色を警告色へ切り替える
+			    broadcastDifficulty(difficulty); });
 		m_difficultyWindow->setOnMinimize([this]() noexcept {
             m_difficultyWindow->hide();
             m_diffVisible = false;
@@ -421,7 +423,40 @@ namespace platform::window::select
 		}
 	}
 
-    void Win32SelectWindowManager::showWarningMessage(const std::string& message) noexcept
+	void Win32SelectWindowManager::broadcastDifficulty(const std::string& difficulty) noexcept
+	{
+		// 難易度は配色にも効くため、全ウィンドウへ同じ内容を配る。
+		// 難易度ウィンドウ自身は選択元なので送らなくてよいが、
+		// 再読み込みで見た目が戻るのを防ぐため同じ扱いにしておく
+		try
+		{
+			nlohmann::json j;
+			j[platform::window::WindowConstants::JSON_KEY_TYPE] = platform::window::WindowConstants::MESSAGE_TYPE_DIFFICULTY_CHANGED;
+			j[platform::window::WindowConstants::JSON_KEY_DIFFICULTY] = difficulty;
+			const std::string payload{ j.dump() };
+
+			if (m_desktopWindow)
+				m_desktopWindow->postMessage(payload);
+			if (m_fileSelectWindow)
+				m_fileSelectWindow->postMessage(payload);
+			if (m_parameterWindow)
+				m_parameterWindow->postMessage(payload);
+			if (m_difficultyWindow)
+				m_difficultyWindow->postMessage(payload);
+			if (m_rulesWindow)
+				m_rulesWindow->postMessage(payload);
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("Win32SelectWindowManager::broadcastDifficulty: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("Win32SelectWindowManager::broadcastDifficulty: 不明な例外が発生しました");
+		}
+	}
+
+	void Win32SelectWindowManager::showWarningMessage(const std::string& message) noexcept
     {
         HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
 

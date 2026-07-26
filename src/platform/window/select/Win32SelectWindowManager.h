@@ -107,6 +107,14 @@ namespace platform::window::select
 		 */
 		void updateDebugOverlayToggle() noexcept;
 
+		/**
+		 * @brief 選択中の難易度を全ウィンドウへ配る
+		 *
+		 * HARDでは配色を警告色へ切り替えるため、デスクトップも含めた全画面が知る必要がある
+		 * @param difficulty 難易度文字列（"NORMAL" | "HARD"）
+		 */
+		void broadcastDifficulty(const std::string& difficulty) noexcept;
+
 		void handleDesktopMessage(const std::string& json) noexcept;
         void notifyWindowState(const std::string& name, bool visible) noexcept;
 

@@ -91,3 +91,24 @@ button.danger.active {
     color: var(--text-muted);
     margin-bottom: 8px;
 }
+
+/* ── 難易度HARDの配色 ──
+   セレクト画面はWindowsのデスクトップを模しているので、
+   「OS全体が危険な状態に切り替わった」ように見せる。
+   アクセント色だけを差し替えれば、枠・バー・選択色・ボタンがまとめて追従する。
+
+   CSS変数そのものはアニメーションできないため、実際に色を使う側
+   （背景・枠線・文字）へ transition を掛けて、切り替わりをゆっくり見せる */
+body,
+body * {
+    transition: background-color 0.9s ease, border-color 0.9s ease, color 0.9s ease;
+}
+
+body.hard {
+    --accent: #e81123;
+    --accent-hover: #c50f1f;
+    --border: #5a2a2e;
+    --surface: #2a1e1f;
+    --surface-hover: #3a2628;
+    --bg: #1e1516;
+}

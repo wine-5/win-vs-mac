@@ -59,8 +59,11 @@ namespace platform::window
         static constexpr const char* MESSAGE_TYPE_TOGGLE_WINDOW{ "toggleWindow" };
         static constexpr const char* MESSAGE_TYPE_LAUNCH_APP{ "launchApp" };
         static constexpr const char* MESSAGE_TYPE_WINDOW_STATE_CHANGED{ "windowStateChanged" };
+		// 難易度が変わったことを全ウィンドウへ伝える（HARDなら配色を警告色へ変える）
+		static constexpr const char* MESSAGE_TYPE_DIFFICULTY_CHANGED{ "difficultyChanged" };
+		static constexpr const char* JSON_KEY_DIFFICULTY{ "difficulty" };
 
-        // JSONメッセージタイプ（FileSelectWindow）
+		// JSONメッセージタイプ（FileSelectWindow）
         static constexpr const char* MESSAGE_TYPE_SLOT_SELECTED{ "slotSelected" };
         static constexpr const char* MESSAGE_TYPE_REQUEST_BONUS_INFO{ "requestBonusInfo" };
 		// ページ読み込み時にJS側から現在の装備状態を要求する（再読み込みで表示が消えるのを防ぐ）
