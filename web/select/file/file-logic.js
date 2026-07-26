@@ -63,7 +63,8 @@ const FileLogic = (function () {
     let sameFileMode = false;
     let onSlotChangeCallback = null;
     let onBonusUpdateCallback = null;
-    let onSlotsUpdateCallback = null;
+    // 装備の更新は表示側と操作ガイドの両方が知る必要があるため、複数の購読を受け付ける
+    const slotsUpdateCallbacks = [];
 
     function selectSlot(i) {
         selectedSlot = i;
@@ -96,9 +97,7 @@ const FileLogic = (function () {
                 slots[info.slot] = info;
             }
         });
-        if (onSlotsUpdateCallback) {
-            onSlotsUpdateCallback();
-        }
+        slotsUpdateCallbacks.forEach(function (callback) { callback(); });
     }
 
     function getActiveExtensions() {
@@ -162,7 +161,12 @@ const FileLogic = (function () {
     }
 
     function onSlotsUpdate(callback) {
-        onSlotsUpdateCallback = callback;
+        slotsUpdateCallbacks.push(callback);
+    }
+
+    /** 初回だけ出す操作ガイドを表示してよいかをC++へ問い合わせる */
+    function requestTutorial() {
+        sendToGame({ type: 'requestTutorial' });
     }
 
     return {
@@ -186,6 +190,7 @@ const FileLogic = (function () {
         onMessageFromGame: onMessageFromGame,
         requestBonusInfo: requestBonusInfo,
         requestSlots: requestSlots,
+        requestTutorial: requestTutorial,
         onSlotChange: onSlotChange,
         onBonusUpdate: onBonusUpdate,
         onSlotsUpdate: onSlotsUpdate

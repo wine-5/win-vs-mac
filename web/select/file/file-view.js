@@ -324,6 +324,8 @@ window.onMessageFromGame = function (data) {
     // HARDでは配色を警告色へ切り替える（common.jsの共通処理）
     applyDifficultyTheme(data);
     FileLogic.onMessageFromGame(data);
+    if (typeof FileTutorial !== 'undefined')
+        FileTutorial.onMessageFromGame(data);
 };
 
 (function () {

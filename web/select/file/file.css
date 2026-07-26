@@ -404,3 +404,100 @@ body {
     accent-color: var(--accent);
     cursor: pointer;
 }
+
+/* ── 初回だけ出る操作ガイド ───────────────────────────────
+   「急にこの画面に来て何をすればいいのか分からない」への対処。
+   ウィンドウは互いに別のWebViewで重ねられないため、案内はこのウィンドウ内で完結させる */
+
+/* 案内中の対象を光る枠で囲む。操作は妨げたくないので枠だけを載せる */
+.tutorial-target {
+    position: relative;
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    animation: tutorial-glow 1.6s ease-in-out infinite;
+}
+
+@keyframes tutorial-glow {
+    0%, 100% { box-shadow: inset 0 0 0 0 rgba(0, 120, 212, 0); }
+    50%      { box-shadow: inset 0 0 24px 0 rgba(0, 120, 212, 0.45); }
+}
+
+.tutorial-tip {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 34px;
+    z-index: 50;
+    background: rgba(20, 20, 22, 0.97);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 12px 14px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+    animation: tutorial-tip-in 0.28s ease-out;
+}
+
+@keyframes tutorial-tip-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.tutorial-step {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 4px;
+}
+
+.tutorial-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.tutorial-body {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+.tutorial-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.tutorial-skip,
+.tutorial-next {
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 5px 14px;
+    cursor: pointer;
+}
+
+.tutorial-skip {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+}
+
+.tutorial-skip:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+}
+
+.tutorial-next {
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: #fff;
+}
+
+.tutorial-next:hover { background: var(--accent-hover); }
+
+/* 案内の対象が画面下端の一覧そのものになる段では、隠さないよう上へ回す */
+.tutorial-tip.at-top {
+    top: 64px;
+    bottom: auto;
+}
