@@ -44,6 +44,16 @@ namespace game::system::combat
 			// 「このフレームで攻撃を開始したか」は毎フレーム作り直す
 			attack.m_justFired = false;
 
+			// 死亡済みのEntityは攻撃を成立させない。AIは死亡時に止めているが、
+			// 倒れる直前に立った m_attackRequested が残っていると次のフレームで死体が殴ってくる
+			const auto* attackerHealth{ m_componentManager.tryGet<component::combat::HealthComponent>(attackerId) };
+			if (attackerHealth != nullptr && attackerHealth->m_isDead)
+			{
+				attack.m_attackRequested = false;
+				attack.m_windupPending = false;
+				continue;
+			}
+
 			// クールダウンを更新
 			if (attack.m_currentCooldown > 0.0f)
 				attack.m_currentCooldown -= deltaTime;
@@ -62,11 +72,8 @@ namespace game::system::combat
 					if (attack.m_impactSeType != core::constant::SeType::None)
 						m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType });
 
-					// 溜め中に攻撃者が倒された場合は、振り終わりのダメージを不発にする
-					const bool attackerDead{ m_componentManager.has<component::combat::HealthComponent>(attackerId) &&
-						                     m_componentManager.get<component::combat::HealthComponent>(attackerId).m_isDead };
-					if (!attackerDead)
-						resolveAttack(attackerId, attack);
+					// 攻撃者が倒された場合はこのフレームへ到達しない（先頭で溜めごと打ち切る）
+					resolveAttack(attackerId, attack);
 					attack.m_currentCooldown = attack.m_attackCooldown;
 				}
 				continue;
