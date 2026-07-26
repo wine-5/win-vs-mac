@@ -73,6 +73,7 @@ namespace game::system::combat
 			{
 				m_isCharging = true;
 				m_chargeTime = 0.0f;
+				m_hasNotifiedFullCharge = false;
 
 				// 溜め始めた合図。集中線が出るより先に音で分かるようにする
 				auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
@@ -86,6 +87,18 @@ namespace game::system::combat
 				// 最大溜め時間で頭打ちにする
 				if (m_chargeTime > m_metadata.m_chargeMaxTime)
 					m_chargeTime = m_metadata.m_chargeMaxTime;
+
+				// 溜め切った瞬間に1回だけ合図を鳴らす。ここから先は溜めても強くならないため、
+				// 画面を見ていなくても「今離せば最大」が耳で分かるようにする
+				const bool isFull{ m_metadata.m_chargeMaxTime > 0.0f &&
+					               m_chargeTime / m_metadata.m_chargeMaxTime >= FULL_CHARGE_THRESHOLD };
+				if (isFull && !m_hasNotifiedFullCharge)
+				{
+					m_hasNotifiedFullCharge = true;
+					auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+					if (audio)
+						audio->playSe(core::constant::SeType::PlayerChargeReady);
+				}
 			}
 			return;
 		}
@@ -100,6 +113,7 @@ namespace game::system::combat
 			fire(chargeRate);
 			m_isCharging = false;
 			m_chargeTime = 0.0f;
+			m_hasNotifiedFullCharge = false;
 			m_cooldownTimer = m_metadata.m_cooldown;
 		}
 	}
