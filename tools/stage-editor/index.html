@@ -888,20 +888,21 @@ function duplicateSelected() {
   if (!dupable.length) return;
 
   pushUndo();
-  const offset = (pos) => [pos[0] + 200, pos[1], pos[2] + 200];
+  /* 複製は元と同じ座標に置く。ずらすと「同じ場所に重ねてから片方だけ動かす」
+     使い方ができず、位置合わせをやり直すことになるため */
   const newSel = [];
   for (const s of dupable) {
     if (s.kind === 'prop') {
       const src = state.props.find(p => p.uid === s.uid);
-      const c = structuredClone(src); c.uid = uid(); c.position = offset(src.position);
+      const c = structuredClone(src); c.uid = uid();
       state.props.push(c); newSel.push({ kind: 'prop', uid: c.uid });
     } else if (s.kind === 'spawn') {
       const src = state.spawns.find(x => x.uid === s.uid);
-      const c = structuredClone(src); c.uid = uid(); c.position = offset(src.position);
+      const c = structuredClone(src); c.uid = uid();
       state.spawns.push(c); newSel.push({ kind: 'spawn', uid: c.uid });
     } else if (s.kind === 'light') {
       const src = state.lights.find(x => x.uid === s.uid);
-      const c = structuredClone(src); c.uid = uid(); c.position = offset(src.position);
+      const c = structuredClone(src); c.uid = uid();
       state.lights.push(c); newSel.push({ kind: 'light', uid: c.uid });
     }
   }
