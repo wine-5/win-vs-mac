@@ -2,7 +2,7 @@
   "effects": [
     {
       "type": "Enemy_HitSword",
-      "path": "assets/effects/slash.efk",
+      "path": "assets/effects/hit_sword.efk",
       "poolSize": 10,
       "yOffset": 75.0,
       "scale": 30.0
