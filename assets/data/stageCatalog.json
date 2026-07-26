@@ -155,9 +155,9 @@
       "scrollV": 0.0
     },
     {
-      "id": "floor_terminal",
-      "displayName": "ターミナル床",
-      "model": "assets/model/stage/FloorTerminal.mqo",
+      "id": "floor_memory",
+      "displayName": "メモリマップ床",
+      "model": "assets/model/stage/FloorMemory.mqo",
       "baseSize": [
         100,
         100,
@@ -170,8 +170,8 @@
         20,
         1000
       ],
-      "texture": "assets/model/stage/FloorTerminal.png",
-      "textureTile": 600,
+      "texture": "assets/model/stage/FloorMemory.png",
+      "textureTile": 1400,
       "slideAccel": 0.0,
       "scrollU": 0.0,
       "scrollV": 0.0

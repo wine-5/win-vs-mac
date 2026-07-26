@@ -279,7 +279,7 @@
       ]
     },
     {
-      "type": "floor_terminal",
+      "type": "floor_memory",
       "position": [
         3800,
         -1046.77,
@@ -315,7 +315,7 @@
       ]
     },
     {
-      "type": "floor_terminal",
+      "type": "floor_memory",
       "position": [
         851.26,
         -1496.68,
@@ -333,7 +333,7 @@
       ]
     },
     {
-      "type": "floor_terminal",
+      "type": "floor_memory",
       "position": [
         851.26,
         -1496.68,
@@ -387,7 +387,7 @@
       ]
     },
     {
-      "type": "floor_terminal",
+      "type": "floor_memory",
       "position": [
         851.26,
         -1496.68,
@@ -405,7 +405,7 @@
       ]
     },
     {
-      "type": "floor_terminal",
+      "type": "floor_memory",
       "position": [
         -648.74,
         -1496.68,
@@ -459,7 +459,7 @@
       ]
     },
     {
-      "type": "floor_terminal",
+      "type": "floor_memory",
       "position": [
         -2148.74,
         -1496.68,
@@ -477,7 +477,7 @@
       ]
     },
     {
-      "type": "floor_terminal",
+      "type": "floor_memory",
       "position": [
         -2998.74,
         -1496.68,
@@ -495,7 +495,7 @@
       ]
     },
     {
-      "type": "floor_terminal",
+      "type": "floor_memory",
       "position": [
         -3948.74,
         -1496.68,
@@ -513,7 +513,7 @@
       ]
     },
     {
-      "type": "floor_terminal",
+      "type": "floor_memory",
       "position": [
         -2148.74,
         -1496.68,
@@ -567,7 +567,7 @@
       ]
     },
     {
-      "type": "floor_terminal",
+      "type": "floor_memory",
       "position": [
         -2148.74,
         -1496.68,
@@ -603,7 +603,7 @@
       ]
     },
     {
-      "type": "floor_terminal",
+      "type": "floor_memory",
       "position": [
         -2148.74,
         -2081.55,
