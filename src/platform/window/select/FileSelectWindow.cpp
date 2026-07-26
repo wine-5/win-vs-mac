@@ -5,6 +5,9 @@
 #include "core/interface/IResourceManager.h"
 #include "platform/window/WindowConstants.h"
 #include "core/interface/ILogger.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IAudioManager.h"
+#include "core/constant/SeType.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include "core/utility/Log.h"
 #include <exception>
@@ -121,6 +124,11 @@ namespace platform::window::select
 		}
 
 		sendSlotsRefresh();
+
+		// 装備が決まった合図。ダイアログを閉じた直後なので、画面の更新と同じ拍で鳴る
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio)
+			audio->playSe(core::constant::SeType::UiFileSelect);
 	}
 
 	std::string FileSelectWindow::toUtf8(const char* ansi) noexcept
