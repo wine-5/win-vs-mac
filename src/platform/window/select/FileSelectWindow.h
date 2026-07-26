@@ -63,10 +63,11 @@ namespace platform::window::select
         static constexpr const wchar_t* FILE_SELECT_HTML_URL{ L"https://game.web/select/file/file.html" };
         static constexpr int SLOT_COUNT{ 3 };
 
-        // ファイルダイアログフィルター
-        static constexpr const char* FILE_DIALOG_FILTER{ "All Files\0*.*\0" };
+		// ファイルダイアログフィルター
+		// ワイド文字版のダイアログを使う（日本語パスをUTF-8で受け取るため）
+		static constexpr const wchar_t* FILE_DIALOG_FILTER_W{ L"All Files\0*.*\0" };
 
-        // ファイル拡張子タイプ名
+		// ファイル拡張子タイプ名
         static constexpr const char* EXT_TYPE_NAME_EXECUTABLE{ "Executable" };
         static constexpr const char* EXT_TYPE_NAME_DOCUMENT{ "Document" };
         static constexpr const char* EXT_TYPE_NAME_IMAGE{ "Image" };
@@ -92,7 +93,17 @@ namespace platform::window::select
 
         void handleMessage(const std::string& json) noexcept;
         void openFileDialog(int slotIndex);
-        void sendSlotsRefresh() noexcept;
+
+		/**
+		 * @brief ワイド文字列を UTF-8 へ変換する
+		 *
+		 * WebViewへ渡すJSONはUTF-8でなければ例外になるため、
+		 * ファイルダイアログから受け取ったパスは必ずここを通す
+		 * @param wide 変換元のワイド文字列
+		 * @return UTF-8 の文字列（空やnullptrなら空文字）
+		 */
+		[[nodiscard]] static std::string toUtf8(const wchar_t* wide) noexcept;
+		void sendSlotsRefresh() noexcept;
         void sendBonusInfo() noexcept;
     };
 } // namespace platform::window::select

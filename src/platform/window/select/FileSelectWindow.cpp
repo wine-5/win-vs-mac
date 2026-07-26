@@ -83,28 +83,45 @@ namespace platform::window::select
 
 	void FileSelectWindow::openFileDialog(int slotIndex)
 	{
-		OPENFILENAMEA ofn{};
-		char szFile[MAX_PATH]{};
+		// ANSI版（GetOpenFileNameA）だと日本語環境ではShift_JISのパスが返り、
+		// そのままJSONへ載せると「不正なUTF-8」で例外になりスロットが送信されない。
+		// ワイド文字で受け取り、UTF-8へ変換してから保持する
+		OPENFILENAMEW ofn{};
+		wchar_t fileBuffer[MAX_PATH]{};
 
 		ofn.lStructSize = sizeof(ofn);
 		ofn.hwndOwner = getHwnd();
-		ofn.lpstrFile = szFile;
+		ofn.lpstrFile = fileBuffer;
 		ofn.nMaxFile = MAX_PATH;
-		ofn.lpstrFilter = FILE_DIALOG_FILTER;
+		ofn.lpstrFilter = FILE_DIALOG_FILTER_W;
 		ofn.nFilterIndex = 1;
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
-		if (GetOpenFileNameA(&ofn))
-		{
-			m_filePaths[slotIndex] = szFile;
+		if (!GetOpenFileNameW(&ofn))
+			return;
 
-			m_extensionTypes[slotIndex] = game::utility::FileExtensionTypeResolver::fromPath(m_filePaths[slotIndex]);
+		m_filePaths[slotIndex] = toUtf8(fileBuffer);
 
-			if (m_onFileSlotChanged)
-				m_onFileSlotChanged(slotIndex, m_filePaths[slotIndex]);
+		m_extensionTypes[slotIndex] = game::utility::FileExtensionTypeResolver::fromPath(m_filePaths[slotIndex]);
 
-			sendSlotsRefresh();
-		}
+		if (m_onFileSlotChanged)
+			m_onFileSlotChanged(slotIndex, m_filePaths[slotIndex]);
+
+		sendSlotsRefresh();
+	}
+
+	std::string FileSelectWindow::toUtf8(const wchar_t* wide) noexcept
+	{
+		if (wide == nullptr || wide[0] == L'\0')
+			return {};
+
+		const int length{ WideCharToMultiByte(CP_UTF8, 0, wide, -1, nullptr, 0, nullptr, nullptr) };
+		if (length <= 1)
+			return {};
+
+		std::string utf8(static_cast<std::size_t>(length) - 1, '\0');
+		WideCharToMultiByte(CP_UTF8, 0, wide, -1, utf8.data(), length, nullptr, nullptr);
+		return utf8;
 	}
 
 	void FileSelectWindow::sendSlotsRefresh() noexcept
