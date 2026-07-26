@@ -74,16 +74,19 @@ namespace platform::window::select
 		    availH,
 		    m_resourceManager);
 		if (!m_fileSelectWindow->create(m_desktopWindow->getHwnd())) return;
-        m_fileSelectWindow->setOnFileSlotChanged([this](int slot, const std::string& path) noexcept {
+		// noexcept にしない。文字列の代入などで例外が出た場合、noexcept だと
+		// std::terminate になってログも残らず即死する。
+		// ここで投げれば FileSelectWindow::handleMessage の catch がログに残す
+		m_fileSelectWindow->setOnFileSlotChanged([this](int slot, const std::string& path)
+		    {
             if (m_onFileSlotChanged) m_onFileSlotChanged(slot, path);
             if (slot >= 0 && slot < FILE_SLOT_COUNT)
             {
                 m_slotPaths[slot] = path;
 				m_slotExtTypes[slot] = game::utility::FileExtensionTypeResolver::fromPath(path);
 			}
-			updateParameterWindow();
-        });
-        m_fileSelectWindow->setOnMinimize([this]() noexcept {
+			updateParameterWindow(); });
+		m_fileSelectWindow->setOnMinimize([this]() noexcept {
             m_fileSelectWindow->hide();
             m_fileVisible = false;
             notifyWindowState(WINDOW_NAME_FILE, false);
@@ -202,7 +205,7 @@ namespace platform::window::select
 		return count;
 	}
 
-	void Win32SelectWindowManager::updateParameterWindow() noexcept
+	void Win32SelectWindowManager::updateParameterWindow()
 	{
         if (!m_parameterWindow) return;
 

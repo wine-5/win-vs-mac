@@ -77,8 +77,13 @@ namespace platform::window::select
         static constexpr const wchar_t* APP_RECYCLEBIN_PATH{ L"shell:RecycleBinFolder" };
         static constexpr const wchar_t* APP_NOTEPAD_PATH{ L"notepad.exe" };
 
-		/** @brief パラメータウィンドウを最新の装備内容で更新する */
-		void updateParameterWindow() noexcept;
+		/**
+		 * @brief パラメータウィンドウを最新の装備内容で更新する
+		 *
+		 * noexcept にはしない。ここで例外を握りつぶすと std::terminate になり、
+		 * 原因がログにも残らないまま落ちるため、呼び出し元の catch まで通す
+		 */
+		void updateParameterWindow();
 
 		/** @brief 装備済みスロット数を数える */
 		[[nodiscard]] int countEquippedSlots() const noexcept;
