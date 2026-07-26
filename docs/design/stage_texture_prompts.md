@@ -29,7 +29,8 @@ MANIFEST に1行足して立方体(.mqo)を生成する。
 - [ ] 2. BlockFolder.png
 - [ ] 3. BlockRecycleBin.png
 - [ ] 4. WallExplorer.png
-- [ ] 5. FloorTerminal.png
+- [ ] 5. FloorMemory.png
+- [ ] 15. WallTerminal.png（旧 FloorTerminal.png を壁へ移設）
 - [ ] 6. BlockDll.png
 - [ ] 7. BlockExe.png
 - [ ] 8. WallRegistry.png
@@ -81,11 +82,21 @@ A single face texture for a cube: a Windows 11 style Recycle Bin icon, large and
 A wall texture showing the Windows 11 File Explorer window UI seen straight on. Title bar and address bar across the top, a left navigation pane listing "PC, Downloads, Documents, Pictures", and a right area filled with file and folder icons in a grid. Bright light-gray Windows 11 interface. A complete single image (not tiled). Flat front-facing orthographic view, no perspective, no camera tilt, even lighting. Fully opaque, no transparency. 1024x1024 pixels, square.
 ```
 
-## 5. FloorTerminal.png — ② System32 / floor / tileable
+## 5. FloorMemory.png — ② System32 / floor / tileable
+
+> 旧 `FloorTerminal.png`（緑のログ床）から差し替え。緑のログ絵は**壁**として残すので
+> 削除せず、#15 WallTerminal.png に移設する。
+>
+> **床に文字を置かない理由**：床は上下左右どの向きからも見るため文字が裏返って読めてしまい、
+> 視線も吸われる。さらに `textureTile` が小さいと細い文字が斜めからの見えでちらつく。
+> 読ませたい情報（ログ・コード・エラー）は壁に寄せ、床は向きを持たない構造だけにする。
 
 ```
-A top-down floor texture of a terminal / console: a black background with about 10 to 12 lines of LARGE, bold, high-contrast green monospaced command-line logs, with one or two amber warning lines. The text must be big and clearly readable at a glance (each line spanning most of the width), with generous line spacing and margins — NOT densely packed small text. Green (#3FB950) dominant. Seamlessly tileable — top/bottom and left/right edges must connect and text lines must not get cut off at the seams so it repeats cleanly. Flat orthographic straight-down view, no perspective, no camera tilt, even and uniform brightness. Fully opaque, no transparency. 1024x1024 pixels, square.
+A top-down floor texture of a memory map / allocation grid, like a debugger's VMMap or Task Manager memory view seen from directly above. A near-black dark surface (#0b1410) covered by a regular grid of small square cells with thin dim separator lines. Most cells are very dark and barely distinguishable; roughly one in eight cells is filled with a muted green (#2d6b3a) and a rare few with a dim amber (#8a6415), scattered irregularly so no obvious pattern forms. Very LOW contrast overall — the whole image must read as a dark, calm, quiet surface, never bright or glowing. Absolutely no text, no letters, no numbers, no icons. Rotationally neutral: it must look the same viewed from any direction. Seamlessly tileable — all four edges must connect. Flat orthographic straight-down view, no perspective, no camera tilt, even and uniform brightness. Fully opaque, no transparency. 1024x1024 pixels, square.
 ```
+
+あわせて `stageCatalog.json` の `floor_terminal` の `textureTile` を 600 → **1400** に上げる。
+タイルが大きくなるほど繰り返しが減り、模様の空間周波数が下がって斜めのちらつきが収まる。
 
 ## 6. BlockDll.png — ② System32 / one face of a cube block
 
