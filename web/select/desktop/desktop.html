@@ -10,9 +10,13 @@
     <div class="desktop-area">
         <canvas id="matrix-bg"></canvas>
 
-        <!-- デスクトップアイコン -->
+        <!--
+            デスクトップアイコン。
+            1列4個だと縦に伸びて、Debugの小さいウィンドウでは下の難易度ウィンドウに隠れる。
+            3 / 3 / 2 の3列に分けて、どの解像度でも全アイコンが見えるようにしている
+        -->
         <div class="desktop-icons">
-            <!-- 左列: 標準 Windows アプリ -->
+            <!-- 1列目: 標準 Windows アプリ -->
             <div class="icon-column">
                 <div class="desk-icon" ondblclick="launchApp('cmd')">
                     <img src="https://assets.game.web/images/ui/app/cmdIcon.png" alt="">
@@ -26,12 +30,8 @@
                     <img src="https://assets.game.web/images/ui/app/notepad.png" alt="">
                     <span>メモ帳</span>
                 </div>
-                <div class="desk-icon" ondblclick="launchApp('recyclebin')">
-                    <img src="https://assets.game.web/images/ui/app/gomibako.png" alt="">
-                    <span>ごみ箱</span>
-                </div>
             </div>
-            <!-- 右列: ゲーム設定 -->
+            <!-- 2列目: ゲームの設定ウィンドウ -->
             <div class="icon-column">
                 <div class="desk-icon" ondblclick="toggleWindow('diff')">
                     <img src="https://assets.game.web/images/ui/app/diff.png" alt="">
@@ -45,9 +45,16 @@
                     <img src="https://assets.game.web/images/ui/app/param.png" alt="">
                     <span>パラメータ</span>
                 </div>
+            </div>
+            <!-- 3列目: 説明とごみ箱。ルール説明は初回ガイドの締めで指し示すので先頭へ置く -->
+            <div class="icon-column">
                 <div class="desk-icon" id="icon-rules" ondblclick="toggleWindow('rules')">
                     <img src="https://assets.game.web/images/ui/app/Rules.png" alt="">
                     <span>ルール説明.txt</span>
+                </div>
+                <div class="desk-icon" ondblclick="launchApp('recyclebin')">
+                    <img src="https://assets.game.web/images/ui/app/gomibako.png" alt="">
+                    <span>ごみ箱</span>
                 </div>
             </div>
         </div>
