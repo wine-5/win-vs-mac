@@ -136,7 +136,9 @@ const FileView = (function () {
             wrap.className = 'file-slot';
 
             const row = document.createElement('div');
-            row.className = 'file-row' + (isSelected ? ' selected' : '') + (justLoaded ? ' anim-in' : '');
+            // 未選択の行は is-empty を付けてCSS側の誘導アニメーションを走らせる
+            row.className = 'file-row' + (isSelected ? ' selected' : '') +
+                (justLoaded ? ' anim-in' : '') + (isEmpty ? ' is-empty' : '');
             row.dataset.slot = i;
             row.onclick = function () { FileLogic.selectSlot(i); };
 

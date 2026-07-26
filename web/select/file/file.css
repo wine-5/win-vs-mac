@@ -134,6 +134,47 @@ body {
 
 .file-name.empty { color: var(--text-muted); font-style: italic; }
 
+/* ── 未選択スロットの「押せる」誘導 ──
+   何も装備していない状態は見た目が静かすぎて、クリックできる場所だと気づけない。
+   面・アイコン・文字をゆっくり同じ周期で明滅させ、行そのものが呼吸しているように見せる。
+   3行を少しずつ遅らせて波にすると、並んだスロット全体へ視線が動く */
+@keyframes emptySlotBreath {
+    0%, 100% { background: rgba(0, 120, 212, 0); }
+    50%      { background: rgba(0, 120, 212, 0.10); }
+}
+
+@keyframes emptyIconFloat {
+    0%, 100% { transform: translateY(0);    opacity: 0.5; }
+    50%      { transform: translateY(-3px); opacity: 1; }
+}
+
+@keyframes emptyTextPulse {
+    0%, 100% { opacity: 0.45; }
+    50%      { opacity: 0.95; }
+}
+
+.file-row.is-empty            { animation: emptySlotBreath 2.4s ease-in-out infinite; }
+.file-row.is-empty .file-icon { animation: emptyIconFloat  2.4s ease-in-out infinite; }
+.file-row.is-empty .file-name.empty { animation: emptyTextPulse 2.4s ease-in-out infinite; }
+
+.file-row.is-empty:nth-of-type(2),
+.file-row.is-empty:nth-of-type(2) .file-icon,
+.file-row.is-empty:nth-of-type(2) .file-name.empty { animation-delay: 0.35s; }
+
+.file-row.is-empty:nth-of-type(3),
+.file-row.is-empty:nth-of-type(3) .file-icon,
+.file-row.is-empty:nth-of-type(3) .file-name.empty { animation-delay: 0.7s; }
+
+/* カーソルが乗っている行は誘導をやめ、通常のホバー表示に任せる
+   （明滅し続けると「今どこを指しているか」が分かりにくくなるため） */
+.file-row.is-empty:hover,
+.file-row.is-empty:hover .file-icon,
+.file-row.is-empty:hover .file-name.empty {
+    animation: none;
+    opacity: 1;
+    transform: none;
+}
+
 .ext-badge {
     width: 32px;
     height: 32px;
