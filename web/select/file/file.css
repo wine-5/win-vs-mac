@@ -473,8 +473,21 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
     border: clamp(2px, 0.35vw, 3px) solid var(--accent);
     border-radius: clamp(6px, 1vw, 10px);
     padding: clamp(10px, 2.2vw, 28px) clamp(12px, 2.6vw, 32px);
-    box-shadow: 0 10px 44px rgba(0, 0, 0, 0.8);
-    animation: tutorial-tip-in 0.28s ease-out;
+    /* 出たあとも青い光がゆっくり明滅し続ける。
+       止まった枠のままだと画面に馴染んでしまい、読まれないまま見過ごされる */
+    animation: tutorial-tip-in 0.28s ease-out,
+               tutorial-tip-glow 2.2s ease-in-out 0.28s infinite;
+}
+
+@keyframes tutorial-tip-glow {
+    0%, 100% {
+        box-shadow: 0 10px 44px rgba(0, 0, 0, 0.8),
+                    0 0 0 0 rgba(0, 150, 255, 0);
+    }
+    50% {
+        box-shadow: 0 10px 44px rgba(0, 0, 0, 0.8),
+                    0 0 34px 5px rgba(0, 150, 255, 0.6);
+    }
 }
 
 /* 案内の対象が画面下端の一覧そのものになる段では、隠さないよう上へ回す */
@@ -488,10 +501,16 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
     to   { opacity: 1; transform: translateY(0); }
 }
 
+/* STEP表示は塗りつぶしのバッジにする。文字色だけだと背景に沈んで見出しに埋もれる */
 .tutorial-step {
+    display: inline-block;
     font-size: clamp(12px, 2.8vw, 24px);
+    font-weight: 700;
     letter-spacing: 0.1em;
-    color: var(--accent);
+    color: #fff;
+    background: var(--accent);
+    padding: clamp(2px, 0.5vw, 5px) clamp(8px, 1.6vw, 16px);
+    border-radius: 999px;
     margin-bottom: clamp(4px, 0.9vw, 10px);
 }
 
@@ -543,3 +562,33 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
 }
 
 .tutorial-next:hover { background: var(--accent-hover); }
+
+/* 案内と対象を線で結ぶ代わりに、光っている側を指す三角を出す。
+   段によって案内の位置が上下入れ替わるので、向きも合わせて切り替える */
+body.tutorial-focus-first-slot .tutorial-tip::after,
+body.tutorial-focus-bonus .tutorial-tip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    margin-left: clamp(-18px, -2vw, -10px);
+    border-left: clamp(10px, 2vw, 18px) solid transparent;
+    border-right: clamp(10px, 2vw, 18px) solid transparent;
+    animation: tutorial-arrow-nudge 1.4s ease-in-out infinite;
+}
+
+/* 対象が上（1つ目のスロット）にある段 */
+body.tutorial-focus-first-slot .tutorial-tip::after {
+    top: clamp(-18px, -2vw, -10px);
+    border-bottom: clamp(10px, 2vw, 18px) solid var(--accent);
+}
+
+/* 対象が下（拡張子ボーナス一覧）にある段 */
+body.tutorial-focus-bonus .tutorial-tip::after {
+    bottom: clamp(-18px, -2vw, -10px);
+    border-top: clamp(10px, 2vw, 18px) solid var(--accent);
+}
+
+@keyframes tutorial-arrow-nudge {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 1; }
+}
