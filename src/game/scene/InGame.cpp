@@ -70,6 +70,7 @@
 #include "game/system/combat/PlayerRangedAttackSystem.h"
 #include "game/system/combat/PlayerAttackComboSystem.h"
 #include "game/system/visual/PlayerChargeVisualsSystem.h"
+#include "game/system/visual/CriticalVisualsSystem.h"
 #include "game/system/camera/ChargeZoomSystem.h"
 #include "game/system/camera/DamageShakeSystem.h"
 #include "game/system/visual/MacAwakenEffectSystem.h"
@@ -496,6 +497,15 @@ namespace game::scene
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
 			m_playerId) };
 		m_view.setPlayerChargeVisualsSystem(chargeVisuals);
+
+		// クリティカルの瞬間に弾ける集中線
+		auto* criticalVisuals{ m_systemManager.registerSystem<game::system::visual::CriticalVisualsSystem>(
+			m_componentManager,
+			m_eventBus,
+			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+			*core::base::ServiceLocator::get<core::iface::IScreen>(),
+			m_playerId) };
+		m_view.setCriticalVisualsSystem(criticalVisuals);
 
 		// 虚空を流れるデータの光跡（背景の奥行きと動きを作る）
 		auto* backgroundParticles{ m_systemManager.registerSystem<game::system::visual::BackgroundParticleSystem>(

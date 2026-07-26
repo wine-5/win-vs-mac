@@ -16,6 +16,7 @@ namespace game::system::combat
 namespace game::system::visual
 {
 	class PlayerChargeVisualsSystem;
+	class CriticalVisualsSystem;
 	class MacAwakenEffectSystem;
 	class DetectionAlertVisualsSystem;
 	class AttackTelegraphVisualsSystem;
@@ -86,6 +87,12 @@ namespace game::scene
 		 * @param system PlayerChargeVisualsSystemのポインタ（所有はSystemManager）
 		 */
 		void setPlayerChargeVisualsSystem(system::visual::PlayerChargeVisualsSystem* system);
+
+		/**
+		 * @brief クリティカルの演出System（弾ける集中線の描画元）を設定する
+		 * @param system CriticalVisualsSystemのポインタ（所有はSystemManager）
+		 */
+		void setCriticalVisualsSystem(system::visual::CriticalVisualsSystem* system);
 
 		/**
 		 * @brief ボス覚醒演出System（赤ビネットの描画元）を設定する
@@ -258,6 +265,9 @@ namespace game::scene
 		// 溜め攻撃の集中線の描画元（描画内容はSystemが持ち、Viewは描画順だけを管理する）
 		// 所有はSystemManagerにあり、InGameがsetupSystemsで設定する
 		system::visual::PlayerChargeVisualsSystem* m_playerChargeVisualsSystem{ nullptr };
+
+		// クリティカルの集中線の描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
+		system::visual::CriticalVisualsSystem* m_criticalVisualsSystem{ nullptr };
 
 		// ボス覚醒演出の赤ビネットの描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::visual::MacAwakenEffectSystem* m_macAwakenEffectSystem{ nullptr };

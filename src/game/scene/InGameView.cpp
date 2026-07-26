@@ -11,6 +11,7 @@
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
 #include "game/system/visual/PlayerChargeVisualsSystem.h"
+#include "game/system/visual/CriticalVisualsSystem.h"
 #include "game/system/visual/MacAwakenEffectSystem.h"
 #include "game/system/visual/DetectionAlertVisualsSystem.h"
 #include "game/system/visual/DamagePopupSystem.h"
@@ -81,6 +82,10 @@ namespace game::scene
 		if (m_playerChargeVisualsSystem)
 			m_playerChargeVisualsSystem->draw();
 
+		// クリティカルの集中線。溜めの集中線と同じ層に、その手前で重ねる
+		if (m_criticalVisualsSystem)
+			m_criticalVisualsSystem->draw();
+
 		// ボス覚醒の赤ビネット（画面全体の演出。HUDより奥に描く）
 		if (m_macAwakenEffectSystem)
 			m_macAwakenEffectSystem->draw();
@@ -143,6 +148,11 @@ namespace game::scene
 	void InGameView::setPlayerChargeVisualsSystem(system::visual::PlayerChargeVisualsSystem* system)
 	{
 		m_playerChargeVisualsSystem = system;
+	}
+
+	void InGameView::setCriticalVisualsSystem(system::visual::CriticalVisualsSystem* system)
+	{
+		m_criticalVisualsSystem = system;
 	}
 
 	void InGameView::setMacAwakenEffectSystem(system::visual::MacAwakenEffectSystem* system)
