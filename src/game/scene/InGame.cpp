@@ -192,7 +192,8 @@ namespace game::scene
 	    , m_fileEquipmentData{ gameManager.getFileEquipmentData() }
 	    , m_effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() }
 	    , m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }
-	    , m_enemySpawner{ m_factoryManager, m_componentManager, m_resourceManager, m_eventBus }
+	    , m_enemySpawner{ m_factoryManager, m_componentManager, m_resourceManager, m_eventBus,
+		    gameManager.getDifficulty() }
 	    , m_projectileFactory{ m_entityManager, m_componentManager }
 	    // 実データは loadResources() で設定する（コライダー自動計算がモデルロード後に確定するため）
 	    , m_playerData{}

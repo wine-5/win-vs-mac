@@ -37,11 +37,13 @@ namespace game::factory
 	    FactoryManager& factoryManager,
 	    core::ecs::ComponentManager& componentManager,
 	    core::iface::IResourceManager& resourceManager,
-	    core::base::EventBus& eventBus)
+	    core::base::EventBus& eventBus,
+	    core::data::Difficulty difficulty)
 	    : m_factoryManager{ factoryManager }
 	    , m_componentManager{ componentManager }
 	    , m_resourceManager{ resourceManager }
 	    , m_eventBus{ eventBus }
+	    , m_difficulty{ difficulty }
 	{
 	}
 
@@ -65,7 +67,7 @@ namespace game::factory
 			throw std::runtime_error("敵メタデータの読み込みに失敗しました");
 		}
 
-		data::EnemyData enemyData{ data::EnemyData::fromMetadata(meta.value()) };
+		data::EnemyData enemyData{ data::EnemyData::fromMetadata(meta.value(), m_difficulty) };
 		enemyData.setPosition(position); // 位置は呼び出し側の指定が正
 		const auto enemyId{ m_factoryManager.getEnemyFactory().create(modelHandle, enemyData) };
 
