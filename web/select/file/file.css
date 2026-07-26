@@ -467,8 +467,9 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
     right: 1.5vw;
     bottom: 4vh;
     z-index: 50;
-    max-height: 62vh;
-    overflow-y: auto;
+    /* 枠の外へ出す矢印を切り取らせないため、ここでは隠さない。
+       長文であふれる可能性がある本文側だけをスクロールさせる */
+    overflow: visible;
     background: rgba(20, 20, 22, 0.98);
     border: clamp(2px, 0.35vw, 3px) solid var(--accent);
     border-radius: clamp(6px, 1vw, 10px);
@@ -526,6 +527,8 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
     font-size: clamp(15px, 3.8vw, 34px);
     line-height: 1.55;
     color: var(--text);
+    max-height: 40vh;
+    overflow-y: auto;
 }
 
 .tutorial-actions {
@@ -563,32 +566,61 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
 
 .tutorial-next:hover { background: var(--accent-hover); }
 
-/* 案内と対象を線で結ぶ代わりに、光っている側を指す三角を出す。
-   段によって案内の位置が上下入れ替わるので、向きも合わせて切り替える */
+/* ── 光っている対象を指す矢印 ──
+   案内と対象が離れていると視線がつながらないので、軸と頭を持つ矢印で結ぶ。
+   段によって案内の位置が上下入れ替わるため、向きも合わせて切り替える。
+   ::before が軸、::after が頭。跳ねる動きで視線を対象へ往復させる */
+body.tutorial-focus-first-slot .tutorial-tip::before,
+body.tutorial-focus-bonus .tutorial-tip::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: clamp(4px, 0.8vw, 7px);
+    height: clamp(26px, 5vw, 46px);
+    margin-left: clamp(-3.5px, -0.4vw, -2px);
+    background: var(--accent);
+    box-shadow: 0 0 12px rgba(0, 150, 255, 0.8);
+    animation: tutorial-arrow-bounce 1.2s ease-in-out infinite;
+}
+
 body.tutorial-focus-first-slot .tutorial-tip::after,
 body.tutorial-focus-bonus .tutorial-tip::after {
     content: '';
     position: absolute;
     left: 50%;
-    margin-left: clamp(-18px, -2vw, -10px);
-    border-left: clamp(10px, 2vw, 18px) solid transparent;
-    border-right: clamp(10px, 2vw, 18px) solid transparent;
-    animation: tutorial-arrow-nudge 1.4s ease-in-out infinite;
+    margin-left: clamp(-20px, -2.2vw, -12px);
+    border-left: clamp(12px, 2.2vw, 20px) solid transparent;
+    border-right: clamp(12px, 2.2vw, 20px) solid transparent;
+    filter: drop-shadow(0 0 10px rgba(0, 150, 255, 0.8));
+    animation: tutorial-arrow-bounce 1.2s ease-in-out infinite;
 }
 
-/* 対象が上（1つ目のスロット）にある段 */
+/* 対象が上（1つ目のスロット）にある段：案内の上へ上向きの矢印を伸ばす */
+body.tutorial-focus-first-slot .tutorial-tip::before {
+    bottom: 100%;
+    margin-bottom: clamp(6px, 1.2vw, 11px);
+}
+
 body.tutorial-focus-first-slot .tutorial-tip::after {
-    top: clamp(-18px, -2vw, -10px);
-    border-bottom: clamp(10px, 2vw, 18px) solid var(--accent);
+    bottom: 100%;
+    margin-bottom: clamp(30px, 6vw, 55px);
+    border-bottom: clamp(16px, 3vw, 28px) solid var(--accent);
 }
 
-/* 対象が下（拡張子ボーナス一覧）にある段 */
+/* 対象が下（拡張子ボーナス一覧）にある段：案内の下へ下向きの矢印を伸ばす */
+body.tutorial-focus-bonus .tutorial-tip::before {
+    top: 100%;
+    margin-top: clamp(6px, 1.2vw, 11px);
+}
+
 body.tutorial-focus-bonus .tutorial-tip::after {
-    bottom: clamp(-18px, -2vw, -10px);
-    border-top: clamp(10px, 2vw, 18px) solid var(--accent);
+    top: 100%;
+    margin-top: clamp(30px, 6vw, 55px);
+    border-top: clamp(16px, 3vw, 28px) solid var(--accent);
 }
 
-@keyframes tutorial-arrow-nudge {
-    0%, 100% { opacity: 0.55; }
-    50%      { opacity: 1; }
+/* 対象の側へ跳ねる。向きは上下どちらでも同じ動きで通じる */
+@keyframes tutorial-arrow-bounce {
+    0%, 100% { opacity: 0.6; transform: translateY(0); }
+    50%      { opacity: 1;   transform: translateY(-6px); }
 }
