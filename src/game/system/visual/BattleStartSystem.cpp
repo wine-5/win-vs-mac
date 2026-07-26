@@ -459,8 +459,10 @@ namespace game::system::visual
 		m_uiRenderer.setFont(MONO_FONT_NAME);
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
 		    static_cast<int>(255 * alphaRate));
+		// 開戦の合図は青い床の上でも沈まないオレンジで出す。
+		// READY（白）→ FIGHT!（オレンジ）と色を変えることで、切り替わった瞬間も分かりやすい
 		m_uiRenderer.drawText(centerX - textWidth / 2, textY, FIGHT_TEXT,
-		    core::utility::Color::HUD_CHARGE_CYAN, fontSize);
+		    core::utility::Color::HUD_CRITICAL_ORANGE, fontSize);
 		m_uiRenderer.resetBlendMode();
 		m_uiRenderer.resetFont();
 
@@ -474,7 +476,7 @@ namespace game::system::visual
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD,
 		    static_cast<int>(255 * alphaRate));
 		m_uiRenderer.drawBox(centerX - halfWidth, lineY, halfWidth * 2, scaled(LINE_THICKNESS),
-		    core::utility::Color::HUD_ACCENT, true);
+		    core::utility::Color::HUD_CRITICAL_ORANGE, true);
 		m_uiRenderer.resetBlendMode();
 	}
 } // namespace game::system::visual
