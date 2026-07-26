@@ -200,8 +200,9 @@ namespace platform::window::select
 	{
         if (!m_parameterWindow) return;
 
+		ParameterStats stats{};
+
 		// 基礎ステータスは playerData.json のメタデータを唯一の情報源とする
-		float baseHp{}, baseAtk{}, baseDef{}, baseSpd{};
 		if (const auto meta{ m_resourceManager.getMetadata(game::constant::model_id::PLAYER) })
 		{
 			const auto& props{ meta->floatProperties };
@@ -210,29 +211,26 @@ namespace platform::window::select
 				    if (const auto it{ props.find(std::string{ key }) }; it != props.end())
 					    out = it->second;
 				} };
-			read(game::constant::metadata_keys::MAX_HP, baseHp);
-			read(game::constant::metadata_keys::ATTACK_POWER, baseAtk);
-			read(game::constant::metadata_keys::DEFENCE, baseDef);
-			read(game::constant::metadata_keys::MOVE_SPEED, baseSpd);
+			read(game::constant::metadata_keys::MAX_HP, stats.m_hp.m_base);
+			read(game::constant::metadata_keys::ATTACK_POWER, stats.m_atk.m_base);
+			read(game::constant::metadata_keys::DEFENCE, stats.m_def.m_base);
+			read(game::constant::metadata_keys::MOVE_SPEED, stats.m_spd.m_base);
 		}
 
-		float bonusHp{}, bonusAtk{}, bonusDef{}, bonusSpd{};
         for (int i = 0; i < FILE_SLOT_COUNT; ++i)
         {
             if (!m_slotPaths[i].empty())
             {
 				const auto& bonus = m_resourceManager.getExtensionBonus(m_slotExtTypes[i]);
-				bonusHp  += bonus.hp;
-                bonusAtk += bonus.atk;
-                bonusDef += bonus.def;
-                bonusSpd += bonus.spd;
-            }
+				stats.m_hp.m_bonus += bonus.hp;
+				stats.m_atk.m_bonus += bonus.atk;
+				stats.m_def.m_bonus += bonus.def;
+				stats.m_spd.m_bonus += bonus.spd;
+			}
         }
 
-		m_parameterWindow->refresh(
-		    baseHp, baseAtk, baseDef, baseSpd,
-		    bonusHp, bonusAtk, bonusDef, bonusSpd,
-		    countEquippedSlots());
+		stats.m_equippedSlots = countEquippedSlots();
+		m_parameterWindow->refresh(stats);
 	}
 
     void Win32SelectWindowManager::handleDesktopMessage(const std::string& json) noexcept

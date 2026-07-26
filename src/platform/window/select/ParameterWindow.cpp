@@ -12,27 +12,24 @@ namespace platform::window::select
 	{
     }
 
-    void ParameterWindow::refresh(
-        float baseHp, float baseAtk, float baseDef, float baseSpd,
-        float bonusHp, float bonusAtk, float bonusDef, float bonusSpd,
-        int equippedSlots) noexcept
-    {
+	void ParameterWindow::refresh(const ParameterStats& stats) noexcept
+	{
         if (!m_webView.isReady()) return;
 
         try
         {
             nlohmann::json j;
-            j[platform::window::WindowConstants::JSON_KEY_TYPE]     = platform::window::WindowConstants::MESSAGE_TYPE_REFRESH;
-            j[platform::window::WindowConstants::JSON_KEY_BASE_HP]   = baseHp;
-            j[platform::window::WindowConstants::JSON_KEY_BASE_ATK]  = baseAtk;
-            j[platform::window::WindowConstants::JSON_KEY_BASE_DEF]  = baseDef;
-            j[platform::window::WindowConstants::JSON_KEY_BASE_SPD]  = baseSpd;
-            j[platform::window::WindowConstants::JSON_KEY_BONUS_HP]  = bonusHp;
-            j[platform::window::WindowConstants::JSON_KEY_BONUS_ATK] = bonusAtk;
-            j[platform::window::WindowConstants::JSON_KEY_BONUS_DEF] = bonusDef;
-            j[platform::window::WindowConstants::JSON_KEY_BONUS_SPD] = bonusSpd;
-            j[platform::window::WindowConstants::JSON_KEY_SLOT]     = equippedSlots;
-            m_webView.postMessage(j.dump());
+			j[platform::window::WindowConstants::JSON_KEY_TYPE] = platform::window::WindowConstants::MESSAGE_TYPE_REFRESH;
+			j[platform::window::WindowConstants::JSON_KEY_BASE_HP] = stats.m_hp.m_base;
+			j[platform::window::WindowConstants::JSON_KEY_BASE_ATK] = stats.m_atk.m_base;
+			j[platform::window::WindowConstants::JSON_KEY_BASE_DEF] = stats.m_def.m_base;
+			j[platform::window::WindowConstants::JSON_KEY_BASE_SPD] = stats.m_spd.m_base;
+			j[platform::window::WindowConstants::JSON_KEY_BONUS_HP] = stats.m_hp.m_bonus;
+			j[platform::window::WindowConstants::JSON_KEY_BONUS_ATK] = stats.m_atk.m_bonus;
+			j[platform::window::WindowConstants::JSON_KEY_BONUS_DEF] = stats.m_def.m_bonus;
+			j[platform::window::WindowConstants::JSON_KEY_BONUS_SPD] = stats.m_spd.m_bonus;
+			j[platform::window::WindowConstants::JSON_KEY_SLOT] = stats.m_equippedSlots;
+			m_webView.postMessage(j.dump());
         }
 		catch (const std::exception& e)
 		{
