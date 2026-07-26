@@ -22,6 +22,7 @@
 #include "game/data/PlayerData.h"
 #include "game/data/FileEquipmentData.h"
 #include "game/event/AudioEventListener.h"
+#include "game/HitStop.h"
 #include "game/factory/ProjectileFactory.h"
 #include "game/scene/InGameView.h"
 #include <memory>
@@ -193,6 +194,9 @@ namespace game::scene
 
 		// 敵の頭上HPバーのView
 		std::unique_ptr<ui::ingame::EnemyHealthBarView> m_enemyHealthBarView;
+
+		// クリティカル・撃破の瞬間に時間を止める
+		HitStop m_hitStop{};
 
 		// 進行トラッキング
 		float m_elapsedTime{0.0f};

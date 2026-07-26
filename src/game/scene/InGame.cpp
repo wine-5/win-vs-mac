@@ -326,14 +326,16 @@ namespace game::scene
 
 	void InGame::logPlayerParameters(const char* label) const
 	{
-		core::log::info("Player[{}] HP={} ATK={} DEF={} SPD={} 攻撃範囲={} クールダウン={}",
+		core::log::info("Player[{}] HP={} ATK={} DEF={} SPD={} 攻撃範囲={} クールダウン={} 会心率={} 会心倍率={}",
 		    label,
 		    m_playerData.getMaxHp(),
 		    m_playerData.getAttackPower(),
 		    m_playerData.getDefence(),
 		    m_playerData.getMoveSpeed(),
 		    m_playerData.getAttackRange(),
-		    m_playerData.getAttackCooldown());
+		    m_playerData.getAttackCooldown(),
+		    m_playerData.getCriticalRate(),
+		    m_playerData.getCriticalMultiplier());
 	}
 
 	void InGame::spawnEntities()
@@ -543,7 +545,12 @@ namespace game::scene
 		    {
 				// 被ダメージ追跡（プレイヤーが攻撃を受けた場合）
 				if (e.m_targetId == m_playerId)
-					m_totalDamageTaken += e.m_damage; }));
+					m_totalDamageTaken += e.m_damage;
+
+				// クリティカルの瞬間に一拍止めて会心の手応えを作る。
+				// 与えたときだけで、被弾側では止めない（操作不能時間は理不尽に感じるため）
+				if (e.m_isCritical && e.m_targetId != m_playerId)
+					m_hitStop.requestOnCritical(); }));
 		// プレイヤー死亡演出の完了イベントの購読。
 		// HPが尽きた瞬間（PlayerDeadEvent）ではなく、死亡アニメと暗転を見せ終えてから遷移する。
 		// 演出中もモデルは表示し続ける（非表示にすると死亡アニメが見えなくなる）
@@ -576,6 +583,13 @@ namespace game::scene
 				    m_componentManager.get<component::ai::AIComponent>(e.m_entityId).m_isActive = false;
 
 			    m_killCount++;
+
+			    // 撃破の瞬間に時間を止めて「仕留めた」手応えを返す。
+			    // 止め方（長さ・スロー具合）はHitStopが決めるので、ここは何が起きたかだけを伝える
+			    if (e.m_entityId == m_macId)
+				    m_hitStop.requestOnBossKilled();
+			    else
+				    m_hitStop.requestOnEnemyKilled();
 
 			    // 開始時の雑魚を全滅させたらボスを出現させる。
 			    // 集合に無いID（ボスの召喚した雑魚・ボス自身）はここでは無視される
@@ -663,8 +677,13 @@ namespace game::scene
 			return;
 		}
 
-		m_elapsedTime += deltaTime;
-		m_systemManager.update(deltaTime);
+		// ヒットストップ中はSystemへ渡す時間に倍率を掛ける（0なら何も進まない）。
+		// 経過時間の計測もここへ揃える。止まっている間もタイマーだけ進むと、
+		// 画面が止まっているのに右上の秒数だけ動いて不自然になる
+		const float scaledDeltaTime{ m_hitStop.apply(deltaTime) };
+
+		m_elapsedTime += scaledDeltaTime;
+		m_systemManager.update(scaledDeltaTime);
 
 		// DEBUG: Tキーでプレイヤー位置にテストエフェクト（Enemy_Spawn）を再生する（テスト後に削除）
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::T))
