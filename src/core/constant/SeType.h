@@ -1,4 +1,7 @@
 #pragma once
+#include <array>
+#include <string_view>
+#include <utility>
 
 namespace core::constant
 {
@@ -40,6 +43,49 @@ namespace core::constant
 		UiKeyPress,   // 選択の移動・キー入力
 		UiFileSelect, // 装備するファイルを決定した
 
-		// 今後追加したら AudioRepository の typeMap にも追加を忘れないように
-    };
+		// 今後追加したら SE_TYPE_NAMES にも追加を忘れないように
+	};
+
+	/**
+	 * @brief JSONに書くSE名と列挙の対応表
+	 *
+	 * resources.json の音源定義と、敵の定義JSON（叩きつけ音など）の両方がこの名前を使う。
+	 * 対応表を1つに保つことで、書ける名前がファイルごとにずれないようにする
+	 */
+	inline constexpr std::array<std::pair<std::string_view, SeType>, 19> SE_TYPE_NAMES{ {
+		{ "PlayerSwing1", SeType::PlayerSwing1 },
+		{ "PlayerSwing2", SeType::PlayerSwing2 },
+		{ "PlayerCharge", SeType::PlayerCharge },
+		{ "HitWindow", SeType::HitWindow },
+		{ "HitChargedWindow", SeType::HitChargedWindow },
+		{ "Critical", SeType::Critical },
+		{ "HitEnemy", SeType::HitEnemy },
+		{ "HitPlayer", SeType::HitPlayer },
+		{ "DeadEnemy", SeType::DeadEnemy },
+		{ "DeadPlayer", SeType::DeadPlayer },
+		{ "PlayerJump", SeType::PlayerJump },
+		{ "PlayerFootstep", SeType::PlayerFootstep },
+		{ "EnemyAlert", SeType::EnemyAlert },
+		{ "EnemySlam", SeType::EnemySlam },
+		{ "BattleReady", SeType::BattleReady },
+		{ "BattleFight", SeType::BattleFight },
+		{ "UiClick", SeType::UiClick },
+		{ "UiKeyPress", SeType::UiKeyPress },
+		{ "UiFileSelect", SeType::UiFileSelect },
+	} };
+
+	/**
+	 * @brief JSONに書かれたSE名を列挙へ変換する
+	 * @param name SE名（SE_TYPE_NAMES のいずれか）
+	 * @return 対応する種別。知らない名前ならNone（＝無音）
+	 */
+	[[nodiscard]] constexpr SeType toSeType(std::string_view name) noexcept
+	{
+		for (const auto& [key, type] : SE_TYPE_NAMES)
+		{
+			if (key == name)
+				return type;
+		}
+		return SeType::None;
+	}
 } // namespace core::constant

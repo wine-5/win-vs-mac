@@ -90,35 +90,15 @@ namespace infrastructure::resource::repository
 	{
 		if (!json.contains("se")) return;
 
-		const std::unordered_map<std::string, core::constant::SeType> typeMap{
-			{ "PlayerSwing1", core::constant::SeType::PlayerSwing1 },
-			{ "PlayerSwing2", core::constant::SeType::PlayerSwing2 },
-			{ "PlayerCharge", core::constant::SeType::PlayerCharge },
-			{ "HitWindow", core::constant::SeType::HitWindow },
-			{ "HitChargedWindow", core::constant::SeType::HitChargedWindow },
-			{ "Critical", core::constant::SeType::Critical },
-			{ "HitEnemy", core::constant::SeType::HitEnemy },
-			{ "HitPlayer", core::constant::SeType::HitPlayer },
-			{ "DeadEnemy", core::constant::SeType::DeadEnemy },
-			{ "DeadPlayer", core::constant::SeType::DeadPlayer },
-			{ "PlayerJump", core::constant::SeType::PlayerJump },
-			{ "PlayerFootstep", core::constant::SeType::PlayerFootstep },
-			{ "EnemyAlert", core::constant::SeType::EnemyAlert },
-			{ "EnemySlam", core::constant::SeType::EnemySlam },
-			{ "BattleReady", core::constant::SeType::BattleReady },
-			{ "BattleFight", core::constant::SeType::BattleFight },
-			{ "UiClick", core::constant::SeType::UiClick },
-			{ "UiKeyPress", core::constant::SeType::UiKeyPress },
-			{ "UiFileSelect", core::constant::SeType::UiFileSelect },
-		};
-
 		for (const auto& entry : json["se"])
 		{
 			const std::string key  { entry["type"] };
 			const std::string path { entry["path"] };
 
-			auto it{ typeMap.find(key) };
-			if (it == typeMap.end()) continue;
+			// 名前と種別の対応は SeType.h の SE_TYPE_NAMES に一本化している
+			const core::constant::SeType type{ core::constant::toSeType(key) };
+			if (type == core::constant::SeType::None)
+				continue;
 
 			if (!entry.contains("volume"))
 				throw std::runtime_error{ "se '" + key + "' に必須フィールド (volume) が設定されていません" };
@@ -130,7 +110,7 @@ namespace infrastructure::resource::repository
 			config.m_handle = handle;
 			config.m_volume = entry["volume"].get<float>();
 
-			m_seConfigs[it->second] = config;
+			m_seConfigs[type] = config;
 		}
 	}
 } // namespace infrastructure::resource::repository
