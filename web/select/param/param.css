@@ -67,6 +67,15 @@ body {
     min-width: 24px;
 }
 
+/* 英字の略称だけでは何の値か伝わらないため、日本語の呼び名を小さく添える。
+   主役は数値なので、略称よりさらに落としたトーンにする */
+.metric-key-note {
+    font-size: 9px;
+    color: var(--text-muted);
+    opacity: 0.65;
+    white-space: nowrap;
+}
+
 .metric-val { font-size: 12px; font-weight: 700; color: var(--text); }
 
 .metric-bonus {
