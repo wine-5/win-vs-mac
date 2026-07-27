@@ -114,6 +114,11 @@ namespace game::data
 		  if (fireCooldownIt != properties.end())
 			  data.m_fireCooldown = fireCooldownIt->second;
 
+		  auto attackImpactEffectLeadIt{ properties.find(
+			  std::string(constant::metadata_keys::ATTACK_IMPACT_EFFECT_LEAD)) };
+		  if (attackImpactEffectLeadIt != properties.end())
+			  data.m_attackImpactEffectLead = attackImpactEffectLeadIt->second;
+
 		  auto facingYawOffsetIt{ properties.find(
 			  std::string(constant::metadata_keys::FACING_YAW_OFFSET)) };
 		  if (facingYawOffsetIt != properties.end())
@@ -270,6 +275,12 @@ namespace game::data
 			return m_attackImpactEffect;
 		}
 
+		/** @brief 着弾エフェクトを当たる瞬間より何秒早く出すかを取得（未設定なら0＝ちょうど） */
+		[[nodiscard]] float getAttackImpactEffectLead() const noexcept
+		{
+			return m_attackImpactEffectLead;
+		}
+
 		/** @brief アニメーションクリップ定義の一覧を取得（アニメ無しの敵では空） */
 		[[nodiscard]] const std::vector<core::data::AnimationClipDef>& getAnimations() const noexcept
 		{
@@ -291,6 +302,7 @@ namespace game::data
 	  float m_preferredDistanceMax{ 0.0f };
 	  float m_fireCooldown{ 0.0f };
 	  float m_facingYawOffset{ 0.0f };
+	  float m_attackImpactEffectLead{ 0.0f };                                  // 着弾エフェクトの先出し秒数
 	  core::constant::SeType m_attackImpactSe{ core::constant::SeType::None }; // 攻撃が当たる瞬間のSE
 	  core::constant::EffectType m_attackImpactEffect{ core::constant::EffectType::None }; // 攻撃が当たる瞬間のエフェクト
 	  core::Vector3 m_colliderSize;

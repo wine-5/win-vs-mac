@@ -21,6 +21,7 @@ namespace game::constant
 		constexpr std::string_view ATTACK_COOLDOWN = "attackCooldown";
 		constexpr std::string_view ATTACK_WINDUP = "attackWindup";
 		constexpr std::string_view ATTACK_MAX_HEIGHT = "attackMaxHeight";
+		constexpr std::string_view ATTACK_IMPACT_EFFECT_LEAD = "attackImpactEffectLead";
 		constexpr std::string_view COMBO_INPUT_WINDOW = "comboInputWindow";
 		constexpr std::string_view COMBO_STAGE2_MULTIPLIER = "comboStage2Multiplier";
 		constexpr std::string_view CRITICAL_RATE = "criticalRate";

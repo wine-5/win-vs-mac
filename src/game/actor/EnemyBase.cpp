@@ -70,6 +70,7 @@ namespace game::actor
 		attack.m_attackMaxHeight = m_enemyData.getAttackMaxHeight();
 		attack.m_impactSeType = m_enemyData.getAttackImpactSe();
 		attack.m_impactEffectType = m_enemyData.getAttackImpactEffect();
+		attack.m_impactEffectLead = m_enemyData.getAttackImpactEffectLead();
 		m_componentManager.add<component::combat::AttackComponent>(m_entity.getId(), attack);
 
 		component::combat::ColliderComponent collider{};

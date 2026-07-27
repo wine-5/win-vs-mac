@@ -68,5 +68,13 @@ namespace game::component::combat
 		// ダメージ判定が成立する瞬間に出すエフェクト。地面を叩きつける攻撃の土煙のように、
 		// 「振り始め」ではなく「当たる瞬間」に置きたい演出のために持つ。Noneなら演出無し
 		core::constant::EffectType m_impactEffectType{ core::constant::EffectType::None };
+
+		// 着弾エフェクトを当たる瞬間より何秒早く出すか。エフェクトは絵が育つまでに間があるため、
+		// 音と同時に出すと土煙が立ち上がる頃には叩きつけが終わっている。0なら当たる瞬間ちょうど
+		float m_impactEffectLead{ 0.0f };
+
+		// このワインドアップ中に着弾エフェクトを出し終えたか。
+		// 先出しは1回だけにしたいので、振りごとにAttackSystemが倒す
+		bool m_hasPlayedImpactEffect{ false };
 	};
 } // namespace game::component::combat

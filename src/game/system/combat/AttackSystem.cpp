@@ -63,16 +63,33 @@ namespace game::system::combat
 			if (attack.m_windupPending)
 			{
 				attack.m_windupTimer -= deltaTime;
+
+				// エフェクトだけは着弾より先に出す。土煙のように絵が立ち上がるまで間のある演出は、
+				// 音と同時に出すと叩きつけが終わってから盛り上がってしまう
+				if (!attack.m_hasPlayedImpactEffect &&
+				    attack.m_impactEffectType != core::constant::EffectType::None &&
+				    attack.m_windupTimer <= attack.m_impactEffectLead)
+				{
+					attack.m_hasPlayedImpactEffect = true;
+					m_eventBus.publish(event::AttackImpactEvent{ attackerId, core::constant::SeType::None,
+					    attack.m_impactEffectType });
+				}
+
 				if (attack.m_windupTimer <= 0.0f)
 				{
 					attack.m_windupPending = false;
 
 					// 振り終わり＝地面を叩く瞬間。当たったかどうかに関係なく出したいので、
-					// ヒット判定（resolveAttack）より前に発行する
+					// ヒット判定（resolveAttack）より前に発行する。
+					// エフェクトを先出し済みならここでは音だけ鳴らす
+					const core::constant::EffectType impactEffect{ attack.m_hasPlayedImpactEffect
+						                                               ? core::constant::EffectType::None
+						                                               : attack.m_impactEffectType };
+
 					if (attack.m_impactSeType != core::constant::SeType::None ||
-					    attack.m_impactEffectType != core::constant::EffectType::None)
+					    impactEffect != core::constant::EffectType::None)
 						m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType,
-						    attack.m_impactEffectType });
+						    impactEffect });
 
 					// 攻撃者が倒された場合はこのフレームへ到達しない（先頭で溜めごと打ち切る）
 					resolveAttack(attackerId, attack);
@@ -147,6 +164,7 @@ namespace game::system::combat
 			{
 				attack.m_windupPending = true;
 				attack.m_windupTimer = attack.m_windupDelay;
+				attack.m_hasPlayedImpactEffect = false;
 				continue;
 			}
 

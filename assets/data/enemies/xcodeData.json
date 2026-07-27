@@ -19,7 +19,8 @@
     "attackWindup": 1.5,
     "attackMaxHeight": 30.0,
     "attackImpactSe": "EnemySlam",
-    "attackImpactEffect": "Xcode_GroundSlam"
+    "attackImpactEffect": "Xcode_GroundSlam",
+    "attackImpactEffectLead": 1.0
   },
   "hard": {
     "moveSpeed": 320.0,
