@@ -185,12 +185,14 @@ void Application::updatePauseMenu()
 
 bool Application::canOpenPauseMenu(game::scene::SceneType sceneType) const noexcept
 {
-	// Bios（Escをスキップに使用）・Loading（中断不可）・Result（専用UIあり）では開かない
+	// Bios（Escをスキップに使用）・Loading（中断不可）・Result（専用UIあり）では開かない。
+	// Selectも開かない。デスクトップのウィンドウは常時最前面で、ポーズ中はそれを引っ込める
+	// 必要があり、画面が丸ごと消えたように見える。代わりにデスクトップのアイコンから
+	// タイトルへ戻る／終了できるようにしてある
 	switch (sceneType)
 	{
 	case game::scene::SceneType::Title:
 	case game::scene::SceneType::Lockscreen:
-	case game::scene::SceneType::Select:
 	case game::scene::SceneType::InGame:
 		return true;
 	default:
@@ -201,8 +203,7 @@ bool Application::canOpenPauseMenu(game::scene::SceneType sceneType) const noexc
 bool Application::allowBackToTitle(game::scene::SceneType sceneType) const noexcept
 {
 	// タイトルより後のシーンでのみ「タイトルへ戻る」を表示する
-	return sceneType == game::scene::SceneType::Select ||
-	       sceneType == game::scene::SceneType::InGame;
+	return sceneType == game::scene::SceneType::InGame;
 }
 
 int Application::preloadBudgetMs(game::scene::SceneType sceneType) const noexcept
