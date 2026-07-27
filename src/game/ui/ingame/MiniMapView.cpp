@@ -7,9 +7,12 @@
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/EnemyTypeComponent.h"
+#include "game/component/ai/AIComponent.h"
 #include "game/constant/Tag.h"
 #include "game/constant/EnemyType.h"
+#include "core/utility/MathConstants.h"
 #include "game/utility/MiniMapProjection.h"
+#include <algorithm>
 #include <array>
 #include <cmath>
 
@@ -45,6 +48,21 @@ namespace
 	constexpr int ARROW_HALF_HEIGHT{ 7 };
 	constexpr int ARROW_HALF_WIDTH{ 5 };
 	constexpr int ARROW_TAIL{ 3 }; // 後端のくびれ
+
+	// 発見されている間の赤い警告（1080p基準）
+	constexpr unsigned int COLOR_ALERT{ 0xFFE81123 };
+	// マップ全体に薄く被せる赤。地形が読める濃さに留める
+	constexpr int ALERT_WASH_ALPHA{ 54 };
+	// 縁のにじみ。層ごとに位置をずらして描くので、濃淡は層ごとの不透明度で作る
+	constexpr int ALERT_GLOW_LAYERS{ 10 };
+	constexpr int ALERT_GLOW_DEPTH{ 34 };  // にじみが内側へ届く深さ
+	constexpr int ALERT_GLOW_ALPHA{ 110 }; // 最も外側の層の明るさ（内へ向かって0まで落とす）
+	constexpr int ALERT_GLOW_THICKNESS{ 3 };
+	// 縁そのものの赤い線。輪郭をはっきり出して「囲まれている」感を作る
+	constexpr int ALERT_BORDER_ALPHA{ 235 };
+	constexpr int ALERT_BORDER_THICKNESS{ 2 };
+	constexpr float ALERT_PULSE_PERIOD{ 1.1f }; // 明滅の周期（秒）
+	constexpr float ALERT_PULSE_FLOOR{ 0.40f }; // 明滅の下限。消えきらせず「ずっと危険」を保つ
 
 	// 敵・ボスの点（1080p基準）
 	constexpr int ENEMY_MARKER_SIZE{ 3 };
@@ -238,6 +256,72 @@ namespace game::ui::ingame
 		}
 	}
 
+	bool MiniMapView::isPlayerDetected() const
+	{
+		const auto entities{ m_componentManager.getAllEntities<component::ai::AIComponent>() };
+
+		for (const auto entityId : entities)
+		{
+			const auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
+			if (!ai.m_isActive || !ai.m_wasAware)
+				continue;
+
+			// 死亡直後はAIが止まる前に1フレーム残ることがあるので念のため弾く
+			if (const auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(entityId) })
+			{
+				if (health->m_isDead)
+					continue;
+			}
+			return true;
+		}
+		return false;
+	}
+
+	void MiniMapView::drawAlertGlow(int x, int y, int size)
+	{
+		const float elapsed{ std::chrono::duration<float>(
+			std::chrono::steady_clock::now() - m_startTime)
+			    .count() };
+
+		// ゆっくり息をするような明滅。点滅させると地形が読めなくなるので振れ幅は小さくする
+		const float wave{ 0.5f + 0.5f * std::sin(elapsed / ALERT_PULSE_PERIOD * core::utility::TWO_PI) };
+		const float pulse{ ALERT_PULSE_FLOOR + (1.0f - ALERT_PULSE_FLOOR) * wave };
+
+		const int depth{ scaled(ALERT_GLOW_DEPTH) };
+		const int radius{ scaled(MAP_CORNER_RADIUS) };
+
+		// マップ全体を赤く染める。ここで「今は平常時ではない」ことをまず伝える
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+		    static_cast<int>(ALERT_WASH_ALPHA * pulse));
+		m_uiRenderer.drawRoundedBox(x, y, size, size, radius, COLOR_ALERT, true, 1);
+
+		// 縁から内側へ、太めの枠を少しずつ小さくしながら重ねる。
+		// 層ごとに位置が違って重ならないため、濃淡は層ごとの不透明度で作る
+		for (int i{ 0 }; i < ALERT_GLOW_LAYERS; ++i)
+		{
+			const float falloff{ 1.0f - static_cast<float>(i) / ALERT_GLOW_LAYERS };
+			const int alpha{ static_cast<int>(ALERT_GLOW_ALPHA * falloff * falloff * pulse) };
+			if (alpha <= 0)
+				continue;
+
+			const int inset{ depth * i / ALERT_GLOW_LAYERS };
+			const int side{ size - inset * 2 };
+			if (side <= 0)
+				break;
+
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, alpha);
+			m_uiRenderer.drawRoundedBox(x + inset, y + inset, side, side,
+			    radius, COLOR_ALERT, false, std::max(1, scaled(ALERT_GLOW_THICKNESS)));
+		}
+
+		// いちばん外の輪郭をはっきり出して、赤い枠に囲まれている状態を作る
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+		    static_cast<int>(ALERT_BORDER_ALPHA * pulse));
+		m_uiRenderer.drawRoundedBox(x, y, size, size, radius, COLOR_ALERT, false,
+		    std::max(1, scaled(ALERT_BORDER_THICKNESS)));
+		m_uiRenderer.resetBlendMode();
+	}
+
 	void MiniMapView::drawPlayerArrow(int centerX, int centerY)
 	{
 		// 回転式なので自機は常に中心・常に上向き。矢印そのものは回さない
@@ -287,5 +371,9 @@ namespace game::ui::ingame
 		m_uiRenderer.resetClipArea();
 
 		drawPlayerArrow(centerX, centerY);
+
+		// 発見されている間だけ縁が赤く滲む。地形の上に重ねて最後に描く
+		if (isPlayerDetected())
+			drawAlertGlow(mapX, mapY, size);
 	}
 } // namespace game::ui::ingame

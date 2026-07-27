@@ -5,6 +5,7 @@
 #include "core/utility/Vector3.h"
 #include "game/utility/MiniMapProjection.h"
 #include "HudPanel.h"
+#include <chrono>
 
 namespace game::ui::ingame
 {
@@ -105,6 +106,26 @@ namespace game::ui::ingame
 		    int radius, unsigned int color, int markerSize, bool isBoss);
 
 		/**
+		 * @brief いずれかの敵に発見されているかを返す
+		 *
+		 * 発見の瞬間だけでなく「今も追われているか」を見たいので、
+		 * イベントではなくAIComponentの索敵状態を毎フレーム読む
+		 * @return 生存中の敵の誰かがプレイヤーを索敵範囲に捉えていればtrue
+		 */
+		[[nodiscard]] bool isPlayerDetected() const;
+
+		/**
+		 * @brief 発見されている間、マップの縁を赤くにじませる
+		 *
+		 * 縁から内側へ向かって薄くなる層を重ね、ぼかしたような赤にする。
+		 * 中身（地形・敵）を塗り潰さずに危険を伝えるため、面ではなく縁を光らせる
+		 * @param x マップ左上のX座標
+		 * @param y マップ左上のY座標
+		 * @param size マップの一辺
+		 */
+		void drawAlertGlow(int x, int y, int size);
+
+		/**
 		 * @brief 中心に自機の矢印を描く
 		 * @param centerX マップ中心のスクリーンX座標
 		 * @param centerY マップ中心のスクリーンY座標
@@ -115,5 +136,9 @@ namespace game::ui::ingame
 		core::iface::IScreen& m_screen;
 		core::ecs::ComponentManager& m_componentManager;
 		HudPanel m_panel;
+
+		// 警告の脈動の基準時刻。描画経路からしか呼ばれずdeltaTimeを受け取らないため、
+		// 経過時間は壁時計から求める
+		std::chrono::steady_clock::time_point m_startTime{ std::chrono::steady_clock::now() };
 	};
 } // namespace game::ui::ingame
