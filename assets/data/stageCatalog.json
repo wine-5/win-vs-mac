@@ -333,6 +333,29 @@
       "scrollV": 0.0
     },
     {
+      "id": "slope_boss",
+      "displayName": "ボス坂(出現でせり上がり)",
+      "model": "assets/model/stage/PathCorridor.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#E81123",
+      "collider": "ground",
+      "role": "bossGate",
+      "defaultSize": [
+        800,
+        20,
+        2000
+      ],
+      "texture": "assets/model/stage/PathCorridor.png",
+      "textureTile": 800,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
       "id": "pillar_app",
       "displayName": "アプリ柱",
       "model": "assets/model/stage/PillarApp.mqo",
