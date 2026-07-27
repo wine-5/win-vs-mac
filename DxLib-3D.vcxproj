@@ -232,6 +232,7 @@
     <ClCompile Include="src\game\system\movement\MoveSystem.cpp" />
     <ClCompile Include="src\game\system\movement\PhysicsSystem.cpp" />
     <ClCompile Include="src\game\system\movement\FootstepSystem.cpp" />
+    <ClCompile Include="src\game\system\movement\FallOutSystem.cpp" />
     <ClCompile Include="src\game\system\movement\GroundingSystem.cpp" />
     <ClCompile Include="src\game\system\stage\BossGateSystem.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageRepository.cpp" />
@@ -317,6 +318,7 @@
     <ClInclude Include="src\game\component\movement\GroundSurfaceComponent.h" />
     <ClInclude Include="src\game\component\movement\FallRecoveryComponent.h" />
     <ClInclude Include="src\game\system\movement\FootstepSystem.h" />
+    <ClInclude Include="src\game\system\movement\FallOutSystem.h" />
     <ClInclude Include="src\game\system\movement\GroundingSystem.h" />
     <ClInclude Include="src\game\system\stage\BossGateSystem.h" />
     <ClInclude Include="src\core\data\ProjectileMetadata.h" />

@@ -30,9 +30,6 @@ namespace
 	// 動く歩道に乗ったとき、運ぶ速度へ寄っていく割合（毎秒）。
 	// 即座に合わせると乗った瞬間に弾かれたように見えるので少しだけ滑らかにする
 	constexpr float CONVEYOR_BLEND_PER_SEC{ 8.0f };
-	// 最後に立っていた場所からこれ以上下がったら、奈落へ落ちたとみなして引き戻す。
-	// 坂や段差による正規の落差より十分大きくとる
-	constexpr float FALL_LIMIT{ 1200.0f };
 } // namespace
 
 namespace game::system::movement
@@ -40,24 +37,6 @@ namespace game::system::movement
 	GroundingSystem::GroundingSystem(core::ecs::ComponentManager& componentManager)
 	    : m_componentManager{ componentManager }
 	{
-	}
-
-	bool GroundingSystem::recoverFromFall(core::ecs::EntityId riderId,
-	    component::movement::TransformComponent& transform,
-	    component::movement::VelocityComponent& velocity) const
-	{
-		auto* recovery{ m_componentManager.tryGet<component::movement::FallRecoveryComponent>(riderId) };
-		if (recovery == nullptr || !recovery->m_hasSafePosition)
-			return false;
-
-		// 深く潜るステージなので、絶対的な高さではなく「最後の足場からの落差」で見る
-		if (recovery->m_lastSafePosition.y - transform.m_position.y < FALL_LIMIT)
-			return false;
-
-		transform.m_position = recovery->m_lastSafePosition;
-		velocity.m_velocity = core::Vector3{};
-		velocity.m_externalVelocity = core::Vector3{};
-		return true;
 	}
 
 	void GroundingSystem::updateSlide(component::movement::VelocityComponent& velocity,
@@ -167,10 +146,6 @@ namespace game::system::movement
 
 			auto& transform{ m_componentManager.get<component::movement::TransformComponent>(riderId) };
 			auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(riderId) };
-
-			// 奈落へ落ちていたら、直前に立っていた場所へ戻す
-			if (recoverFromFall(riderId, transform, velocity))
-				continue;
 
 			// モデル原点が足元なので、足の高さ＝positionのY
 			const float foot{ transform.m_position.y };

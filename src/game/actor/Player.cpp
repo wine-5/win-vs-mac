@@ -39,6 +39,7 @@ namespace game::actor
 		componentManager.add<component::movement::VelocityComponent>(m_entity.getId(), {});
 		componentManager.add<component::movement::InputComponent>(m_entity.getId(), {});
 		// 床の縁から落ちても詰まないよう、直前に立っていた場所へ戻せるようにする
+		// （戻すのと落下ダメージはFallOutSystemが担う）
 		componentManager.add<component::movement::FallRecoveryComponent>(m_entity.getId(), {});
 
 		// アニメーションクリップは playerData.json の animations 配列で定義する。
