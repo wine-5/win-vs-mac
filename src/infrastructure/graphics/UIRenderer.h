@@ -56,6 +56,17 @@ namespace infrastructure::graphics
 		void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, unsigned int color, bool isFilled) override;
 
 		/**
+		 * @brief 直線をアンチエイリアス付きで描画する
+		 * @param x1 始点のX座標
+		 * @param y1 始点のY座標
+		 * @param x2 終点のX座標
+		 * @param y2 終点のY座標
+		 * @param color 色（ARGB形式：0xAARRGGBB）
+		 * @param thickness 線の太さ
+		 */
+		void drawLine(int x1, int y1, int x2, int y2, unsigned int color, int thickness) override;
+
+		/**
 		 * @brief 角の丸い矩形をアンチエイリアス付きで描画する
 		 * @param x X座標
 		 * @param y Y座標

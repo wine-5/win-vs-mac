@@ -49,6 +49,19 @@ namespace core::iface
 		virtual void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, unsigned int color, bool isFilled) = 0;
 
 		/**
+		 * @brief 直線をアンチエイリアス付きで描画する
+		 *
+		 * 矩形や三角形では表せない任意角度の線（ミニマップの床の輪郭など）に使う
+		 * @param x1 始点のX座標
+		 * @param y1 始点のY座標
+		 * @param x2 終点のX座標
+		 * @param y2 終点のY座標
+		 * @param color 色（ARGB形式：0xAARRGGBB）
+		 * @param thickness 線の太さ
+		 */
+		virtual void drawLine(int x1, int y1, int x2, int y2, unsigned int color, int thickness) = 0;
+
+		/**
 		 * @brief 角の丸い矩形をアンチエイリアス付きで描画する
 		 *
 		 * Windows 11（Fluent）のパネル・ボタンを再現するための基本形。
