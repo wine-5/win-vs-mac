@@ -77,6 +77,14 @@
                  rules-bonus.js が埋める。ここに直接書くと調整のたびに食い違う -->
             <h2>どの拡張子で何が伸びるか</h2>
             <div class="ext-grid" id="ext-grid">
+                <!-- 数値が何の単位なのかは、表の外に書くと読まれない。
+                     値の列の真上に置いて、数字を見た瞬間に「1つあたり」だと分かるようにする -->
+                <div class="ext-row ext-head">
+                    <span></span>
+                    <span class="ext-head-label">拡張子</span>
+                    <span></span>
+                    <span class="ext-head-label">ファイル1つあたりの上がり幅</span>
+                </div>
                 <div class="ext-row" data-key="executable">
                     <img class="ext-icon" src="https://assets.game.web/images/ui/select/exe.png" alt="EXE">
                     <span class="ext-name">.exe .dll .bat</span>
@@ -133,7 +141,7 @@
                 </div>
             </div>
 
-            <p class="note">数値はファイル1つあたりの上がり幅です。同じ種類を3つ装備すれば3倍になります。
+            <p class="note">同じ種類を3つ装備すれば3倍になります。
                 装備した結果は「パラメータ」ウィンドウで確認できます。</p>
 
             <h2>選び方の考え方</h2>

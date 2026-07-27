@@ -52,6 +52,12 @@
                     <img src="https://assets.game.web/images/ui/app/Rules.png" alt="">
                     <span>ルール説明.txt</span>
                 </div>
+                <!-- 右下のボタンに気づかない人のための2つ目の入口。
+                     ダブルクリックで即出撃はさせず、必ず確認を挟む -->
+                <div class="desk-icon" id="icon-start" ondblclick="confirmStart()">
+                    <img src="https://assets.game.web/images/ui/icons/gameicon.ico" alt="">
+                    <span>ゲーム開始.exe</span>
+                </div>
                 <div class="desk-icon" ondblclick="launchApp('recyclebin')">
                     <img src="https://assets.game.web/images/ui/app/gomibako.png" alt="">
                     <span>ごみ箱</span>
@@ -75,7 +81,42 @@
 
         <div class="taskbar-right">
             <div class="clock" id="clock">00:00<br>--/--</div>
-            <button class="start-btn" onclick="startGame()">ゲームを開始 →</button>
+            <button class="start-btn" onclick="confirmStart()">ゲームを開始 →</button>
+        </div>
+    </div>
+
+    <!-- 出撃の確認。難易度ウィンドウと同じUAC風にして、
+         「押したら戻れない操作」だと見た目で伝える -->
+    <div class="modal-veil" id="start-confirm" hidden>
+        <div class="uac-dialog">
+            <div class="uac-header">
+                <img class="uac-shield" src="https://assets.game.web/images/ui/select/shield.png" alt="">
+                <div>
+                    <div class="uac-title-main">ユーザーアカウント制御</div>
+                    <div class="uac-title-sub">ダンジョンへの出撃を許可しますか？</div>
+                </div>
+            </div>
+            <div class="uac-body">
+                <div class="prog-info">
+                    <div class="prog-row">
+                        <span class="prog-label">プログラム名:</span>
+                        <span class="prog-value">Win vs Mac.exe</span>
+                    </div>
+                    <div class="prog-row">
+                        <span class="prog-label">発行元:</span>
+                        <span class="prog-value verified">wine-5</span>
+                        <span class="verified-icon">&#x2714;</span>
+                    </div>
+                </div>
+                <div class="uac-desc">
+                    今の装備と難易度でダンジョンを生成します。出撃後は変更できません。<br>
+                    装備は「ファイル選択」、難易度は「難易度設定」から変えられます。
+                </div>
+                <div class="uac-actions">
+                    <button class="uac-btn" onclick="cancelStart()">キャンセル</button>
+                    <button class="uac-btn is-primary" onclick="startGame()">出撃する</button>
+                </div>
+            </div>
         </div>
     </div>
 
