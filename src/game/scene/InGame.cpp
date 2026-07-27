@@ -242,8 +242,8 @@ namespace game::scene
 		// 遠くの床を背景と同じ闇へ溶かし、ステージの果てを見せずに浮遊感を出す
 		constexpr float NEAR_CLIP{ 16.0f };
 		constexpr float FAR_CLIP{ 20000.0f };
-		constexpr float FOG_START{ 3000.0f }; // ここから徐々に闇へ
-		constexpr float FOG_END{ 9000.0f };   // ここで完全に闇へ溶ける
+		constexpr float FOG_START{ 6000.0f }; // ここから徐々に闇へ
+		constexpr float FOG_END{ 16000.0f };  // ここで完全に闇へ溶ける
 		m_camera.setNearFar(NEAR_CLIP, FAR_CLIP);
 		if (screen)
 			screen->setFog(true, VOID_R, VOID_G, VOID_B, FOG_START, FOG_END);
