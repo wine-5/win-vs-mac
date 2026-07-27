@@ -709,6 +709,11 @@ namespace game::scene
 			        m_stageEnemyIds.empty() && m_macId == core::ecs::INVALID_ENTITY_ID)
 				    spawnBoss();
 
+			    // ボスを倒した瞬間に決着なので、ここでクリアタイムを止める。
+			    // 消失フェードと勝利遷移は演出の時間で、プレイヤーの速さとは関係ない
+			    if (e.m_entityId == m_macId)
+				    m_isTimeMeasuring = false;
+
 			    // 勝利遷移はここ（HP0の瞬間）では行わない。ボスの死亡アニメと消失フェードを
 			    // 見せ終えてから遷移したいので、EnemyVanishedEvent（消滅完了）を待つ
 		    }));
@@ -773,8 +778,10 @@ namespace game::scene
 		// 画面が止まっているのに右上の秒数だけ動いて不自然になる
 		const float scaledDeltaTime{ m_hitStop.apply(deltaTime) };
 
-		// 開始演出（READY）の間はまだ動けないので、クリアタイムの計測も始めない
-		if (m_battleStartSystem == nullptr || !m_battleStartSystem->isPreparing())
+		// 開始演出（READY）の間はまだ動けないので、クリアタイムの計測も始めない。
+		// ボス撃破後（m_isTimeMeasuring=false）も、そこから先は演出の時間なので進めない
+		if (m_isTimeMeasuring &&
+		    (m_battleStartSystem == nullptr || !m_battleStartSystem->isPreparing()))
 			m_elapsedTime += scaledDeltaTime;
 		m_systemManager.update(scaledDeltaTime);
 	}

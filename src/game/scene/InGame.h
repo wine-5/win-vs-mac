@@ -216,6 +216,10 @@ namespace game::scene
 		int   m_killCount{0};
 		float m_totalDamageTaken{0.0f};
 
+		// クリアタイムを計測中か。ボスを倒した瞬間にfalseになり、
+		// 消失フェードや勝利遷移までの演出時間はタイムに含めない
+		bool m_isTimeMeasuring{ true };
+
 		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
 		std::vector<core::base::EventBus::Subscription> m_subscriptions{};
 	};
