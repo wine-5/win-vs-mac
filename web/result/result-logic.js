@@ -9,6 +9,17 @@ const ResultLogic = (function () {
         return m + ':' + String(s).padStart(2, '0');
     }
 
+    /**
+     * 大きく見せる用に mm:ss へ 0 埋めして整える
+     * @param {number} seconds 秒数
+     * @returns {string} "04:19" 形式の文字列
+     */
+    function formatClock(seconds) {
+        const m = Math.floor((seconds || 0) / 60);
+        const s = Math.floor((seconds || 0) % 60);
+        return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
     function escapeHtml(str) {
         return String(str)
             .replace(/&/g, '&amp;')
@@ -89,6 +100,7 @@ const ResultLogic = (function () {
 
     return {
         formatTime: formatTime,
+        formatClock: formatClock,
         escapeHtml: escapeHtml,
         calcRank: calcRank,
         calcNextRankGoal: calcNextRankGoal,

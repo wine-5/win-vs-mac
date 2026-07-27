@@ -1,6 +1,16 @@
-/* ===== ボディ ===== */
+/* ===== ボディ =====
+   リザルトは DxLib ウィンドウと同じ全画面サイズで開く。
+   中央にカードを1枚置き、背景はゲーム画面の続きに見えるよう暗く沈めている */
 body {
-    background: #2d2d2d;
+    background:
+        radial-gradient(ellipse 900px 600px at 50% 38%, rgba(0, 120, 212, 0.16), transparent 70%),
+        #16171a;
+}
+
+body.hard {
+    background:
+        radial-gradient(ellipse 900px 600px at 50% 38%, rgba(232, 17, 35, 0.18), transparent 70%),
+        #171214;
 }
 
 #result-root {
@@ -8,109 +18,149 @@ body {
     height: 100%;
 }
 
-/* ===== コンテンツ領域 ===== */
-.result-content {
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-/* 登場アニメーション（勝利）*/
-.result-content.good-end {
-    animation: windowFadeIn 0.4s ease-out;
-}
-
-/* 登場アニメーション（敗北：BSOD 後に表示）*/
-.result-content.bad-end {
-    animation: windowShakeIn 0.7s ease-out;
-}
-
-@keyframes windowFadeIn {
-    from { opacity: 0; transform: scale(0.98); }
-    to   { opacity: 1; transform: scale(1); }
-}
-
-@keyframes windowShakeIn {
-    0%   { opacity: 0; transform: scale(0.98) translateX(0); }
-    20%  { opacity: 1; transform: scale(1) translateX(-8px); }
-    40%  {             transform: scale(1) translateX( 8px); }
-    60%  {             transform: scale(1) translateX(-8px); }
-    80%  {             transform: scale(1) translateX( 4px); }
-    100% { opacity: 1; transform: scale(1) translateX(0); }
-}
-
-/* ===== メッセージ行 ===== */
-.result-message-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-}
-
-.result-message-icon {
-    font-size: 22px;
-    line-height: 1;
-    flex-shrink: 0;
-}
-
-.result-message-icon.checkmark {
-    animation: checkmarkPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.result-message-icon.error {
-    animation: errorBlink 0.6s ease-out;
-}
-
-@keyframes checkmarkPop {
-    0%   { transform: scale(0); opacity: 0; }
-    50%  { transform: scale(1.3); }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes errorBlink {
-    0%, 20%, 40% { opacity: 0; }
-    10%, 30%, 100% { opacity: 1; }
-}
-
-.result-message-body {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.result-message-main {
-    font-size: 14px;
-    color: #ffffff;
-    line-height: 1.4;
-}
-
-.result-message-sub {
-    font-size: 13px;
-    color: #aaaaaa;
-}
-
-/* ===== 評価ランク ===== */
-.result-rank-row {
+/* ===== ステージ（カードを中央に置くだけの器） ===== */
+.result-stage {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    padding: 4px 0;
+    padding: 24px;
+    overflow-y: auto;
 }
 
-.result-rank-label {
-    font-size: 12px;
-    color: #aaaaaa;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+.result-stage.good-end {
+    animation: stageFadeIn 0.5s ease-out;
 }
 
-.result-rank-value {
-    font-size: 72px;
+.result-stage.bad-end {
+    animation: stageShakeIn 0.7s ease-out;
+}
+
+@keyframes stageFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes stageShakeIn {
+    0%   { opacity: 0; transform: translateX(0); }
+    20%  { opacity: 1; transform: translateX(-8px); }
+    40%  {             transform: translateX( 8px); }
+    60%  {             transform: translateX(-8px); }
+    80%  {             transform: translateX( 4px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+/* ===== カード ===== */
+.result-card {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 28px 32px 26px;
+    background: linear-gradient(180deg, rgba(45, 46, 51, 0.96), rgba(31, 32, 36, 0.96));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow:
+        0 24px 60px rgba(0, 0, 0, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    animation: cardRise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes cardRise {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ===== ヘッダー ===== */
+.result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.result-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    color: #4ade80;
+}
+
+.result-eyebrow.error {
+    color: #ff6b6b;
+}
+
+.result-eyebrow-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+    animation: dotPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+}
+
+.result-difficulty-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    padding: 3px 10px;
+    border-radius: 999px;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+body.hard .result-difficulty-badge {
+    color: #ff8a8a;
+    border-color: rgba(232, 17, 35, 0.55);
+    background: rgba(232, 17, 35, 0.12);
+}
+
+.result-title {
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--text);
+}
+
+.result-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: -10px;
+}
+
+/* ===== ランクの主役表示 ===== */
+.rank-hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 0 10px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.rank-letter {
+    position: relative;
+    z-index: 2;
+    font-size: 104px;
     font-weight: 700;
     line-height: 1;
     font-family: 'Courier New', monospace;
-    animation: rankPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.15s both;
+    color: var(--rank-color);
+    text-shadow: 0 0 28px var(--rank-shadow);
+    animation: rankPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.2s both;
 }
 
 @keyframes rankPop {
@@ -118,104 +168,260 @@ body {
     to   { transform: scale(1); opacity: 1; }
 }
 
-.rank-s { color: #ffd700; text-shadow: 0 0 24px rgba(255, 215, 0, 0.7); }
-.rank-a { color: #00ccff; text-shadow: 0 0 24px rgba(0, 204, 255, 0.7); }
-.rank-b { color: #00ff88; text-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
-.rank-c { color: #ffaa00; text-shadow: 0 0 20px rgba(255, 170, 0, 0.5); }
-.rank-d { color: #ff4444; text-shadow: 0 0 20px rgba(255, 68, 68, 0.5); }
-
-/* ===== 区切り線 ===== */
-.result-divider {
-    height: 1px;
-    background: #444;
+/* ランク文字の背後に敷く光。文字と同じ色で滲ませる */
+.rank-glow {
+    position: absolute;
+    top: 12px;
+    width: 190px;
+    height: 130px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--rank-shadow), transparent 68%);
+    filter: blur(14px);
+    opacity: 0;
+    animation: glowFadeIn 0.6s ease-out 0.3s forwards;
 }
 
-/* ===== スタット一覧 ===== */
-.result-stats {
-    display: flex;
-    flex-direction: column;
+@keyframes glowFadeIn {
+    to { opacity: 0.85; }
 }
 
-.result-stat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 4px 0;
-    color: #cccccc;
+/* 着弾の衝撃波。演出強化側で使う土台 */
+.rank-shockwave {
+    position: absolute;
+    top: 34px;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 2px solid var(--rank-color);
+    opacity: 0;
 }
 
-/* 勝利時：各行をスライドインさせる */
-.good-end .result-stat-row {
-    animation: statSlideIn 0.4s ease-out backwards;
+.rank-caption {
+    position: relative;
+    z-index: 2;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    animation: fadeUp 0.5s ease-out 0.55s both;
 }
 
-.good-end .result-stat-row:nth-child(1) { animation-delay: 0.2s; }
-.good-end .result-stat-row:nth-child(2) { animation-delay: 0.35s; }
-.good-end .result-stat-row:nth-child(3) { animation-delay: 0.5s; }
-.good-end .result-stat-row:nth-child(4) { animation-delay: 0.65s; }
+/* ランクごとの色。文字・光・衝撃波が同じ変数を見る */
+.rank-s { --rank-color: #ffd700; --rank-shadow: rgba(255, 215,   0, 0.55); }
+.rank-a { --rank-color: #00ccff; --rank-shadow: rgba(  0, 204, 255, 0.55); }
+.rank-b { --rank-color: #4ade80; --rank-shadow: rgba( 74, 222, 128, 0.45); }
+.rank-c { --rank-color: #ffaa00; --rank-shadow: rgba(255, 170,   0, 0.45); }
+.rank-d { --rank-color: #ff5c5c; --rank-shadow: rgba(255,  92,  92, 0.45); }
 
-@keyframes statSlideIn {
-    from { opacity: 0; transform: translateY(-8px); }
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-.result-stat-label {
+/* ===== クリアタイム ===== */
+.time-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    animation: fadeUp 0.45s ease-out 0.65s both;
+}
+
+.time-value {
+    font-size: 46px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    font-family: 'Courier New', monospace;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.next-rank {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.next-rank-track {
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.next-rank-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), #6ec8ff);
+    animation: barGrow 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.8s both;
+    transform-origin: left center;
+}
+
+@keyframes barGrow {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+.next-rank-text {
     font-size: 12px;
-    color: #aaaaaa;
+    color: var(--text-muted);
 }
 
-.result-stat-value {
-    font-weight: 500;
-    color: #ffffff;
+.next-rank-text strong {
+    color: var(--text);
+    font-weight: 700;
 }
 
-/* ===== 使用ファイルバッジ ===== */
+.next-rank-text.max {
+    color: #ffd700;
+    letter-spacing: 0.06em;
+}
+
+.next-rank-letter {
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    color: var(--rank-color);
+}
+
+/* ===== 補助スタット ===== */
+.stat-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    animation: fadeUp 0.45s ease-out 0.8s both;
+}
+
+.stat-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.stat-tile-label {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.stat-tile-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-tile-unit {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-left: 3px;
+}
+
+/* ===== 使用ファイル ===== */
+.result-files {
+    animation: fadeUp 0.45s ease-out 0.9s both;
+}
+
 .result-file-badges {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    justify-content: flex-end;
 }
 
 .result-file-badge {
-    background: #3a3a3a;
-    border: 1px solid #555;
-    padding: 3px 8px;
-    border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
     font-size: 12px;
-    color: #aaaaaa;
+    color: var(--text);
+}
+
+.result-file-ext {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    text-transform: uppercase;
+}
+
+body.hard .result-file-ext {
+    color: #ff8a8a;
+}
+
+/* ===== 敗北時の詳細行 ===== */
+.crash-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.25);
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+}
+
+.crash-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--text-muted);
+}
+
+.crash-row span:last-child {
+    color: var(--text);
 }
 
 /* ===== ボタン行 ===== */
 .result-btn-row {
     display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 4px;
+    gap: 10px;
+    margin-top: 2px;
+    animation: fadeUp 0.45s ease-out 1s both;
 }
 
 .result-btn {
-    padding: 8px 24px;
-    background: #3a3a3a;
-    border: 1px solid #555;
-    border-radius: 2px;
-    color: #cccccc;
+    flex: 1;
+    padding: 10px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
     font-size: 13px;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
     font-family: inherit;
 }
 
 .result-btn:hover {
-    background: #4a4a4a;
-    border-color: #0078d4;
-    color: #0078d4;
+    background: var(--surface-hover);
+    border-color: var(--accent);
+}
+
+.result-btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.result-btn.primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
 }
 
 .result-btn:active {
-    background: #0078d4;
-    border-color: #0078d4;
-    color: #ffffff;
+    transform: translateY(1px);
 }
 
 /* ===== BSOD オーバーレイ（敗北時） ===== */
