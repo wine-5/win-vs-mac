@@ -130,7 +130,7 @@ namespace game::ui::ingame
 
 		m_uiRenderer.setFont(UI_FONT_NAME);
 		m_uiRenderer.drawText(panelX + padding, panelY + scaled(CAPTION_Y), m_captionText.c_str(),
-		    core::utility::Color::HUD_INK_FAINT, scaled(CAPTION_FONT_SIZE));
+		    core::utility::Color::HUD_INK, scaled(CAPTION_FONT_SIZE));
 
 		// ボスが出たら残り数は無意味になる。目標そのものを討伐へ差し替える
 		if (isBossAppeared)
@@ -166,7 +166,7 @@ namespace game::ui::ingame
 		m_uiRenderer.setFont(UI_FONT_NAME);
 		m_uiRenderer.drawText(panelX + padding + countWidth + scaled(COUNT_DETAIL_GAP),
 		    panelY + scaled(DETAIL_Y), m_detailText.c_str(),
-		    core::utility::Color::HUD_INK_FAINT, scaled(DETAIL_FONT_SIZE));
+		    core::utility::Color::HUD_INK, scaled(DETAIL_FONT_SIZE));
 		m_uiRenderer.resetFont();
 	}
 
