@@ -164,6 +164,14 @@ namespace game::system::combat
 		                         ? core::constant::SeType::HitChargedWindow
 		                         : core::constant::SeType::HitWindow;
 
+		// 溜め切って撃ったときだけ専用の発射音を鳴らす。通常撃ちは今までどおり無音のままにして、
+		// 「溜め切った一撃」であることを離した瞬間に耳で分かるようにする
+		if (isFullyCharged)
+		{
+			if (auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() })
+				audio->playSe(core::constant::SeType::PlayerChargeRelease);
+		}
+
 		// 壁・ブロックを抜けられるのは溜め切った弾だけ。通常撃ちは遮蔽物で止まる
 		config.m_penetratesWalls = isFullyCharged;
 
