@@ -22,6 +22,13 @@
       "scale": 2.0
     },
     {
+      "type": "Player_Hit",
+      "path": "assets/effects/player_hit.efk",
+      "poolSize": 10,
+      "yOffset": 75.0,
+      "scale": 30.0
+    },
+    {
       "type": "Player_Slash1",
       "path": "assets/effects/player_slash1.efk",
       "poolSize": 5,

@@ -11,9 +11,10 @@ namespace core::constant
 	enum class EffectType
 	{
 		None,
-		Enemy_HitSword,   // 敵がプレイヤーの剣（近接）で被弹
+		Enemy_HitSword,   // 敵がプレイヤーの剣（近接）で被弾
 		Enemy_HitWindow,  // 敵がプレイヤーのWindow投撃弾（遠距離）で被弾
 		Enemy_Spawn,      // 敵スポーン（テスト用：Tキーでプレイヤー位置に再生）
+		Player_Hit,       // プレイヤーが敵の攻撃で被弾（近接・遠距離を問わない）
 		Player_Slash1,    // プレイヤーの近接コンボ1段目の斬撃エフェクト
 		Player_Slash2,    // プレイヤーの近接コンボ2段目（回転斬り）の斬撃エフェクト
 		Xcode_GroundSlam, // Xcodeの地面叩きつけがダメージを与える瞬間のエフェクト
@@ -25,10 +26,11 @@ namespace core::constant
 	/**
 	 * @brief JSONに書くエフェクト名と列挙の対応表
 	 */
-	inline constexpr std::array<std::pair<std::string_view, EffectType>, 6> EFFECT_TYPE_NAMES{ {
+	inline constexpr std::array<std::pair<std::string_view, EffectType>, 7> EFFECT_TYPE_NAMES{ {
 		{ "Enemy_HitSword", EffectType::Enemy_HitSword },
 		{ "Enemy_HitWindow", EffectType::Enemy_HitWindow },
 		{ "Enemy_Spawn", EffectType::Enemy_Spawn },
+		{ "Player_Hit", EffectType::Player_Hit },
 		{ "Player_Slash1", EffectType::Player_Slash1 },
 		{ "Player_Slash2", EffectType::Player_Slash2 },
 		{ "Xcode_GroundSlam", EffectType::Xcode_GroundSlam },

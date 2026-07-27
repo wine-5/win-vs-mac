@@ -269,11 +269,14 @@ namespace game::system::combat
 			hitEvent.m_damage = chain.m_damage;
 			hitEvent.m_isCritical = chain.m_isCritical;
 
-			// 攻撃者がProjectileComponentを持つ（=弾＝Window投撃などの遠距離攻撃）ならEnemy_HitWindow、
-			// そうでなければ（=本体による近接攻撃）Enemy_HitSwordを再生する
-			hitEvent.m_effectType = m_componentManager.has<component::combat::ProjectileComponent>(attackerId)
-			                            ? core::constant::EffectType::Enemy_HitWindow
-			                            : core::constant::EffectType::Enemy_HitSword;
+			// 被弾エフェクトは「誰が食らったか」で決める。
+			// 敵が食らったときだけ、当たったのが弾（Enemy_HitWindow）か剣（Enemy_HitSword）かで出し分ける
+			if (targetTagCheck.m_tag == constant::Tag::Player)
+				hitEvent.m_effectType = core::constant::EffectType::Player_Hit;
+			else
+				hitEvent.m_effectType = m_componentManager.has<component::combat::ProjectileComponent>(attackerId)
+				                            ? core::constant::EffectType::Enemy_HitWindow
+				                            : core::constant::EffectType::Enemy_HitSword;
 
 			// ヒット音は「何が当たったか」で決める。弾は弾自身が持つ音（Window弾・溜め撃ちで別）、
 			// プレイヤーの近接は敵が斬られた音。振り音は AttackStartEvent 側が担う
