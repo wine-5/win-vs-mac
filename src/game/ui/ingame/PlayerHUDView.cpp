@@ -18,8 +18,8 @@ namespace
 
 	// パネルの位置とサイズ（左下・1080p基準）
 	constexpr int PANEL_MARGIN{ 28 };
-	constexpr int PANEL_WIDTH{ 400 };
-	constexpr int PANEL_HEIGHT{ 124 };
+	constexpr int PANEL_WIDTH{ 430 };
+	constexpr int PANEL_HEIGHT{ 140 };
 	constexpr int PANEL_PADDING{ 20 };
 
 	// パネル内の各要素の位置（パネル左上からの相対座標・1080p基準）
@@ -31,10 +31,10 @@ namespace
 
 	// 能力値の並び（1行4項目・1080p基準）
 	constexpr int STAT_ROW_Y{ 76 };
-	constexpr int STAT_ROW_HEIGHT{ 38 };
-	constexpr int STAT_ICON_SIZE{ 24 };
-	constexpr int STAT_VALUE_GAP{ 6 }; // アイコンと数値の間隔
-	constexpr int STAT_FONT_SIZE{ 17 };
+	constexpr int STAT_ROW_HEIGHT{ 52 };
+	constexpr int STAT_ICON_SIZE{ 42 };
+	constexpr int STAT_VALUE_GAP{ 8 }; // アイコンと数値の間隔
+	constexpr int STAT_FONT_SIZE{ 19 };
 	constexpr int STATS_PER_PAGE{ 4 };
 
 	// ページ送り。切り替えは上下のスライドで見せる（横に流すとパネルからはみ出すため）
