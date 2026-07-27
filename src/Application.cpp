@@ -8,8 +8,10 @@
 #include "core/interface/IResourcePreloader.h"
 #include "core/input/KeyCode.h"
 #include "game/scene/SceneManager.h"
+#include "core/utility/Probe.h" // 一時: メモリ調査用（原因特定後に削除）
 #include <DxLib.h>
 #include <chrono>
+#include <format>
 
 namespace
 {
@@ -120,6 +122,18 @@ void Application::run()
 		m_inputProvider->updatePreviousState();
 
 		ScreenFlip(); // 画面を反映
+
+		// 一時: 1秒ごとに使用量を記録する。カウントダウン明けに段差状に増えるのか、
+		// プレイ中じわじわ増え続ける（リーク）のかを分けるため（原因特定後に削除）
+		{
+			constexpr int PROBE_INTERVAL_FRAMES{ 60 };
+			static int frameCount{ 0 };
+			++frameCount;
+			if (frameCount == 1)
+				core::probe::mark("  初回 ScreenFlip 直後");
+			if (frameCount % PROBE_INTERVAL_FRAMES == 0)
+				core::probe::mark(std::format("frame {:5} ({:4}秒)", frameCount, frameCount / 60));
+		}
 	}
 }
 

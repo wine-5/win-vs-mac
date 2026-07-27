@@ -89,6 +89,7 @@
 #include "game/ui/ingame/EnemyHealthBarView.h"
 #include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
 #include "game/event/InGameEvents.h"
+#include "core/utility/Probe.h" // 一時: メモリ調査用（原因特定後に削除）
 
 /* 標準のインクルード */
 #include <cassert>
@@ -147,7 +148,10 @@ namespace
 		for (const auto modelId : TAB_MODEL_IDS)
 		{
 			const int handle{ resourceManager.loadModelById(modelId) };
-			setup.m_visuals.push_back({ handle, resolveProjectileRadius(resourceManager, setup.m_meta, handle) });
+			core::probe::mark(std::format("        tab load  : {}", modelId));
+			const float radius{ resolveProjectileRadius(resourceManager, setup.m_meta, handle) };
+			core::probe::mark(std::format("        tab radius: {}", modelId));
+			setup.m_visuals.push_back({ handle, radius });
 		}
 		return setup;
 	}
@@ -171,9 +175,12 @@ namespace
 		RainbowSetup setup{};
 		setup.m_meta = resourceManager.getProjectileMetadata(game::constant::projectile_id::MAC_RAINBOW);
 		setup.m_handle = resourceManager.loadModelById(game::constant::model_id::MAC_RAINBOW_WHEEL);
+		core::probe::mark("        rainbow load  ");
 		setup.m_radius = resolveProjectileRadius(resourceManager, setup.m_meta, setup.m_handle);
+		core::probe::mark("        rainbow radius");
 		// モデル原点が見た目の中心とズレていると回転で円軌道を描くため、中心を求めて逆補正する
 		setup.m_center = resourceManager.computeBoundingCenter(setup.m_handle);
+		core::probe::mark("        rainbow center");
 		return setup;
 	}
 } // namespace
@@ -208,10 +215,14 @@ namespace game::scene
 		    m_effectFactory }
 	{
 		loadResources();
+		core::probe::mark("  InGame: loadResources");
 		spawnEntities();
+		core::probe::mark("  InGame: spawnEntities");
 		m_audioEventListener = std::make_unique<game::event::AudioEventListener>(m_eventBus, m_playerId);
 		setupSystems();
+		core::probe::mark("  InGame: setupSystems");
 		setupEvents();
+		core::probe::mark("  InGame: setupEvents");
 
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio) audio->playBgm(core::constant::BgmType::InGame);
@@ -378,6 +389,7 @@ namespace game::scene
 		logPlayerParameters("装備後");
 
 		initializer.initializePlayer(m_playerData);
+		core::probe::mark("    spawn: initializePlayer");
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
 
 		// プレイヤー専用コンポーネント（CameraComponent、AimComponent、PlayerChargeComponent）
@@ -396,13 +408,16 @@ namespace game::scene
 
 		// 地面は stageData.json の props[] が持つ（単一の水平地面は坂と競合するため生成しない）
 		initializer.initializeProps();
+		core::probe::mark("    spawn: initializeProps");
 
 		// ステージ定義の点光源（青い道中・白銀のアリーナなどの明暗演出）
 		initializer.initializeLights();
+		core::probe::mark("    spawn: initializeLights");
 
 		// 生成される敵の追跡対象をプレイヤーに設定してからスポーンする
 		m_enemySpawner.setTargetEntity(core::ecs::Entity(m_playerId));
 		m_enemySpawner.spawnStageEnemies();
+		core::probe::mark("    spawn: spawnStageEnemies");
 
 		// 開始時に配置された雑魚のIDを控える。ボスはまだ出さず、これらを全滅させてから出現させる。
 		// この時点ではボスが未生成なので、敵種を持つEntity＝開始時の雑魚だけが集まる
@@ -425,12 +440,16 @@ namespace game::scene
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
 		    m_inputProvider,
 		    m_playerId);
+		core::probe::mark("      sys: BattleStartSystem");
 		m_view.setBattleStartSystem(m_battleStartSystem);
 
 		m_systemManager.registerSystem<game::system::movement::InputSystem>(m_componentManager, m_playerId, m_inputProvider);
+		core::probe::mark("      sys: InputSystem");
 		// カメラ演出（Zoom/Shake）はCameraSystemより前に走らせ、合成結果をCameraEffectComponentへ書いておく
 		m_systemManager.registerSystem<game::system::camera::ChargeZoomSystem>(m_componentManager, m_playerId);
+		core::probe::mark("      sys: ChargeZoomSystem");
 		m_systemManager.registerSystem<game::system::camera::DamageShakeSystem>(m_componentManager, m_eventBus, m_playerId);
+		core::probe::mark("      sys: DamageShakeSystem");
 		// ボス覚醒演出（ズーム・シェイク・赤ビネット）。CameraSystemより前に走らせて演出チャンネルを書く。
 		// 描画（赤ビネット）はInGameViewの描画フェーズから呼ぶためポインタを渡す
 		auto* macAwakenEffect{ m_systemManager.registerSystem<game::system::visual::MacAwakenEffectSystem>(
@@ -438,12 +457,16 @@ namespace game::scene
 			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
 			m_playerId) };
+		core::probe::mark("      sys: MacAwakenEffectSystem");
 		m_view.setMacAwakenEffectSystem(macAwakenEffect);
 		// カメラはMoveSystemより前に更新し、最新のyawで移動方向を計算させる
 		m_systemManager.registerSystem<game::system::camera::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera);
+		core::probe::mark("      sys: CameraSystem");
 		m_systemManager.registerSystem<game::system::movement::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
+		core::probe::mark("      sys: MoveSystem");
 		// 照準の敵捕捉判定（カメラ更新後・描画前に走らせる）
 		m_systemManager.registerSystem<game::system::combat::TargetingSystem>(m_componentManager);
+		core::probe::mark("      sys: TargetingSystem");
 		// 発射入力→弾生成（生成はPhysicsSystemより前でよい）。弾定義はjsonから取得する。
 		// Window弾の見た目はビルボード（板に貼ったWindow画像）で描くので、その画像を先に読む
 		auto projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
@@ -460,51 +483,69 @@ namespace game::scene
 
 		auto* rangedAttack{ m_systemManager.registerSystem<game::system::combat::PlayerRangedAttackSystem>(
 			m_componentManager, m_playerId, m_projectileFactory, projectileMeta, windowBillboard) };
+		core::probe::mark("      sys: PlayerRangedAttackSystem");
 		// レティクルがクールダウンの残量を読むため、Viewへ参照を渡す
 		m_view.setPlayerRangedAttackSystem(rangedAttack);
 		m_systemManager.registerSystem<game::system::movement::PhysicsSystem>(m_componentManager, m_gameManager, m_playerData.getJumpForce(), m_playerData.getGravity(), m_playerData.getMaxFallSpeed());
+		core::probe::mark("      sys: PhysicsSystem");
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
 		m_systemManager.registerSystem<game::system::combat::ProjectileSystem>(m_componentManager, m_entityManager, m_eventBus);
+		core::probe::mark("      sys: ProjectileSystem");
 		// 敵弾をプレイヤーのWindow弾で跳ね返す（移動後・ダメージ判定AttackSystemより前に判定する）
 		m_systemManager.registerSystem<game::system::combat::ProjectileReflectSystem>(m_componentManager);
+		core::probe::mark("      sys: ProjectileReflectSystem");
 
 		m_systemManager.registerSystem<game::system::visual::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
+		core::probe::mark("      sys: AnimationSystem");
 
 		// ボス出現で入り口を塞ぐ扉。押し返しの前に動かして、その位置で当たり判定させる
 		m_systemManager.registerSystem<game::system::stage::BossGateSystem>(m_componentManager, m_eventBus);
+		core::probe::mark("      sys: BossGateSystem");
 
 		m_systemManager.registerSystem<game::system::combat::CollisionSystem>(m_componentManager);
+		core::probe::mark("      sys: CollisionSystem");
 		// 障害物の押し返し後に、床・坂の傾いた面へ足を乗せる（坂はAABBで表せないため専用処理）
 		m_systemManager.registerSystem<game::system::movement::GroundingSystem>(m_componentManager);
+		core::probe::mark("      sys: GroundingSystem");
 		// 足音は「進んだ距離」で数えるため、押し返しと接地が終わって位置が確定してから走らせる
 		m_systemManager.registerSystem<game::system::movement::FootstepSystem>(m_componentManager, m_playerId);
+		core::probe::mark("      sys: FootstepSystem");
 		// AI行動分割：近接追跡型敵を駆動
 		m_systemManager.registerSystem<game::system::ai::MeleeChaseAISystem>(m_componentManager);
+		core::probe::mark("      sys: MeleeChaseAISystem");
 		// AI行動分割：遠距離維持型敵を駆動
 		m_systemManager.registerSystem<game::system::ai::RangeKeepAISystem>(m_componentManager);
+		core::probe::mark("      sys: RangeKeepAISystem");
 		// 遠距離維持型敵の弾発射（Safariのタブ投擲）。見た目は3種のタブモデルからランダムに選ぶ
 		auto tabSetup{ buildTabProjectileSetup(m_resourceManager) };
 		m_systemManager.registerSystem<game::system::ai::EnemyRangedAttackSystem>(
 		    m_componentManager, m_projectileFactory, tabSetup.m_meta, std::move(tabSetup.m_visuals));
+		core::probe::mark("      sys: EnemyRangedAttackSystem");
 
 		// ボス（Mac）のFSM駆動。遠距離はレインボー弾を扇状に、召喚はEnemySpawner経由で行う
 		const auto rainbow{ buildRainbowSetup(m_resourceManager) };
 		m_systemManager.registerSystem<game::system::ai::MacAISystem>(
 		    m_componentManager, m_eventBus, m_projectileFactory, m_enemySpawner,
 		    rainbow.m_meta, rainbow.m_handle, rainbow.m_radius, rainbow.m_center);
+		core::probe::mark("      sys: MacAISystem");
 
 		// 敵がプレイヤーを発見した瞬間を検知（全敵共通）。発見演出のトリガーになる
 		m_systemManager.registerSystem<game::system::ai::DetectionSystem>(m_componentManager, m_eventBus);
+		core::probe::mark("      sys: DetectionSystem");
 
 		// プレイヤーの近接攻撃入力をコンボの段数へ振り分ける（攻撃の成立はAttackSystem）
 		m_systemManager.registerSystem<game::system::combat::PlayerAttackComboSystem>(
 		    m_componentManager, m_playerId);
+		core::probe::mark("      sys: PlayerAttackComboSystem");
 
 		m_systemManager.registerSystem<game::system::combat::AttackSystem>(
 		    m_componentManager, m_eventBus);
+		core::probe::mark("      sys: AttackSystem");
 		m_systemManager.registerSystem<game::system::visual::HitEffectSystem>(m_componentManager, m_eventBus);
+		core::probe::mark("      sys: HitEffectSystem");
 		// 死亡した敵の後始末（赤化＋ディゾルブ演出→Entity破棄＋モデルハンドルのプール返却）
 		m_systemManager.registerSystem<game::system::combat::EnemyDeathSystem>(m_componentManager, m_entityManager, m_eventBus, m_enemySpawner, m_renderer);
+		core::probe::mark("      sys: EnemyDeathSystem");
 
 		// プレイヤーの死亡演出（死亡アニメ→暗転）。完了時にシーン遷移用のイベントを発行する。
 		// 描画（暗転）はInGameViewの描画フェーズから呼ぶためポインタを渡す
@@ -513,20 +554,24 @@ namespace game::scene
 			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
 			m_playerId) };
+		core::probe::mark("      sys: PlayerDeathSystem");
 		m_view.setPlayerDeathSystem(playerDeath);
 
 		m_systemManager.registerSystem<game::system::visual::EffectSystem>(m_componentManager, m_eventBus, m_effectFactory);
+		core::probe::mark("      sys: EffectSystem");
 
 		// 壁などの模様を流す（貼り方をずらすだけなので描画状態に影響しない）
 		m_systemManager.registerSystem<game::system::visual::TextureScrollSystem>(m_componentManager);
+		core::probe::mark("      sys: TextureScrollSystem");
 
 		// 装着武器の装着先ボーンを解決する（解決はEntityごとに一度きり。描画はInGameView）
 		m_systemManager.registerSystem<game::system::visual::WeaponAttachSystem>(m_componentManager, m_renderer);
+		core::probe::mark("      sys: WeaponAttachSystem");
 
 		// LightComponentを持つエンティティの点光源を生成・追従させる（プレイヤーの携行灯など）
 		if (auto* lighting{ core::base::ServiceLocator::get<core::iface::ILighting>() })
 			m_systemManager.registerSystem<game::system::visual::LightSystem>(m_componentManager, *lighting);
-
+		core::probe::mark("      sys: LightSystem");
 
 		// プレイヤーの溜め攻撃の画面演出（集中線）。描画内容はSystemが持ち、
 		// InGameViewには描画フェーズで呼び出させるためにポインタを渡す
@@ -535,6 +580,7 @@ namespace game::scene
 			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
 			m_playerId) };
+		core::probe::mark("      sys: PlayerChargeVisualsSystem");
 		m_view.setPlayerChargeVisualsSystem(chargeVisuals);
 
 		// クリティカルの瞬間に弾ける集中線
@@ -544,17 +590,20 @@ namespace game::scene
 			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
 			m_playerId) };
+		core::probe::mark("      sys: CriticalVisualsSystem");
 		m_view.setCriticalVisualsSystem(criticalVisuals);
 
 		// 虚空を流れるデータの光跡（背景の奥行きと動きを作る）
 		auto* backgroundParticles{ m_systemManager.registerSystem<game::system::visual::BackgroundParticleSystem>(
 			m_componentManager, m_playerId, m_renderer, m_resourceManager) };
+		core::probe::mark("      sys: BackgroundParticleSystem");
 		m_view.setBackgroundParticleSystem(backgroundParticles);
 
 		// Hardの敵を包む赤いオーラ（強化されていることを戦闘中に伝える）
 		auto* hardAura{ m_systemManager.registerSystem<game::system::visual::HardAuraVisualsSystem>(
 			m_componentManager, m_renderer, m_resourceManager,
 			m_gameManager.getDifficulty() == core::data::Difficulty::Hard) };
+		core::probe::mark("      sys: HardAuraVisualsSystem");
 		m_view.setHardAuraVisualsSystem(hardAura);
 
 		// 敵の発見演出（頭上の通知バッジ）。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
@@ -565,6 +614,7 @@ namespace game::scene
 			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 			*core::base::ServiceLocator::get<core::iface::IScreen>(),
 			m_resourceManager) };
+		core::probe::mark("      sys: DetectionAlertVisualsSystem");
 		m_view.setDetectionAlertVisualsSystem(detectionAlert);
 
 		// 敵に与えたダメージ量の表示。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
@@ -574,16 +624,19 @@ namespace game::scene
 			m_renderer,
 			*core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 			*core::base::ServiceLocator::get<core::iface::IScreen>()) };
+		core::probe::mark("      sys: DamagePopupSystem");
 		m_view.setDamagePopupSystem(damagePopup);
 
 		// 攻撃予兆（地面の攻撃範囲サークル）。描画内容はSystemが持ち、Viewが3D描画フェーズで呼ぶ
 		auto* attackTelegraph{ m_systemManager.registerSystem<game::system::visual::AttackTelegraphVisualsSystem>(
 			m_componentManager, m_renderer) };
+		core::probe::mark("      sys: AttackTelegraphVisualsSystem");
 		m_view.setAttackTelegraphVisualsSystem(attackTelegraph);
 
 		// 汎用の攻撃予兆（TelegraphComponent駆動：円・扇）。ボスの溜め攻撃などが使う
 		auto* telegraph{ m_systemManager.registerSystem<game::system::visual::TelegraphVisualsSystem>(
 			m_componentManager, m_renderer) };
+		core::probe::mark("      sys: TelegraphVisualsSystem");
 		m_view.setTelegraphVisualsSystem(telegraph);
 	}
 
@@ -673,8 +726,10 @@ namespace game::scene
 				spawnYawDegrees = std::atan2f(-toPlayerX, -toPlayerZ) * core::utility::RAD_TO_DEG;
 		}
 
+		core::probe::mark("  ボス出現: spawn 前");
 		m_macId = m_enemySpawner.spawn(constant::toEnemyType(macSpawn.m_type), macSpawn.m_position,
 		    spawnYawDegrees);
+		core::probe::mark("  ボス出現: spawn 後");
 		core::log::info("雑魚を全滅：ボスが出現しました (EntityId={})", m_macId);
 
 		// 出現シネマ（カメラをボスへ寄せてシェイク→プレイヤーへ戻す）を起動する。

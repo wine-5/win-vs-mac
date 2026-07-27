@@ -33,6 +33,7 @@
 #include "core/interface/IEffectFactory.h"
 #include "infrastructure/AudioManager.h"
 #include "infrastructure/effect/EffectFactory.h"
+#include "core/utility/Probe.h" // 一時: メモリ調査用（原因特定後に削除）
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
     game::GameManager& gameManager, game::PauseManager& pauseManager)
@@ -41,6 +42,8 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 	core::base::ServiceLocator::provide<core::iface::IStringConverter>(
 		std::make_unique<platform::utility::StringConverter>()
 	);
+
+	core::probe::mark("  service: StringConverter");
 
 	// ResourceManager を生成して登録（Facade パターン：内部でリポジトリが管理）
 	// 失敗時は握りつぶさず伝播させる。リソースが欠けたまま起動すると
@@ -53,9 +56,13 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 	core::base::ServiceLocator::provide<core::iface::IResourcePreloader>(
 	    std::make_unique<infrastructure::resource::ResourcePreloader>(*resourceManagerPtr));
 
+	core::probe::mark("  service: ResourceManager");
+
 	// デバッグ用ロガーを登録
 	core::base::ServiceLocator::provide<core::iface::ILogger>(
 	    std::make_unique<platform::utility::LogUtil>());
+
+	core::probe::mark("  service: Logger");
 
 	// Screen登録（SetGraphMode()で設定した画面サイズを渡す）
 	auto screen = std::make_unique<infrastructure::graphics::Screen>(screenWidth, screenHeight);
@@ -64,44 +71,64 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 		std::move(screen)
 	);
 
+	core::probe::mark("  service: Screen");
+
 	// UIRenderer登録
 	core::base::ServiceLocator::provide<core::iface::IUIRenderer>(
 	    std::make_unique<infrastructure::graphics::UIRenderer>());
+
+	core::probe::mark("  service: UIRenderer");
 
 	// InputManager登録
 	core::base::ServiceLocator::provide<core::iface::IInputProvider>(
 		std::make_unique<infrastructure::InputManager>()
 	);
 
+	core::probe::mark("  service: InputManager");
+
 	// Camera登録
 	core::base::ServiceLocator::provide<core::iface::ICamera>(
 	    std::make_unique<infrastructure::graphics::Camera>());
+
+	core::probe::mark("  service: Camera");
 
 	// Renderer登録
 	core::base::ServiceLocator::provide<core::iface::IRenderer>(
 	    std::make_unique<infrastructure::graphics::Renderer>());
 
+	core::probe::mark("  service: Renderer");
+
 	// Animator登録
 	core::base::ServiceLocator::provide<core::iface::IAnimator>(
 	    std::make_unique<infrastructure::graphics::Animator>());
 
+	core::probe::mark("  service: Animator");
+
 	// Lighting登録
 	core::base::ServiceLocator::provide<core::iface::ILighting>(
 	    std::make_unique<infrastructure::graphics::Lighting>());
+
+	core::probe::mark("  service: Lighting");
 
 	// WindowFactory登録
 	core::base::ServiceLocator::provide<core::iface::IWindowFactory>(
 		std::make_unique<platform::window::WindowFactory>(*screenPtr)
 	);
 
+	core::probe::mark("  service: WindowFactory");
+
 	// SceneManager登録（内部でSceneFactoryを所有。GameManager/PauseManagerを各シーンへ注入する）
 	core::base::ServiceLocator::provide(
 	    std::make_unique<game::scene::SceneManager>(gameManager, pauseManager));
+
+	core::probe::mark("  service: SceneManager");
 
 	// パフォーマンスデータプロバイダを登録
 	core::base::ServiceLocator::provide<core::iface::IPerformanceDataProvider>(
 		std::make_unique<platform::system::WindowsPerformanceProvider>()
 	);
+
+	core::probe::mark("  service: PerformanceProvider");
 
 	// EffectFactory登録
 	auto effectFactory{ std::make_unique<infrastructure::effect::EffectFactory>() };
@@ -110,10 +137,14 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 		std::move(effectFactory)
 	);
 
+	core::probe::mark("  service: EffectFactory");
+
 	// AudioManager登録
 	auto audioManager{ std::make_unique<infrastructure::AudioManager>() };
 	audioManager->initialize();
 	core::base::ServiceLocator::provide<core::iface::IAudioManager>(
 		std::move(audioManager)
 	);
+
+	core::probe::mark("  service: AudioManager");
 }

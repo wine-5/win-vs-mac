@@ -1,4 +1,4 @@
-#include "BattleStartSystem.h"
+﻿#include "BattleStartSystem.h"
 #include "game/component/movement/InputComponent.h"
 #include "game/component/ai/AIComponent.h"
 #include "core/utility/Color.h"
@@ -8,6 +8,7 @@
 #include "core/interface/IAudioManager.h"
 #include "core/interface/IStringConverter.h"
 #include "core/utility/MathConstants.h"
+#include "core/utility/Probe.h" // 一時: メモリ調査用（原因特定後に削除）
 #include <algorithm>
 #include <cmath>
 
@@ -238,7 +239,10 @@ namespace game::system::visual
 		// もう動けるのか分からない空白の時間ができる
 		if (m_isLocked && m_elapsedTime >= FIGHT_TIME)
 		{
+			// 一時: 敵AI解禁の前後を挟んで、解禁そのものが確保しているのかを見る（原因特定後に削除）
+			core::probe::mark("  カウントダウン: 解禁 前");
 			setGameplayLocked(false);
+			core::probe::mark("  カウントダウン: 解禁 後");
 
 			auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 			if (audio)
