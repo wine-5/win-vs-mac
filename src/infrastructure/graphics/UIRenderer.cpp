@@ -95,4 +95,19 @@ namespace infrastructure::graphics
 		// （アルファを持たないJPG等は不透明のままなので影響なし）
 		DrawExtendGraph(x, y, x + width, y + height, handle, TRUE);
 	}
+
+	void UIRenderer::setClipArea(int x, int y, int width, int height)
+	{
+		// DxLibの描画可能範囲は右下端を含むため、幅・高さから1引いた座標を渡す
+		SetDrawArea(x, y, x + width - 1, y + height - 1);
+	}
+
+	void UIRenderer::resetClipArea()
+	{
+		int screenWidth{ 0 };
+		int screenHeight{ 0 };
+		int colorBitDepth{ 0 };
+		GetScreenState(&screenWidth, &screenHeight, &colorBitDepth);
+		SetDrawArea(0, 0, screenWidth, screenHeight);
+	}
 } // namespace infrastructure::graphics

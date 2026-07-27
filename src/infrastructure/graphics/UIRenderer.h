@@ -118,7 +118,21 @@ namespace infrastructure::graphics
          */
         void drawImage(int handle, int x, int y, int width, int height) override;
 
-    private:
+		/**
+		 * @brief 以降の描画を矩形の内側だけに制限する
+		 * @param x 左上X座標
+		 * @param y 左上Y座標
+		 * @param width 幅
+		 * @param height 高さ
+		 */
+		void setClipArea(int x, int y, int width, int height) override;
+
+		/**
+		 * @brief 描画範囲の制限を解除して全画面へ戻す
+		 */
+		void resetClipArea() override;
+
+	  private:
         std::string m_defaultFontName{};
         std::string m_currentFontName{};
         // mutable: getTextWidth はフォントハンドルを遅延生成してキャッシュする

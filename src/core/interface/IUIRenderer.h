@@ -114,5 +114,23 @@ namespace core::iface
          * @param height 描画高さ
          */
         virtual void drawImage(int handle, int x, int y, int width, int height) = 0;
-    };
+
+		/**
+		 * @brief 以降の描画を矩形の内側だけに制限する
+		 *
+		 * ミニマップのように「枠からはみ出した中身を切り落とす」用途に使う。
+		 * 使い終わったら必ず resetClipArea() で全画面へ戻すこと。
+		 * 指定できるのは矩形のみで、円や角丸での切り抜きはできない
+		 * @param x 左上X座標
+		 * @param y 左上Y座標
+		 * @param width 幅
+		 * @param height 高さ
+		 */
+		virtual void setClipArea(int x, int y, int width, int height) = 0;
+
+		/**
+		 * @brief 描画範囲の制限を解除して全画面へ戻す
+		 */
+		virtual void resetClipArea() = 0;
+	};
 } // namespace core::iface
