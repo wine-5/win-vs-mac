@@ -270,12 +270,17 @@ namespace game::system::combat
 			hitEvent.m_isCritical = chain.m_isCritical;
 
 			// 被弾エフェクトは「誰が食らったか」で決める。
-			// 敵が食らったときだけ、当たったのが弾（Enemy_HitWindow）か剣（Enemy_HitSwordNormal）かで出し分ける
+			// 敵が食らったときだけ、当たったのが弾（Enemy_HitWindow）か剣（Enemy_HitSword系）かで出し分ける。
+			// 剣の場合はさらに、その一振りが近接コンボの何段目だったかで通常／強を切り替える。
+			// 段数そのもの（AttackComboComponent.m_stage）は受付時間切れで振っている最中に0へ戻り得るため、
+			// 一振りごとに確定して以降上書きされない m_startEffectType を段の判定に使う
 			if (targetTagCheck.m_tag == constant::Tag::Player)
 				hitEvent.m_effectType = core::constant::EffectType::Player_Hit;
+			else if (m_componentManager.has<component::combat::ProjectileComponent>(attackerId))
+				hitEvent.m_effectType = core::constant::EffectType::Enemy_HitWindow;
 			else
-				hitEvent.m_effectType = m_componentManager.has<component::combat::ProjectileComponent>(attackerId)
-				                            ? core::constant::EffectType::Enemy_HitWindow
+				hitEvent.m_effectType = attack.m_startEffectType == core::constant::EffectType::Player_SlashStrong
+				                            ? core::constant::EffectType::Enemy_HitSwordStrong
 				                            : core::constant::EffectType::Enemy_HitSwordNormal;
 
 			// ヒット音は「何が当たったか」で決める。弾は弾自身が持つ音（Window弾・溜め撃ちで別）、

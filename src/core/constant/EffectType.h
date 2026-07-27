@@ -12,6 +12,7 @@ namespace core::constant
 	{
 		None,
 		Enemy_HitSwordNormal, // 敵がプレイヤーの剣（近接コンボ1段目）で被弾
+		Enemy_HitSwordStrong, // 敵がプレイヤーの剣（近接コンボ2段目の回転斬り）で被弾
 		Enemy_HitWindow,      // 敵がプレイヤーのWindow投撃弾（遠距離）で被弾
 		Enemy_Spawn,          // 敵スポーン（テスト用：Tキーでプレイヤー位置に再生）
 		Player_Hit,           // プレイヤーが敵の攻撃で被弾（近接・遠距離を問わない）
@@ -26,8 +27,9 @@ namespace core::constant
 	/**
 	 * @brief JSONに書くエフェクト名と列挙の対応表
 	 */
-	inline constexpr std::array<std::pair<std::string_view, EffectType>, 7> EFFECT_TYPE_NAMES{ {
+	inline constexpr std::array<std::pair<std::string_view, EffectType>, 8> EFFECT_TYPE_NAMES{ {
 		{ "Enemy_HitSwordNormal", EffectType::Enemy_HitSwordNormal },
+		{ "Enemy_HitSwordStrong", EffectType::Enemy_HitSwordStrong },
 		{ "Enemy_HitWindow", EffectType::Enemy_HitWindow },
 		{ "Enemy_Spawn", EffectType::Enemy_Spawn },
 		{ "Player_Hit", EffectType::Player_Hit },

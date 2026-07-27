@@ -8,6 +8,13 @@
       "scale": 30.0
     },
     {
+      "type": "Enemy_HitSwordStrong",
+      "path": "assets/effects/enemy_hit_sword_strong.efk",
+      "poolSize": 10,
+      "yOffset": 75.0,
+      "scale": 30.0
+    },
+    {
       "type": "Enemy_HitWindow",
       "path": "assets/effects/enemy_hit_window.efk",
       "poolSize": 10,
