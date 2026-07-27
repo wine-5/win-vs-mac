@@ -1,7 +1,9 @@
 :root {
     /* Responsive Layout Variables */
-    --taskbar-height: 48px;
-    --icon-size: 40px;
+    /* タスクバーは画面サイズに追従させる。固定pxのままだと、フルスクリーンでは
+       帯も文字も豆粒になり、右端の「ゲームを開始」が見つけられない */
+    --taskbar-height: clamp(48px, 5.2vh, 104px);
+    --icon-size: clamp(40px, 4.2vh, 84px);
     --app-icon-padding: 6px;
     --taskbar-padding: 0 14px;
     --taskbar-gap: 8px;
@@ -9,16 +11,16 @@
     --taskbar-app-radius: 6px;
     --app-padding: 6px;
     --tooltip-padding: 6px 10px;
-    --tooltip-font-size: 11px;
+    --tooltip-font-size: clamp(11px, 0.85vw, 22px);
     --tooltip-margin-bottom: 8px;
     --tooltip-border-radius: 4px;
     --active-indicator-size: 4px;
     --active-indicator-bottom: 2px;
     --taskbar-right-gap: 10px;
-    --clock-font-size: 11px;
+    --clock-font-size: clamp(11px, 0.85vw, 22px);
     --clock-min-width: 40px;
-    --start-btn-padding: 7px 16px;
-    --start-btn-font-size: 13px;
+    --start-btn-padding: clamp(7px, 0.8vh, 16px) clamp(16px, 1.6vw, 38px);
+    --start-btn-font-size: clamp(13px, 1.25vw, 30px);
     --border-top-color: rgba(255, 255, 255, 0.08);
     --app-hover-background: rgba(255, 255, 255, 0.1);
     --tooltip-background: rgba(0, 0, 0, 0.9);
@@ -220,6 +222,8 @@ body {
     min-width: var(--clock-min-width);
 }
 
+/* この画面で最後に押させたいボタン。周りのアイコンと同じ調子で置くと埋もれるので、
+   光を落として一段浮かせ、押す場所だと分かるようにする */
 .start-btn {
     padding: var(--start-btn-padding);
     background: var(--accent);
@@ -228,6 +232,8 @@ body {
     font-size: var(--start-btn-font-size);
     font-weight: 600;
     letter-spacing: 0.02em;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18) inset,
+                0 2px 14px rgba(0, 120, 212, 0.55);
 }
 
 .start-btn:hover {
