@@ -57,6 +57,17 @@ namespace game::system::ai
 		core::Vector3 pickWanderTarget(const core::Vector3& home);
 
 		/**
+		 * @brief その向きへ踏み出しても落ちないかを判定する
+		 *
+		 * 進行方向の少し先の足元を調べ、床が無い／落差が大きすぎるなら踏み出させない。
+		 * 追跡でも徘徊でも同じ基準にしたいので、両方からここを通す。
+		 * @param entityId 対象のEntityId
+		 * @param direction 進もうとしている正規化済み水平方向ベクトル
+		 * @return 踏み出してよい場合true（空中にいる間は判定せずtrue）
+		 */
+		bool canStepToward(core::ecs::EntityId entityId, const core::Vector3& direction) const;
+
+		/**
 		 * @brief 攻撃モーションの最中かを判定する
 		 *
 		 * 溜め（ワインドアップ）中と、攻撃アニメが再生し終わるまでを「攻撃中」とみなす。
