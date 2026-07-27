@@ -469,7 +469,7 @@ namespace game::scene
 		// カメラはMoveSystemより前に更新し、最新のyawで移動方向を計算させる
 		m_systemManager.registerSystem<game::system::camera::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera);
 		core::probe::mark("      sys: CameraSystem");
-		m_systemManager.registerSystem<game::system::movement::MoveSystem>(m_componentManager, m_playerId, m_playerData.getMoveSpeed(), m_playerData.getDashMultiplier());
+		m_systemManager.registerSystem<game::system::movement::MoveSystem>(m_componentManager, m_playerId, m_playerData.getDashMultiplier());
 		core::probe::mark("      sys: MoveSystem");
 		// 照準の敵捕捉判定（カメラ更新後・描画前に走らせる）
 		m_systemManager.registerSystem<game::system::combat::TargetingSystem>(m_componentManager);

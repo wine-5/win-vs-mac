@@ -13,12 +13,14 @@ namespace game::system::movement
 	public:
 	  /**
 	   * @brief MoveSystemのコンストラクタ
+	   *
+	   * 移動速度はPlayerStatsComponentから毎フレーム読む。Itemで速度が上がっても
+	   * そのまま効くようにするため、Systemが値を抱え込まない
 	   * @param componentManager ComponentManagerの参照
 	   * @param entityId 対象EntityのID
-	   * @param moveSpeed 移動速度
 	   * @param dashMultiplier ダッシュ時の速度倍率
 	   */
-	  MoveSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId, float moveSpeed, float dashMultiplier);
+	  MoveSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId, float dashMultiplier);
 
 	  /**
 	   * @brief 入力を元に速度を計算する
@@ -29,7 +31,6 @@ namespace game::system::movement
 	private:
 		core::ecs::ComponentManager& m_componentManager;
 		core::ecs::EntityId m_entityId{};
-		float m_moveSpeed{0.0f};
 		float m_dashMultiplier{ 1.0f };
 	};
 } // namespace game::system::movement
