@@ -325,7 +325,9 @@ function drawMinimap() {
 
     ctx.save();
     ctx.translate(cx + c.x, cy + c.y);
-    ctx.rotate(-(g.r * Math.PI / 180) + (opt.rotate ? player.yaw : 0));
+    // 床自身の向きとマップ全体の回転を同じ符号で掛ける。
+    // ここの符号を取り違えると、床だけがマップと逆向きに自転して見える
+    ctx.rotate(-(g.r * Math.PI / 180) - (opt.rotate ? player.yaw : 0));
     ctx.globalAlpha = alpha;
     ctx.fillStyle = FLOOR_COLORS[g.t] || "#4A5A70";
     ctx.globalAlpha = alpha * 0.30;
