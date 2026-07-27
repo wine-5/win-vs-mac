@@ -40,18 +40,6 @@ namespace game::ui::ingame
 		    core::iface::IResourceManager& resourceManager);
 
 		/**
-		 * @brief コンポーネントから読めない能力値を設定する
-		 *
-		 * 移動速度と弾の性能はSystemが値を抱えていてコンポーネントに無いため、
-		 * 組み立て側（InGame）から渡してもらう。Itemで動かせるようになった時点で
-		 * コンポーネントへ移し、この経路は畳む
-		 * @param moveSpeed 移動速度
-		 * @param projectileSpeed Window弾の弾速
-		 * @param projectileRange Window弾の飛距離
-		 */
-		void setDerivedStats(float moveSpeed, float projectileSpeed, float projectileRange);
-
-		/**
 		 * @brief プレイヤーステータスを描画する
 		 * @param playerId ステータスの読み出し元となるプレイヤーのEntityID
 		 */
@@ -116,10 +104,11 @@ namespace game::ui::ingame
 		/**
 		 * @brief 8項目の現在値を集める
 		 *
-		 * HP・攻撃・防御・射程・会心はコンポーネントの生値を読み、
-		 * 残りは setDerivedStats() で受け取った値を使う
+		 * HP・防御は HealthComponent、攻撃・射程・会心は AttackComponent、
+		 * 移動速度と弾の性能は PlayerStatsComponent から、いずれも毎フレーム生値を読む。
+		 * Itemがコンポーネントを書き換えれば表示は自動で追従する
 		 * @param playerId プレイヤーのEntityID
-		 * @return STAT_ORDER の並びに対応した現在値
+		 * @return アイコンの並びに対応した現在値
 		 */
 		[[nodiscard]] std::array<float, STAT_COUNT> collectStats(core::ecs::EntityId playerId) const;
 
@@ -175,11 +164,6 @@ namespace game::ui::ingame
 
 		// 能力値アイコンの画像ハンドル（STAT_ORDER と同じ並び）。読み込みに失敗した項目は-1
 		std::array<int, STAT_COUNT> m_iconHandles{};
-
-		// コンポーネントに無い能力値。setDerivedStats() で受け取る
-		float m_moveSpeed{ 0.0f };
-		float m_projectileSpeed{ 0.0f };
-		float m_projectileRange{ 0.0f };
 
 		// ページ送りの状態
 		int m_page{ 0 };                 // 今表示しているページ（0または1）

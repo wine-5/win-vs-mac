@@ -5,6 +5,7 @@
 #include "core/utility/Log.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/combat/AttackComponent.h"
+#include "game/component/combat/PlayerStatsComponent.h"
 #include "game/component/movement/InputComponent.h"
 #include <algorithm>
 #include <array>
@@ -113,13 +114,6 @@ namespace game::ui::ingame
 		}
 	}
 
-	void PlayerHUDView::setDerivedStats(float moveSpeed, float projectileSpeed, float projectileRange)
-	{
-		m_moveSpeed = moveSpeed;
-		m_projectileSpeed = projectileSpeed;
-		m_projectileRange = projectileRange;
-	}
-
 	int PlayerHUDView::scaled(int value) const
 	{
 		return value * m_screen.getHeight() / BASE_SCREEN_HEIGHT;
@@ -215,9 +209,12 @@ namespace game::ui::ingame
 			stats[STAT_INDEX_HP] = health->m_maxHp;
 			stats[STAT_INDEX_DEF] = health->m_defence;
 		}
-		stats[STAT_INDEX_SPD] = m_moveSpeed;
-		stats[STAT_INDEX_BSPD] = m_projectileSpeed;
-		stats[STAT_INDEX_BRNG] = m_projectileRange;
+		if (const auto* player{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(playerId) })
+		{
+			stats[STAT_INDEX_SPD] = player->m_moveSpeed;
+			stats[STAT_INDEX_BSPD] = player->m_projectileSpeed;
+			stats[STAT_INDEX_BRNG] = player->m_projectileRange;
+		}
 		return stats;
 	}
 
