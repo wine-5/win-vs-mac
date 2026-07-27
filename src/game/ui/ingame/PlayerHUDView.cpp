@@ -44,15 +44,24 @@ namespace
 	constexpr float CHANGE_HOLD_DURATION{ 3.0f }; // 値が変わった項目を留めて強調する長さ（秒）
 	constexpr float EXPAND_SPEED{ 6.0f };         // Tabで開閉する速さ（1.0を割る秒数の逆数）
 
-	// 能力値の並び。セレクト画面（パラメータウィンドウ）と同じ8項目・同じアイコンを使う。
+	// 能力値の並び。セレクト画面（パラメータウィンドウ）と同じ8項目・同じアイコン・同じ順序で使う。
+	// 順序が違うと「セレクトで見たあの位置の値」を探し直すことになるため、必ず揃える。
 	// 前半4つがページ0、後半4つがページ1になる
 	constexpr std::array<const char*, 8> STAT_ICON_IMAGE_IDS{
-		"stat-atk", "stat-def", "stat-spd", "stat-crit",
-		"stat-rng", "stat-bspd", "stat-brng", "stat-hp"
+		"stat-hp", "stat-atk", "stat-def", "stat-spd",
+		"stat-rng", "stat-crit", "stat-bspd", "stat-brng"
 	};
 
+	// STAT_ICON_IMAGE_IDS 上の位置。値を詰める側と並びがずれないよう名前で参照する
+	constexpr int STAT_INDEX_HP{ 0 };
+	constexpr int STAT_INDEX_ATK{ 1 };
+	constexpr int STAT_INDEX_DEF{ 2 };
+	constexpr int STAT_INDEX_SPD{ 3 };
+	constexpr int STAT_INDEX_RNG{ 4 };
 	// 会心率だけは割合なので百分率で見せる。この位置だけ書式が変わる
-	constexpr int STAT_INDEX_CRIT{ 3 };
+	constexpr int STAT_INDEX_CRIT{ 5 };
+	constexpr int STAT_INDEX_BSPD{ 6 };
+	constexpr int STAT_INDEX_BRNG{ 7 };
 
 	// 能力値を通常の濃さで描くときの不透明度（スライド中はここから落とす）
 	constexpr int STAT_ALPHA_OPAQUE{ 255 };
@@ -197,18 +206,18 @@ namespace game::ui::ingame
 
 		if (const auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(playerId) })
 		{
-			stats[0] = attack->m_attackPower;
+			stats[STAT_INDEX_ATK] = attack->m_attackPower;
+			stats[STAT_INDEX_RNG] = attack->m_attackRange;
 			stats[STAT_INDEX_CRIT] = attack->m_criticalRate * 100.0f; // 割合を百分率へ
-			stats[4] = attack->m_attackRange;
 		}
 		if (const auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(playerId) })
 		{
-			stats[1] = health->m_defence;
-			stats[7] = health->m_maxHp;
+			stats[STAT_INDEX_HP] = health->m_maxHp;
+			stats[STAT_INDEX_DEF] = health->m_defence;
 		}
-		stats[2] = m_moveSpeed;
-		stats[5] = m_projectileSpeed;
-		stats[6] = m_projectileRange;
+		stats[STAT_INDEX_SPD] = m_moveSpeed;
+		stats[STAT_INDEX_BSPD] = m_projectileSpeed;
+		stats[STAT_INDEX_BRNG] = m_projectileRange;
 		return stats;
 	}
 
