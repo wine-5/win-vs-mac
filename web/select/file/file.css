@@ -10,7 +10,6 @@ body {
    バーの有無で中身の幅がずれて、毎フレーム揺れて見える。
    スクロール自体（ホイール操作）はそのまま効く */
 .file-list::-webkit-scrollbar,
-.bonus-panel-list::-webkit-scrollbar,
 .tutorial-body::-webkit-scrollbar {
     display: none;
 }
@@ -265,13 +264,38 @@ body {
     border-bottom: 1px solid var(--border);
 }
 
+/* ここだけはスクロールバーを出す。行が画面に収まりきらず、続きがあることに
+   気づかないまま出撃されてしまうため。常に scroll にして溝を確保し、
+   行数が変わってもバーの有無で中身の幅がずれないようにしている */
 .bonus-panel-list {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: scroll;
     padding: 6px 12px;
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+.bonus-panel-list::-webkit-scrollbar {
+    width: 10px;
+}
+
+.bonus-panel-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-left: 1px solid var(--border);
+}
+
+.bonus-panel-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.26);
+    border-radius: 5px;
+    /* 溝の縁から少し内側に置いて、Windows 11 のバーの細さに近づける */
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.bonus-panel-list::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+    background-clip: content-box;
 }
 
 /* バッジ / 対象拡張子 / ボーナス内訳 の3列。
