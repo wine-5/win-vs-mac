@@ -790,6 +790,7 @@ namespace game::scene
 	{
 		core::data::ResultData result{};
 		result.m_isVictory        = isVictory;
+		result.m_difficulty = m_gameManager.getDifficulty();
 		result.m_elapsedTime      = m_elapsedTime;
 		result.m_killCount        = m_killCount;
 		result.m_totalDamageTaken = m_totalDamageTaken;

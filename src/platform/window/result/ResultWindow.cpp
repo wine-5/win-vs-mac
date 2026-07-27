@@ -150,7 +150,8 @@ namespace platform::window::result
             nlohmann::json j{};
             j[WindowConstants::JSON_KEY_TYPE]             = WindowConstants::MESSAGE_TYPE_RESULT_DATA;
             j["isVictory"]        = data.m_isVictory;
-            j["elapsedTime"]      = data.m_elapsedTime;
+			j["difficulty"] = std::string{ core::data::toText(data.m_difficulty) };
+			j["elapsedTime"]      = data.m_elapsedTime;
             j["killCount"]        = data.m_killCount;
             j["totalDamageTaken"] = data.m_totalDamageTaken;
             j["usedFiles"]        = data.m_usedFiles;
