@@ -113,6 +113,17 @@ namespace game::ui::ingame
 		[[nodiscard]] std::array<float, STAT_COUNT> collectStats(core::ecs::EntityId playerId) const;
 
 		/**
+		 * @brief 8項目の素の値（強化を受けていない値）を集める
+		 *
+		 * 現在値と突き合わせて「今この能力は強化されているか」を判定するために使う。
+		 * 強化の出どころ（装備ファイル／Item／将来のバフ）は問わないので、
+		 * 現在値を書き換える手段が増えても、ここは変更しなくてよい
+		 * @param playerId プレイヤーのEntityID
+		 * @return アイコンの並びに対応した素の値。控えが無ければすべて0
+		 */
+		[[nodiscard]] std::array<float, STAT_COUNT> collectBaseStats(core::ecs::EntityId playerId) const;
+
+		/**
 		 * @brief ページ送りと開閉の進行を更新する
 		 *
 		 * 値が変わった項目があれば、その項目を含むページへ即座に送って少しの間留める。
@@ -132,8 +143,11 @@ namespace game::ui::ingame
 		 * @param y 並びの左上Y座標
 		 * @param cellWidth セル1つぶんの幅
 		 * @param stats 8項目の値
+		 * @param baseStats 8項目の素の値
 		 */
-		void drawStats(int x, int y, int cellWidth, const std::array<float, STAT_COUNT>& stats);
+		void drawStats(int x, int y, int cellWidth,
+		    const std::array<float, STAT_COUNT>& stats,
+		    const std::array<float, STAT_COUNT>& baseStats);
 
 		/**
 		 * @brief 能力値1項目を描画する
@@ -141,9 +155,10 @@ namespace game::ui::ingame
 		 * @param y セルの左上Y座標
 		 * @param index STAT_ORDER 上の位置
 		 * @param value 表示する値
+		 * @param isBoosted 素の値より上がっているか（強化中なら色を変える）
 		 * @param alpha 不透明度（0〜255）
 		 */
-		void drawStatCell(int x, int y, int index, float value, int alpha);
+		void drawStatCell(int x, int y, int index, float value, bool isBoosted, int alpha);
 
 		/**
 		 * @brief 能力値を4項目ぶん横に並べて描画する
@@ -151,11 +166,13 @@ namespace game::ui::ingame
 		 * @param y 並びの左上Y座標
 		 * @param cellWidth セル1つぶんの幅
 		 * @param stats 8項目の値
+		 * @param baseStats 8項目の素の値
 		 * @param page 描画するページ（0または1）
 		 * @param alpha 不透明度（0〜255）
 		 */
 		void drawStatPage(int x, int y, int cellWidth,
-		    const std::array<float, STAT_COUNT>& stats, int page, int alpha);
+		    const std::array<float, STAT_COUNT>& stats,
+		    const std::array<float, STAT_COUNT>& baseStats, int page, int alpha);
 
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;

@@ -6,6 +6,7 @@
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/PlayerStatsComponent.h"
+#include "game/component/combat/PlayerStatBaseComponent.h"
 #include "game/component/movement/InputComponent.h"
 #include <algorithm>
 #include <array>
@@ -63,6 +64,11 @@ namespace
 	constexpr int STAT_INDEX_CRIT{ 5 };
 	constexpr int STAT_INDEX_BSPD{ 6 };
 	constexpr int STAT_INDEX_BRNG{ 7 };
+
+	// 素の値より上がっている項目の色。装備ファイル・Itemなど強化の出どころは問わない
+	constexpr unsigned int STAT_BOOSTED_COLOR{ 0xFFFFC83D };
+	// 強化とみなす下限。浮動小数の誤差で素の値と同じものが光らないようにする
+	constexpr float STAT_BOOST_EPSILON{ 0.001f };
 
 	// 能力値を通常の濃さで描くときの不透明度（スライド中はここから落とす）
 	constexpr int STAT_ALPHA_OPAQUE{ 255 };
@@ -218,6 +224,25 @@ namespace game::ui::ingame
 		return stats;
 	}
 
+	std::array<float, PlayerHUDView::STAT_COUNT> PlayerHUDView::collectBaseStats(core::ecs::EntityId playerId) const
+	{
+		std::array<float, STAT_COUNT> stats{};
+
+		const auto* base{ m_componentManager.tryGet<component::combat::PlayerStatBaseComponent>(playerId) };
+		if (base == nullptr)
+			return stats; // 控えが無ければ強化なし扱い（全項目が素の色になる）
+
+		stats[STAT_INDEX_HP] = base->m_maxHp;
+		stats[STAT_INDEX_ATK] = base->m_attackPower;
+		stats[STAT_INDEX_DEF] = base->m_defence;
+		stats[STAT_INDEX_SPD] = base->m_moveSpeed;
+		stats[STAT_INDEX_RNG] = base->m_attackRange;
+		stats[STAT_INDEX_CRIT] = base->m_criticalRate * 100.0f; // 現在値と同じ百分率へ揃える
+		stats[STAT_INDEX_BSPD] = base->m_projectileSpeed;
+		stats[STAT_INDEX_BRNG] = base->m_projectileRange;
+		return stats;
+	}
+
 	void PlayerHUDView::updatePaging(const std::array<float, STAT_COUNT>& stats, bool isExpanded, float deltaTime)
 	{
 		// Tabの開閉は往復とも同じ速さで進める
@@ -278,7 +303,7 @@ namespace game::ui::ingame
 		m_slideProgress = 0.0f;
 	}
 
-	void PlayerHUDView::drawStatCell(int x, int y, int index, float value, int alpha)
+	void PlayerHUDView::drawStatCell(int x, int y, int index, float value, bool isBoosted, int alpha)
 	{
 		const int iconSize{ scaled(STAT_ICON_SIZE) };
 		const int rowHeight{ scaled(STAT_ROW_HEIGHT) };
@@ -297,10 +322,14 @@ namespace game::ui::ingame
 		else
 			std::snprintf(text, sizeof(text), "%d", static_cast<int>(value));
 
-		// 直近で変化した項目はアクセント色で数フレーム目立たせる
+		// 素の値より上がっている項目は黄色にして、強化されていることを一目で分かるようにする。
+		// 直近で変化した項目は、そのうえで一時的に強い色にして「今上がった」ことも伝える
 		const bool isChanged{ index == m_changedIndex && m_changeHighlight > 0.0f };
-		const unsigned int color{ isChanged ? core::utility::Color::HUD_CHARGE_MAX
-			                                : core::utility::Color::HUD_INK };
+		unsigned int color{ core::utility::Color::HUD_INK };
+		if (isChanged)
+			color = core::utility::Color::HUD_CHARGE_MAX;
+		else if (isBoosted)
+			color = STAT_BOOSTED_COLOR;
 
 		const int fontSize{ scaled(STAT_FONT_SIZE) };
 		const int textY{ y + (rowHeight - fontSize) / 2 };
@@ -313,14 +342,20 @@ namespace game::ui::ingame
 	}
 
 	void PlayerHUDView::drawStatPage(int x, int y, int cellWidth,
-	    const std::array<float, STAT_COUNT>& stats, int page, int alpha)
+	    const std::array<float, STAT_COUNT>& stats,
+	    const std::array<float, STAT_COUNT>& baseStats, int page, int alpha)
 	{
 		if (alpha <= 0)
 			return;
 
 		const int first{ page * STATS_PER_PAGE };
 		for (int i{ 0 }; i < STATS_PER_PAGE; ++i)
-			drawStatCell(x + cellWidth * i, y, first + i, stats[first + i], alpha);
+		{
+			const int index{ first + i };
+			// 素の値を「上回っているか」だけを見る。強化がどこから来たか（装備・Item）は問わない
+			const bool isBoosted{ stats[index] > baseStats[index] + STAT_BOOST_EPSILON };
+			drawStatCell(x + cellWidth * i, y, index, stats[index], isBoosted, alpha);
+		}
 	}
 
 	void PlayerHUDView::draw(core::ecs::EntityId playerId)
@@ -339,6 +374,7 @@ namespace game::ui::ingame
 		const bool isExpanded{ input != nullptr && input->m_statusViewPressed };
 
 		const auto stats{ collectStats(playerId) };
+		const auto baseStats{ collectBaseStats(playerId) };
 		updatePaging(stats, isExpanded, deltaTime);
 
 		const int panelWidth{ scaled(PANEL_WIDTH) };
@@ -374,17 +410,18 @@ namespace game::ui::ingame
 		    panelWidth - padding * 2, scaled(BAR_HEIGHT), ratio);
 
 		drawStats(panelX + padding, panelY + scaled(STAT_ROW_Y),
-		    (panelWidth - padding * 2) / STATS_PER_PAGE, stats);
+		    (panelWidth - padding * 2) / STATS_PER_PAGE, stats, baseStats);
 	}
 
 	void PlayerHUDView::drawStats(int x, int y, int cellWidth,
-	    const std::array<float, STAT_COUNT>& stats)
+	    const std::array<float, STAT_COUNT>& stats,
+	    const std::array<float, STAT_COUNT>& baseStats)
 	{
 		// 開ききっている間は2ページを縦に並べて全項目を見せる（この間はページ送りが止まっている）
 		if (m_expandProgress >= 1.0f)
 		{
-			drawStatPage(x, y, cellWidth, stats, 0, STAT_ALPHA_OPAQUE);
-			drawStatPage(x, y + scaled(STAT_ROW_HEIGHT), cellWidth, stats, 1,
+			drawStatPage(x, y, cellWidth, stats, baseStats, 0, STAT_ALPHA_OPAQUE);
+			drawStatPage(x, y + scaled(STAT_ROW_HEIGHT), cellWidth, stats, baseStats, 1,
 			    STAT_ALPHA_OPAQUE);
 			return;
 		}
@@ -392,8 +429,8 @@ namespace game::ui::ingame
 		// 開閉の途中：2ページ目は伸びる高さに合わせて濃さも上げる
 		if (m_expandProgress > 0.0f)
 		{
-			drawStatPage(x, y, cellWidth, stats, 0, STAT_ALPHA_OPAQUE);
-			drawStatPage(x, y + scaled(STAT_ROW_HEIGHT), cellWidth, stats, 1,
+			drawStatPage(x, y, cellWidth, stats, baseStats, 0, STAT_ALPHA_OPAQUE);
+			drawStatPage(x, y + scaled(STAT_ROW_HEIGHT), cellWidth, stats, baseStats, 1,
 			    static_cast<int>(STAT_ALPHA_OPAQUE * m_expandProgress));
 			return;
 		}
@@ -402,15 +439,15 @@ namespace game::ui::ingame
 		// ドット等の指標を置かなくても、この動き自体が「続きがある」ことを伝える
 		if (m_slideProgress >= 1.0f)
 		{
-			drawStatPage(x, y, cellWidth, stats, m_page, STAT_ALPHA_OPAQUE);
+			drawStatPage(x, y, cellWidth, stats, baseStats, m_page, STAT_ALPHA_OPAQUE);
 			return;
 		}
 
 		const int offset{ scaled(SLIDE_OFFSET) };
 		const float t{ m_slideProgress };
-		drawStatPage(x, y - static_cast<int>(offset * t), cellWidth, stats, m_slideFromPage,
+		drawStatPage(x, y - static_cast<int>(offset * t), cellWidth, stats, baseStats, m_slideFromPage,
 		    static_cast<int>(STAT_ALPHA_OPAQUE * (1.0f - t)));
-		drawStatPage(x, y + static_cast<int>(offset * (1.0f - t)), cellWidth, stats, m_page,
+		drawStatPage(x, y + static_cast<int>(offset * (1.0f - t)), cellWidth, stats, baseStats, m_page,
 		    static_cast<int>(STAT_ALPHA_OPAQUE * t));
 	}
 
