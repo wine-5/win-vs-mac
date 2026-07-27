@@ -159,9 +159,13 @@ namespace game::system::combat
 
 		// 溜め切って撃った弾だけ重い着弾音にする。溜めた甲斐を音でも返すため、
 		// 見た目（サイズ）と同じく「溜め切ったか」で切り替える
-		config.m_hitSeType = chargeRate >= FULL_CHARGE_THRESHOLD
+		const bool isFullyCharged{ chargeRate >= FULL_CHARGE_THRESHOLD };
+		config.m_hitSeType = isFullyCharged
 		                         ? core::constant::SeType::HitChargedWindow
 		                         : core::constant::SeType::HitWindow;
+
+		// 壁・ブロックを抜けられるのは溜め切った弾だけ。通常撃ちは遮蔽物で止まる
+		config.m_penetratesWalls = isFullyCharged;
 
 		// 近接と同じようにクリティカルが出るよう、プレイヤーの会心設定を弾へ引き継ぐ
 		if (auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(m_playerId) })
