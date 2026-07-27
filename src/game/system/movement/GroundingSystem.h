@@ -37,18 +37,6 @@ namespace game::system::movement
 
 	  private:
 		/**
-		 * @brief 傾いた天面の、指定XZ位置での高さを求める
-		 * @param surfaceId 面のEntityID
-		 * @param x ワールドX座標
-		 * @param z ワールドZ座標
-		 * @param outHeight 求まった高さの格納先
-		 * @param outNormal 天面の法線の格納先（滑り方向の算出に使う）
-		 * @return XZが面の範囲内で高さが求まった場合true
-		 */
-		bool surfaceHeightAt(core::ecs::EntityId surfaceId, float x, float z,
-		    float& outHeight, core::Vector3& outNormal) const;
-
-		/**
 		 * @brief 坂を滑り落ちる速度を更新する
 		 *
 		 * 法線の水平成分がそのまま「坂を下る向き」になる。傾きが急なほど強く加速し、
