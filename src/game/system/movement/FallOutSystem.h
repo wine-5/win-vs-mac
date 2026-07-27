@@ -40,7 +40,7 @@ namespace game::system::movement
 		bool hasFallenOut(core::ecs::EntityId entityId) const;
 
 		/**
-		 * @brief 落下したプレイヤーを直前の足場へ戻す
+		 * @brief 落下したプレイヤーにダメージを与え、直前の足場へ戻す
 		 * @param entityId プレイヤーのEntityID
 		 */
 		void punishPlayer(core::ecs::EntityId entityId);
