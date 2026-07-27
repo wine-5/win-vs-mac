@@ -11,7 +11,8 @@
     --taskbar-app-radius: 6px;
     --app-padding: 6px;
     --tooltip-padding: 6px 10px;
-    --tooltip-font-size: clamp(11px, 0.85vw, 22px);
+    /* 薄い文字だと暗い壁紙の上で沈んで読めないため、下限を上げて太字で出す */
+    --tooltip-font-size: clamp(14px, 1.05vw, 26px);
     --tooltip-margin-bottom: 8px;
     --tooltip-border-radius: 4px;
     --active-indicator-size: 4px;
@@ -23,8 +24,8 @@
     --start-btn-font-size: clamp(13px, 1.25vw, 30px);
     --border-top-color: rgba(255, 255, 255, 0.08);
     --app-hover-background: rgba(255, 255, 255, 0.1);
-    --tooltip-background: rgba(0, 0, 0, 0.9);
-    --tooltip-color: rgba(255, 255, 255, 0.95);
+    --tooltip-background: rgba(24, 24, 24, 0.98);
+    --tooltip-color: #ffffff;
     --app-color: rgba(255, 255, 255, 0.9);
     --app-hidden-color: rgba(255, 255, 255, 0.38);
     --app-hidden-icon-opacity: 0.38;
@@ -173,7 +174,10 @@ body {
     background: var(--tooltip-background);
     color: var(--tooltip-color);
     border-radius: var(--tooltip-border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
     font-size: var(--tooltip-font-size);
+    font-weight: 600;
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;

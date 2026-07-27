@@ -29,7 +29,8 @@ const DesktopView = (function () {
         const taskbarHeight    = Math.max(48, Math.round(baseTaskbarHeight * scale));
         const iconSize         = Math.max(32, Math.round(baseIconSize * scale));
         const appPadding       = Math.max(4,  Math.round(6  * scale));
-        const tooltipFontSize  = Math.max(10, Math.round(11 * scale));
+        // ツールチップだけは小さくしない。11pxだと暗い壁紙の上で沈んで読めない
+        const tooltipFontSize  = Math.max(14, Math.round(15 * scale));
         const clockFontSize    = Math.max(10, Math.round(11 * scale));
         const startBtnFontSize = Math.max(12, Math.round(13 * scale));
 
