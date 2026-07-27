@@ -16,17 +16,17 @@ namespace
 
 	// スロットの配置（右下・1080p基準）
 	constexpr int MARGIN{ 28 };
-	constexpr int SLOT_SIZE{ 92 };
+	constexpr int SLOT_SIZE{ 116 };
 	constexpr int SLOT_GAP{ 16 };
 	constexpr int SLOT_RADIUS{ 4 }; // Windows 11のボタン・コントロールの角丸
 
 	// スロット内の要素位置（スロット左上からの相対座標・1080p基準）
-	constexpr int ICON_Y{ 10 };
-	constexpr int ICON_SIZE{ 48 };
-	constexpr int TYPE_LABEL_Y{ 24 }; // アイコンの読み込みに失敗したときの代替表示に使う
-	constexpr int TYPE_FONT_SIZE{ 22 };
-	constexpr int BONUS_LABEL_Y{ 62 };
-	constexpr int BONUS_FONT_SIZE{ 14 };
+	constexpr int ICON_Y{ 12 };
+	constexpr int ICON_SIZE{ 68 };
+	constexpr int TYPE_LABEL_Y{ 30 }; // アイコンの読み込みに失敗したときの代替表示に使う
+	constexpr int TYPE_FONT_SIZE{ 26 };
+	constexpr int BONUS_LABEL_Y{ 84 };
+	constexpr int BONUS_FONT_SIZE{ 19 };
 
 	// スロットの塗りと枠。色と不透明度を分けて持つ（DxLibのブレンドはアルファを別途指定するため）
 	constexpr unsigned int SLOT_FILL_COLOR{ 0xFF0E1420 };
