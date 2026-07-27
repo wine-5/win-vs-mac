@@ -235,6 +235,7 @@
     <ClCompile Include="src\game\system\movement\FootstepSystem.cpp" />
     <ClCompile Include="src\game\system\movement\FallOutSystem.cpp" />
     <ClCompile Include="src\game\system\movement\GroundingSystem.cpp" />
+    <ClCompile Include="src\game\utility\GroundQuery.cpp" />
     <ClCompile Include="src\game\system\stage\BossGateSystem.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageRepository.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageCatalogRepository.cpp" />
@@ -420,6 +421,7 @@
     <ClInclude Include="src\game\component\ai\AlertComponent.h" />
     <ClInclude Include="src\game\ui\FadeTransition.h" />
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
+    <ClInclude Include="src\game\utility\GroundQuery.h" />
     <ClInclude Include="src\infrastructure\AudioManager.h" />
     <ClInclude Include="src\infrastructure\effect\EffectFactory.h" />
     <ClInclude Include="src\infrastructure\effect\EffectPool.h" />
