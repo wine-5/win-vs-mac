@@ -205,6 +205,19 @@ body {
     object-fit: contain;
 }
 
+/* 画像を持たないタスクバー項目（タイトルへ戻る・シャットダウン）用。
+   .app-icon と同じ枠を取り、中央に文字を置いて他のアイコンと高さを揃える */
+.taskbar-glyph {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(var(--icon-size) * 0.62);
+    line-height: 1;
+    color: var(--app-color);
+}
+
 .taskbar-app.hidden-win .app-icon { opacity: var(--app-hidden-icon-opacity); }
 
 .taskbar-right {

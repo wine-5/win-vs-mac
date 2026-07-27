@@ -93,6 +93,14 @@
         </div>
 
         <div class="taskbar-right">
+            <!-- デスクトップアイコンと同じ出口をタスクバーにも置く。
+                 ウィンドウを開いたままアイコンが隠れても、ここから抜けられる -->
+            <div class="taskbar-app" data-tooltip="タイトルへ戻る" onclick="backToTitle()">
+                <span class="taskbar-glyph">🏠</span>
+            </div>
+            <div class="taskbar-app" data-tooltip="シャットダウン" onclick="quitGame()">
+                <span class="taskbar-glyph">⏻</span>
+            </div>
             <div class="clock" id="clock">00:00<br>--/--</div>
             <button class="start-btn" onclick="startGame()">ゲームを開始 →</button>
         </div>
