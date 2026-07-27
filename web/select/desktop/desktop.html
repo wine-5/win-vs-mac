@@ -12,8 +12,8 @@
 
         <!--
             デスクトップアイコン。
-            1列4個だと縦に伸びて、Debugの小さいウィンドウでは下の難易度ウィンドウに隠れる。
-            3 / 3 / 2 の3列に分けて、どの解像度でも全アイコンが見えるようにしている
+            1列に並べると縦に伸びて、Debugの小さいウィンドウでは下の難易度ウィンドウに隠れる。
+            4 / 3 / 4 の3列に分けて、どの解像度でも全アイコンが見えるようにしている
         -->
         <div class="desktop-icons">
             <!-- 1列目: 標準 Windows アプリ -->
@@ -29,6 +29,10 @@
                 <div class="desk-icon" ondblclick="launchApp('notepad')">
                     <img src="https://assets.game.web/images/ui/app/notepad.png" alt="">
                     <span>メモ帳</span>
+                </div>
+                <div class="desk-icon" ondblclick="launchApp('recyclebin')">
+                    <img src="https://assets.game.web/images/ui/app/gomibako.png" alt="">
+                    <span>ごみ箱</span>
                 </div>
             </div>
             <!-- 2列目: ゲームの設定ウィンドウ -->
@@ -46,7 +50,9 @@
                     <span>パラメータ</span>
                 </div>
             </div>
-            <!-- 3列目: 説明とごみ箱。ルール説明は初回ガイドの締めで指し示すので先頭へ置く -->
+            <!-- 3列目: 説明と、この画面の出口。ルール説明は初回ガイドの締めで指し示すので先頭へ置く。
+                 セレクト画面ではEscのポーズメニューを開けないため、
+                 タイトルへ戻る／終了はここが唯一の入口になる -->
             <div class="icon-column">
                 <div class="desk-icon" id="icon-rules" ondblclick="toggleWindow('rules')">
                     <img src="https://assets.game.web/images/ui/app/Rules.png" alt="">
@@ -60,9 +66,14 @@
                     <img src="https://assets.game.web/images/ui/icons/gameicon.ico" alt="">
                     <span>ゲーム開始.exe</span>
                 </div>
-                <div class="desk-icon" ondblclick="launchApp('recyclebin')">
-                    <img src="https://assets.game.web/images/ui/app/gomibako.png" alt="">
-                    <span>ごみ箱</span>
+                <!-- 戻る／終了の確認も同じ理由で C++ 側のダイアログに任せる -->
+                <div class="desk-icon" ondblclick="backToTitle()">
+                    <span class="desk-icon-emoji">🏠</span>
+                    <span>タイトルへ戻る</span>
+                </div>
+                <div class="desk-icon" ondblclick="quitGame()">
+                    <span class="desk-icon-emoji">⏻</span>
+                    <span>シャットダウン</span>
                 </div>
             </div>
         </div>
