@@ -40,6 +40,12 @@ namespace game::system::movement
 		bool hasFallenOut(core::ecs::EntityId entityId) const;
 
 		/**
+		 * @brief 直前に立っていた足場へ戻し、落下の勢いを消す
+		 * @param entityId 戻す対象のEntityID
+		 */
+		void returnToSafeGround(core::ecs::EntityId entityId);
+
+		/**
 		 * @brief 落下したプレイヤーにダメージを与え、直前の足場へ戻す
 		 * @param entityId プレイヤーのEntityID
 		 */

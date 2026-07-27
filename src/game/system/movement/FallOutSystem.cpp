@@ -39,16 +39,21 @@ namespace game::system::movement
 		return recovery->m_lastSafePosition.y - transform.m_position.y >= FALL_LIMIT;
 	}
 
-	void FallOutSystem::punishPlayer(core::ecs::EntityId entityId)
+	void FallOutSystem::returnToSafeGround(core::ecs::EntityId entityId)
 	{
 		auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
 		auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(entityId) };
 		const auto& recovery{ m_componentManager.get<component::movement::FallRecoveryComponent>(entityId) };
 
-		// HPが尽きても直前の足場へ戻す。死亡演出は足場の上で見せたいため
 		transform.m_position = recovery.m_lastSafePosition;
 		velocity.m_velocity = core::Vector3{};
 		velocity.m_externalVelocity = core::Vector3{};
+	}
+
+	void FallOutSystem::punishPlayer(core::ecs::EntityId entityId)
+	{
+		// HPが尽きても直前の足場へ戻す。死亡演出は足場の上で見せたいため
+		returnToSafeGround(entityId);
 
 		auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(entityId) };
 		if (health == nullptr || health->m_isDead)
