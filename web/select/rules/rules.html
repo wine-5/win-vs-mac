@@ -7,6 +7,13 @@
     <link rel="stylesheet" href="select/rules/rules.css">
 </head>
 <body>
+    <!-- Windows 11のメモ帳と同じく、タブ行はメニューバーの上に置く。
+         閉じる(×)や新規(+)は出さない。押せてしまうと説明を消せてしまい、戻す手段が無い -->
+    <div class="tabbar" id="tabbar">
+        <button type="button" class="tab is-active" data-page="controls">操作説明.txt</button>
+        <button type="button" class="tab" data-page="bonus">拡張子ボーナス.txt</button>
+        <button type="button" class="tab" data-page="flow">ゲームの流れ.txt</button>
+    </div>
     <div class="menubar">
         <span class="menu-item">ファイル(F)</span>
         <span class="menu-item">編集(E)</span>
@@ -15,7 +22,70 @@
         <span class="menu-item">ヘルプ(H)</span>
     </div>
     <div class="content" id="content">
-        <pre>これから実装予定</pre>
+        <!-- 1枚目だけは1画面で読み切れる分量に収める。
+             目的の1行をここへ置くのは、他のタブが開かれない前提で書いているため -->
+        <pre class="page is-active" id="page-controls">
+【 目的 】
+  PC内部のダンジョンを進み、最終ボス mac_os.exe を撃退する。
+
+【 操作（キーボード＋マウス） 】
+  移動            W A S D ／ 矢印キー
+  攻撃（斬撃）    マウス左クリック
+  遠距離攻撃      マウス右クリック
+  ダッシュ        Shift
+  ジャンプ        Space
+  メニュー        Esc
+
+【 操作（ゲームパッド） 】
+  移動            左スティック ／ 十字キー
+  攻撃            A ボタン
+  ジャンプ        B ボタン
+
+  ※ ゲームパッドは接続されていれば自動で使えます。
+     キーボードと同時に使っても構いません。</pre>
+
+        <pre class="page" id="page-bonus">
+【 装備ファイルとは 】
+  出撃前に、あなたのPCの中から最大3つのファイルを装備できます。
+  装備したファイルの「拡張子」に応じて、能力が上がった状態で出撃します。
+
+【 どの拡張子で何が伸びるか 】
+  .exe .dll .bat        攻撃力
+  .txt .pdf .docx       移動速度
+  .png .jpg .bmp        防御力
+  .mp3 .wav .flac       体力
+  .cpp .h .py .js       クリティカル確率
+  .lnk .url             弾速
+  .mp4 .avi .mkv        弾の飛距離
+  .zip .7z .rar         すべて少しずつ
+  それ以外              攻撃範囲
+
+  ※ 上がる数値は「ファイル選択」ウィンドウの拡張子ボーナス一覧に出ています。
+     装備した結果は「パラメータ」ウィンドウで確認できます。
+
+【 選び方の考え方 】
+  1種類で固めるほど、その能力が大きく伸びます。
+  迷ったら、まず .exe を3つ積んで攻撃力に寄せると分かりやすいです。
+  ファイルの中身は読み取りません。装備しても元のファイルは変化しません。</pre>
+
+        <pre class="page" id="page-flow">
+【 ゲームの流れ 】
+  1. デスクトップの「ファイル選択」で、装備するファイルを最大3つ選ぶ
+  2. 「難易度設定」で NORMAL / HARD を選ぶ
+  3. 右下の「ゲームを開始 →」で出撃する
+
+【 ダンジョンでやること 】
+  部屋にいる敵をすべて倒すと、次へ進めるようになります。
+  残りの敵の数は画面左上に出ています。
+  最後の部屋では mac_os.exe が現れます。これを倒せばクリアです。
+
+【 難易度 】
+  NORMAL  標準の敵の強さ。まずはこちらを推奨します。
+  HARD    敵が強化されます。手強い相手を求める人向けです。
+
+【 やられたときは 】
+  体力が0になると失敗になります。装備を選び直して再挑戦できます。</pre>
     </div>
+    <script src="select/rules/rules-tabs.js"></script>
 </body>
 </html>

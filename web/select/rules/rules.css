@@ -8,6 +8,41 @@ body {
     margin: 0;
 }
 
+/* タブ行（Windows 11のメモ帳準拠でメニューバーの上に置く）。
+   説明を分冊にして、必要な項目だけ引けるようにするためのもの */
+.tabbar {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    background: #2b2b2b;
+    padding: clamp(4px, 0.5vw, 8px) clamp(4px, 0.5vw, 8px) 0;
+    flex-shrink: 0;
+}
+
+.tab {
+    font-family: inherit;
+    font-size: clamp(12px, 1.0vw, 20px);
+    color: #b8b8b8;
+    background: transparent;
+    border: none;
+    border-radius: clamp(4px, 0.5vw, 8px) clamp(4px, 0.5vw, 8px) 0 0;
+    padding: clamp(5px, 0.7vw, 11px) clamp(10px, 1.4vw, 24px);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.tab:hover:not(.is-active) {
+    background: rgba(255, 255, 255, 0.07);
+    color: #e4e4e4;
+}
+
+/* 選択中のタブは本文と地続きに見せる。色を変えるだけだと、
+   どのタブの中身を読んでいるのか一目で分からない */
+.tab.is-active {
+    background: #1e1e1e;
+    color: #ffffff;
+}
+
 /* メニューバー */
 .menubar {
     display: flex;
@@ -36,15 +71,20 @@ body {
     padding: 4px 8px;
 }
 
+/* 文字はウィンドウ幅（vw）に追従させる。この窓は画面の8割近くを占めるので、
+   固定pxだと広い画面で文字が豆粒になり、読ませたい説明が読まれない */
 .content pre {
     font-family: 'MaruMonica', 'Consolas', 'MS Gothic', monospace;
-    font-size: 13px;
-    line-height: 1.6;
+    font-size: clamp(13px, 1.15vw, 24px);
+    line-height: 1.7;
     color: #d4d4d4;
     white-space: pre-wrap;
-    word-break: break-all;
     margin: 0;
 }
+
+/* タブで選ばれた1枚だけを出す */
+.page { display: none; }
+.page.is-active { display: block; }
 
 /* スクロールバー */
 .content::-webkit-scrollbar {
