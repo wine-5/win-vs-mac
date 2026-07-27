@@ -97,10 +97,10 @@ namespace game::system::combat
 			attack.m_justFired = true;
 
 			// 攻撃開始時の演出用エフェクト（AttackStartEvent）の発行を絞る：
-			// ・Playerの近接（剣）：Player_Slash を出す。Playerの弾（Window弾）はエフェクト無し
+			// ・Playerの近接（剣）：斬撃エフェクトを出す。Playerの弾（Window弾）はエフェクト無し
 			// ・Enemyの弾：弾自身が持つ m_startEffect を出す（None なら無し）。
-			//   これによりボスのレインボー弾だけ演出を出し、Safariのタブ弾は無しにできる。
-			//   地面を叩く近接（弾でない敵攻撃）はエフェクト無し
+			//   弾ごとに発射演出を出し分けられるようにするための仕組み。
+			//   地面を叩く近接（弾でない敵攻撃）は振り始めではなく当たる瞬間に出す
 			//   （弾はProjectileSystemが毎フレームm_attackRequestedを立て直すため、初回1回のみに絞る）
 			const auto& attackerTagForStart{ m_componentManager.get<component::TagComponent>(attackerId) };
 			const bool isProjectile{ m_componentManager.has<component::combat::ProjectileComponent>(attackerId) };
@@ -115,7 +115,7 @@ namespace game::system::combat
 				{
 					// 剣を振るアニメーションは段数に応じて PlayerAttackComboSystem が要求する
 					shouldPlayStartEffect = true;
-					startEffect = core::constant::EffectType::Player_Slash;
+					startEffect = core::constant::EffectType::Player_Slash1;
 				}
 			}
 			else if (attackerTagForStart.m_tag == constant::Tag::Enemy)

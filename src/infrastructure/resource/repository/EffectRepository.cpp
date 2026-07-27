@@ -40,8 +40,9 @@ namespace infrastructure::resource::repository
 			{ "Enemy_HitSword", core::constant::EffectType::Enemy_HitSword },
 			{ "Enemy_HitWindow", core::constant::EffectType::Enemy_HitWindow },
 			{ "Enemy_Spawn", core::constant::EffectType::Enemy_Spawn },
-			{ "Player_Slash", core::constant::EffectType::Player_Slash },
-			{ "Mac_Rainbow", core::constant::EffectType::Mac_Rainbow },
+			{ "Player_Slash1", core::constant::EffectType::Player_Slash1 },
+			{ "Player_Slash2", core::constant::EffectType::Player_Slash2 },
+			{ "Xcode_GroundSlam", core::constant::EffectType::Xcode_GroundSlam },
 		};
 
 		for (const auto& entry : json["effects"])

@@ -380,8 +380,8 @@ namespace game::system::ai
 				transform.m_position.z + fanDir.z * m_rainbowMeta.m_spawnForward
 			};
 
+			// 発射時の演出は専用エフェクトが無くなったため付けない（弾自身の見た目で見せる）
 			factory::ProjectileConfig config{ makeRainbowConfig(phase) };
-			config.m_startEffect = core::constant::EffectType::Mac_Rainbow; // 発射時の演出（扇撃ち）
 
 			m_projectileFactory.spawn(origin, fanDir, config, constant::Tag::Enemy);
 		}
