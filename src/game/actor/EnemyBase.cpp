@@ -2,6 +2,7 @@
 #include "game/actor/EnemyBehaviors.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/movement/VelocityComponent.h"
+#include "game/component/movement/FallRecoveryComponent.h"
 #include "game/component/visual/RenderComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/ai/AIComponent.h"
@@ -52,6 +53,13 @@ namespace game::actor
 		m_componentManager.add<component::movement::TransformComponent>(m_entity.getId(), transform);
 
 		m_componentManager.add<component::movement::VelocityComponent>(m_entity.getId(), {});
+
+		// 奈落へ落ちたかの基準。浮遊する敵は接地しないため、配置位置を最初の基準にしておく
+		component::movement::FallRecoveryComponent fallRecovery{};
+		fallRecovery.m_lastSafePosition = transform.m_position;
+		fallRecovery.m_hasSafePosition = true;
+		m_componentManager.add<component::movement::FallRecoveryComponent>(m_entity.getId(), fallRecovery);
+
 		m_componentManager.add<component::visual::RenderComponent>(m_entity.getId(), component::visual::RenderComponent{ .m_modelHandle = m_modelHandle });
 		m_componentManager.add<component::visual::HitEffectComponent>(m_entity.getId(), {});
 		m_componentManager.add<component::visual::EffectComponent>(m_entity.getId(), {});

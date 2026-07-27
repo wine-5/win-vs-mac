@@ -45,6 +45,12 @@ namespace game::system::movement
 		 */
 		void punishPlayer(core::ecs::EntityId entityId);
 
+		/**
+		 * @brief 落下した敵を撃破扱いにする
+		 * @param entityId 敵のEntityID
+		 */
+		void killEnemy(core::ecs::EntityId entityId);
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::base::EventBus& m_eventBus;
 	};

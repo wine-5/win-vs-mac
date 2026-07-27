@@ -76,6 +76,19 @@ namespace game::system::movement
 		}
 	}
 
+	void FallOutSystem::killEnemy(core::ecs::EntityId entityId)
+	{
+		auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(entityId) };
+		if (health == nullptr || health->m_isDead)
+			return;
+
+		// 奈落の底から復帰する術は無いので、落ちきった時点で撃破扱いにする。
+		// 以降の消失演出・Entityの後始末はEnemyDeathSystemが引き受ける
+		health->m_currentHp = 0.0f;
+		health->m_isDead = true;
+		m_eventBus.publish(event::EnemyDeadEvent{ entityId });
+	}
+
 	void FallOutSystem::update(float /*deltaTime*/)
 	{
 		const auto entities{ m_componentManager.getAllEntities<component::movement::FallRecoveryComponent>() };
@@ -90,6 +103,8 @@ namespace game::system::movement
 
 			if (tag->m_tag == constant::Tag::Player)
 				punishPlayer(entityId);
+			else if (tag->m_tag == constant::Tag::Enemy)
+				killEnemy(entityId);
 		}
 	}
 } // namespace game::system::movement
