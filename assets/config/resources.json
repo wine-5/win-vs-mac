@@ -63,7 +63,7 @@
     { "type": "Title",      "path": "assets/audio/bgm/bgm_title.ogg",         "volume":0.8, "useFade": true  },
     { "type": "Select",     "path": "assets/audio/bgm/bgm_select.ogg",        "volume":0.8, "useFade": true  },
     { "type": "InGame",     "path": "assets/audio/bgm/bgm_ingame_normal.ogg", "volume":0.8, "useFade": true  },
-    { "type": "Boss",       "path": "assets/audio/bgm/bgm_ingame_boss.ogg",   "volume":0.8, "useFade": true  },
+    { "type": "Boss",       "path": "assets/audio/bgm/bgm_ingame_boss.ogg",   "volume":1.0, "useFade": false  },
     { "type": "ResultWin",  "path": "assets/audio/bgm/bgm_result_good.ogg",   "volume":0.8, "useFade": false },
     { "type": "ResultLose", "path": "assets/audio/bgm/bgm_result_bad.ogg",    "volume":0.8, "useFade": false }
   ],
