@@ -9,6 +9,7 @@
 #include "core/data/FileExtensionType.h"
 #include "game/utility/FileExtensionTypeResolver.h"
 #include <functional>
+#include <memory>
 
 namespace core::iface
 {
@@ -80,8 +81,13 @@ namespace platform::window::select
         static constexpr const wchar_t* FILE_SELECT_HTML_URL{ L"https://game.web/select/file/file.html" };
         static constexpr int SLOT_COUNT{ 3 };
 
-		// ファイルダイアログフィルター
-		static constexpr const char* FILE_DIALOG_FILTER{ "All Files\0*.*\0" };
+		// ファイル選択ダイアログを「開く依頼」「終わった通知」を運ぶ独自メッセージ。
+		// WebView2 のイベントハンドラの中で直接ダイアログを開くと、ハンドラが返るのを
+		// 待っている WebView2 と、入れ子のモーダルループを回すシェルが互いに待ち合い、
+		// アプリが応答不能になる（検索窓を使うとシェル側の処理が増えて再現しやすい）。
+		// 一度メッセージを積んでハンドラを抜けてから開くことで、この待ち合いを断つ
+		static constexpr UINT WM_OPEN_FILE_DIALOG{ WM_APP + 1 };
+		static constexpr UINT WM_FILE_DIALOG_DONE{ WM_APP + 2 };
 
 		// ファイル拡張子タイプ名
         static constexpr const char* EXT_TYPE_NAME_EXECUTABLE{ "Executable" };
@@ -111,23 +117,52 @@ namespace platform::window::select
 		bool m_showTutorial{ false };
 		std::function<void(int)> m_onTutorialStepChanged{};
 
+		/// @brief ダイアログのスレッドと本体の間で受け渡す、開く依頼と選ばれた結果
+		struct DialogRequest
+		{
+			int m_slotIndex{};
+			bool m_applyToAllSlots{};
+			std::string m_path{}; // 選ばれたファイル（UTF-8）。キャンセル時は空のまま
+		};
+
+		// ダイアログを開いている間だけ中身を持つ。二重に開かせない印も兼ねる。
+		// shared_ptr にしているのは、セレクト画面を抜けてウィンドウが消えた後も
+		// ダイアログのスレッドが安全に書き込みを終えられるようにするため
+		std::shared_ptr<DialogRequest> m_dialogRequest{};
+
 		void handleMessage(const std::string& json) noexcept;
+
 		/**
-		 * @brief ファイル選択ダイアログを開き、選ばれたファイルをスロットへ入れる
+		 * @brief ファイル選択ダイアログを別スレッドで開き始める
 		 * @param slotIndex 対象のスロット番号
 		 * @param applyToAllSlots trueなら全スロットへ同じファイルを入れる（同一ファイル指定）
 		 */
-		void openFileDialog(int slotIndex, bool applyToAllSlots);
+		void beginFileDialog(int slotIndex, bool applyToAllSlots) noexcept;
+
+		/// @brief ダイアログが閉じた後、選ばれたファイルをスロットへ入れる
+		void onFileDialogFinished() noexcept;
 
 		/**
-		 * @brief システム既定のコードページの文字列を UTF-8 へ変換する
+		 * @brief ダイアログ専用スレッドの本体
+		 *
+		 * シェルのファイルダイアログはSTAでしか正しく動かないが、メインスレッドの
+		 * COM初期化状態はDxLib側の都合で決まってしまう。ここで専用スレッドを
+		 * STAとして初期化することで、その状態に左右されなくなる。
+		 * 加えて、ダイアログを開いている間もゲームループが止まらない
+		 * @param owner ダイアログのオーナーウィンドウ（結果の通知先でもある）
+		 * @param request 開く依頼。結果もここへ書き戻す
+		 */
+		static void runFileDialog(HWND owner, std::shared_ptr<DialogRequest> request) noexcept;
+
+		/**
+		 * @brief ワイド文字列を UTF-8 へ変換する
 		 *
 		 * WebViewへ渡すJSONはUTF-8でなければ例外になるため、
 		 * ファイルダイアログから受け取ったパスは必ずここを通す
-		 * @param ansi 変換元の文字列（日本語環境ではShift_JIS）
+		 * @param wide 変換元の文字列
 		 * @return UTF-8 の文字列（空やnullptrなら空文字）
 		 */
-		[[nodiscard]] static std::string toUtf8(const char* ansi) noexcept;
+		[[nodiscard]] static std::string toUtf8(const wchar_t* wide) noexcept;
 		void sendSlotsRefresh() noexcept;
 
 		/** @brief 初回ガイドを出してよいかをJS側へ返す */
