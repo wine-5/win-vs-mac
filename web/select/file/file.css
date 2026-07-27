@@ -5,6 +5,16 @@ body {
     overflow: hidden;
 }
 
+/* スクロールバーは出さない。Windowsのエクスプローラー風に作っている画面に
+   Chromium既定の灰色のバーが載ると浮くうえ、行の高さが1pxでも変わるたびに
+   バーの有無で中身の幅がずれて、毎フレーム揺れて見える。
+   スクロール自体（ホイール操作）はそのまま効く */
+.file-list::-webkit-scrollbar,
+.bonus-panel-list::-webkit-scrollbar,
+.tutorial-body::-webkit-scrollbar {
+    display: none;
+}
+
 .exp-toolbar {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
