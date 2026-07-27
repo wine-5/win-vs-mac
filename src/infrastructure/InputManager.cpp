@@ -20,6 +20,7 @@ namespace infrastructure
 		{ core::input::KeyCode::Right, KEY_INPUT_RIGHT },
 
 		{ core::input::KeyCode::Shift, KEY_INPUT_LSHIFT },
+		{ core::input::KeyCode::Tab, KEY_INPUT_TAB },
 	};
 
 	InputManager::InputManager()
