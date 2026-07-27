@@ -154,6 +154,7 @@
     <ClCompile Include="src\game\factory\EnemySpawner.cpp" />
     <ClCompile Include="src\game\factory\ProjectileFactory.cpp" />
     <ClCompile Include="src\game\system\combat\ProjectileReflectSystem.cpp" />
+    <ClCompile Include="src\game\system\combat\ProjectileBlockSystem.cpp" />
     <ClCompile Include="src\game\system\combat\ProjectileSystem.cpp" />
     <ClCompile Include="src\game\system\combat\PlayerRangedAttackSystem.cpp" />
     <ClCompile Include="src\game\system\combat\PlayerAttackComboSystem.cpp" />
@@ -375,6 +376,7 @@
     <ClInclude Include="src\game\factory\EnemySpawner.h" />
     <ClInclude Include="src\game\factory\ProjectileFactory.h" />
     <ClInclude Include="src\game\system\combat\ProjectileReflectSystem.h" />
+    <ClInclude Include="src\game\system\combat\ProjectileBlockSystem.h" />
     <ClInclude Include="src\game\system\combat\ProjectileSystem.h" />
     <ClInclude Include="src\game\system\combat\PlayerRangedAttackSystem.h" />
     <ClInclude Include="src\game\system\combat\PlayerAttackComboSystem.h" />

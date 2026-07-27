@@ -69,6 +69,7 @@
 #include "game/component/combat/AimComponent.h"
 #include "game/system/combat/ProjectileSystem.h"
 #include "game/system/combat/ProjectileReflectSystem.h"
+#include "game/system/combat/ProjectileBlockSystem.h"
 #include "game/system/combat/PlayerRangedAttackSystem.h"
 #include "game/system/combat/PlayerAttackComboSystem.h"
 #include "game/system/visual/PlayerChargeVisualsSystem.h"
@@ -495,6 +496,9 @@ namespace game::scene
 		// 敵弾をプレイヤーのWindow弾で跳ね返す（移動後・ダメージ判定AttackSystemより前に判定する）
 		m_systemManager.registerSystem<game::system::combat::ProjectileReflectSystem>(m_componentManager);
 		core::probe::mark("      sys: ProjectileReflectSystem");
+		// 壁・ブロックにぶつかった弾を消す。壁越しに当たらないよう、ダメージ判定より前に消す
+		m_systemManager.registerSystem<game::system::combat::ProjectileBlockSystem>(m_componentManager, m_entityManager);
+		core::probe::mark("      sys: ProjectileBlockSystem");
 
 		m_systemManager.registerSystem<game::system::visual::AnimationSystem>(m_componentManager, m_animator, m_eventBus);
 		core::probe::mark("      sys: AnimationSystem");
