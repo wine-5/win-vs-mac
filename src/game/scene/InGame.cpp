@@ -281,7 +281,8 @@ namespace game::scene
 		m_playerHUDView = std::make_unique<ui::ingame::PlayerHUDView>(
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
-		    m_componentManager);
+		    m_componentManager,
+		    m_resourceManager);
 		m_view.setPlayerHUDView(m_playerHUDView.get());
 
 		m_equipmentSlotView = std::make_unique<ui::ingame::EquipmentSlotView>(
@@ -490,6 +491,12 @@ namespace game::scene
 		core::probe::mark("      sys: PlayerRangedAttackSystem");
 		// レティクルがクールダウンの残量を読むため、Viewへ参照を渡す
 		m_view.setPlayerRangedAttackSystem(rangedAttack);
+
+		// 移動速度と弾の性能はコンポーネントに無くSystemが抱えているため、HUDへは直接渡す。
+		// 装備ボーナスを載せ終えたこの時点の値が、そのまま画面に出る値になる
+		if (m_playerHUDView)
+			m_playerHUDView->setDerivedStats(m_playerData.getMoveSpeed(), projectileMeta.m_speed,
+			    projectileMeta.m_speed * projectileMeta.m_lifetime);
 		m_systemManager.registerSystem<game::system::movement::PhysicsSystem>(m_componentManager, m_gameManager, m_playerData.getJumpForce(), m_playerData.getGravity(), m_playerData.getMaxFallSpeed());
 		core::probe::mark("      sys: PhysicsSystem");
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
