@@ -742,6 +742,11 @@ namespace game::scene
 		core::probe::mark("  ボス出現: spawn 後");
 		core::log::info("雑魚を全滅：ボスが出現しました (EntityId={})", m_macId);
 
+		// BGMをボス戦へ切り替える。出現シネマと同時に変えることで、カメラが寄る瞬間に
+		// 曲も切り替わり「ここからボス戦」が音でも分かる
+		if (auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() })
+			audio->playBgm(core::constant::BgmType::Boss);
+
 		// 出現シネマ（カメラをボスへ寄せてシェイク→プレイヤーへ戻す）を起動する。
 		// 実際の演出はMacAwakenEffectSystemが担う
 		m_eventBus.publish(event::BossAppearedEvent{ m_macId });
