@@ -49,6 +49,7 @@
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/PlayerStatsComponent.h"
+#include "game/component/combat/PlayerStatBaseComponent.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/AnimationId.h"
 #include "game/constant/ProjectileId.h"
@@ -388,6 +389,16 @@ namespace game::scene
 		// 装備で実際にパラメータが動いたかを追えるよう、反映の前後をログに出す
 		logPlayerParameters("装備前");
 
+		// 強化前の値を控えておく。HUDが「今この能力は強化されているか」を判定する基準になる。
+		// 装備ボーナスを載せたあとでは素の値を復元できないので、必ずここで取る
+		component::combat::PlayerStatBaseComponent base{};
+		base.m_maxHp = m_playerData.getMaxHp();
+		base.m_defence = m_playerData.getDefence();
+		base.m_attackPower = m_playerData.getAttackPower();
+		base.m_attackRange = m_playerData.getAttackRange();
+		base.m_criticalRate = m_playerData.getCriticalRate();
+		base.m_moveSpeed = m_playerData.getMoveSpeed();
+
 		// 拡張子ボーナスをPlayerDataに反映
 		for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
 		{
@@ -402,7 +413,12 @@ namespace game::scene
 
 		initializer.initializePlayer(m_playerData);
 		core::probe::mark("    spawn: initializePlayer");
+
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
+
+		// 弾の素の性能はまだ分からない（弾定義を読むのはsetupSystems）。
+		// そちらで残りを埋めるため、ここでは先に器だけ付けておく
+		m_componentManager.add<component::combat::PlayerStatBaseComponent>(m_playerId, base);
 
 		// プレイヤー専用コンポーネント（CameraComponent、AimComponent、PlayerChargeComponent）
 		// は Player.cpp のコンストラクタで初期化済
@@ -489,10 +505,20 @@ namespace game::scene
 		// 装備ファイルのボーナスを載せた弾の性能をPlayerStatsComponentへ入れる。
 		// 「速さ」と「距離」は別々のボーナスとして独立に効かせたいので、寿命ではなく飛距離で持つ
 		// （寿命は発射時に 飛距離÷弾速 で引き直される）
+		const float baseProjectileSpeed{ projectileMeta.m_speed };
+		const float baseProjectileRange{ projectileMeta.m_speed * projectileMeta.m_lifetime };
+
 		if (auto* stats{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(m_playerId) })
 		{
-			stats->m_projectileSpeed = projectileMeta.m_speed + m_playerData.getProjectileSpeedBonus();
-			stats->m_projectileRange = projectileMeta.m_speed * projectileMeta.m_lifetime + m_playerData.getProjectileRangeBonus();
+			stats->m_projectileSpeed = baseProjectileSpeed + m_playerData.getProjectileSpeedBonus();
+			stats->m_projectileRange = baseProjectileRange + m_playerData.getProjectileRangeBonus();
+		}
+
+		// 弾の素の性能はここで初めて分かるので、控えの残りを埋める
+		if (auto* base{ m_componentManager.tryGet<component::combat::PlayerStatBaseComponent>(m_playerId) })
+		{
+			base->m_projectileSpeed = baseProjectileSpeed;
+			base->m_projectileRange = baseProjectileRange;
 		}
 
 		auto* rangedAttack{ m_systemManager.registerSystem<game::system::combat::PlayerRangedAttackSystem>(
