@@ -16,69 +16,166 @@
         <span class="menu-item" data-page="flow">進行(P)</span>
     </div>
     <div class="content" id="content">
-        <!-- 1枚目だけは1画面で読み切れる分量に収める。
-             目的の1行をここへ置くのは、他のタブが開かれない前提で書いているため -->
-        <pre class="page is-active" id="page-controls">
-【 目的 】
-  PC内部のダンジョンを進み、最終ボス mac_os.exe を撃退する。
+        <!-- 操作は「読む」より「見て分かる」が速い。キーは実物のキーの形、
+             マウスは押すボタンを塗った図にして、文字は補足に回す -->
+        <section class="page is-active" id="page-controls">
+            <p class="lead">PC内部のダンジョンを進み、最終ボス <code>mac_os.exe</code> を撃退する。</p>
 
-【 操作（キーボード＋マウス） 】
-  移動            W A S D ／ 矢印キー
-  攻撃（斬撃）    マウス左クリック
-  遠距離攻撃      マウス右クリック
-  ダッシュ        Shift
-  ジャンプ        Space
-  メニュー        Esc
+            <h2>キーボード＋マウス</h2>
+            <div class="ctrl-grid">
+                <div class="ctrl-visual">
+                    <div class="keypad">
+                        <span class="key">W</span>
+                        <span class="key">A</span>
+                        <span class="key">S</span>
+                        <span class="key">D</span>
+                    </div>
+                </div>
+                <div class="ctrl-label">移動<span class="ctrl-sub">矢印キーでも動かせます</span></div>
 
-【 操作（ゲームパッド） 】
-  移動            左スティック ／ 十字キー
-  攻撃            A ボタン
-  ジャンプ        B ボタン
+                <div class="ctrl-visual">
+                    <svg class="mouse" viewBox="0 0 60 92" aria-hidden="true">
+                        <rect class="mouse-body" x="2" y="2" width="56" height="88" rx="26"/>
+                        <path class="mouse-btn is-on" d="M2 28V28C2 13.6 13.6 2 28 2h2v26z"/>
+                        <line class="mouse-line" x1="30" y1="2" x2="30" y2="28"/>
+                        <line class="mouse-line" x1="2" y1="28" x2="58" y2="28"/>
+                    </svg>
+                </div>
+                <div class="ctrl-label">攻撃（斬撃）<span class="ctrl-sub">マウス左クリック</span></div>
 
-  ※ ゲームパッドは接続されていれば自動で使えます。
-     キーボードと同時に使っても構いません。</pre>
+                <div class="ctrl-visual">
+                    <svg class="mouse" viewBox="0 0 60 92" aria-hidden="true">
+                        <rect class="mouse-body" x="2" y="2" width="56" height="88" rx="26"/>
+                        <path class="mouse-btn is-on" d="M58 28V28C58 13.6 46.4 2 32 2h-2v26z"/>
+                        <line class="mouse-line" x1="30" y1="2" x2="30" y2="28"/>
+                        <line class="mouse-line" x1="2" y1="28" x2="58" y2="28"/>
+                    </svg>
+                </div>
+                <div class="ctrl-label">遠距離攻撃<span class="ctrl-sub">マウス右クリック</span></div>
 
-        <pre class="page" id="page-bonus">
-【 装備ファイルとは 】
-  出撃前に、あなたのPCの中から最大3つのファイルを装備できます。
-  装備したファイルの「拡張子」に応じて、能力が上がった状態で出撃します。
+                <div class="ctrl-visual"><span class="key is-wide">Shift</span></div>
+                <div class="ctrl-label">ダッシュ</div>
 
-【 どの拡張子で何が伸びるか 】
-  .exe .dll .bat        攻撃力
-  .txt .pdf .docx       移動速度
-  .png .jpg .bmp        防御力
-  .mp3 .wav .flac       体力
-  .cpp .h .py .js       クリティカル確率
-  .lnk .url             弾速
-  .mp4 .avi .mkv        弾の飛距離
-  .zip .7z .rar         すべて少しずつ
-  それ以外              攻撃範囲
+                <div class="ctrl-visual"><span class="key is-space">Space</span></div>
+                <div class="ctrl-label">ジャンプ</div>
 
-  ※ 上がる数値は「ファイル選択」ウィンドウの拡張子ボーナス一覧に出ています。
-     装備した結果は「パラメータ」ウィンドウで確認できます。
+                <div class="ctrl-visual"><span class="key is-wide">Esc</span></div>
+                <div class="ctrl-label">メニュー</div>
+            </div>
 
-【 選び方の考え方 】
-  1種類で固めるほど、その能力が大きく伸びます。
-  迷ったら、まず .exe を3つ積んで攻撃力に寄せると分かりやすいです。
-  ファイルの中身は読み取りません。装備しても元のファイルは変化しません。</pre>
+            <h2>ゲームパッド</h2>
+            <div class="ctrl-grid">
+                <div class="ctrl-visual"><span class="key is-round">L</span></div>
+                <div class="ctrl-label">移動<span class="ctrl-sub">左スティック／十字キー</span></div>
 
-        <pre class="page" id="page-flow">
-【 ゲームの流れ 】
-  1. デスクトップの「ファイル選択」で、装備するファイルを最大3つ選ぶ
-  2. 「難易度設定」で NORMAL / HARD を選ぶ
-  3. 右下の「ゲームを開始 →」で出撃する
+                <div class="ctrl-visual"><span class="key is-round">A</span></div>
+                <div class="ctrl-label">攻撃</div>
 
-【 ダンジョンでやること 】
-  部屋にいる敵をすべて倒すと、次へ進めるようになります。
-  残りの敵の数は画面左上に出ています。
-  最後の部屋では mac_os.exe が現れます。これを倒せばクリアです。
+                <div class="ctrl-visual"><span class="key is-round">B</span></div>
+                <div class="ctrl-label">ジャンプ</div>
+            </div>
+            <p class="note">ゲームパッドは接続されていれば自動で使えます。キーボードと同時に使っても構いません。</p>
+        </section>
 
-【 難易度 】
-  NORMAL  標準の敵の強さ。まずはこちらを推奨します。
-  HARD    敵が強化されます。手強い相手を求める人向けです。
+        <!-- アイコンはファイル選択ウィンドウと同じものを使う。
+             見た目を揃えておくと、あちらの一覧とこの説明が同じ話だと分かる -->
+        <section class="page" id="page-bonus">
+            <p class="lead">出撃前に、あなたのPCの中から最大3つのファイルを装備できます。<br>
+                装備したファイルの拡張子に応じて、能力が上がった状態で出撃します。</p>
 
-【 やられたときは 】
-  体力が0になると失敗になります。装備を選び直して再挑戦できます。</pre>
+            <h2>どの拡張子で何が伸びるか</h2>
+            <div class="ext-grid">
+                <img class="ext-icon" src="https://assets.game.web/images/ui/select/exe.png" alt="EXE">
+                <span class="ext-name">.exe .dll .bat</span>
+                <span class="ext-arrow">→</span>
+                <img class="stat-icon" src="https://assets.game.web/images/ui/select/atk.png" alt="">
+                <span class="stat-name">攻撃力</span>
+
+                <img class="ext-icon" src="https://assets.game.web/images/ui/select/doc.png" alt="DOC">
+                <span class="ext-name">.txt .pdf .docx</span>
+                <span class="ext-arrow">→</span>
+                <img class="stat-icon" src="https://assets.game.web/images/ui/select/spd.png" alt="">
+                <span class="stat-name">移動速度</span>
+
+                <img class="ext-icon" src="https://assets.game.web/images/ui/select/img.png" alt="IMG">
+                <span class="ext-name">.png .jpg .bmp</span>
+                <span class="ext-arrow">→</span>
+                <img class="stat-icon" src="https://assets.game.web/images/ui/select/def.png" alt="">
+                <span class="stat-name">防御力</span>
+
+                <img class="ext-icon" src="https://assets.game.web/images/ui/select/aud.png" alt="AUD">
+                <span class="ext-name">.mp3 .wav .flac</span>
+                <span class="ext-arrow">→</span>
+                <img class="stat-icon" src="https://assets.game.web/images/ui/select/hp.png" alt="">
+                <span class="stat-name">体力</span>
+
+                <img class="ext-icon" src="https://assets.game.web/images/ui/select/src.png" alt="SRC">
+                <span class="ext-name">.cpp .h .py .js</span>
+                <span class="ext-arrow">→</span>
+                <img class="stat-icon" src="https://assets.game.web/images/ui/select/crit.png" alt="">
+                <span class="stat-name">クリティカル確率</span>
+
+                <img class="ext-icon" src="https://assets.game.web/images/ui/select/lnk.png" alt="LNK">
+                <span class="ext-name">.lnk .url</span>
+                <span class="ext-arrow">→</span>
+                <img class="stat-icon" src="https://assets.game.web/images/ui/select/bspd.png" alt="">
+                <span class="stat-name">弾速</span>
+
+                <img class="ext-icon" src="https://assets.game.web/images/ui/select/vid.png" alt="VID">
+                <span class="ext-name">.mp4 .avi .mkv</span>
+                <span class="ext-arrow">→</span>
+                <img class="stat-icon" src="https://assets.game.web/images/ui/select/brng.png" alt="">
+                <span class="stat-name">弾の飛距離</span>
+
+                <img class="ext-icon" src="https://assets.game.web/images/ui/select/arc.png" alt="ARC">
+                <span class="ext-name">.zip .7z .rar</span>
+                <span class="ext-arrow">→</span>
+                <img class="stat-icon" src="https://assets.game.web/images/ui/select/rng.png" alt="">
+                <span class="stat-name">すべて少しずつ</span>
+
+                <img class="ext-icon" src="https://assets.game.web/images/ui/select/etc.png" alt="ETC">
+                <span class="ext-name">それ以外</span>
+                <span class="ext-arrow">→</span>
+                <img class="stat-icon" src="https://assets.game.web/images/ui/select/rng.png" alt="">
+                <span class="stat-name">攻撃範囲</span>
+            </div>
+
+            <p class="note">上がる数値は「ファイル選択」ウィンドウの拡張子ボーナス一覧に出ています。
+                装備した結果は「パラメータ」ウィンドウで確認できます。</p>
+
+            <h2>選び方の考え方</h2>
+            <p class="body-text">1種類で固めるほど、その能力が大きく伸びます。
+                迷ったら、まず <code>.exe</code> を3つ積んで攻撃力に寄せると分かりやすいです。<br>
+                ファイルの中身は読み取りません。装備しても元のファイルは変化しません。</p>
+        </section>
+
+        <section class="page" id="page-flow">
+            <h2>ゲームの流れ</h2>
+            <ol class="steps">
+                <li>デスクトップの「ファイル選択」で、装備するファイルを最大3つ選ぶ</li>
+                <li>「難易度設定」で NORMAL / HARD を選ぶ</li>
+                <li>右下の「ゲームを開始 →」で出撃する</li>
+            </ol>
+
+            <h2>ダンジョンでやること</h2>
+            <p class="body-text">部屋にいる敵をすべて倒すと、次へ進めるようになります。
+                残りの敵の数は画面左上に出ています。<br>
+                最後の部屋では <code>mac_os.exe</code> が現れます。これを倒せばクリアです。</p>
+
+            <h2>難易度</h2>
+            <div class="ext-grid is-three">
+                <img class="ext-icon" src="https://assets.game.web/images/ui/select/normal.png" alt="">
+                <span class="stat-name">NORMAL</span>
+                <span class="body-text">標準の敵の強さ。まずはこちらを推奨します。</span>
+
+                <img class="ext-icon" src="https://assets.game.web/images/ui/select/hard.png" alt="">
+                <span class="stat-name">HARD</span>
+                <span class="body-text">敵が強化されます。手強い相手を求める人向けです。</span>
+            </div>
+
+            <h2>やられたときは</h2>
+            <p class="body-text">体力が0になると失敗になります。装備を選び直して再挑戦できます。</p>
+        </section>
     </div>
     <script src="select/rules/rules-nav.js"></script>
 </body>
