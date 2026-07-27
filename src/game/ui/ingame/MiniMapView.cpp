@@ -4,6 +4,11 @@
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/movement/GroundSurfaceComponent.h"
 #include "game/component/camera/CameraComponent.h"
+#include "game/component/combat/HealthComponent.h"
+#include "game/component/TagComponent.h"
+#include "game/component/EnemyTypeComponent.h"
+#include "game/constant/Tag.h"
+#include "game/constant/EnemyType.h"
 #include "game/utility/MiniMapProjection.h"
 #include <array>
 #include <cmath>
@@ -38,6 +43,14 @@ namespace
 	constexpr int ARROW_HALF_HEIGHT{ 7 };
 	constexpr int ARROW_HALF_WIDTH{ 5 };
 	constexpr int ARROW_TAIL{ 3 }; // 後端のくびれ
+
+	// 敵・ボスの点（1080p基準）
+	constexpr int ENEMY_MARKER_SIZE{ 3 };
+	constexpr int BOSS_MARKER_SIZE{ 5 };
+	constexpr unsigned int COLOR_ENEMY{ 0xFFE81123 };
+	constexpr unsigned int COLOR_BOSS{ 0xFFFFC83D };
+	constexpr int MARKER_ALPHA{ 255 };
+	constexpr int MARKER_OUTSIDE_ALPHA{ 140 }; // 範囲外＝方向だけを示している点
 
 	// 床の色。配置物の種類（stageCatalog.jsonのid）はゲーム層まで降りてこないため、
 	// GroundSurfaceComponentが持つ「振る舞い」で塗り分ける。
@@ -146,6 +159,83 @@ namespace game::ui::ingame
 		}
 	}
 
+	void MiniMapView::drawEnemyMarker(int centerX, int centerY, const utility::MiniMapPoint& point,
+	    int radius, unsigned int color, int markerSize, bool isBoss)
+	{
+		// 縁に貼り付ける位置。点が枠に食い込まないよう内側へ寄せる
+		const float edge{ static_cast<float>(radius - markerSize) };
+
+		float x{ point.m_x };
+		float y{ point.m_y };
+		const float distance{ std::sqrt(x * x + y * y) };
+		const bool isOutside{ distance > edge };
+		if (isOutside && distance > 0.0f)
+		{
+			const float ratio{ edge / distance };
+			x *= ratio;
+			y *= ratio;
+		}
+
+		const int screenX{ centerX + static_cast<int>(x) };
+		const int screenY{ centerY + static_cast<int>(y) };
+
+		// 範囲外の敵は薄くする。位置ではなく方向だけを示していることを見た目で区別する
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+		    isOutside ? MARKER_OUTSIDE_ALPHA : MARKER_ALPHA);
+
+		if (isBoss)
+		{
+			// ボスだけ菱形にして、雑魚の丸と一目で区別できるようにする
+			m_uiRenderer.drawTriangle(screenX, screenY - markerSize, screenX + markerSize, screenY,
+			    screenX - markerSize, screenY, color, true);
+			m_uiRenderer.drawTriangle(screenX, screenY + markerSize, screenX + markerSize, screenY,
+			    screenX - markerSize, screenY, color, true);
+		}
+		else
+		{
+			m_uiRenderer.drawCircle(screenX, screenY, markerSize, color, true, 1);
+		}
+		m_uiRenderer.resetBlendMode();
+	}
+
+	void MiniMapView::drawEnemies(int centerX, int centerY, const core::Vector3& playerPosition,
+	    float yaw, float scale, int radius)
+	{
+		const auto entities{ m_componentManager.getAllEntities<component::TagComponent>() };
+
+		for (const auto entityId : entities)
+		{
+			const auto& tag{ m_componentManager.get<component::TagComponent>(entityId) };
+			if (tag.m_tag != constant::Tag::Enemy)
+				continue;
+
+			// 死んだ敵は消す。撃破したのに点が残っていると索敵の役に立たない
+			if (const auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(entityId) })
+			{
+				if (health->m_isDead)
+					continue;
+			}
+
+			const auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(entityId) };
+			if (transform == nullptr)
+				continue;
+
+			// 床と同じ基準で階層を絞る。別の階の敵まで出すと今いる場所の状況が読めなくなる
+			if (std::abs(transform->m_position.y - playerPosition.y) > LAYER_TOLERANCE * 2.0f)
+				continue;
+
+			const auto* type{ m_componentManager.tryGet<component::EnemyTypeComponent>(entityId) };
+			const bool isBoss{ type != nullptr && type->m_type == constant::EnemyType::Mac };
+
+			const auto point{ utility::projectToMiniMap(transform->m_position.x, transform->m_position.z,
+				playerPosition.x, playerPosition.z, yaw, scale) };
+
+			drawEnemyMarker(centerX, centerY, point, radius,
+			    isBoss ? COLOR_BOSS : COLOR_ENEMY,
+			    scaled(isBoss ? BOSS_MARKER_SIZE : ENEMY_MARKER_SIZE), isBoss);
+		}
+	}
+
 	void MiniMapView::drawPlayerArrow(int centerX, int centerY)
 	{
 		// 回転式なので自機は常に中心・常に上向き。矢印そのものは回さない
@@ -191,6 +281,7 @@ namespace game::ui::ingame
 		// ここから枠の内側だけに描く。解除を忘れると以降のHUDがすべて消える
 		m_uiRenderer.setClipArea(mapX, mapY, size, size);
 		drawFloors(centerX, centerY, transform.m_position, yaw, scale, radius);
+		drawEnemies(centerX, centerY, transform.m_position, yaw, scale, radius);
 		m_uiRenderer.resetClipArea();
 
 		drawPlayerArrow(centerX, centerY);

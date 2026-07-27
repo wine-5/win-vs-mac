@@ -3,6 +3,7 @@
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/utility/Vector3.h"
+#include "game/utility/MiniMapProjection.h"
 #include "HudPanel.h"
 
 namespace game::ui::ingame
@@ -74,6 +75,34 @@ namespace game::ui::ingame
 		 */
 		void drawRotatedRect(float centerX, float centerY, float halfWidth, float halfDepth,
 		    float angle, unsigned int color, int fillAlpha, int lineAlpha);
+
+		/**
+		 * @brief 敵とボスをすべて描画する
+		 * @param centerX マップ中心のスクリーンX座標
+		 * @param centerY マップ中心のスクリーンY座標
+		 * @param playerPosition 自機のワールド座標
+		 * @param yaw 自機の向き（ラジアン）
+		 * @param scale ワールド1ユニットあたりのピクセル数
+		 * @param radius マップの半径（ピクセル）
+		 */
+		void drawEnemies(int centerX, int centerY, const core::Vector3& playerPosition,
+		    float yaw, float scale, int radius);
+
+		/**
+		 * @brief 敵の点を1つ描く
+		 *
+		 * 範囲外の敵は消さずに縁へ貼り付け、方向だけでも分かるようにする。
+		 * 追われていることに気づけないまま囲まれるのを防ぐため
+		 * @param centerX マップ中心のスクリーンX座標
+		 * @param centerY マップ中心のスクリーンY座標
+		 * @param point マップ中心からのピクセル差分
+		 * @param radius マップの半径（ピクセル）
+		 * @param color 色（ARGB形式：0xAARRGGBB）
+		 * @param markerSize 点の大きさ（ピクセル）
+		 * @param isBoss ボスなら菱形、雑魚なら円で描く
+		 */
+		void drawEnemyMarker(int centerX, int centerY, const utility::MiniMapPoint& point,
+		    int radius, unsigned int color, int markerSize, bool isBoss);
 
 		/**
 		 * @brief 中心に自機の矢印を描く
