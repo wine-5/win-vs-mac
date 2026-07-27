@@ -29,6 +29,9 @@ namespace
 	// 動く歩道に乗ったとき、運ぶ速度へ寄っていく割合（毎秒）。
 	// 即座に合わせると乗った瞬間に弾かれたように見えるので少しだけ滑らかにする
 	constexpr float CONVEYOR_BLEND_PER_SEC{ 8.0f };
+	// 流れと同じ向きへ進もうとしているときに、運ぶ速度へ上乗せする割合。
+	// 「流れに乗ると速い」を出すための後押しで、逆走側には掛けない
+	constexpr float CONVEYOR_ASSIST_RATIO{ 0.5f };
 } // namespace
 
 namespace game::system::movement
@@ -74,8 +77,26 @@ namespace game::system::movement
 	    const core::Vector3& conveyorVelocity, float deltaTime) const
 	{
 		const float blend{ std::min(CONVEYOR_BLEND_PER_SEC * deltaTime, 1.0f) };
-		velocity.m_externalVelocity.x += (conveyorVelocity.x - velocity.m_externalVelocity.x) * blend;
-		velocity.m_externalVelocity.z += (conveyorVelocity.z - velocity.m_externalVelocity.z) * blend;
+
+		// 流れと同じ向きへ進もうとしているぶんだけ、運ぶ速度を上乗せする。
+		// 揃っていれば最大、直交で0、逆走なら上乗せしない（流れに逆らう重さは残す）。
+		// 入力側の速度（m_velocity）はMoveSystemがこのフレームで入れた値を読む
+		core::Vector3 target{ conveyorVelocity };
+		const float beltSpeed{ std::sqrt(conveyorVelocity.x * conveyorVelocity.x +
+			                             conveyorVelocity.z * conveyorVelocity.z) };
+		const float inputSpeed{ std::sqrt(velocity.m_velocity.x * velocity.m_velocity.x +
+			                              velocity.m_velocity.z * velocity.m_velocity.z) };
+		if (beltSpeed > 0.0f && inputSpeed > 0.0f)
+		{
+			const float alignment{ (velocity.m_velocity.x * conveyorVelocity.x +
+				                       velocity.m_velocity.z * conveyorVelocity.z) /
+				                   (beltSpeed * inputSpeed) };
+			if (alignment > 0.0f)
+				target = conveyorVelocity * (1.0f + CONVEYOR_ASSIST_RATIO * alignment);
+		}
+
+		velocity.m_externalVelocity.x += (target.x - velocity.m_externalVelocity.x) * blend;
+		velocity.m_externalVelocity.z += (target.z - velocity.m_externalVelocity.z) * blend;
 	}
 
 	core::Vector3 GroundingSystem::conveyorVelocityOf(core::ecs::EntityId surfaceId) const
