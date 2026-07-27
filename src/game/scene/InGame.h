@@ -185,7 +185,21 @@ namespace game::scene
 		std::unique_ptr<ui::debug::DebugGizmoView> m_debugGizmoView;
 		std::unique_ptr<ui::debug::DebugHUDView> m_debugHUDView;
 
-		// プレイヤーステータス（左下のHP）のView
+		/**
+		 * @brief コンポーネントに無く、Systemが抱えている能力値
+		 *
+		 * 左下HUDに出すためだけに持つ。setupSystems()で確定し、そのあとのView生成時に渡す。
+		 * Itemで動かせるようになった時点でコンポーネントへ移し、ここは畳む
+		 */
+		struct DerivedStats
+		{
+			float m_moveSpeed{ 0.0f };
+			float m_projectileSpeed{ 0.0f };
+			float m_projectileRange{ 0.0f };
+		};
+		DerivedStats m_derivedStats{};
+
+		// プレイヤーステータス（左下のHP・能力値）のView
 		std::unique_ptr<ui::ingame::PlayerHUDView> m_playerHUDView;
 
 		// 装備スロット（右下）のView
