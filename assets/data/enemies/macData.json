@@ -23,7 +23,7 @@
     "defence": 30.0,
     "attackPower": 68.0
   },
-  "behaviors": [ "boss" ],
+  "behaviors": [ "boss", "avoidCliff" ],
   "animations": [
     { "state": "Idle",    "id": "anim_mac_idle" },
     { "state": "Walk",    "id": "anim_mac_walk",         "loop": true,  "onComplete": "Idle",  "priority": "locomotion", "speed": 1.2 },

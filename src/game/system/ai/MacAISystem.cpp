@@ -11,6 +11,7 @@
 #include "game/constant/EnemyType.h"
 #include "game/constant/MacAwakenTiming.h"
 #include "game/event/InGameEvents.h"
+#include "game/utility/CliffGuard.h"
 #include <cmath>
 #include <utility>
 #include <algorithm>
@@ -230,7 +231,8 @@ namespace game::system::ai
 			{
 				// --- 追跡（近接レンジ外なら接近、レンジ内なら待機） ---
 				mac.m_state = MacState::Chase;
-				if (distance > phase.m_meleeRange)
+				// プレイヤーが崖の向こうにいても追って落ちないよう、足場が続く間だけ前へ出る
+				if (distance > phase.m_meleeRange && utility::canStepToward(m_componentManager, entityId, dir))
 				{
 					if (hasVelocity)
 					{
