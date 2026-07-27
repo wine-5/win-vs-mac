@@ -65,18 +65,6 @@
                 <div class="ctrl-label">メニュー</div>
             </div>
 
-            <h2>ゲームパッド</h2>
-            <div class="ctrl-grid">
-                <div class="ctrl-visual"><span class="key is-round">L</span></div>
-                <div class="ctrl-label">移動<span class="ctrl-sub">左スティック／十字キー</span></div>
-
-                <div class="ctrl-visual"><span class="key is-round">A</span></div>
-                <div class="ctrl-label">攻撃</div>
-
-                <div class="ctrl-visual"><span class="key is-round">B</span></div>
-                <div class="ctrl-label">ジャンプ</div>
-            </div>
-            <p class="note">ゲームパッドは接続されていれば自動で使えます。キーボードと同時に使っても構いません。</p>
         </section>
 
         <!-- アイコンはファイル選択ウィンドウと同じものを使う。
@@ -85,64 +73,67 @@
             <p class="lead">出撃前に、あなたのPCの中から最大3つのファイルを装備できます。<br>
                 装備したファイルの拡張子に応じて、能力が上がった状態で出撃します。</p>
 
+            <!-- 伸びる能力と数値は extensionBonus.json（C++が読むのと同じファイル）から
+                 rules-bonus.js が埋める。ここに直接書くと調整のたびに食い違う -->
             <h2>どの拡張子で何が伸びるか</h2>
-            <div class="ext-grid">
-                <img class="ext-icon" src="https://assets.game.web/images/ui/select/exe.png" alt="EXE">
-                <span class="ext-name">.exe .dll .bat</span>
-                <span class="ext-arrow">→</span>
-                <img class="stat-icon" src="https://assets.game.web/images/ui/select/atk.png" alt="">
-                <span class="stat-name">攻撃力</span>
-
-                <img class="ext-icon" src="https://assets.game.web/images/ui/select/doc.png" alt="DOC">
-                <span class="ext-name">.txt .pdf .docx</span>
-                <span class="ext-arrow">→</span>
-                <img class="stat-icon" src="https://assets.game.web/images/ui/select/spd.png" alt="">
-                <span class="stat-name">移動速度</span>
-
-                <img class="ext-icon" src="https://assets.game.web/images/ui/select/img.png" alt="IMG">
-                <span class="ext-name">.png .jpg .bmp</span>
-                <span class="ext-arrow">→</span>
-                <img class="stat-icon" src="https://assets.game.web/images/ui/select/def.png" alt="">
-                <span class="stat-name">防御力</span>
-
-                <img class="ext-icon" src="https://assets.game.web/images/ui/select/aud.png" alt="AUD">
-                <span class="ext-name">.mp3 .wav .flac</span>
-                <span class="ext-arrow">→</span>
-                <img class="stat-icon" src="https://assets.game.web/images/ui/select/hp.png" alt="">
-                <span class="stat-name">体力</span>
-
-                <img class="ext-icon" src="https://assets.game.web/images/ui/select/src.png" alt="SRC">
-                <span class="ext-name">.cpp .h .py .js</span>
-                <span class="ext-arrow">→</span>
-                <img class="stat-icon" src="https://assets.game.web/images/ui/select/crit.png" alt="">
-                <span class="stat-name">クリティカル確率</span>
-
-                <img class="ext-icon" src="https://assets.game.web/images/ui/select/lnk.png" alt="LNK">
-                <span class="ext-name">.lnk .url</span>
-                <span class="ext-arrow">→</span>
-                <img class="stat-icon" src="https://assets.game.web/images/ui/select/bspd.png" alt="">
-                <span class="stat-name">弾速</span>
-
-                <img class="ext-icon" src="https://assets.game.web/images/ui/select/vid.png" alt="VID">
-                <span class="ext-name">.mp4 .avi .mkv</span>
-                <span class="ext-arrow">→</span>
-                <img class="stat-icon" src="https://assets.game.web/images/ui/select/brng.png" alt="">
-                <span class="stat-name">弾の飛距離</span>
-
-                <img class="ext-icon" src="https://assets.game.web/images/ui/select/arc.png" alt="ARC">
-                <span class="ext-name">.zip .7z .rar</span>
-                <span class="ext-arrow">→</span>
-                <img class="stat-icon" src="https://assets.game.web/images/ui/select/rng.png" alt="">
-                <span class="stat-name">すべて少しずつ</span>
-
-                <img class="ext-icon" src="https://assets.game.web/images/ui/select/etc.png" alt="ETC">
-                <span class="ext-name">それ以外</span>
-                <span class="ext-arrow">→</span>
-                <img class="stat-icon" src="https://assets.game.web/images/ui/select/rng.png" alt="">
-                <span class="stat-name">攻撃範囲</span>
+            <div class="ext-grid" id="ext-grid">
+                <div class="ext-row" data-key="executable">
+                    <img class="ext-icon" src="https://assets.game.web/images/ui/select/exe.png" alt="EXE">
+                    <span class="ext-name">.exe .dll .bat</span>
+                    <span class="ext-arrow">→</span>
+                    <span class="ext-gain"></span>
+                </div>
+                <div class="ext-row" data-key="document">
+                    <img class="ext-icon" src="https://assets.game.web/images/ui/select/doc.png" alt="DOC">
+                    <span class="ext-name">.txt .pdf .docx</span>
+                    <span class="ext-arrow">→</span>
+                    <span class="ext-gain"></span>
+                </div>
+                <div class="ext-row" data-key="image">
+                    <img class="ext-icon" src="https://assets.game.web/images/ui/select/img.png" alt="IMG">
+                    <span class="ext-name">.png .jpg .bmp</span>
+                    <span class="ext-arrow">→</span>
+                    <span class="ext-gain"></span>
+                </div>
+                <div class="ext-row" data-key="audio">
+                    <img class="ext-icon" src="https://assets.game.web/images/ui/select/aud.png" alt="AUD">
+                    <span class="ext-name">.mp3 .wav .flac</span>
+                    <span class="ext-arrow">→</span>
+                    <span class="ext-gain"></span>
+                </div>
+                <div class="ext-row" data-key="sourceCode">
+                    <img class="ext-icon" src="https://assets.game.web/images/ui/select/src.png" alt="SRC">
+                    <span class="ext-name">.cpp .h .py .js</span>
+                    <span class="ext-arrow">→</span>
+                    <span class="ext-gain"></span>
+                </div>
+                <div class="ext-row" data-key="shortcut">
+                    <img class="ext-icon" src="https://assets.game.web/images/ui/select/lnk.png" alt="LNK">
+                    <span class="ext-name">.lnk .url</span>
+                    <span class="ext-arrow">→</span>
+                    <span class="ext-gain"></span>
+                </div>
+                <div class="ext-row" data-key="video">
+                    <img class="ext-icon" src="https://assets.game.web/images/ui/select/vid.png" alt="VID">
+                    <span class="ext-name">.mp4 .avi .mkv</span>
+                    <span class="ext-arrow">→</span>
+                    <span class="ext-gain"></span>
+                </div>
+                <div class="ext-row" data-key="archive">
+                    <img class="ext-icon" src="https://assets.game.web/images/ui/select/arc.png" alt="ARC">
+                    <span class="ext-name">.zip .7z .rar</span>
+                    <span class="ext-arrow">→</span>
+                    <span class="ext-gain"></span>
+                </div>
+                <div class="ext-row" data-key="unknown">
+                    <img class="ext-icon" src="https://assets.game.web/images/ui/select/etc.png" alt="ETC">
+                    <span class="ext-name">それ以外</span>
+                    <span class="ext-arrow">→</span>
+                    <span class="ext-gain"></span>
+                </div>
             </div>
 
-            <p class="note">上がる数値は「ファイル選択」ウィンドウの拡張子ボーナス一覧に出ています。
+            <p class="note">数値はファイル1つあたりの上がり幅です。同じ種類を3つ装備すれば3倍になります。
                 装備した結果は「パラメータ」ウィンドウで確認できます。</p>
 
             <h2>選び方の考え方</h2>
@@ -179,6 +170,8 @@
             <p class="body-text">体力が0になると失敗になります。装備を選び直して再挑戦できます。</p>
         </section>
     </div>
+    <script src="common/stat-meta.js"></script>
     <script src="select/rules/rules-nav.js"></script>
+    <script src="select/rules/rules-bonus.js"></script>
 </body>
 </html>

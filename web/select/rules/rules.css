@@ -9,7 +9,7 @@ body {
     color: #d4d4d4;
     margin: 0;
     font-family: 'MaruMonica', 'Consolas', 'MS Gothic', monospace;
-    font-size: clamp(17px, 1.7vw, 36px);
+    font-size: clamp(20px, 2.1vw, 46px);
     line-height: 1.6;
 }
 
@@ -26,7 +26,7 @@ body {
 
 .menu-item {
     padding: clamp(4px, 0.6vw, 11px) clamp(10px, 1.5vw, 26px);
-    font-size: clamp(15px, 1.5vw, 30px);
+    font-size: clamp(18px, 1.85vw, 40px);
     color: #cccccc;
     cursor: pointer;
     border-radius: 3px;
@@ -67,7 +67,7 @@ body {
 }
 
 h2 {
-    font-size: clamp(19px, 1.9vw, 40px);
+    font-size: clamp(23px, 2.4vw, 52px);
     font-weight: normal;
     color: #ffffff;
     margin: clamp(18px, 2.4vw, 44px) 0 clamp(8px, 1.1vw, 20px);
@@ -80,7 +80,7 @@ h2 {
 .note {
     margin: clamp(10px, 1.3vw, 24px) 0 0;
     color: #a0a0a0;
-    font-size: clamp(15px, 1.45vw, 30px);
+    font-size: clamp(18px, 1.8vw, 39px);
 }
 
 code {
@@ -120,7 +120,7 @@ code {
 .ctrl-sub {
     display: block;
     color: #9a9a9a;
-    font-size: clamp(14px, 1.35vw, 28px);
+    font-size: clamp(17px, 1.7vw, 37px);
 }
 
 /* キーキャップ。実物のキーの形に寄せると、文字を読む前に何を押すか伝わる */
@@ -135,31 +135,25 @@ code {
     border-bottom-width: clamp(3px, 0.3vw, 6px);
     border-radius: clamp(4px, 0.5vw, 9px);
     color: #ffffff;
-    font-size: clamp(15px, 1.45vw, 30px);
+    font-size: clamp(18px, 1.8vw, 39px);
     line-height: 1;
 }
 
 .key.is-wide { min-width: clamp(64px, 6.4vw, 136px); }
 .key.is-space { min-width: clamp(96px, 9.6vw, 200px); }
 
-/* パッドのボタンは丸で描く。四角のキーと並べたときに別物だと分かる */
-.key.is-round {
-    border-radius: 50%;
-    width: clamp(34px, 3.3vw, 70px);
-    height: clamp(34px, 3.3vw, 70px);
-    min-width: 0;
-    padding: 0;
-    border-bottom-width: 1px;
-}
-
-/* WASDのキー配置。上段中央にW、下段にASDを置いた実際の並びを再現する */
+/* WASDのキー配置。上段中央にW、下段にA・S・Dを置いた実際の並びを再現する。
+   自動配置に任せるとWの右にAが並んでしまうので、4つとも位置を明示する */
 .keypad {
     display: grid;
     grid-template-columns: repeat(3, max-content);
     gap: clamp(3px, 0.35vw, 7px);
 }
 
-.keypad .key:nth-child(1) { grid-column: 2; }
+.keypad .key:nth-child(1) { grid-area: 1 / 2; }
+.keypad .key:nth-child(2) { grid-area: 2 / 1; }
+.keypad .key:nth-child(3) { grid-area: 2 / 2; }
+.keypad .key:nth-child(4) { grid-area: 2 / 3; }
 
 /* マウス図。押すボタン側だけを塗ることで、左右どちらかを言葉にせず示す */
 .mouse {
@@ -184,7 +178,7 @@ code {
    ファイル選択ウィンドウと同じアイコンを使い、「拡張子 → 伸びる能力」を1行で見せる */
 .ext-grid {
     display: grid;
-    grid-template-columns: max-content max-content max-content max-content 1fr;
+    grid-template-columns: max-content max-content max-content 1fr;
     align-items: center;
     gap: clamp(6px, 0.9vw, 18px) clamp(10px, 1.3vw, 26px);
 }
@@ -192,6 +186,28 @@ code {
 .ext-grid.is-three {
     grid-template-columns: max-content max-content 1fr;
 }
+
+/* 行をまとめる箱は枠として存在させず、中の4つを直接グリッドの升目へ載せる。
+   こうしないと行ごとに列幅がばらつき、拡張子と能力の位置が縦に揃わない */
+.ext-row { display: contents; }
+
+/* 伸びる能力。1つの種別が複数を伸ばすことがある（.zip など）ので、
+   アイコン・名前・数値の3点セットを並べられる形にしておく */
+.ext-gain {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: clamp(4px, 0.5vw, 10px) clamp(10px, 1.3vw, 26px);
+}
+
+.gain-item {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(4px, 0.5vw, 10px);
+}
+
+/* 数値は「1つあたりどれだけ増えるか」を伝える主役なので、名前より目立たせる */
+.stat-value { color: #4cc2ff; }
 
 .ext-icon {
     width: clamp(28px, 2.7vw, 58px);
