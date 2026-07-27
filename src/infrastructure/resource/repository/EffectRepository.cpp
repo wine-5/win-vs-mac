@@ -36,22 +36,14 @@ namespace infrastructure::resource::repository
 	{
 		if (!json.contains("effects")) return;
 
-		const std::unordered_map<std::string, core::constant::EffectType> typeMap{
-			{ "Enemy_HitSword", core::constant::EffectType::Enemy_HitSword },
-			{ "Enemy_HitWindow", core::constant::EffectType::Enemy_HitWindow },
-			{ "Enemy_Spawn", core::constant::EffectType::Enemy_Spawn },
-			{ "Player_Slash1", core::constant::EffectType::Player_Slash1 },
-			{ "Player_Slash2", core::constant::EffectType::Player_Slash2 },
-			{ "Xcode_GroundSlam", core::constant::EffectType::Xcode_GroundSlam },
-		};
-
 		for (const auto& entry : json["effects"])
 		{
 			const std::string key  { entry["type"] };
 			const std::string path { entry["path"] };
 
-			auto it{ typeMap.find(key) };
-			if (it == typeMap.end()) continue;
+			const core::constant::EffectType type{ core::constant::toEffectType(key) };
+			if (type == core::constant::EffectType::None)
+				continue;
 
 			int handle{ LoadEffekseerEffect(path.c_str()) };
 			if (handle == -1) continue;
@@ -65,7 +57,7 @@ namespace infrastructure::resource::repository
 			config.m_yOffset  = entry["yOffset"].get<float>();
 			config.m_scale    = entry["scale"].get<float>();
 
-			m_configs[it->second] = config;
+			m_configs[type] = config;
 		}
 	}
 } // namespace infrastructure::resource::repository
