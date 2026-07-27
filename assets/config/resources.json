@@ -77,7 +77,7 @@
     { "type": "Critical",         "path": "assets/audio/se/se_critical.mp3",          "volume":1.0 },
     { "type": "HitEnemy",         "path": "assets/audio/se/se_hit_enemy.mp3",         "volume":1.0 },
     { "type": "HitPlayer",        "path": "assets/audio/se/se_hit_player.mp3",        "volume":1.0 },
-    { "type": "DeadEnemy",        "path": "assets/audio/se/se_dead_enemy.mp3",        "volume":1.0 },
+    { "type": "DeadEnemy",        "path": "assets/audio/se/se_dead_enemy.mp3",        "volume":0.7 },
     { "type": "DeadPlayer",       "path": "assets/audio/se/se_dead_player.mp3",       "volume":1.0 },
     { "type": "PlayerJump",       "path": "assets/audio/se/se_jump.mp3",              "volume":0.6 },
     { "type": "PlayerFootstep",   "path": "assets/audio/se/se_walk.mp3",              "volume":0.35 },
