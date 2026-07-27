@@ -54,6 +54,7 @@
 #include "game/constant/ProjectileId.h"
 #include "game/constant/EnemyType.h"
 #include "game/component/EnemyTypeComponent.h"
+#include "game/component/TagComponent.h"
 #include "game/scene/SceneManager.h"
 #include "game/scene/SceneType.h"
 #include "game/system/ai/MeleeChaseAISystem.h"
@@ -712,7 +713,10 @@ namespace game::scene
 			    // ボスを倒した瞬間に決着なので、ここでクリアタイムを止める。
 			    // 消失フェードと勝利遷移は演出の時間で、プレイヤーの速さとは関係ない
 			    if (e.m_entityId == m_macId)
+			    {
 				    m_isTimeMeasuring = false;
+				    killRemainingEnemies(e.m_entityId);
+			    }
 
 			    // 勝利遷移はここ（HP0の瞬間）では行わない。ボスの死亡アニメと消失フェードを
 			    // 見せ終えてから遷移したいので、EnemyVanishedEvent（消滅完了）を待つ
@@ -730,6 +734,37 @@ namespace game::scene
 			    auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 			    sceneManager->changeScene(game::scene::SceneType::Result);
 		    }));
+	}
+
+	void InGame::killRemainingEnemies(core::ecs::EntityId excludedId) noexcept
+	{
+		// 先に対象を控えてから倒す。撃破するとEnemyDeathSystemがDeathComponentを足すので、
+		// 走査しながら倒すと反復中にComponentManagerの中身が変わってしまう
+		std::vector<core::ecs::EntityId> targets{};
+		for (const auto entityId : m_componentManager.getAllEntities<component::combat::HealthComponent>())
+		{
+			if (entityId == excludedId)
+				continue;
+
+			const auto* tag{ m_componentManager.tryGet<component::TagComponent>(entityId) };
+			if (tag == nullptr || tag->m_tag != constant::Tag::Enemy)
+				continue;
+
+			if (m_componentManager.get<component::combat::HealthComponent>(entityId).m_isDead)
+				continue;
+
+			targets.push_back(entityId);
+		}
+
+		// 倒し方は落下死（FallOutSystem）と揃える。HPを0にして死亡フラグを立て、
+		// EnemyDeadEventを出せば、撃破数の集計も消失演出も通常どおり流れる
+		for (const auto entityId : targets)
+		{
+			auto& health{ m_componentManager.get<component::combat::HealthComponent>(entityId) };
+			health.m_currentHp = 0.0f;
+			health.m_isDead = true;
+			m_eventBus.publish(event::EnemyDeadEvent{ entityId });
+		}
 	}
 
 	void InGame::spawnBoss()

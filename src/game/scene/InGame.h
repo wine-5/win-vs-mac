@@ -141,6 +141,15 @@ namespace game::scene
 		 */
 		void spawnBoss();
 
+		/**
+		 * @brief 生き残っている敵をまとめて撃破扱いにする
+		 *
+		 * ボスを倒した時点で決着なので、ボスが召喚した雑魚が残っていても
+		 * 一緒に片付ける。以降の消失演出は通常の撃破と同じくEnemyDeathSystemが担う。
+		 * @param excludedId 対象から外すEntityId（撃破済みのボス自身）
+		 */
+		void killRemainingEnemies(core::ecs::EntityId excludedId) noexcept;
+
 		// 各クラスにイベントバスの参照を渡したいため先にメンバ変数として宣言しておく。
 		//
 		// 【重要】購読者（SystemManagerが持つ各System・m_audioEventListener）より
