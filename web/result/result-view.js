@@ -34,12 +34,39 @@ const ResultView = (function () {
      */
     function buildRankHero(rank) {
         const lower = rank.toLowerCase();
+
+        // 上位ランクほど演出を足す。下位で派手に光ると「褒められている」感が出てしまう
+        const shine = (rank === 'S' || rank === 'A') ? '<div class="rank-shine"></div>' : '';
+        const sparks = rank === 'S' ? buildSparks() : '';
+
         return '<section class="rank-hero rank-' + lower + '" id="rank-hero">'
             + '<div class="rank-shockwave"></div>'
+            + '<div class="rank-shockwave delayed"></div>'
             + '<div class="rank-glow"></div>'
+            + sparks
             + '<div class="rank-letter" id="rank-letter" data-rank="' + rank + '">' + rank + '</div>'
+            + shine
             + '<div class="rank-caption">' + ResultLogic.escapeHtml(RANK_CAPTIONS[rank] || '') + '</div>'
             + '</section>';
+    }
+
+    /**
+     * Sランクで着弾に合わせて飛ばす火花を組み立てる
+     * @returns {string} HTML文字列
+     */
+    function buildSparks() {
+        const COUNT = 10;
+        let html = '<div class="rank-sparks">';
+        for (let i = 0; i < COUNT; i++) {
+            // 放射状に等間隔で飛ばす。距離だけ交互に変えて機械的な並びを崩す
+            const angle = (360 / COUNT) * i;
+            const distance = 68 + (i % 3) * 22;
+            html += '<span class="rank-spark" style="'
+                + '--spark-angle:' + angle + 'deg;'
+                + '--spark-distance:' + distance + 'px;'
+                + 'animation-delay:' + (0.5 + (i % 4) * 0.03).toFixed(2) + 's"></span>';
+        }
+        return html + '</div>';
     }
 
     /**
@@ -217,6 +244,49 @@ const ResultView = (function () {
         }, 600);
     }
 
+    // ランク文字が着弾する瞬間（CSSの rankStamp の遅延0.25s＋落下ぶんに合わせている）
+    const RANK_IMPACT_MS = 520;
+
+    // 着弾に鳴らすSE。Sだけ会心音にして特別扱いする
+    const RANK_IMPACT_SE = { S: 'Critical', A: 'HitChargedWindow' };
+
+    /**
+     * ランクの着弾に合わせて音と余韻の光を入れる
+     * @param {string} rank ランク文字
+     */
+    function startRankSequence(rank) {
+        setTimeout(function () {
+            sendToGame({ type: 'uiSound', se: RANK_IMPACT_SE[rank] || 'UiFileSelect' });
+
+            // 着弾しきってから呼吸する光へ移す。落下中から光らせると衝撃が弱まる
+            const hero = document.getElementById('rank-hero');
+            if (hero) hero.classList.add('settled');
+        }, RANK_IMPACT_MS);
+    }
+
+    /**
+     * クリアタイムを 00:00 から実測値まで数え上げる
+     * @param {number} seconds 実際のクリアタイム（秒）
+     */
+    function startTimeCountUp(seconds) {
+        const element = document.getElementById('time-value');
+        if (!element || seconds <= 0) return;
+
+        const DURATION_MS = 900;
+        const startedAt = performance.now();
+
+        function step(now) {
+            const t = Math.min(1, (now - startedAt) / DURATION_MS);
+            // 終わり際をゆっくりにして、止まる瞬間に目が行くようにする
+            const eased = 1 - Math.pow(1 - t, 3);
+            element.textContent = ResultLogic.formatClock(seconds * eased);
+            if (t < 1) requestAnimationFrame(step);
+        }
+
+        // タイムパネル自体のフェードイン（0.65s）が終わる頃から動かす
+        setTimeout(function () { requestAnimationFrame(step); }, 700);
+    }
+
     function render(data) {
         const rootElement = document.getElementById('result-root');
         // HARD は配色そのものを警告色へ寄せる（common.css の body.hard）
@@ -225,6 +295,8 @@ const ResultView = (function () {
         if (data.isVictory) {
             rootElement.innerHTML = renderWin(data);
             setupButtons();
+            startRankSequence(ResultLogic.calcRank(data));
+            startTimeCountUp(data.elapsedTime || 0);
         } else {
             rootElement.innerHTML = renderLose(data);
             startBsodAnimation();

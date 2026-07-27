@@ -160,12 +160,26 @@ body.hard .result-difficulty-badge {
     font-family: 'Courier New', monospace;
     color: var(--rank-color);
     text-shadow: 0 0 28px var(--rank-shadow);
-    animation: rankPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.2s both;
+    /* 大きくぼやけた文字が落ちてきて叩きつけられるように見せる */
+    animation: rankStamp 0.6s cubic-bezier(0.22, 0.9, 0.28, 1.2) 0.25s both;
 }
 
-@keyframes rankPop {
-    from { transform: scale(0); opacity: 0; }
-    to   { transform: scale(1); opacity: 1; }
+@keyframes rankStamp {
+    0%   { transform: scale(3.4); opacity: 0;   filter: blur(16px); }
+    45%  { transform: scale(1.0); opacity: 1;   filter: blur(0); }
+    60%  { transform: scale(0.88); }
+    78%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+}
+
+/* 着弾後の余韻。呼吸するように光を強弱させる */
+.rank-hero.settled .rank-letter {
+    animation: rankBreathe 2.6s ease-in-out infinite;
+}
+
+@keyframes rankBreathe {
+    0%, 100% { text-shadow: 0 0 28px var(--rank-shadow); }
+    50%      { text-shadow: 0 0 46px var(--rank-shadow), 0 0 12px var(--rank-shadow); }
 }
 
 /* ランク文字の背後に敷く光。文字と同じ色で滲ませる */
@@ -178,14 +192,14 @@ body.hard .result-difficulty-badge {
     background: radial-gradient(circle, var(--rank-shadow), transparent 68%);
     filter: blur(14px);
     opacity: 0;
-    animation: glowFadeIn 0.6s ease-out 0.3s forwards;
+    animation: glowFadeIn 0.6s ease-out 0.48s forwards;
 }
 
 @keyframes glowFadeIn {
     to { opacity: 0.85; }
 }
 
-/* 着弾の衝撃波。演出強化側で使う土台 */
+/* 着弾の衝撃波。2枚を少しずらして広げ、1枚だけより厚みを出す */
 .rank-shockwave {
     position: absolute;
     top: 34px;
@@ -194,6 +208,69 @@ body.hard .result-difficulty-badge {
     border-radius: 50%;
     border: 2px solid var(--rank-color);
     opacity: 0;
+    animation: shockwaveSpread 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+}
+
+.rank-shockwave.delayed {
+    animation-delay: 0.62s;
+}
+
+@keyframes shockwaveSpread {
+    0%   { transform: scale(0.3); opacity: 0.85; border-width: 3px; }
+    100% { transform: scale(2.8); opacity: 0;    border-width: 1px; }
+}
+
+/* S/A だけ、着弾のあとに文字の上を光が横切る */
+.rank-shine {
+    position: absolute;
+    top: 14px;
+    z-index: 3;
+    width: 210px;
+    height: 128px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.rank-shine::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: -60%;
+    width: 45%;
+    height: 160%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+    transform: skewX(-22deg);
+    animation: shineSweep 0.9s ease-out 0.72s both;
+}
+
+@keyframes shineSweep {
+    0%   { left: -60%; opacity: 0; }
+    25%  {             opacity: 1; }
+    100% { left: 120%; opacity: 0; }
+}
+
+/* Sランクの火花。角度と距離だけ差し替えて放射状に飛ばす */
+.rank-sparks {
+    position: absolute;
+    top: 74px;
+    width: 0;
+    height: 0;
+}
+
+.rank-spark {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--rank-color);
+    box-shadow: 0 0 8px var(--rank-color);
+    opacity: 0;
+    animation: sparkBurst 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes sparkBurst {
+    0%   { opacity: 1; transform: rotate(var(--spark-angle)) translateX(6px) scale(1); }
+    100% { opacity: 0; transform: rotate(var(--spark-angle)) translateX(var(--spark-distance)) scale(0.3); }
 }
 
 .rank-caption {

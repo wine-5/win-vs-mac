@@ -3,6 +3,7 @@
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IAudioManager.h"
 #include "core/constant/SeType.h"
+#include "platform/window/UiSound.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include "core/utility/Log.h"
 #include <exception>
@@ -97,7 +98,11 @@ namespace platform::window::result
 
     void ResultWindow::handleMessage(const std::string& json) noexcept
     {
-        try
+		// ランク着弾など、JS側が鳴らしたいSEはここで処理して終わる
+		if (platform::window::tryPlayUiSound(json))
+			return;
+
+		try
         {
             auto j{ nlohmann::json::parse(json) };
             const std::string type{ j.value(WindowConstants::JSON_KEY_TYPE, "") };
