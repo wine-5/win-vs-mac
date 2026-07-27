@@ -43,22 +43,6 @@ namespace game::system::ai
 
 	  private:
 		/**
-		 * @brief 浮遊敵の落下判定の基準を、足元の床に追従させる
-		 *
-		 * 浮遊敵は接地しないため、接地時に基準を更新するCollisionSystemの経路に乗らない。
-		 * 放っておくとスポーン位置が永久に基準のままで、床がそこより十分低いだけで
-		 * 落ちてもいないのに奈落判定になってしまう。床が見つかっている間は
-		 * 「そのXZでのホバー高度」を安全地点として書き直し、床を見失ったときだけ
-		 * 最後の値を残して本当の落下を測れるようにする。
-		 * @param entityId 対象のEntityId
-		 * @param rangeKeep 対象のRangeKeepAIComponent（浮遊高度を持つ）
-		 * @param transform 対象のTransform
-		 */
-		void updateHoverSafePosition(core::ecs::EntityId entityId,
-		    const component::ai::RangeKeepAIComponent& rangeKeep,
-		    const component::movement::TransformComponent& transform);
-
-		/**
 		 * @brief 索敵範囲外の徘徊（ホーム周辺をふらつく）を1体分処理する
 		 *
 		 * 水平方向はホーム周辺の目的地へゆっくり移動し、到着したら少し待機する。
