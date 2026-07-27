@@ -4,6 +4,7 @@
 #include "game/component/ai/AIComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/movement/VelocityComponent.h"
+#include "game/component/movement/FallRecoveryComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/visual/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
@@ -108,6 +109,10 @@ namespace game::system::ai
 				patrol.m_homeInitialized = true;
 			}
 
+			// 落下判定の基準を足元の床へ追従させる。追跡・徘徊のどちらでもホバーは働くので、
+			// 分岐へ入る前のここで一度だけ更新する
+			updateHoverSafePosition(entityId, rangeKeep, transform);
+
 			auto& targetTransform{ m_componentManager.get<component::movement::TransformComponent>(ai.m_targetEntity.getId()) };
 
 			// ターゲットへの方向ベクトルを計算（3D全軸）
@@ -200,6 +205,30 @@ namespace game::system::ai
 				attack->m_attackRequested = true;
 		}
 	}
+	void RangeKeepAISystem::updateHoverSafePosition(core::ecs::EntityId entityId,
+	    const component::ai::RangeKeepAIComponent& rangeKeep,
+	    const component::movement::TransformComponent& transform)
+	{
+		if (rangeKeep.m_hoverHeight <= 0.0f)
+			return;
+
+		auto* recovery{ m_componentManager.tryGet<component::movement::FallRecoveryComponent>(entityId) };
+		if (recovery == nullptr)
+			return;
+
+		const auto* velocity{ m_componentManager.tryGet<component::movement::VelocityComponent>(entityId) };
+		// 床を見失っている間は更新しない。最後に床があった地点からの落差で奈落を判定させる
+		if (velocity == nullptr || !velocity->m_hasGroundHeight)
+			return;
+
+		// 実際にいる高さではなく「そのXZで保つべきホバー高度」を安全地点にする。
+		// 撃たれて押し下げられた高さを基準にすると、判定の余裕が削られてしまうため
+		recovery->m_lastSafePosition = core::Vector3{ transform.m_position.x,
+			velocity->m_groundHeight + rangeKeep.m_hoverHeight,
+			transform.m_position.z };
+		recovery->m_hasSafePosition = true;
+	}
+
 	void RangeKeepAISystem::updatePatrol(core::ecs::EntityId entityId, component::ai::RangeKeepAIComponent& rangeKeep,
 	    component::movement::TransformComponent& transform, float deltaTime)
 	{
