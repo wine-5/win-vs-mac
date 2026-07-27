@@ -33,6 +33,22 @@ const DesktopLogic = (function () {
     }
 
     /**
+     * @brief タイトルへ戻ることをゲームへ通知する
+     * この画面では Esc のポーズメニューを開けないため、ここが唯一の戻り道になる。
+     * 確認ダイアログは C++ 側（Win32）が出す
+     */
+    function backToTitle() {
+        sendToGame({ type: 'backToTitle' });
+    }
+
+    /**
+     * @brief アプリの終了をゲームへ通知する
+     */
+    function quitGame() {
+        sendToGame({ type: 'quitGame' });
+    }
+
+    /**
      * @brief Windows アプリ起動をゲームへ通知する
      * @param {'cmd'|'taskmgr'|'recyclebin'} app 起動するアプリ識別子
      */
@@ -57,12 +73,14 @@ const DesktopLogic = (function () {
         }
     }
 
-    return { onWindowChange, toggleWindow, startGame, launchApp, handleMessage };
+    return { onWindowChange, toggleWindow, startGame, backToTitle, quitGame, launchApp, handleMessage };
 }());
 
 // HTML の onclick から呼ばれるグローバル関数
 function toggleWindow(name) { DesktopLogic.toggleWindow(name); }
 function startGame()        { DesktopLogic.startGame(); }
+function backToTitle()      { DesktopLogic.backToTitle(); }
+function quitGame()         { DesktopLogic.quitGame(); }
 function launchApp(app)     { DesktopLogic.launchApp(app); }
 
 // messaging.js が呼び出すグローバル関数
