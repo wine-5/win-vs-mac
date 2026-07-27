@@ -404,7 +404,9 @@ namespace game::scene
 		playerTransform.m_position = playerStart.m_position;
 
 		const float startYawRad{ playerStart.m_rotationY * core::utility::DEG_TO_RAD };
-		playerTransform.m_rotation.y = startYawRad;
+		// モデルの正面は -Z 向きで、MoveSystem も進行方向に π を足した角度を入れている。
+		// カメラと同じ yaw をそのまま入れるとカメラ側を向いてしまうため、ここでも π を足して背中を向ける
+		playerTransform.m_rotation.y = startYawRad + core::utility::PI;
 		if (m_componentManager.has<component::camera::CameraComponent>(m_playerId))
 			m_componentManager.get<component::camera::CameraComponent>(m_playerId).m_yaw = startYawRad;
 

@@ -5,7 +5,7 @@
       0,
       324.68
     ],
-    "rotationY": 180
+    "rotationY": 0
   },
   "props": [
     {
@@ -1285,15 +1285,6 @@
         3852.01,
         -584.87,
         5774.37
-      ],
-      "rotationY": 0
-    },
-    {
-      "type": "xcode",
-      "position": [
-        125.82,
-        0,
-        940.81
       ],
       "rotationY": 0
     }
