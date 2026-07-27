@@ -38,6 +38,7 @@ namespace game::system::visual
 
 	  void onAttackHit(const game::event::AttackHitEvent& event);
 	  void onAttackStart(const game::event::AttackStartEvent& event);
+	  void onAttackImpact(const game::event::AttackImpactEvent& event);
 	  void onEnemyDead(const game::event::EnemyDeadEvent& event);
 	  void onEnemySpawned(const game::event::EnemySpawnedEvent& event);
 

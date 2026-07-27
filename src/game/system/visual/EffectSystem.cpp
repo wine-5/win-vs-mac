@@ -31,6 +31,13 @@ namespace game::system::visual
 			    onAttackStart(e);
 		    }));
 
+		// AttackImpactEventを購読する
+		m_subscriptions.push_back(m_eventBus.subscribe<game::event::AttackImpactEvent>(
+		    [this](const game::event::AttackImpactEvent& e)
+		    {
+			    onAttackImpact(e);
+		    }));
+
 		// EnemyDeadEventを購読する
 		m_subscriptions.push_back(m_eventBus.subscribe<game::event::EnemyDeadEvent>(
 		    [this](const game::event::EnemyDeadEvent& e)
@@ -113,6 +120,18 @@ namespace game::system::visual
 		position.z += event.m_effectPositionOffset.z;
 
 		playAndTrack(event.m_attackerId, event.m_effectType, position, rotation);
+	}
+
+	void EffectSystem::onAttackImpact(const game::event::AttackImpactEvent& event)
+	{
+		// 地面叩きつけの土煙のように、当たる瞬間に攻撃者の足元へ出す演出。
+		// 音だけを鳴らす攻撃ではエフェクト種別がNoneで届く
+		if (event.m_effectType == core::constant::EffectType::None)
+			return;
+
+		// 叩きつけたのは足元なので、攻撃者の原点（＝地面の高さ）をそのまま使う
+		if (const auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(event.m_attackerId) })
+			playAndTrack(event.m_attackerId, event.m_effectType, transform->m_position);
 	}
 
 	void EffectSystem::onEnemyDead(const game::event::EnemyDeadEvent& event)

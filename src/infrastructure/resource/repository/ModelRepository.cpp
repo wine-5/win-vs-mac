@@ -454,6 +454,10 @@ namespace infrastructure::resource::repository
 			// 敵ごとに攻撃音を変えられるようにするため、数値ではなく文字列で持つ
 			if (j["gameplay"].contains("attackImpactSe"))
 				metadata.stringProperties["attackImpactSe"] = j["gameplay"]["attackImpactSe"];
+
+			// 攻撃が当たる瞬間に出すエフェクトの名前（EffectType.h の EFFECT_TYPE_NAMES に対応）
+			if (j["gameplay"].contains("attackImpactEffect"))
+				metadata.stringProperties["attackImpactEffect"] = j["gameplay"]["attackImpactEffect"];
 		}
 
 		// hard配下はgameplayと同じキー名で書いた値だけを持つ。

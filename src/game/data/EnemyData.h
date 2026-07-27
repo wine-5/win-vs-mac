@@ -8,6 +8,7 @@
 #include "core/data/ModelMetadata.h"
 #include "core/data/MacMetadata.h"
 #include "core/constant/SeType.h"
+#include "core/constant/EffectType.h"
 #include "game/constant/MetadataKeys.h"
 
 namespace game::data
@@ -122,6 +123,11 @@ namespace game::data
 		  auto attackImpactSeIt{ metadata.stringProperties.find("attackImpactSe") };
 		  if (attackImpactSeIt != metadata.stringProperties.end())
 			  data.m_attackImpactSe = core::constant::toSeType(attackImpactSeIt->second);
+
+		  // 攻撃が当たる瞬間に出すエフェクト。書かれていなければNone（＝演出無し）のまま
+		  auto attackImpactEffectIt{ metadata.stringProperties.find("attackImpactEffect") };
+		  if (attackImpactEffectIt != metadata.stringProperties.end())
+			  data.m_attackImpactEffect = core::constant::toEffectType(attackImpactEffectIt->second);
 
 		  return data;
         }
@@ -258,6 +264,12 @@ namespace game::data
 			return m_attackImpactSe;
 		}
 
+		/** @brief 攻撃が当たる瞬間に出すエフェクトを取得（未設定の敵ではNone＝演出無し） */
+		[[nodiscard]] core::constant::EffectType getAttackImpactEffect() const noexcept
+		{
+			return m_attackImpactEffect;
+		}
+
 		/** @brief アニメーションクリップ定義の一覧を取得（アニメ無しの敵では空） */
 		[[nodiscard]] const std::vector<core::data::AnimationClipDef>& getAnimations() const noexcept
 		{
@@ -280,6 +292,7 @@ namespace game::data
 	  float m_fireCooldown{ 0.0f };
 	  float m_facingYawOffset{ 0.0f };
 	  core::constant::SeType m_attackImpactSe{ core::constant::SeType::None }; // 攻撃が当たる瞬間のSE
+	  core::constant::EffectType m_attackImpactEffect{ core::constant::EffectType::None }; // 攻撃が当たる瞬間のエフェクト
 	  core::Vector3 m_colliderSize;
 	  core::Vector3 m_colliderOffset;
 	  core::Vector3 m_scale{ 1.0f, 1.0f, 1.0f };

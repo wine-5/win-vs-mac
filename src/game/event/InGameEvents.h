@@ -110,10 +110,15 @@ namespace game::event
 		/** @brief 再生するSEの種類（Noneなら無音） */
 		core::constant::SeType m_seType{ core::constant::SeType::None };
 
+		/** @brief 再生するエフェクトの種類（Noneなら演出無し） */
+		core::constant::EffectType m_effectType{ core::constant::EffectType::None };
+
 		AttackImpactEvent() = default;
-		AttackImpactEvent(core::ecs::EntityId attackerId, core::constant::SeType seType)
+		AttackImpactEvent(core::ecs::EntityId attackerId, core::constant::SeType seType,
+		    core::constant::EffectType effectType = core::constant::EffectType::None)
 		    : m_attackerId{ attackerId }
 		    , m_seType{ seType }
+		    , m_effectType{ effectType }
 		{
 		}
 	};

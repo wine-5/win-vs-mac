@@ -67,10 +67,12 @@ namespace game::system::combat
 				{
 					attack.m_windupPending = false;
 
-					// 振り終わり＝地面を叩く瞬間。当たったかどうかに関係なく鳴らしたいので、
+					// 振り終わり＝地面を叩く瞬間。当たったかどうかに関係なく出したいので、
 					// ヒット判定（resolveAttack）より前に発行する
-					if (attack.m_impactSeType != core::constant::SeType::None)
-						m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType });
+					if (attack.m_impactSeType != core::constant::SeType::None ||
+					    attack.m_impactEffectType != core::constant::EffectType::None)
+						m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType,
+						    attack.m_impactEffectType });
 
 					// 攻撃者が倒された場合はこのフレームへ到達しない（先頭で溜めごと打ち切る）
 					resolveAttack(attackerId, attack);
@@ -149,8 +151,10 @@ namespace game::system::combat
 			}
 
 			// ワインドアップ無し（従来動作）：発動と同時が当たる瞬間になる
-			if (attack.m_impactSeType != core::constant::SeType::None)
-				m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType });
+			if (attack.m_impactSeType != core::constant::SeType::None ||
+			    attack.m_impactEffectType != core::constant::EffectType::None)
+				m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType,
+				    attack.m_impactEffectType });
 
 			// 即座にダメージを解決する
 			resolveAttack(attackerId, attack);

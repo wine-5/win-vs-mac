@@ -64,5 +64,9 @@ namespace game::component::combat
 		// 無しの攻撃では発動と同時に鳴る。地面を叩きつける攻撃の着弾音のように、
 		// 「振り始め」ではなく「当たる瞬間」に置きたい音のために持つ。Noneなら無音
 		core::constant::SeType m_impactSeType{ core::constant::SeType::None };
+
+		// ダメージ判定が成立する瞬間に出すエフェクト。地面を叩きつける攻撃の土煙のように、
+		// 「振り始め」ではなく「当たる瞬間」に置きたい演出のために持つ。Noneなら演出無し
+		core::constant::EffectType m_impactEffectType{ core::constant::EffectType::None };
 	};
 } // namespace game::component::combat
