@@ -52,6 +52,13 @@ namespace game::system::movement
 		void punishPlayer(core::ecs::EntityId entityId);
 
 		/**
+		 * @brief ボス（Mac）かどうか
+		 * @param entityId 判定対象のEntityID
+		 * @return ボスならtrue
+		 */
+		bool isBoss(core::ecs::EntityId entityId) const;
+
+		/**
 		 * @brief 落下した敵を撃破扱いにする
 		 * @param entityId 敵のEntityID
 		 */

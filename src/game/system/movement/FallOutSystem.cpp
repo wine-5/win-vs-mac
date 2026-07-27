@@ -5,7 +5,9 @@
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/visual/HitEffectComponent.h"
 #include "game/component/TagComponent.h"
+#include "game/component/EnemyTypeComponent.h"
 #include "game/constant/Tag.h"
+#include "game/constant/EnemyType.h"
 #include "game/event/InGameEvents.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IAudioManager.h"
@@ -81,6 +83,12 @@ namespace game::system::movement
 		}
 	}
 
+	bool FallOutSystem::isBoss(core::ecs::EntityId entityId) const
+	{
+		const auto* type{ m_componentManager.tryGet<component::EnemyTypeComponent>(entityId) };
+		return type != nullptr && type->m_type == constant::EnemyType::Mac;
+	}
+
 	void FallOutSystem::killEnemy(core::ecs::EntityId entityId)
 	{
 		auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(entityId) };
@@ -109,7 +117,14 @@ namespace game::system::movement
 			if (tag->m_tag == constant::Tag::Player)
 				punishPlayer(entityId);
 			else if (tag->m_tag == constant::Tag::Enemy)
-				killEnemy(entityId);
+			{
+				// ボスが落ちて勝ちになるのは決着として成立しないので、
+				// 撃破扱いにはせず足場へ戻して戦いを続けさせる
+				if (isBoss(entityId))
+					returnToSafeGround(entityId);
+				else
+					killEnemy(entityId);
+			}
 		}
 	}
 } // namespace game::system::movement
