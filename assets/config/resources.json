@@ -42,6 +42,7 @@
   "images": [
     {"id": "lock-bg",           "path": "assets/images/background/LockBG.jpg"},
     {"id": "desktop-bg",        "path": "assets/images/background/DesktopBG.jpg"},
+    {"id": "projectile-window7",  "path": "assets/images/ingame/projectile_window7.png"},
     {"id": "projectile-window11", "path": "assets/images/ingame/projectile_window11.png"},
     {"id": "alert-icon",        "path": "assets/images/ui/ingame/alert_icon.png"},
     {"id": "alert-bar",         "path": "assets/images/ui/ingame/alert_bar.png"},
