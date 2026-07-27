@@ -240,6 +240,7 @@
     <ClCompile Include="src\infrastructure\resource\repository\ProjectileRepository.cpp" />
     <ClCompile Include="src\infrastructure\graphics\UIRenderer.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\platform\diagnostics\MemoryProbe.cpp" />
     <ClCompile Include="src\platform\utility\LogUtil.cpp" />
     <ClCompile Include="src\platform\system\WindowsPerformanceProvider.cpp" />
     <ClCompile Include="src\platform\utility\StringConverter.cpp" />
@@ -493,6 +494,9 @@
     <ClInclude Include="src\game\system\movement\PhysicsSystem.h" />
     <ClInclude Include="src\game\event\InGameEvents.h" />
     <ClInclude Include="src\infrastructure\graphics\UIRenderer.h" />
+    <ClInclude Include="src\core\interface\IMemoryProbe.h" />
+    <ClInclude Include="src\core\utility\Probe.h" />
+    <ClInclude Include="src\platform\diagnostics\MemoryProbe.h" />
     <ClInclude Include="src\platform\utility\LogUtil.h" />
     <ClInclude Include="src\platform\system\WindowsPerformanceProvider.h" />
     <ClInclude Include="src\platform\utility\StringConverter.h" />
