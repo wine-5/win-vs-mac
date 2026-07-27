@@ -435,6 +435,71 @@ body.hard .result-file-ext {
     color: #ff8a8a;
 }
 
+/* ===== 敗北時のカードは一回り大きく =====
+   勝利側と違ってランク表示が無く要素数が少ないため、同じ寸法だと画面に対して
+   小さく見える。カード幅と文字を上げて、全画面でも見応えが出るようにする */
+.bad-end .result-card {
+    max-width: 760px;
+    gap: 24px;
+    padding: 40px 44px 36px;
+    border-radius: 12px;
+}
+
+.bad-end .result-eyebrow {
+    font-size: 13px;
+}
+
+.bad-end .result-eyebrow-dot {
+    width: 9px;
+    height: 9px;
+}
+
+.bad-end .result-difficulty-badge {
+    font-size: 12px;
+    padding: 4px 14px;
+}
+
+.bad-end .result-title {
+    font-size: 27px;
+}
+
+.bad-end .result-subtitle {
+    font-size: 16px;
+    margin-top: -14px;
+}
+
+.bad-end .stat-tiles {
+    gap: 14px;
+}
+
+.bad-end .stat-tile {
+    gap: 7px;
+    padding: 16px 18px;
+}
+
+.bad-end .stat-tile-label {
+    font-size: 13px;
+}
+
+.bad-end .stat-tile-value {
+    font-size: 30px;
+}
+
+.bad-end .stat-tile-unit {
+    font-size: 14px;
+}
+
+.bad-end .crash-detail {
+    gap: 7px;
+    padding: 16px 18px;
+    font-size: 15px;
+}
+
+.bad-end .result-btn {
+    padding: 14px 24px;
+    font-size: 16px;
+}
+
 /* ===== 敗北時の詳細行 ===== */
 .crash-detail {
     display: flex;
