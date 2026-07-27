@@ -27,46 +27,46 @@ namespace platform::utility
 		// AllocConsole() は新しいコンソールへフォーカスを移してしまい、ゲーム本体ウィンドウが
 		// 非アクティブになってキー入力を取得できなくなる（Escでポーズが開かない等）。
 		// 生成前の前面ウィンドウ（＝ゲーム本体）を控えておき、あとで戻す。
-		HWND previousForeground{ GetForegroundWindow() };
+		// HWND previousForeground{ GetForegroundWindow() };
 
-		// Windowsコンソールウィンドウを作成（不要な場合はコメントアウト）
-		AllocConsole();
+		//// Windowsコンソールウィンドウを作成（不要な場合はコメントアウト）
+		// AllocConsole();
 
-		// 標準出力をコンソールにリダイレクト
-		FILE* fp{};
-		freopen_s(&fp, "CONOUT$", "w", stdout);
-		freopen_s(&fp, "CONOUT$", "w", stderr);
+		//// 標準出力をコンソールにリダイレクト
+		// FILE* fp{};
+		// freopen_s(&fp, "CONOUT$", "w", stdout);
+		// freopen_s(&fp, "CONOUT$", "w", stderr);
 
-		// コンソールの出力コードページを UTF-8 に設定する。
-		// ソースは /utf-8 でコンパイルされ文字列リテラルがUTF-8バイトのため、
-		// コンソールもUTF-8にしないと日本語ログが文字化けする
-		SetConsoleOutputCP(CP_UTF8);
+		//// コンソールの出力コードページを UTF-8 に設定する。
+		//// ソースは /utf-8 でコンパイルされ文字列リテラルがUTF-8バイトのため、
+		//// コンソールもUTF-8にしないと日本語ログが文字化けする
+		// SetConsoleOutputCP(CP_UTF8);
 
-		m_consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+		// m_consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
-		SetConsoleTitleA("DxLib-3D Debug Console");
+		// SetConsoleTitleA("DxLib-3D Debug Console");
 
-		// 起動ごとに作り直す（前回の内容が混ざるとどの実行のログか分からなくなる）
-		m_logFile.open(LOG_FILE_PATH, std::ios::out | std::ios::trunc);
+		//// 起動ごとに作り直す（前回の内容が混ざるとどの実行のログか分からなくなる）
+		// m_logFile.open(LOG_FILE_PATH, std::ios::out | std::ios::trunc);
 
-		// CRTのデバッグアサーション（std::arrayの範囲外など）はロガーを通らず
-		// ダイアログを出すだけで終わる。ゲームがフルスクリーンだとそのダイアログが
-		// 前面に出せず内容を読めないため、内容をファイルへも書き出させる
-		m_assertFileHandle = CreateFileA(ASSERT_FILE_PATH, GENERIC_WRITE,
-		    FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS,
-		    FILE_ATTRIBUTE_NORMAL, nullptr);
-		if (m_assertFileHandle != INVALID_HANDLE_VALUE)
-		{
-			for (const int reportType : { _CRT_ASSERT, _CRT_ERROR, _CRT_WARN })
-			{
-				// ダイアログも残す（デバッガで止めたいときのため）。ファイルへは常に出す
-				_CrtSetReportMode(reportType, _CRTDBG_MODE_FILE | _CRTDBG_MODE_WNDW | _CRTDBG_MODE_DEBUG);
-				_CrtSetReportFile(reportType, static_cast<HANDLE>(m_assertFileHandle));
-			}
-		}
+		//// CRTのデバッグアサーション（std::arrayの範囲外など）はロガーを通らず
+		//// ダイアログを出すだけで終わる。ゲームがフルスクリーンだとそのダイアログが
+		//// 前面に出せず内容を読めないため、内容をファイルへも書き出させる
+		// m_assertFileHandle = CreateFileA(ASSERT_FILE_PATH, GENERIC_WRITE,
+		//     FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, CREATE_ALWAYS,
+		//     FILE_ATTRIBUTE_NORMAL, nullptr);
+		// if (m_assertFileHandle != INVALID_HANDLE_VALUE)
+		//{
+		//	for (const int reportType : { _CRT_ASSERT, _CRT_ERROR, _CRT_WARN })
+		//	{
+		//		// ダイアログも残す（デバッガで止めたいときのため）。ファイルへは常に出す
+		//		_CrtSetReportMode(reportType, _CRTDBG_MODE_FILE | _CRTDBG_MODE_WNDW | _CRTDBG_MODE_DEBUG);
+		//		_CrtSetReportFile(reportType, static_cast<HANDLE>(m_assertFileHandle));
+		//	}
+		// }
 
-		if (previousForeground != nullptr)
-			SetForegroundWindow(previousForeground);
+		// if (previousForeground != nullptr)
+		//	SetForegroundWindow(previousForeground);
 #endif
 	}
 
