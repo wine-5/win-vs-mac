@@ -57,12 +57,20 @@ namespace game::ui::ingame
 		void drawHealthBar(int x, int y, int width, int height, float ratio);
 
 		/**
-		 * @brief 被弾の検知と、遅れて追従する残像バーの更新を行う
+		 * @brief 前回の描画からの経過時間を求める
 		 *
-		 * 描画経路からしか呼ばれずdeltaTimeを受け取らないため、経過時間は壁時計から求める
-		 * @param ratio 今フレームのHP残量比（0.0〜1.0）
+		 * 描画経路からしか呼ばれずdeltaTimeを受け取らないため、経過時間は壁時計から求める。
+		 * 時間で進む演出が複数あるので、1フレームに一度ここで取ってから配る
+		 * @return 前回の描画からの経過秒数（初回は0）
 		 */
-		void updateDamageReaction(float ratio);
+		[[nodiscard]] float tickDeltaTime();
+
+		/**
+		 * @brief 被弾の検知と、遅れて追従する残像バーの更新を行う
+		 * @param ratio 今フレームのHP残量比（0.0〜1.0）
+		 * @param deltaTime 前回の描画からの経過秒数
+		 */
+		void updateDamageReaction(float ratio, float deltaTime);
 
 		/**
 		 * @brief 被弾フラッシュの進行度を返す

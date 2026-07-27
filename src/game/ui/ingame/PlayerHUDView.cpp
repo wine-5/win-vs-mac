@@ -68,7 +68,7 @@ namespace game::ui::ingame
 		return value * m_screen.getHeight() / BASE_SCREEN_HEIGHT;
 	}
 
-	void PlayerHUDView::updateDamageReaction(float ratio)
+	float PlayerHUDView::tickDeltaTime()
 	{
 		const auto now{ std::chrono::steady_clock::now() };
 		const float deltaTime{ m_hasLastFrameTime
@@ -76,6 +76,12 @@ namespace game::ui::ingame
 			                       : 0.0f };
 		m_lastFrameTime = now;
 		m_hasLastFrameTime = true;
+		return deltaTime;
+	}
+
+	void PlayerHUDView::updateDamageReaction(float ratio, float deltaTime)
+	{
+		const auto now{ std::chrono::steady_clock::now() };
 
 		// 初回は残像を実HPに合わせるだけ。ここで演出を出すと開始直後に赤帯が走ってしまう
 		if (m_displayedRatio < 0.0f)
@@ -172,7 +178,7 @@ namespace game::ui::ingame
 
 		// 0除算はmaxHpのチェックで防いでいる。回復過多などで1.0を超えても溝からはみ出さないよう丸める
 		const float ratio{ std::clamp(health.m_currentHp / health.m_maxHp, 0.0f, 1.0f) };
-		updateDamageReaction(ratio);
+		updateDamageReaction(ratio, tickDeltaTime());
 		drawHealthBar(panelX + padding, panelY + scaled(BAR_Y),
 		    panelWidth - padding * 2, scaled(BAR_HEIGHT), ratio);
 	}
