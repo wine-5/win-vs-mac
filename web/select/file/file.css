@@ -68,6 +68,9 @@ body {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+    /* 縦がautoだと横のvisibleもautoに繰り上がり、はみ出した行の分だけ
+       横スクロールバーが出てしまう。横へは送らないので明示的に切る */
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
 }
