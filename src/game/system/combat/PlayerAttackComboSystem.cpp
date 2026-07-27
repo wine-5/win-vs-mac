@@ -94,8 +94,8 @@ namespace game::system::combat
 
 		// 斬撃エフェクトも段で変える。1段目は振り下ろし、2段目は回転斬りとして作られている
 		attack.m_startEffectType = isFinalStage
-		                               ? core::constant::EffectType::Player_Slash2
-		                               : core::constant::EffectType::Player_Slash1;
+		                               ? core::constant::EffectType::Player_SlashStrong
+		                               : core::constant::EffectType::Player_SlashNormal;
 
 		// 振り音も段で変える。1段目と2段目が同じ音だと、コンボが繋がった手応えが出ない
 		attack.m_startSeType = isFinalStage

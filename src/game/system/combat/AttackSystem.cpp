@@ -270,13 +270,13 @@ namespace game::system::combat
 			hitEvent.m_isCritical = chain.m_isCritical;
 
 			// 被弾エフェクトは「誰が食らったか」で決める。
-			// 敵が食らったときだけ、当たったのが弾（Enemy_HitWindow）か剣（Enemy_HitSword）かで出し分ける
+			// 敵が食らったときだけ、当たったのが弾（Enemy_HitWindow）か剣（Enemy_HitSwordNormal）かで出し分ける
 			if (targetTagCheck.m_tag == constant::Tag::Player)
 				hitEvent.m_effectType = core::constant::EffectType::Player_Hit;
 			else
 				hitEvent.m_effectType = m_componentManager.has<component::combat::ProjectileComponent>(attackerId)
 				                            ? core::constant::EffectType::Enemy_HitWindow
-				                            : core::constant::EffectType::Enemy_HitSword;
+				                            : core::constant::EffectType::Enemy_HitSwordNormal;
 
 			// ヒット音は「何が当たったか」で決める。弾は弾自身が持つ音（Window弾・溜め撃ちで別）、
 			// プレイヤーの近接は敵が斬られた音。振り音は AttackStartEvent 側が担う

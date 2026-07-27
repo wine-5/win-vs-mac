@@ -1,8 +1,8 @@
 {
   "effects": [
     {
-      "type": "Enemy_HitSword",
-      "path": "assets/effects/enemy_hit_sword.efk",
+      "type": "Enemy_HitSwordNormal",
+      "path": "assets/effects/enemy_hit_sword_normal.efk",
       "poolSize": 10,
       "yOffset": 75.0,
       "scale": 30.0
@@ -29,15 +29,15 @@
       "scale": 30.0
     },
     {
-      "type": "Player_Slash1",
-      "path": "assets/effects/player_slash1.efk",
+      "type": "Player_SlashNormal",
+      "path": "assets/effects/player_slash_normal.efk",
       "poolSize": 5,
       "yOffset": 75.0,
       "scale": 30.0
     },
     {
-      "type": "Player_Slash2",
-      "path": "assets/effects/player_slash2.efk",
+      "type": "Player_SlashStrong",
+      "path": "assets/effects/player_slash_strong.efk",
       "poolSize": 5,
       "yOffset": 75.0,
       "scale": 30.0
