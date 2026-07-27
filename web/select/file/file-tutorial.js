@@ -19,6 +19,9 @@ const FileTutorial = (function () {
                   'クリックするとPC内のファイルを選べます。まずは好きなファイルを1つ選んでみてください。',
             // ファイルが1つ入った時点で自動的に次へ進む（「次へ」は出さない）
             advancesOnEquip: true,
+            // 対象は画面上部の1つ目のスロット。画面下端に置くと矢印が届かず
+            // 別の場所（拡張子ボーナス一覧）を指しているように見えるため、枠の真下へ寄せる
+            anchor: '.file-list .file-slot:first-child',
             atTop: false
         },
         {
@@ -57,6 +60,39 @@ const FileTutorial = (function () {
         });
     }
 
+    // 対象の枠と案内のあいだに空ける距離。矢印（軸＋頭）がちょうど収まる高さ
+    const ANCHOR_GAP_RATIO = 0.075;
+    const ANCHOR_GAP_MIN = 44;
+    const ANCHOR_GAP_MAX = 90;
+
+    /**
+     * 案内を対象の枠の真下へ置く。
+     * スロットの高さはウィンドウサイズや装備状況で変わるので、
+     * CSSの固定値ではなく実際の位置を測って合わせる
+     * @param step 表示中の段
+     */
+    function layoutTip(step) {
+        if (!tipEl) return;
+
+        const target = step.anchor ? document.querySelector(step.anchor) : null;
+        if (!target) {
+            // 対象を持たない段はCSS（下端、または at-top で上端）に任せる
+            tipEl.style.top = '';
+            tipEl.style.bottom = '';
+            return;
+        }
+
+        const gap = Math.min(ANCHOR_GAP_MAX,
+                             Math.max(ANCHOR_GAP_MIN, window.innerHeight * ANCHOR_GAP_RATIO));
+        const bottomMargin = window.innerHeight * 0.04;
+        // 案内が画面からはみ出す場合は、はみ出さない位置まで戻す
+        const maxTop = window.innerHeight - tipEl.offsetHeight - bottomMargin;
+        const top = Math.max(0, Math.min(target.getBoundingClientRect().bottom + gap, maxTop));
+
+        tipEl.style.top = top + 'px';
+        tipEl.style.bottom = 'auto';
+    }
+
     /**
      * 今の段を他のウィンドウへ知らせる。
      * パラメータ（伸びた項目の強調）やデスクトップ（ルール説明アイコンの強調）は
@@ -71,7 +107,11 @@ const FileTutorial = (function () {
         isActive = false;
         clearTarget();
         notifyStep(0);
-        if (tipEl) tipEl.hidden = true;
+        if (!tipEl) return;
+
+        tipEl.hidden = true;
+        tipEl.style.top = '';
+        tipEl.style.bottom = '';
     }
 
     function showStep(index) {
@@ -99,6 +139,8 @@ const FileTutorial = (function () {
 
         tipEl.classList.toggle('at-top', step.atTop === true);
         tipEl.hidden = false;
+        // 高さを測るため、中身を入れて表示したあとに位置を決める
+        layoutTip(step);
     }
 
     /** 装備が変わったときに呼ばれる。ファイルが1つでも入っていれば次の段へ進む */
@@ -106,7 +148,11 @@ const FileTutorial = (function () {
         if (!isActive) return;
 
         const step = STEPS[currentStep];
-        if (!step || !step.advancesOnEquip) return;
+        if (!step) return;
+
+        // 一覧は作り直されるので、対象の枠の位置も取り直す
+        layoutTip(step);
+        if (!step.advancesOnEquip) return;
 
         const hasEquipped = FileLogic.getSlots().some(function (s) { return !s.isEmpty; });
         if (hasEquipped) showStep(currentStep + 1);
@@ -125,6 +171,9 @@ const FileTutorial = (function () {
 
         nextEl.onclick = function () { showStep(currentStep + 1); };
         skipEl.onclick = finish;
+        window.addEventListener('resize', function () {
+            if (isActive && STEPS[currentStep]) layoutTip(STEPS[currentStep]);
+        });
 
         isActive = true;
         showStep(0);

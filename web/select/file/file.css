@@ -465,6 +465,8 @@ body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
     position: fixed;
     left: 1.5vw;
     right: 1.5vw;
+    /* 既定は画面下端。対象の枠を持つ段では JS（layoutTip）が top を上書きして
+       枠の真下へ寄せるため、矢印が指す先と対象がずれない */
     bottom: 4vh;
     z-index: 50;
     /* 枠の外へ出す矢印を切り取らせないため、ここでは隠さない。
