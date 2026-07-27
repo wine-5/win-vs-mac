@@ -8,60 +8,37 @@ body {
     margin: 0;
 }
 
-/* タブ行（Windows 11のメモ帳準拠でメニューバーの上に置く）。
-   説明を分冊にして、必要な項目だけ引けるようにするためのもの */
-.tabbar {
-    display: flex;
-    align-items: flex-end;
-    gap: 2px;
-    background: #2b2b2b;
-    padding: clamp(4px, 0.5vw, 8px) clamp(4px, 0.5vw, 8px) 0;
-    flex-shrink: 0;
-}
-
-.tab {
-    font-family: inherit;
-    font-size: clamp(12px, 1.0vw, 20px);
-    color: #b8b8b8;
-    background: transparent;
-    border: none;
-    border-radius: clamp(4px, 0.5vw, 8px) clamp(4px, 0.5vw, 8px) 0 0;
-    padding: clamp(5px, 0.7vw, 11px) clamp(10px, 1.4vw, 24px);
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.tab:hover:not(.is-active) {
-    background: rgba(255, 255, 255, 0.07);
-    color: #e4e4e4;
-}
-
-/* 選択中のタブは本文と地続きに見せる。色を変えるだけだと、
-   どのタブの中身を読んでいるのか一目で分からない */
-.tab.is-active {
-    background: #1e1e1e;
-    color: #ffffff;
-}
-
-/* メニューバー */
+/* メニューバー。読む項目を切り替える唯一の入口なので、
+   飾りだった頃より当たりを大きく取り、文字もウィンドウ幅に追従させる */
 .menubar {
     display: flex;
-    gap: 0;
+    gap: clamp(2px, 0.3vw, 6px);
     background: #2d2d2d;
     border-bottom: 1px solid #3c3c3c;
-    padding: 2px 4px;
+    padding: clamp(2px, 0.3vw, 6px) clamp(4px, 0.5vw, 10px);
     flex-shrink: 0;
 }
 
 .menu-item {
-    padding: 3px 8px;
-    font-size: 12px;
+    padding: clamp(3px, 0.5vw, 9px) clamp(8px, 1.2vw, 20px);
+    font-size: clamp(12px, 1.0vw, 20px);
+    color: #cccccc;
     cursor: pointer;
-    border-radius: 2px;
+    border-radius: 3px;
+    white-space: nowrap;
 }
 
-.menu-item:hover {
+.menu-item:hover:not(.is-active) {
     background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+/* 今どの項目を読んでいるかを示す。タブを外したので、
+   これが無いと現在地を示すものが画面上に何も無くなる */
+.menu-item.is-active {
+    background: #1e1e1e;
+    color: #ffffff;
+    box-shadow: inset 0 -2px 0 0 #4cc2ff;
 }
 
 /* テキストコンテンツエリア */

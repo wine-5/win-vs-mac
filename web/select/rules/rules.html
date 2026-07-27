@@ -7,17 +7,11 @@
     <link rel="stylesheet" href="select/rules/rules.css">
 </head>
 <body>
-    <!-- Windows 11のメモ帳と同じく、タブ行はメニューバーの上に置く。
-         閉じる(×)や新規(+)は出さない。押せてしまうと説明を消せてしまい、戻す手段が無い -->
-    <div class="tabbar" id="tabbar">
-        <button type="button" class="tab is-active" data-page="controls">操作説明.txt</button>
-        <button type="button" class="tab" data-page="bonus">拡張子ボーナス.txt</button>
-        <button type="button" class="tab" data-page="flow">ゲームの流れ.txt</button>
-    </div>
-    <!-- メニューは中身に合わせた名前にして、押すとタブと同じページへ移す。
+    <!-- 読む項目の切り替えはこのメニューだけで行う。タブと二重に置くと、
+         同じ場所へ行く入口が2つ並ぶことになり、どちらを押すのか迷わせる。
          押しても何も起きない飾りだと壊れて見えるため、行き先を持たない項目は置かない -->
     <div class="menubar">
-        <span class="menu-item" data-page="controls">操作(C)</span>
+        <span class="menu-item is-active" data-page="controls">操作(C)</span>
         <span class="menu-item" data-page="bonus">装備(E)</span>
         <span class="menu-item" data-page="flow">進行(P)</span>
     </div>
@@ -86,6 +80,6 @@
 【 やられたときは 】
   体力が0になると失敗になります。装備を選び直して再挑戦できます。</pre>
     </div>
-    <script src="select/rules/rules-tabs.js"></script>
+    <script src="select/rules/rules-nav.js"></script>
 </body>
 </html>
