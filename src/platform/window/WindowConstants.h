@@ -62,7 +62,10 @@ namespace platform::window
 
 		// JSONメッセージタイプ（Win32SelectWindowManager）
         static constexpr const char* MESSAGE_TYPE_START_GAME{ "startGame" };
-        static constexpr const char* MESSAGE_TYPE_TOGGLE_WINDOW{ "toggleWindow" };
+		// セレクト画面ではEscのポーズメニューを開けないため、
+		// タイトルへ戻る手段はデスクトップ側のアイコンとタスクバーが担う
+		static constexpr const char* MESSAGE_TYPE_BACK_TO_TITLE{ "backToTitle" };
+		static constexpr const char* MESSAGE_TYPE_TOGGLE_WINDOW{ "toggleWindow" };
         static constexpr const char* MESSAGE_TYPE_LAUNCH_APP{ "launchApp" };
         static constexpr const char* MESSAGE_TYPE_WINDOW_STATE_CHANGED{ "windowStateChanged" };
 		// 難易度が変わったことを全ウィンドウへ伝える（HARDなら配色を警告色へ変える）

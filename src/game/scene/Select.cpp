@@ -56,7 +56,7 @@ namespace game::scene
 			if (m_fade && m_fade->isFinished())
 			{
 				auto* sceneManager{ core::base::ServiceLocator::get<SceneManager>() };
-				sceneManager->changeScene(SceneType::Loading);
+				sceneManager->changeScene(m_nextScene);
 			}
 			break;
 		}
@@ -74,7 +74,7 @@ namespace game::scene
 			m_windowManager->setWindowsVisible(!isPaused);
 	}
 
-	void Select::startFadeOut()
+	void Select::startFadeOut(SceneType nextScene)
 	{
 		if (m_state == State::FadeOut)
 		{
@@ -82,6 +82,7 @@ namespace game::scene
 		}
 		if (m_windowManager)
 			m_windowManager->destroyAllWindows();
+		m_nextScene = nextScene;
 		m_fade = std::make_unique<ui::FadeTransition>(m_uiRenderer, m_screen, FADE_DURATION, false);
 		m_state = State::FadeOut;
 	}
@@ -97,7 +98,14 @@ namespace game::scene
 	{
 		if (!m_windowManager)
 			return;
-		startFadeOut();
+		startFadeOut(SceneType::Loading);
+	}
+
+	void Select::notifyBackToTitle() noexcept
+	{
+		if (!m_windowManager)
+			return;
+		startFadeOut(SceneType::Title);
 	}
 
 } // namespace game::scene

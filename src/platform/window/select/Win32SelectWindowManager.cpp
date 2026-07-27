@@ -21,12 +21,14 @@ namespace platform::window::select
 {
 	Win32SelectWindowManager::Win32SelectWindowManager(
 	    std::function<void()> onGameStart,
+	    std::function<void()> onBackToTitle,
 	    std::function<void(int, const std::string&)> onFileSlotChanged,
 	    std::function<void(const std::string&)> onDifficultyChanged,
 	    core::iface::IResourceManager& resourceManager,
 	    core::iface::IScreen& screen,
 	    bool showTutorial) noexcept
 	    : m_onGameStart{ std::move(onGameStart) }
+	    , m_onBackToTitle{ std::move(onBackToTitle) }
 	    , m_onFileSlotChanged{ std::move(onFileSlotChanged) }
 	    , m_onDifficultyChanged{ std::move(onDifficultyChanged) }
 	    , m_resourceManager{ resourceManager }
@@ -321,7 +323,27 @@ namespace platform::window::select
 		m_parameterWindow->refresh(stats);
 	}
 
-    void Win32SelectWindowManager::handleDesktopMessage(const std::string& json) noexcept
+	void Win32SelectWindowManager::hideAllWindows() noexcept
+	{
+		if (m_desktopWindow && m_desktopWindow->getHwnd())
+			ShowWindow(m_desktopWindow->getHwnd(), SW_HIDE);
+		if (m_fileSelectWindow)
+			m_fileSelectWindow->hide();
+		if (m_parameterWindow)
+			m_parameterWindow->hide();
+		if (m_difficultyWindow)
+			m_difficultyWindow->hide();
+		if (m_rulesWindow)
+			m_rulesWindow->hide();
+
+		if (HWND gameHwnd{ static_cast<HWND>(m_screen.getNativeWindowHandle()) })
+		{
+			SetForegroundWindow(gameHwnd);
+			SetActiveWindow(gameHwnd);
+		}
+	}
+
+	void Win32SelectWindowManager::handleDesktopMessage(const std::string& json) noexcept
     {
 		// 操作音はJS側が要求する（押した要素ごとに鳴らし分けるため）
 		if (platform::window::tryPlayUiSound(json))
@@ -340,23 +362,21 @@ namespace platform::window::select
 					return;
 
 				// ゲーム開始前に全サブウィンドウを非表示にしてからコールバックを実行
-                if (m_desktopWindow && m_desktopWindow->getHwnd())
-                    ShowWindow(m_desktopWindow->getHwnd(), SW_HIDE);
-                if (m_fileSelectWindow) m_fileSelectWindow->hide();
-                if (m_parameterWindow)  m_parameterWindow->hide();
-                if (m_difficultyWindow) m_difficultyWindow->hide();
-
-				// デスクトップのギミックで開いた実アプリ（cmd.exe等）が前面に残ると、
-				// ボーダーレスのゲーム画面が隠れてしまう。ゲーム本体ウィンドウを前面へ戻す
-				if (HWND gameHwnd{ static_cast<HWND>(m_screen.getNativeWindowHandle()) })
-				{
-					SetForegroundWindow(gameHwnd);
-					SetActiveWindow(gameHwnd);
-				}
+				hideAllWindows();
 
 				if (m_onGameStart) m_onGameStart();
             }
-            else if (type == platform::window::WindowConstants::MESSAGE_TYPE_TOGGLE_WINDOW)
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_BACK_TO_TITLE)
+			{
+				// 戻ると装備も難易度も選び直しになるため、出撃と同じく確認を挟む
+				if (!confirmBackToTitle())
+					return;
+
+				hideAllWindows();
+				if (m_onBackToTitle)
+					m_onBackToTitle();
+			}
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_TOGGLE_WINDOW)
             {
                 const std::string name{ j.value(platform::window::WindowConstants::JSON_KEY_WINDOW, "") };
 				if (name == WINDOW_NAME_FILE && m_fileSelectWindow)
@@ -534,5 +554,15 @@ namespace platform::window::select
 
 		return MessageBoxW(parentHwnd, message.c_str(), L"出撃の確認",
 		           MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
+	}
+
+	bool Win32SelectWindowManager::confirmBackToTitle() noexcept
+	{
+		HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
+
+		// 既定はキャンセル側。誤ってダブルクリックしても選び直しにならないようにする
+		return MessageBoxW(parentHwnd,
+		           L"選んだ装備ファイルと難易度は破棄されます。\n\nタイトル画面へ戻りますか？",
+		           L"タイトルへ戻る", MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
 	}
 } // namespace platform::window::select

@@ -41,6 +41,7 @@ namespace core::iface
 		/**
 		 * @brief セレクト画面のウィンドウマネージャを生成・初期化
 		 * @param onGameStart ゲーム開始時のコールバック
+		 * @param onBackToTitle タイトルへ戻るときのコールバック
 		 * @param onFileSlotChanged ファイルスロット変更時のコールバック
 		 * @param onDifficultyChanged 難易度変更時のコールバック（"NORMAL" | "HARD"）
 		 * @param resourceManager リソースマネージャ
@@ -49,6 +50,7 @@ namespace core::iface
 		 */
 		virtual std::unique_ptr<ISelectWindowManager> createSelectWindowManager(
 		    std::function<void()> onGameStart,
+		    std::function<void()> onBackToTitle,
 		    std::function<void(int, const std::string&)> onFileSlotChanged,
 		    std::function<void(const std::string&)> onDifficultyChanged,
 		    IResourceManager& resourceManager,

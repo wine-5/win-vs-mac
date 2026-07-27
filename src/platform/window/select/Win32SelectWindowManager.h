@@ -28,6 +28,7 @@ namespace platform::window::select
     public:
 	  Win32SelectWindowManager(
 		  std::function<void()> onGameStart,
+		  std::function<void()> onBackToTitle,
 		  std::function<void(int, const std::string&)> onFileSlotChanged,
 		  std::function<void(const std::string&)> onDifficultyChanged,
 		  core::iface::IResourceManager& resourceManager,
@@ -103,6 +104,14 @@ namespace platform::window::select
 		 */
 		[[nodiscard]] bool confirmStart() noexcept;
 
+		/**
+		 * @brief タイトルへ戻る前の確認ダイアログを出す
+		 *
+		 * 戻ると装備も難易度も選び直しになるため、確認を挟む
+		 * @return 戻ってよい場合true
+		 */
+		[[nodiscard]] bool confirmBackToTitle() noexcept;
+
 		// DEBUG: セレクト画面を一時的に引っ込めるキー（裏のコンソールやダイアログを読むため）
 		static constexpr int DEBUG_HIDE_KEY{ VK_F4 };
 
@@ -134,6 +143,15 @@ namespace platform::window::select
 		 */
 		void broadcastTutorialStep(int step) noexcept;
 
+		/**
+		 * @brief デスクトップと全サブウィンドウを引っ込め、ゲーム本体を前面へ戻す
+		 *
+		 * セレクト画面を抜けるとき（出撃・タイトルへ戻る）に共通で使う。
+		 * デスクトップのギミックで開いた実アプリ（cmd.exe等）が前面に残ると、
+		 * ボーダーレスのゲーム画面が隠れてしまうため、前面も取り直す
+		 */
+		void hideAllWindows() noexcept;
+
 		void handleDesktopMessage(const std::string& json) noexcept;
         void notifyWindowState(const std::string& name, bool visible) noexcept;
 
@@ -164,7 +182,8 @@ namespace platform::window::select
 		};
 
 		std::function<void()> m_onGameStart{};
-        std::function<void(int, const std::string&)> m_onFileSlotChanged{};
+		std::function<void()> m_onBackToTitle{};
+		std::function<void(int, const std::string&)> m_onFileSlotChanged{};
 		std::function<void(const std::string&)> m_onDifficultyChanged{};
 
 		core::iface::IResourceManager& m_resourceManager;

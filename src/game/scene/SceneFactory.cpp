@@ -95,6 +95,8 @@ namespace game::scene
 			auto windowManager = windowFactory->createSelectWindowManager(
 			    [selectPtr = m_selectScene.get()]()
 			    { selectPtr->notifyGameStart(); },
+			    [selectPtr = m_selectScene.get()]()
+			    { selectPtr->notifyBackToTitle(); },
 			    [this](int slot, const std::string& path)
 			    {
 				    m_gameManager.getFileEquipmentData().setFilePath(slot, path);
