@@ -1,6 +1,7 @@
 #pragma once
 #include "core/interface/ILogger.h"
 #include <fstream>
+#include <mutex>
 
 namespace platform::utility
 {
@@ -62,5 +63,9 @@ namespace platform::utility
 		// ログの控え。フルスクリーンやフリーズ中はコンソールを前面に出せず読めないため、
 		// 後から確認できるようファイルにも同じ内容を残す
 		std::ofstream m_logFile{};
+
+		// ファイル選択ダイアログのようにワーカースレッドから書く経路があるため、
+		// 1行が途中で混ざらないよう書き出しを直列化する
+		std::mutex m_writeMutex{};
 	};
 } // namespace platform::utility
