@@ -94,10 +94,14 @@ namespace platform::window::select
 		[[nodiscard]] int countEquippedSlots() const noexcept;
 
 		/**
-		 * @brief 装備スロットが埋まっていない状態での開始確認ダイアログを出す
+		 * @brief 出撃前の確認ダイアログを出す
+		 *
+		 * デスクトップ側のHTMLではなくWin32のダイアログで出す。セレクト画面の各ウィンドウは
+		 * それぞれ別のHWNDなので、HTMLで出した確認はファイル選択などの背面に回ってしまう。
+		 *
 		 * @return 開始してよい場合true
 		 */
-		[[nodiscard]] bool confirmStartWithEmptySlots() noexcept;
+		[[nodiscard]] bool confirmStart() noexcept;
 
 		// DEBUG: セレクト画面を一時的に引っ込めるキー（裏のコンソールやダイアログを読むため）
 		static constexpr int DEBUG_HIDE_KEY{ VK_F4 };
@@ -147,6 +151,10 @@ namespace platform::window::select
 		// DEBUG: F4での一時退避の状態（リリース時に削除）
 		bool m_debugOverlayHidden{ false };
 		bool m_debugHideKeyDown{ false };
+
+		// 出撃確認で読み上げるために、選ばれている難易度を控えておく。
+		// 初期値は難易度ウィンドウの初期選択（NORMAL）に合わせる
+		std::string m_difficulty{ "NORMAL" };
 
 		std::array<std::string, 3> m_slotPaths{};
 		std::array<core::data::FileExtensionType, 3> m_slotExtTypes{

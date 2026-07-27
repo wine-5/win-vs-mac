@@ -29,17 +29,7 @@ const DesktopLogic = (function () {
      * @brief ゲーム開始をゲームへ通知する
      */
     function startGame() {
-        setConfirmVisible(false);
         sendToGame({ type: 'startGame' });
-    }
-
-    /**
-     * @brief 出撃確認の表示を切り替える
-     * @param {boolean} visible 表示するかどうか
-     */
-    function setConfirmVisible(visible) {
-        const veil = document.getElementById('start-confirm');
-        if (veil) veil.hidden = !visible;
     }
 
     /**
@@ -67,13 +57,11 @@ const DesktopLogic = (function () {
         }
     }
 
-    return { onWindowChange, toggleWindow, startGame, setConfirmVisible, launchApp, handleMessage };
+    return { onWindowChange, toggleWindow, startGame, launchApp, handleMessage };
 }());
 
 // HTML の onclick から呼ばれるグローバル関数
 function toggleWindow(name) { DesktopLogic.toggleWindow(name); }
-function confirmStart()     { DesktopLogic.setConfirmVisible(true); }
-function cancelStart()      { DesktopLogic.setConfirmVisible(false); }
 function startGame()        { DesktopLogic.startGame(); }
 function launchApp(app)     { DesktopLogic.launchApp(app); }
 

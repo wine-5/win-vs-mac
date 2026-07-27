@@ -5,11 +5,10 @@
 #include "game/constant/ProjectileId.h"
 #include "core/data/ProjectileMetadata.h"
 #include "platform/window/WindowConstants.h"
+#include "platform/window/UiSound.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
 #include "core/base/ServiceLocator.h"
-#include "core/interface/IAudioManager.h"
-#include "core/constant/SeType.h"
 #include "platform/utility/StringConverter.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include <shellapi.h>
@@ -134,6 +133,7 @@ namespace platform::window::select
 		if (!m_difficultyWindow->create(m_desktopWindow->getHwnd())) return;
 		m_difficultyWindow->setOnDifficultyChanged([this](const std::string& difficulty) noexcept
 		    {
+			    m_difficulty = difficulty;
 			    if (m_onDifficultyChanged) m_onDifficultyChanged(difficulty);
 			    // HARDでは全ウィンドウの配色を警告色へ切り替える
 			    broadcastDifficulty(difficulty); });
@@ -323,26 +323,20 @@ namespace platform::window::select
 
     void Win32SelectWindowManager::handleDesktopMessage(const std::string& json) noexcept
     {
-        try
+		// 操作音はJS側が要求する（押した要素ごとに鳴らし分けるため）
+		if (platform::window::tryPlayUiSound(json))
+			return;
+
+		try
         {
             auto j = nlohmann::json::parse(json);
             const std::string type{ j.value(platform::window::WindowConstants::JSON_KEY_TYPE, "") };
 
-			// デスクトップ上のボタン操作はここに集まる。押した手応えを1か所で返す
-			// （状態の問い合わせなど、押していないメッセージでは鳴らさない）
-			if (type == platform::window::WindowConstants::MESSAGE_TYPE_START_GAME ||
-			    type == platform::window::WindowConstants::MESSAGE_TYPE_TOGGLE_WINDOW ||
-			    type == platform::window::WindowConstants::MESSAGE_TYPE_LAUNCH_APP)
-			{
-				auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
-				if (audio)
-					audio->playSe(core::constant::SeType::UiClick);
-			}
-
 			if (type == platform::window::WindowConstants::MESSAGE_TYPE_START_GAME)
             {
-				// ファイル装備は任意。ただし埋まっていないスロットがある場合は確認を挟む
-				if (countEquippedSlots() < FILE_SLOT_COUNT && !confirmStartWithEmptySlots())
+				// 出撃は取り消せないので必ず確認を挟む。
+				// デスクトップアイコンからも右下のボタンからも、ここを通る
+				if (!confirmStart())
 					return;
 
 				// ゲーム開始前に全サブウィンドウを非表示にしてからコールバックを実行
@@ -521,16 +515,24 @@ namespace platform::window::select
         MessageBoxW(parentHwnd, wMessage.c_str(), L"警告", MB_OK | MB_ICONWARNING);
     }
 
-	bool Win32SelectWindowManager::confirmStartWithEmptySlots() noexcept
+	bool Win32SelectWindowManager::confirmStart() noexcept
 	{
 		HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
 
-		platform::utility::StringConverter converter;
-		const std::wstring message{ converter.utf8ToWide(
-			"装備ファイルが3つ選択されていません。\n"
-			"ボーナスを受け取らずにこのまま開始しますか？") };
+		const int equipped{ countEquippedSlots() };
 
-		return MessageBoxW(parentHwnd, message.c_str(), L"確認",
-		           MB_OKCANCEL | MB_ICONWARNING | MB_DEFBUTTON2) == IDOK;
+		// 出撃後は装備も難易度も変えられないので、今の内容をそのまま読み上げて確認する。
+		// 埋まっていないスロットがあるときだけは、取り逃しに気づけるよう一言添える
+		std::string text{ "装備ファイル: " + std::to_string(equipped) + " / " + std::to_string(FILE_SLOT_COUNT) + "\n" };
+		text += "難易度: " + m_difficulty + "\n\n";
+		if (equipped < FILE_SLOT_COUNT)
+			text += "空いているスロットの分はボーナスを受け取れません。\n";
+		text += "この内容でダンジョンへ出撃しますか？";
+
+		platform::utility::StringConverter converter;
+		const std::wstring message{ converter.utf8ToWide(text) };
+
+		return MessageBoxW(parentHwnd, message.c_str(), L"出撃の確認",
+		           MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
 	}
 } // namespace platform::window::select
