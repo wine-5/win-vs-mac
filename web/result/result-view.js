@@ -48,10 +48,33 @@ const ResultView = (function () {
      * @returns {string} HTML文字列
      */
     function buildTimePanel(data) {
+        const goal = ResultLogic.calcNextRankGoal(data);
+        const elapsed = data.elapsedTime || 0;
+
+        let goalHtml = '';
+        if (goal) {
+            // 上のランクの制限時間に対して、今のタイムがどこまで収まっているかを見せる。
+            // 100%を超えた分は溢れて見えないので上限で止める
+            const budget = Math.max(0, elapsed - goal.remainSeconds);
+            const ratio = elapsed > 0 ? Math.min(1, budget / elapsed) : 0;
+            goalHtml = '<div class="next-rank">'
+                + '<div class="next-rank-track">'
+                + '<div class="next-rank-fill" style="width:' + (ratio * 100).toFixed(1) + '%"></div>'
+                + '</div>'
+                + '<div class="next-rank-text">あと <strong>' + Math.ceil(goal.remainSeconds) + '</strong> 秒 縮めると '
+                + '<span class="next-rank-letter rank-' + goal.rank.toLowerCase() + '">' + goal.rank + '</span> ランク'
+                + '</div></div>';
+        } else {
+            goalHtml = '<div class="next-rank">'
+                + '<div class="next-rank-text max">最高ランク到達 — これ以上はありません</div>'
+                + '</div>';
+        }
+
         return '<section class="time-panel">'
             + '<div class="section-label">CLEAR TIME</div>'
             + '<div class="time-value" id="time-value">'
-            + ResultLogic.formatClock(data.elapsedTime) + '</div>'
+            + ResultLogic.formatClock(elapsed) + '</div>'
+            + goalHtml
             + '</section>';
     }
 
