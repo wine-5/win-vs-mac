@@ -435,26 +435,26 @@ body.tutorial-focus-bonus .bonus-panel {
     50%      { box-shadow: inset 0 0 30px 0 rgba(0, 120, 212, 0.55); }
 }
 
-/* 1つ目のスロットは「ここを押す」と気づいてもらう必要があるので、
-   光らせるだけでなく大きさも脈打たせる。transformは周りの配置に影響しない */
+/* 1つ目のスロットは「ここを押す」と気づいてもらう必要があるので、他より強く脈打たせる。
+   拡大（transform: scale）は使わない。行がスクロール領域（.file-list）の幅を超えて
+   横スクロールバーが明滅してしまうため、はみ出さない outline と box-shadow だけで表現する */
 body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
     position: relative;
     z-index: 1;
     outline: 3px solid var(--accent);
     outline-offset: -3px;
-    transform-origin: center;
     animation: tutorial-pulse 1.4s ease-in-out infinite;
 }
 
 @keyframes tutorial-pulse {
     0%, 100% {
-        transform: scale(1);
+        outline-color: rgba(0, 120, 212, 0.45);
         box-shadow: inset 0 0 0 0 rgba(0, 120, 212, 0);
     }
     50% {
-        transform: scale(1.035);
-        box-shadow: inset 0 0 36px 0 rgba(0, 120, 212, 0.6),
-                    0 0 22px 0 rgba(0, 120, 212, 0.5);
+        outline-color: rgba(80, 180, 255, 1);
+        box-shadow: inset 0 0 46px 0 rgba(0, 120, 212, 0.75),
+                    inset 0 0 0 3px rgba(80, 180, 255, 0.55);
     }
 }
 
