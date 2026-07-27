@@ -4,6 +4,7 @@
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
 #include "game/component/combat/AttackComponent.h"
+#include "game/component/combat/PlayerStatsComponent.h"
 #include "game/component/visual/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
 #include "game/constant/Tag.h"
@@ -144,10 +145,18 @@ namespace game::system::combat
 			transform.m_position.z + direction.z * m_metadata.m_spawnForward
 		};
 
+		// 弾速と飛距離はPlayerStatsComponentを正とする（Itemで伸ばせるようにするため）。
+		// 寿命は「飛距離÷弾速」で毎回引き直す。弾速だけ上げたときに飛距離まで伸びないようにする
+		const auto* stats{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(m_playerId) };
+		const float baseSpeed{ stats != nullptr ? stats->m_projectileSpeed : m_metadata.m_speed };
+		const float baseRange{ stats != nullptr ? stats->m_projectileRange
+			                                    : m_metadata.m_speed * m_metadata.m_lifetime };
+		const float baseLifetime{ baseSpeed > 0.0f ? baseRange / baseSpeed : m_metadata.m_lifetime };
+
 		factory::ProjectileConfig config{};
-		config.m_speed = m_metadata.m_speed * speedMultiplier;
+		config.m_speed = baseSpeed * speedMultiplier;
 		config.m_damage = m_metadata.m_damage * damageMultiplier;
-		config.m_lifetime = m_metadata.m_lifetime * lifetimeMultiplier;
+		config.m_lifetime = baseLifetime * lifetimeMultiplier;
 		config.m_radius = m_metadata.m_radius * sizeMultiplier;
 		config.m_scale = m_metadata.m_scale;
 

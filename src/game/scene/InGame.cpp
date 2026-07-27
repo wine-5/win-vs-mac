@@ -48,6 +48,7 @@
 #include "game/system/combat/AttackSystem.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/combat/AttackComponent.h"
+#include "game/component/combat/PlayerStatsComponent.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/AnimationId.h"
 #include "game/constant/ProjectileId.h"
@@ -283,8 +284,6 @@ namespace game::scene
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
 		    m_componentManager,
 		    m_resourceManager);
-		m_playerHUDView->setDerivedStats(m_derivedStats.m_moveSpeed, m_derivedStats.m_projectileSpeed,
-		    m_derivedStats.m_projectileRange);
 		m_view.setPlayerHUDView(m_playerHUDView.get());
 
 		m_equipmentSlotView = std::make_unique<ui::ingame::EquipmentSlotView>(
@@ -479,26 +478,20 @@ namespace game::scene
 		auto projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
 		const int windowBillboard{ projectileMeta.m_imageId.empty() ? -1 : m_resourceManager.loadImageById(projectileMeta.m_imageId) };
 
-		// 装備ファイルのボーナスを弾定義へ反映する。
-		// 飛距離は「弾速×寿命」で決まるため、弾速だけを上げると距離まで一緒に伸びてしまう。
-		// 元の飛距離にボーナスを足したうえで、新しい弾速から寿命を逆算し、
-		// 「速さ」と「距離」を別々のボーナスとして独立に効かせる
-		const float baseProjectileRange{ projectileMeta.m_speed * projectileMeta.m_lifetime };
-		projectileMeta.m_speed += m_playerData.getProjectileSpeedBonus();
-		if (projectileMeta.m_speed > 0.0f)
-			projectileMeta.m_lifetime = (baseProjectileRange + m_playerData.getProjectileRangeBonus()) / projectileMeta.m_speed;
+		// 装備ファイルのボーナスを載せた弾の性能をPlayerStatsComponentへ入れる。
+		// 「速さ」と「距離」は別々のボーナスとして独立に効かせたいので、寿命ではなく飛距離で持つ
+		// （寿命は発射時に 飛距離÷弾速 で引き直される）
+		if (auto* stats{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(m_playerId) })
+		{
+			stats->m_projectileSpeed = projectileMeta.m_speed + m_playerData.getProjectileSpeedBonus();
+			stats->m_projectileRange = projectileMeta.m_speed * projectileMeta.m_lifetime + m_playerData.getProjectileRangeBonus();
+		}
 
 		auto* rangedAttack{ m_systemManager.registerSystem<game::system::combat::PlayerRangedAttackSystem>(
 			m_componentManager, m_playerId, m_projectileFactory, projectileMeta, windowBillboard) };
 		core::probe::mark("      sys: PlayerRangedAttackSystem");
 		// レティクルがクールダウンの残量を読むため、Viewへ参照を渡す
 		m_view.setPlayerRangedAttackSystem(rangedAttack);
-
-		// 移動速度と弾の性能はコンポーネントに無くSystemが抱えているため、HUDに出す値をここで確定する。
-		// Viewの生成はこの後なので、値を持ち回って生成時に渡す
-		m_derivedStats.m_moveSpeed = m_playerData.getMoveSpeed();
-		m_derivedStats.m_projectileSpeed = projectileMeta.m_speed;
-		m_derivedStats.m_projectileRange = projectileMeta.m_speed * projectileMeta.m_lifetime;
 		m_systemManager.registerSystem<game::system::movement::PhysicsSystem>(m_componentManager, m_gameManager, m_playerData.getJumpForce(), m_playerData.getGravity(), m_playerData.getMaxFallSpeed());
 		core::probe::mark("      sys: PhysicsSystem");
 		// 弾の寿命・再アーム・破棄（当たり判定するAttackSystemより前で再アームする）
