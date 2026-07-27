@@ -54,11 +54,17 @@ namespace game::actor
 
 		m_componentManager.add<component::movement::VelocityComponent>(m_entity.getId(), {});
 
-		// 奈落へ落ちたかの基準。浮遊する敵は接地しないため、配置位置を最初の基準にしておく
-		component::movement::FallRecoveryComponent fallRecovery{};
-		fallRecovery.m_lastSafePosition = transform.m_position;
-		fallRecovery.m_hasSafePosition = true;
-		m_componentManager.add<component::movement::FallRecoveryComponent>(m_entity.getId(), fallRecovery);
+		// 奈落へ落ちたかの基準。地上の敵にだけ持たせる。
+		// 浮遊敵は床の高さに合わせて浮き続けるだけで落ちることが無く、接地もしないので
+		// 基準が配置位置のまま固まる。床が配置位置より十分低いだけで奈落と誤判定されるため、
+		// そもそも落下判定の対象から外す
+		if (m_enemyData.getHoverHeight() <= 0.0f)
+		{
+			component::movement::FallRecoveryComponent fallRecovery{};
+			fallRecovery.m_lastSafePosition = transform.m_position;
+			fallRecovery.m_hasSafePosition = true;
+			m_componentManager.add<component::movement::FallRecoveryComponent>(m_entity.getId(), fallRecovery);
+		}
 
 		m_componentManager.add<component::visual::RenderComponent>(m_entity.getId(), component::visual::RenderComponent{ .m_modelHandle = m_modelHandle });
 		m_componentManager.add<component::visual::HitEffectComponent>(m_entity.getId(), {});
