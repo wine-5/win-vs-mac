@@ -61,6 +61,7 @@ namespace platform::window
 	std::unique_ptr<core::iface::ISelectWindowManager> WindowFactory::createSelectWindowManager(
 	    std::function<void()> onGameStart,
 	    std::function<void()> onBackToTitle,
+	    std::function<void()> onQuitGame,
 	    std::function<void(int, const std::string&)> onFileSlotChanged,
 	    std::function<void(const std::string&)> onDifficultyChanged,
 	    core::iface::IResourceManager& resourceManager,
@@ -69,6 +70,7 @@ namespace platform::window
 		return std::make_unique<select::Win32SelectWindowManager>(
 		    std::move(onGameStart),
 		    std::move(onBackToTitle),
+		    std::move(onQuitGame),
 		    std::move(onFileSlotChanged),
 		    std::move(onDifficultyChanged),
 		    resourceManager,

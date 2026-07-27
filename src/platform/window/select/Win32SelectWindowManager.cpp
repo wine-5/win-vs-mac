@@ -22,6 +22,7 @@ namespace platform::window::select
 	Win32SelectWindowManager::Win32SelectWindowManager(
 	    std::function<void()> onGameStart,
 	    std::function<void()> onBackToTitle,
+	    std::function<void()> onQuitGame,
 	    std::function<void(int, const std::string&)> onFileSlotChanged,
 	    std::function<void(const std::string&)> onDifficultyChanged,
 	    core::iface::IResourceManager& resourceManager,
@@ -29,6 +30,7 @@ namespace platform::window::select
 	    bool showTutorial) noexcept
 	    : m_onGameStart{ std::move(onGameStart) }
 	    , m_onBackToTitle{ std::move(onBackToTitle) }
+	    , m_onQuitGame{ std::move(onQuitGame) }
 	    , m_onFileSlotChanged{ std::move(onFileSlotChanged) }
 	    , m_onDifficultyChanged{ std::move(onDifficultyChanged) }
 	    , m_resourceManager{ resourceManager }
@@ -376,6 +378,15 @@ namespace platform::window::select
 				if (m_onBackToTitle)
 					m_onBackToTitle();
 			}
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_QUIT_GAME)
+			{
+				if (!confirmQuitGame())
+					return;
+
+				hideAllWindows();
+				if (m_onQuitGame)
+					m_onQuitGame();
+			}
 			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_TOGGLE_WINDOW)
             {
                 const std::string name{ j.value(platform::window::WindowConstants::JSON_KEY_WINDOW, "") };
@@ -564,5 +575,14 @@ namespace platform::window::select
 		return MessageBoxW(parentHwnd,
 		           L"選んだ装備ファイルと難易度は破棄されます。\n\nタイトル画面へ戻りますか？",
 		           L"タイトルへ戻る", MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
+	}
+
+	bool Win32SelectWindowManager::confirmQuitGame() noexcept
+	{
+		HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
+
+		return MessageBoxW(parentHwnd,
+		           L"ゲームを終了します。\n\nよろしいですか？",
+		           L"シャットダウン", MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
 	}
 } // namespace platform::window::select

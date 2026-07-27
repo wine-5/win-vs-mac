@@ -29,6 +29,7 @@ namespace platform::window::select
 	  Win32SelectWindowManager(
 		  std::function<void()> onGameStart,
 		  std::function<void()> onBackToTitle,
+		  std::function<void()> onQuitGame,
 		  std::function<void(int, const std::string&)> onFileSlotChanged,
 		  std::function<void(const std::string&)> onDifficultyChanged,
 		  core::iface::IResourceManager& resourceManager,
@@ -112,6 +113,12 @@ namespace platform::window::select
 		 */
 		[[nodiscard]] bool confirmBackToTitle() noexcept;
 
+		/**
+		 * @brief アプリを終了する前の確認ダイアログを出す
+		 * @return 終了してよい場合true
+		 */
+		[[nodiscard]] bool confirmQuitGame() noexcept;
+
 		// DEBUG: セレクト画面を一時的に引っ込めるキー（裏のコンソールやダイアログを読むため）
 		static constexpr int DEBUG_HIDE_KEY{ VK_F4 };
 
@@ -183,6 +190,7 @@ namespace platform::window::select
 
 		std::function<void()> m_onGameStart{};
 		std::function<void()> m_onBackToTitle{};
+		std::function<void()> m_onQuitGame{};
 		std::function<void(int, const std::string&)> m_onFileSlotChanged{};
 		std::function<void(const std::string&)> m_onDifficultyChanged{};
 

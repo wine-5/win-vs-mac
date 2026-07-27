@@ -65,6 +65,8 @@ namespace platform::window
 		// セレクト画面ではEscのポーズメニューを開けないため、
 		// タイトルへ戻る手段はデスクトップ側のアイコンとタスクバーが担う
 		static constexpr const char* MESSAGE_TYPE_BACK_TO_TITLE{ "backToTitle" };
+		// アプリごと終了する（Windowsのシャットダウンに見立てた出口）
+		static constexpr const char* MESSAGE_TYPE_QUIT_GAME{ "quitGame" };
 		static constexpr const char* MESSAGE_TYPE_TOGGLE_WINDOW{ "toggleWindow" };
         static constexpr const char* MESSAGE_TYPE_LAUNCH_APP{ "launchApp" };
         static constexpr const char* MESSAGE_TYPE_WINDOW_STATE_CHANGED{ "windowStateChanged" };

@@ -97,6 +97,8 @@ namespace game::scene
 			    { selectPtr->notifyGameStart(); },
 			    [selectPtr = m_selectScene.get()]()
 			    { selectPtr->notifyBackToTitle(); },
+			    [this]()
+			    { m_gameManager.requestQuit(); },
 			    [this](int slot, const std::string& path)
 			    {
 				    m_gameManager.getFileEquipmentData().setFilePath(slot, path);
