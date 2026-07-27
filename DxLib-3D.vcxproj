@@ -235,6 +235,7 @@
     <ClCompile Include="src\game\system\movement\FootstepSystem.cpp" />
     <ClCompile Include="src\game\system\movement\FallOutSystem.cpp" />
     <ClCompile Include="src\game\system\movement\GroundingSystem.cpp" />
+    <ClCompile Include="src\game\utility\CliffGuard.cpp" />
     <ClCompile Include="src\game\utility\GroundQuery.cpp" />
     <ClCompile Include="src\game\system\stage\BossGateSystem.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageRepository.cpp" />
@@ -421,6 +422,7 @@
     <ClInclude Include="src\game\component\ai\AlertComponent.h" />
     <ClInclude Include="src\game\ui\FadeTransition.h" />
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
+    <ClInclude Include="src\game\utility\CliffGuard.h" />
     <ClInclude Include="src\game\utility\GroundQuery.h" />
     <ClInclude Include="src\infrastructure\AudioManager.h" />
     <ClInclude Include="src\infrastructure\effect\EffectFactory.h" />
@@ -487,6 +489,7 @@
     <ClInclude Include="src\game\component\ai\MeleeChaseAIComponent.h" />
     <ClInclude Include="src\game\component\ai\PatrolComponent.h" />
     <ClInclude Include="src\game\component\ai\RangeKeepAIComponent.h" />
+    <ClInclude Include="src\game\component\ai\CliffAvoidanceComponent.h" />
     <ClInclude Include="src\game\component\ai\MacAIComponent.h" />
     <ClInclude Include="src\game\component\visual\RenderComponent.h" />
     <ClInclude Include="src\game\component\movement\TransformComponent.h" />

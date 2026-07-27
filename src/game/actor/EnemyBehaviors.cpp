@@ -8,6 +8,7 @@
 #include "game/component/ai/RangeKeepAIComponent.h"
 #include "game/component/ai/PatrolComponent.h"
 #include "game/component/ai/MacAIComponent.h"
+#include "game/component/ai/CliffAvoidanceComponent.h"
 #include "game/component/combat/TelegraphComponent.h"
 #include "game/constant/AnimationState.h"
 #include "core/interface/IResourceManager.h"
@@ -61,6 +62,17 @@ namespace game::actor
 			cm.add<component::ai::PatrolComponent>(id, {});
 		}
 
+		void installAvoidCliff(core::ecs::ComponentManager& cm, core::ecs::EntityId id, const data::EnemyData& enemyData)
+		{
+			// 崖の先読み距離・許容落差はJSONで詰められるようにする（未指定なら既定値のまま）
+			component::ai::CliffAvoidanceComponent avoidance{};
+			if (enemyData.getCliffProbeDistance() > 0.0f)
+				avoidance.m_probeDistance = enemyData.getCliffProbeDistance();
+			if (enemyData.getCliffMaxStepDown() > 0.0f)
+				avoidance.m_maxStepDown = enemyData.getCliffMaxStepDown();
+			cm.add<component::ai::CliffAvoidanceComponent>(id, avoidance);
+		}
+
 		void installBoss(core::ecs::ComponentManager& cm, core::ecs::EntityId id, const data::EnemyData& enemyData)
 		{
 			component::ai::MacAIComponent mac{};
@@ -88,6 +100,8 @@ namespace game::actor
 				installPatrol(componentManager, entityId, enemyData);
 			else if (name == "boss")
 				installBoss(componentManager, entityId, enemyData);
+			else if (name == "avoidCliff")
+				installAvoidCliff(componentManager, entityId, enemyData);
 			else
 				core::log::error("未知のbehavior名です: {}", name.c_str());
 		}

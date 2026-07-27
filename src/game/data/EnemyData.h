@@ -124,6 +124,16 @@ namespace game::data
 		  if (facingYawOffsetIt != properties.end())
 			  data.m_facingYawOffset = facingYawOffsetIt->second;
 
+		  auto cliffProbeDistanceIt{ properties.find(
+			  std::string(constant::metadata_keys::CLIFF_PROBE_DISTANCE)) };
+		  if (cliffProbeDistanceIt != properties.end())
+			  data.m_cliffProbeDistance = cliffProbeDistanceIt->second;
+
+		  auto cliffMaxStepDownIt{ properties.find(
+			  std::string(constant::metadata_keys::CLIFF_MAX_STEP_DOWN)) };
+		  if (cliffMaxStepDownIt != properties.end())
+			  data.m_cliffMaxStepDown = cliffMaxStepDownIt->second;
+
 		  // 攻撃が当たる瞬間に鳴らすSE。書かれていなければNone（＝無音）のまま
 		  auto attackImpactSeIt{ metadata.stringProperties.find("attackImpactSe") };
 		  if (attackImpactSeIt != metadata.stringProperties.end())
@@ -221,6 +231,18 @@ namespace game::data
 			return m_facingYawOffset;
 		}
 
+		/** @brief 崖チェックで先読みする距離を取得（0なら既定値を使う） */
+		[[nodiscard]] float getCliffProbeDistance() const noexcept
+		{
+			return m_cliffProbeDistance;
+		}
+
+		/** @brief 踏み出してよい下りの落差を取得（0なら既定値を使う） */
+		[[nodiscard]] float getCliffMaxStepDown() const noexcept
+		{
+			return m_cliffMaxStepDown;
+		}
+
 		/** @brief コライダーサイズを取得 */
 		[[nodiscard]] core::Vector3 getColliderSize() const noexcept
 		{
@@ -302,6 +324,8 @@ namespace game::data
 	  float m_preferredDistanceMax{ 0.0f };
 	  float m_fireCooldown{ 0.0f };
 	  float m_facingYawOffset{ 0.0f };
+	  float m_cliffProbeDistance{ 0.0f };                                      // 崖チェックの先読み距離（0ならComponentの既定値）
+	  float m_cliffMaxStepDown{ 0.0f };                                        // 踏み出してよい落差（0ならComponentの既定値）
 	  float m_attackImpactEffectLead{ 0.0f };                                  // 着弾エフェクトの先出し秒数
 	  core::constant::SeType m_attackImpactSe{ core::constant::SeType::None }; // 攻撃が当たる瞬間のSE
 	  core::constant::EffectType m_attackImpactEffect{ core::constant::EffectType::None }; // 攻撃が当たる瞬間のエフェクト

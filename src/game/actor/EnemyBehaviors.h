@@ -26,6 +26,7 @@ namespace game::actor
 	 *   "rangeKeep"  … 距離維持＋周回＋遠距離発射（RangeKeepAIComponent）
 	 *   "patrol"     … 索敵範囲外の徘徊（PatrolComponent）
 	 *   "boss"       … FSM駆動ボス（MacAIComponent）。攻撃クールダウンはFSMに委ねる
+	 *   "avoidCliff" … 崖の手前で止まる（CliffAvoidanceComponent）
 	 *
 	 * @param componentManager ComponentManagerの参照
 	 * @param entityId 対象の敵EntityId

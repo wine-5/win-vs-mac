@@ -31,5 +31,7 @@ namespace game::constant
 		constexpr std::string_view PREFERRED_DISTANCE_MAX = "preferredDistanceMax";
 		constexpr std::string_view FIRE_COOLDOWN = "fireCooldown";
 		constexpr std::string_view FACING_YAW_OFFSET = "facingYawOffset";
+		constexpr std::string_view CLIFF_PROBE_DISTANCE = "cliffProbeDistance";
+		constexpr std::string_view CLIFF_MAX_STEP_DOWN = "cliffMaxStepDown";
 	} // namespace metadata_keys
 } // namespace game::constant
