@@ -113,9 +113,9 @@ namespace game::system::combat
 				// プレイヤーは近接（剣）のときだけ斬撃エフェクト。弾（遠距離）は出さない
 				if (!isProjectile)
 				{
-					// 剣を振るアニメーションは段数に応じて PlayerAttackComboSystem が要求する
-					shouldPlayStartEffect = true;
-					startEffect = core::constant::EffectType::Player_Slash1;
+					// 剣を振るアニメーションとエフェクトは段数に応じて PlayerAttackComboSystem が要求する
+					startEffect = attack.m_startEffectType;
+					shouldPlayStartEffect = startEffect != core::constant::EffectType::None;
 				}
 			}
 			else if (attackerTagForStart.m_tag == constant::Tag::Enemy)
