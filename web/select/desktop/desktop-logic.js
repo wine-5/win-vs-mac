@@ -70,6 +70,11 @@ const DesktopLogic = (function () {
             // 初回ガイドの締めで「ルール説明.txt」へ送り出す段。
             // ガイドを閉じるまでアイコンを脈打たせ、次に開く場所を体で覚えてもらう
             document.body.classList.toggle('tutorial-highlight-rules', data.show === true);
+        } else if (data.type === 'equipReady') {
+            // 3つ選び終えた人が次の一手を探して止まらないよう、
+            // 出撃の入口（デスクトップの「ゲーム開始.exe」と右下のボタン）を脈打たせる。
+            // 装備を外したら false が届くので、強調は元に戻る
+            document.body.classList.toggle('equip-ready', data.ready === true);
         }
     }
 
