@@ -486,6 +486,7 @@
     <ClInclude Include="src\game\component\camera\CameraEffectComponent.h" />
     <ClInclude Include="src\game\component\combat\AimComponent.h" />
     <ClInclude Include="src\game\component\combat\PlayerChargeComponent.h" />
+    <ClInclude Include="src\game\component\combat\PlayerStatsComponent.h" />
     <ClInclude Include="src\game\component\ai\MeleeChaseAIComponent.h" />
     <ClInclude Include="src\game\component\ai\PatrolComponent.h" />
     <ClInclude Include="src\game\component\ai\RangeKeepAIComponent.h" />
