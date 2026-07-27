@@ -609,6 +609,46 @@ body.tutorial-focus-first-slot .tutorial-tip::after {
     border-bottom: clamp(16px, 3vw, 28px) solid var(--accent);
 }
 
+/* 対象が左（デスクトップの「ルール説明.txt」）にある段：
+   このウィンドウの外にあるので、案内の左を空けてそこへ横向きの矢印を伸ばす */
+body.tutorial-focus-rules .tutorial-tip {
+    left: 18vw;
+}
+
+body.tutorial-focus-rules .tutorial-tip::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-right: clamp(6px, 1.2vw, 11px);
+    width: clamp(26px, 5vw, 46px);
+    height: clamp(4px, 0.8vw, 7px);
+    margin-top: clamp(-3.5px, -0.4vw, -2px);
+    background: var(--accent);
+    box-shadow: 0 0 12px rgba(0, 150, 255, 0.8);
+    animation: tutorial-arrow-bounce-left 1.2s ease-in-out infinite;
+}
+
+body.tutorial-focus-rules .tutorial-tip::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-right: clamp(30px, 6vw, 55px);
+    margin-top: clamp(-20px, -2.2vw, -12px);
+    border-top: clamp(12px, 2.2vw, 20px) solid transparent;
+    border-bottom: clamp(12px, 2.2vw, 20px) solid transparent;
+    border-right: clamp(16px, 3vw, 28px) solid var(--accent);
+    filter: drop-shadow(0 0 10px rgba(0, 150, 255, 0.8));
+    animation: tutorial-arrow-bounce-left 1.2s ease-in-out infinite;
+}
+
+/* 左向きの段は横に跳ねる。上下の段と動きの意味をそろえる */
+@keyframes tutorial-arrow-bounce-left {
+    0%, 100% { opacity: 0.6; transform: translateX(0); }
+    50%      { opacity: 1;   transform: translateX(-6px); }
+}
+
 /* 対象が下（拡張子ボーナス一覧）にある段：案内の下へ下向きの矢印を伸ばす */
 body.tutorial-focus-bonus .tutorial-tip::before {
     top: 100%;

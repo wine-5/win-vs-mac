@@ -35,13 +35,15 @@ const FileTutorial = (function () {
             atTop: true
         },
         {
-            bodyClass: null,
+            // 対象はデスクトップ（左側の別ウィンドウ）の「ルール説明.txt」。
+            // この段だけ矢印を左向きにし、案内も左を空けて上部に置く
+            bodyClass: 'tutorial-focus-rules',
             title: '詳しい操作は「ルール説明.txt」へ',
             body: 'デスクトップにある「ルール説明.txt」をダブルクリックすると、' +
                   '操作方法とゲームの目的が読めます。' +
                   '準備ができたら右下の「ゲームを開始 →」で出撃してください。',
             advancesOnEquip: false,
-            atTop: false
+            atTop: true
         }
     ];
 
