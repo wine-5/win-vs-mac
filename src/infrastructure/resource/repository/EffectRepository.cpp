@@ -41,12 +41,17 @@ namespace infrastructure::resource::repository
 			const std::string key  { entry["type"] };
 			const std::string path { entry["path"] };
 
+			// 名前の綴り間違いや列挙への追加漏れを黙って捨てると、
+			// 「エフェクトだけ出ない」状態の原因を追えなくなるため必ず気付けるようにする
 			const core::constant::EffectType type{ core::constant::toEffectType(key) };
 			if (type == core::constant::EffectType::None)
-				continue;
+				throw std::runtime_error{ "effect '" + key + "' は EffectType に存在しません（EFFECT_TYPE_NAMESを確認）" };
 
+			// efkファイルの配置漏れは配布物を作ったときに起きやすい。
+			// ここで落としておかないと、遊ぶ側には「演出が無いゲーム」としか見えない
 			int handle{ LoadEffekseerEffect(path.c_str()) };
-			if (handle == -1) continue;
+			if (handle == -1)
+				throw std::runtime_error{ "エフェクトファイル '" + path + "' を読み込めませんでした" };
 
 			if (!entry.contains("poolSize") || !entry.contains("yOffset") || !entry.contains("scale"))
 				throw std::runtime_error{ "effect '" + key + "' に必須フィールド (poolSize / yOffset / scale) が設定されていません" };
