@@ -3,6 +3,7 @@
 #include "game/component/camera/CameraComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/HealthComponent.h"
+#include "game/component/combat/PlayerStatsComponent.h"
 #include "game/component/TagComponent.h"
 #include <cmath>
 
@@ -42,6 +43,13 @@ namespace game::system::combat
 				aimerTransform.m_position.z
 			};
 
+			// 捕捉できるのはWindow弾が届く範囲まで。距離を見ないと、撃っても届かない
+			// 遠くの敵にレティクルが反応してしまう。
+			// 射程を持たない照準主体（能力値が無いもの）は、これまで通り距離で切らない
+			float maxRange{ 0.0f };
+			if (const auto* stats{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(aimerId) })
+				maxRange = stats->m_projectileRange;
+
 			// 最も視線に近い「別陣営の被ダメージ対象」を捕捉対象にする
 			float bestDot{ ON_TARGET_COS };
 			core::ecs::EntityId bestTarget{ core::ecs::INVALID_ENTITY_ID };
@@ -70,6 +78,8 @@ namespace game::system::combat
 
 				const float length{ std::sqrt(toTarget.x * toTarget.x + toTarget.y * toTarget.y + toTarget.z * toTarget.z) };
 				if (length <= 0.0f)
+					continue;
+				if (maxRange > 0.0f && length > maxRange)
 					continue;
 
 				// 視線方向（単位ベクトル）との内積＝cosθ。大きいほど視線に近い
