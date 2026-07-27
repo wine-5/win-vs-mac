@@ -89,6 +89,7 @@
 #include "game/ui/ingame/InGameStatusView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
 #include "game/ui/ingame/BossHUDView.h"
+#include "game/ui/ingame/MiniMapView.h"
 #include "game/ui/ingame/EnemyHealthBarView.h"
 #include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
 #include "game/event/InGameEvents.h"
@@ -316,6 +317,12 @@ namespace game::scene
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
 		    m_componentManager);
 		m_view.setBossHUDView(m_bossHUDView.get());
+
+		m_miniMapView = std::make_unique<ui::ingame::MiniMapView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager);
+		m_view.setMiniMapView(m_miniMapView.get());
 
 		m_enemyHealthBarView = std::make_unique<ui::ingame::EnemyHealthBarView>(
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),

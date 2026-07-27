@@ -41,6 +41,7 @@ namespace game::ui::ingame
 	class InGameStatusView;  // 前方宣言
 	class LowHealthVignetteView; // 前方宣言
 	class BossHUDView;           // 前方宣言
+	class MiniMapView;           // 前方宣言
 	class EnemyHealthBarView;    // 前方宣言
 } // namespace game::ui::ingame
 
@@ -204,6 +205,12 @@ namespace game::scene
 		void setBossHUDView(ui::ingame::BossHUDView* view);
 
 		/**
+		 * @brief ミニマップのViewを設定する
+		 * @param view MiniMapViewのポインタ（所有はInGame）
+		 */
+		void setMiniMapView(ui::ingame::MiniMapView* view);
+
+		/**
 		 * @brief 敵の頭上HPバーViewを設定する
 		 * @param view EnemyHealthBarViewのポインタ（所有はInGame）
 		 */
@@ -312,6 +319,7 @@ namespace game::scene
 
 		// ボスHP（上中央のHUD）の描画元（所有はInGame）
 		ui::ingame::BossHUDView* m_bossHUDView{ nullptr };
+		ui::ingame::MiniMapView* m_miniMapView{ nullptr };
 
 		// 敵の頭上HPバーの描画元（所有はInGame）
 		ui::ingame::EnemyHealthBarView* m_enemyHealthBarView{ nullptr };

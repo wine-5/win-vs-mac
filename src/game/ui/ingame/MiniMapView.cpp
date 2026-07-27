@@ -18,8 +18,10 @@ namespace
 	// 基準解像度。レイアウトの数値はすべてこの高さのときのピクセル数として書く
 	constexpr int BASE_SCREEN_HEIGHT{ 1080 };
 
-	// マップの位置と大きさ（右上・1080p基準）
+	// マップの位置と大きさ（右上・1080p基準）。
+	// 右上には難易度と経過時間のパネル（高さ104）が先に居るので、その下へ重ねる
 	constexpr int MAP_MARGIN{ 28 };
+	constexpr int MAP_TOP{ 144 }; // 上余白28 ＋ 上のパネル104 ＋ 間隔12
 	constexpr int MAP_SIZE{ 200 };
 	constexpr int MAP_CORNER_RADIUS{ 8 }; // Windows 11のパネルと同じ角丸
 
@@ -265,7 +267,7 @@ namespace game::ui::ingame
 
 		const int size{ scaled(MAP_SIZE) };
 		const int mapX{ m_screen.getWidth() - scaled(MAP_MARGIN) - size };
-		const int mapY{ scaled(MAP_MARGIN) };
+		const int mapY{ scaled(MAP_TOP) };
 		const int centerX{ mapX + size / 2 };
 		const int centerY{ mapY + size / 2 };
 		const int radius{ size / 2 };

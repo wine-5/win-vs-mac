@@ -31,6 +31,7 @@
 #include "game/ui/ingame/InGameStatusView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
 #include "game/ui/ingame/BossHUDView.h"
+#include "game/ui/ingame/MiniMapView.h"
 #include "game/ui/ingame/EnemyHealthBarView.h"
 #include <algorithm>
 #include <cmath>
@@ -124,6 +125,10 @@ namespace game::scene
 		// ボスHP（上中央）。出現していなければ描かれない
 		if (m_bossHUDView)
 			m_bossHUDView->draw(bossId);
+
+		// ミニマップ（右上・難易度パネルの下）
+		if (m_miniMapView)
+			m_miniMapView->draw(playerId);
 
 		// 低HP警告のビネット。四隅を赤く染めるが、下の隅はHUDのパネルが占めているため、
 		// パネルより手前に描かないと下2つの隅が隠れてしまう。
@@ -246,6 +251,11 @@ namespace game::scene
 	void InGameView::setLowHealthVignetteView(ui::ingame::LowHealthVignetteView* view)
 	{
 		m_lowHealthVignetteView = view;
+	}
+
+	void InGameView::setMiniMapView(ui::ingame::MiniMapView* view)
+	{
+		m_miniMapView = view;
 	}
 
 	void InGameView::setBossHUDView(ui::ingame::BossHUDView* view)

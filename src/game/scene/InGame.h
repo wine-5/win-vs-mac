@@ -56,6 +56,7 @@ namespace game
 		class InGameStatusView;  // 前方宣言
 		class LowHealthVignetteView; // 前方宣言
 		class BossHUDView;           // 前方宣言
+		class MiniMapView;           // 前方宣言
 		class EnemyHealthBarView;    // 前方宣言
 	} // namespace ui::ingame
 } // namespace game
@@ -200,6 +201,9 @@ namespace game::scene
 
 		// ボスHP（上中央）のView
 		std::unique_ptr<ui::ingame::BossHUDView> m_bossHUDView;
+
+		// ミニマップ（右上）のView
+		std::unique_ptr<ui::ingame::MiniMapView> m_miniMapView;
 
 		// 敵の頭上HPバーのView
 		std::unique_ptr<ui::ingame::EnemyHealthBarView> m_enemyHealthBarView;
