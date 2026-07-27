@@ -7,7 +7,7 @@
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/visual/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
-#include "game/utility/GroundQuery.h"
+#include "game/utility/CliffGuard.h"
 #include <cmath>
 #include <algorithm>
 #include "core/utility/MathConstants.h"
@@ -24,13 +24,6 @@ namespace
 	// 目的地到着後に立ち止まる時間の範囲（秒）
 	constexpr float PAUSE_MIN{ 1.0f };
 	constexpr float PAUSE_MAX{ 2.5f };
-	// 崖チェックで足元を確かめる距離（進行方向へこのぶん先を見る）。
-	// 短すぎると止まりきれず、長すぎると通れる細道まで避けてしまう
-	constexpr float EDGE_PROBE_DISTANCE{ 70.0f };
-	// 踏み出してよい下りの落差。段差はそのまま降りるが、これを超える崖には向かわない
-	constexpr float MAX_STEP_DOWN{ 150.0f };
-	// 崖チェックで見上げる高さ（GroundingSystemの段差許容と揃える）
-	constexpr float STEP_UP_TOLERANCE{ 40.0f };
 	// 徘徊の目的地を選び直す最大回数。床の上を引けなければ諦めてスポーン地点へ戻す
 	constexpr int WANDER_PICK_ATTEMPTS{ 8 };
 } // namespace
@@ -113,7 +106,7 @@ namespace game::system::ai
 		const bool isAttacking{ isAttackInProgress(entityId) };
 
 		// プレイヤーが崖の向こうにいても、追いかけて落ちないよう足元で止まる
-		const bool atEdge{ !canStepToward(entityId, dirToPlayer) };
+		const bool atEdge{ !utility::canStepToward(m_componentManager, entityId, dirToPlayer) };
 
 		// 移動：攻撃レンジ内・攻撃モーション中・崖の縁では止まり、それ以外なら接近する
 		// （従来はレンジ内でも速度を与え続け、プレイヤーへ押し込んでいた）
@@ -186,7 +179,7 @@ namespace game::system::ai
 		// 目的地が無ければスポーン地点まわりから新たに選ぶ
 		if (!patrol.m_hasWanderTarget)
 		{
-			patrol.m_wanderTarget = pickWanderTarget(patrol.m_homePosition);
+			patrol.m_wanderTarget = pickWanderTarget(entityId, patrol.m_homePosition);
 			patrol.m_hasWanderTarget = true;
 		}
 
@@ -217,7 +210,7 @@ namespace game::system::ai
 
 		// 目的地との間に崖があるなら、その手前で立ち止まって別の目的地を選び直す。
 		// 目的地自体は床の上でも、そこへ向かう直線が奈落をまたぐことはある
-		if (!canStepToward(entityId, toTarget))
+		if (!utility::canStepToward(m_componentManager, entityId, toTarget))
 		{
 			patrol.m_hasWanderTarget = false;
 			std::uniform_real_distribution<float> pauseDist{ PAUSE_MIN, PAUSE_MAX };
@@ -239,7 +232,7 @@ namespace game::system::ai
 		requestAnimation(entityId, constant::AnimationState::Walk);
 	}
 
-	core::Vector3 MeleeChaseAISystem::pickWanderTarget(const core::Vector3& home)
+	core::Vector3 MeleeChaseAISystem::pickWanderTarget(core::ecs::EntityId entityId, const core::Vector3& home)
 	{
 		std::uniform_real_distribution<float> angleDist{ 0.0f, core::utility::TWO_PI };
 		std::uniform_real_distribution<float> radiusDist{ WANDER_RADIUS_MIN, WANDER_RADIUS_MAX };
@@ -255,31 +248,10 @@ namespace game::system::ai
 			target.x += std::cos(angle) * radius;
 			target.z += std::sin(angle) * radius;
 
-			if (utility::findGround(m_componentManager, target.x, target.z, home.y + STEP_UP_TOLERANCE).has_value())
+			if (utility::hasFootingAt(m_componentManager, entityId, target.x, target.z, home.y))
 				return target;
 		}
 		return home;
-	}
-
-	bool MeleeChaseAISystem::canStepToward(core::ecs::EntityId entityId, const core::Vector3& direction) const
-	{
-		// 空中にいる間は判定しない。落下や吹き飛びの最中に足を止めても意味が無く、
-		// 崖から落ちた敵が空中で固まって見えるだけになる
-		const auto* velocity{ m_componentManager.tryGet<component::movement::VelocityComponent>(entityId) };
-		if (velocity == nullptr || !velocity->m_isGrounded)
-			return true;
-
-		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(entityId) };
-		const float foot{ transform.m_position.y };
-		const float probeX{ transform.m_position.x + direction.x * EDGE_PROBE_DISTANCE };
-		const float probeZ{ transform.m_position.z + direction.z * EDGE_PROBE_DISTANCE };
-
-		const auto ground{ utility::findGround(m_componentManager, probeX, probeZ, foot + STEP_UP_TOLERANCE) };
-		if (!ground.has_value())
-			return false; // その先は奈落
-
-		// 段差程度なら降りてよい。それより深ければ崖とみなす
-		return foot - ground->m_height <= MAX_STEP_DOWN;
 	}
 
 	bool MeleeChaseAISystem::isAttackInProgress(core::ecs::EntityId entityId) const
