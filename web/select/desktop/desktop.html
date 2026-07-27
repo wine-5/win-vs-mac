@@ -68,7 +68,7 @@
                 </div>
                 <!-- 戻る／終了の確認も同じ理由で C++ 側のダイアログに任せる -->
                 <div class="desk-icon" ondblclick="backToTitle()">
-                    <span class="desk-icon-emoji">🏠</span>
+                    <img src="https://assets.game.web/images/ui/app/home.png" alt="">
                     <span>タイトルへ戻る</span>
                 </div>
                 <div class="desk-icon" ondblclick="quitGame()">
@@ -96,7 +96,7 @@
             <!-- デスクトップアイコンと同じ出口をタスクバーにも置く。
                  ウィンドウを開いたままアイコンが隠れても、ここから抜けられる -->
             <div class="taskbar-app" data-tooltip="タイトルへ戻る" onclick="backToTitle()">
-                <span class="taskbar-glyph">🏠</span>
+                <img class="app-icon" src="https://assets.game.web/images/ui/app/home.png">
             </div>
             <div class="taskbar-app" data-tooltip="シャットダウン" onclick="quitGame()">
                 <span class="taskbar-glyph">⏻</span>
