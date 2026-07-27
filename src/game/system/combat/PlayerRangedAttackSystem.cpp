@@ -26,12 +26,14 @@ namespace game::system::combat
 	    core::ecs::EntityId playerId,
 	    factory::ProjectileFactory& projectileFactory,
 	    core::data::ProjectileMetadata metadata,
-	    int billboardImage)
+	    int billboardImage,
+	    int chargedBillboardImage)
 	    : m_componentManager{ componentManager }
 	    , m_playerId{ playerId }
 	    , m_projectileFactory{ projectileFactory }
 	    , m_metadata{ std::move(metadata) }
 	    , m_billboardImage{ billboardImage }
+	    , m_chargedBillboardImage{ chargedBillboardImage }
 	{
 	}
 
@@ -160,15 +162,19 @@ namespace game::system::combat
 		config.m_radius = m_metadata.m_radius * sizeMultiplier;
 		config.m_scale = m_metadata.m_scale;
 
+		const bool isFullyCharged{ chargeRate >= FULL_CHARGE_THRESHOLD };
+
 		// 見た目は板に貼ったWindow画像（ビルボード）。当たり判定半径に合わせて大きさを決め、
 		// 溜めサイズ倍率も反映する。視認しやすいよう当たり判定より少し大きめにする
 		constexpr float BILLBOARD_SIZE_FACTOR{ 2.5f };
-		config.m_billboardImage = m_billboardImage;
+		// 溜め切った弾だけWindow11ロゴに差し替える。サイズ以外でも一目で区別できるようにする
+		config.m_billboardImage = (isFullyCharged && m_chargedBillboardImage != -1)
+		                              ? m_chargedBillboardImage
+		                              : m_billboardImage;
 		config.m_billboardSize = m_metadata.m_radius * BILLBOARD_SIZE_FACTOR * sizeMultiplier;
 
 		// 溜め切って撃った弾だけ重い着弾音にする。溜めた甲斐を音でも返すため、
 		// 見た目（サイズ）と同じく「溜め切ったか」で切り替える
-		const bool isFullyCharged{ chargeRate >= FULL_CHARGE_THRESHOLD };
 		config.m_hitSeType = isFullyCharged
 		                         ? core::constant::SeType::HitChargedWindow
 		                         : core::constant::SeType::HitWindow;

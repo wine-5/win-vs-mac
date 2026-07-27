@@ -2,7 +2,8 @@
   "projectiles": [
     {
       "id": "player_window",
-      "imageId": "projectile-window11",
+      "imageId": "projectile-window7",
+      "chargedImageId": "projectile-window11",
       "speed": 600.0,
       "damage": 20.0,
       "lifetime": 4.0,

@@ -501,6 +501,10 @@ namespace game::scene
 		// Window弾の見た目はビルボード（板に貼ったWindow画像）で描くので、その画像を先に読む
 		auto projectileMeta{ m_resourceManager.getProjectileMetadata(constant::projectile_id::PLAYER_WINDOW) };
 		const int windowBillboard{ projectileMeta.m_imageId.empty() ? -1 : m_resourceManager.loadImageById(projectileMeta.m_imageId) };
+		// 溜め切った弾は別のWindowロゴで描くので、そちらの画像も読んでおく
+		const int chargedWindowBillboard{ projectileMeta.m_chargedImageId.empty()
+			                                  ? -1
+			                                  : m_resourceManager.loadImageById(projectileMeta.m_chargedImageId) };
 
 		// 装備ファイルのボーナスを載せた弾の性能をPlayerStatsComponentへ入れる。
 		// 「速さ」と「距離」は別々のボーナスとして独立に効かせたいので、寿命ではなく飛距離で持つ
@@ -522,7 +526,7 @@ namespace game::scene
 		}
 
 		auto* rangedAttack{ m_systemManager.registerSystem<game::system::combat::PlayerRangedAttackSystem>(
-			m_componentManager, m_playerId, m_projectileFactory, projectileMeta, windowBillboard) };
+			m_componentManager, m_playerId, m_projectileFactory, projectileMeta, windowBillboard, chargedWindowBillboard) };
 		core::probe::mark("      sys: PlayerRangedAttackSystem");
 		// レティクルがクールダウンの残量を読むため、Viewへ参照を渡す
 		m_view.setPlayerRangedAttackSystem(rangedAttack);
