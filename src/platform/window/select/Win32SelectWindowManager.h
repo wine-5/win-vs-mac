@@ -159,6 +159,15 @@ namespace platform::window::select
 		 */
 		void hideAllWindows() noexcept;
 
+		/**
+		 * @brief 装備スロットが全て埋まっているかをデスクトップへ伝える
+		 *
+		 * 3つ選び終えた人が次に何をすればよいか分からず止まってしまうため、
+		 * 埋まった時点でデスクトップ側の出撃導線を強調させる。
+		 * 外した場合も伝えて、強調を元に戻す
+		 */
+		void notifyEquipReady() noexcept;
+
 		void handleDesktopMessage(const std::string& json) noexcept;
         void notifyWindowState(const std::string& name, bool visible) noexcept;
 

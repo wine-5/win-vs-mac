@@ -93,6 +93,11 @@ namespace platform::window
 		static constexpr const char* MESSAGE_TYPE_TUTORIAL_HIGHLIGHT{ "tutorialHighlight" };
 		static constexpr const char* JSON_KEY_STEP{ "step" };
 
+		// 装備スロットが全て埋まったことをデスクトップへ伝える。
+		// 出撃の準備が整った合図として、ゲーム開始への導線を目立たせるのに使う
+		static constexpr const char* MESSAGE_TYPE_EQUIP_READY{ "equipReady" };
+		static constexpr const char* JSON_KEY_READY{ "ready" };
+
 		// JSONメッセージタイプ（ResultWindow）
         static constexpr const char* MESSAGE_TYPE_REQUEST_RESULT{ "requestResult" };
         static constexpr const char* MESSAGE_TYPE_RESULT_DATA{ "resultData" };

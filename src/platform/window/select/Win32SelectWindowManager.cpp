@@ -95,7 +95,8 @@ namespace platform::window::select
                 m_slotPaths[slot] = path;
 				m_slotExtTypes[slot] = game::utility::FileExtensionTypeResolver::fromPath(path);
 			}
-			updateParameterWindow(); });
+			updateParameterWindow();
+			notifyEquipReady(); });
 		// ガイドの段に応じて他ウィンドウの強調表示を切り替える。
 		// ウィンドウ同士は直接やり取りできないので、ここが中継役になる
 		m_fileSelectWindow->setOnTutorialStepChanged([this](int step) noexcept
@@ -469,6 +470,37 @@ namespace platform::window::select
 		catch (...)
 		{
 			core::log::error("Win32SelectWindowManager::notifyWindowState: 不明な例外が発生しました");
+		}
+	}
+
+	void Win32SelectWindowManager::notifyEquipReady() noexcept
+	{
+		if (!m_desktopWindow)
+			return;
+		try
+		{
+			bool ready{ true };
+			for (const auto& path : m_slotPaths)
+			{
+				if (path.empty())
+				{
+					ready = false;
+					break;
+				}
+			}
+
+			nlohmann::json j;
+			j[platform::window::WindowConstants::JSON_KEY_TYPE] = platform::window::WindowConstants::MESSAGE_TYPE_EQUIP_READY;
+			j[platform::window::WindowConstants::JSON_KEY_READY] = ready;
+			m_desktopWindow->postMessage(j.dump());
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("Win32SelectWindowManager::notifyEquipReady: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("Win32SelectWindowManager::notifyEquipReady: 不明な例外が発生しました");
 		}
 	}
 
