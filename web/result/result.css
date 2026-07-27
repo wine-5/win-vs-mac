@@ -29,8 +29,14 @@ body.hard {
     overflow-y: auto;
 }
 
+/* 勝利は難易度に関わらず水色の下地にする。
+   HARDのままだと画面全体が赤く沈み、負けたときとほとんど同じ絵になって
+   「勝った」ことが色で伝わらない。難易度は右上のHARDバッジが赤いままなので分かる */
 .result-stage.good-end {
     animation: stageFadeIn 0.5s ease-out;
+    background:
+        radial-gradient(ellipse 900px 600px at 50% 38%, rgba(56, 189, 248, 0.22), transparent 70%),
+        #0f1a20;
 }
 
 .result-stage.bad-end {
