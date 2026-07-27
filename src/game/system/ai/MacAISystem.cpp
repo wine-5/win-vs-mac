@@ -83,12 +83,9 @@ namespace game::system::ai
 			if (mac.m_animLockTimer > 0.0f)
 				mac.m_animLockTimer -= deltaTime;
 
-			// 覚醒演出が終わったら無敵を解除して行動再開する
+			// 覚醒演出が終わったら行動再開する（無敵の出し入れはMacAwakenEffectSystemが持つ）
 			if (mac.m_state == MacState::PhaseTransition && mac.m_animLockTimer <= 0.0f)
-			{
-				health.m_isInvincible = false;
 				mac.m_state = MacState::Chase;
-			}
 
 			// --- フェーズ移行（1回だけ） ---
 			if (!mac.m_phase2Triggered && mac.m_config.m_hasPhase2)
@@ -101,7 +98,6 @@ namespace game::system::ai
 					mac.m_state = MacState::PhaseTransition;
 					mac.m_animLockTimer = PHASE_TRANSITION_LOCK;
 					mac.m_actionTimer = mac.currentPhase().m_actionInterval;
-					health.m_isInvincible = true; // 覚醒演出中は無敵（演出終了時に解除する）
 					if (hasVelocity)
 						stopHorizontalVelocity(entityId);
 					if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
