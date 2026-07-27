@@ -1,9 +1,8 @@
 ﻿#include <windows.h>
 #include "DifficultyWindow.h"
 #include "platform/window/WindowConstants.h"
+#include "platform/window/UiSound.h"
 #include "core/base/ServiceLocator.h"
-#include "core/interface/IAudioManager.h"
-#include "core/constant/SeType.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include "core/utility/Log.h"
 #include <exception>
@@ -61,17 +60,17 @@ namespace platform::window::select
 
     void DifficultyWindow::handleMessage(const std::string& json) noexcept
     {
-        try
+		// 操作音はJS側が要求する（押した要素ごとに鳴らし分けるため）
+		if (platform::window::tryPlayUiSound(json))
+			return;
+
+		try
         {
             auto j = nlohmann::json::parse(json);
             const std::string type{ j.value(platform::window::WindowConstants::JSON_KEY_TYPE, "") };
 
             if (type == MESSAGE_TYPE_DIFFICULTY_CHANGED)
             {
-				auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
-				if (audio)
-					audio->playSe(core::constant::SeType::UiClick);
-
 				const std::string diff{ j.value("difficulty", DIFFICULTY_NORMAL) };
 				if (diff == DIFFICULTY_NORMAL || diff == DIFFICULTY_HARD)
 					applyDifficulty(diff);

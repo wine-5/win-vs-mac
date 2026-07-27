@@ -11,9 +11,9 @@
          同じ場所へ行く入口が2つ並ぶことになり、どちらを押すのか迷わせる。
          押しても何も起きない飾りだと壊れて見えるため、行き先を持たない項目は置かない -->
     <div class="menubar">
-        <span class="menu-item is-active" data-page="controls">操作(C)</span>
-        <span class="menu-item" data-page="bonus">装備(E)</span>
-        <span class="menu-item" data-page="flow">進行(P)</span>
+        <span class="menu-item is-active" data-page="controls" data-se="UiKeyPress">操作(C)</span>
+        <span class="menu-item" data-page="bonus" data-se="UiKeyPress">装備(E)</span>
+        <span class="menu-item" data-page="flow" data-se="UiKeyPress">進行(P)</span>
     </div>
     <div class="content" id="content">
         <!-- 操作は「読む」より「見て分かる」が速い。キーは実物のキーの形、
@@ -178,6 +178,7 @@
             <p class="body-text">体力が0になると失敗になります。装備を選び直して再挑戦できます。</p>
         </section>
     </div>
+    <script src="common/ui-sound.js"></script>
     <script src="common/stat-meta.js"></script>
     <script src="select/rules/rules-nav.js"></script>
     <script src="select/rules/rules-bonus.js"></script>

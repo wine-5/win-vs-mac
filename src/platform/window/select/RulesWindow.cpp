@@ -1,6 +1,7 @@
 ﻿#include <windows.h>
 #include "RulesWindow.h"
 #include "platform/window/WindowConstants.h"
+#include "platform/window/UiSound.h"
 
 namespace platform::window::select
 {
@@ -12,7 +13,11 @@ namespace platform::window::select
     void RulesWindow::onCreateControls(HWND hwnd)
     {
         setIcon(hwnd, ICON_PATH);
-        m_webView.initialize(hwnd, RULES_HTML_URL);
+		// このウィンドウがC++へ送るのは操作音の要求だけ。
+		// ページの切り替えはJS内で完結している
+		m_webView.setOnMessage([](const std::string& json) noexcept
+		    { (void)platform::window::tryPlayUiSound(json); });
+		m_webView.initialize(hwnd, RULES_HTML_URL);
     }
 
     LRESULT RulesWindow::onMessage(

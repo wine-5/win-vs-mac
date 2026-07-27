@@ -4,6 +4,7 @@
 #include "FileSelectWindow.h"
 #include "core/interface/IResourceManager.h"
 #include "platform/window/WindowConstants.h"
+#include "platform/window/UiSound.h"
 #include "core/interface/ILogger.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IAudioManager.h"
@@ -83,6 +84,10 @@ namespace platform::window::select
 
 	void FileSelectWindow::handleMessage(const std::string& json) noexcept
 	{
+		// 操作音はJS側が要求する（押した要素ごとに鳴らし分けるため）
+		if (platform::window::tryPlayUiSound(json))
+			return;
+
 		try
 		{
 			auto j = nlohmann::json::parse(json);

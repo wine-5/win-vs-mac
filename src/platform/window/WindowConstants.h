@@ -54,6 +54,12 @@ namespace platform::window
 		// 種別ごとのボーナス内訳（[{ stat, value }, ...]）。アイコン付き表示に使う
 		static constexpr const char* JSON_KEY_BONUS_STATS{ "bonusStats" };
 
+		// JSONメッセージタイプ（全WebViewウィンドウ共通）
+		// 画面上の操作音。どのウィンドウのどの操作かはJS側が決め、
+		// 鳴らす仕事だけをC++が引き受ける（音源はresources.jsonが正）
+		static constexpr const char* MESSAGE_TYPE_UI_SOUND{ "uiSound" };
+		static constexpr const char* JSON_KEY_SE{ "se" };
+
 		// JSONメッセージタイプ（Win32SelectWindowManager）
         static constexpr const char* MESSAGE_TYPE_START_GAME{ "startGame" };
         static constexpr const char* MESSAGE_TYPE_TOGGLE_WINDOW{ "toggleWindow" };
