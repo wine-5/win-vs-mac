@@ -8,6 +8,9 @@
  */
 (function () {
     const tabs = document.querySelectorAll('#tabbar .tab');
+    // メニューもタブと同じページへ移す。名前が違うだけの入口が2つある状態にして、
+    // 「ファイル名で探す人」と「読みたい項目で探す人」の両方が辿り着けるようにする
+    const menuItems = document.querySelectorAll('.menubar .menu-item[data-page]');
     const pages = document.querySelectorAll('#content .page');
     const content = document.getElementById('content');
 
@@ -25,5 +28,9 @@
 
     tabs.forEach(function (tab) {
         tab.onclick = function () { activate(tab.dataset.page); };
+    });
+
+    menuItems.forEach(function (item) {
+        item.onclick = function () { activate(item.dataset.page); };
     });
 }());

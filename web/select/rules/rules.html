@@ -14,12 +14,12 @@
         <button type="button" class="tab" data-page="bonus">拡張子ボーナス.txt</button>
         <button type="button" class="tab" data-page="flow">ゲームの流れ.txt</button>
     </div>
+    <!-- メニューは中身に合わせた名前にして、押すとタブと同じページへ移す。
+         押しても何も起きない飾りだと壊れて見えるため、行き先を持たない項目は置かない -->
     <div class="menubar">
-        <span class="menu-item">ファイル(F)</span>
-        <span class="menu-item">編集(E)</span>
-        <span class="menu-item">書式(O)</span>
-        <span class="menu-item">表示(V)</span>
-        <span class="menu-item">ヘルプ(H)</span>
+        <span class="menu-item" data-page="controls">操作(C)</span>
+        <span class="menu-item" data-page="bonus">装備(E)</span>
+        <span class="menu-item" data-page="flow">進行(P)</span>
     </div>
     <div class="content" id="content">
         <!-- 1枚目だけは1画面で読み切れる分量に収める。
