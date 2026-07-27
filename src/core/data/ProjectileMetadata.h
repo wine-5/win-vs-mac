@@ -13,6 +13,8 @@ namespace core::data
 	{
 		std::string m_id{};           // 弾の識別子（例: "player_window"）
 		std::string m_imageId{};      // ビルボード描画に使う画像ID（resources.jsonのimagesで定義）
+		// 溜め切って撃ったときだけ差し替える画像ID（空なら m_imageId をそのまま使う）
+		std::string m_chargedImageId{};
 		float m_speed{ 0.0f };        // 弾速
 		float m_damage{ 0.0f };       // 与ダメージ
 		float m_lifetime{ 0.0f };     // 寿命（秒）
