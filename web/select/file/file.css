@@ -62,7 +62,7 @@ body {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
     display: grid;
-    grid-template-columns: 1fr 52px 100px;
+    grid-template-columns: 1fr 52px 230px;
     padding: 4px 12px;
     font-size: 14px;
     color: var(--text-muted);
@@ -96,7 +96,7 @@ body {
 
 .file-row {
     display: grid;
-    grid-template-columns: 1fr 52px 100px;
+    grid-template-columns: 1fr 52px 230px;
     padding: 0 12px;
     cursor: pointer;
     align-items: center;
@@ -231,7 +231,8 @@ body {
     flex-shrink: 0;
 }
 
-.bonus-text { font-size: 15px; color: var(--text-muted); }
+/* 未選択スロットの「—」。内訳の数値が右端に揃うので、こちらも右に寄せる */
+.bonus-text { font-size: 15px; color: var(--text-muted); text-align: right; }
 .bonus-text.has-bonus { color: #f0c040; font-weight: 600; }
 
 .exp-statusbar {

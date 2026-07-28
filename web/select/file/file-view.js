@@ -166,10 +166,11 @@ const FileView = (function () {
             const badge = isEmpty ? '<span></span>' :
                 '<img class="ext-badge" src="' + (FileLogic.EXT_ICON[et] || FileLogic.EXT_ICON.Unknown) + '" alt="' + (FileLogic.EXT_LABEL[et] || '?') + '">';
 
-            const bonusText = (!isEmpty && FileLogic.getBonusDesc(et)) ? FileLogic.getBonusDesc(et) : null;
-            const bonus = bonusText
-                ? '<span class="bonus-text has-bonus">' + bonusText + '</span>'
-                : '<span class="bonus-text">—</span>';
+            // 下の一覧と同じアイコン表記にする。装備中のスロットこそ一番見る場所なので、
+            // 一覧より読み取りにくい略称テキストのままにしない
+            const bonus = isEmpty
+                ? '<span class="bonus-text">—</span>'
+                : buildStatsHtml(FileLogic.getBonusStats(et), FileLogic.getBonusDesc(et) || '—');
 
             const iconHtml = isEmpty ?
                 '<img class="file-icon" src="https://assets.game.web/images/ui/select/emp.png" alt="未選択">' :
