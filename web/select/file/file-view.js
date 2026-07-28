@@ -163,14 +163,12 @@ const FileView = (function () {
             row.dataset.slot = i;
             row.onclick = function () { FileLogic.selectSlot(i); };
 
-            const badge = isEmpty ? '<span></span>' :
-                '<img class="ext-badge" src="' + (FileLogic.EXT_ICON[et] || FileLogic.EXT_ICON.Unknown) + '" alt="' + (FileLogic.EXT_LABEL[et] || '?') + '">';
-
             // 下の一覧と同じアイコン表記にする。装備中のスロットこそ一番見る場所なので、
-            // 一覧より読み取りにくい略称テキストのままにしない
+            // 一覧より読み取りにくい略称テキストのままにしない。
+            // 名前はアイコンで分かるので出さず、アイコンと数値だけを右端に揃える
             const bonus = isEmpty
                 ? '<span class="bonus-text">—</span>'
-                : buildStatsHtml(FileLogic.getBonusStats(et), FileLogic.getBonusDesc(et) || '—');
+                : buildStatsHtml(FileLogic.getBonusStats(et), FileLogic.getBonusDesc(et) || '—', true);
 
             const iconHtml = isEmpty ?
                 '<img class="file-icon" src="https://assets.game.web/images/ui/select/emp.png" alt="未選択">' :
@@ -183,7 +181,7 @@ const FileView = (function () {
                         (isEmpty ? '─ 未選択 ─' : '') +
                     '</span>' +
                 '</div>' +
-                badge + bonus +
+                bonus +
                 // 装備中の行だけ、外周を光の粒が回り続ける（起動中であることの表現）
                 (isEmpty ? '' : buildOrbitDots());
 
@@ -260,12 +258,13 @@ const FileView = (function () {
      * 日本語名まで出すと折り返してしまうので、アイコンと数値だけにする
      * @param stats [{ stat, value }, ...]
      * @param fallbackText 内訳が届いていないときに出す短い説明文
+     * @param forceCompact 項目数によらず名前を省く（スロット行はアイコンだけで足りるため）
      */
-    function buildStatsHtml(stats, fallbackText) {
+    function buildStatsHtml(stats, fallbackText, forceCompact) {
         if (!stats || stats.length === 0)
             return '<span class="bonus-entry-val multi">' + (fallbackText || '') + '</span>';
 
-        const showName = stats.length <= 2;
+        const showName = !forceCompact && stats.length <= 2;
         const parts = stats.map(function (s) {
             const meta = FileLogic.STAT_META[s.stat];
             if (!meta) return '';

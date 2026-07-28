@@ -8,7 +8,7 @@
     "sourceCode": { "criticalRate": 0.08 },
     "shortcut":   { "projectileSpeed": 180.0 },
     "video":      { "projectileRange": 540.0 },
-    "archive":    { "atk": 3.2, "spd": 32.0, "def": 1.0, "hp": 52.5, "attackRange": 21.0, "criticalRate": 0.03, "projectileSpeed": 63.0, "projectileRange": 190.0 },
+    "archive":    { "atk": 3.0, "spd": 32.0, "def": 1.0, "hp": 53.0, "attackRange": 21.0, "criticalRate": 0.03, "projectileSpeed": 63.0, "projectileRange": 190.0 },
     "unknown":    { "attackRange": 60.0 }
   }
 }
