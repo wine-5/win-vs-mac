@@ -83,7 +83,9 @@ body {
 
 .file-row {
     display: grid;
-    grid-template-columns: 1fr 230px;
+    /* ボーナス欄は内容ぶんだけ取る。項目が1つの拡張子ではその分ファイル名を長く出せる。
+       固定幅にすると、アーカイブに合わせた幅を全ての行が持ち続けて名前が無駄に削れる */
+    grid-template-columns: 1fr auto;
     padding: 0 12px;
     cursor: pointer;
     align-items: center;
@@ -93,6 +95,10 @@ body {
     /* 装備中に周回する光の粒（.orbit-dot）の基準にする */
     position: relative;
 }
+
+/* アーカイブは項目が8つあるので、上限を決めないと1行に伸びて名前を潰してしまう。
+   ここで折り返させて、今までどおり2行に収める */
+.file-row > .bonus-entry-val { max-width: 230px; }
 
 .file-row:hover { background: var(--surface-hover); }
 .file-row.selected { background: rgba(0, 120, 212, 0.18); }
