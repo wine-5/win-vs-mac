@@ -50,6 +50,13 @@ namespace
 
 	/// @brief 空気抵抗（1秒あたりに失う速度の割合）
 	constexpr float AIR_DRAG{ 0.9f };
+
+	/// @brief アイテムが浮かぶ高さと上下する幅
+	constexpr float ITEM_BASE_HEIGHT{ 110.0f };
+	constexpr float ITEM_BOB_AMPLITUDE{ 18.0f };
+
+	/// @brief アイテムのスケール（モデル素材の実寸に対する比率）
+	constexpr float ITEM_SCALE{ 0.35f };
 } // namespace
 
 namespace game::scene
@@ -69,6 +76,9 @@ namespace game::scene
 	{
 		m_screen.setBackgroundColor(10, 15, 22);
 		buildFragments();
+
+		const int source{ m_resourceManager.loadModelByPath(BLOCK_MODEL_PATH) };
+		m_itemHandle = m_resourceManager.duplicateModel(source);
 
 		core::log::info("DebugDestruction: 破片 {} 個を生成しました", m_fragments.size());
 	}
@@ -121,6 +131,20 @@ namespace game::scene
 		m_phaseTime += deltaTime;
 		m_cameraAngle += deltaTime * CAMERA_ORBIT_SPEED;
 		m_shake = std::max(0.0f, m_shake - deltaTime * 3.0f);
+		m_itemSpin += deltaTime * 2.4f;
+
+		// 疑似プレイヤーの移動（アイテムへ近づくため）
+		core::Vector3 move{};
+		if (m_inputProvider.isKeyDown(core::input::KeyCode::W))
+			move.z += 1.0f;
+		if (m_inputProvider.isKeyDown(core::input::KeyCode::S))
+			move.z -= 1.0f;
+		if (m_inputProvider.isKeyDown(core::input::KeyCode::A))
+			move.x -= 1.0f;
+		if (m_inputProvider.isKeyDown(core::input::KeyCode::D))
+			move.x += 1.0f;
+		if (move.lengthSq() > 0.0f)
+			m_playerPosition += move.normalized() * (PLAYER_SPEED * deltaTime);
 
 		if (m_inputProvider.isKeyPressed(core::input::KeyCode::Enter))
 			reset();
@@ -134,6 +158,20 @@ namespace game::scene
 
 		case Phase::Broken:
 			updateFragments(deltaTime);
+			// 破片が消え終わったらアイテムを出す
+			if (m_phaseTime > FRAGMENT_LIFE)
+			{
+				m_phase = Phase::Dropped;
+				m_phaseTime = 0.0f;
+				m_itemPosition = { 0.0f, ITEM_BASE_HEIGHT, 0.0f };
+			}
+			break;
+
+		case Phase::Dropped:
+			updateItem();
+			break;
+
+		case Phase::Gained:
 			break;
 		}
 	}
@@ -198,6 +236,20 @@ namespace game::scene
 		}
 	}
 
+	void DebugDestruction::updateItem()
+	{
+		m_itemPosition.y = ITEM_BASE_HEIGHT + std::sin(m_phaseTime * 2.2f) * ITEM_BOB_AMPLITUDE;
+
+		const core::Vector3 toPlayer{ m_playerPosition - m_itemPosition };
+		const float distanceSq{ toPlayer.x * toPlayer.x + toPlayer.z * toPlayer.z };
+		if (distanceSq > PICKUP_RANGE * PICKUP_RANGE)
+			return;
+
+		m_phase = Phase::Gained;
+		m_phaseTime = 0.0f;
+		core::log::info("DebugDestruction: アイテムを取得しました");
+	}
+
 	void DebugDestruction::reset()
 	{
 		for (auto& fragment : m_fragments)
@@ -254,6 +306,19 @@ namespace game::scene
 			    { cellScale * fragment.m_scale, cellScale * fragment.m_scale, cellScale * fragment.m_scale });
 		}
 
+		// アイテムと取得範囲
+		if (m_phase == Phase::Dropped)
+		{
+			m_renderer.drawModel(m_itemHandle, m_itemPosition, { 0.0f, m_itemSpin, 0.4f },
+			    { ITEM_SCALE, ITEM_SCALE, ITEM_SCALE });
+			m_renderer.drawGroundCircle({ m_itemPosition.x, FLOOR_Y + 1.0f, m_itemPosition.z },
+			    PICKUP_RANGE, 0x6022D3EEu, false);
+		}
+
+		// 疑似プレイヤーの居場所
+		m_renderer.drawDebugSphere({ m_playerPosition.x, FLOOR_Y + 40.0f, m_playerPosition.z },
+		    40.0f, 0xFF4ADE80u);
+
 		drawHud();
 	}
 
@@ -283,6 +348,12 @@ namespace game::scene
 			break;
 		case Phase::Broken:
 			line("破壊中...", 0xFFF59E0Bu);
+			break;
+		case Phase::Dropped:
+			line("アイテム出現  [WASD で近づく]", 0xFFF59E0Bu);
+			break;
+		case Phase::Gained:
+			line("取得！", 0xFF4ADE80u);
 			break;
 		}
 

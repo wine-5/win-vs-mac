@@ -60,8 +60,10 @@ namespace game::scene
 		/// @brief 検証の進行段階
 		enum class Phase
 		{
-			Intact, // 無傷〜ひび（Spaceで殴る）
-			Broken  // 破片が飛散している
+			Intact,  // 無傷〜ひび（Spaceで殴る）
+			Broken,  // 破片が飛散している
+			Dropped, // アイテムが出現し取得待ち
+			Gained   // アイテムを取得した（Enterでリセット）
 		};
 
 		/// @brief 破片1つ分の状態
@@ -82,6 +84,7 @@ namespace game::scene
 		void explode();
 		void reset();
 		void updateFragments(float deltaTime);
+		void updateItem();
 		void drawHud();
 
 		/// @brief 1辺あたりの分割数（GRID^3 個の破片になる）
@@ -105,6 +108,12 @@ namespace game::scene
 		/// @brief 破片が消えるまでの時間（秒）
 		static constexpr float FRAGMENT_LIFE{ 1.4f };
 
+		/// @brief アイテム取得と判定する距離（ユニット）
+		static constexpr float PICKUP_RANGE{ 140.0f };
+
+		/// @brief 疑似プレイヤーの移動速度（ユニット/秒）
+		static constexpr float PLAYER_SPEED{ 420.0f };
+
 		core::iface::ICamera& m_camera;
 		core::iface::IRenderer& m_renderer;
 		core::iface::IResourceManager& m_resourceManager;
@@ -113,11 +122,18 @@ namespace game::scene
 		core::iface::IScreen& m_screen;
 
 		std::vector<Fragment> m_fragments;
+		int m_itemHandle{ -1 };
 
 		Phase m_phase{ Phase::Intact };
 		int m_hitCount{ 0 };
 		float m_phaseTime{ 0.0f };
 		float m_shake{ 0.0f };
 		float m_cameraAngle{ 0.0f };
+
+		core::Vector3 m_itemPosition{};
+		float m_itemSpin{ 0.0f };
+
+		// プレイヤーの代わり。WASDで動かしてアイテムに近づく
+		core::Vector3 m_playerPosition{ 0.0f, 0.0f, -420.0f };
 	};
 } // namespace game::scene
