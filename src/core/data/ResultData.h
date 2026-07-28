@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "core/data/Difficulty.h"
 
 namespace core::data
 {
@@ -12,7 +13,10 @@ namespace core::data
         /** @brief 勝利かどうか (true=全敵撃破, false=プレイヤー死亡) */
         bool m_isVictory{false};
 
-        /** @brief 経過時間（秒） */
+		/** @brief プレイした難易度（ランクのタイム基準が難易度ごとに変わる） */
+		Difficulty m_difficulty{ Difficulty::Normal };
+
+		/** @brief 経過時間（秒） */
         float m_elapsedTime{0.0f};
 
         /** @brief 撃破した敵の数 */

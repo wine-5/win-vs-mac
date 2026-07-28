@@ -479,6 +479,10 @@ function buildPropMesh(prop) {
 
 function syncPropMesh(mesh, prop) {
   mesh.position.fromArray(prop.position);
+  /* DxLib の MV1SetRotationXYZ は行ベクトル規約の X→Y→Z 合成で、列ベクトルに直すと Rz・Ry・Rx。
+     three.js 既定の 'XYZ'（Rx・Ry・Rz）とは順序が逆になり、2軸以上回すと向きがズレるため 'ZYX' に揃える。
+     ギズモは quaternion 経由で書き戻すので、order さえ立てておけば保存値も DxLib 互換になる */
+  mesh.rotation.order = 'ZYX';
   mesh.rotation.set(prop.rotation[0] * DEG2RAD, prop.rotation[1] * DEG2RAD, prop.rotation[2] * DEG2RAD);
   mesh.scale.fromArray(prop.size.map(v => Math.max(v, 0.001)));
   /* ラベルは親スケールの影響を打ち消して等倍表示 */
@@ -1290,7 +1294,7 @@ function renderInspector() {
     const note = document.createElement('div'); note.className = 'note';
     /* 役割を持つ配置物は置き方の意味が変わるので、専用の説明に差し替える */
     note.textContent = (c && c.role === 'bossGate')
-      ? 'ボス出現時にせり上がって入り口を塞ぐ扉。ここには「閉じた状態」の位置とサイズを置く（ゲーム開始時は床下に隠れている）。'
+      ? 'ボス出現時にせり上がる配置物（塞ぐ扉・登る坂）。ここには「せり上がりきった状態」の位置・回転・サイズを置く（ゲーム開始時は床下に隠れている）。'
       : '坂は Rotation の X / Z を傾けて作成（Local 軸推奨）。Size は実寸ユニット。';
     root.appendChild(note);
   } else if (selected.kind === 'light') {

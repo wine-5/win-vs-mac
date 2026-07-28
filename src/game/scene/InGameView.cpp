@@ -31,6 +31,7 @@
 #include "game/ui/ingame/InGameStatusView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
 #include "game/ui/ingame/BossHUDView.h"
+#include "game/ui/ingame/MiniMapView.h"
 #include "game/ui/ingame/EnemyHealthBarView.h"
 #include <algorithm>
 #include <cmath>
@@ -111,8 +112,10 @@ namespace game::scene
 		if (m_equipmentSlotView)
 			m_equipmentSlotView->draw();
 
-		// 目標（左上）
-		if (m_objectiveView)
+		// 目標（左上）。開始演出のミッションが中央から流れ着くまでは伏せておく
+		// （同じ内容が中央と左上に同時に出ていると、どちらを見ればよいのか分からない）
+		if (m_objectiveView &&
+		    (m_battleStartSystem == nullptr || m_battleStartSystem->isObjectiveRevealed()))
 			m_objectiveView->draw(remainingEnemyCount, bossId != core::ecs::INVALID_ENTITY_ID);
 
 		// 難易度と経過時間（右上）
@@ -122,6 +125,10 @@ namespace game::scene
 		// ボスHP（上中央）。出現していなければ描かれない
 		if (m_bossHUDView)
 			m_bossHUDView->draw(bossId);
+
+		// ミニマップ（右上・難易度パネルの下）
+		if (m_miniMapView)
+			m_miniMapView->draw(playerId);
 
 		// 低HP警告のビネット。四隅を赤く染めるが、下の隅はHUDのパネルが占めているため、
 		// パネルより手前に描かないと下2つの隅が隠れてしまう。
@@ -244,6 +251,11 @@ namespace game::scene
 	void InGameView::setLowHealthVignetteView(ui::ingame::LowHealthVignetteView* view)
 	{
 		m_lowHealthVignetteView = view;
+	}
+
+	void InGameView::setMiniMapView(ui::ingame::MiniMapView* view)
+	{
+		m_miniMapView = view;
 	}
 
 	void InGameView::setBossHUDView(ui::ingame::BossHUDView* view)

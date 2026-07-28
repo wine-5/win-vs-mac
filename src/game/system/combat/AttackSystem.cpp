@@ -44,6 +44,16 @@ namespace game::system::combat
 			// 「このフレームで攻撃を開始したか」は毎フレーム作り直す
 			attack.m_justFired = false;
 
+			// 死亡済みのEntityは攻撃を成立させない。AIは死亡時に止めているが、
+			// 倒れる直前に立った m_attackRequested が残っていると次のフレームで死体が殴ってくる
+			const auto* attackerHealth{ m_componentManager.tryGet<component::combat::HealthComponent>(attackerId) };
+			if (attackerHealth != nullptr && attackerHealth->m_isDead)
+			{
+				attack.m_attackRequested = false;
+				attack.m_windupPending = false;
+				continue;
+			}
+
 			// クールダウンを更新
 			if (attack.m_currentCooldown > 0.0f)
 				attack.m_currentCooldown -= deltaTime;
@@ -53,20 +63,36 @@ namespace game::system::combat
 			if (attack.m_windupPending)
 			{
 				attack.m_windupTimer -= deltaTime;
+
+				// エフェクトだけは着弾より先に出す。土煙のように絵が立ち上がるまで間のある演出は、
+				// 音と同時に出すと叩きつけが終わってから盛り上がってしまう
+				if (!attack.m_hasPlayedImpactEffect &&
+				    attack.m_impactEffectType != core::constant::EffectType::None &&
+				    attack.m_windupTimer <= attack.m_impactEffectLead)
+				{
+					attack.m_hasPlayedImpactEffect = true;
+					m_eventBus.publish(event::AttackImpactEvent{ attackerId, core::constant::SeType::None,
+					    attack.m_impactEffectType });
+				}
+
 				if (attack.m_windupTimer <= 0.0f)
 				{
 					attack.m_windupPending = false;
 
-					// 振り終わり＝地面を叩く瞬間。当たったかどうかに関係なく鳴らしたいので、
-					// ヒット判定（resolveAttack）より前に発行する
-					if (attack.m_impactSeType != core::constant::SeType::None)
-						m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType });
+					// 振り終わり＝地面を叩く瞬間。当たったかどうかに関係なく出したいので、
+					// ヒット判定（resolveAttack）より前に発行する。
+					// エフェクトを先出し済みならここでは音だけ鳴らす
+					const core::constant::EffectType impactEffect{ attack.m_hasPlayedImpactEffect
+						                                               ? core::constant::EffectType::None
+						                                               : attack.m_impactEffectType };
 
-					// 溜め中に攻撃者が倒された場合は、振り終わりのダメージを不発にする
-					const bool attackerDead{ m_componentManager.has<component::combat::HealthComponent>(attackerId) &&
-						                     m_componentManager.get<component::combat::HealthComponent>(attackerId).m_isDead };
-					if (!attackerDead)
-						resolveAttack(attackerId, attack);
+					if (attack.m_impactSeType != core::constant::SeType::None ||
+					    impactEffect != core::constant::EffectType::None)
+						m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType,
+						    impactEffect });
+
+					// 攻撃者が倒された場合はこのフレームへ到達しない（先頭で溜めごと打ち切る）
+					resolveAttack(attackerId, attack);
 					attack.m_currentCooldown = attack.m_attackCooldown;
 				}
 				continue;
@@ -90,10 +116,10 @@ namespace game::system::combat
 			attack.m_justFired = true;
 
 			// 攻撃開始時の演出用エフェクト（AttackStartEvent）の発行を絞る：
-			// ・Playerの近接（剣）：Player_Slash を出す。Playerの弾（Window弾）はエフェクト無し
+			// ・Playerの近接（剣）：斬撃エフェクトを出す。Playerの弾（Window弾）はエフェクト無し
 			// ・Enemyの弾：弾自身が持つ m_startEffect を出す（None なら無し）。
-			//   これによりボスのレインボー弾だけ演出を出し、Safariのタブ弾は無しにできる。
-			//   地面を叩く近接（弾でない敵攻撃）はエフェクト無し
+			//   弾ごとに発射演出を出し分けられるようにするための仕組み。
+			//   地面を叩く近接（弾でない敵攻撃）は振り始めではなく当たる瞬間に出す
 			//   （弾はProjectileSystemが毎フレームm_attackRequestedを立て直すため、初回1回のみに絞る）
 			const auto& attackerTagForStart{ m_componentManager.get<component::TagComponent>(attackerId) };
 			const bool isProjectile{ m_componentManager.has<component::combat::ProjectileComponent>(attackerId) };
@@ -106,9 +132,9 @@ namespace game::system::combat
 				// プレイヤーは近接（剣）のときだけ斬撃エフェクト。弾（遠距離）は出さない
 				if (!isProjectile)
 				{
-					// 剣を振るアニメーションは段数に応じて PlayerAttackComboSystem が要求する
-					shouldPlayStartEffect = true;
-					startEffect = core::constant::EffectType::Player_Slash;
+					// 剣を振るアニメーションとエフェクトは段数に応じて PlayerAttackComboSystem が要求する
+					startEffect = attack.m_startEffectType;
+					shouldPlayStartEffect = startEffect != core::constant::EffectType::None;
 				}
 			}
 			else if (attackerTagForStart.m_tag == constant::Tag::Enemy)
@@ -138,12 +164,15 @@ namespace game::system::combat
 			{
 				attack.m_windupPending = true;
 				attack.m_windupTimer = attack.m_windupDelay;
+				attack.m_hasPlayedImpactEffect = false;
 				continue;
 			}
 
 			// ワインドアップ無し（従来動作）：発動と同時が当たる瞬間になる
-			if (attack.m_impactSeType != core::constant::SeType::None)
-				m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType });
+			if (attack.m_impactSeType != core::constant::SeType::None ||
+			    attack.m_impactEffectType != core::constant::EffectType::None)
+				m_eventBus.publish(event::AttackImpactEvent{ attackerId, attack.m_impactSeType,
+				    attack.m_impactEffectType });
 
 			// 即座にダメージを解決する
 			resolveAttack(attackerId, attack);
@@ -240,11 +269,19 @@ namespace game::system::combat
 			hitEvent.m_damage = chain.m_damage;
 			hitEvent.m_isCritical = chain.m_isCritical;
 
-			// 攻撃者がProjectileComponentを持つ（=弾＝Window投撃などの遠距離攻撃）ならEnemy_HitWindow、
-			// そうでなければ（=本体による近接攻撃）Enemy_HitSwordを再生する
-			hitEvent.m_effectType = m_componentManager.has<component::combat::ProjectileComponent>(attackerId)
-			                            ? core::constant::EffectType::Enemy_HitWindow
-			                            : core::constant::EffectType::Enemy_HitSword;
+			// 被弾エフェクトは「誰が食らったか」で決める。
+			// 敵が食らったときだけ、当たったのが弾（Enemy_HitWindow）か剣（Enemy_HitSword系）かで出し分ける。
+			// 剣の場合はさらに、その一振りが近接コンボの何段目だったかで通常／強を切り替える。
+			// 段数そのもの（AttackComboComponent.m_stage）は受付時間切れで振っている最中に0へ戻り得るため、
+			// 一振りごとに確定して以降上書きされない m_startEffectType を段の判定に使う
+			if (targetTagCheck.m_tag == constant::Tag::Player)
+				hitEvent.m_effectType = core::constant::EffectType::Player_Hit;
+			else if (m_componentManager.has<component::combat::ProjectileComponent>(attackerId))
+				hitEvent.m_effectType = core::constant::EffectType::Enemy_HitWindow;
+			else
+				hitEvent.m_effectType = attack.m_startEffectType == core::constant::EffectType::Player_SlashStrong
+				                            ? core::constant::EffectType::Enemy_HitSwordStrong
+				                            : core::constant::EffectType::Enemy_HitSwordNormal;
 
 			// ヒット音は「何が当たったか」で決める。弾は弾自身が持つ音（Window弾・溜め撃ちで別）、
 			// プレイヤーの近接は敵が斬られた音。振り音は AttackStartEvent 側が担う

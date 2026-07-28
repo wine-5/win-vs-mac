@@ -185,3 +185,23 @@ body {
 .meta-row:last-child { border-bottom: none; }
 .meta-key { color: var(--text-muted); }
 .meta-val { font-weight: 600; }
+
+/* ── 初回ガイド中の強調 ───────────────────────────────
+   ファイル選択画面のSTEP2（拡張子で能力が上がる）の間だけ、
+   実際に伸びた項目を残して他を落とす。どの数値が動いたのかを説明文と結びつける */
+body.tutorial-highlight-bonus .metric-row:not(.has-bonus) {
+    opacity: 0.22;
+    transition: opacity 0.25s ease;
+}
+
+body.tutorial-highlight-bonus .metric-row.has-bonus {
+    border-radius: var(--radius);
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+    animation: param-bonus-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes param-bonus-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0, 120, 212, 0); }
+    50%      { box-shadow: 0 0 22px 0 rgba(0, 120, 212, 0.5); }
+}

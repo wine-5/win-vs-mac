@@ -23,6 +23,7 @@ namespace game::system::movement
 		input.m_attackPressed = false;
 		input.m_dashPressed = false;
 		input.m_rangedAttackPressed = false;
+		input.m_statusViewPressed = false;
 
 		// シネマ演出中（ボス覚醒など）は全入力を受け付けない（上の初期化でニュートラルを維持）
 		if (input.m_locked)
@@ -45,6 +46,8 @@ namespace game::system::movement
 			input.m_jumpPressed = true;
 		if (m_inputProvider.isKeyDown(core::input::KeyCode::Shift))
 			input.m_dashPressed = true;
+		if (m_inputProvider.isKeyDown(core::input::KeyCode::Tab))
+			input.m_statusViewPressed = true;
 
 		// マウスの入力
 		if (m_inputProvider.isMouseLeftPressed())

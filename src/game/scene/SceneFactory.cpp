@@ -95,6 +95,10 @@ namespace game::scene
 			auto windowManager = windowFactory->createSelectWindowManager(
 			    [selectPtr = m_selectScene.get()]()
 			    { selectPtr->notifyGameStart(); },
+			    [selectPtr = m_selectScene.get()]()
+			    { selectPtr->notifyBackToTitle(); },
+			    [this]()
+			    { m_gameManager.requestQuit(); },
 			    [this](int slot, const std::string& path)
 			    {
 				    m_gameManager.getFileEquipmentData().setFilePath(slot, path);
@@ -104,7 +108,9 @@ namespace game::scene
 				    m_gameManager.setDifficulty(core::data::toDifficulty(difficulty));
 				    core::log::info("難易度を選択しました: {}", difficulty.c_str());
 			    },
-			    *resourceManager);
+			    *resourceManager,
+			    // 初見の「何をすればいいのか分からない」を解くための案内。起動後の1回だけ出す
+			    m_gameManager.consumeSelectTutorial());
 
 			m_selectScene->setWindowManager(std::move(windowManager));
 			return m_selectScene.get();

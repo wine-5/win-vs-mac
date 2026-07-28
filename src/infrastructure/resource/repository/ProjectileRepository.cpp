@@ -16,6 +16,8 @@ namespace
 		metadata.m_id = j["id"].get<std::string>();
 		if (j.contains("imageId"))
 			metadata.m_imageId = j["imageId"].get<std::string>();
+		if (j.contains("chargedImageId"))
+			metadata.m_chargedImageId = j["chargedImageId"].get<std::string>();
 		metadata.m_speed = j["speed"];
 		metadata.m_damage = j["damage"];
 		metadata.m_lifetime = j["lifetime"];

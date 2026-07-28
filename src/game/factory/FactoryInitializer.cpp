@@ -2,6 +2,7 @@
 #include "core/interface/ILogger.h"
 #include "core/utility/Log.h"
 #include "core/utility/MathConstants.h"
+#include "core/utility/Rotation.h"
 #include "core/data/PropDefinition.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/PropCollision.h"
@@ -17,6 +18,24 @@ namespace
 	// ボス扉を開状態で沈める際、自分の高さに加えて余分に下げる量。
 	// 床の厚みぶん余計に沈めて、閉じる前に上端がのぞかないようにする
 	constexpr float BOSS_GATE_SINK_MARGIN{ 100.0f };
+
+	/**
+	 * @brief 傾けた配置物がY方向に占める高さを求める
+	 *
+	 * 薄い床でも坂として寝かせれば見た目の高さは実寸のYを大きく超える。
+	 * 沈める量をsize.yで決めると坂だけ床から突き出てしまうため、
+	 * 三辺を回転させてY成分を足し合わせた「傾きこみの高さ」を使う。
+	 * @param size 配置物の実寸
+	 * @param rotation オイラー角（ラジアン）
+	 * @return 回転後にY方向へ占める高さ
+	 */
+	float rotatedHeight(const core::Vector3& size, const core::Vector3& rotation) noexcept
+	{
+		const float x{ core::utility::rotateEulerXYZ(core::Vector3{ size.x, 0.0f, 0.0f }, rotation).y };
+		const float y{ core::utility::rotateEulerXYZ(core::Vector3{ 0.0f, size.y, 0.0f }, rotation).y };
+		const float z{ core::utility::rotateEulerXYZ(core::Vector3{ 0.0f, 0.0f, size.z }, rotation).y };
+		return std::abs(x) + std::abs(y) + std::abs(z);
+	}
 } // namespace
 
 namespace game::factory
@@ -109,6 +128,16 @@ namespace game::factory
 			{
 				params.m_collisionSize = prop.m_size;
 				params.m_slideAccel = def.m_slideAccel;
+				params.m_conveyorSpeed = def.m_conveyorSpeed;
+
+				// 動く歩道は模様の流れる向き・速さを運ぶ力から導く。
+				// テクスチャ1枚がtextureTileぶんの実寸を受け持つので、速さ÷1枚の実寸が
+				// そのまま「1秒あたり何枚ぶん流すか」になる。
+				// JSONへ別々に書くと片方だけ直したときに見た目と力が食い違うため、ここで揃える。
+				// 符号が負なのは、天面のV軸がローカル+Zと逆向き（V=0がZ+側）に貼られているため。
+				// 正のまま渡すと模様だけが運ぶ向きと反対へ流れる
+				if (def.m_conveyorSpeed != 0.0f && def.m_textureTile > 0.0f)
+					params.m_scrollSpeedV = -def.m_conveyorSpeed / def.m_textureTile;
 			}
 
 			// テクスチャ1枚が受け持つ実寸から繰り返し回数を決める。
@@ -126,10 +155,11 @@ namespace game::factory
 			}
 
 			// ボス扉は「閉じた状態」で置かれているので、開いた状態（床下）から始める。
-			// 沈める量は自分の高さぶん＋余白で、隙間から見えないようにする
+			// 沈める量は傾きこみの高さぶん＋余白で、隙間から見えないようにする。
+			// 寝かせた坂も同じ役割で扱えるよう、実寸のYではなく回転後の高さで測る
 			const bool isBossGate{ def.m_role == constant::prop_role::BOSS_GATE };
 			if (isBossGate)
-				params.m_position.y -= prop.m_size.y + BOSS_GATE_SINK_MARGIN;
+				params.m_position.y -= rotatedHeight(prop.m_size, rotation) + BOSS_GATE_SINK_MARGIN;
 
 			const auto propId{ factory.create(params) };
 

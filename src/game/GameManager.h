@@ -95,6 +95,21 @@ namespace game
 		// DEBUG: ここまでデバッグモード関連
 
 		/**
+		 * @brief セレクト画面のチュートリアルを出すべきかを返し、以後は出ないようにする
+		 *
+		 * 初見の「何をすればいいのか分からない」を解くための案内なので、
+		 * 一度見せたら以降の再挑戦では出さない。アプリを起動し直せばまた出る
+		 * （面接や展示では毎回起動し直すため、保存せずともかならず見せられる）
+		 * @return 今回出すべきならtrue
+		 */
+		[[nodiscard]] bool consumeSelectTutorial() noexcept
+		{
+			const bool shouldShow{ m_isSelectTutorialPending };
+			m_isSelectTutorialPending = false;
+			return shouldShow;
+		}
+
+		/**
 		 * @brief デフォルトコンストラクタ
 		 */
 		GameManager() = default;
@@ -106,8 +121,11 @@ namespace game
 		core::data::Difficulty m_difficulty{ core::data::Difficulty::Normal };
 		bool m_quitRequested{ false };
 
+		// セレクト画面のチュートリアルをまだ見せていないか（起動直後の1回だけ出す）
+		bool m_isSelectTutorialPending{ true };
+
 		// DEBUG: 連続ジャンプ（空中浮上）を許可するか。falseで通常の接地単発ジャンプ。
 		// 空中移動して動作確認したいときにここをtrueにする（リリース時に削除）
-		bool m_continuousJumpEnabled{ false };
+		bool m_continuousJumpEnabled{ true };
 	};
 } // namespace game

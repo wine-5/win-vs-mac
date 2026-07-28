@@ -21,6 +21,7 @@ namespace game::constant
 		constexpr std::string_view ATTACK_COOLDOWN = "attackCooldown";
 		constexpr std::string_view ATTACK_WINDUP = "attackWindup";
 		constexpr std::string_view ATTACK_MAX_HEIGHT = "attackMaxHeight";
+		constexpr std::string_view ATTACK_IMPACT_EFFECT_LEAD = "attackImpactEffectLead";
 		constexpr std::string_view COMBO_INPUT_WINDOW = "comboInputWindow";
 		constexpr std::string_view COMBO_STAGE2_MULTIPLIER = "comboStage2Multiplier";
 		constexpr std::string_view CRITICAL_RATE = "criticalRate";
@@ -30,5 +31,7 @@ namespace game::constant
 		constexpr std::string_view PREFERRED_DISTANCE_MAX = "preferredDistanceMax";
 		constexpr std::string_view FIRE_COOLDOWN = "fireCooldown";
 		constexpr std::string_view FACING_YAW_OFFSET = "facingYawOffset";
+		constexpr std::string_view CLIFF_PROBE_DISTANCE = "cliffProbeDistance";
+		constexpr std::string_view CLIFF_MAX_STEP_DOWN = "cliffMaxStepDown";
 	} // namespace metadata_keys
 } // namespace game::constant

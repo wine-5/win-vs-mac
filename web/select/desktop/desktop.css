@@ -1,7 +1,9 @@
 :root {
     /* Responsive Layout Variables */
-    --taskbar-height: 48px;
-    --icon-size: 40px;
+    /* タスクバーは画面サイズに追従させる。固定pxのままだと、フルスクリーンでは
+       帯も文字も豆粒になり、右端の「ゲームを開始」が見つけられない */
+    --taskbar-height: clamp(48px, 5.2vh, 104px);
+    --icon-size: clamp(40px, 4.2vh, 84px);
     --app-icon-padding: 6px;
     --taskbar-padding: 0 14px;
     --taskbar-gap: 8px;
@@ -9,20 +11,21 @@
     --taskbar-app-radius: 6px;
     --app-padding: 6px;
     --tooltip-padding: 6px 10px;
-    --tooltip-font-size: 11px;
+    /* 薄い文字だと暗い壁紙の上で沈んで読めないため、下限を上げて太字で出す */
+    --tooltip-font-size: clamp(14px, 1.05vw, 26px);
     --tooltip-margin-bottom: 8px;
     --tooltip-border-radius: 4px;
     --active-indicator-size: 4px;
     --active-indicator-bottom: 2px;
     --taskbar-right-gap: 10px;
-    --clock-font-size: 11px;
+    --clock-font-size: clamp(11px, 0.85vw, 22px);
     --clock-min-width: 40px;
-    --start-btn-padding: 7px 16px;
-    --start-btn-font-size: 13px;
+    --start-btn-padding: clamp(7px, 0.8vh, 16px) clamp(16px, 1.6vw, 38px);
+    --start-btn-font-size: clamp(13px, 1.25vw, 30px);
     --border-top-color: rgba(255, 255, 255, 0.08);
     --app-hover-background: rgba(255, 255, 255, 0.1);
-    --tooltip-background: rgba(0, 0, 0, 0.9);
-    --tooltip-color: rgba(255, 255, 255, 0.95);
+    --tooltip-background: rgba(24, 24, 24, 0.98);
+    --tooltip-color: #ffffff;
     --app-color: rgba(255, 255, 255, 0.9);
     --app-hidden-color: rgba(255, 255, 255, 0.38);
     --app-hidden-icon-opacity: 0.38;
@@ -71,13 +74,16 @@ body {
     gap: 4px;
 }
 
+/* 1列4段になったぶん縦に伸びるので、アイコンの各寸法を画面の高さへ追従させる。
+   固定pxのままだと Debug の 1280x720 では4段目が下の難易度ウィンドウの裏に隠れ、
+   フルスクリーンでは逆に余白が余る。上限は元の見た目（72px / 15px）で止める */
 .desk-icon {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 112px;
-    gap: 6px;
-    padding: 10px 6px;
+    width: clamp(84px, 8.75vw, 112px);
+    gap: clamp(3px, 0.8vh, 6px);
+    padding: clamp(3px, 0.5vh, 10px) 6px;
     border-radius: 4px;
     cursor: pointer;
     user-select: none;
@@ -95,19 +101,19 @@ body {
 
 .desk-icon img,
 .desk-icon-emoji {
-    width: 72px;
-    height: 72px;
+    width: clamp(38px, 5.6vh, 72px);
+    height: clamp(38px, 5.6vh, 72px);
     object-fit: contain;
     image-rendering: pixelated;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 50px;
-    line-height: 72px;
+    font-size: clamp(26px, 3.9vh, 50px);
+    line-height: 1;
 }
 
 .desk-icon span:not(.desk-icon-emoji) {
-    font-size: 15px;
+    font-size: clamp(10px, 1.5vh, 15px);
     font-weight: 600;
     color: #fff;
     text-align: center;
@@ -168,7 +174,10 @@ body {
     background: var(--tooltip-background);
     color: var(--tooltip-color);
     border-radius: var(--tooltip-border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
     font-size: var(--tooltip-font-size);
+    font-weight: 600;
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
@@ -203,6 +212,19 @@ body {
     object-fit: contain;
 }
 
+/* 画像を持たないタスクバー項目（タイトルへ戻る・シャットダウン）用。
+   .app-icon と同じ枠を取り、中央に文字を置いて他のアイコンと高さを揃える */
+.taskbar-glyph {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(var(--icon-size) * 0.62);
+    line-height: 1;
+    color: var(--app-color);
+}
+
 .taskbar-app.hidden-win .app-icon { opacity: var(--app-hidden-icon-opacity); }
 
 .taskbar-right {
@@ -220,6 +242,8 @@ body {
     min-width: var(--clock-min-width);
 }
 
+/* この画面で最後に押させたいボタン。周りのアイコンと同じ調子で置くと埋もれるので、
+   光を落として一段浮かせ、押す場所だと分かるようにする */
 .start-btn {
     padding: var(--start-btn-padding);
     background: var(--accent);
@@ -228,10 +252,86 @@ body {
     font-size: var(--start-btn-font-size);
     font-weight: 600;
     letter-spacing: 0.02em;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18) inset,
+                0 2px 14px rgba(0, 120, 212, 0.55);
+    animation: start-btn-glow 2.4s ease-in-out infinite;
 }
 
 .start-btn:hover {
     background: var(--accent-hover);
     border-color: var(--accent-hover);
     color: #fff;
+}
+
+/* ── 初回ガイドの締め：ルール説明.txt への誘導 ─────────────
+   ファイル選択画面のSTEP3の間だけ、アイコンを脈打たせて場所を知らせる。
+   transformは周りのアイコンの配置に影響しない */
+body.tutorial-highlight-rules #icon-rules {
+    position: relative;
+    z-index: 2;
+    animation: rules-icon-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes rules-icon-pulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 0 rgba(0, 120, 212, 0));
+    }
+    50% {
+        transform: scale(1.18);
+        filter: drop-shadow(0 0 16px rgba(0, 150, 255, 0.9));
+    }
+}
+
+/* 出撃ボタンはゆっくり明滅させる。止まったままだと、
+   並んだアイコンの中に沈んで「次に押す場所」だと気づかれない */
+@keyframes start-btn-glow {
+    0%, 100% {
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18) inset,
+                    0 2px 14px rgba(0, 120, 212, 0.55);
+    }
+    50% {
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.28) inset,
+                    0 2px 26px rgba(0, 150, 255, 0.95);
+    }
+}
+
+/* ── 装備が3つ揃ったあとの出撃導線 ───────────────────────
+   選び終えた直後は「次はどこを押すのか」が分からず手が止まりやすい。
+   出口は2つ（デスクトップの「ゲーム開始.exe」と右下のボタン）あるので、
+   その両方を同じ間隔で伸縮させ、同じ行き先だと見た目で結びつける。
+   transform は周りの配置に影響しないため、アイコンの並びもタスクバーも動かない */
+body.equip-ready #icon-start {
+    position: relative;
+    z-index: 2;
+    animation: start-icon-ready 1.4s ease-in-out infinite;
+}
+
+@keyframes start-icon-ready {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 0 rgba(0, 120, 212, 0));
+    }
+    50% {
+        transform: scale(1.18);
+        filter: drop-shadow(0 0 16px rgba(0, 150, 255, 0.9));
+    }
+}
+
+/* 常時の明滅より一段強くする。ここまで来たら押してよい、と分かる差にする */
+body.equip-ready .start-btn {
+    animation: start-btn-ready 1.4s ease-in-out infinite;
+}
+
+@keyframes start-btn-ready {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.28) inset,
+                    0 2px 16px rgba(0, 150, 255, 0.7);
+    }
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55) inset,
+                    0 2px 34px rgba(0, 170, 255, 1);
+    }
 }

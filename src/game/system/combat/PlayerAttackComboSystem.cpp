@@ -10,13 +10,10 @@ namespace
 	// コンボの最終段。ここまで進んだら次の入力は1段目へ戻る
 	constexpr int MAX_COMBO_STAGE{ 2 };
 
-	// 段ごとの斬撃エフェクトの傾き（ラジアン）。同じエフェクトを使い回すため、
-	// 1段目は正面への振り下ろし、2段目は水平に寝かせて回転斬りに見せる。
-	// 実機での見た目に合わせた調整値
-	constexpr float STAGE2_EFFECT_ROLL{ 1.5708f }; // 90度
-
+	// 段ごとの斬撃エフェクトの傾き（ラジアン）。段ごとに専用のエフェクトを持たせたため、
+	// 絵柄側で振りの向きが表現されている。傾きで寝かせる必要は無いので補正は入れない
 	const core::Vector3 STAGE1_EFFECT_ROTATION{ 0.0f, 0.0f, 0.0f };
-	const core::Vector3 STAGE2_EFFECT_ROTATION{ 0.0f, 0.0f, STAGE2_EFFECT_ROLL };
+	const core::Vector3 STAGE2_EFFECT_ROTATION{ 0.0f, 0.0f, 0.0f };
 
 	// 斬撃エフェクトの高さの微調整（ワールド単位）。基準は足元で、絵柄が上方向へ
 	// 伸びるため既定は補正なし。高すぎる／低すぎる場合はここのYを動かす
@@ -94,6 +91,11 @@ namespace game::system::combat
 
 		attack.m_effectRotationOffset = isFinalStage ? STAGE2_EFFECT_ROTATION : STAGE1_EFFECT_ROTATION;
 		attack.m_effectPositionOffset = EFFECT_POSITION_OFFSET;
+
+		// 斬撃エフェクトも段で変える。1段目は振り下ろし、2段目は回転斬りとして作られている
+		attack.m_startEffectType = isFinalStage
+		                               ? core::constant::EffectType::Player_SlashStrong
+		                               : core::constant::EffectType::Player_SlashNormal;
 
 		// 振り音も段で変える。1段目と2段目が同じ音だと、コンボが繋がった手応えが出ない
 		attack.m_startSeType = isFinalStage

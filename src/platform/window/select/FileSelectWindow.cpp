@@ -1,9 +1,12 @@
 ﻿#include <windows.h>
-#include <commdlg.h>
+#include <shobjidl.h>
+#include <wrl/client.h>
 #include <sstream>
+#include <thread>
 #include "FileSelectWindow.h"
 #include "core/interface/IResourceManager.h"
 #include "platform/window/WindowConstants.h"
+#include "platform/window/UiSound.h"
 #include "core/interface/ILogger.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IAudioManager.h"
@@ -27,6 +30,36 @@ namespace platform::window::select
 		m_onFileSlotChanged = std::move(callback);
 	}
 
+	void FileSelectWindow::setShowTutorial(bool showTutorial) noexcept
+	{
+		m_showTutorial = showTutorial;
+	}
+
+	void FileSelectWindow::setOnTutorialStepChanged(std::function<void(int)> callback) noexcept
+	{
+		m_onTutorialStepChanged = std::move(callback);
+	}
+
+	void FileSelectWindow::sendTutorialState() noexcept
+	{
+		try
+		{
+			nlohmann::json j;
+			j[platform::window::WindowConstants::JSON_KEY_TYPE] =
+			    platform::window::WindowConstants::MESSAGE_TYPE_TUTORIAL;
+			j[platform::window::WindowConstants::JSON_KEY_SHOW] = m_showTutorial;
+			postMessage(j.dump());
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("FileSelectWindow::sendTutorialState: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("FileSelectWindow::sendTutorialState: 不明な例外が発生しました");
+		}
+	}
+
 	std::string FileSelectWindow::getFilePath(int slot) const noexcept
 	{
 		if (slot < 0 || slot >= SLOT_COUNT) return "";
@@ -48,11 +81,28 @@ namespace platform::window::select
 		if (const auto handled{ handleWebViewMessage(hwnd, msg, wParam, lParam) })
 			return *handled;
 
+		// WebView2 のイベントハンドラを抜けた後に、ここでダイアログを開き始める
+		if (msg == WM_OPEN_FILE_DIALOG)
+		{
+			beginFileDialog(static_cast<int>(wParam), lParam != 0);
+			return 0;
+		}
+
+		if (msg == WM_FILE_DIALOG_DONE)
+		{
+			onFileDialogFinished();
+			return 0;
+		}
+
 		return WindowBase::onMessage(hwnd, msg, wParam, lParam);
 	}
 
 	void FileSelectWindow::handleMessage(const std::string& json) noexcept
 	{
+		// 操作音はJS側が要求する（押した要素ごとに鳴らし分けるため）
+		if (platform::window::tryPlayUiSound(json))
+			return;
+
 		try
 		{
 			auto j = nlohmann::json::parse(json);
@@ -62,12 +112,24 @@ namespace platform::window::select
 				int slot = j.value("slot", 0);
 				// 「同一ファイル」チェックがオンなら、1回選ぶだけで3枠すべてに同じものを入れる
 				const bool sameFile{ j.value(platform::window::WindowConstants::JSON_KEY_SAME_FILE, false) };
+				// ここは WebView2 のイベントハンドラの中なので、ダイアログは直接開かない。
+				// メッセージを積んでハンドラを抜けてから開く（詳細はヘッダの定数コメント参照）
 				if (slot >= 0 && slot < SLOT_COUNT)
-					openFileDialog(slot, sameFile);
+					PostMessageW(getHwnd(), WM_OPEN_FILE_DIALOG,
+					    static_cast<WPARAM>(slot), sameFile ? 1 : 0);
 			}
 			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_BONUS_INFO)
 			{
 				sendBonusInfo();
+			}
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_TUTORIAL)
+			{
+				sendTutorialState();
+			}
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_TUTORIAL_STEP)
+			{
+				if (m_onTutorialStepChanged)
+					m_onTutorialStepChanged(j.value(platform::window::WindowConstants::JSON_KEY_STEP, 0));
 			}
 			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_REQUEST_SLOTS)
 			{
@@ -86,72 +148,142 @@ namespace platform::window::select
 		}
 	}
 
-	void FileSelectWindow::openFileDialog(int slotIndex, bool applyToAllSlots)
+	void FileSelectWindow::beginFileDialog(int slotIndex, bool applyToAllSlots) noexcept
 	{
-		// ワイド文字版（GetOpenFileNameW）は comdlg32 の内部で __debugbreak() に当たるため使わない。
-		// ANSI版が返すのは日本語環境ではShift_JIS（システム既定のコードページ）のパスで、
-		// そのままJSONへ載せると「不正なUTF-8」で例外になりスロットが送信されない。
-		// 受け取ったあとにUTF-8へ変換してから保持する
-		OPENFILENAMEA ofn{};
-		char fileBuffer[MAX_PATH]{};
-
-		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner = getHwnd();
-		ofn.lpstrFile = fileBuffer;
-		ofn.nMaxFile = MAX_PATH;
-		ofn.lpstrFilter = FILE_DIALOG_FILTER;
-		ofn.nFilterIndex = 1;
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-
-		if (!GetOpenFileNameA(&ofn))
+		// 開いている間は次を受け付けない。スロットを連打すると同じダイアログが
+		// 何枚も重なり、閉じ忘れた1枚がオーナーを掴んだまま残る
+		if (m_dialogRequest)
 			return;
 
-		const std::string path{ toUtf8(fileBuffer) };
-		const auto extensionType{ game::utility::FileExtensionTypeResolver::fromPath(path) };
-
-		// 同一ファイル指定なら全スロットへ、そうでなければ選んだスロットだけへ入れる。
-		// 同じ拡張子を3枠に積む特化ビルドを組むとき、同じファイルを3回選ぶ手間を省く
-		for (int i = 0; i < SLOT_COUNT; ++i)
+		try
 		{
-			if (!applyToAllSlots && i != slotIndex)
-				continue;
+			m_dialogRequest = std::make_shared<DialogRequest>();
+			m_dialogRequest->m_slotIndex = slotIndex;
+			m_dialogRequest->m_applyToAllSlots = applyToAllSlots;
 
-			m_filePaths[i] = path;
-			m_extensionTypes[i] = extensionType;
-
-			if (m_onFileSlotChanged)
-				m_onFileSlotChanged(i, path);
+			std::thread{ &FileSelectWindow::runFileDialog, getHwnd(), m_dialogRequest }.detach();
 		}
-
-		sendSlotsRefresh();
-
-		// 装備が決まった合図。ダイアログを閉じた直後なので、画面の更新と同じ拍で鳴る
-		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
-		if (audio)
-			audio->playSe(core::constant::SeType::UiFileSelect);
+		catch (const std::exception& e)
+		{
+			core::log::error("FileSelectWindow::beginFileDialog: ダイアログを開けませんでした: {}", e.what());
+			m_dialogRequest.reset();
+		}
+		catch (...)
+		{
+			core::log::error("FileSelectWindow::beginFileDialog: 不明な例外が発生しました");
+			m_dialogRequest.reset();
+		}
 	}
 
-	std::string FileSelectWindow::toUtf8(const char* ansi) noexcept
+	void FileSelectWindow::runFileDialog(HWND owner, std::shared_ptr<DialogRequest> request) noexcept
 	{
-		if (ansi == nullptr || ansi[0] == '\0')
+		// このスレッドをSTAとして初期化する（理由はヘッダのコメント参照）
+		if (FAILED(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)))
+		{
+			core::log::error("FileSelectWindow::runFileDialog: COMの初期化に失敗しました");
+			PostMessageW(owner, WM_FILE_DIALOG_DONE, 0, 0);
+			return;
+		}
+
+		try
+		{
+			// GetOpenFileName ではなく IFileOpenDialog を使う。前者は互換のための薄い皮で、
+			// 検索結果や長いパスを返されると内部で失敗したまま進み、
+			// comdlg32 の中で __debugbreak() に当たることがある
+			Microsoft::WRL::ComPtr<IFileOpenDialog> dialog{};
+			const HRESULT createResult{ CoCreateInstance(CLSID_FileOpenDialog, nullptr,
+				CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&dialog)) };
+
+			if (SUCCEEDED(createResult))
+			{
+				// FOS_FORCEFILESYSTEM が要。検索結果や仮想フォルダから選んだ項目は
+				// 実ファイルとは限らず、これが無いとパスを取れない項目まで返ってくる
+				DWORD options{};
+				dialog->GetOptions(&options);
+				dialog->SetOptions(options | FOS_FORCEFILESYSTEM | FOS_PATHMUSTEXIST | FOS_FILEMUSTEXIST | FOS_NOCHANGEDIR);
+
+				Microsoft::WRL::ComPtr<IShellItem> item{};
+				PWSTR widePath{};
+				if (SUCCEEDED(dialog->Show(owner)) && SUCCEEDED(dialog->GetResult(&item)) && SUCCEEDED(item->GetDisplayName(SIGDN_FILESYSPATH, &widePath)))
+				{
+					request->m_path = toUtf8(widePath);
+					CoTaskMemFree(widePath);
+				}
+			}
+			else
+			{
+				core::log::error("FileSelectWindow::runFileDialog: ダイアログの生成に失敗しました");
+			}
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("FileSelectWindow::runFileDialog: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("FileSelectWindow::runFileDialog: 不明な例外が発生しました");
+		}
+
+		CoUninitialize();
+
+		// ウィンドウが既に消えていれば送信は失敗するだけで害はない。
+		// 結果は shared_ptr が抱えているので、ここで捨てられても不正アクセスにならない
+		PostMessageW(owner, WM_FILE_DIALOG_DONE, 0, 0);
+	}
+
+	void FileSelectWindow::onFileDialogFinished() noexcept
+	{
+		const auto request{ std::move(m_dialogRequest) };
+		if (!request || request->m_path.empty())
+			return; // キャンセルされた
+
+		try
+		{
+			const std::string& path{ request->m_path };
+			const auto extensionType{ game::utility::FileExtensionTypeResolver::fromPath(path) };
+
+			// 同一ファイル指定なら全スロットへ、そうでなければ選んだスロットだけへ入れる。
+			// 同じ拡張子を3枠に積む特化ビルドを組むとき、同じファイルを3回選ぶ手間を省く
+			for (int i = 0; i < SLOT_COUNT; ++i)
+			{
+				if (!request->m_applyToAllSlots && i != request->m_slotIndex)
+					continue;
+
+				m_filePaths[i] = path;
+				m_extensionTypes[i] = extensionType;
+
+				if (m_onFileSlotChanged)
+					m_onFileSlotChanged(i, path);
+			}
+
+			sendSlotsRefresh();
+
+			// 装備が決まった合図。ダイアログを閉じた直後なので、画面の更新と同じ拍で鳴る
+			auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+			if (audio)
+				audio->playSe(core::constant::SeType::UiFileSelect);
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("FileSelectWindow::onFileDialogFinished: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("FileSelectWindow::onFileDialogFinished: 不明な例外が発生しました");
+		}
+	}
+
+	std::string FileSelectWindow::toUtf8(const wchar_t* wide) noexcept
+	{
+		if (wide == nullptr || wide[0] == L'\0')
 			return {};
 
-		// システム既定のコードページ（日本語環境ならShift_JIS）→ UTF-16 → UTF-8 と二段で変換する。
-		// 直接ANSI→UTF-8に変換するAPIは無いため、UTF-16を経由するのが定石
-		const int wideLength{ MultiByteToWideChar(CP_ACP, 0, ansi, -1, nullptr, 0) };
-		if (wideLength <= 1)
-			return {};
-
-		std::wstring wide(static_cast<std::size_t>(wideLength) - 1, L'\0');
-		MultiByteToWideChar(CP_ACP, 0, ansi, -1, wide.data(), wideLength);
-
-		const int utf8Length{ WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1,
-			nullptr, 0, nullptr, nullptr) };
+		const int utf8Length{ WideCharToMultiByte(CP_UTF8, 0, wide, -1, nullptr, 0, nullptr, nullptr) };
 		if (utf8Length <= 1)
 			return {};
 
 		std::string utf8(static_cast<std::size_t>(utf8Length) - 1, '\0');
-		WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), -1, utf8.data(), utf8Length, nullptr, nullptr);
+		WideCharToMultiByte(CP_UTF8, 0, wide, -1, utf8.data(), utf8Length, nullptr, nullptr);
 		return utf8;
 	}
 

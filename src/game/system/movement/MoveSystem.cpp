@@ -5,12 +5,15 @@
 #include "game/component/visual/AnimationComponent.h"
 #include "game/component/camera/CameraComponent.h"
 #include "game/component/combat/HealthComponent.h"
+#include "game/component/combat/PlayerStatsComponent.h"
 #include <cmath>
 
 namespace game::system::movement
 {
-	MoveSystem::MoveSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId, float moveSpeed, float dashMultiplier)
-	    : m_componentManager{ componentManager }, m_entityId{ entityId }, m_moveSpeed{ moveSpeed }, m_dashMultiplier{ dashMultiplier }
+	MoveSystem::MoveSystem(core::ecs::ComponentManager& componentManager, core::ecs::EntityId entityId, float dashMultiplier)
+	    : m_componentManager{ componentManager }
+	    , m_entityId{ entityId }
+	    , m_dashMultiplier{ dashMultiplier }
 	{
 	}
 
@@ -56,7 +59,9 @@ namespace game::system::movement
 		}
 
 		const bool isDashing{ input.m_dashPressed };
-		const float speed{ m_moveSpeed * (isDashing ? m_dashMultiplier : 1.0f) };
+		const auto* stats{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(m_entityId) };
+		const float moveSpeed{ stats != nullptr ? stats->m_moveSpeed : 0.0f };
+		const float speed{ moveSpeed * (isDashing ? m_dashMultiplier : 1.0f) };
 		velocity.m_velocity.x = worldX * speed;
 		velocity.m_velocity.z = worldZ * speed;
 

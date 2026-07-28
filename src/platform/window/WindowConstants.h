@@ -54,9 +54,20 @@ namespace platform::window
 		// 種別ごとのボーナス内訳（[{ stat, value }, ...]）。アイコン付き表示に使う
 		static constexpr const char* JSON_KEY_BONUS_STATS{ "bonusStats" };
 
+		// JSONメッセージタイプ（全WebViewウィンドウ共通）
+		// 画面上の操作音。どのウィンドウのどの操作かはJS側が決め、
+		// 鳴らす仕事だけをC++が引き受ける（音源はresources.jsonが正）
+		static constexpr const char* MESSAGE_TYPE_UI_SOUND{ "uiSound" };
+		static constexpr const char* JSON_KEY_SE{ "se" };
+
 		// JSONメッセージタイプ（Win32SelectWindowManager）
         static constexpr const char* MESSAGE_TYPE_START_GAME{ "startGame" };
-        static constexpr const char* MESSAGE_TYPE_TOGGLE_WINDOW{ "toggleWindow" };
+		// セレクト画面ではEscのポーズメニューを開けないため、
+		// タイトルへ戻る手段はデスクトップ側のアイコンとタスクバーが担う
+		static constexpr const char* MESSAGE_TYPE_BACK_TO_TITLE{ "backToTitle" };
+		// アプリごと終了する（Windowsのシャットダウンに見立てた出口）
+		static constexpr const char* MESSAGE_TYPE_QUIT_GAME{ "quitGame" };
+		static constexpr const char* MESSAGE_TYPE_TOGGLE_WINDOW{ "toggleWindow" };
         static constexpr const char* MESSAGE_TYPE_LAUNCH_APP{ "launchApp" };
         static constexpr const char* MESSAGE_TYPE_WINDOW_STATE_CHANGED{ "windowStateChanged" };
 		// 難易度が変わったことを全ウィンドウへ伝える（HARDなら配色を警告色へ変える）
@@ -72,8 +83,22 @@ namespace platform::window
 		static constexpr const char* JSON_KEY_SAME_FILE{ "sameFile" };
 		static constexpr const char* MESSAGE_TYPE_REFRESH{ "refresh" };
         static constexpr const char* MESSAGE_TYPE_BONUS_INFO{ "bonusInfo" };
+		// 初回だけ出す操作ガイドを表示してよいかをJS側から問い合わせる／その返答
+		static constexpr const char* MESSAGE_TYPE_REQUEST_TUTORIAL{ "requestTutorial" };
+		static constexpr const char* MESSAGE_TYPE_TUTORIAL{ "tutorial" };
+		static constexpr const char* JSON_KEY_SHOW{ "show" };
+		// ガイドがどの段に進んだかをファイル選択から他ウィンドウへ配る（0は終了）。
+		// 各ウィンドウは自分に関係する段だけ強調表示に切り替える
+		static constexpr const char* MESSAGE_TYPE_TUTORIAL_STEP{ "tutorialStep" };
+		static constexpr const char* MESSAGE_TYPE_TUTORIAL_HIGHLIGHT{ "tutorialHighlight" };
+		static constexpr const char* JSON_KEY_STEP{ "step" };
 
-        // JSONメッセージタイプ（ResultWindow）
+		// 装備スロットが全て埋まったことをデスクトップへ伝える。
+		// 出撃の準備が整った合図として、ゲーム開始への導線を目立たせるのに使う
+		static constexpr const char* MESSAGE_TYPE_EQUIP_READY{ "equipReady" };
+		static constexpr const char* JSON_KEY_READY{ "ready" };
+
+		// JSONメッセージタイプ（ResultWindow）
         static constexpr const char* MESSAGE_TYPE_REQUEST_RESULT{ "requestResult" };
         static constexpr const char* MESSAGE_TYPE_RESULT_DATA{ "resultData" };
         static constexpr const char* MESSAGE_TYPE_RETRY{ "retry" };

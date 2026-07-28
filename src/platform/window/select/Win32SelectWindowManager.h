@@ -28,10 +28,13 @@ namespace platform::window::select
     public:
 	  Win32SelectWindowManager(
 		  std::function<void()> onGameStart,
+		  std::function<void()> onBackToTitle,
+		  std::function<void()> onQuitGame,
 		  std::function<void(int, const std::string&)> onFileSlotChanged,
 		  std::function<void(const std::string&)> onDifficultyChanged,
 		  core::iface::IResourceManager& resourceManager,
-		  core::iface::IScreen& screen) noexcept;
+		  core::iface::IScreen& screen,
+		  bool showTutorial) noexcept;
 
 	  virtual ~Win32SelectWindowManager() noexcept = default;
 
@@ -53,11 +56,13 @@ namespace platform::window::select
 		static constexpr int ICON_AREA_RATIO{ 11 };
 		static constexpr int ICON_AREA_RATIO_BASE{ 20 };
 
-		// RulesWindowのサイズ
-        static constexpr int RULES_WINDOW_WIDTH{ 920 };
-        static constexpr int RULES_WINDOW_HEIGHT{ 660 };
+		// RulesWindowのサイズ（クライアント領域に対する割合）。
+		// 固定サイズだと、Debugの小さいウィンドウでは画面を覆い、
+		// フルスクリーンでは読ませたい説明文が小さく浮くだけになる
+		static constexpr int RULES_WINDOW_WIDTH_PERCENT{ 76 };
+		static constexpr int RULES_WINDOW_HEIGHT_PERCENT{ 84 };
 
-        // ウィンドウのアルファ値
+		// ウィンドウのアルファ値
         static constexpr BYTE WINDOW_ALPHA{ 250 };
 
         // ファイルスロット数
@@ -91,10 +96,28 @@ namespace platform::window::select
 		[[nodiscard]] int countEquippedSlots() const noexcept;
 
 		/**
-		 * @brief 装備スロットが埋まっていない状態での開始確認ダイアログを出す
+		 * @brief 出撃前の確認ダイアログを出す
+		 *
+		 * デスクトップ側のHTMLではなくWin32のダイアログで出す。セレクト画面の各ウィンドウは
+		 * それぞれ別のHWNDなので、HTMLで出した確認はファイル選択などの背面に回ってしまう。
+		 *
 		 * @return 開始してよい場合true
 		 */
-		[[nodiscard]] bool confirmStartWithEmptySlots() noexcept;
+		[[nodiscard]] bool confirmStart() noexcept;
+
+		/**
+		 * @brief タイトルへ戻る前の確認ダイアログを出す
+		 *
+		 * 戻ると装備も難易度も選び直しになるため、確認を挟む
+		 * @return 戻ってよい場合true
+		 */
+		[[nodiscard]] bool confirmBackToTitle() noexcept;
+
+		/**
+		 * @brief アプリを終了する前の確認ダイアログを出す
+		 * @return 終了してよい場合true
+		 */
+		[[nodiscard]] bool confirmQuitGame() noexcept;
 
 		// DEBUG: セレクト画面を一時的に引っ込めるキー（裏のコンソールやダイアログを読むため）
 		static constexpr int DEBUG_HIDE_KEY{ VK_F4 };
@@ -115,6 +138,36 @@ namespace platform::window::select
 		 */
 		void broadcastDifficulty(const std::string& difficulty) noexcept;
 
+		// 初回ガイドの段番号（file-tutorial.js の並びと対）
+		static constexpr int TUTORIAL_STEP_BONUS{ 2 }; // 拡張子で能力が上がる（パラメータを強調）
+		static constexpr int TUTORIAL_STEP_RULES{ 3 }; // ルール説明.txtへ誘導（デスクトップを強調）
+
+		/**
+		 * @brief 初回ガイドの段を各ウィンドウへ配り、強調表示を切り替えさせる
+		 *
+		 * ウィンドウは互いに直接やり取りできないため、ここが中継役になる
+		 * @param step 段番号（1始まり・0はガイド終了）
+		 */
+		void broadcastTutorialStep(int step) noexcept;
+
+		/**
+		 * @brief デスクトップと全サブウィンドウを引っ込め、ゲーム本体を前面へ戻す
+		 *
+		 * セレクト画面を抜けるとき（出撃・タイトルへ戻る）に共通で使う。
+		 * デスクトップのギミックで開いた実アプリ（cmd.exe等）が前面に残ると、
+		 * ボーダーレスのゲーム画面が隠れてしまうため、前面も取り直す
+		 */
+		void hideAllWindows() noexcept;
+
+		/**
+		 * @brief 装備スロットが全て埋まっているかをデスクトップへ伝える
+		 *
+		 * 3つ選び終えた人が次に何をすればよいか分からず止まってしまうため、
+		 * 埋まった時点でデスクトップ側の出撃導線を強調させる。
+		 * 外した場合も伝えて、強調を元に戻す
+		 */
+		void notifyEquipReady() noexcept;
+
 		void handleDesktopMessage(const std::string& json) noexcept;
         void notifyWindowState(const std::string& name, bool visible) noexcept;
 
@@ -133,6 +186,10 @@ namespace platform::window::select
 		bool m_debugOverlayHidden{ false };
 		bool m_debugHideKeyDown{ false };
 
+		// 出撃確認で読み上げるために、選ばれている難易度を控えておく。
+		// 初期値は難易度ウィンドウの初期選択（NORMAL）に合わせる
+		std::string m_difficulty{ "NORMAL" };
+
 		std::array<std::string, 3> m_slotPaths{};
 		std::array<core::data::FileExtensionType, 3> m_slotExtTypes{
 			core::data::FileExtensionType::Unknown,
@@ -141,10 +198,15 @@ namespace platform::window::select
 		};
 
 		std::function<void()> m_onGameStart{};
-        std::function<void(int, const std::string&)> m_onFileSlotChanged{};
+		std::function<void()> m_onBackToTitle{};
+		std::function<void()> m_onQuitGame{};
+		std::function<void(int, const std::string&)> m_onFileSlotChanged{};
 		std::function<void(const std::string&)> m_onDifficultyChanged{};
 
 		core::iface::IResourceManager& m_resourceManager;
         core::iface::IScreen& m_screen;
-    };
+
+		// 初回だけ出す操作ガイドを表示するか（ファイル選択ウィンドウへ引き渡す）
+		bool m_showTutorial{ false };
+	};
 } // namespace platform::window::select

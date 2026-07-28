@@ -51,10 +51,13 @@ namespace game::system::ai
 
 		/**
 		 * @brief 徘徊の目的地をスポーン地点まわりからランダムに選ぶ
+		 *
+		 * 崖回避が有効な敵では、床の上に乗る座標を引けるまで選び直す。
+		 * @param entityId 対象のEntityId
 		 * @param home スポーン地点（徘徊の基準）
 		 * @return 選ばれた目的地のワールド座標
 		 */
-		core::Vector3 pickWanderTarget(const core::Vector3& home);
+		core::Vector3 pickWanderTarget(core::ecs::EntityId entityId, const core::Vector3& home);
 
 		/**
 		 * @brief 攻撃モーションの最中かを判定する

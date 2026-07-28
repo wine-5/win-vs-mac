@@ -49,6 +49,19 @@ namespace core::iface
 		virtual void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, unsigned int color, bool isFilled) = 0;
 
 		/**
+		 * @brief 直線をアンチエイリアス付きで描画する
+		 *
+		 * 矩形や三角形では表せない任意角度の線（ミニマップの床の輪郭など）に使う
+		 * @param x1 始点のX座標
+		 * @param y1 始点のY座標
+		 * @param x2 終点のX座標
+		 * @param y2 終点のY座標
+		 * @param color 色（ARGB形式：0xAARRGGBB）
+		 * @param thickness 線の太さ
+		 */
+		virtual void drawLine(int x1, int y1, int x2, int y2, unsigned int color, int thickness) = 0;
+
+		/**
 		 * @brief 角の丸い矩形をアンチエイリアス付きで描画する
 		 *
 		 * Windows 11（Fluent）のパネル・ボタンを再現するための基本形。
@@ -114,5 +127,23 @@ namespace core::iface
          * @param height 描画高さ
          */
         virtual void drawImage(int handle, int x, int y, int width, int height) = 0;
-    };
+
+		/**
+		 * @brief 以降の描画を矩形の内側だけに制限する
+		 *
+		 * ミニマップのように「枠からはみ出した中身を切り落とす」用途に使う。
+		 * 使い終わったら必ず resetClipArea() で全画面へ戻すこと。
+		 * 指定できるのは矩形のみで、円や角丸での切り抜きはできない
+		 * @param x 左上X座標
+		 * @param y 左上Y座標
+		 * @param width 幅
+		 * @param height 高さ
+		 */
+		virtual void setClipArea(int x, int y, int width, int height) = 0;
+
+		/**
+		 * @brief 描画範囲の制限を解除して全画面へ戻す
+		 */
+		virtual void resetClipArea() = 0;
+	};
 } // namespace core::iface

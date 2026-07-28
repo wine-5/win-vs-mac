@@ -1,5 +1,7 @@
 ﻿#include "ModelRepository.h"
 #include <DxLib.h>
+#include <format>
+#include "core/utility/Probe.h" // 一時: メモリ調査用（原因特定後に削除）
 #include <fstream>
 #include <string>
 #include <string_view>
@@ -13,6 +15,45 @@ namespace
 {
 	// 腕を広げたポーズだと横幅が実際の胴体より大きく出るため、水平方向を絞って胴体に沿わせる係数
 	constexpr float HORIZONTAL_SHRINK{ 0.5f };
+
+	/**
+	 * @brief 一時: 読み込んだモデルの構成を計測ログへ書き出す（原因特定後に削除）
+	 *
+	 * ファイルサイズが同じモデル同士で展開コストが桁違いになる原因を、
+	 * ポリゴン数・テクスチャ解像度・アニメのキーセット数のどれなのかで切り分けるために使う。
+	 * @param label モデルの識別名
+	 * @param handle モデルハンドル
+	 */
+	void dumpModelStats(std::string_view label, int handle)
+	{
+		if (handle == -1)
+			return;
+
+		const int meshNum{ MV1GetMeshNum(handle) };
+		long long triangleNum{ 0 };
+		for (int i{ 0 }; i < meshNum; ++i)
+			triangleNum += MV1GetMeshTriangleNum(handle, i);
+
+		const int textureNum{ MV1GetTextureNum(handle) };
+		long long texturePixels{ 0 };
+		std::string sizes{};
+		for (int i{ 0 }; i < textureNum; ++i)
+		{
+			int w{ 0 }, h{ 0 };
+			if (GetGraphSize(MV1GetTextureGraphHandle(handle, i), &w, &h) == 0)
+			{
+				texturePixels += static_cast<long long>(w) * h;
+				if (i < 8)
+					sizes += std::format("{}x{} ", w, h);
+			}
+		}
+
+		core::probe::note(std::format(
+		    "    [model] {:<22} tri={:6} mesh={:3} mat={:3} tex={:2} texMB={:6.1f} frame={:4} anim={:2} keyset={:5}  {}",
+		    label, triangleNum, meshNum, MV1GetMaterialNum(handle), textureNum,
+		    static_cast<double>(texturePixels) * 4.0 / (1024.0 * 1024.0),
+		    MV1GetFrameNum(handle), MV1GetAnimNum(handle), MV1GetAnimKeySetNum(handle), sizes));
+	}
 
 	/**
 	 * @brief モデル全マテリアルの環境光反射を白に揃える
@@ -82,6 +123,7 @@ namespace infrastructure::resource::repository
 				}
 				else
 				{
+					dumpModelStats(id, handle);
 					normalizeMaterialAmbient(handle);
 					m_modelHandles[id] = handle;
 				}
@@ -108,6 +150,7 @@ namespace infrastructure::resource::repository
 			return -1;
 		}
 
+		dumpModelStats(id, handle);
 		normalizeMaterialAmbient(handle);
 
 		VECTOR scale = VGet(metadata.scale.x, metadata.scale.y, metadata.scale.z);
@@ -176,6 +219,7 @@ namespace infrastructure::resource::repository
 		}
 		else
 		{
+			dumpModelStats(key, handle);
 			normalizeMaterialAmbient(handle);
 			// パス指定で読むのは配置物（自前生成の立方体）なので、巻き方向に左右されないよう
 			// カリングを切る。キャラクター等のID指定モデルには適用しない
@@ -454,6 +498,10 @@ namespace infrastructure::resource::repository
 			// 敵ごとに攻撃音を変えられるようにするため、数値ではなく文字列で持つ
 			if (j["gameplay"].contains("attackImpactSe"))
 				metadata.stringProperties["attackImpactSe"] = j["gameplay"]["attackImpactSe"];
+
+			// 攻撃が当たる瞬間に出すエフェクトの名前（EffectType.h の EFFECT_TYPE_NAMES に対応）
+			if (j["gameplay"].contains("attackImpactEffect"))
+				metadata.stringProperties["attackImpactEffect"] = j["gameplay"]["attackImpactEffect"];
 		}
 
 		// hard配下はgameplayと同じキー名で書いた値だけを持つ。

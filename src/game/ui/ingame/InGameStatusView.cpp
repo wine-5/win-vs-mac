@@ -81,7 +81,7 @@ namespace game::ui::ingame
 
 		m_uiRenderer.setFont(UI_FONT_NAME);
 		m_uiRenderer.drawText(panelX + padding, panelY + scaled(CAPTION_Y), m_captionText.c_str(),
-		    core::utility::Color::HUD_INK_FAINT, scaled(CAPTION_FONT_SIZE));
+		    core::utility::Color::HUD_INK, scaled(CAPTION_FONT_SIZE));
 
 		// 難易度バッジはパネル右上の角に寄せる。文字幅ぶんだけ左へ戻して右端を揃える
 		const char* difficultyText{ core::data::toText(m_difficulty).data() };

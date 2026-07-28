@@ -33,6 +33,13 @@ namespace infrastructure::graphics
 		DrawTriangle(x1, y1, x2, y2, x3, y3, color, isFilled ? TRUE : FALSE);
 	}
 
+	void UIRenderer::drawLine(int x1, int y1, int x2, int y2, unsigned int color, int thickness)
+	{
+		DrawLineAA(static_cast<float>(x1), static_cast<float>(y1),
+		    static_cast<float>(x2), static_cast<float>(y2),
+		    color, static_cast<float>(thickness));
+	}
+
 	void UIRenderer::drawRoundedBox(int x, int y, int width, int height, int radius, unsigned int color, bool isFilled, int thickness)
 	{
 		// 角の円弧を何分割して描くか。Windows 11の角丸（4〜8px）ならこの程度で十分滑らかになる
@@ -94,5 +101,20 @@ namespace infrastructure::graphics
 		// 第6引数は透過フラグ。PNGのアルファチャンネルを反映するためTRUEにする
 		// （アルファを持たないJPG等は不透明のままなので影響なし）
 		DrawExtendGraph(x, y, x + width, y + height, handle, TRUE);
+	}
+
+	void UIRenderer::setClipArea(int x, int y, int width, int height)
+	{
+		// DxLibの描画可能範囲は右下端を含むため、幅・高さから1引いた座標を渡す
+		SetDrawArea(x, y, x + width - 1, y + height - 1);
+	}
+
+	void UIRenderer::resetClipArea()
+	{
+		int screenWidth{ 0 };
+		int screenHeight{ 0 };
+		int colorBitDepth{ 0 };
+		GetScreenState(&screenWidth, &screenHeight, &colorBitDepth);
+		SetDrawArea(0, 0, screenWidth, screenHeight);
 	}
 } // namespace infrastructure::graphics

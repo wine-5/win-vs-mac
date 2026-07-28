@@ -11,4 +11,7 @@ namespace core::utility
 
 	/// @brief 度をラジアンへ変換する係数（JSONは度で持ち、内部計算はラジアンで行う）
 	constexpr float DEG_TO_RAD{ PI / 180.0f };
+
+	/// @brief ラジアンを度へ変換する係数（度で受け取るAPIへ計算結果を渡すときに使う）
+	constexpr float RAD_TO_DEG{ 180.0f / PI };
 } // namespace core::utility

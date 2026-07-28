@@ -89,6 +89,10 @@ const ParamView = (function () {
         const bonusEl = document.getElementById('b-' + id);
         if (bonusEl) bonusEl.textContent = barData.bonus > 0 ? ('+' + ParamLogic.fmt(barData.bonus)) : '';
 
+        // 初回ガイドで「上がった項目だけ」を残して他を落とすため、伸びた行に印を付ける
+        const rowEl = document.getElementById('bar-base-' + id).closest('.metric-row');
+        if (rowEl) rowEl.classList.toggle('has-bonus', barData.bonus > 0);
+
         if (!firstRender && Math.abs(diff) > 0.001) {
             showFloatChange(id, diff);
             flashBar(id, diff < 0);
@@ -127,6 +131,11 @@ window.onMessageFromGame = function (data) {
     // HARDでは配色を警告色へ切り替える（common.jsの共通処理）
     applyDifficultyTheme(data);
     ParamLogic.onMessageFromGame(data);
+
+    // 初回ガイドが「拡張子で能力が上がる」を説明している間は、
+    // 実際に伸びた項目だけを残して他を灰色に落とし、どこが変わったのかを一目で分からせる
+    if (data.type === 'tutorialHighlight')
+        document.body.classList.toggle('tutorial-highlight-bonus', data.show === true);
 };
 
 (function () {

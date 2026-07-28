@@ -5,6 +5,15 @@ body {
     overflow: hidden;
 }
 
+/* スクロールバーは出さない。Windowsのエクスプローラー風に作っている画面に
+   Chromium既定の灰色のバーが載ると浮くうえ、行の高さが1pxでも変わるたびに
+   バーの有無で中身の幅がずれて、毎フレーム揺れて見える。
+   スクロール自体（ホイール操作）はそのまま効く */
+.file-list::-webkit-scrollbar,
+.tutorial-body::-webkit-scrollbar {
+    display: none;
+}
+
 .exp-toolbar {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
@@ -49,25 +58,15 @@ body {
     gap: 5px;
 }
 
-.file-list-header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: grid;
-    grid-template-columns: 1fr 52px 100px;
-    padding: 4px 12px;
-    font-size: 14px;
-    color: var(--text-muted);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    flex-shrink: 0;
-}
-
 /* 装備スロットとボーナス一覧を縦半分ずつに分ける。
    スロット側を大きく取ると一覧が潰れて、どの拡張子が何を上げるのか読めなくなる */
 .file-list {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+    /* 縦がautoだと横のvisibleもautoに繰り上がり、はみ出した行の分だけ
+       横スクロールバーが出てしまう。横へは送らないので明示的に切る */
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
 }
@@ -84,7 +83,9 @@ body {
 
 .file-row {
     display: grid;
-    grid-template-columns: 1fr 52px 100px;
+    /* ボーナス欄は内容ぶんだけ取る。項目が1つの拡張子ではその分ファイル名を長く出せる。
+       固定幅にすると、アーカイブに合わせた幅を全ての行が持ち続けて名前が無駄に削れる */
+    grid-template-columns: 1fr auto;
     padding: 0 12px;
     cursor: pointer;
     align-items: center;
@@ -94,6 +95,10 @@ body {
     /* 装備中に周回する光の粒（.orbit-dot）の基準にする */
     position: relative;
 }
+
+/* アーカイブは項目が8つあるので、上限を決めないと1行に伸びて名前を潰してしまう。
+   ここで折り返させて、今までどおり2行に収める */
+.file-row > .bonus-entry-val { max-width: 230px; }
 
 .file-row:hover { background: var(--surface-hover); }
 .file-row.selected { background: rgba(0, 120, 212, 0.18); }
@@ -219,7 +224,8 @@ body {
     flex-shrink: 0;
 }
 
-.bonus-text { font-size: 15px; color: var(--text-muted); }
+/* 未選択スロットの「—」。内訳の数値が右端に揃うので、こちらも右に寄せる */
+.bonus-text { font-size: 15px; color: var(--text-muted); text-align: right; }
 .bonus-text.has-bonus { color: #f0c040; font-weight: 600; }
 
 .exp-statusbar {
@@ -252,13 +258,38 @@ body {
     border-bottom: 1px solid var(--border);
 }
 
+/* ここだけはスクロールバーを出す。行が画面に収まりきらず、続きがあることに
+   気づかないまま出撃されてしまうため。常に scroll にして溝を確保し、
+   行数が変わってもバーの有無で中身の幅がずれないようにしている */
 .bonus-panel-list {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: scroll;
     padding: 6px 12px;
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+.bonus-panel-list::-webkit-scrollbar {
+    width: 10px;
+}
+
+.bonus-panel-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+    border-left: 1px solid var(--border);
+}
+
+.bonus-panel-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.26);
+    border-radius: 5px;
+    /* 溝の縁から少し内側に置いて、Windows 11 のバーの細さに近づける */
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.bonus-panel-list::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+    background-clip: content-box;
 }
 
 /* バッジ / 対象拡張子 / ボーナス内訳 の3列。
@@ -403,4 +434,266 @@ body {
     height: 14px;
     accent-color: var(--accent);
     cursor: pointer;
+}
+
+/* ── 初回だけ出る操作ガイド ───────────────────────────────
+   「急にこの画面に来て何をすればいいのか分からない」への対処。
+   各ウィンドウは別々のWebViewで互いに重ねられないため、案内はこのウィンドウ内で完結させる。
+
+   注目させる対象は body のクラスで指定する。装備するたびにファイル一覧は
+   作り直されるので、要素へ直接クラスを付けると光る枠が消えてしまう。
+   覆うオーバーレイではなく透明度を落とす方式にしているのは、
+   案内中でも対象を普通にクリックできるようにするため */
+
+/* 注目していない箇所は薄く落として、目線が対象へ向くようにする */
+body.tutorial-focus-first-slot .file-list .file-slot:not(:first-child),
+body.tutorial-focus-first-slot .bonus-panel,
+body.tutorial-focus-bonus .file-list {
+    opacity: 0.28;
+    transition: opacity 0.25s ease;
+}
+
+/* 光らせる対象。枠と内側の光だけを載せ、操作は妨げない */
+body.tutorial-focus-bonus .bonus-panel {
+    position: relative;
+    outline: 3px solid var(--accent);
+    outline-offset: -3px;
+    animation: tutorial-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes tutorial-glow {
+    0%, 100% { box-shadow: inset 0 0 0 0 rgba(0, 120, 212, 0); }
+    50%      { box-shadow: inset 0 0 30px 0 rgba(0, 120, 212, 0.55); }
+}
+
+/* 1つ目のスロットは「ここを押す」と気づいてもらう必要があるので、他より強く脈打たせる。
+   拡大（transform: scale）は使わない。行がスクロール領域（.file-list）の幅を超えて
+   横スクロールバーが明滅してしまうため、はみ出さない outline と box-shadow だけで表現する */
+body.tutorial-focus-first-slot .file-list .file-slot:first-child .file-row {
+    position: relative;
+    z-index: 1;
+    outline: 3px solid var(--accent);
+    outline-offset: -3px;
+    animation: tutorial-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes tutorial-pulse {
+    0%, 100% {
+        outline-color: rgba(0, 120, 212, 0.45);
+        box-shadow: inset 0 0 0 0 rgba(0, 120, 212, 0);
+    }
+    50% {
+        outline-color: rgba(80, 180, 255, 1);
+        box-shadow: inset 0 0 46px 0 rgba(0, 120, 212, 0.75),
+                    inset 0 0 0 3px rgba(80, 180, 255, 0.55);
+    }
+}
+
+/* 文字と余白はウィンドウ幅（vw）に追従させる。
+   Debugの小さいウィンドウとリリースのフルスクリーンで同じ見え方にするため、
+   固定pxではなく clamp(最小, ウィンドウ比, 最大) で指定する */
+.tutorial-tip {
+    position: fixed;
+    left: 1.5vw;
+    right: 1.5vw;
+    /* 既定は画面下端。対象の枠を持つ段では JS（layoutTip）が top を上書きして
+       枠の真下へ寄せるため、矢印が指す先と対象がずれない */
+    bottom: 4vh;
+    z-index: 50;
+    /* 枠の外へ出す矢印を切り取らせないため、ここでは隠さない。
+       長文であふれる可能性がある本文側だけをスクロールさせる */
+    overflow: visible;
+    background: rgba(20, 20, 22, 0.98);
+    border: clamp(2px, 0.35vw, 3px) solid var(--accent);
+    border-radius: clamp(6px, 1vw, 10px);
+    padding: clamp(10px, 2.2vw, 28px) clamp(12px, 2.6vw, 32px);
+    /* 出たあとも青い光がゆっくり明滅し続ける。
+       止まった枠のままだと画面に馴染んでしまい、読まれないまま見過ごされる */
+    animation: tutorial-tip-in 0.28s ease-out,
+               tutorial-tip-glow 2.2s ease-in-out 0.28s infinite;
+}
+
+@keyframes tutorial-tip-glow {
+    0%, 100% {
+        box-shadow: 0 10px 44px rgba(0, 0, 0, 0.8),
+                    0 0 0 0 rgba(0, 150, 255, 0);
+    }
+    50% {
+        box-shadow: 0 10px 44px rgba(0, 0, 0, 0.8),
+                    0 0 34px 5px rgba(0, 150, 255, 0.6);
+    }
+}
+
+/* 案内の対象が画面下端の一覧そのものになる段では、隠さないよう上へ回す */
+.tutorial-tip.at-top {
+    top: 8vh;
+    bottom: auto;
+}
+
+@keyframes tutorial-tip-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* STEP表示は塗りつぶしのバッジにする。文字色だけだと背景に沈んで見出しに埋もれる */
+.tutorial-step {
+    display: inline-block;
+    font-size: clamp(12px, 2.8vw, 24px);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: #fff;
+    background: var(--accent);
+    padding: clamp(2px, 0.5vw, 5px) clamp(8px, 1.6vw, 16px);
+    border-radius: 999px;
+    margin-bottom: clamp(4px, 0.9vw, 10px);
+}
+
+.tutorial-title {
+    font-size: clamp(20px, 5.4vw, 48px);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text);
+    margin-bottom: clamp(5px, 1.1vw, 12px);
+}
+
+.tutorial-body {
+    font-size: clamp(15px, 3.8vw, 34px);
+    line-height: 1.55;
+    color: var(--text);
+    max-height: 40vh;
+    overflow-y: auto;
+}
+
+.tutorial-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: clamp(6px, 1.3vw, 14px);
+    margin-top: clamp(8px, 2vw, 22px);
+}
+
+.tutorial-skip,
+.tutorial-next {
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: clamp(13px, 3vw, 27px);
+    padding: clamp(6px, 1.3vw, 13px) clamp(12px, 2.7vw, 30px);
+    cursor: pointer;
+}
+
+.tutorial-skip {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+}
+
+.tutorial-skip:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+}
+
+.tutorial-next {
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: #fff;
+}
+
+.tutorial-next:hover { background: var(--accent-hover); }
+
+/* ── 光っている対象を指す矢印 ──
+   案内と対象が離れていると視線がつながらないので、軸と頭を持つ矢印で結ぶ。
+   段によって案内の位置が上下入れ替わるため、向きも合わせて切り替える。
+   ::before が軸、::after が頭。跳ねる動きで視線を対象へ往復させる */
+body.tutorial-focus-first-slot .tutorial-tip::before,
+body.tutorial-focus-bonus .tutorial-tip::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    width: clamp(4px, 0.8vw, 7px);
+    height: clamp(26px, 5vw, 46px);
+    margin-left: clamp(-3.5px, -0.4vw, -2px);
+    background: var(--accent);
+    box-shadow: 0 0 12px rgba(0, 150, 255, 0.8);
+    animation: tutorial-arrow-bounce 1.2s ease-in-out infinite;
+}
+
+body.tutorial-focus-first-slot .tutorial-tip::after,
+body.tutorial-focus-bonus .tutorial-tip::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    margin-left: clamp(-20px, -2.2vw, -12px);
+    border-left: clamp(12px, 2.2vw, 20px) solid transparent;
+    border-right: clamp(12px, 2.2vw, 20px) solid transparent;
+    filter: drop-shadow(0 0 10px rgba(0, 150, 255, 0.8));
+    animation: tutorial-arrow-bounce 1.2s ease-in-out infinite;
+}
+
+/* 対象が上（1つ目のスロット）にある段：案内の上へ上向きの矢印を伸ばす */
+body.tutorial-focus-first-slot .tutorial-tip::before {
+    bottom: 100%;
+    margin-bottom: clamp(6px, 1.2vw, 11px);
+}
+
+body.tutorial-focus-first-slot .tutorial-tip::after {
+    bottom: 100%;
+    margin-bottom: clamp(30px, 6vw, 55px);
+    border-bottom: clamp(16px, 3vw, 28px) solid var(--accent);
+}
+
+/* 対象が左（デスクトップの「ルール説明.txt」）にある段：
+   このウィンドウの外にあるので、案内の左を空けてそこへ横向きの矢印を伸ばす */
+body.tutorial-focus-rules .tutorial-tip {
+    left: 18vw;
+}
+
+body.tutorial-focus-rules .tutorial-tip::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-right: clamp(6px, 1.2vw, 11px);
+    width: clamp(26px, 5vw, 46px);
+    height: clamp(4px, 0.8vw, 7px);
+    margin-top: clamp(-3.5px, -0.4vw, -2px);
+    background: var(--accent);
+    box-shadow: 0 0 12px rgba(0, 150, 255, 0.8);
+    animation: tutorial-arrow-bounce-left 1.2s ease-in-out infinite;
+}
+
+body.tutorial-focus-rules .tutorial-tip::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    margin-right: clamp(30px, 6vw, 55px);
+    margin-top: clamp(-20px, -2.2vw, -12px);
+    border-top: clamp(12px, 2.2vw, 20px) solid transparent;
+    border-bottom: clamp(12px, 2.2vw, 20px) solid transparent;
+    border-right: clamp(16px, 3vw, 28px) solid var(--accent);
+    filter: drop-shadow(0 0 10px rgba(0, 150, 255, 0.8));
+    animation: tutorial-arrow-bounce-left 1.2s ease-in-out infinite;
+}
+
+/* 左向きの段は横に跳ねる。上下の段と動きの意味をそろえる */
+@keyframes tutorial-arrow-bounce-left {
+    0%, 100% { opacity: 0.6; transform: translateX(0); }
+    50%      { opacity: 1;   transform: translateX(-6px); }
+}
+
+/* 対象が下（拡張子ボーナス一覧）にある段：案内の下へ下向きの矢印を伸ばす */
+body.tutorial-focus-bonus .tutorial-tip::before {
+    top: 100%;
+    margin-top: clamp(6px, 1.2vw, 11px);
+}
+
+body.tutorial-focus-bonus .tutorial-tip::after {
+    top: 100%;
+    margin-top: clamp(30px, 6vw, 55px);
+    border-top: clamp(16px, 3vw, 28px) solid var(--accent);
+}
+
+/* 対象の側へ跳ねる。向きは上下どちらでも同じ動きで通じる */
+@keyframes tutorial-arrow-bounce {
+    0%, 100% { opacity: 0.6; transform: translateY(0); }
+    50%      { opacity: 1;   transform: translateY(-6px); }
 }

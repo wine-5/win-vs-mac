@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "core/utility/Vector3.h"
 #include "core/constant/SeType.h"
+#include "core/constant/EffectType.h"
 
 namespace game::component::combat
 {
@@ -49,6 +50,11 @@ namespace game::component::combat
 		// 同じ斬撃エフェクトを縦振りと水平回転で使い分けるために使う
 		core::Vector3 m_effectRotationOffset{};
 
+		// 振り始めに出すエフェクト。攻撃を要求した側が「どう振ったか」に応じて入れ、
+		// AttackSystem が AttackStartEvent へそのまま載せる。Noneなら演出無し。
+		// 近接コンボの段ごとに別々の斬撃エフェクトを出し分けるために持つ
+		core::constant::EffectType m_startEffectType{ core::constant::EffectType::None };
+
 		// 振り始めに鳴らすSE。攻撃を要求した側が「どう振ったか」に応じて入れ、
 		// AttackSystem が AttackStartEvent へそのまま載せる。Noneなら無音。
 		// 近接コンボの段ごとに振り音を変えるために使う
@@ -58,5 +64,17 @@ namespace game::component::combat
 		// 無しの攻撃では発動と同時に鳴る。地面を叩きつける攻撃の着弾音のように、
 		// 「振り始め」ではなく「当たる瞬間」に置きたい音のために持つ。Noneなら無音
 		core::constant::SeType m_impactSeType{ core::constant::SeType::None };
+
+		// ダメージ判定が成立する瞬間に出すエフェクト。地面を叩きつける攻撃の土煙のように、
+		// 「振り始め」ではなく「当たる瞬間」に置きたい演出のために持つ。Noneなら演出無し
+		core::constant::EffectType m_impactEffectType{ core::constant::EffectType::None };
+
+		// 着弾エフェクトを当たる瞬間より何秒早く出すか。エフェクトは絵が育つまでに間があるため、
+		// 音と同時に出すと土煙が立ち上がる頃には叩きつけが終わっている。0なら当たる瞬間ちょうど
+		float m_impactEffectLead{ 0.0f };
+
+		// このワインドアップ中に着弾エフェクトを出し終えたか。
+		// 先出しは1回だけにしたいので、振りごとにAttackSystemが倒す
+		bool m_hasPlayedImpactEffect{ false };
 	};
 } // namespace game::component::combat

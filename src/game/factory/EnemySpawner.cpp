@@ -31,6 +31,9 @@ namespace
 	}
 } // namespace
 
+#include <format>
+#include "core/utility/Probe.h" // 一時: メモリ調査用（原因特定後に削除）
+
 namespace game::factory
 {
 	EnemySpawner::EnemySpawner(
@@ -94,8 +97,12 @@ namespace game::factory
 	void EnemySpawner::spawnStageEnemies()
 	{
 		const auto& stage{ m_resourceManager.getStageMetadata() };
+		int index{ 0 };
 		for (const auto& spawn : stage.m_spawns)
+		{
 			this->spawn(constant::toEnemyType(spawn.m_type), spawn.m_position, spawn.m_rotationY);
+			core::probe::mark(std::format("      enemy[{}] {}", index++, spawn.m_type));
+		}
 	}
 
 	void EnemySpawner::returnEnemy(constant::EnemyType type, core::ecs::EntityId entityId, int modelHandle)

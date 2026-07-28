@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiniMap Prototype — InGame HUD</title>
+<style>
+  :root {
+    --ink: #EAF1FB;
+    --ink-faint: #5E708A;
+    --accent: #0078D4;
+    --panel-bg: rgba(14, 20, 32, 0.72);
+    --panel-border: rgba(140, 170, 210, 0.18);
+    --danger: #E81123;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: #05070C; overflow: hidden; }
+  body {
+    font-family: "Segoe UI", "Yu Gothic UI", sans-serif;
+    color: var(--ink);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 14px; padding: 16px;
+  }
+
+  /* ---- 16:9 のゲーム画面モック ---- */
+  #screen {
+    position: relative;
+    width: min(100vw - 32px, (100vh - 210px) * 16 / 9);
+    aspect-ratio: 16 / 9;
+    background: radial-gradient(ellipse at 50% 60%, #0A1220 0%, #05070C 70%);
+    border: 1px solid #1A2434;
+    overflow: hidden;
+    flex: none;
+  }
+  /* 奥行きの雰囲気づけ（ゲーム画面の代わり） */
+  #screen::after {
+    content: ""; position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(90deg, rgba(0,120,212,0.05) 0 1px, transparent 1px 64px),
+      repeating-linear-gradient(0deg, rgba(0,120,212,0.05) 0 1px, transparent 1px 64px);
+    mask-image: linear-gradient(to bottom, transparent 40%, #000 100%);
+    pointer-events: none;
+  }
+
+  .hud { position: absolute; pointer-events: none; }
+  .panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    backdrop-filter: blur(2px);
+  }
+
+  /* 左上：目標 */
+  #objective { left: 2.6%; top: 2.6%; padding: 1.0% 1.4%; }
+  #objective .cap { font-size: 0.72em; color: var(--ink-faint); letter-spacing: .08em; }
+  #objective .num { font-family: "Cascadia Mono", Consolas, monospace; font-size: 2.1em; line-height: 1.1; }
+  #objective .det { font-size: 0.78em; color: #9BB0CC; }
+
+  /* 左下：ステータス */
+  #status { left: 2.6%; bottom: 2.6%; width: 22.4%; padding: 1.1% 1.3%; }
+  #status .row1 { display: flex; justify-content: space-between; align-items: baseline; }
+  #status .lbl { font-size: 0.8em; letter-spacing: .06em; }
+  #status .hp { font-family: "Cascadia Mono", Consolas, monospace; font-size: 0.8em; }
+  #status .bar { height: 9px; border-radius: 5px; background: rgba(255,255,255,.08); margin: 7px 0 9px; }
+  #status .bar > i { display: block; height: 100%; width: 74%; border-radius: 5px; background: #36D07B; }
+  #status .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+  #status .stat { display: flex; align-items: center; gap: 5px; }
+  #status .stat b {
+    width: 21px; height: 21px; border-radius: 5px; flex: none;
+    background: rgba(0,120,212,.22); border: 1px solid rgba(0,120,212,.5);
+  }
+  #status .stat span { font-family: "Cascadia Mono", Consolas, monospace; font-size: 0.82em; }
+
+  /* 右下：装備スロット */
+  #equip { right: 2.6%; bottom: 2.6%; display: flex; gap: 1.0%; }
+  #equip div {
+    width: 4.8vw; max-width: 62px; aspect-ratio: 1;
+    background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 4px;
+  }
+
+  /* 中央：レティクル */
+  #reticle {
+    left: 50%; top: 50%; width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px;
+    background: var(--ink); border-radius: 50%;
+    box-shadow: 0 0 0 6px transparent, 0 0 8px rgba(234,241,251,.6);
+  }
+
+  /* 右上：ミニマップ本体 */
+  #minimapWrap { right: 2.6%; top: 2.6%; }
+  #minimap { display: block; }
+  #mapmeta {
+    margin-top: 5px; text-align: right;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 0.68em; color: var(--ink-faint); letter-spacing: .04em;
+  }
+
+  /* ---- 操作パネル ---- */
+  #controls {
+    display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
+    justify-content: center; max-width: 1100px;
+    font-size: 12px; color: #9BB0CC;
+  }
+  #controls fieldset {
+    border: 1px solid #1E2A3C; border-radius: 6px; padding: 6px 10px 8px;
+    display: flex; gap: 8px; align-items: center;
+  }
+  #controls legend { padding: 0 5px; font-size: 10px; color: var(--ink-faint); letter-spacing: .08em; }
+  #controls button {
+    background: #101827; color: #C9D4E3; border: 1px solid #253248;
+    border-radius: 4px; padding: 5px 11px; font: inherit; cursor: pointer;
+  }
+  #controls button:hover { border-color: var(--accent); }
+  #controls button.on { background: rgba(0,120,212,.28); border-color: var(--accent); color: #fff; }
+  #controls label { display: flex; align-items: center; gap: 6px; }
+  #controls input[type=range] { width: 118px; }
+  #hint {
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 11px; color: var(--ink-faint); text-align: center;
+  }
+  #hint b { color: #9BB0CC; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div id="screen">
+  <div class="hud panel" id="objective">
+    <div class="cap">目標</div>
+    <div class="num">3</div>
+    <div class="det">体 倒すと Mac が出現</div>
+  </div>
+
+  <div class="hud panel" id="status">
+    <div class="row1"><span class="lbl">PLAYER STATUS</span><span class="hp">HP 740 / 1000</span></div>
+    <div class="bar"><i></i></div>
+    <div class="stats">
+      <div class="stat"><b></b><span>1000</span></div>
+      <div class="stat"><b></b><span>30</span></div>
+      <div class="stat"><b></b><span>10</span></div>
+      <div class="stat"><b></b><span>300</span></div>
+    </div>
+  </div>
+
+  <div class="hud" id="equip"><div></div><div></div><div></div></div>
+  <div class="hud" id="reticle"></div>
+
+  <div class="hud" id="minimapWrap">
+    <canvas id="minimap"></canvas>
+    <div id="mapmeta">— m</div>
+  </div>
+</div>
+
+<div id="controls">
+  <fieldset>
+    <legend>向き</legend>
+    <button id="btnRotate" class="on">回転式（自分が上）</button>
+    <button id="btnNorth">北固定</button>
+  </fieldset>
+  <fieldset>
+    <legend>形</legend>
+    <button id="btnCircle" class="on">円</button>
+    <button id="btnRound">角丸</button>
+  </fieldset>
+  <fieldset>
+    <legend>大きさ・範囲</legend>
+    <label>サイズ <input id="size" type="range" min="120" max="320" value="200"></label>
+    <label>範囲 <input id="range" type="range" min="1500" max="9000" step="250" value="4000"></label>
+  </fieldset>
+  <fieldset>
+    <legend>表示</legend>
+    <button id="btnLayer" class="on">高さで絞る</button>
+    <button id="btnClamp" class="on">範囲外を縁に</button>
+    <button id="btnGrid">方位</button>
+  </fieldset>
+</div>
+
+<div id="hint">
+  <b>WASD</b> 移動 ／ <b>Q E</b> または <b>ドラッグ</b> で旋回 ／ <b>Shift</b> ダッシュ
+</div>
+
+<script>
+// ============================================================================
+// ステージ実データ（assets/data/stage-test.json の床・敵配置から抜粋）
+// ============================================================================
+const STAGE = {"grounds":[{"t":"floor_desktop","p":[50,-12,337.4],"s":[2000,24,2000],"r":0},{"t":"floor_desktop","p":[475.3,-596.9,5236.1],"s":[1849.5,24,2800],"r":0},{"t":"floor_desktop","p":[2350,-596.9,5733.4],"s":[1900,24,1000],"r":0},{"t":"floor_desktop","p":[3800,-596.9,5733.4],"s":[1000,24,1000],"r":0},{"t":"path_corridor","p":[6800,-821.5,11010.4],"s":[1000,24,2000],"r":0},{"t":"floor_memory","p":[6800,-1046.2,12487.5],"s":[1000,24,1000],"r":0},{"t":"path_conveyor","p":[3322.2,-744.9,9552.9],"s":[1000,24,2000],"r":-90},{"t":"floor_memory","p":[851.3,-1496.7,11082.1],"s":[1000,24,1000],"r":0},{"t":"floor_memory","p":[851.3,-1496.7,12082.1],"s":[1000,24,1000],"r":0},{"t":"floor_memory","p":[-648.7,-1496.7,12082.1],"s":[2000,24,1000],"r":0},{"t":"floor_memory","p":[-2148.7,-1496.7,12082.1],"s":[1000,24,1000],"r":0},{"t":"floor_memory","p":[-5040.8,-596.7,12074.5],"s":[1200,24,1015.1],"r":0},{"t":"floor_memory","p":[-2148.7,-1496.7,13782.1],"s":[1000,24,2400],"r":0},{"t":"floor_memory","p":[-2148.7,-1496.7,15482.1],"s":[1000,24,1000],"r":0},{"t":"path_corridor","p":[-2148.7,-1789.1,17248.8],"s":[1000,24,2600],"r":0},{"t":"floor_memory","p":[-2148.7,-2081.6,20315.5],"s":[3800,24,3600],"r":0},{"t":"path_corridor","p":[-2148.7,-2377.3,23370.7],"s":[1000,24,2632.6],"r":0},{"t":"floor_apple","p":[-2148.7,-2666.4,26206],"s":[3100,24,3100],"r":0},{"t":"path_corridor","p":[50.5,-304.7,2566.7],"s":[1000,24,2600],"r":0},{"t":"path_conveyor","p":[-3544.8,-1046.7,12082.1],"s":[1000,20,2000],"r":90},{"t":"floor_desktop","p":[4800,-596.9,5733.4],"s":[1000,24,1000],"r":0},{"t":"floor_desktop","p":[5800,-596.9,5733.4],"s":[1000,24,1000],"r":0},{"t":"floor_desktop","p":[6800,-596.9,5733.4],"s":[1000,24,1000],"r":0},{"t":"floor_desktop","p":[7700,-596.9,8633.4],"s":[2800,24,2800],"r":0},{"t":"floor_desktop","p":[6800,-596.9,6733.4],"s":[1000,24,1000],"r":0},{"t":"floor_memory","p":[5800,-1046.2,12487.5],"s":[1000,24,1000],"r":0},{"t":"floor_memory","p":[4800,-1046.2,12487.5],"s":[1000,24,1000],"r":0},{"t":"path_conveyor","p":[4800,-785,11020.2],"s":[1000,20,2000],"r":0},{"t":"floor_memory","p":[4800,-523.8,9552.9],"s":[1000,24,1000],"r":0},{"t":"path_conveyor","p":[1343.4,-1190.2,9552.9],"s":[1000,24,2093.6],"r":-90},{"t":"floor_memory","p":[-148.7,-1496.7,10082.1],"s":[1000,24,1000],"r":0},{"t":"floor_memory","p":[-148.7,-1496.7,11052.1],"s":[1000,24,1000],"r":0},{"t":"floor_memory","p":[-148.7,-1496.7,9082.1],"s":[1000,24,1000],"r":0}],
+"spawns":[{"t":"safari","p":[6709.4,527.3,8223.9]},{"t":"safari","p":[7598.2,527.3,7868.6]},{"t":"xcode","p":[100,-584.9,4869.4]},{"t":"xcode","p":[-2148.7,-1484.7,13682.1]},{"t":"safari","p":[-3148.7,-2069.6,19915.5]},{"t":"safari","p":[-1048.7,-2069.6,20615.5]},{"t":"safari","p":[-2448.7,-2069.6,21415.5]},{"t":"safari","p":[-1748.7,-2069.6,19215.5]},{"t":"xcode","p":[-1648.7,-2069.6,19415.5]},{"t":"xcode","p":[-3448.7,-2069.6,21015.5]},{"t":"xcode","p":[-2007.9,-2417.2,26562.6]},{"t":"xcode","p":[6698.4,-1034.2,12462.9]},{"t":"xcode","p":[700,-1241.1,10691.2]},{"t":"xcode","p":[3852,-584.9,5774.4]}],
+"mac":{"p":[-2148.7,-2654.4,27341.3]},
+"start":{"position":[0,0,324.68]}};
+
+// stageCatalog.json の editorColor に合わせた床の色
+const FLOOR_COLORS = {
+  floor_desktop:  "#0067C0",
+  floor_memory:   "#3FB950",
+  floor_apple:    "#C9CDD6",
+  path_corridor:  "#0078D4",
+  path_conveyor:  "#00B7C3",
+};
+
+// ---------------------------------------------------------------------------
+// 状態
+// ---------------------------------------------------------------------------
+const opt = {
+  rotate: true,      // 回転式（自分の向きが上）
+  circle: true,      // 円形にくり抜く
+  size: 200,         // ミニマップの一辺（px・1080p基準相当）
+  range: 4000,       // 端までのワールド距離（ユニット）
+  layerFilter: true, // 自分の高さから離れた床を隠す
+  clamp: true,       // 範囲外の敵を縁に貼り付ける
+  compass: false,    // 方位を出す
+};
+
+const player = { x: STAGE.start.position[0], y: 0, z: STAGE.start.position[2], yaw: 0 };
+const keys = {};
+// 高さで絞るときの許容差。上下の階層を拾わない程度に、坂ぶんは残す
+const LAYER_TOLERANCE = 700;
+
+addEventListener("keydown", e => { keys[e.key.toLowerCase()] = true; });
+addEventListener("keyup",   e => { keys[e.key.toLowerCase()] = false; });
+
+// ドラッグで旋回
+let dragging = false, lastX = 0;
+const screenEl = document.getElementById("screen");
+screenEl.addEventListener("mousedown", e => { dragging = true; lastX = e.clientX; });
+addEventListener("mouseup", () => dragging = false);
+addEventListener("mousemove", e => {
+  if (!dragging) return;
+  player.yaw += (e.clientX - lastX) * 0.006;
+  lastX = e.clientX;
+});
+
+// ---------------------------------------------------------------------------
+// 自機の高さを、真下にある床から求める（GroundingSystem と同じ考え方）
+// ---------------------------------------------------------------------------
+function groundHeightAt(x, z) {
+  let best = null;
+  for (const g of STAGE.grounds) {
+    const rad = -g.r * Math.PI / 180;
+    const dx = x - g.p[0], dz = z - g.p[2];
+    const lx = dx * Math.cos(rad) - dz * Math.sin(rad);
+    const lz = dx * Math.sin(rad) + dz * Math.cos(rad);
+    if (Math.abs(lx) > g.s[0] / 2 || Math.abs(lz) > g.s[2] / 2) continue;
+    const top = g.p[1] + g.s[1] / 2;
+    if (best === null || top > best) best = top;
+  }
+  return best;
+}
+
+function update(dt) {
+  const speed = (keys["shift"] ? 900 : 340) * dt;
+  let mx = 0, mz = 0;
+  if (keys["w"]) mz += 1;
+  if (keys["s"]) mz -= 1;
+  if (keys["d"]) mx += 1;
+  if (keys["a"]) mx -= 1;
+  if (keys["q"]) player.yaw -= 1.8 * dt;
+  if (keys["e"]) player.yaw += 1.8 * dt;
+
+  const len = Math.hypot(mx, mz);
+  if (len > 0) {
+    mx /= len; mz /= len;
+    // カメラ相対（yaw基準）へ変換
+    const s = Math.sin(player.yaw), c = Math.cos(player.yaw);
+    player.x += (mx * c + mz * s) * speed;
+    player.z += (-mx * s + mz * c) * speed;
+  }
+  const h = groundHeightAt(player.x, player.z);
+  if (h !== null) player.y = h;
+}
+
+// ---------------------------------------------------------------------------
+// ミニマップ描画
+// ---------------------------------------------------------------------------
+const canvas = document.getElementById("minimap");
+const ctx = canvas.getContext("2d");
+
+/** ワールド座標 → マップ中心からのピクセル差分 */
+function toMap(wx, wz, scale) {
+  let dx = wx - player.x;
+  let dz = wz - player.z;
+  if (opt.rotate) {
+    // 自分の向きが上に来るよう逆回転させる
+    const s = Math.sin(player.yaw), c = Math.cos(player.yaw);
+    const rx = dx * c - dz * s;
+    const rz = dx * s + dz * c;
+    dx = rx; dz = rz;
+  }
+  // 画面のY下方向とワールドの+Zを合わせる（奥が上）
+  return { x: dx * scale, y: -dz * scale };
+}
+
+function drawMinimap() {
+  const dpr = devicePixelRatio || 1;
+  const size = opt.size;
+  canvas.width = size * dpr; canvas.height = size * dpr;
+  canvas.style.width = size + "px"; canvas.style.height = size + "px";
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, size, size);
+
+  const cx = size / 2, cy = size / 2;
+  const radius = size / 2;
+  const scale = radius / opt.range; // 端 = opt.range ユニット
+
+  // --- 下地 ---
+  ctx.save();
+  ctx.beginPath();
+  if (opt.circle) ctx.arc(cx, cy, radius - 1, 0, Math.PI * 2);
+  else roundRect(ctx, 1, 1, size - 2, size - 2, 8);
+  ctx.closePath();
+  ctx.fillStyle = "rgba(10,15,24,0.78)";
+  ctx.fill();
+  ctx.clip(); // ここから先は枠の内側だけに描く
+
+  // --- 床 ---
+  for (const g of STAGE.grounds) {
+    const top = g.p[1] + g.s[1] / 2;
+    let alpha = 1;
+    if (opt.layerFilter) {
+      const diff = Math.abs(top - player.y);
+      if (diff > LAYER_TOLERANCE * 2) continue;            // 別階層は描かない
+      if (diff > LAYER_TOLERANCE) alpha = 0.28;            // 上り下りの先はうっすら
+    }
+    const c = toMap(g.p[0], g.p[2], scale);
+    const w = g.s[0] * scale, h = g.s[2] * scale;
+    // 画面外の床は早めに捨てる（実装時もこの間引きを入れる）
+    if (Math.hypot(c.x, c.y) > radius + Math.max(w, h)) continue;
+
+    ctx.save();
+    ctx.translate(cx + c.x, cy + c.y);
+    // 床自身の向きとマップ全体の回転を同じ符号で掛ける。
+    // ここの符号を取り違えると、床だけがマップと逆向きに自転して見える
+    ctx.rotate(-(g.r * Math.PI / 180) - (opt.rotate ? player.yaw : 0));
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = FLOOR_COLORS[g.t] || "#4A5A70";
+    ctx.globalAlpha = alpha * 0.30;
+    ctx.fillRect(-w / 2, -h / 2, w, h);
+    ctx.globalAlpha = alpha * 0.85;
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = FLOOR_COLORS[g.t] || "#4A5A70";
+    ctx.strokeRect(-w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+
+  // --- 敵 ---
+  for (const s of STAGE.spawns) {
+    if (opt.layerFilter && Math.abs(s.p[1] - player.y) > LAYER_TOLERANCE * 2) continue;
+    drawMarker(toMap(s.p[0], s.p[2], scale), cx, cy, radius, "#E81123", 3.2);
+  }
+  // --- ボス ---
+  drawMarker(toMap(STAGE.mac.p[0], STAGE.mac.p[2], scale), cx, cy, radius, "#FFC83D", 5, true);
+
+  ctx.restore(); // クリップ解除
+
+  // --- 自機（常に中心） ---
+  ctx.save();
+  ctx.translate(cx, cy);
+  if (!opt.rotate) ctx.rotate(player.yaw); // 北固定のときは矢印のほうが回る
+  ctx.beginPath();
+  ctx.moveTo(0, -7); ctx.lineTo(5, 6); ctx.lineTo(0, 3); ctx.lineTo(-5, 6);
+  ctx.closePath();
+  ctx.fillStyle = "#EAF1FB";
+  ctx.fill();
+  ctx.restore();
+
+  // --- 枠 ---
+  ctx.beginPath();
+  if (opt.circle) ctx.arc(cx, cy, radius - 1, 0, Math.PI * 2);
+  else roundRect(ctx, 1, 1, size - 2, size - 2, 8);
+  ctx.strokeStyle = "rgba(140,170,210,0.30)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // --- 方位（回転式のときだけ意味がある） ---
+  if (opt.compass) {
+    const northAngle = opt.rotate ? -player.yaw : 0;
+    const nx = cx + Math.sin(northAngle) * (radius - 12);
+    const ny = cy - Math.cos(northAngle) * (radius - 12);
+    ctx.fillStyle = "#8CAAD2";
+    ctx.font = "10px 'Cascadia Mono', monospace";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("N", nx, ny);
+  }
+
+  document.getElementById("mapmeta").textContent =
+    `半径 ${(opt.range / 100).toFixed(0)} m ／ Y ${player.y.toFixed(0)}`;
+}
+
+/** 敵・ボスの点。範囲外は縁に貼り付けて方向だけ示す */
+function drawMarker(c, cx, cy, radius, color, size, isBoss = false) {
+  const dist = Math.hypot(c.x, c.y);
+  let x = c.x, y = c.y, outside = false;
+  if (dist > radius - 6) {
+    if (!opt.clamp) return;
+    const k = (radius - 6) / dist;
+    x *= k; y *= k; outside = true;
+  }
+  ctx.save();
+  ctx.translate(cx + x, cy + y);
+  ctx.fillStyle = color;
+  ctx.globalAlpha = outside ? 0.55 : 1;
+  if (isBoss) {
+    // ボスだけ菱形にして雑魚と一目で区別する
+    ctx.beginPath();
+    ctx.moveTo(0, -size); ctx.lineTo(size, 0); ctx.lineTo(0, size); ctx.lineTo(-size, 0);
+    ctx.closePath();
+    ctx.fill();
+  } else {
+    ctx.beginPath();
+    ctx.arc(0, 0, size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function roundRect(c, x, y, w, h, r) {
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+}
+
+// ---------------------------------------------------------------------------
+// 操作パネル
+// ---------------------------------------------------------------------------
+function bindToggle(idOn, idOff, key) {
+  const a = document.getElementById(idOn), b = document.getElementById(idOff);
+  a.onclick = () => { opt[key] = true;  a.classList.add("on");  b.classList.remove("on"); };
+  b.onclick = () => { opt[key] = false; b.classList.add("on");  a.classList.remove("on"); };
+}
+bindToggle("btnRotate", "btnNorth", "rotate");
+bindToggle("btnCircle", "btnRound", "circle");
+
+function bindFlag(id, key) {
+  const el = document.getElementById(id);
+  el.onclick = () => { opt[key] = !opt[key]; el.classList.toggle("on", opt[key]); };
+}
+bindFlag("btnLayer", "layerFilter");
+bindFlag("btnClamp", "clamp");
+bindFlag("btnGrid", "compass");
+
+document.getElementById("size").oninput  = e => opt.size  = +e.target.value;
+document.getElementById("range").oninput = e => opt.range = +e.target.value;
+
+// ---------------------------------------------------------------------------
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+  update(dt);
+  drawMinimap();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

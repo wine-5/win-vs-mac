@@ -7,6 +7,7 @@
 #include "game/component/combat/ProjectileComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/constant/Tag.h"
+#include "game/utility/GroundQuery.h"
 #include "core/utility/Rotation.h"
 #include <cmath>
 #include <algorithm>
@@ -15,8 +16,6 @@ namespace
 {
 	// 面がこの高さまで上にあれば「今立っている面」とみなす（小さな段差を登れる猶予）
 	constexpr float STEP_TOLERANCE{ 40.0f };
-	// 天面がほぼ垂直な面は床として扱わない
-	constexpr float MIN_UP_NORMAL{ 0.0001f };
 	// 死亡中の敵が着地で反発する係数（CollisionSystemと揃える）
 	constexpr float DEATH_BOUNCE_RESTITUTION{ 0.5f };
 	// これより落下速度が遅くなったらバウンドをやめて静止させる
@@ -27,9 +26,12 @@ namespace
 	constexpr float MAX_SLIDE_SPEED{ 1800.0f };
 	// 滑らない足場に移ったとき、残った滑り速度が減衰する割合（毎秒）
 	constexpr float SLIDE_DECAY_PER_SEC{ 6.0f };
-	// 最後に立っていた場所からこれ以上下がったら、奈落へ落ちたとみなして引き戻す。
-	// 坂や段差による正規の落差より十分大きくとる
-	constexpr float FALL_LIMIT{ 1200.0f };
+	// 動く歩道に乗ったとき、運ぶ速度へ寄っていく割合（毎秒）。
+	// 即座に合わせると乗った瞬間に弾かれたように見えるので少しだけ滑らかにする
+	constexpr float CONVEYOR_BLEND_PER_SEC{ 8.0f };
+	// 流れと同じ向きへ進もうとしているときに、運ぶ速度へ上乗せする割合。
+	// 「流れに乗ると速い」を出すための後押しで、逆走側には掛けない
+	constexpr float CONVEYOR_ASSIST_RATIO{ 0.5f };
 } // namespace
 
 namespace game::system::movement
@@ -37,24 +39,6 @@ namespace game::system::movement
 	GroundingSystem::GroundingSystem(core::ecs::ComponentManager& componentManager)
 	    : m_componentManager{ componentManager }
 	{
-	}
-
-	bool GroundingSystem::recoverFromFall(core::ecs::EntityId riderId,
-	    component::movement::TransformComponent& transform,
-	    component::movement::VelocityComponent& velocity) const
-	{
-		auto* recovery{ m_componentManager.tryGet<component::movement::FallRecoveryComponent>(riderId) };
-		if (recovery == nullptr || !recovery->m_hasSafePosition)
-			return false;
-
-		// 深く潜るステージなので、絶対的な高さではなく「最後の足場からの落差」で見る
-		if (recovery->m_lastSafePosition.y - transform.m_position.y < FALL_LIMIT)
-			return false;
-
-		transform.m_position = recovery->m_lastSafePosition;
-		velocity.m_velocity = core::Vector3{};
-		velocity.m_externalVelocity = core::Vector3{};
-		return true;
 	}
 
 	void GroundingSystem::updateSlide(component::movement::VelocityComponent& velocity,
@@ -89,35 +73,45 @@ namespace game::system::movement
 		}
 	}
 
-	bool GroundingSystem::surfaceHeightAt(core::ecs::EntityId surfaceId, float x, float z,
-	    float& outHeight, core::Vector3& outNormal) const
+	void GroundingSystem::updateConveyor(component::movement::VelocityComponent& velocity,
+	    const core::Vector3& conveyorVelocity, float deltaTime) const
 	{
-		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(surfaceId) };
+		const float blend{ std::min(CONVEYOR_BLEND_PER_SEC * deltaTime, 1.0f) };
+
+		// 流れと同じ向きへ進もうとしているぶんだけ、運ぶ速度を上乗せする。
+		// 揃っていれば最大、直交で0、逆走なら上乗せしない（流れに逆らう重さは残す）。
+		// 入力側の速度（m_velocity）はMoveSystemがこのフレームで入れた値を読む
+		core::Vector3 target{ conveyorVelocity };
+		const float beltSpeed{ std::sqrt(conveyorVelocity.x * conveyorVelocity.x +
+			                             conveyorVelocity.z * conveyorVelocity.z) };
+		const float inputSpeed{ std::sqrt(velocity.m_velocity.x * velocity.m_velocity.x +
+			                              velocity.m_velocity.z * velocity.m_velocity.z) };
+		if (beltSpeed > 0.0f && inputSpeed > 0.0f)
+		{
+			const float alignment{ (velocity.m_velocity.x * conveyorVelocity.x +
+				                       velocity.m_velocity.z * conveyorVelocity.z) /
+				                   (beltSpeed * inputSpeed) };
+			if (alignment > 0.0f)
+				target = conveyorVelocity * (1.0f + CONVEYOR_ASSIST_RATIO * alignment);
+		}
+
+		velocity.m_externalVelocity.x += (target.x - velocity.m_externalVelocity.x) * blend;
+		velocity.m_externalVelocity.z += (target.z - velocity.m_externalVelocity.z) * blend;
+	}
+
+	core::Vector3 GroundingSystem::conveyorVelocityOf(core::ecs::EntityId surfaceId) const
+	{
 		const auto& surface{ m_componentManager.get<component::movement::GroundSurfaceComponent>(surfaceId) };
+		if (surface.m_conveyorSpeed == 0.0f)
+			return core::Vector3{};
 
-		const core::Vector3& center{ transform.m_position };
-		const core::Vector3& rotation{ transform.m_rotation };
-		const core::Vector3 halfSize{ surface.m_size * 0.5f };
-
-		// 天面の法線と、天面上の一点（箱の中心から真上へ半分ずらした点）を回転で求める
-		const core::Vector3 normal{ core::utility::rotateEulerXYZ(core::Vector3{ 0.0f, 1.0f, 0.0f }, rotation) };
-		if (std::abs(normal.y) < MIN_UP_NORMAL)
-			return false;
-
-		const core::Vector3 top{ center + core::utility::rotateEulerXYZ(core::Vector3{ 0.0f, halfSize.y, 0.0f }, rotation) };
-
-		// 平面 normal・(p - top) = 0 を y について解く
-		const float height{ top.y - (normal.x * (x - top.x) + normal.z * (z - top.z)) / normal.y };
-
-		// 求めた接地点を配置物のローカル座標へ戻し、箱の範囲内かを見る
-		const core::Vector3 local{ core::utility::inverseRotateEulerXYZ(
-			core::Vector3{ x - center.x, height - center.y, z - center.z }, rotation) };
-		if (std::abs(local.x) > halfSize.x || std::abs(local.z) > halfSize.z)
-			return false;
-
-		outHeight = height;
-		outNormal = normal;
-		return true;
+		// 運ぶ向きは面のローカル+Z（配置物の長辺）をワールドへ回したもの。
+		// 「坂を下る向き」ではなく面自身の向きなので、配置をY180度回すだけで逆走にできる。
+		// テクスチャの流れる向きもローカル+Zに合わせてあるため、見た目と一致する
+		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(surfaceId) };
+		const core::Vector3 forward{ core::utility::rotateEulerXYZ(
+			core::Vector3{ 0.0f, 0.0f, 1.0f }, transform.m_rotation) };
+		return forward * surface.m_conveyorSpeed;
 	}
 
 	void GroundingSystem::update(float deltaTime)
@@ -142,10 +136,6 @@ namespace game::system::movement
 			auto& transform{ m_componentManager.get<component::movement::TransformComponent>(riderId) };
 			auto& velocity{ m_componentManager.get<component::movement::VelocityComponent>(riderId) };
 
-			// 奈落へ落ちていたら、直前に立っていた場所へ戻す
-			if (recoverFromFall(riderId, transform, velocity))
-				continue;
-
 			// モデル原点が足元なので、足の高さ＝positionのY
 			const float foot{ transform.m_position.y };
 
@@ -155,38 +145,38 @@ namespace game::system::movement
 				reach += -velocity.m_velocity.y * deltaTime;
 
 			// 足元にある面のうち最も高いものを選ぶ
-			bool found{ false };
-			float bestHeight{ 0.0f };
-			core::Vector3 bestNormal{ 0.0f, 1.0f, 0.0f };
+			const auto ground{ utility::findGround(m_componentManager,
+				transform.m_position.x, transform.m_position.z, foot + reach) };
+
+			const bool found{ ground.has_value() };
+			const float bestHeight{ found ? ground->m_height : 0.0f };
+			const core::Vector3 bestNormal{ found ? ground->m_normal : core::Vector3{ 0.0f, 1.0f, 0.0f } };
 			float bestSlideAccel{ 0.0f };
-			for (const auto surfaceId : surfaces)
+			core::Vector3 bestConveyor{};
+			if (found)
 			{
-				float height{ 0.0f };
-				core::Vector3 normal{};
-				if (!surfaceHeightAt(surfaceId, transform.m_position.x, transform.m_position.z, height, normal))
-					continue;
-				if (height > foot + reach)
-					continue; // 頭上の面（別階層の床など）は無視する
-				if (!found || height > bestHeight)
-				{
-					found = true;
-					bestHeight = height;
-					bestNormal = normal;
-					bestSlideAccel = m_componentManager
-					                     .get<component::movement::GroundSurfaceComponent>(surfaceId)
-					                     .m_slideAccel;
-				}
+				bestSlideAccel = m_componentManager
+				                     .get<component::movement::GroundSurfaceComponent>(ground->m_surfaceId)
+				                     .m_slideAccel;
+				bestConveyor = conveyorVelocityOf(ground->m_surfaceId);
 			}
 
 			// 足元の床の高さを共有する。浮遊敵はこれを基準にホバー高度を決める
 			velocity.m_hasGroundHeight = found;
 			velocity.m_groundHeight = found ? bestHeight : 0.0f;
 
-			// 接地している面に応じて滑り速度を更新する（空中では減衰させる）
+			// 接地している面に応じて外力を更新する（空中では減衰させる）
 			const bool isStanding{ found && foot <= bestHeight + STEP_TOLERANCE };
 			velocity.m_isGrounded = isStanding; // ジャンプの可否判定用にPhysicsSystemへ伝える
-			updateSlide(velocity, isStanding ? bestNormal : core::Vector3{ 0.0f, 1.0f, 0.0f },
-			    isStanding ? bestSlideAccel : 0.0f, deltaTime);
+
+			// 動く歩道は運ぶ速度そのものが外力になるため、滑りとは併用せず排他にする。
+			// 両方効かせると坂の下り勾配ぶんだけ速度が上乗せされ、データの値と挙動が合わなくなる
+			const bool onConveyor{ isStanding && (bestConveyor.x != 0.0f || bestConveyor.z != 0.0f) };
+			if (onConveyor)
+				updateConveyor(velocity, bestConveyor, deltaTime);
+			else
+				updateSlide(velocity, isStanding ? bestNormal : core::Vector3{ 0.0f, 1.0f, 0.0f },
+				    isStanding ? bestSlideAccel : 0.0f, deltaTime);
 
 			// 面より下に沈んでいるときだけ持ち上げる。引き下げないので
 			// 障害物（Box）の上に立っている状態を壊さない

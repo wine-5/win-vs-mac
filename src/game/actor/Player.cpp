@@ -14,6 +14,7 @@
 #include "game/component/visual/HitEffectComponent.h"
 #include "game/component/visual/EffectComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
+#include "game/component/combat/PlayerStatsComponent.h"
 #include "game/component/camera/CameraComponent.h"
 #include "game/component/visual/LightComponent.h"
 #include "game/component/camera/CameraEffectComponent.h"
@@ -39,6 +40,7 @@ namespace game::actor
 		componentManager.add<component::movement::VelocityComponent>(m_entity.getId(), {});
 		componentManager.add<component::movement::InputComponent>(m_entity.getId(), {});
 		// 床の縁から落ちても詰まないよう、直前に立っていた場所へ戻せるようにする
+		// （戻すのと落下ダメージはFallOutSystemが担う）
 		componentManager.add<component::movement::FallRecoveryComponent>(m_entity.getId(), {});
 
 		// アニメーションクリップは playerData.json の animations 配列で定義する。
@@ -80,6 +82,13 @@ namespace game::actor
 		componentManager.add<component::combat::ColliderComponent>(m_entity.getId(), collider);
 
 		componentManager.add<component::combat::PlayerChargeComponent>(m_entity.getId(), {});
+
+		// 移動速度と弾の性能。弾の性能は弾定義（projectileData.json）と突き合わせて決まるため、
+		// ここでは移動速度だけを入れ、残りは組み立て側（InGame）が続けて書き込む
+		component::combat::PlayerStatsComponent stats{};
+		stats.m_moveSpeed = playerData.getMoveSpeed();
+		componentManager.add<component::combat::PlayerStatsComponent>(m_entity.getId(), stats);
+
 		// プレイヤーに追従する点光源。虚無の中で自機が沈まないようにしつつ、
 		// 「自機が周囲を照らす」演出も兼ねる。頭上に置いて上から当てる
 		component::visual::LightComponent light{};

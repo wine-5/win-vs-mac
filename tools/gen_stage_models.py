@@ -39,7 +39,8 @@ MANIFEST = [
     ("BlockRecycleBin",  "BlockRecycleBin.png"),
     ("WallExplorer",     "WallExplorer.png"),
     # ② System32（システム深層）
-    ("FloorTerminal",    "FloorTerminal.png"),
+    ("FloorMemory",      "FloorMemory.png"),
+    ("WallTerminal",     "WallTerminal.png"),
     ("BlockDll",         "BlockDll.png"),
     ("BlockExe",         "BlockExe.png"),
     ("WallRegistry",     "WallRegistry.png"),

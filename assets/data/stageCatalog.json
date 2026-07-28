@@ -23,6 +23,29 @@
       "scrollV": 0.0
     },
     {
+      "id": "path_conveyor",
+      "displayName": "動く歩道",
+      "model": "assets/model/stage/PathCorridor.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#00B7C3",
+      "collider": "ground",
+      "defaultSize": [
+        1000,
+        20,
+        2000
+      ],
+      "texture": "assets/model/stage/PathCorridor.png",
+      "textureTile": 800,
+      "slideAccel": 0.0,
+      "conveyorSpeed": 400.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
       "id": "floor_apple",
       "displayName": "アリーナ床",
       "model": "assets/model/stage/FloorApple.mqo",
@@ -155,9 +178,9 @@
       "scrollV": 0.0
     },
     {
-      "id": "floor_terminal",
-      "displayName": "ターミナル床",
-      "model": "assets/model/stage/FloorTerminal.mqo",
+      "id": "floor_memory",
+      "displayName": "メモリマップ床",
+      "model": "assets/model/stage/FloorMemory.mqo",
       "baseSize": [
         100,
         100,
@@ -170,8 +193,30 @@
         20,
         1000
       ],
-      "texture": "assets/model/stage/FloorTerminal.png",
-      "textureTile": 600,
+      "texture": "assets/model/stage/FloorMemory.png",
+      "textureTile": 1400,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
+      "id": "wall_terminal",
+      "displayName": "ターミナル壁",
+      "model": "assets/model/stage/WallTerminal.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#3FB950",
+      "collider": "box",
+      "defaultSize": [
+        1600,
+        900,
+        40
+      ],
+      "texture": "assets/model/stage/WallTerminal.png",
+      "textureTile": 0,
       "slideAccel": 0.0,
       "scrollU": 0.0,
       "scrollV": 0.0
@@ -283,6 +328,29 @@
       ],
       "texture": "assets/model/stage/GateUac.png",
       "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
+      "id": "slope_boss",
+      "displayName": "ボス坂(出現でせり上がり)",
+      "model": "assets/model/stage/PathCorridor.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#E81123",
+      "collider": "ground",
+      "role": "bossGate",
+      "defaultSize": [
+        800,
+        20,
+        2000
+      ],
+      "texture": "assets/model/stage/PathCorridor.png",
+      "textureTile": 800,
       "slideAccel": 0.0,
       "scrollU": 0.0,
       "scrollV": 0.0

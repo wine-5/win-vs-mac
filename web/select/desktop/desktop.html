@@ -10,9 +10,13 @@
     <div class="desktop-area">
         <canvas id="matrix-bg"></canvas>
 
-        <!-- デスクトップアイコン -->
+        <!--
+            デスクトップアイコン。
+            1列に並べると縦に伸びて、Debugの小さいウィンドウでは下の難易度ウィンドウに隠れる。
+            4 / 3 / 4 の3列に分けて、どの解像度でも全アイコンが見えるようにしている
+        -->
         <div class="desktop-icons">
-            <!-- 左列: 標準 Windows アプリ -->
+            <!-- 1列目: 標準 Windows アプリ -->
             <div class="icon-column">
                 <div class="desk-icon" ondblclick="launchApp('cmd')">
                     <img src="https://assets.game.web/images/ui/app/cmdIcon.png" alt="">
@@ -31,7 +35,7 @@
                     <span>ごみ箱</span>
                 </div>
             </div>
-            <!-- 右列: ゲーム設定 -->
+            <!-- 2列目: ゲームの設定ウィンドウ -->
             <div class="icon-column">
                 <div class="desk-icon" ondblclick="toggleWindow('diff')">
                     <img src="https://assets.game.web/images/ui/app/diff.png" alt="">
@@ -45,9 +49,31 @@
                     <img src="https://assets.game.web/images/ui/app/param.png" alt="">
                     <span>パラメータ</span>
                 </div>
-                <div class="desk-icon" ondblclick="toggleWindow('rules')">
+            </div>
+            <!-- 3列目: 説明と、この画面の出口。ルール説明は初回ガイドの締めで指し示すので先頭へ置く。
+                 セレクト画面ではEscのポーズメニューを開けないため、
+                 タイトルへ戻る／終了はここが唯一の入口になる -->
+            <div class="icon-column">
+                <div class="desk-icon" id="icon-rules" ondblclick="toggleWindow('rules')">
                     <img src="https://assets.game.web/images/ui/app/Rules.png" alt="">
                     <span>ルール説明.txt</span>
+                </div>
+                <!-- 右下のボタンに気づかない人のための2つ目の入口。
+                     出撃の確認は C++ 側（Win32のダイアログ）が出す。
+                     ここでHTMLのモーダルを出しても、他のウィンドウは別HWNDなので
+                     その背面に回ってしまい、確認として機能しない -->
+                <div class="desk-icon" id="icon-start" ondblclick="startGame()">
+                    <img src="https://assets.game.web/images/ui/icons/gameicon.ico" alt="">
+                    <span>ゲーム開始.exe</span>
+                </div>
+                <!-- 戻る／終了の確認も同じ理由で C++ 側のダイアログに任せる -->
+                <div class="desk-icon" ondblclick="backToTitle()">
+                    <img src="https://assets.game.web/images/ui/app/home.png" alt="">
+                    <span>タイトルへ戻る</span>
+                </div>
+                <div class="desk-icon" ondblclick="quitGame()">
+                    <span class="desk-icon-emoji">⏻</span>
+                    <span>シャットダウン</span>
                 </div>
             </div>
         </div>
@@ -67,12 +93,21 @@
         </div>
 
         <div class="taskbar-right">
+            <!-- デスクトップアイコンと同じ出口をタスクバーにも置く。
+                 ウィンドウを開いたままアイコンが隠れても、ここから抜けられる -->
+            <div class="taskbar-app" data-tooltip="タイトルへ戻る" onclick="backToTitle()">
+                <img class="app-icon" src="https://assets.game.web/images/ui/app/home.png">
+            </div>
+            <div class="taskbar-app" data-tooltip="シャットダウン" onclick="quitGame()">
+                <span class="taskbar-glyph">⏻</span>
+            </div>
             <div class="clock" id="clock">00:00<br>--/--</div>
             <button class="start-btn" onclick="startGame()">ゲームを開始 →</button>
         </div>
     </div>
 
     <script src="common/messaging.js"></script>
+    <script src="common/ui-sound.js"></script>
     <script src="select/desktop/desktop-logic.js"></script>
     <script src="select/desktop/desktop-view.js"></script>
 </body>

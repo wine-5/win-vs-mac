@@ -4,18 +4,23 @@
 #include "core/ecs/Entity.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "core/interface/IInputProvider.h"
+#include <string>
 #include <vector>
 
 namespace game::system::visual
 {
 	/**
-	 * @brief インゲーム開始時の「READY → FIGHT!」演出を担うSystem
+	 * @brief インゲーム開始時の「ミッション提示 → READY → FIGHT!」演出を担うSystem
 	 *
 	 * シーンに入った瞬間から戦闘が始まってしまうと、プレイヤーは状況を把握する前に
-	 * 敵に詰め寄られる。開始直後に一拍おいて「これから戦闘が始まる」と宣言するための演出。
+	 * 敵に詰め寄られる。開始直後に一拍おいて「何をすればいいのか」「これから戦闘が始まる」を
+	 * 順に伝えるための演出。
 	 *
-	 * タイムラインは ①READY（操作ロック・敵AI停止）→ ②FIGHT!（この瞬間に操作解禁）
-	 * → ③FIGHT!のフェードアウト（この間はもう動ける）の3段。
+	 * タイムラインは ①ミッション提示（画面中央・入力があるまで待つ）→ ②左上のObjectiveViewへ
+	 * 流れていく → ③READY → ④FIGHT!（この瞬間に操作解禁）→ ⑤FIGHT!のフェードアウトの5段。
+	 * ①で入力を待つのは、読み終える速さが人によって違い、固定秒数では誰かに合わないため。
+	 * 待たずにいつでも先へ進める（読み終えた人・2周目以降を待たせない）。
 	 * 文字の描画はInGameViewの描画フェーズから呼ばれる。
 	 */
 	class BattleStartSystem : public core::ecs::ISystem
@@ -26,11 +31,13 @@ namespace game::system::visual
 		 * @param componentManager ComponentManagerの参照
 		 * @param uiRenderer UI描画のインターフェース
 		 * @param screen 画面サイズ取得のインターフェース
+		 * @param inputProvider 入力取得のインターフェース（ミッション提示を進める操作を読む）
 		 * @param playerId 操作ロックの対象（プレイヤー）EntityID
 		 */
 		BattleStartSystem(core::ecs::ComponentManager& componentManager,
 		    core::iface::IUIRenderer& uiRenderer,
 		    core::iface::IScreen& screen,
+		    core::iface::IInputProvider& inputProvider,
 		    core::ecs::EntityId playerId);
 
 		/**
@@ -52,7 +59,23 @@ namespace game::system::visual
 		 */
 		[[nodiscard]] bool isPreparing() const noexcept;
 
+		/**
+		 * @brief 左上の目標表示（ObjectiveView）を出してよい段階かどうかを返す
+		 *
+		 * ミッションが中央から左上へ流れ着くまでは、同じ内容が2箇所に出ないよう伏せておく
+		 * @return 流れ着いていればtrue
+		 */
+		[[nodiscard]] bool isObjectiveRevealed() const noexcept;
+
 	  private:
+		/** @brief 開始演出の進行段階 */
+		enum class Phase
+		{
+			Mission, // ミッションを中央に見せ、入力を待つ
+			Fly,     // ミッションが左上のObjectiveViewの位置へ流れていく
+			Battle   // READY → FIGHT!（従来の演出）
+		};
+
 		/**
 		 * @brief 1080p基準で書いた寸法を、実際の画面高さに合わせて拡縮する
 		 * @param value 1080p基準のピクセル数
@@ -67,6 +90,33 @@ namespace game::system::visual
 		void setGameplayLocked(bool isLocked);
 
 		/**
+		 * @brief ミッション提示（中央のカード＋一拍おいて出る操作プロンプト）を描画する
+		 */
+		void drawMission();
+
+		/**
+		 * @brief ミッションが中央から左上へ流れていく途中を描画する
+		 */
+		void drawMissionFly();
+
+		/**
+		 * @brief ミッションのカードと文字を、指定の中心・拡大率・濃さで描画する
+		 * @param centerX カードの中心X（ピクセル）
+		 * @param centerY カードの中心Y（ピクセル）
+		 * @param scale 拡大率（1.0で中央表示時の大きさ）
+		 * @param alphaRate 濃さ（0.0〜1.0）
+		 */
+		void drawMissionCard(int centerX, int centerY, float scale, float alphaRate);
+
+		/**
+		 * @brief ミッション提示を先へ進める操作が行われたかを返す
+		 *
+		 * マウスの押下エッジを内部で更新するため、1フレームに1回だけ呼ぶこと
+		 * @return Enter / Space / マウス左クリックのいずれかが押された瞬間ならtrue
+		 */
+		[[nodiscard]] bool isAdvanceRequested();
+
+		/**
 		 * @brief READYの文字（フェードイン→ホールド→フェードアウト）を描画する
 		 */
 		void drawReady();
@@ -79,11 +129,24 @@ namespace game::system::visual
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
+		core::iface::IInputProvider& m_inputProvider;
 		core::ecs::EntityId m_playerId;
 
-		float m_elapsedTime{ 0.0f }; // 演出開始からの経過時間（秒）
-		bool m_isPlaying{ true };    // 演出中かどうか（構築と同時に始まる）
-		bool m_isLocked{ true };     // 操作ロック中かどうか
+		Phase m_phase{ Phase::Mission }; // 現在の段階
+		float m_phaseTime{ 0.0f };       // 現在の段階に入ってからの経過時間（秒）
+		float m_elapsedTime{ 0.0f };     // READY/FIGHT!のタイムライン上の経過時間（秒）
+		bool m_isPlaying{ true };        // 演出中かどうか（構築と同時に始まる）
+		bool m_isLocked{ true };         // 操作ロック中かどうか
+
+		// マウス左ボタンは押下エッジを自前で取る（IInputProviderは押下状態しか返さない）。
+		// シーンへ入る前のクリックを押しっぱなしと見なして即スキップしないよう、押下状態から始める
+		bool m_wasMouseLeftDown{ true };
+
+		// DxLibの描画はShift_JISを期待するため、ソース上のUTF-8日本語をそのまま渡すと文字化けする。
+		// 変換結果は毎フレーム同じなので生成時に一度だけ変換して保持する
+		std::string m_missionText{};
+		std::string m_missionDetailText{};
+		std::string m_promptText{};
 
 		// 演出中に止めた敵のID。解禁時にこれらだけを再開させる（無関係な敵を巻き込まない）
 		std::vector<core::ecs::EntityId> m_suspendedEnemyIds{};

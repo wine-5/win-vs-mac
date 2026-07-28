@@ -1,4 +1,4 @@
-#include "BattleStartSystem.h"
+﻿#include "BattleStartSystem.h"
 #include "game/component/movement/InputComponent.h"
 #include "game/component/ai/AIComponent.h"
 #include "core/utility/Color.h"
@@ -6,6 +6,9 @@
 #include "core/constant/SeType.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IAudioManager.h"
+#include "core/interface/IStringConverter.h"
+#include "core/utility/MathConstants.h"
+#include "core/utility/Probe.h" // 一時: メモリ調査用（原因特定後に削除）
 #include <algorithm>
 #include <cmath>
 
@@ -13,6 +16,18 @@ namespace
 {
 	// 基準解像度。レイアウトの数値はすべてこの高さのときのピクセル数として書く
 	constexpr int BASE_SCREEN_HEIGHT{ 1080 };
+
+	// --- ミッション提示のタイムライン（秒） ---
+	constexpr float MISSION_FADE_IN{ 0.40f };     // ミッションのカードが浮かび上がる
+	constexpr float MISSION_PROMPT_DELAY{ 2.0f }; // 「Enterで開始」が出るまでの間（読む時間）
+	constexpr float MISSION_PROMPT_FADE_IN{ 0.35f };
+	constexpr float MISSION_FLY_TIME{ 0.55f }; // 中央から左上へ流れ着くまでの時間
+
+	// 流れ着く先（左上のObjectiveViewのパネル中心・1080p基準）。
+	// ObjectiveView側のPANEL_MARGIN/WIDTH/HEIGHTと同じ値から中心を求めている
+	constexpr int OBJECTIVE_PANEL_MARGIN{ 28 };
+	constexpr int OBJECTIVE_PANEL_WIDTH{ 330 };
+	constexpr int OBJECTIVE_PANEL_HEIGHT{ 104 };
 
 	// --- タイムライン（秒。先頭からの累積で区切る） ---
 	constexpr float READY_FADE_IN{ 0.35f };  // READYが浮かび上がる
@@ -31,6 +46,39 @@ namespace
 	// 「Windowsの内部」という世界観に合わせ、システムメッセージのような等幅＋字間で見せる
 	constexpr const char* READY_TEXT{ "R E A D Y" };
 	constexpr const char* FIGHT_TEXT{ "F I G H T !" };
+
+	constexpr const char* UI_FONT_NAME{ "Noto Sans JP" };
+
+	// ミッションの文面。左上のObjectiveViewと同じ目標を、初見でも分かる言い回しで先に伝える
+	constexpr const char* MISSION_CAPTION{ "MISSION" };
+	constexpr const char* MISSION_TEXT{ "敵をすべて撃破せよ" };
+	constexpr const char* MISSION_DETAIL_TEXT{ "全滅させると現れるボス「Mac」も撃破せよ" };
+	constexpr const char* MISSION_PROMPT_TEXT{ "クリック / Enter / Space で開始" };
+
+	// ミッションのカード（中央・1080p基準）
+	constexpr int MISSION_CARD_WIDTH{ 1000 };
+	constexpr int MISSION_CARD_HEIGHT{ 250 };
+	constexpr int MISSION_CAPTION_FONT_SIZE{ 24 };
+	constexpr int MISSION_FONT_SIZE{ 60 };
+	constexpr int MISSION_DETAIL_FONT_SIZE{ 27 };
+	constexpr int MISSION_CAPTION_OFFSET_Y{ -92 }; // カード中心からの相対位置
+	constexpr int MISSION_TEXT_OFFSET_Y{ -34 };
+	constexpr int MISSION_DETAIL_OFFSET_Y{ 50 };
+	constexpr int MISSION_CARD_ALPHA{ 205 };
+	constexpr int MISSION_ACCENT_THICKNESS{ 3 }; // 見出しの下に引くアクセント線
+
+	// プロンプト（カードの下）。明るい床の上でも読めるよう、暗い帯を敷いた上に載せる
+	constexpr int MISSION_PROMPT_FONT_SIZE{ 30 };
+	constexpr int MISSION_PROMPT_GAP{ 40 }; // カード下端から帯の上端までの間隔
+	constexpr int MISSION_PROMPT_PADDING_X{ 32 };
+	constexpr int MISSION_PROMPT_PADDING_Y{ 14 };
+	constexpr int MISSION_PROMPT_BAND_ALPHA{ 200 };
+	constexpr int MISSION_PROMPT_BAND_MIN_ALPHA{ 60 };
+	constexpr float MISSION_PROMPT_BLINK_CYCLE{ 1.8f };
+	constexpr int MISSION_PROMPT_MIN_ALPHA{ 70 };
+
+	// 流れていく間の縮小率（流れ着いた時点の大きさ）
+	constexpr float MISSION_FLY_END_SCALE{ 0.42f };
 
 	constexpr int TEXT_CENTER_Y_RATIO_PERCENT{ 40 }; // 文字の中心の高さ（画面高さに対する％）
 	constexpr int READY_FONT_SIZE{ 52 };
@@ -69,15 +117,30 @@ namespace game::system::visual
 	BattleStartSystem::BattleStartSystem(core::ecs::ComponentManager& componentManager,
 	    core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
+	    core::iface::IInputProvider& inputProvider,
 	    core::ecs::EntityId playerId)
 	    : m_componentManager{ componentManager }
 	    , m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
+	    , m_inputProvider{ inputProvider }
 	    , m_playerId{ playerId }
+	    , m_missionText{ MISSION_TEXT }
+	    , m_missionDetailText{ MISSION_DETAIL_TEXT }
+	    , m_promptText{ MISSION_PROMPT_TEXT }
 	{
 		// Systemの登録順に関係なく初回フレームから止めたいので、update待ちではなくここでロックする
 		setGameplayLocked(true);
 
+		// DxLibの描画はShift_JISを期待する。ソース上のUTF-8をそのまま渡すと日本語が化けるため、
+		// ここで一度だけ変換しておく
+		if (auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() })
+		{
+			m_missionText = converter->utf8ToShiftJis(m_missionText);
+			m_missionDetailText = converter->utf8ToShiftJis(m_missionDetailText);
+			m_promptText = converter->utf8ToShiftJis(m_promptText);
+		}
+
+		// ミッション提示の出だしに鳴らす。READYの合図と同じ音で「これから始まる」を揃える
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio)
 			audio->playSe(core::constant::SeType::BattleReady);
@@ -86,6 +149,22 @@ namespace game::system::visual
 	bool BattleStartSystem::isPreparing() const noexcept
 	{
 		return m_isLocked;
+	}
+
+	bool BattleStartSystem::isObjectiveRevealed() const noexcept
+	{
+		return m_phase == Phase::Battle;
+	}
+
+	bool BattleStartSystem::isAdvanceRequested()
+	{
+		const bool isMouseLeftDown{ m_inputProvider.isMouseLeftPressed() };
+		const bool isMouseLeftClicked{ isMouseLeftDown && !m_wasMouseLeftDown };
+		m_wasMouseLeftDown = isMouseLeftDown;
+
+		return m_inputProvider.isKeyPressed(core::input::KeyCode::Enter) ||
+		       m_inputProvider.isKeyPressed(core::input::KeyCode::Space) ||
+		       isMouseLeftClicked;
 	}
 
 	int BattleStartSystem::scaled(int value) const
@@ -129,13 +208,41 @@ namespace game::system::visual
 		if (!m_isPlaying)
 			return;
 
+		m_phaseTime += deltaTime;
+
+		// ミッションを読み終えるまでREADYへ進まない。フェードインの途中で飛ばすと
+		// 何が出たのか分からないまま消えるため、出し切ってから入力を受け付ける
+		if (m_phase == Phase::Mission)
+		{
+			if (m_phaseTime >= MISSION_FADE_IN && isAdvanceRequested())
+			{
+				m_phase = Phase::Fly;
+				m_phaseTime = 0.0f;
+			}
+			return;
+		}
+
+		// 左上へ流れ着いたらREADYを始める。ここでObjectiveViewの表示も解禁される
+		if (m_phase == Phase::Fly)
+		{
+			if (m_phaseTime >= MISSION_FLY_TIME)
+			{
+				m_phase = Phase::Battle;
+				m_phaseTime = 0.0f;
+			}
+			return;
+		}
+
 		m_elapsedTime += deltaTime;
 
 		// FIGHT!が出た瞬間に操作と敵AIを解禁する。文字が消えるのを待たせると、
 		// もう動けるのか分からない空白の時間ができる
 		if (m_isLocked && m_elapsedTime >= FIGHT_TIME)
 		{
+			// 一時: 敵AI解禁の前後を挟んで、解禁そのものが確保しているのかを見る（原因特定後に削除）
+			core::probe::mark("  カウントダウン: 解禁 前");
 			setGameplayLocked(false);
+			core::probe::mark("  カウントダウン: 解禁 後");
 
 			auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 			if (audio)
@@ -151,10 +258,139 @@ namespace game::system::visual
 		if (!m_isPlaying)
 			return;
 
+		if (m_phase == Phase::Mission)
+		{
+			drawMission();
+			return;
+		}
+
+		if (m_phase == Phase::Fly)
+		{
+			drawMissionFly();
+			return;
+		}
+
 		if (m_elapsedTime < FIGHT_TIME)
 			drawReady();
 		else
 			drawFight();
+	}
+
+	void BattleStartSystem::drawMissionCard(int centerX, int centerY, float scale, float alphaRate)
+	{
+		if (alphaRate <= 0.0f)
+			return;
+
+		auto scaledBy = [&](int value)
+		{ return static_cast<int>(scaled(value) * scale); };
+
+		const int cardWidth{ scaledBy(MISSION_CARD_WIDTH) };
+		const int cardHeight{ scaledBy(MISSION_CARD_HEIGHT) };
+		const int cardX{ centerX - cardWidth / 2 };
+		const int cardY{ centerY - cardHeight / 2 };
+
+		// 下地。HudPanelは濃さを引数に取らないので、ブレンドを掛けた状態で描かせる
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+		    static_cast<int>(MISSION_CARD_ALPHA * alphaRate));
+		m_uiRenderer.drawBox(cardX, cardY, cardWidth, cardHeight, core::utility::Color::BLACK, true);
+
+		const int textAlpha{ static_cast<int>(255 * alphaRate) };
+		const int captionFontSize{ scaledBy(MISSION_CAPTION_FONT_SIZE) };
+		const int missionFontSize{ scaledBy(MISSION_FONT_SIZE) };
+		const int detailFontSize{ scaledBy(MISSION_DETAIL_FONT_SIZE) };
+
+		// 見出し（等幅）＋その下のアクセント線。「システムからの指令」という体裁にする
+		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, textAlpha);
+		const int captionWidth{ m_uiRenderer.getTextWidth(MISSION_CAPTION, captionFontSize) };
+		const int captionY{ centerY + scaledBy(MISSION_CAPTION_OFFSET_Y) };
+		m_uiRenderer.drawText(centerX - captionWidth / 2, captionY, MISSION_CAPTION,
+		    core::utility::Color::HUD_ACCENT, captionFontSize);
+		m_uiRenderer.resetFont();
+
+		const int accentThickness{ std::max(1, scaledBy(MISSION_ACCENT_THICKNESS)) };
+		m_uiRenderer.drawBox(centerX - captionWidth / 2, captionY + captionFontSize + accentThickness,
+		    captionWidth, accentThickness, core::utility::Color::HUD_ACCENT, true);
+
+		// 本文と補足
+		m_uiRenderer.setFont(UI_FONT_NAME);
+		const int missionWidth{ m_uiRenderer.getTextWidth(m_missionText.c_str(), missionFontSize) };
+		m_uiRenderer.drawText(centerX - missionWidth / 2, centerY + scaledBy(MISSION_TEXT_OFFSET_Y),
+		    m_missionText.c_str(), core::utility::Color::HUD_INK, missionFontSize);
+
+		const int detailWidth{ m_uiRenderer.getTextWidth(m_missionDetailText.c_str(), detailFontSize) };
+		m_uiRenderer.drawText(centerX - detailWidth / 2, centerY + scaledBy(MISSION_DETAIL_OFFSET_Y),
+		    m_missionDetailText.c_str(), core::utility::Color::HUD_INK_FAINT, detailFontSize);
+		m_uiRenderer.resetFont();
+		m_uiRenderer.resetBlendMode();
+	}
+
+	void BattleStartSystem::drawMission()
+	{
+		const float alphaRate{ smoothstep(m_phaseTime / MISSION_FADE_IN) };
+		const int centerX{ m_screen.getWidth() / 2 };
+		const int centerY{ m_screen.getHeight() * TEXT_CENTER_Y_RATIO_PERCENT / 100 };
+
+		drawMissionCard(centerX, centerY, 1.0f, alphaRate);
+
+		// 操作プロンプトは一拍おいてから出す。カードと同時に出すと目線が下へ流れ、
+		// 肝心のミッションを読まないまま進まれてしまう
+		if (m_phaseTime < MISSION_PROMPT_DELAY)
+			return;
+
+		const float promptTime{ m_phaseTime - MISSION_PROMPT_DELAY };
+		const float promptFade{ smoothstep(promptTime / MISSION_PROMPT_FADE_IN) };
+
+		// ゆっくりフェードイン・フェードアウトを繰り返して「入力を待っている」ことを示す。
+		// 帯も文字と一緒に濃さを変える（帯だけ残ると黒い箱が貼り付いて見える）
+		const float blink{ 0.5f + 0.5f * std::cos(promptTime / MISSION_PROMPT_BLINK_CYCLE * core::utility::TWO_PI) };
+		const int promptAlpha{ static_cast<int>(
+			(MISSION_PROMPT_MIN_ALPHA + (255 - MISSION_PROMPT_MIN_ALPHA) * blink) * promptFade) };
+		const int bandAlpha{ static_cast<int>(
+			(MISSION_PROMPT_BAND_MIN_ALPHA +
+			    (MISSION_PROMPT_BAND_ALPHA - MISSION_PROMPT_BAND_MIN_ALPHA) * blink) *
+			promptFade) };
+
+		const int promptFontSize{ scaled(MISSION_PROMPT_FONT_SIZE) };
+
+		m_uiRenderer.setFont(UI_FONT_NAME);
+		const int promptWidth{ m_uiRenderer.getTextWidth(m_promptText.c_str(), promptFontSize) };
+
+		// 床が明るいステージでは文字だけだと沈む。文字の後ろに暗い帯を敷いて必ず読めるようにする
+		const int paddingX{ scaled(MISSION_PROMPT_PADDING_X) };
+		const int paddingY{ scaled(MISSION_PROMPT_PADDING_Y) };
+		const int bandWidth{ promptWidth + paddingX * 2 };
+		const int bandHeight{ promptFontSize + paddingY * 2 };
+		const int bandY{ centerY + scaled(MISSION_CARD_HEIGHT) / 2 + scaled(MISSION_PROMPT_GAP) };
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, bandAlpha);
+		m_uiRenderer.drawBox(centerX - bandWidth / 2, bandY, bandWidth, bandHeight,
+		    core::utility::Color::BLACK, true);
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, promptAlpha);
+		m_uiRenderer.drawText(centerX - promptWidth / 2, bandY + paddingY, m_promptText.c_str(),
+		    core::utility::Color::HUD_CHARGE_CYAN, promptFontSize);
+		m_uiRenderer.resetBlendMode();
+		m_uiRenderer.resetFont();
+	}
+
+	void BattleStartSystem::drawMissionFly()
+	{
+		const float progress{ smoothstep(m_phaseTime / MISSION_FLY_TIME) };
+
+		const int startX{ m_screen.getWidth() / 2 };
+		const int startY{ m_screen.getHeight() * TEXT_CENTER_Y_RATIO_PERCENT / 100 };
+
+		// 流れ着く先は左上のObjectiveViewのパネル中心。着いた瞬間に本物と入れ替わる
+		const int endX{ scaled(OBJECTIVE_PANEL_MARGIN) + scaled(OBJECTIVE_PANEL_WIDTH) / 2 };
+		const int endY{ scaled(OBJECTIVE_PANEL_MARGIN) + scaled(OBJECTIVE_PANEL_HEIGHT) / 2 };
+
+		const int centerX{ startX + static_cast<int>((endX - startX) * progress) };
+		const int centerY{ startY + static_cast<int>((endY - startY) * progress) };
+		const float scale{ 1.0f + (MISSION_FLY_END_SCALE - 1.0f) * progress };
+
+		// 着地の手前で薄くしていき、ObjectiveViewへ自然に引き継ぐ
+		drawMissionCard(centerX, centerY, scale, 1.0f - progress * progress);
 	}
 
 	void BattleStartSystem::drawReady()
@@ -227,8 +463,10 @@ namespace game::system::visual
 		m_uiRenderer.setFont(MONO_FONT_NAME);
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
 		    static_cast<int>(255 * alphaRate));
+		// 開戦の合図は青い床の上でも沈まないオレンジで出す。
+		// READY（白）→ FIGHT!（オレンジ）と色を変えることで、切り替わった瞬間も分かりやすい
 		m_uiRenderer.drawText(centerX - textWidth / 2, textY, FIGHT_TEXT,
-		    core::utility::Color::HUD_CHARGE_CYAN, fontSize);
+		    core::utility::Color::HUD_CRITICAL_ORANGE, fontSize);
 		m_uiRenderer.resetBlendMode();
 		m_uiRenderer.resetFont();
 
@@ -242,7 +480,7 @@ namespace game::system::visual
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD,
 		    static_cast<int>(255 * alphaRate));
 		m_uiRenderer.drawBox(centerX - halfWidth, lineY, halfWidth * 2, scaled(LINE_THICKNESS),
-		    core::utility::Color::HUD_ACCENT, true);
+		    core::utility::Color::HUD_CRITICAL_ORANGE, true);
 		m_uiRenderer.resetBlendMode();
 	}
 } // namespace game::system::visual

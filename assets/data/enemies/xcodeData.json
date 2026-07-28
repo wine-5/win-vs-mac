@@ -18,7 +18,9 @@
     "attackCooldown": 2.0,
     "attackWindup": 1.5,
     "attackMaxHeight": 30.0,
-    "attackImpactSe": "EnemySlam"
+    "attackImpactSe": "EnemySlam",
+    "attackImpactEffect": "Xcode_GroundSlam",
+    "attackImpactEffectLead": 1.0
   },
   "hard": {
     "moveSpeed": 320.0,
@@ -29,7 +31,7 @@
     "attackCooldown": 1.3,
     "attackWindup": 1.0
   },
-  "behaviors": [ "meleeChase", "patrol" ],
+  "behaviors": [ "meleeChase", "patrol", "avoidCliff" ],
   "animations": [
     { "state": "Idle",    "id": "anim_xcode_idle" },
     { "state": "Walk",    "id": "anim_xcode_walk",        "loop": true,  "onComplete": "Idle",  "priority": "locomotion", "speed": 1.5 },

@@ -35,5 +35,9 @@ namespace game::component::combat
 		// 命中したときに鳴らすSE。本体の近接とは音を分けたいので弾自身が持つ。
 		// プレイヤーのWindow弾は溜めの有無でここが変わる。Noneなら弾のヒット音は無し
 		core::constant::SeType m_hitSeType{ core::constant::SeType::None };
+
+		// trueなら壁・ブロックをすり抜ける。既定はfalse＝ぶつかって消える。
+		// 溜め切ったWindow弾だけの特権にすることで、溜めに「壁越しに撃てる」意味を持たせる
+		bool m_penetratesWalls{ false };
 	};
 } // namespace game::component::combat

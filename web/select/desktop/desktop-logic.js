@@ -33,6 +33,22 @@ const DesktopLogic = (function () {
     }
 
     /**
+     * @brief タイトルへ戻ることをゲームへ通知する
+     * この画面では Esc のポーズメニューを開けないため、ここが唯一の戻り道になる。
+     * 確認ダイアログは C++ 側（Win32）が出す
+     */
+    function backToTitle() {
+        sendToGame({ type: 'backToTitle' });
+    }
+
+    /**
+     * @brief アプリの終了をゲームへ通知する
+     */
+    function quitGame() {
+        sendToGame({ type: 'quitGame' });
+    }
+
+    /**
      * @brief Windows アプリ起動をゲームへ通知する
      * @param {'cmd'|'taskmgr'|'recyclebin'} app 起動するアプリ識別子
      */
@@ -50,15 +66,26 @@ const DesktopLogic = (function () {
             if (onWindowChangeCallback) {
                 onWindowChangeCallback(data.window, data.visible);
             }
+        } else if (data.type === 'tutorialHighlight') {
+            // 初回ガイドの締めで「ルール説明.txt」へ送り出す段。
+            // ガイドを閉じるまでアイコンを脈打たせ、次に開く場所を体で覚えてもらう
+            document.body.classList.toggle('tutorial-highlight-rules', data.show === true);
+        } else if (data.type === 'equipReady') {
+            // 3つ選び終えた人が次の一手を探して止まらないよう、
+            // 出撃の入口（デスクトップの「ゲーム開始.exe」と右下のボタン）を脈打たせる。
+            // 装備を外したら false が届くので、強調は元に戻る
+            document.body.classList.toggle('equip-ready', data.ready === true);
         }
     }
 
-    return { onWindowChange, toggleWindow, startGame, launchApp, handleMessage };
+    return { onWindowChange, toggleWindow, startGame, backToTitle, quitGame, launchApp, handleMessage };
 }());
 
 // HTML の onclick から呼ばれるグローバル関数
 function toggleWindow(name) { DesktopLogic.toggleWindow(name); }
 function startGame()        { DesktopLogic.startGame(); }
+function backToTitle()      { DesktopLogic.backToTitle(); }
+function quitGame()         { DesktopLogic.quitGame(); }
 function launchApp(app)     { DesktopLogic.launchApp(app); }
 
 // messaging.js が呼び出すグローバル関数

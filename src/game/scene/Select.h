@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "IScene.h"
+#include "SceneType.h"
 #include "game/ui/FadeTransition.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
@@ -62,6 +63,14 @@ namespace game::scene
 		 */
 		void notifyGameStart() noexcept;
 
+		/**
+		 * @brief タイトルへ戻る通知（Windowからのコールバック用）
+		 *
+		 * セレクト画面ではEscのポーズメニューを開けないため、
+		 * デスクトップのアイコン／タスクバーがタイトルへ戻る唯一の入口になる
+		 */
+		void notifyBackToTitle() noexcept;
+
 	  private:
 		enum class State
 		{
@@ -70,7 +79,11 @@ namespace game::scene
 			FadeOut
 		};
 
-		void startFadeOut();
+		/**
+		 * @brief 暗転を始め、明けたら指定シーンへ移る
+		 * @param nextScene 暗転後に移るシーン
+		 */
+		void startFadeOut(SceneType nextScene);
 
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
@@ -80,6 +93,9 @@ namespace game::scene
 		std::unique_ptr<ui::FadeTransition> m_fade;
 
 		State m_state{ State::FadeIn };
+
+		// 暗転が明けたあとに移るシーン。出撃ならLoading、タイトルへ戻るならTitle
+		SceneType m_nextScene{ SceneType::Loading };
 
 		static constexpr float FADE_DURATION = 0.5f;
 	};

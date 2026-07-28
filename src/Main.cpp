@@ -3,7 +3,11 @@
 #include "core/base/ServiceLocator.h"
 #include "DxLib.h"
 #include "resource.h"
+#include "core/interface/IMemoryProbe.h"
+#include "core/utility/Probe.h"
+#include "platform/diagnostics/MemoryProbe.h" // 一時: メモリ調査用（原因特定後に削除）
 #include <exception>
+#include <memory>
 
 namespace
 {
@@ -57,6 +61,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// 幅だけデスクトップのアスペクト比に合わせる。これで枠なしウィンドウをデスクトップ全体へ
 	// 拡大したとき、余白（レターボックス）も歪み（ストレッチ）も無くどの端末でも全画面になる。
 	// ＝ Unity の Fullscreen Window と同じ考え方
+	// 計測プローブは他のどのサービスより先に登録する。以降はGame層・Infrastructure層からも
+	// core::probe 越しに呼べるようになり、Platform層へ直接依存せずに計測できる
+	core::base::ServiceLocator::provide<core::iface::IMemoryProbe>(
+	    std::make_unique<platform::diagnostics::MemoryProbe>());
+	core::base::ServiceLocator::get<core::iface::IMemoryProbe>()->reset();
+	core::probe::mark("WinMain 開始");
+
 	int screenWidth{ RENDER_WIDTH };
 	int screenHeight{ RENDER_HEIGHT };
 
@@ -99,6 +110,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SetChangeScreenModeGraphicsSystemResetFlag(FALSE); // フルスクリーン切り替え時のリソース保護
 
 	if (DxLib_Init() == -1) return -1;
+
+	core::probe::mark("DxLib_Init 完了");
 
 	SetDrawScreen(DX_SCREEN_BACK);  // 描画先を裏画面に設定
 

@@ -1,3 +1,5 @@
+/* 文字と余白はウィンドウ幅（vw）に追従させる。この窓は画面の8割近くを占めるので、
+   固定pxだと広い画面で文字が豆粒になり、読ませたい説明が読まれない */
 body {
     display: flex;
     flex-direction: column;
@@ -6,45 +8,226 @@ body {
     background: #1e1e1e;
     color: #d4d4d4;
     margin: 0;
+    font-family: 'MaruMonica', 'Consolas', 'MS Gothic', monospace;
+    font-size: clamp(20px, 2.1vw, 46px);
+    line-height: 1.6;
 }
 
-/* メニューバー */
+/* メニューバー。読む項目を切り替える唯一の入口なので、
+   飾りだった頃より当たりを大きく取り、文字もウィンドウ幅に追従させる */
 .menubar {
     display: flex;
-    gap: 0;
+    gap: clamp(2px, 0.3vw, 6px);
     background: #2d2d2d;
     border-bottom: 1px solid #3c3c3c;
-    padding: 2px 4px;
+    padding: clamp(2px, 0.3vw, 6px) clamp(4px, 0.5vw, 10px);
     flex-shrink: 0;
 }
 
 .menu-item {
-    padding: 3px 8px;
-    font-size: 12px;
+    padding: clamp(4px, 0.6vw, 11px) clamp(10px, 1.5vw, 26px);
+    font-size: clamp(18px, 1.85vw, 40px);
+    color: #cccccc;
     cursor: pointer;
-    border-radius: 2px;
+    border-radius: 3px;
+    white-space: nowrap;
 }
 
-.menu-item:hover {
+.menu-item:hover:not(.is-active) {
     background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+/* 今どの項目を読んでいるかを示す。タブを外したので、
+   これが無いと現在地を示すものが画面上に何も無くなる */
+.menu-item.is-active {
+    background: #1e1e1e;
+    color: #ffffff;
+    box-shadow: inset 0 -2px 0 0 #4cc2ff;
 }
 
 /* テキストコンテンツエリア */
 .content {
     flex: 1;
     overflow-y: auto;
-    padding: 4px 8px;
+    padding: clamp(10px, 1.6vw, 32px) clamp(12px, 2vw, 40px);
 }
 
-.content pre {
-    font-family: 'MaruMonica', 'Consolas', 'MS Gothic', monospace;
-    font-size: 13px;
-    line-height: 1.6;
-    color: #d4d4d4;
-    white-space: pre-wrap;
-    word-break: break-all;
-    margin: 0;
+/* メニューで選ばれた1枚だけを出す */
+.page { display: none; }
+.page.is-active { display: block; }
+
+/* 冒頭の目的。他のページを開かない人にも必ず届くよう、本文より一段強く見せる */
+.lead {
+    margin: 0 0 clamp(14px, 2vw, 32px);
+    padding: clamp(10px, 1.3vw, 24px) clamp(12px, 1.6vw, 30px);
+    background: rgba(76, 194, 255, 0.08);
+    border-left: clamp(3px, 0.35vw, 6px) solid #4cc2ff;
+    color: #e8e8e8;
 }
+
+h2 {
+    font-size: clamp(23px, 2.4vw, 52px);
+    font-weight: normal;
+    color: #ffffff;
+    margin: clamp(18px, 2.4vw, 44px) 0 clamp(8px, 1.1vw, 20px);
+    padding-bottom: clamp(4px, 0.5vw, 10px);
+    border-bottom: 1px solid #3c3c3c;
+}
+
+.body-text { margin: 0 0 clamp(6px, 0.8vw, 14px); }
+
+.note {
+    margin: clamp(10px, 1.3vw, 24px) 0 0;
+    color: #a0a0a0;
+    font-size: clamp(18px, 1.8vw, 39px);
+}
+
+code {
+    font-family: inherit;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+    padding: 0 0.3em;
+}
+
+.steps {
+    margin: 0;
+    padding-left: 1.6em;
+}
+
+.steps li { margin-bottom: clamp(4px, 0.6vw, 12px); }
+
+/* ── 操作ページ ──
+   一目で分かることを優先し、左に図、右に名前を置く。
+   図はすべてCSSとSVGで描く。画像を用意しないので、拡大しても輪郭が崩れない */
+.ctrl-grid {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    align-items: center;
+    gap: clamp(8px, 1.1vw, 22px) clamp(14px, 1.8vw, 36px);
+}
+
+.ctrl-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: clamp(80px, 8vw, 170px);
+}
+
+.ctrl-label { color: #e8e8e8; }
+
+/* 補足（矢印キーでも動く、など）は主たる名前より小さく落とす */
+.ctrl-sub {
+    display: block;
+    color: #9a9a9a;
+    font-size: clamp(17px, 1.7vw, 37px);
+}
+
+/* キーキャップ。実物のキーの形に寄せると、文字を読む前に何を押すか伝わる */
+.key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: clamp(30px, 2.9vw, 62px);
+    padding: clamp(5px, 0.6vw, 12px) clamp(6px, 0.7vw, 14px);
+    background: #333333;
+    border: 1px solid #565656;
+    border-bottom-width: clamp(3px, 0.3vw, 6px);
+    border-radius: clamp(4px, 0.5vw, 9px);
+    color: #ffffff;
+    font-size: clamp(18px, 1.8vw, 39px);
+    line-height: 1;
+}
+
+.key.is-wide { min-width: clamp(64px, 6.4vw, 136px); }
+.key.is-space { min-width: clamp(96px, 9.6vw, 200px); }
+
+/* WASDのキー配置。上段中央にW、下段にA・S・Dを置いた実際の並びを再現する。
+   自動配置に任せるとWの右にAが並んでしまうので、4つとも位置を明示する */
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    gap: clamp(3px, 0.35vw, 7px);
+}
+
+.keypad .key:nth-child(1) { grid-area: 1 / 2; }
+.keypad .key:nth-child(2) { grid-area: 2 / 1; }
+.keypad .key:nth-child(3) { grid-area: 2 / 2; }
+.keypad .key:nth-child(4) { grid-area: 2 / 3; }
+
+/* マウス図。押すボタン側だけを塗ることで、左右どちらかを言葉にせず示す */
+.mouse {
+    width: clamp(38px, 3.6vw, 78px);
+    height: auto;
+}
+
+.mouse-body {
+    fill: #333333;
+    stroke: #565656;
+    stroke-width: 3;
+}
+
+.mouse-btn.is-on { fill: #4cc2ff; }
+
+.mouse-line {
+    stroke: #565656;
+    stroke-width: 3;
+}
+
+/* ── 装備ページ ──
+   ファイル選択ウィンドウと同じアイコンを使い、「拡張子 → 伸びる能力」を1行で見せる */
+.ext-grid {
+    display: grid;
+    grid-template-columns: max-content max-content max-content 1fr;
+    align-items: center;
+    gap: clamp(6px, 0.9vw, 18px) clamp(10px, 1.3vw, 26px);
+}
+
+.ext-grid.is-three {
+    grid-template-columns: max-content max-content 1fr;
+}
+
+/* 行をまとめる箱は枠として存在させず、中の4つを直接グリッドの升目へ載せる。
+   こうしないと行ごとに列幅がばらつき、拡張子と能力の位置が縦に揃わない */
+.ext-row { display: contents; }
+
+/* 列の見出し。本文と同じ強さで書くと1行目のデータと見分けがつかない */
+.ext-head-label {
+    color: #9a9a9a;
+    font-size: clamp(17px, 1.7vw, 37px);
+}
+
+/* 伸びる能力。1つの種別が複数を伸ばすことがある（.zip など）ので、
+   アイコン・名前・数値の3点セットを並べられる形にしておく */
+.ext-gain {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: clamp(4px, 0.5vw, 10px) clamp(10px, 1.3vw, 26px);
+}
+
+.gain-item {
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(4px, 0.5vw, 10px);
+}
+
+/* 数値は「1つあたりどれだけ増えるか」を伝える主役なので、名前より目立たせる */
+.stat-value { color: #4cc2ff; }
+
+.ext-icon {
+    width: clamp(28px, 2.7vw, 58px);
+    height: auto;
+}
+
+.stat-icon {
+    width: clamp(22px, 2.1vw, 46px);
+    height: auto;
+}
+
+.ext-name { color: #e8e8e8; }
+.ext-arrow { color: #6f6f6f; }
+.stat-name { color: #ffffff; }
 
 /* スクロールバー */
 .content::-webkit-scrollbar {

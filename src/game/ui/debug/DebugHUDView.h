@@ -118,7 +118,7 @@ namespace game::ui::debug
 		float m_perfUpdateTimer{ 0.0f };
 
 		// 表示するかどうか。右上は難易度・経過時間のHUDが使うため、既定では出さない
-		bool m_isVisible{ false };
+		bool m_isVisible{ true };
 
 		static constexpr float FPS_UPDATE_INTERVAL{ 0.5f };  // FPS表示の更新間隔（秒）
 		static constexpr float PERF_UPDATE_INTERVAL{ 1.0f }; // CPU/メモリ取得の更新間隔（秒）

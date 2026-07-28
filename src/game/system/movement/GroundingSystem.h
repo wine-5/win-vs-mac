@@ -37,32 +37,6 @@ namespace game::system::movement
 
 	  private:
 		/**
-		 * @brief 傾いた天面の、指定XZ位置での高さを求める
-		 * @param surfaceId 面のEntityID
-		 * @param x ワールドX座標
-		 * @param z ワールドZ座標
-		 * @param outHeight 求まった高さの格納先
-		 * @param outNormal 天面の法線の格納先（滑り方向の算出に使う）
-		 * @return XZが面の範囲内で高さが求まった場合true
-		 */
-		bool surfaceHeightAt(core::ecs::EntityId surfaceId, float x, float z,
-		    float& outHeight, core::Vector3& outNormal) const;
-
-		/**
-		 * @brief 奈落へ落ちていたら直前の足場へ戻す
-		 *
-		 * 床だけが虚無に浮かぶ構成のため、縁から落ちるとどこまでも落下する。
-		 * 全周を壁で囲むと世界観が壊れるので、落下を検知して引き戻す方式で救済する。
-		 * @param riderId 対象のEntityID
-		 * @param transform 対象のTransform
-		 * @param velocity 対象のVelocity
-		 * @return 引き戻した場合true（その場合この後の接地処理は行わない）
-		 */
-		bool recoverFromFall(core::ecs::EntityId riderId,
-		    component::movement::TransformComponent& transform,
-		    component::movement::VelocityComponent& velocity) const;
-
-		/**
 		 * @brief 坂を滑り落ちる速度を更新する
 		 *
 		 * 法線の水平成分がそのまま「坂を下る向き」になる。傾きが急なほど強く加速し、
@@ -75,6 +49,28 @@ namespace game::system::movement
 		 */
 		void updateSlide(component::movement::VelocityComponent& velocity,
 		    const core::Vector3& normal, float slideAccel, float deltaTime) const;
+
+		/**
+		 * @brief 動く歩道に運ばれる速度を更新する
+		 *
+		 * 坂を滑る力が加速度なのに対し、こちらは一定速度で運ぶ。乗っている間は
+		 * 常にこの速度が加わるので、歩き速度との大小がそのまま「逆走できる／できない」になる。
+		 * さらに、流れと同じ向きへ進もうとしているときだけ運ぶ速度を上乗せして、
+		 * 「流れに乗れば速い」を作る。逆走側には掛けないので重さは変わらない。
+		 * 高さは接地処理が面に合わせて追従させるため、水平成分だけを扱う。
+		 * @param velocity 対象のVelocityComponent
+		 * @param conveyorVelocity 面が運ぶワールド速度
+		 * @param deltaTime フレーム間の時間差
+		 */
+		void updateConveyor(component::movement::VelocityComponent& velocity,
+		    const core::Vector3& conveyorVelocity, float deltaTime) const;
+
+		/**
+		 * @brief 面が乗っている者を運ぶワールド速度を求める
+		 * @param surfaceId 面のEntityID
+		 * @return 運ぶ速度。動く歩道でなければゼロベクトル
+		 */
+		core::Vector3 conveyorVelocityOf(core::ecs::EntityId surfaceId) const;
 
 		core::ecs::ComponentManager& m_componentManager;
 	};

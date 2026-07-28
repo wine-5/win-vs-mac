@@ -49,6 +49,16 @@ namespace game::system::visual
 		void draw();
 
 	  private:
+		/**
+		 * @brief 演出中のボスを無敵にする／解除する
+		 *
+		 * カメラがボスへ寄っている間、プレイヤーは操作を奪われていて狙いを外せない。
+		 * その間に飛んでいる弾（雑魚へ撃った流れ弾など）が当たると、
+		 * 見ているだけの時間に一方的にダメージが入ってしまうため受け付けない
+		 * @param isInvincible 無敵にするならtrue
+		 */
+		void setMacInvincible(bool isInvincible) noexcept;
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;

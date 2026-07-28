@@ -42,6 +42,9 @@ namespace game::factory
 
 		// 命中時に鳴らすSE。Noneなら弾のヒット音は無し（既定）
 		core::constant::SeType m_hitSeType{ core::constant::SeType::None };
+
+		// trueなら壁・ブロックをすり抜ける。既定はfalse＝ぶつかって消える
+		bool m_penetratesWalls{ false };
 	};
 
 	/**

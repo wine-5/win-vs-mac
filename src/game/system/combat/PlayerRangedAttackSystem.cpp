@@ -4,6 +4,7 @@
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
 #include "game/component/combat/AttackComponent.h"
+#include "game/component/combat/PlayerStatsComponent.h"
 #include "game/component/visual/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
 #include "game/constant/Tag.h"
@@ -25,12 +26,14 @@ namespace game::system::combat
 	    core::ecs::EntityId playerId,
 	    factory::ProjectileFactory& projectileFactory,
 	    core::data::ProjectileMetadata metadata,
-	    int billboardImage)
+	    int billboardImage,
+	    int chargedBillboardImage)
 	    : m_componentManager{ componentManager }
 	    , m_playerId{ playerId }
 	    , m_projectileFactory{ projectileFactory }
 	    , m_metadata{ std::move(metadata) }
 	    , m_billboardImage{ billboardImage }
+	    , m_chargedBillboardImage{ chargedBillboardImage }
 	{
 	}
 
@@ -144,24 +147,48 @@ namespace game::system::combat
 			transform.m_position.z + direction.z * m_metadata.m_spawnForward
 		};
 
+		// 弾速と飛距離はPlayerStatsComponentを正とする（Itemで伸ばせるようにするため）。
+		// 寿命は「飛距離÷弾速」で毎回引き直す。弾速だけ上げたときに飛距離まで伸びないようにする
+		const auto* stats{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(m_playerId) };
+		const float baseSpeed{ stats != nullptr ? stats->m_projectileSpeed : m_metadata.m_speed };
+		const float baseRange{ stats != nullptr ? stats->m_projectileRange
+			                                    : m_metadata.m_speed * m_metadata.m_lifetime };
+		const float baseLifetime{ baseSpeed > 0.0f ? baseRange / baseSpeed : m_metadata.m_lifetime };
+
 		factory::ProjectileConfig config{};
-		config.m_speed = m_metadata.m_speed * speedMultiplier;
+		config.m_speed = baseSpeed * speedMultiplier;
 		config.m_damage = m_metadata.m_damage * damageMultiplier;
-		config.m_lifetime = m_metadata.m_lifetime * lifetimeMultiplier;
+		config.m_lifetime = baseLifetime * lifetimeMultiplier;
 		config.m_radius = m_metadata.m_radius * sizeMultiplier;
 		config.m_scale = m_metadata.m_scale;
+
+		const bool isFullyCharged{ chargeRate >= FULL_CHARGE_THRESHOLD };
 
 		// 見た目は板に貼ったWindow画像（ビルボード）。当たり判定半径に合わせて大きさを決め、
 		// 溜めサイズ倍率も反映する。視認しやすいよう当たり判定より少し大きめにする
 		constexpr float BILLBOARD_SIZE_FACTOR{ 2.5f };
-		config.m_billboardImage = m_billboardImage;
+		// 溜め切った弾だけWindow11ロゴに差し替える。サイズ以外でも一目で区別できるようにする
+		config.m_billboardImage = (isFullyCharged && m_chargedBillboardImage != -1)
+		                              ? m_chargedBillboardImage
+		                              : m_billboardImage;
 		config.m_billboardSize = m_metadata.m_radius * BILLBOARD_SIZE_FACTOR * sizeMultiplier;
 
 		// 溜め切って撃った弾だけ重い着弾音にする。溜めた甲斐を音でも返すため、
 		// 見た目（サイズ）と同じく「溜め切ったか」で切り替える
-		config.m_hitSeType = chargeRate >= FULL_CHARGE_THRESHOLD
+		config.m_hitSeType = isFullyCharged
 		                         ? core::constant::SeType::HitChargedWindow
 		                         : core::constant::SeType::HitWindow;
+
+		// 溜め切って撃ったときだけ専用の発射音を鳴らす。通常撃ちは今までどおり無音のままにして、
+		// 「溜め切った一撃」であることを離した瞬間に耳で分かるようにする
+		if (isFullyCharged)
+		{
+			if (auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() })
+				audio->playSe(core::constant::SeType::PlayerChargeRelease);
+		}
+
+		// 壁・ブロックを抜けられるのは溜め切った弾だけ。通常撃ちは遮蔽物で止まる
+		config.m_penetratesWalls = isFullyCharged;
 
 		// 近接と同じようにクリティカルが出るよう、プレイヤーの会心設定を弾へ引き継ぐ
 		if (auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(m_playerId) })

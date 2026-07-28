@@ -11,6 +11,7 @@
 #include "game/constant/EnemyType.h"
 #include "game/constant/MacAwakenTiming.h"
 #include "game/event/InGameEvents.h"
+#include "game/utility/CliffGuard.h"
 #include <cmath>
 #include <utility>
 #include <algorithm>
@@ -82,12 +83,9 @@ namespace game::system::ai
 			if (mac.m_animLockTimer > 0.0f)
 				mac.m_animLockTimer -= deltaTime;
 
-			// 覚醒演出が終わったら無敵を解除して行動再開する
+			// 覚醒演出が終わったら行動再開する（無敵の出し入れはMacAwakenEffectSystemが持つ）
 			if (mac.m_state == MacState::PhaseTransition && mac.m_animLockTimer <= 0.0f)
-			{
-				health.m_isInvincible = false;
 				mac.m_state = MacState::Chase;
-			}
 
 			// --- フェーズ移行（1回だけ） ---
 			if (!mac.m_phase2Triggered && mac.m_config.m_hasPhase2)
@@ -100,7 +98,6 @@ namespace game::system::ai
 					mac.m_state = MacState::PhaseTransition;
 					mac.m_animLockTimer = PHASE_TRANSITION_LOCK;
 					mac.m_actionTimer = mac.currentPhase().m_actionInterval;
-					health.m_isInvincible = true; // 覚醒演出中は無敵（演出終了時に解除する）
 					if (hasVelocity)
 						stopHorizontalVelocity(entityId);
 					if (m_componentManager.has<component::visual::AnimationComponent>(entityId))
@@ -230,7 +227,8 @@ namespace game::system::ai
 			{
 				// --- 追跡（近接レンジ外なら接近、レンジ内なら待機） ---
 				mac.m_state = MacState::Chase;
-				if (distance > phase.m_meleeRange)
+				// プレイヤーが崖の向こうにいても追って落ちないよう、足場が続く間だけ前へ出る
+				if (distance > phase.m_meleeRange && utility::canStepToward(m_componentManager, entityId, dir))
 				{
 					if (hasVelocity)
 					{
@@ -380,8 +378,8 @@ namespace game::system::ai
 				transform.m_position.z + fanDir.z * m_rainbowMeta.m_spawnForward
 			};
 
+			// 発射時の演出は専用エフェクトが無くなったため付けない（弾自身の見た目で見せる）
 			factory::ProjectileConfig config{ makeRainbowConfig(phase) };
-			config.m_startEffect = core::constant::EffectType::Mac_Rainbow; // 発射時の演出（扇撃ち）
 
 			m_projectileFactory.spawn(origin, fanDir, config, constant::Tag::Enemy);
 		}

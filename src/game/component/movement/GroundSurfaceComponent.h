@@ -17,5 +17,10 @@ namespace game::component::movement
 		// 坂を滑り落ちる加速度。0なら滑らない普通の足場。
 		// 傾きが急なほど強く働き、水平な面では効かない
 		float m_slideAccel{ 0.0f };
+
+		// 動く歩道として乗っている者を運ぶ速さ（ユニット/秒）。0なら運ばない。
+		// 向きは面のローカル+Zをワールドへ回したもの。滑り落ちる向き（下り）ではなく
+		// 面自身の向きなので、配置をY180度回せば運ぶ向きも反転する
+		float m_conveyorSpeed{ 0.0f };
 	};
 } // namespace game::component::movement

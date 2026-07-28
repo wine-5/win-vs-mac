@@ -16,9 +16,9 @@
     "defence": 0.0,
     "attackPower": 24.0,
     "attackCooldown": 4.0,
-    "hoverHeight": 300.0,
-    "preferredDistanceMin": 400.0,
-    "preferredDistanceMax": 600.0,
+    "hoverHeight": 500.0,
+    "preferredDistanceMin": 550.0,
+    "preferredDistanceMax": 750.0,
     "fireCooldown": 5.0,
     "facingYawOffset": 90.0
   },

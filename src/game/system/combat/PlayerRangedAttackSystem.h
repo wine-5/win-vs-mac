@@ -24,12 +24,15 @@ namespace game::system::combat
 		 * @param playerId プレイヤーのEntityID
 		 * @param projectileFactory 弾生成ファクトリの参照
 		 * @param metadata 弾定義（projectileData.jsonから取得したもの）
+		 * @param billboardImage 通常撃ちの見た目に使う画像ハンドル
+		 * @param chargedBillboardImage 溜め切って撃ったときの見た目に使う画像ハンドル（-1なら通常と同じ）
 		 */
 		PlayerRangedAttackSystem(core::ecs::ComponentManager& componentManager,
 		    core::ecs::EntityId playerId,
 		    factory::ProjectileFactory& projectileFactory,
 		    core::data::ProjectileMetadata metadata,
-		    int billboardImage);
+		    int billboardImage,
+		    int chargedBillboardImage);
 
 		/**
 		 * @brief 発射入力に応じて弾を発射する
@@ -57,6 +60,7 @@ namespace game::system::combat
 
 		core::data::ProjectileMetadata m_metadata{}; // 弾定義（値コピーで保持）
 		int m_billboardImage{ -1 };                  // Window弾の見た目に使う2D画像ハンドル（ビルボード描画）
+		int m_chargedBillboardImage{ -1 };           // 溜め切って撃った弾の見た目に使う2D画像ハンドル
 		float m_cooldownTimer{ 0.0f };
 		float m_chargeTime{ 0.0f }; // 現在の溜め時間（秒）
 		bool m_isCharging{ false }; // 溜め中かどうか

@@ -2,8 +2,14 @@
 #include "LowHealthPulse.h"
 #include "core/constant/UI.h"
 #include "core/utility/Color.h"
+#include "core/utility/Log.h"
 #include "game/component/combat/HealthComponent.h"
+#include "game/component/combat/AttackComponent.h"
+#include "game/component/combat/PlayerStatsComponent.h"
+#include "game/component/combat/PlayerStatBaseComponent.h"
+#include "game/component/movement/InputComponent.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdio>
 
@@ -14,16 +20,58 @@ namespace
 
 	// パネルの位置とサイズ（左下・1080p基準）
 	constexpr int PANEL_MARGIN{ 28 };
-	constexpr int PANEL_WIDTH{ 380 };
-	constexpr int PANEL_HEIGHT{ 92 };
+	constexpr int PANEL_WIDTH{ 430 };
+	constexpr int PANEL_HEIGHT{ 140 };
 	constexpr int PANEL_PADDING{ 20 };
 
 	// パネル内の各要素の位置（パネル左上からの相対座標・1080p基準）
 	constexpr int LABEL_Y{ 16 };
 	constexpr int LABEL_FONT_SIZE{ 19 };
 	constexpr int VALUE_FONT_SIZE{ 18 };
-	constexpr int BAR_Y{ 54 };
+	constexpr int BAR_Y{ 48 };
 	constexpr int BAR_HEIGHT{ 18 };
+
+	// 能力値の並び（1行4項目・1080p基準）
+	constexpr int STAT_ROW_Y{ 76 };
+	constexpr int STAT_ROW_HEIGHT{ 52 };
+	constexpr int STAT_ICON_SIZE{ 42 };
+	constexpr int STAT_VALUE_GAP{ 8 }; // アイコンと数値の間隔
+	constexpr int STAT_FONT_SIZE{ 19 };
+	constexpr int STATS_PER_PAGE{ 4 };
+
+	// ページ送り。切り替えは上下のスライドで見せる（横に流すとパネルからはみ出すため）
+	constexpr float PAGE_INTERVAL{ 5.0f };        // 自動で切り替わる間隔（秒）
+	constexpr float SLIDE_DURATION{ 0.30f };      // 切り替えアニメの長さ（秒）
+	constexpr int SLIDE_OFFSET{ 12 };             // スライドの振れ幅（1080p基準）
+	constexpr float CHANGE_HOLD_DURATION{ 3.0f }; // 値が変わった項目を留めて強調する長さ（秒）
+	constexpr float EXPAND_SPEED{ 6.0f };         // Tabで開閉する速さ（1.0を割る秒数の逆数）
+
+	// 能力値の並び。セレクト画面（パラメータウィンドウ）と同じ8項目・同じアイコン・同じ順序で使う。
+	// 順序が違うと「セレクトで見たあの位置の値」を探し直すことになるため、必ず揃える。
+	// 前半4つがページ0、後半4つがページ1になる
+	constexpr std::array<const char*, 8> STAT_ICON_IMAGE_IDS{
+		"stat-hp", "stat-atk", "stat-def", "stat-spd",
+		"stat-rng", "stat-crit", "stat-bspd", "stat-brng"
+	};
+
+	// STAT_ICON_IMAGE_IDS 上の位置。値を詰める側と並びがずれないよう名前で参照する
+	constexpr int STAT_INDEX_HP{ 0 };
+	constexpr int STAT_INDEX_ATK{ 1 };
+	constexpr int STAT_INDEX_DEF{ 2 };
+	constexpr int STAT_INDEX_SPD{ 3 };
+	constexpr int STAT_INDEX_RNG{ 4 };
+	// 会心率だけは割合なので百分率で見せる。この位置だけ書式が変わる
+	constexpr int STAT_INDEX_CRIT{ 5 };
+	constexpr int STAT_INDEX_BSPD{ 6 };
+	constexpr int STAT_INDEX_BRNG{ 7 };
+
+	// 素の値より上がっている項目の色。装備ファイル・Itemなど強化の出どころは問わない
+	constexpr unsigned int STAT_BOOSTED_COLOR{ 0xFFFFC83D };
+	// 強化とみなす下限。浮動小数の誤差で素の値と同じものが光らないようにする
+	constexpr float STAT_BOOST_EPSILON{ 0.001f };
+
+	// 能力値を通常の濃さで描くときの不透明度（スライド中はここから落とす）
+	constexpr int STAT_ALPHA_OPAQUE{ 255 };
 
 	constexpr int BAR_GROOVE_ALPHA{ 20 }; // バーの溝（白をごく薄く敷く）
 
@@ -55,12 +103,21 @@ namespace game::ui::ingame
 {
 	PlayerHUDView::PlayerHUDView(core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
-	    core::ecs::ComponentManager& componentManager)
+	    core::ecs::ComponentManager& componentManager,
+	    core::iface::IResourceManager& resourceManager)
 	    : m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_componentManager{ componentManager }
 	    , m_panel{ uiRenderer, screen }
 	{
+		// アイコンは毎フレーム引き直さず、生成時に一度だけ読み込む。
+		// 失敗しても数値だけは出せるので、記録に留めて描画は続ける
+		for (int i{ 0 }; i < STAT_COUNT; ++i)
+		{
+			m_iconHandles[i] = resourceManager.loadImageById(STAT_ICON_IMAGE_IDS[i]);
+			if (m_iconHandles[i] == -1)
+				core::log::error("ステータスアイコン '{}' の読み込みに失敗しました", STAT_ICON_IMAGE_IDS[i]);
+		}
 	}
 
 	int PlayerHUDView::scaled(int value) const
@@ -68,7 +125,7 @@ namespace game::ui::ingame
 		return value * m_screen.getHeight() / BASE_SCREEN_HEIGHT;
 	}
 
-	void PlayerHUDView::updateDamageReaction(float ratio)
+	float PlayerHUDView::tickDeltaTime()
 	{
 		const auto now{ std::chrono::steady_clock::now() };
 		const float deltaTime{ m_hasLastFrameTime
@@ -76,6 +133,12 @@ namespace game::ui::ingame
 			                       : 0.0f };
 		m_lastFrameTime = now;
 		m_hasLastFrameTime = true;
+		return deltaTime;
+	}
+
+	void PlayerHUDView::updateDamageReaction(float ratio, float deltaTime)
+	{
+		const auto now{ std::chrono::steady_clock::now() };
 
 		// 初回は残像を実HPに合わせるだけ。ここで演出を出すと開始直後に赤帯が走ってしまう
 		if (m_displayedRatio < 0.0f)
@@ -137,6 +200,164 @@ namespace game::ui::ingame
 		return std::clamp(elapsed / DAMAGE_FLASH_DURATION, 0.0f, 1.0f);
 	}
 
+	std::array<float, PlayerHUDView::STAT_COUNT> PlayerHUDView::collectStats(core::ecs::EntityId playerId) const
+	{
+		std::array<float, STAT_COUNT> stats{};
+
+		if (const auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(playerId) })
+		{
+			stats[STAT_INDEX_ATK] = attack->m_attackPower;
+			stats[STAT_INDEX_RNG] = attack->m_attackRange;
+			stats[STAT_INDEX_CRIT] = attack->m_criticalRate * 100.0f; // 割合を百分率へ
+		}
+		if (const auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(playerId) })
+		{
+			stats[STAT_INDEX_HP] = health->m_maxHp;
+			stats[STAT_INDEX_DEF] = health->m_defence;
+		}
+		if (const auto* player{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(playerId) })
+		{
+			stats[STAT_INDEX_SPD] = player->m_moveSpeed;
+			stats[STAT_INDEX_BSPD] = player->m_projectileSpeed;
+			stats[STAT_INDEX_BRNG] = player->m_projectileRange;
+		}
+		return stats;
+	}
+
+	std::array<float, PlayerHUDView::STAT_COUNT> PlayerHUDView::collectBaseStats(core::ecs::EntityId playerId) const
+	{
+		std::array<float, STAT_COUNT> stats{};
+
+		const auto* base{ m_componentManager.tryGet<component::combat::PlayerStatBaseComponent>(playerId) };
+		if (base == nullptr)
+			return stats; // 控えが無ければ強化なし扱い（全項目が素の色になる）
+
+		stats[STAT_INDEX_HP] = base->m_maxHp;
+		stats[STAT_INDEX_ATK] = base->m_attackPower;
+		stats[STAT_INDEX_DEF] = base->m_defence;
+		stats[STAT_INDEX_SPD] = base->m_moveSpeed;
+		stats[STAT_INDEX_RNG] = base->m_attackRange;
+		stats[STAT_INDEX_CRIT] = base->m_criticalRate * 100.0f; // 現在値と同じ百分率へ揃える
+		stats[STAT_INDEX_BSPD] = base->m_projectileSpeed;
+		stats[STAT_INDEX_BRNG] = base->m_projectileRange;
+		return stats;
+	}
+
+	void PlayerHUDView::updatePaging(const std::array<float, STAT_COUNT>& stats, bool isExpanded, float deltaTime)
+	{
+		// Tabの開閉は往復とも同じ速さで進める
+		const float expandTarget{ isExpanded ? 1.0f : 0.0f };
+		const float expandStep{ EXPAND_SPEED * deltaTime };
+		if (m_expandProgress < expandTarget)
+			m_expandProgress = std::min(expandTarget, m_expandProgress + expandStep);
+		else
+			m_expandProgress = std::max(expandTarget, m_expandProgress - expandStep);
+
+		// 値が変わった項目を探す。初回は比較対象が無いので基準を取るだけ
+		if (!m_hasPreviousStats)
+		{
+			m_previousStats = stats;
+			m_hasPreviousStats = true;
+		}
+		else
+		{
+			for (int i{ 0 }; i < STAT_COUNT; ++i)
+			{
+				if (stats[i] == m_previousStats[i])
+					continue;
+
+				m_changedIndex = i;
+				m_changeHighlight = CHANGE_HOLD_DURATION;
+
+				// 変わった項目が裏のページなら即座にそちらへ送る（Item取得を見逃さないため）
+				const int page{ i / STATS_PER_PAGE };
+				if (page != m_page)
+				{
+					m_slideFromPage = m_page;
+					m_page = page;
+					m_slideProgress = 0.0f;
+				}
+				m_pageTimer = CHANGE_HOLD_DURATION;
+			}
+			m_previousStats = stats;
+		}
+
+		if (m_changeHighlight > 0.0f)
+			m_changeHighlight -= deltaTime;
+
+		// スライド中の進行
+		if (m_slideProgress < 1.0f)
+			m_slideProgress = std::min(1.0f, m_slideProgress + deltaTime / SLIDE_DURATION);
+
+		// 全項目を開いている間はページ送りを止める。読んでいる最中に動くと目が滑る
+		if (isExpanded)
+			return;
+
+		m_pageTimer -= deltaTime;
+		if (m_pageTimer > 0.0f)
+			return;
+
+		m_pageTimer = PAGE_INTERVAL;
+		m_slideFromPage = m_page;
+		m_page = (m_page + 1) % 2;
+		m_slideProgress = 0.0f;
+	}
+
+	void PlayerHUDView::drawStatCell(int x, int y, int index, float value, bool isBoosted, int alpha)
+	{
+		const int iconSize{ scaled(STAT_ICON_SIZE) };
+		const int rowHeight{ scaled(STAT_ROW_HEIGHT) };
+		const int iconY{ y + (rowHeight - iconSize) / 2 };
+
+		if (m_iconHandles[index] != -1)
+		{
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+			m_uiRenderer.drawImage(m_iconHandles[index], x, iconY, iconSize, iconSize);
+			m_uiRenderer.resetBlendMode();
+		}
+
+		char text[16]{};
+		if (index == STAT_INDEX_CRIT)
+			std::snprintf(text, sizeof(text), "%d%%", static_cast<int>(value));
+		else
+			std::snprintf(text, sizeof(text), "%d", static_cast<int>(value));
+
+		// 素の値より上がっている項目は黄色にして、強化されていることを一目で分かるようにする。
+		// 直近で変化した項目は、そのうえで一時的に強い色にして「今上がった」ことも伝える
+		const bool isChanged{ index == m_changedIndex && m_changeHighlight > 0.0f };
+		unsigned int color{ core::utility::Color::HUD_INK };
+		if (isChanged)
+			color = core::utility::Color::HUD_CHARGE_MAX;
+		else if (isBoosted)
+			color = STAT_BOOSTED_COLOR;
+
+		const int fontSize{ scaled(STAT_FONT_SIZE) };
+		const int textY{ y + (rowHeight - fontSize) / 2 };
+
+		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+		m_uiRenderer.drawText(x + iconSize + scaled(STAT_VALUE_GAP), textY, text, color, fontSize);
+		m_uiRenderer.resetBlendMode();
+		m_uiRenderer.resetFont();
+	}
+
+	void PlayerHUDView::drawStatPage(int x, int y, int cellWidth,
+	    const std::array<float, STAT_COUNT>& stats,
+	    const std::array<float, STAT_COUNT>& baseStats, int page, int alpha)
+	{
+		if (alpha <= 0)
+			return;
+
+		const int first{ page * STATS_PER_PAGE };
+		for (int i{ 0 }; i < STATS_PER_PAGE; ++i)
+		{
+			const int index{ first + i };
+			// 素の値を「上回っているか」だけを見る。強化がどこから来たか（装備・Item）は問わない
+			const bool isBoosted{ stats[index] > baseStats[index] + STAT_BOOST_EPSILON };
+			drawStatCell(x + cellWidth * i, y, index, stats[index], isBoosted, alpha);
+		}
+	}
+
 	void PlayerHUDView::draw(core::ecs::EntityId playerId)
 	{
 		if (!m_componentManager.has<component::combat::HealthComponent>(playerId))
@@ -146,8 +367,20 @@ namespace game::ui::ingame
 		if (health.m_maxHp <= 0.0f)
 			return;
 
+		const float deltaTime{ tickDeltaTime() };
+
+		// Tabを押している間だけ8項目すべてを開く（押せる見た目のUIを置かずに全項目へ到達させる）
+		const auto* input{ m_componentManager.tryGet<component::movement::InputComponent>(playerId) };
+		const bool isExpanded{ input != nullptr && input->m_statusViewPressed };
+
+		const auto stats{ collectStats(playerId) };
+		const auto baseStats{ collectBaseStats(playerId) };
+		updatePaging(stats, isExpanded, deltaTime);
+
 		const int panelWidth{ scaled(PANEL_WIDTH) };
-		const int panelHeight{ scaled(PANEL_HEIGHT) };
+		const int rowHeight{ scaled(STAT_ROW_HEIGHT) };
+		// 開いている間は2行ぶんへ伸ばす。高さを連続に変えることで、開閉が引き出しのように見える
+		const int panelHeight{ scaled(PANEL_HEIGHT) + static_cast<int>(rowHeight * m_expandProgress) };
 		const int panelX{ scaled(PANEL_MARGIN) };
 		const int panelY{ m_screen.getHeight() - scaled(PANEL_MARGIN) - panelHeight };
 
@@ -172,9 +405,50 @@ namespace game::ui::ingame
 
 		// 0除算はmaxHpのチェックで防いでいる。回復過多などで1.0を超えても溝からはみ出さないよう丸める
 		const float ratio{ std::clamp(health.m_currentHp / health.m_maxHp, 0.0f, 1.0f) };
-		updateDamageReaction(ratio);
+		updateDamageReaction(ratio, deltaTime);
 		drawHealthBar(panelX + padding, panelY + scaled(BAR_Y),
 		    panelWidth - padding * 2, scaled(BAR_HEIGHT), ratio);
+
+		drawStats(panelX + padding, panelY + scaled(STAT_ROW_Y),
+		    (panelWidth - padding * 2) / STATS_PER_PAGE, stats, baseStats);
+	}
+
+	void PlayerHUDView::drawStats(int x, int y, int cellWidth,
+	    const std::array<float, STAT_COUNT>& stats,
+	    const std::array<float, STAT_COUNT>& baseStats)
+	{
+		// 開ききっている間は2ページを縦に並べて全項目を見せる（この間はページ送りが止まっている）
+		if (m_expandProgress >= 1.0f)
+		{
+			drawStatPage(x, y, cellWidth, stats, baseStats, 0, STAT_ALPHA_OPAQUE);
+			drawStatPage(x, y + scaled(STAT_ROW_HEIGHT), cellWidth, stats, baseStats, 1,
+			    STAT_ALPHA_OPAQUE);
+			return;
+		}
+
+		// 開閉の途中：2ページ目は伸びる高さに合わせて濃さも上げる
+		if (m_expandProgress > 0.0f)
+		{
+			drawStatPage(x, y, cellWidth, stats, baseStats, 0, STAT_ALPHA_OPAQUE);
+			drawStatPage(x, y + scaled(STAT_ROW_HEIGHT), cellWidth, stats, baseStats, 1,
+			    static_cast<int>(STAT_ALPHA_OPAQUE * m_expandProgress));
+			return;
+		}
+
+		// 平常時：切り替え中は前のページが上へ抜け、次のページが下から入る。
+		// ドット等の指標を置かなくても、この動き自体が「続きがある」ことを伝える
+		if (m_slideProgress >= 1.0f)
+		{
+			drawStatPage(x, y, cellWidth, stats, baseStats, m_page, STAT_ALPHA_OPAQUE);
+			return;
+		}
+
+		const int offset{ scaled(SLIDE_OFFSET) };
+		const float t{ m_slideProgress };
+		drawStatPage(x, y - static_cast<int>(offset * t), cellWidth, stats, baseStats, m_slideFromPage,
+		    static_cast<int>(STAT_ALPHA_OPAQUE * (1.0f - t)));
+		drawStatPage(x, y + static_cast<int>(offset * (1.0f - t)), cellWidth, stats, baseStats, m_page,
+		    static_cast<int>(STAT_ALPHA_OPAQUE * t));
 	}
 
 	void PlayerHUDView::drawHealthBar(int x, int y, int width, int height, float ratio)

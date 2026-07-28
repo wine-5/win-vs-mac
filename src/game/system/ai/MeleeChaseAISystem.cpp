@@ -7,6 +7,7 @@
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/visual/AnimationComponent.h"
 #include "game/constant/AnimationState.h"
+#include "game/utility/CliffGuard.h"
 #include <cmath>
 #include <algorithm>
 #include "core/utility/MathConstants.h"
@@ -23,6 +24,8 @@ namespace
 	// 目的地到着後に立ち止まる時間の範囲（秒）
 	constexpr float PAUSE_MIN{ 1.0f };
 	constexpr float PAUSE_MAX{ 2.5f };
+	// 徘徊の目的地を選び直す最大回数。床の上を引けなければ諦めてスポーン地点へ戻す
+	constexpr int WANDER_PICK_ATTEMPTS{ 8 };
 } // namespace
 
 namespace game::system::ai
@@ -102,9 +105,12 @@ namespace game::system::ai
 		// 溜め・振りの最中に追いかけると滑って見え、間合いを外して避ける動きも成立しなくなる
 		const bool isAttacking{ isAttackInProgress(entityId) };
 
-		// 移動：攻撃レンジ内・攻撃モーション中は止まり、それ以外なら接近する
+		// プレイヤーが崖の向こうにいても、追いかけて落ちないよう足元で止まる
+		const bool atEdge{ !utility::canStepToward(m_componentManager, entityId, dirToPlayer) };
+
+		// 移動：攻撃レンジ内・攻撃モーション中・崖の縁では止まり、それ以外なら接近する
 		// （従来はレンジ内でも速度を与え続け、プレイヤーへ押し込んでいた）
-		if (inAttackRange || isAttacking)
+		if (inAttackRange || isAttacking || atEdge)
 			stopHorizontalMovement(entityId);
 		else if (m_componentManager.has<component::movement::VelocityComponent>(entityId))
 		{
@@ -135,7 +141,7 @@ namespace game::system::ai
 			requestAnimation(entityId, constant::AnimationState::Attack1);
 		else if (isAttacking)
 			return;
-		else if (inAttackRange)
+		else if (inAttackRange || atEdge)
 			requestAnimation(entityId, constant::AnimationState::Idle);
 		else
 			requestAnimation(entityId, constant::AnimationState::Walk);
@@ -173,7 +179,7 @@ namespace game::system::ai
 		// 目的地が無ければスポーン地点まわりから新たに選ぶ
 		if (!patrol.m_hasWanderTarget)
 		{
-			patrol.m_wanderTarget = pickWanderTarget(patrol.m_homePosition);
+			patrol.m_wanderTarget = pickWanderTarget(entityId, patrol.m_homePosition);
 			patrol.m_hasWanderTarget = true;
 		}
 
@@ -199,9 +205,22 @@ namespace game::system::ai
 			return;
 		}
 
-		// 目的地へゆっくり移動し、その方向を向く
 		toTarget.x /= distance;
 		toTarget.z /= distance;
+
+		// 目的地との間に崖があるなら、その手前で立ち止まって別の目的地を選び直す。
+		// 目的地自体は床の上でも、そこへ向かう直線が奈落をまたぐことはある
+		if (!utility::canStepToward(m_componentManager, entityId, toTarget))
+		{
+			patrol.m_hasWanderTarget = false;
+			std::uniform_real_distribution<float> pauseDist{ PAUSE_MIN, PAUSE_MAX };
+			patrol.m_pauseTimer = pauseDist(m_rng);
+			stopHorizontalMovement(entityId);
+			requestAnimation(entityId, constant::AnimationState::Idle);
+			return;
+		}
+
+		// 目的地へゆっくり移動し、その方向を向く
 		const float patrolSpeed{ ai.m_moveSpeed * PATROL_SPEED_FACTOR };
 		if (hasVelocity)
 		{
@@ -213,17 +232,26 @@ namespace game::system::ai
 		requestAnimation(entityId, constant::AnimationState::Walk);
 	}
 
-	core::Vector3 MeleeChaseAISystem::pickWanderTarget(const core::Vector3& home)
+	core::Vector3 MeleeChaseAISystem::pickWanderTarget(core::ecs::EntityId entityId, const core::Vector3& home)
 	{
 		std::uniform_real_distribution<float> angleDist{ 0.0f, core::utility::TWO_PI };
 		std::uniform_real_distribution<float> radiusDist{ WANDER_RADIUS_MIN, WANDER_RADIUS_MAX };
-		const float angle{ angleDist(m_rng) };
-		const float radius{ radiusDist(m_rng) };
 
-		core::Vector3 target{ home };
-		target.x += std::cos(angle) * radius;
-		target.z += std::sin(angle) * radius;
-		return target;
+		// 床の無い場所を目的地にすると、そこを目指して崖から歩き出してしまう。
+		// 引き直しても床の上を引けなければスポーン地点へ戻す（そこは必ず床の上）
+		for (int attempt{ 0 }; attempt < WANDER_PICK_ATTEMPTS; ++attempt)
+		{
+			const float angle{ angleDist(m_rng) };
+			const float radius{ radiusDist(m_rng) };
+
+			core::Vector3 target{ home };
+			target.x += std::cos(angle) * radius;
+			target.z += std::sin(angle) * radius;
+
+			if (utility::hasFootingAt(m_componentManager, entityId, target.x, target.z, home.y))
+				return target;
+		}
+		return home;
 	}
 
 	bool MeleeChaseAISystem::isAttackInProgress(core::ecs::EntityId entityId) const

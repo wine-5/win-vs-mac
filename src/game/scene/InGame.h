@@ -56,6 +56,7 @@ namespace game
 		class InGameStatusView;  // 前方宣言
 		class LowHealthVignetteView; // 前方宣言
 		class BossHUDView;           // 前方宣言
+		class MiniMapView;           // 前方宣言
 		class EnemyHealthBarView;    // 前方宣言
 	} // namespace ui::ingame
 } // namespace game
@@ -103,6 +104,14 @@ namespace game::scene
 	   */
 	  void draw() override;
 
+	  /**
+	   * @brief ポーズ状態の変化に応じてマウスカーソルの表示を切り替える
+	   *
+	   * 戦闘中は隠しているが、ポーズメニューはマウスでも操作できる必要がある
+	   * @param isPaused ポーズ中ならtrue
+	   */
+	  void onPauseChanged(bool isPaused) override;
+
 	private:
 		/* コンストラクタで参照する関数 */
 		void loadResources();
@@ -131,6 +140,15 @@ namespace game::scene
 		 * 開始時ではなく、配置された雑魚を全滅させてから呼ぶ。撃破判定用にIDを保持する。
 		 */
 		void spawnBoss();
+
+		/**
+		 * @brief 生き残っている敵をまとめて撃破扱いにする
+		 *
+		 * ボスを倒した時点で決着なので、ボスが召喚した雑魚が残っていても
+		 * 一緒に片付ける。以降の消失演出は通常の撃破と同じくEnemyDeathSystemが担う。
+		 * @param excludedId 対象から外すEntityId（撃破済みのボス自身）
+		 */
+		void killRemainingEnemies(core::ecs::EntityId excludedId) noexcept;
 
 		// 各クラスにイベントバスの参照を渡したいため先にメンバ変数として宣言しておく。
 		//
@@ -177,7 +195,7 @@ namespace game::scene
 		std::unique_ptr<ui::debug::DebugGizmoView> m_debugGizmoView;
 		std::unique_ptr<ui::debug::DebugHUDView> m_debugHUDView;
 
-		// プレイヤーステータス（左下のHP）のView
+		// プレイヤーステータス（左下のHP・能力値）のView
 		std::unique_ptr<ui::ingame::PlayerHUDView> m_playerHUDView;
 
 		// 装備スロット（右下）のView
@@ -193,6 +211,9 @@ namespace game::scene
 		// ボスHP（上中央）のView
 		std::unique_ptr<ui::ingame::BossHUDView> m_bossHUDView;
 
+		// ミニマップ（右上）のView
+		std::unique_ptr<ui::ingame::MiniMapView> m_miniMapView;
+
 		// 敵の頭上HPバーのView
 		std::unique_ptr<ui::ingame::EnemyHealthBarView> m_enemyHealthBarView;
 
@@ -203,6 +224,10 @@ namespace game::scene
 		float m_elapsedTime{0.0f};
 		int   m_killCount{0};
 		float m_totalDamageTaken{0.0f};
+
+		// クリアタイムを計測中か。ボスを倒した瞬間にfalseになり、
+		// 消失フェードや勝利遷移までの演出時間はタイムに含めない
+		bool m_isTimeMeasuring{ true };
 
 		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
 		std::vector<core::base::EventBus::Subscription> m_subscriptions{};

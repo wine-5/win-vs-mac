@@ -5,11 +5,10 @@
 #include "game/constant/ProjectileId.h"
 #include "core/data/ProjectileMetadata.h"
 #include "platform/window/WindowConstants.h"
+#include "platform/window/UiSound.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
 #include "core/base/ServiceLocator.h"
-#include "core/interface/IAudioManager.h"
-#include "core/constant/SeType.h"
 #include "platform/utility/StringConverter.h"
 #include "thirdparty/nlohmann/json.hpp"
 #include <shellapi.h>
@@ -22,15 +21,21 @@ namespace platform::window::select
 {
 	Win32SelectWindowManager::Win32SelectWindowManager(
 	    std::function<void()> onGameStart,
+	    std::function<void()> onBackToTitle,
+	    std::function<void()> onQuitGame,
 	    std::function<void(int, const std::string&)> onFileSlotChanged,
 	    std::function<void(const std::string&)> onDifficultyChanged,
 	    core::iface::IResourceManager& resourceManager,
-	    core::iface::IScreen& screen) noexcept
+	    core::iface::IScreen& screen,
+	    bool showTutorial) noexcept
 	    : m_onGameStart{ std::move(onGameStart) }
+	    , m_onBackToTitle{ std::move(onBackToTitle) }
+	    , m_onQuitGame{ std::move(onQuitGame) }
 	    , m_onFileSlotChanged{ std::move(onFileSlotChanged) }
 	    , m_onDifficultyChanged{ std::move(onDifficultyChanged) }
 	    , m_resourceManager{ resourceManager }
 	    , m_screen{ screen }
+	    , m_showTutorial{ showTutorial }
 	{
     }
 
@@ -76,6 +81,8 @@ namespace platform::window::select
 		    colWidth,
 		    availH,
 		    m_resourceManager);
+		// 初回ガイドの有無はページ読み込み時に問い合わせられるため、create() より前に渡しておく
+		m_fileSelectWindow->setShowTutorial(m_showTutorial);
 		if (!m_fileSelectWindow->create(m_desktopWindow->getHwnd())) return;
 		// noexcept にしない。文字列の代入などで例外が出た場合、noexcept だと
 		// std::terminate になってログも残らず即死する。
@@ -88,7 +95,12 @@ namespace platform::window::select
                 m_slotPaths[slot] = path;
 				m_slotExtTypes[slot] = game::utility::FileExtensionTypeResolver::fromPath(path);
 			}
-			updateParameterWindow(); });
+			updateParameterWindow();
+			notifyEquipReady(); });
+		// ガイドの段に応じて他ウィンドウの強調表示を切り替える。
+		// ウィンドウ同士は直接やり取りできないので、ここが中継役になる
+		m_fileSelectWindow->setOnTutorialStepChanged([this](int step) noexcept
+		    { broadcastTutorialStep(step); });
 		m_fileSelectWindow->setOnMinimize([this]() noexcept {
             m_fileSelectWindow->hide();
             m_fileVisible = false;
@@ -126,6 +138,7 @@ namespace platform::window::select
 		if (!m_difficultyWindow->create(m_desktopWindow->getHwnd())) return;
 		m_difficultyWindow->setOnDifficultyChanged([this](const std::string& difficulty) noexcept
 		    {
+			    m_difficulty = difficulty;
 			    if (m_onDifficultyChanged) m_onDifficultyChanged(difficulty);
 			    // HARDでは全ウィンドウの配色を警告色へ切り替える
 			    broadcastDifficulty(difficulty); });
@@ -139,14 +152,16 @@ namespace platform::window::select
             notifyWindowState(WINDOW_NAME_DIFF, false);
         });
 
-        // RulesWindow（センタリング・初期非表示）
-        m_rulesWindow = std::make_unique<RulesWindow>(
-            originX + (screenWidth  - RULES_WINDOW_WIDTH) / 2,
-            originY + (screenHeight - RULES_WINDOW_HEIGHT) / 2,
-            RULES_WINDOW_WIDTH,
-            RULES_WINDOW_HEIGHT
-        );
-        if (!m_rulesWindow->create(m_desktopWindow->getHwnd())) return;
+		// RulesWindow（センタリング・初期非表示）。
+		// 操作方法をまとめて読ませる場所なので、画面の大部分を占める大きさで開く
+		const int rulesWidth{ screenWidth * RULES_WINDOW_WIDTH_PERCENT / 100 };
+		const int rulesHeight{ screenHeight * RULES_WINDOW_HEIGHT_PERCENT / 100 };
+		m_rulesWindow = std::make_unique<RulesWindow>(
+		    originX + (screenWidth - rulesWidth) / 2,
+		    originY + (screenHeight - rulesHeight) / 2,
+		    rulesWidth,
+		    rulesHeight);
+		if (!m_rulesWindow->create(m_desktopWindow->getHwnd())) return;
         m_rulesWindow->setOnMinimize([this]() noexcept {
             m_rulesWindow->hide();
             m_rulesVisible = false;
@@ -311,48 +326,69 @@ namespace platform::window::select
 		m_parameterWindow->refresh(stats);
 	}
 
-    void Win32SelectWindowManager::handleDesktopMessage(const std::string& json) noexcept
+	void Win32SelectWindowManager::hideAllWindows() noexcept
+	{
+		if (m_desktopWindow && m_desktopWindow->getHwnd())
+			ShowWindow(m_desktopWindow->getHwnd(), SW_HIDE);
+		if (m_fileSelectWindow)
+			m_fileSelectWindow->hide();
+		if (m_parameterWindow)
+			m_parameterWindow->hide();
+		if (m_difficultyWindow)
+			m_difficultyWindow->hide();
+		if (m_rulesWindow)
+			m_rulesWindow->hide();
+
+		if (HWND gameHwnd{ static_cast<HWND>(m_screen.getNativeWindowHandle()) })
+		{
+			SetForegroundWindow(gameHwnd);
+			SetActiveWindow(gameHwnd);
+		}
+	}
+
+	void Win32SelectWindowManager::handleDesktopMessage(const std::string& json) noexcept
     {
-        try
+		// 操作音はJS側が要求する（押した要素ごとに鳴らし分けるため）
+		if (platform::window::tryPlayUiSound(json))
+			return;
+
+		try
         {
             auto j = nlohmann::json::parse(json);
             const std::string type{ j.value(platform::window::WindowConstants::JSON_KEY_TYPE, "") };
 
-			// デスクトップ上のボタン操作はここに集まる。押した手応えを1か所で返す
-			// （状態の問い合わせなど、押していないメッセージでは鳴らさない）
-			if (type == platform::window::WindowConstants::MESSAGE_TYPE_START_GAME ||
-			    type == platform::window::WindowConstants::MESSAGE_TYPE_TOGGLE_WINDOW ||
-			    type == platform::window::WindowConstants::MESSAGE_TYPE_LAUNCH_APP)
-			{
-				auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
-				if (audio)
-					audio->playSe(core::constant::SeType::UiClick);
-			}
-
 			if (type == platform::window::WindowConstants::MESSAGE_TYPE_START_GAME)
             {
-				// ファイル装備は任意。ただし埋まっていないスロットがある場合は確認を挟む
-				if (countEquippedSlots() < FILE_SLOT_COUNT && !confirmStartWithEmptySlots())
+				// 出撃は取り消せないので必ず確認を挟む。
+				// デスクトップアイコンからも右下のボタンからも、ここを通る
+				if (!confirmStart())
 					return;
 
 				// ゲーム開始前に全サブウィンドウを非表示にしてからコールバックを実行
-                if (m_desktopWindow && m_desktopWindow->getHwnd())
-                    ShowWindow(m_desktopWindow->getHwnd(), SW_HIDE);
-                if (m_fileSelectWindow) m_fileSelectWindow->hide();
-                if (m_parameterWindow)  m_parameterWindow->hide();
-                if (m_difficultyWindow) m_difficultyWindow->hide();
-
-				// デスクトップのギミックで開いた実アプリ（cmd.exe等）が前面に残ると、
-				// ボーダーレスのゲーム画面が隠れてしまう。ゲーム本体ウィンドウを前面へ戻す
-				if (HWND gameHwnd{ static_cast<HWND>(m_screen.getNativeWindowHandle()) })
-				{
-					SetForegroundWindow(gameHwnd);
-					SetActiveWindow(gameHwnd);
-				}
+				hideAllWindows();
 
 				if (m_onGameStart) m_onGameStart();
             }
-            else if (type == platform::window::WindowConstants::MESSAGE_TYPE_TOGGLE_WINDOW)
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_BACK_TO_TITLE)
+			{
+				// 戻ると装備も難易度も選び直しになるため、出撃と同じく確認を挟む
+				if (!confirmBackToTitle())
+					return;
+
+				hideAllWindows();
+				if (m_onBackToTitle)
+					m_onBackToTitle();
+			}
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_QUIT_GAME)
+			{
+				if (!confirmQuitGame())
+					return;
+
+				hideAllWindows();
+				if (m_onQuitGame)
+					m_onQuitGame();
+			}
+			else if (type == platform::window::WindowConstants::MESSAGE_TYPE_TOGGLE_WINDOW)
             {
                 const std::string name{ j.value(platform::window::WindowConstants::JSON_KEY_WINDOW, "") };
 				if (name == WINDOW_NAME_FILE && m_fileSelectWindow)
@@ -437,6 +473,37 @@ namespace platform::window::select
 		}
 	}
 
+	void Win32SelectWindowManager::notifyEquipReady() noexcept
+	{
+		if (!m_desktopWindow)
+			return;
+		try
+		{
+			bool ready{ true };
+			for (const auto& path : m_slotPaths)
+			{
+				if (path.empty())
+				{
+					ready = false;
+					break;
+				}
+			}
+
+			nlohmann::json j;
+			j[platform::window::WindowConstants::JSON_KEY_TYPE] = platform::window::WindowConstants::MESSAGE_TYPE_EQUIP_READY;
+			j[platform::window::WindowConstants::JSON_KEY_READY] = ready;
+			m_desktopWindow->postMessage(j.dump());
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("Win32SelectWindowManager::notifyEquipReady: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("Win32SelectWindowManager::notifyEquipReady: 不明な例外が発生しました");
+		}
+	}
+
 	void Win32SelectWindowManager::broadcastDifficulty(const std::string& difficulty) noexcept
 	{
 		// 難易度は配色にも効くため、全ウィンドウへ同じ内容を配る。
@@ -470,6 +537,38 @@ namespace platform::window::select
 		}
 	}
 
+	void Win32SelectWindowManager::broadcastTutorialStep(int step) noexcept
+	{
+		try
+		{
+			nlohmann::json j;
+			j[platform::window::WindowConstants::JSON_KEY_TYPE] =
+			    platform::window::WindowConstants::MESSAGE_TYPE_TUTORIAL_HIGHLIGHT;
+
+			// パラメータ：伸びた項目だけを残す段（拡張子で能力が上がる、の説明中）
+			if (m_parameterWindow)
+			{
+				j[platform::window::WindowConstants::JSON_KEY_SHOW] = (step == TUTORIAL_STEP_BONUS);
+				m_parameterWindow->postMessage(j.dump());
+			}
+
+			// デスクトップ：ルール説明のアイコンを目立たせる段（最後の締め）
+			if (m_desktopWindow)
+			{
+				j[platform::window::WindowConstants::JSON_KEY_SHOW] = (step == TUTORIAL_STEP_RULES);
+				m_desktopWindow->postMessage(j.dump());
+			}
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("Win32SelectWindowManager::broadcastTutorialStep: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+			core::log::error("Win32SelectWindowManager::broadcastTutorialStep: 不明な例外が発生しました");
+		}
+	}
+
 	void Win32SelectWindowManager::showWarningMessage(const std::string& message) noexcept
     {
         HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
@@ -479,16 +578,43 @@ namespace platform::window::select
         MessageBoxW(parentHwnd, wMessage.c_str(), L"警告", MB_OK | MB_ICONWARNING);
     }
 
-	bool Win32SelectWindowManager::confirmStartWithEmptySlots() noexcept
+	bool Win32SelectWindowManager::confirmStart() noexcept
 	{
 		HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
 
-		platform::utility::StringConverter converter;
-		const std::wstring message{ converter.utf8ToWide(
-			"装備ファイルが3つ選択されていません。\n"
-			"ボーナスを受け取らずにこのまま開始しますか？") };
+		const int equipped{ countEquippedSlots() };
 
-		return MessageBoxW(parentHwnd, message.c_str(), L"確認",
-		           MB_OKCANCEL | MB_ICONWARNING | MB_DEFBUTTON2) == IDOK;
+		// 出撃後は装備も難易度も変えられないので、今の内容をそのまま読み上げて確認する。
+		// 埋まっていないスロットがあるときだけは、取り逃しに気づけるよう一言添える
+		std::string text{ "装備ファイル: " + std::to_string(equipped) + " / " + std::to_string(FILE_SLOT_COUNT) + "\n" };
+		text += "難易度: " + m_difficulty + "\n\n";
+		if (equipped < FILE_SLOT_COUNT)
+			text += "空いているスロットの分はボーナスを受け取れません。\n";
+		text += "この内容でダンジョンへ出撃しますか？";
+
+		platform::utility::StringConverter converter;
+		const std::wstring message{ converter.utf8ToWide(text) };
+
+		return MessageBoxW(parentHwnd, message.c_str(), L"出撃の確認",
+		           MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
+	}
+
+	bool Win32SelectWindowManager::confirmBackToTitle() noexcept
+	{
+		HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
+
+		// 既定はキャンセル側。誤ってダブルクリックしても選び直しにならないようにする
+		return MessageBoxW(parentHwnd,
+		           L"選んだ装備ファイルと難易度は破棄されます。\n\nタイトル画面へ戻りますか？",
+		           L"タイトルへ戻る", MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
+	}
+
+	bool Win32SelectWindowManager::confirmQuitGame() noexcept
+	{
+		HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
+
+		return MessageBoxW(parentHwnd,
+		           L"ゲームを終了します。\n\nよろしいですか？",
+		           L"シャットダウン", MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
 	}
 } // namespace platform::window::select

@@ -36,24 +36,22 @@ namespace infrastructure::resource::repository
 	{
 		if (!json.contains("effects")) return;
 
-		const std::unordered_map<std::string, core::constant::EffectType> typeMap{
-			{ "Enemy_HitSword", core::constant::EffectType::Enemy_HitSword },
-			{ "Enemy_HitWindow", core::constant::EffectType::Enemy_HitWindow },
-			{ "Enemy_Spawn", core::constant::EffectType::Enemy_Spawn },
-			{ "Player_Slash", core::constant::EffectType::Player_Slash },
-			{ "Mac_Rainbow", core::constant::EffectType::Mac_Rainbow },
-		};
-
 		for (const auto& entry : json["effects"])
 		{
 			const std::string key  { entry["type"] };
 			const std::string path { entry["path"] };
 
-			auto it{ typeMap.find(key) };
-			if (it == typeMap.end()) continue;
+			// 名前の綴り間違いや列挙への追加漏れを黙って捨てると、
+			// 「エフェクトだけ出ない」状態の原因を追えなくなるため必ず気付けるようにする
+			const core::constant::EffectType type{ core::constant::toEffectType(key) };
+			if (type == core::constant::EffectType::None)
+				throw std::runtime_error{ "effect '" + key + "' は EffectType に存在しません（EFFECT_TYPE_NAMESを確認）" };
 
+			// efkファイルの配置漏れは配布物を作ったときに起きやすい。
+			// ここで落としておかないと、遊ぶ側には「演出が無いゲーム」としか見えない
 			int handle{ LoadEffekseerEffect(path.c_str()) };
-			if (handle == -1) continue;
+			if (handle == -1)
+				throw std::runtime_error{ "エフェクトファイル '" + path + "' を読み込めませんでした" };
 
 			if (!entry.contains("poolSize") || !entry.contains("yOffset") || !entry.contains("scale"))
 				throw std::runtime_error{ "effect '" + key + "' に必須フィールド (poolSize / yOffset / scale) が設定されていません" };
@@ -64,7 +62,7 @@ namespace infrastructure::resource::repository
 			config.m_yOffset  = entry["yOffset"].get<float>();
 			config.m_scale    = entry["scale"].get<float>();
 
-			m_configs[it->second] = config;
+			m_configs[type] = config;
 		}
 	}
 } // namespace infrastructure::resource::repository

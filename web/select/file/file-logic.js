@@ -28,18 +28,8 @@ const FILE_EXT_ORDER = [
 // 対象の拡張子はC++（FileExtensionTypeResolverの判定表が正）から exts で届く。
 // ここに持つのは、拡張子を列挙できない Unknown の文言だけ
 const FILE_EXT_FALLBACK_NAME = { Unknown: '上記以外のすべて' };
-// ステータスの見せ方。アイコンはパラメータウィンドウと同じ画像を使い、
-// 「どの行が伸びるのか」を絵で結びつける。値そのものはC++から届く
-const STAT_META = {
-    hp:   { name: '体力',             icon: 'https://assets.game.web/images/ui/select/hp.png',   suffix: '' },
-    atk:  { name: '攻撃力',           icon: 'https://assets.game.web/images/ui/select/atk.png',  suffix: '' },
-    def:  { name: '防御力',           icon: 'https://assets.game.web/images/ui/select/def.png',  suffix: '' },
-    spd:  { name: '移動速度',         icon: 'https://assets.game.web/images/ui/select/spd.png',  suffix: '' },
-    rng:  { name: '攻撃範囲',         icon: 'https://assets.game.web/images/ui/select/rng.png',  suffix: '' },
-    crit: { name: 'クリティカル確率', icon: 'https://assets.game.web/images/ui/select/crit.png', suffix: '%' },
-    bspd: { name: '弾速',             icon: 'https://assets.game.web/images/ui/select/bspd.png', suffix: '' },
-    brng: { name: '弾の飛距離',       icon: 'https://assets.game.web/images/ui/select/brng.png', suffix: '' }
-};
+// ステータスの見せ方（STAT_META）は common/stat-meta.js に置いてある。
+// ルール説明の装備ページと同じ絵・同じ呼び名で出すために共有している
 
 const FILE_EXT_CLASS = {
     Executable: 'exe', Document: 'doc', Image: 'img', Audio: 'aud',
@@ -63,7 +53,8 @@ const FileLogic = (function () {
     let sameFileMode = false;
     let onSlotChangeCallback = null;
     let onBonusUpdateCallback = null;
-    let onSlotsUpdateCallback = null;
+    // 装備の更新は表示側と操作ガイドの両方が知る必要があるため、複数の購読を受け付ける
+    const slotsUpdateCallbacks = [];
 
     function selectSlot(i) {
         selectedSlot = i;
@@ -96,9 +87,7 @@ const FileLogic = (function () {
                 slots[info.slot] = info;
             }
         });
-        if (onSlotsUpdateCallback) {
-            onSlotsUpdateCallback();
-        }
+        slotsUpdateCallbacks.forEach(function (callback) { callback(); });
     }
 
     function getActiveExtensions() {
@@ -162,7 +151,12 @@ const FileLogic = (function () {
     }
 
     function onSlotsUpdate(callback) {
-        onSlotsUpdateCallback = callback;
+        slotsUpdateCallbacks.push(callback);
+    }
+
+    /** 初回だけ出す操作ガイドを表示してよいかをC++へ問い合わせる */
+    function requestTutorial() {
+        sendToGame({ type: 'requestTutorial' });
     }
 
     return {
@@ -186,6 +180,7 @@ const FileLogic = (function () {
         onMessageFromGame: onMessageFromGame,
         requestBonusInfo: requestBonusInfo,
         requestSlots: requestSlots,
+        requestTutorial: requestTutorial,
         onSlotChange: onSlotChange,
         onBonusUpdate: onBonusUpdate,
         onSlotsUpdate: onSlotsUpdate

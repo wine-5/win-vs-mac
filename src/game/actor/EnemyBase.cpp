@@ -2,6 +2,7 @@
 #include "game/actor/EnemyBehaviors.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/movement/VelocityComponent.h"
+#include "game/component/movement/FallRecoveryComponent.h"
 #include "game/component/visual/RenderComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/ai/AIComponent.h"
@@ -52,6 +53,19 @@ namespace game::actor
 		m_componentManager.add<component::movement::TransformComponent>(m_entity.getId(), transform);
 
 		m_componentManager.add<component::movement::VelocityComponent>(m_entity.getId(), {});
+
+		// 奈落へ落ちたかの基準。地上の敵にだけ持たせる。
+		// 浮遊敵は床の高さに合わせて浮き続けるだけで落ちることが無く、接地もしないので
+		// 基準が配置位置のまま固まる。床が配置位置より十分低いだけで奈落と誤判定されるため、
+		// そもそも落下判定の対象から外す
+		if (m_enemyData.getHoverHeight() <= 0.0f)
+		{
+			component::movement::FallRecoveryComponent fallRecovery{};
+			fallRecovery.m_lastSafePosition = transform.m_position;
+			fallRecovery.m_hasSafePosition = true;
+			m_componentManager.add<component::movement::FallRecoveryComponent>(m_entity.getId(), fallRecovery);
+		}
+
 		m_componentManager.add<component::visual::RenderComponent>(m_entity.getId(), component::visual::RenderComponent{ .m_modelHandle = m_modelHandle });
 		m_componentManager.add<component::visual::HitEffectComponent>(m_entity.getId(), {});
 		m_componentManager.add<component::visual::EffectComponent>(m_entity.getId(), {});
@@ -69,6 +83,8 @@ namespace game::actor
 		attack.m_windupDelay = m_enemyData.getAttackWindup();
 		attack.m_attackMaxHeight = m_enemyData.getAttackMaxHeight();
 		attack.m_impactSeType = m_enemyData.getAttackImpactSe();
+		attack.m_impactEffectType = m_enemyData.getAttackImpactEffect();
+		attack.m_impactEffectLead = m_enemyData.getAttackImpactEffectLead();
 		m_componentManager.add<component::combat::AttackComponent>(m_entity.getId(), attack);
 
 		component::combat::ColliderComponent collider{};

@@ -2,6 +2,7 @@
 #include "game/component/camera/CameraEffectComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/movement/InputComponent.h"
+#include "game/component/combat/HealthComponent.h"
 #include "game/event/InGameEvents.h"
 #include "game/constant/MacAwakenTiming.h"
 #include "core/utility/Color.h"
@@ -71,6 +72,7 @@ namespace game::system::visual
 			    m_isPlaying = true;
 			    m_shakeStrength = intensity.m_shakeStrength;
 			    m_vignetteStrength = intensity.m_vignetteAlpha;
+			    setMacInvincible(true);
 			} };
 
 		// 覚醒（HP閾値でのフェーズ移行）：強め
@@ -109,6 +111,7 @@ namespace game::system::visual
 			effect.m_cinematicBlend = 0.0f;
 			effect.m_awakenShakeOffset = core::Vector3{ 0.0f, 0.0f, 0.0f };
 			m_vignetteAlpha = 0.0f;
+			setMacInvincible(false);
 			if (m_componentManager.has<component::movement::InputComponent>(m_playerId))
 				m_componentManager.get<component::movement::InputComponent>(m_playerId).m_locked = false;
 			return;
@@ -176,6 +179,13 @@ namespace game::system::visual
 		{
 			m_vignetteAlpha = 0.0f;
 		}
+	}
+
+	void MacAwakenEffectSystem::setMacInvincible(bool isInvincible) noexcept
+	{
+		if (!m_componentManager.has<component::combat::HealthComponent>(m_macId))
+			return;
+		m_componentManager.get<component::combat::HealthComponent>(m_macId).m_isInvincible = isInvincible;
 	}
 
 	void MacAwakenEffectSystem::draw()

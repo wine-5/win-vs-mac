@@ -41,16 +41,22 @@ namespace platform::window
 		/**
 		 * @brief セレクト画面のウィンドウマネージャを生成・初期化
 		 * @param onGameStart ゲーム開始時のコールバック
+		 * @param onBackToTitle タイトルへ戻るときのコールバック
+		 * @param onQuitGame アプリを終了するときのコールバック
 		 * @param onFileSlotChanged ファイルスロット変更時のコールバック
 		 * @param onDifficultyChanged 難易度変更時のコールバック
 		 * @param resourceManager リソースマネージャ
+		 * @param showTutorial 初回の操作ガイドを表示するか
 		 * @return 生成されたセレクトウィンドウマネージャ
 		 */
 		std::unique_ptr<core::iface::ISelectWindowManager> createSelectWindowManager(
 		    std::function<void()> onGameStart,
+		    std::function<void()> onBackToTitle,
+		    std::function<void()> onQuitGame,
 		    std::function<void(int, const std::string&)> onFileSlotChanged,
 		    std::function<void(const std::string&)> onDifficultyChanged,
-		    core::iface::IResourceManager& resourceManager) override;
+		    core::iface::IResourceManager& resourceManager,
+		    bool showTutorial) override;
 
 	  private:
         // ローディングウィンドウのサイズ比率（スクリーンサイズに対する割合）

@@ -1,15 +1,22 @@
 {
   "effects": [
     {
-      "type": "Enemy_HitSword",
-      "path": "assets/effects/slash.efk",
+      "type": "Enemy_HitSwordNormal",
+      "path": "assets/effects/enemy_hit_sword_normal.efk",
+      "poolSize": 10,
+      "yOffset": 75.0,
+      "scale": 30.0
+    },
+    {
+      "type": "Enemy_HitSwordStrong",
+      "path": "assets/effects/enemy_hit_sword_strong.efk",
       "poolSize": 10,
       "yOffset": 75.0,
       "scale": 30.0
     },
     {
       "type": "Enemy_HitWindow",
-      "path": "assets/effects/hit_window.efk",
+      "path": "assets/effects/enemy_hit_window.efk",
       "poolSize": 10,
       "yOffset": 75.0,
       "scale": 30.0
@@ -22,17 +29,31 @@
       "scale": 2.0
     },
     {
-      "type": "Player_Slash",
-      "path": "assets/effects/player_slash.efk",
+      "type": "Player_Hit",
+      "path": "assets/effects/player_hit.efk",
+      "poolSize": 10,
+      "yOffset": 75.0,
+      "scale": 30.0
+    },
+    {
+      "type": "Player_SlashNormal",
+      "path": "assets/effects/player_slash_normal.efk",
       "poolSize": 5,
       "yOffset": 75.0,
       "scale": 30.0
     },
     {
-      "type": "Mac_Rainbow",
-      "path": "assets/effects/mac_rainbow.efk",
+      "type": "Player_SlashStrong",
+      "path": "assets/effects/player_slash_strong.efk",
       "poolSize": 5,
       "yOffset": 75.0,
+      "scale": 30.0
+    },
+    {
+      "type": "Xcode_GroundSlam",
+      "path": "assets/effects/xcode_ground_slam.efk",
+      "poolSize": 5,
+      "yOffset": 0.0,
       "scale": 30.0
     }
   ]
