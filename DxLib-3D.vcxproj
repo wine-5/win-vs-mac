@@ -179,6 +179,7 @@
     <ClCompile Include="src\game\system\ai\DetectionSystem.cpp" />
     <ClCompile Include="src\game\system\ai\EnemyRangedAttackSystem.cpp" />
     <ClCompile Include="src\game\scene\Bios.cpp" />
+    <ClCompile Include="src\game\scene\DebugDestruction.cpp" />
     <ClCompile Include="src\game\scene\Loading.cpp" />
     <ClCompile Include="src\game\scene\Lockscreen.cpp" />
     <ClCompile Include="src\game\scene\LockscreenView.cpp" />
@@ -394,6 +395,7 @@
     <ClInclude Include="src\game\system\visual\PlayerChargeVisualsSystem.h" />
     <ClInclude Include="src\game\system\visual\CriticalVisualsSystem.h" />
     <ClInclude Include="src\game\GameManager.h" />
+    <ClInclude Include="src\game\scene\DebugDestruction.h" />
     <ClInclude Include="src\game\scene\Loading.h" />
     <ClInclude Include="src\game\scene\Lockscreen.h" />
     <ClInclude Include="src\game\scene\LockscreenView.h" />
