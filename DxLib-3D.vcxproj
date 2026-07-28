@@ -70,6 +70,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <!-- 配布物だけ製品名で出す。TargetName を指定しない構成（Debug）は
+       既定どおり $(ProjectName) が使われ DxLib-3D.exe のままになるため、
+       タスクマネージャーやログでどちらのビルドかを見分けられる -->
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <TargetName>WinVsMac</TargetName>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
