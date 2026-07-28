@@ -52,7 +52,8 @@ Application::Application(int screenWidth, int screenHeight)
 
 	// 初期シーンを設定する
 	// DEBUG: リリース時はBIOSからスタートすること
-	m_sceneManager->changeScene(game::scene::SceneType::InGame);
+	// DEBUG: 破壊演出の検証中はDebugDestructionから始める（検証後はInGameへ戻す）
+	m_sceneManager->changeScene(game::scene::SceneType::DebugDestruction);
 }
 
 void Application::run()
