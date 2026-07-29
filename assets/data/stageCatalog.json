@@ -651,5 +651,50 @@
       600,
       400
     ]
+  },
+  "blockTable": {
+    "_comment": "block_random を実際の種類へ置き換えるときの抽選表。weightは相対値で、合計が1でなくてよい。0にするとそのプレイでは出現しなくなる。拡張子ブロックは1個につき欠片1つ、zipは複数落とすため重みを低めにしてある",
+    "entries": [
+      {
+        "type": "block_ext_document",
+        "weight": 14.0
+      },
+      {
+        "type": "block_ext_image",
+        "weight": 14.0
+      },
+      {
+        "type": "block_ext_audio",
+        "weight": 12.0
+      },
+      {
+        "type": "block_ext_archive",
+        "weight": 12.0
+      },
+      {
+        "type": "block_ext_video",
+        "weight": 10.0
+      },
+      {
+        "type": "block_ext_sourcecode",
+        "weight": 8.0
+      },
+      {
+        "type": "block_ext_shortcut",
+        "weight": 8.0
+      },
+      {
+        "type": "block_ext_executable",
+        "weight": 6.0
+      },
+      {
+        "type": "block_ext_unknown",
+        "weight": 4.0
+      },
+      {
+        "type": "block_zip",
+        "weight": 12.0
+      }
+    ]
   }
 }
