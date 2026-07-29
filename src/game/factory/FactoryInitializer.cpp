@@ -6,12 +6,14 @@
 #include "core/data/PropDefinition.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/PropCollision.h"
+#include "game/constant/PropId.h"
 #include "game/constant/PropRole.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/visual/LightComponent.h"
 #include "game/component/stage/BossGateComponent.h"
 #include <cmath>
 #include <algorithm>
+#include <random>
 
 namespace
 {
@@ -35,6 +37,34 @@ namespace
 		const float y{ core::utility::rotateEulerXYZ(core::Vector3{ 0.0f, size.y, 0.0f }, rotation).y };
 		const float z{ core::utility::rotateEulerXYZ(core::Vector3{ 0.0f, 0.0f, size.z }, rotation).y };
 		return std::abs(x) + std::abs(y) + std::abs(z);
+	}
+
+	/**
+	 * @brief 抽選対象の種類IDを解決する
+	 *
+	 * block_random は「壊せるブロックがある」という配置だけを表し、
+	 * 実際の中身はプレイのたびに抽選で決まる。それ以外の種類はそのまま返す。
+	 * @param type ステージ配置に書かれた種類ID
+	 * @param table 抽選表（stageCatalog.jsonのblockTable）
+	 * @param rng 乱数エンジン
+	 * @return 実際に生成する種類ID
+	 */
+	std::string resolvePropType(const std::string& type,
+	    const core::data::BlockTable& table,
+	    std::mt19937& rng)
+	{
+		if (type != game::constant::prop_id::BLOCK_RANDOM)
+			return type;
+
+		const float total{ table.totalWeight() };
+		if (total <= 0.0f)
+		{
+			core::log::error("blockTableに抽選できる行がありません（block_randomを解決できない）");
+			return type;
+		}
+
+		std::uniform_real_distribution<float> distribution{ 0.0f, total };
+		return std::string(table.pick(distribution(rng)));
 	}
 } // namespace
 
@@ -92,9 +122,15 @@ namespace game::factory
 		const auto& stage{ m_resourceManager.getStageMetadata() };
 		auto& factory{ m_factoryManager.getStagePropFactory() };
 
+		// ブロックの中身はプレイのたびに変える。同じ席で毎回同じ物が出ると
+		// 配置を覚えたプレイヤーにとってダンジョンが一本道の作業になるため
+		const auto& blockTable{ m_resourceManager.getBlockTable() };
+		std::mt19937 rng{ std::random_device{}() };
+
 		for (const auto& prop : stage.m_props)
 		{
-			const auto& def{ m_resourceManager.getPropDefinition(prop.m_type) };
+			const std::string type{ resolvePropType(prop.m_type, blockTable, rng) };
+			const auto& def{ m_resourceManager.getPropDefinition(type) };
 			const int handle{ m_resourceManager.loadModelByPath(def.m_modelPath) };
 
 			// 実寸(size) ÷ 素材実寸(baseSize) をモデルスケールにする。
