@@ -1,4 +1,5 @@
 #include "platform/diagnostics/MemoryProbe.h"
+#include "core/constant/DebugFlags.h"
 
 // windows.h は max / min / DrawText などをマクロで定義する。取り込む前に塞いでおく
 #ifndef NOMINMAX
@@ -38,6 +39,9 @@ namespace
 	 */
 	void appendLine(std::string_view line)
 	{
+		if (!core::constant::WRITE_DEBUG_LOG_FILES)
+			return;
+
 		std::FILE* file{ nullptr };
 		if (fopen_s(&file, PROBE_LOG_PATH, "a") != 0 || file == nullptr)
 			return;
@@ -91,9 +95,12 @@ namespace platform::diagnostics
 
 	void MemoryProbe::reset()
 	{
-		std::FILE* file{ nullptr };
-		if (fopen_s(&file, PROBE_LOG_PATH, "w") == 0 && file != nullptr)
-			std::fclose(file);
+		if (core::constant::WRITE_DEBUG_LOG_FILES)
+		{
+			std::FILE* file{ nullptr };
+			if (fopen_s(&file, PROBE_LOG_PATH, "w") == 0 && file != nullptr)
+				std::fclose(file);
+		}
 
 		m_lastPrivateBytes = getPrivateBytes();
 	}

@@ -1,6 +1,7 @@
 ﻿// 自前ヘッダを先にincludeする（DxLibのマクロ（DEFAULT_FONT_SIZE等）と定数名の衝突を防ぐ）
 #include "Application.h"
 #include "core/base/ServiceLocator.h"
+#include "core/constant/DebugFlags.h"
 #include "DxLib.h"
 #include "resource.h"
 #include "core/interface/IMemoryProbe.h"
@@ -104,6 +105,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SetAlwaysRunFlag(TRUE); // ファイルダイアログ等でウィンドウが非アクティブになっても描画を継続する
 	SetWindowIconID(IDI_GAMEICON); // アプリケーションアイコンを設定
 	SetMainWindowText("Win VS Mac"); // ウィンドウタイトルを設定
+
+	// DxLibの Log.txt を書き出すか。DxLib_Init より前でしか変えられない
+	SetOutApplicationLogValidFlag(core::constant::WRITE_DEBUG_LOG_FILES ? TRUE : FALSE);
 
 	// Effekseer 用の設定
 	SetUseDirect3DVersion(DX_DIRECT3D_11); // DirectX 11 を指定
