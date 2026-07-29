@@ -123,9 +123,9 @@
       "editorColor": "#0067C0",
       "collider": "box",
       "defaultSize": [
-        200,
-        200,
-        200
+        110,
+        110,
+        110
       ],
       "texture": "assets/model/stage/BlockFolder.png",
       "textureTile": 0,
@@ -145,9 +145,9 @@
       "editorColor": "#0067C0",
       "collider": "box",
       "defaultSize": [
-        200,
-        200,
-        200
+        110,
+        110,
+        110
       ],
       "texture": "assets/model/stage/BlockRecycleBin.png",
       "textureTile": 0,
@@ -233,9 +233,9 @@
       "editorColor": "#D29922",
       "collider": "box",
       "defaultSize": [
-        200,
-        200,
-        200
+        110,
+        110,
+        110
       ],
       "texture": "assets/model/stage/BlockDll.png",
       "textureTile": 0,
@@ -255,9 +255,9 @@
       "editorColor": "#D29922",
       "collider": "box",
       "defaultSize": [
-        200,
-        200,
-        200
+        110,
+        110,
+        110
       ],
       "texture": "assets/model/stage/BlockExe.png",
       "textureTile": 0,
@@ -389,9 +389,9 @@
       "editorColor": "#E8891C",
       "collider": "box",
       "defaultSize": [
-        200,
-        200,
-        200
+        110,
+        110,
+        110
       ],
       "texture": "assets/model/stage/BlockZip.png",
       "textureTile": 0,
