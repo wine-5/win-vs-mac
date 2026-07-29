@@ -1,5 +1,7 @@
 #include "DebugDestruction.h"
+#include "core/base/ServiceLocator.h"
 #include "core/input/KeyCode.h"
+#include "core/interface/IStringConverter.h"
 #include "core/utility/Log.h"
 #include <algorithm>
 #include <format>
@@ -337,10 +339,14 @@ namespace game::scene
 		constexpr unsigned int TEXT_COLOR{ 0xFFDBE6F0u };
 		constexpr unsigned int ACCENT_COLOR{ 0xFF22D3EEu };
 
+		// DxLibの描画はShift_JISを期待するため、UTF-8のソース文字列をそのまま渡すと化ける
+		auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+
 		int y{ 24 };
 		const auto line = [&](const std::string& text, unsigned int color)
 		{
-			m_uiRenderer.drawText(24, y, text.c_str(), color, FONT_SIZE);
+			const std::string drawable{ converter ? converter->utf8ToShiftJis(text) : text };
+			m_uiRenderer.drawText(24, y, drawable.c_str(), color, FONT_SIZE);
 			y += LINE_HEIGHT;
 		};
 
