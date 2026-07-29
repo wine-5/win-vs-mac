@@ -135,5 +135,10 @@ namespace game::scene
 
 		// プレイヤーの代わり。WASDで動かしてアイテムに近づく
 		core::Vector3 m_playerPosition{ 0.0f, 0.0f, -420.0f };
+
+		// 取得で変化するパラメータ（本体のPlayerDataには触らない）
+		int m_attack{ 30 };
+		int m_gainedAttack{ 0 };
+		float m_gainFlash{ 0.0f };
 	};
 } // namespace game::scene

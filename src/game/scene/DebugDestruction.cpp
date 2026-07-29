@@ -57,6 +57,9 @@ namespace
 
 	/// @brief アイテムのスケール（モデル素材の実寸に対する比率）
 	constexpr float ITEM_SCALE{ 0.35f };
+
+	/// @brief 1回の取得で増える攻撃力
+	constexpr int ATTACK_GAIN{ 5 };
 } // namespace
 
 namespace game::scene
@@ -131,6 +134,7 @@ namespace game::scene
 		m_phaseTime += deltaTime;
 		m_cameraAngle += deltaTime * CAMERA_ORBIT_SPEED;
 		m_shake = std::max(0.0f, m_shake - deltaTime * 3.0f);
+		m_gainFlash = std::max(0.0f, m_gainFlash - deltaTime * 1.6f);
 		m_itemSpin += deltaTime * 2.4f;
 
 		// 疑似プレイヤーの移動（アイテムへ近づくため）
@@ -245,9 +249,13 @@ namespace game::scene
 		if (distanceSq > PICKUP_RANGE * PICKUP_RANGE)
 			return;
 
+		// 取得。ここでパラメータが変わる
+		m_attack += ATTACK_GAIN;
+		m_gainedAttack += ATTACK_GAIN;
+		m_gainFlash = 1.0f;
 		m_phase = Phase::Gained;
 		m_phaseTime = 0.0f;
-		core::log::info("DebugDestruction: アイテムを取得しました");
+		core::log::info("DebugDestruction: アイテムを取得しました（攻撃力 {}）", m_attack);
 	}
 
 	void DebugDestruction::reset()
@@ -357,6 +365,9 @@ namespace game::scene
 			break;
 		}
 
+		// パラメータ表示。取得直後は色を変えて変化を目立たせる
+		const unsigned int attackColor{ m_gainFlash > 0.0f ? 0xFF4ADE80u : TEXT_COLOR };
+		line(std::format("攻撃力 {}  (+{})", m_attack, m_gainedAttack), attackColor);
 		line("[Enter] リセット", 0xFF7F93A8u);
 	}
 } // namespace game::scene
