@@ -94,6 +94,7 @@
 #include "game/ui/ingame/MiniMapView.h"
 #include "game/ui/ingame/EnemyHealthBarView.h"
 #include "core/interface/IPerformanceDataProvider.h" // DEBUG: リリース時に削除
+#include "core/constant/DebugFlags.h"
 #include "game/event/InGameEvents.h"
 #include "core/utility/Probe.h" // 一時: メモリ調査用（原因特定後に削除）
 
@@ -264,23 +265,26 @@ namespace game::scene
 			lighting->setDirectionalLight(core::Vector3{ -0.3f, -1.0f, 0.4f }, 255, 255, 255);
 		}
 
-		// 3人称マウス視点のためカーソルを非表示にする
-		// Debug: リリースビルドするときはfalseにすること
-		m_inputProvider.setMouseCursorVisible(true);
+		// 3人称マウス視点のためカーソルを非表示にする（表示の切り替えは DebugFlags.h で行う）
+		m_inputProvider.setMouseCursorVisible(core::constant::SHOW_MOUSE_CURSOR_IN_GAME);
 
-		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（リリース時にまとめて削除）
-		m_debugGizmoView = std::make_unique<ui::debug::DebugGizmoView>(m_componentManager, m_renderer);
-		m_debugHUDView = std::make_unique<ui::debug::DebugHUDView>(
-		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
-		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
-		    m_componentManager,
-		    m_gameManager,
-		    m_pauseManager,
-		    *core::base::ServiceLocator::get<core::iface::IPerformanceDataProvider>(),
-		    m_effectFactory,
-		    m_renderer);
-		m_view.setDebugGizmoView(m_debugGizmoView.get());
-		m_view.setDebugHUDView(m_debugHUDView.get());
+		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（生成するかは DebugFlags.h で切り替える）。
+		// 生成しない場合は両方nullptrのままで、更新も描画も呼び出し側のnull判定で飛ばされる
+		if (core::constant::ENABLE_DEBUG_VIEWS)
+		{
+			m_debugGizmoView = std::make_unique<ui::debug::DebugGizmoView>(m_componentManager, m_renderer);
+			m_debugHUDView = std::make_unique<ui::debug::DebugHUDView>(
+			    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+			    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+			    m_componentManager,
+			    m_gameManager,
+			    m_pauseManager,
+			    *core::base::ServiceLocator::get<core::iface::IPerformanceDataProvider>(),
+			    m_effectFactory,
+			    m_renderer);
+			m_view.setDebugGizmoView(m_debugGizmoView.get());
+			m_view.setDebugHUDView(m_debugHUDView.get());
+		}
 
 		m_playerHUDView = std::make_unique<ui::ingame::PlayerHUDView>(
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
