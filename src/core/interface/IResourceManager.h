@@ -6,6 +6,7 @@
 #include "core/data/ModelMetadata.h"
 #include "core/data/StageMetadata.h"
 #include "core/data/PropDefinition.h"
+#include "core/data/BlockTable.h"
 #include "core/data/FileExtensionBonus.h"
 #include "core/data/FileExtensionType.h"
 #include "core/data/ProjectileMetadata.h"
@@ -170,5 +171,14 @@ namespace core::iface
 		 * @return 各軸の大きさ。失敗時はゼロベクトル
 		 */
 		[[nodiscard]] virtual core::Vector3 computeBoundingSize(int modelHandle) const noexcept = 0;
+
+		/**
+		 * @brief 破壊可能ブロックの抽選表を取得する
+		 *
+		 * ステージに置かれた汎用ブロックを実際の種類へ置き換えるのに使う。
+		 * 重みの調整はstageCatalog.jsonのblockTableで行う
+		 * @return 抽選表（未設定なら空）
+		 */
+		[[nodiscard]] virtual const core::data::BlockTable& getBlockTable() const noexcept = 0;
 	};
 } // namespace core::iface

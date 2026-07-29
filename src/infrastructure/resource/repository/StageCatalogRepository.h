@@ -2,6 +2,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include "core/data/BlockTable.h"
 #include "core/data/PropDefinition.h"
 
 namespace infrastructure::resource::repository
@@ -29,7 +30,14 @@ namespace infrastructure::resource::repository
 		 */
 		[[nodiscard]] const core::data::PropDefinition& getProp(std::string_view type) const;
 
+		/**
+		 * @brief 破壊可能ブロックの抽選表を取得する
+		 * @return 抽選表（blockTableが無い場合は空）
+		 */
+		[[nodiscard]] const core::data::BlockTable& getBlockTable() const noexcept;
+
 	  private:
 		std::unordered_map<std::string, core::data::PropDefinition> m_props{};
+		core::data::BlockTable m_blockTable{};
 	};
 } // namespace infrastructure::resource::repository

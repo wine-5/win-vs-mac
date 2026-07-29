@@ -88,6 +88,11 @@ namespace infrastructure::resource
 		return m_stageCatalogRepo->getProp(type);
 	}
 
+	const core::data::BlockTable& ResourceManager::getBlockTable() const noexcept
+	{
+		return m_stageCatalogRepo->getBlockTable();
+	}
+
 	const core::data::FileExtensionBonus& ResourceManager::getExtensionBonus(
 	    core::data::FileExtensionType type) const noexcept
 	{
