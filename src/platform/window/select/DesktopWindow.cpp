@@ -8,8 +8,8 @@ namespace platform::window::select
         destroy();
     }
 
-    bool DesktopWindow::create(int x, int y, int width, int height) noexcept
-    {
+	bool DesktopWindow::create(HWND ownerHwnd, int x, int y, int width, int height) noexcept
+	{
         if (m_hwnd) return true;
 
         WNDCLASSW wc{};
@@ -19,18 +19,22 @@ namespace platform::window::select
         wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
         RegisterClassW(&wc);
 
-        m_hwnd = CreateWindowExW(
-            WS_EX_NOACTIVATE | WS_EX_TOPMOST,
-            CLASS_NAME,
-            WINDOW_TITLE,
-            WS_POPUP,
-            x, y, width, height,
-            nullptr, nullptr,
-            GetModuleHandleW(nullptr),
-            this
-        );
+		// オーナーを DxLib 本体にする。オーナー無しだとこのウィンドウがトップレベルの
+		// 代表になり、Alt+Tab はルートオーナーをアクティブ化しようとするが、
+		// WS_EX_NOACTIVATE のため必ず失敗する（＝他アプリへ切り替えると戻れなくなる）。
+		// オーナーを持たせればルートオーナーが DxLib 本体になり、切り替えが成立する。
+		// オーナーより手前に描かれる性質も保てるので重なり順は変わらない
+		m_hwnd = CreateWindowExW(
+		    WS_EX_NOACTIVATE | WS_EX_TOPMOST,
+		    CLASS_NAME,
+		    WINDOW_TITLE,
+		    WS_POPUP,
+		    x, y, width, height,
+		    ownerHwnd, nullptr,
+		    GetModuleHandleW(nullptr),
+		    this);
 
-        if (!m_hwnd) return false;
+		if (!m_hwnd) return false;
 
         m_webView.initialize(m_hwnd, DESKTOP_HTML_URL);
         return true;
