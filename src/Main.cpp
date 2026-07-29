@@ -113,6 +113,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	core::probe::mark("DxLib_Init 完了");
 
+	// 枠なしスタイル（SetWindowStyleMode(4)）だと WS_POPUP になり、シェルがタスクバー項目を
+	// 出してくれないことがある。セレクト画面のサブウィンドウが代わりに Alt+Tab の代表として
+	// 拾われ、他アプリへ切り替えるとゲームへ戻る手段が無くなるため、本体を明示的に
+	// 「タスクバーに出るアプリのウィンドウ」として宣言しておく
+	if (HWND mainHwnd{ GetMainWindowHandle() })
+	{
+		const LONG_PTR exStyle{ GetWindowLongPtrW(mainHwnd, GWL_EXSTYLE) };
+		SetWindowLongPtrW(mainHwnd, GWL_EXSTYLE, exStyle | WS_EX_APPWINDOW);
+		// タスクバー項目の有無はウィンドウが表示される瞬間に決まる。
+		// 表示済みのまま拡張スタイルを変えても反映されないので、隠して出し直す
+		ShowWindow(mainHwnd, SW_HIDE);
+		ShowWindow(mainHwnd, SW_SHOW);
+	}
+
 	SetDrawScreen(DX_SCREEN_BACK);  // 描画先を裏画面に設定
 
 	// 3D Z-buffer 設定
