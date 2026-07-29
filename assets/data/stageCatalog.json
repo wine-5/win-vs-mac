@@ -420,6 +420,204 @@
       "slideAccel": 0.0,
       "scrollU": 0.0,
       "scrollV": 0.0
+    },
+    {
+      "id": "block_ext_archive",
+      "displayName": "アーカイブブロック",
+      "model": "assets/model/stage/BlockExtArchive.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#D9C93A",
+      "collider": "box",
+      "defaultSize": [
+        110,
+        110,
+        110
+      ],
+      "texture": "assets/model/stage/BlockExtArchive.png",
+      "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
+      "id": "block_ext_audio",
+      "displayName": "オーディオブロック",
+      "model": "assets/model/stage/BlockExtAudio.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#2E6FD9",
+      "collider": "box",
+      "defaultSize": [
+        110,
+        110,
+        110
+      ],
+      "texture": "assets/model/stage/BlockExtAudio.png",
+      "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
+      "id": "block_ext_document",
+      "displayName": "ドキュメントブロック",
+      "model": "assets/model/stage/BlockExtDocument.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#1E88E5",
+      "collider": "box",
+      "defaultSize": [
+        110,
+        110,
+        110
+      ],
+      "texture": "assets/model/stage/BlockExtDocument.png",
+      "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
+      "id": "block_ext_executable",
+      "displayName": "実行ファイルブロック",
+      "model": "assets/model/stage/BlockExtExecutable.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#E8542B",
+      "collider": "box",
+      "defaultSize": [
+        110,
+        110,
+        110
+      ],
+      "texture": "assets/model/stage/BlockExtExecutable.png",
+      "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
+      "id": "block_ext_image",
+      "displayName": "画像ブロック",
+      "model": "assets/model/stage/BlockExtImage.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#2FA84F",
+      "collider": "box",
+      "defaultSize": [
+        110,
+        110,
+        110
+      ],
+      "texture": "assets/model/stage/BlockExtImage.png",
+      "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
+      "id": "block_ext_shortcut",
+      "displayName": "ショートカットブロック",
+      "model": "assets/model/stage/BlockExtShortcut.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#22D3EE",
+      "collider": "box",
+      "defaultSize": [
+        110,
+        110,
+        110
+      ],
+      "texture": "assets/model/stage/BlockExtShortcut.png",
+      "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
+      "id": "block_ext_sourcecode",
+      "displayName": "ソースコードブロック",
+      "model": "assets/model/stage/BlockExtSourceCode.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#7C4DFF",
+      "collider": "box",
+      "defaultSize": [
+        110,
+        110,
+        110
+      ],
+      "texture": "assets/model/stage/BlockExtSourceCode.png",
+      "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
+      "id": "block_ext_video",
+      "displayName": "動画ブロック",
+      "model": "assets/model/stage/BlockExtVideo.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#E0417F",
+      "collider": "box",
+      "defaultSize": [
+        110,
+        110,
+        110
+      ],
+      "texture": "assets/model/stage/BlockExtVideo.png",
+      "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
+      "id": "block_ext_unknown",
+      "displayName": "不明ファイルブロック",
+      "model": "assets/model/stage/BlockExtUnknown.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#8A99A8",
+      "collider": "box",
+      "defaultSize": [
+        110,
+        110,
+        110
+      ],
+      "texture": "assets/model/stage/BlockExtUnknown.png",
+      "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
     }
   ],
   "enemies": [
