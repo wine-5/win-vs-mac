@@ -1,6 +1,7 @@
 ﻿// 自前ヘッダを先にincludeする（DxLibのマクロ（DEFAULT_FONT_SIZE等）と定数名の衝突を防ぐ）
 #include "Application.h"
 #include "core/base/ServiceLocator.h"
+#include "core/constant/DebugFlags.h"
 #include "DxLib.h"
 #include "resource.h"
 #include "core/interface/IMemoryProbe.h"
@@ -105,6 +106,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SetWindowIconID(IDI_GAMEICON); // アプリケーションアイコンを設定
 	SetMainWindowText("Win VS Mac"); // ウィンドウタイトルを設定
 
+	// DxLibの Log.txt を書き出すか。DxLib_Init より前でしか変えられない
+	SetOutApplicationLogValidFlag(core::constant::WRITE_DEBUG_LOG_FILES ? TRUE : FALSE);
+
 	// Effekseer 用の設定
 	SetUseDirect3DVersion(DX_DIRECT3D_11); // DirectX 11 を指定
 	SetChangeScreenModeGraphicsSystemResetFlag(FALSE); // フルスクリーン切り替え時のリソース保護
@@ -112,6 +116,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	if (DxLib_Init() == -1) return -1;
 
 	core::probe::mark("DxLib_Init 完了");
+
+	// 枠なしスタイル（SetWindowStyleMode(4)）だと WS_POPUP になり、シェルがタスクバー項目を
+	// 出してくれないことがある。セレクト画面のサブウィンドウが代わりに Alt+Tab の代表として
+	// 拾われ、他アプリへ切り替えるとゲームへ戻る手段が無くなるため、本体を明示的に
+	// 「タスクバーに出るアプリのウィンドウ」として宣言しておく
+	if (HWND mainHwnd{ GetMainWindowHandle() })
+	{
+		const LONG_PTR exStyle{ GetWindowLongPtrW(mainHwnd, GWL_EXSTYLE) };
+		SetWindowLongPtrW(mainHwnd, GWL_EXSTYLE, exStyle | WS_EX_APPWINDOW);
+		// タスクバー項目の有無はウィンドウが表示される瞬間に決まる。
+		// 表示済みのまま拡張スタイルを変えても反映されないので、隠して出し直す
+		ShowWindow(mainHwnd, SW_HIDE);
+		ShowWindow(mainHwnd, SW_SHOW);
+	}
 
 	SetDrawScreen(DX_SCREEN_BACK);  // 描画先を裏画面に設定
 

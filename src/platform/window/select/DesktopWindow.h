@@ -20,17 +20,22 @@ namespace platform::window::select
         DesktopWindow(const DesktopWindow&) = delete;
         DesktopWindow& operator=(const DesktopWindow&) = delete;
 
-        /**
-         * @brief ウィンドウを作成し WebView2 を初期化する
-         * @param x スクリーン座標 X
-         * @param y スクリーン座標 Y
-         * @param width 幅
-         * @param height 高さ
-         * @return 成功時 true
-         */
-        bool create(int x, int y, int width, int height) noexcept;
+		/**
+		 * @brief ウィンドウを作成し WebView2 を初期化する
+		 *
+		 * ownerHwnd には必ず DxLib 本体のウィンドウを渡すこと。オーナー無しにすると
+		 * このウィンドウ自身がタスクバー／Alt+Tab の代表になってしまうが、
+		 * WS_EX_NOACTIVATE のためアクティブ化できず、切り替えてもゲームへ戻れなくなる
+		 * @param ownerHwnd オーナーウィンドウ（DxLib 本体）
+		 * @param x スクリーン座標 X
+		 * @param y スクリーン座標 Y
+		 * @param width 幅
+		 * @param height 高さ
+		 * @return 成功時 true
+		 */
+		bool create(HWND ownerHwnd, int x, int y, int width, int height) noexcept;
 
-        /**
+		/**
          * @brief ウィンドウを破棄する
          */
         void destroy() noexcept;

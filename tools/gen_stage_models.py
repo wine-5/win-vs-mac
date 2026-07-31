@@ -52,6 +52,18 @@ MANIFEST = [
     # ④ Apple アリーナ（ボス戦）
     ("FloorApple",       "FloorApple.png"),
     ("WallDanger",       "WallDanger.png"),
+    # ⑤ 拡張子ブロック（gen_block_textures.py が吐くテクスチャを貼る）。
+    #    どの拡張子が出るかはステージ生成時に重み付き抽選で決まるため、
+    #    種類ぶんのモデルを用意しておく
+    ("BlockExtArchive",    "BlockExtArchive.png"),
+    ("BlockExtAudio",      "BlockExtAudio.png"),
+    ("BlockExtDocument",   "BlockExtDocument.png"),
+    ("BlockExtExecutable", "BlockExtExecutable.png"),
+    ("BlockExtImage",      "BlockExtImage.png"),
+    ("BlockExtShortcut",   "BlockExtShortcut.png"),
+    ("BlockExtSourceCode", "BlockExtSourceCode.png"),
+    ("BlockExtVideo",      "BlockExtVideo.png"),
+    ("BlockExtUnknown",    "BlockExtUnknown.png"),
 ]
 
 # ---- 100x100x100 立方体の頂点 ----

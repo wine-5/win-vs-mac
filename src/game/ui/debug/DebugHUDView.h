@@ -2,6 +2,7 @@
 #include "core/ecs/ComponentManager.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "core/constant/DebugFlags.h"
 #include <chrono>
 
 namespace core::iface
@@ -117,8 +118,8 @@ namespace game::ui::debug
 		// パフォーマンスデータ（CPU/メモリ）の更新間隔管理
 		float m_perfUpdateTimer{ 0.0f };
 
-		// 表示するかどうか。右上は難易度・経過時間のHUDが使うため、既定では出さない
-		bool m_isVisible{ true };
+		// 表示するかどうか。既定値の切り替えは DebugFlags.h で行う
+		bool m_isVisible{ core::constant::SHOW_DEBUG_HUD };
 
 		static constexpr float FPS_UPDATE_INTERVAL{ 0.5f };  // FPS表示の更新間隔（秒）
 		static constexpr float PERF_UPDATE_INTERVAL{ 1.0f }; // CPU/メモリ取得の更新間隔（秒）

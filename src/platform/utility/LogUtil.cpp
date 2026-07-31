@@ -1,4 +1,5 @@
 #include "LogUtil.h"
+#include "core/constant/DebugFlags.h"
 #include <Windows.h>
 #include <crtdbg.h>
 #include <cstdio>
@@ -23,10 +24,11 @@ namespace platform::utility
 {
 	LogUtil::LogUtil()
 	{
-		// 控えのファイルはリリースでも必ず開く。全画面表示のままフリーズすると
+		// 控えのファイルは本来リリースでも開く。全画面表示のままフリーズすると
 		// コンソールもダイアログも前面に出せず、後から読めるのはこれだけになる。
 		// 起動ごとに作り直す（前回の内容が混ざるとどの実行のログか分からなくなる）
-		m_logFile.open(LOG_FILE_PATH, std::ios::out | std::ios::trunc);
+		if (core::constant::WRITE_DEBUG_LOG_FILES)
+			m_logFile.open(LOG_FILE_PATH, std::ios::out | std::ios::trunc);
 
 #ifdef _DEBUG
 		// AllocConsole() は新しいコンソールへフォーカスを移してしまい、ゲーム本体ウィンドウが

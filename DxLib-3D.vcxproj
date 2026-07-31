@@ -179,6 +179,7 @@
     <ClCompile Include="src\game\system\ai\DetectionSystem.cpp" />
     <ClCompile Include="src\game\system\ai\EnemyRangedAttackSystem.cpp" />
     <ClCompile Include="src\game\scene\Bios.cpp" />
+    <ClCompile Include="src\game\scene\DebugDestruction.cpp" />
     <ClCompile Include="src\game\scene\Loading.cpp" />
     <ClCompile Include="src\game\scene\Lockscreen.cpp" />
     <ClCompile Include="src\game\scene\LockscreenView.cpp" />
@@ -322,6 +323,7 @@
     <ClInclude Include="src\core\data\Difficulty.h" />
     <ClInclude Include="src\game\HitStop.h" />
     <ClInclude Include="src\core\data\StageMetadata.h" />
+    <ClInclude Include="src\core\data\BlockTable.h" />
     <ClInclude Include="src\core\data\PropDefinition.h" />
     <ClInclude Include="src\core\utility\Rotation.h" />
     <ClInclude Include="src\game\constant\PropCollision.h" />
@@ -394,6 +396,7 @@
     <ClInclude Include="src\game\system\visual\PlayerChargeVisualsSystem.h" />
     <ClInclude Include="src\game\system\visual\CriticalVisualsSystem.h" />
     <ClInclude Include="src\game\GameManager.h" />
+    <ClInclude Include="src\game\scene\DebugDestruction.h" />
     <ClInclude Include="src\game\scene\Loading.h" />
     <ClInclude Include="src\game\scene\Lockscreen.h" />
     <ClInclude Include="src\game\scene\LockscreenView.h" />
@@ -460,6 +463,7 @@
     <ClInclude Include="src\game\constant\Tag.h" />
     <ClInclude Include="src\game\constant\ModelId.h" />
     <ClInclude Include="src\game\constant\AnimationId.h" />
+    <ClInclude Include="src\core\constant\DebugFlags.h" />
     <ClInclude Include="src\core\constant\UI.h" />
     <ClInclude Include="src\game\factory\FactoryInitializer.h" />
     <ClInclude Include="src\game\factory\FactoryManager.h" />

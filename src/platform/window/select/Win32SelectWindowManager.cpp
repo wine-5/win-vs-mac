@@ -58,8 +58,9 @@ namespace platform::window::select
         m_desktopWindow->setOnMessage([this](const std::string& json) noexcept {
             handleDesktopMessage(json);
         });
-        if (!m_desktopWindow->create(originX, originY, screenWidth, screenHeight)) return;
-        m_desktopWindow->show();
+		if (!m_desktopWindow->create(dxlibHwnd, originX, originY, screenWidth, screenHeight))
+			return;
+		m_desktopWindow->show();
 
 		// --- レイアウト定数 ---
 		// 左列: 上はデスクトップアイコンを見せるため空け、下に難易度パネル

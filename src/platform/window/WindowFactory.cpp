@@ -42,8 +42,10 @@ namespace platform::window
         loadingWindow->setOnLoadingComplete(std::move(onLoadingComplete));
 		// 速度はページ読み込み時に要求されるため、create() より前に渡しておく
 		loadingWindow->setSpeedMultiplier(speedMultiplier);
-		if (loadingWindow->create())
-            loadingWindow->show();
+		// オーナーを DxLib 本体にする。オーナー無しだと独立したアプリとして
+		// タスクバーへ並び、本体のウィンドウと取り違えて戻れなくなる
+		if (loadingWindow->create(dxlibHwnd))
+			loadingWindow->show();
 
         return loadingWindow;
     }

@@ -7,6 +7,36 @@ WIN vs MAC は、**PC内部を舞台にしたダンジョンRPG**です。プレ
 
 ---
 
+## プレイ動画
+
+[![WIN vs MAC プレイ動画](https://img.youtube.com/vi/mW9KkOX3Gpc/maxresdefault.jpg)](https://youtu.be/mW9KkOX3Gpc)
+
+▶ **[YouTube で見る](https://youtu.be/mW9KkOX3Gpc)**
+
+---
+
+## スクリーンショット
+
+### タイトル画面
+実行中のPCの **CPU・メモリ・ディスク使用率がそのままグラフの背景**になります。起動した瞬間から「自分のPCの中にいる」ことが伝わる導入です。
+
+![タイトル画面](docs/image/title.png)
+
+### 装備選択画面
+Windows デスクトップを模したUI上で、**実際に自分のPCにあるファイルを選んで装備**します。選んだファイルの拡張子でステータスが変化し（`.cpp` ならクリティカル率、`.mp4` なら弾の飛距離など）、難易度選択は UAC ダイアログ風に演出しています。
+
+![装備選択画面](docs/image/select.png)
+
+### ダンジョン探索・戦闘
+| | |
+|---|---|
+| <img src="docs/image/ingame_1.png" width="420"> | <img src="docs/image/ingame_3.png" width="420"> |
+| ダンジョン内の探索。目標・経過時間・ミニマップ・装備スロットを常時表示 | 敵プロセスの索敵。Windows のトースト通知を模した演出で敵の状態を通知 |
+| <img src="docs/image/ingame_2.png" width="420"> | <img src="docs/image/ingame_4.png" width="420"> |
+| 装備した拡張子ボーナスが乗ったクリティカルヒット | 最終ボス MacBook 戦。フェーズ制のボスバトル |
+
+---
+
 <div style="border: 2px solid #0366d6; border-radius: 8px; padding: 20px; margin: 20px 0; background-color: #f6f8fa;">
 <h2 style="margin-top: 0; color: #0366d6;">ゲームの特徴</h2>
 
@@ -21,8 +51,7 @@ WIN vs MAC は、**PC内部を舞台にしたダンジョンRPG**です。プレ
 | **UI要素** | 実際のWindows UIを模倣した本物っぽいデザイン |
 
 ### Windowsとの連携
-- プレイヤーが倒す敵はプロセス（Chrome.exe など）
-- CPU使用率、メモリ使用量などのシステムデータを活用
+- プレイヤーが倒す敵は Mac 側のプロセス（**Safari** / **Xcode**、そして最終ボスの **MacBook**）
 - 拡張子（.exe, .dll など）がゲーム内での武器システムに統合
 
 </div>
@@ -115,7 +144,7 @@ DWORD cpu = GetSystemTimes(...);
 | **言語** | C++ (C++20) | 高性能・3Dゲーム開発の標準 |
 | **描画ライブラリ** | DxLib | Windows 専用、日本語ドキュメント充実 |
 | **対応OS** | Windows 10 以上 | DxLib と Windows API の活用 |
-| **ビルドシステム** | CMake | クロスプラットフォーム対応の基盤 |
+| **ビルドシステム** | MSBuild (Visual Studio) | DxLib の静的リンク構成をそのまま扱える |
 
 </div>
 
@@ -150,60 +179,25 @@ src/
 ---
 
 <div style="border: 2px solid #dc3545; border-radius: 8px; padding: 20px; margin: 20px 0; background-color: #f6f8fa;">
-<h2 style="margin-top: 0; color: #dc3545;">セットアップ・ビルド方法</h2>
+<h2 style="margin-top: 0; color: #dc3545;">遊び方（ダウンロード）</h2>
 
 ### 必要な環境
-- **OS**: Windows 10 以上
-- **コンパイラ**: Visual Studio 2019 以上（MSVC）または MinGW
-- **CMake**: 3.15 以上
-- **DxLib**: プロジェクトに含まれています
+- **OS**: Windows 10 以上（64bit）
+- ビルド環境やランタイムのインストールは不要です
 
-### ビルド手順
+### ダウンロードして遊ぶ
 
-```bash
-# リポジトリをクローン
-git clone https://github.com/YutoImata/DxLib-3D.git
-cd DxLib-3D
+▶ **[Releases ページはこちら](https://github.com/wine-5/win-vs-mac/releases)**
 
-# ビルドディレクトリ作成
-mkdir build
-cd build
+1. 上記の Releases ページから、最新版の **ZIP ファイル**をダウンロードする
+2. ZIP を**右クリック →「すべて展開」で解凍**する
+3. 解凍したフォルダ内の **`WinVsMac.exe`** をダブルクリックして起動
 
-# CMake でプロジェクト生成
-cmake ..
+> **ZIP の中身のまま実行してください。**
+> エクスプローラーで ZIP を開くと中身がそのまま見えますが、そこから直接 `.exe` を起動するとリソースを読み込めず起動に失敗します。必ず解凍してから実行してください。
 
-# ビルド
-cmake --build . --config Release
-```
-
-### 実行
-```bash
-# ビルド後、実行ファイルを起動
-./Release/WIN_vs_MAC.exe
-```
-
-</div>
-
----
-
-<div style="border: 2px solid #20c997; border-radius: 8px; padding: 20px; margin: 20px 0; background-color: #f6f8fa;">
-<h2 style="margin-top: 0; color: #20c997;">設計のこだわり</h2>
-
-### 1. **依存関係の一方向化**
-内側の層が外側の層をインクルードしない堅牢な設計。
-DxLib や Windows API の変更がゲームロジックに影響しないように分離。
-
-### 2. **ECS による高い拡張性**
-Player や Enemy というクラスではなく、Entity に Component を組み合わせることで、
-新しいゲームオブジェクトを簡単に追加可能。
-
-### 3. **イベント駆動で結合度を低下**
-System 間が EventBus を使ってイベント通信することで、
-直接的な依存を排除。
-
-### 4. **インターフェース経由で OS 依存を隔離**
-Game層が Windows API を直接呼ばないよう、Core層に定義したインターフェース経由でのみアクセス。
-テスト時のモック置き換えも容易。
+> **「Windows によって PC が保護されました」と表示された場合**
+> 署名されていない個人開発アプリのため SmartScreen の警告が出ます。「詳細情報」→「実行」で起動できます。
 
 </div>
 

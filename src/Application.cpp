@@ -7,6 +7,7 @@
 #include "core/interface/IAudioManager.h"
 #include "core/interface/IResourcePreloader.h"
 #include "core/input/KeyCode.h"
+#include "core/constant/DebugFlags.h"
 #include "game/scene/SceneManager.h"
 #include "core/utility/Probe.h" // 一時: メモリ調査用（原因特定後に削除）
 #include <DxLib.h>
@@ -50,9 +51,10 @@ Application::Application(int screenWidth, int screenHeight)
 	    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 	    *core::base::ServiceLocator::get<core::iface::IScreen>());
 
-	// 初期シーンを設定する
-	// DEBUG: リリース時はBIOSからスタートすること
-	m_sceneManager->changeScene(game::scene::SceneType::InGame);
+	// 初期シーンを設定する（デバッグ用シーンから始めるかは DebugFlags.h で切り替える）
+	m_sceneManager->changeScene(core::constant::START_FROM_DEBUG_SCENE
+	                                ? game::scene::SceneType::DebugDestruction
+	                                : game::scene::SceneType::Bios);
 }
 
 void Application::run()

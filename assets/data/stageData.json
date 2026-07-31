@@ -45,7 +45,7 @@
       ]
     },
     {
-      "type": "block_folder",
+      "type": "block_random",
       "position": [
         -900,
         110,
@@ -57,13 +57,13 @@
         0
       ],
       "size": [
-        220,
-        220,
-        220
+        110,
+        110,
+        110
       ]
     },
     {
-      "type": "block_recyclebin",
+      "type": "block_random",
       "position": [
         950,
         110,
@@ -75,9 +75,9 @@
         0
       ],
       "size": [
-        220,
-        220,
-        220
+        110,
+        110,
+        110
       ]
     },
     {
@@ -135,7 +135,7 @@
       ]
     },
     {
-      "type": "block_folder",
+      "type": "block_random",
       "position": [
         -700,
         -474.87,
@@ -147,13 +147,13 @@
         0
       ],
       "size": [
-        220,
-        220,
-        220
+        110,
+        110,
+        110
       ]
     },
     {
-      "type": "block_recyclebin",
+      "type": "block_random",
       "position": [
         -450,
         -474.87,
@@ -165,13 +165,13 @@
         0
       ],
       "size": [
-        220,
-        220,
-        220
+        110,
+        110,
+        110
       ]
     },
     {
-      "type": "block_folder",
+      "type": "block_random",
       "position": [
         -580,
         -254.87,
@@ -183,13 +183,13 @@
         0
       ],
       "size": [
-        220,
-        220,
-        220
+        110,
+        110,
+        110
       ]
     },
     {
-      "type": "block_recyclebin",
+      "type": "block_random",
       "position": [
         800,
         -474.87,
@@ -201,13 +201,13 @@
         0
       ],
       "size": [
-        220,
-        220,
-        220
+        110,
+        110,
+        110
       ]
     },
     {
-      "type": "block_folder",
+      "type": "block_random",
       "position": [
         300,
         -474.87,
@@ -219,9 +219,9 @@
         0
       ],
       "size": [
-        220,
-        220,
-        220
+        110,
+        110,
+        110
       ]
     },
     {
@@ -729,7 +729,7 @@
       ]
     },
     {
-      "type": "block_zip",
+      "type": "block_random",
       "position": [
         -3548.74,
         -1959.55,
@@ -741,13 +741,13 @@
         0
       ],
       "size": [
-        220,
-        220,
-        220
+        110,
+        110,
+        110
       ]
     },
     {
-      "type": "block_zip",
+      "type": "block_random",
       "position": [
         -3438.74,
         -1959.55,
@@ -759,13 +759,13 @@
         0
       ],
       "size": [
-        220,
-        220,
-        220
+        110,
+        110,
+        110
       ]
     },
     {
-      "type": "block_zip",
+      "type": "block_random",
       "position": [
         -3498.74,
         -1739.55,
@@ -777,13 +777,13 @@
         0
       ],
       "size": [
-        220,
-        220,
-        220
+        110,
+        110,
+        110
       ]
     },
     {
-      "type": "block_zip",
+      "type": "block_random",
       "position": [
         -798.74,
         -1959.55,
@@ -795,13 +795,13 @@
         0
       ],
       "size": [
-        220,
-        220,
-        220
+        110,
+        110,
+        110
       ]
     },
     {
-      "type": "block_zip",
+      "type": "block_random",
       "position": [
         -728.74,
         -1959.55,
@@ -813,13 +813,13 @@
         0
       ],
       "size": [
-        220,
-        220,
-        220
+        110,
+        110,
+        110
       ]
     },
     {
-      "type": "block_zip",
+      "type": "block_random",
       "position": [
         -1948.74,
         -1959.55,
@@ -831,9 +831,9 @@
         0
       ],
       "size": [
-        220,
-        220,
-        220
+        110,
+        110,
+        110
       ]
     },
     {

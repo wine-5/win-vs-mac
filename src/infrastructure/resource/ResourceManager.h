@@ -96,6 +96,12 @@ namespace infrastructure::resource
 		[[nodiscard]] const core::data::PropDefinition& getPropDefinition(std::string_view type) const override;
 
 		/**
+		 * @brief 破壊可能ブロックの抽選表を取得する
+		 * @return 抽選表（未設定なら空）
+		 */
+		[[nodiscard]] const core::data::BlockTable& getBlockTable() const noexcept override;
+
+		/**
 		 * @brief 拡張子種別に対応するパラメータボーナスを取得する
 		 * @param type ファイル拡張子グループ種別
 		 * @return 対応するボーナス値

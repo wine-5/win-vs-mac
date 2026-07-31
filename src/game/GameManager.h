@@ -2,6 +2,7 @@
 #include "game/data/FileEquipmentData.h"
 #include "core/base/NonCopyable.h"
 #include "core/data/Difficulty.h"
+#include "core/constant/DebugFlags.h"
 #include "core/data/ResultData.h"
 
 namespace game
@@ -124,8 +125,7 @@ namespace game
 		// セレクト画面のチュートリアルをまだ見せていないか（起動直後の1回だけ出す）
 		bool m_isSelectTutorialPending{ true };
 
-		// DEBUG: 連続ジャンプ（空中浮上）を許可するか。falseで通常の接地単発ジャンプ。
-		// 空中移動して動作確認したいときにここをtrueにする（リリース時に削除）
-		bool m_continuousJumpEnabled{ true };
+		// DEBUG: 連続ジャンプ（空中浮上）を許可するか。切り替えは DebugFlags.h で行う
+		bool m_continuousJumpEnabled{ core::constant::ALLOW_CONTINUOUS_JUMP };
 	};
 } // namespace game

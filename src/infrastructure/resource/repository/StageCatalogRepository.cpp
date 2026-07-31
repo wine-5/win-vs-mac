@@ -49,6 +49,24 @@ namespace infrastructure::resource::repository
 			core::data::PropDefinition def{ parseProp(prop) };
 			m_props[def.m_id] = def;
 		}
+
+		// 抽選表は無くても動く（配置がすべて具体的な種類なら不要）ため、存在チェックのみで済ませる
+		if (j.contains("blockTable") && j["blockTable"].contains("entries"))
+		{
+			for (const auto& entry : j["blockTable"]["entries"])
+			{
+				const auto type{ entry["type"].get<std::string>() };
+				if (m_props.find(type) == m_props.end())
+					throw std::runtime_error("blockTableの '" + type + "' がpropsに存在しません");
+
+				m_blockTable.m_entries.push_back({ type, entry["weight"].get<float>() });
+			}
+		}
+	}
+
+	const core::data::BlockTable& StageCatalogRepository::getBlockTable() const noexcept
+	{
+		return m_blockTable;
 	}
 
 	const core::data::PropDefinition& StageCatalogRepository::getProp(std::string_view type) const
