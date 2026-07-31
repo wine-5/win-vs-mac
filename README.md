@@ -15,6 +15,28 @@ WIN vs MAC は、**PC内部を舞台にしたダンジョンRPG**です。プレ
 
 ---
 
+## スクリーンショット
+
+### タイトル画面
+実行中のPCの **CPU・メモリ・ディスク使用率がそのままグラフの背景**になります。起動した瞬間から「自分のPCの中にいる」ことが伝わる導入です。
+
+![タイトル画面](docs/image/title.png)
+
+### 装備選択画面
+Windows デスクトップを模したUI上で、**実際に自分のPCにあるファイルを選んで装備**します。選んだファイルの拡張子でステータスが変化し（`.cpp` ならクリティカル率、`.mp4` なら弾の飛距離など）、難易度選択は UAC ダイアログ風に演出しています。
+
+![装備選択画面](docs/image/select.png)
+
+### ダンジョン探索・戦闘
+| | |
+|---|---|
+| <img src="docs/image/ingame_1.png" width="420"> | <img src="docs/image/ingame_3.png" width="420"> |
+| ダンジョン内の探索。目標・経過時間・ミニマップ・装備スロットを常時表示 | 敵プロセスの索敵。Windows のトースト通知を模した演出で敵の状態を通知 |
+| <img src="docs/image/ingame_2.png" width="420"> | <img src="docs/image/ingame_4.png" width="420"> |
+| 装備した拡張子ボーナスが乗ったクリティカルヒット | 最終ボス MacBook 戦。フェーズ制のボスバトル |
+
+---
+
 <div style="border: 2px solid #0366d6; border-radius: 8px; padding: 20px; margin: 20px 0; background-color: #f6f8fa;">
 <h2 style="margin-top: 0; color: #0366d6;">ゲームの特徴</h2>
 
@@ -123,7 +145,7 @@ DWORD cpu = GetSystemTimes(...);
 | **言語** | C++ (C++20) | 高性能・3Dゲーム開発の標準 |
 | **描画ライブラリ** | DxLib | Windows 専用、日本語ドキュメント充実 |
 | **対応OS** | Windows 10 以上 | DxLib と Windows API の活用 |
-| **ビルドシステム** | CMake | クロスプラットフォーム対応の基盤 |
+| **ビルドシステム** | MSBuild (Visual Studio) | DxLib の静的リンク構成をそのまま扱える |
 
 </div>
 
@@ -162,33 +184,27 @@ src/
 
 ### 必要な環境
 - **OS**: Windows 10 以上
-- **コンパイラ**: Visual Studio 2019 以上（MSVC）または MinGW
-- **CMake**: 3.15 以上
-- **DxLib**: プロジェクトに含まれています
+- **Visual Studio**: 2022（C++20 対応の MSVC。「C++ によるデスクトップ開発」ワークロード）
+- **DxLib**: `thirdparty/` に同梱済み（別途インストール不要）
 
 ### ビルド手順
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/YutoImata/DxLib-3D.git
-cd DxLib-3D
-
-# ビルドディレクトリ作成
-mkdir build
-cd build
-
-# CMake でプロジェクト生成
-cmake ..
-
-# ビルド
-cmake --build . --config Release
+git clone https://github.com/wine-5/DxLib-3D-Game.git
+cd DxLib-3D-Game
 ```
+
+1. `DxLib-3D.sln` を Visual Studio 2022 で開く
+2. 構成を **x64 / Release** に設定する
+3. `Ctrl + Shift + B` でビルド（または F5 で実行）
 
 ### 実行
-```bash
-# ビルド後、実行ファイルを起動
-./Release/WIN_vs_MAC.exe
 ```
+x64/Release/WinVsMac.exe
+```
+
+リソースを `assets/...` の相対パスで読み込んでいるため、**リポジトリ直下を作業ディレクトリにして起動**してください（Visual Studio から F5 で実行する場合は既定でこの状態になります）。
 
 </div>
 
