@@ -51,8 +51,7 @@ Windows デスクトップを模したUI上で、**実際に自分のPCにある
 | **UI要素** | 実際のWindows UIを模倣した本物っぽいデザイン |
 
 ### Windowsとの連携
-- プレイヤーが倒す敵はプロセス（Chrome.exe など）
-- CPU使用率、メモリ使用量などのシステムデータを活用
+- プレイヤーが倒す敵は Mac 側のプロセス（**Safari** / **Xcode**、そして最終ボスの **MacBook**）
 - 拡張子（.exe, .dll など）がゲーム内での武器システムに統合
 
 </div>
@@ -180,54 +179,25 @@ src/
 ---
 
 <div style="border: 2px solid #dc3545; border-radius: 8px; padding: 20px; margin: 20px 0; background-color: #f6f8fa;">
-<h2 style="margin-top: 0; color: #dc3545;">セットアップ・ビルド方法</h2>
+<h2 style="margin-top: 0; color: #dc3545;">遊び方（ダウンロード）</h2>
 
 ### 必要な環境
-- **OS**: Windows 10 以上
-- **Visual Studio**: 2022（C++20 対応の MSVC。「C++ によるデスクトップ開発」ワークロード）
-- **DxLib**: `thirdparty/` に同梱済み（別途インストール不要）
+- **OS**: Windows 10 以上（64bit）
+- ビルド環境やランタイムのインストールは不要です
 
-### ビルド手順
+### ダウンロードして遊ぶ
 
-```bash
-# リポジトリをクローン
-git clone https://github.com/wine-5/DxLib-3D-Game.git
-cd DxLib-3D-Game
-```
+▶ **[Releases ページはこちら](https://github.com/wine-5/win-vs-mac/releases)**
 
-1. `DxLib-3D.sln` を Visual Studio 2022 で開く
-2. 構成を **x64 / Release** に設定する
-3. `Ctrl + Shift + B` でビルド（または F5 で実行）
+1. 上記の Releases ページから、最新版の **ZIP ファイル**をダウンロードする
+2. ZIP を**右クリック →「すべて展開」で解凍**する
+3. 解凍したフォルダ内の **`WinVsMac.exe`** をダブルクリックして起動
 
-### 実行
-```
-x64/Release/WinVsMac.exe
-```
+> **ZIP の中身のまま実行してください。**
+> エクスプローラーで ZIP を開くと中身がそのまま見えますが、そこから直接 `.exe` を起動するとリソースを読み込めず起動に失敗します。必ず解凍してから実行してください。
 
-リソースを `assets/...` の相対パスで読み込んでいるため、**リポジトリ直下を作業ディレクトリにして起動**してください（Visual Studio から F5 で実行する場合は既定でこの状態になります）。
-
-</div>
-
----
-
-<div style="border: 2px solid #20c997; border-radius: 8px; padding: 20px; margin: 20px 0; background-color: #f6f8fa;">
-<h2 style="margin-top: 0; color: #20c997;">設計のこだわり</h2>
-
-### 1. **依存関係の一方向化**
-内側の層が外側の層をインクルードしない堅牢な設計。
-DxLib や Windows API の変更がゲームロジックに影響しないように分離。
-
-### 2. **ECS による高い拡張性**
-Player や Enemy というクラスではなく、Entity に Component を組み合わせることで、
-新しいゲームオブジェクトを簡単に追加可能。
-
-### 3. **イベント駆動で結合度を低下**
-System 間が EventBus を使ってイベント通信することで、
-直接的な依存を排除。
-
-### 4. **インターフェース経由で OS 依存を隔離**
-Game層が Windows API を直接呼ばないよう、Core層に定義したインターフェース経由でのみアクセス。
-テスト時のモック置き換えも容易。
+> **「Windows によって PC が保護されました」と表示された場合**
+> 署名されていない個人開発アプリのため SmartScreen の警告が出ます。「詳細情報」→「実行」で起動できます。
 
 </div>
 
