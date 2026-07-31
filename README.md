@@ -7,6 +7,14 @@ WIN vs MAC は、**PC内部を舞台にしたダンジョンRPG**です。プレ
 
 ---
 
+## プレイ動画
+
+[![WIN vs MAC プレイ動画](https://img.youtube.com/vi/mW9KkOX3Gpc/maxresdefault.jpg)](https://youtu.be/mW9KkOX3Gpc)
+
+▶ **[YouTube で見る](https://youtu.be/mW9KkOX3Gpc)**
+
+---
+
 <div style="border: 2px solid #0366d6; border-radius: 8px; padding: 20px; margin: 20px 0; background-color: #f6f8fa;">
 <h2 style="margin-top: 0; color: #0366d6;">ゲームの特徴</h2>
 
