@@ -9,8 +9,11 @@
 
 namespace
 {
-	/// @brief 検証用のブロックモデル（stageCatalog.json の block_exe と同じもの）
-	constexpr std::string_view BLOCK_MODEL_PATH{ "assets/model/stage/BlockExe.mqo" };
+	/// @brief 検証用のブロック（stageCatalog.json の block_zip と同じもの）
+	constexpr std::string_view BLOCK_MODEL_PATH{ "assets/model/stage/BlockZip.mqo" };
+
+	/// @brief ひび段階テクスチャのパスを組み立てる土台（gen_crack_textures.py の出力に合わせる）
+	constexpr std::string_view BLOCK_TEXTURE_BASE{ "assets/model/stage/BlockZip" };
 
 	/// @brief 乱数（検証用なのでこの翻訳単位に閉じたもので足りる）
 	std::mt19937& rng()
@@ -81,6 +84,7 @@ namespace game::scene
 	{
 		m_screen.setBackgroundColor(10, 15, 22);
 		buildFragments();
+		loadCrackTextures();
 
 		const int source{ m_resourceManager.loadModelByPath(BLOCK_MODEL_PATH) };
 		m_itemHandle = m_resourceManager.duplicateModel(source);
@@ -129,6 +133,37 @@ namespace game::scene
 				}
 			}
 		}
+	}
+
+	void DebugDestruction::loadCrackTextures()
+	{
+		// [0] は無傷。リセット時に元の絵へ戻すため、段階0も配列に入れておく
+		m_crackTextures.push_back(
+		    m_resourceManager.loadImageByPath(std::string(BLOCK_TEXTURE_BASE) + ".png"));
+
+		for (int stage{ 1 }; stage <= CRACK_STAGE_COUNT; ++stage)
+		{
+			m_crackTextures.push_back(m_resourceManager.loadImageByPath(
+			    std::format("{}_crack{}.png", BLOCK_TEXTURE_BASE, stage)));
+		}
+	}
+
+	void DebugDestruction::applyCrackStage()
+	{
+		if (m_crackTextures.empty())
+			return;
+
+		// 最終打撃は破壊なので、テクスチャは最後のひび段階で頭打ちにする
+		const std::size_t index{ std::min(static_cast<std::size_t>(m_hitCount),
+			m_crackTextures.size() - 1) };
+		const int texture{ m_crackTextures[index] };
+		if (texture == -1)
+			return;
+
+		// 破片はそれぞれ複製ハンドルなので、1つずつ貼り替える必要がある。
+		// 複製元へ貼ると同じモデルを使う他のブロックまでひび割れてしまう
+		for (const auto& fragment : m_fragments)
+			m_renderer.setModelTexture(fragment.m_modelHandle, texture);
 	}
 
 	void DebugDestruction::update(float deltaTime)
@@ -186,6 +221,7 @@ namespace game::scene
 	{
 		++m_hitCount;
 		m_shake = 0.35f;
+		applyCrackStage();
 		if (m_hitCount >= HITS_TO_BREAK)
 			explode();
 	}
@@ -276,6 +312,7 @@ namespace game::scene
 		m_hitCount = 0;
 		m_phaseTime = 0.0f;
 		m_shake = 0.0f;
+		applyCrackStage(); // 無傷のテクスチャへ戻す
 	}
 
 	void DebugDestruction::draw()

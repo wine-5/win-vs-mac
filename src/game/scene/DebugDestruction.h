@@ -80,6 +80,8 @@ namespace game::scene
 		};
 
 		void buildFragments();
+		void loadCrackTextures();
+		void applyCrackStage();
 		void hit();
 		void explode();
 		void reset();
@@ -90,14 +92,20 @@ namespace game::scene
 		/// @brief 1辺あたりの分割数（GRID^3 個の破片になる）
 		static constexpr int GRID{ 4 };
 
-		/// @brief ブロックの実寸（stageCatalog.json の block_exe の defaultSize に合わせる）
-		static constexpr float BLOCK_SIZE{ 200.0f };
+		/// @brief ブロックの実寸（stageCatalog.json の defaultSize に合わせる）
+		static constexpr float BLOCK_SIZE{ 110.0f };
 
-		/// @brief block_exe のモデル素材の実寸（scale = 実寸 / BASE_SIZE）
+		/// @brief モデル素材の実寸（scale = 実寸 / BASE_SIZE）
 		static constexpr float BASE_SIZE{ 100.0f };
 
+		/// @brief 用意されているひび段階の数（gen_crack_textures.py の STAGE_COUNT と合わせる）
+		static constexpr int CRACK_STAGE_COUNT{ 3 };
+
 		/// @brief 破壊までに必要な打撃回数
-		static constexpr int HITS_TO_BREAK{ 3 };
+		///
+		/// ひび段階の数より1回多くする。同数だと最後のひびが表示された瞬間に
+		/// 破壊が走ってしまい、一番派手なひびが見えないまま終わる
+		static constexpr int HITS_TO_BREAK{ CRACK_STAGE_COUNT + 1 };
 
 		/// @brief 破片の初速（ユニット/秒）
 		static constexpr float BURST_SPEED{ 520.0f };
@@ -123,6 +131,10 @@ namespace game::scene
 
 		std::vector<Fragment> m_fragments;
 		int m_itemHandle{ -1 };
+
+		// ひび段階のテクスチャ（[0]=無傷、[1]〜[HITS_TO_BREAK]=ひび）。
+		// ダメージを受けるたびに破片へ貼り替える
+		std::vector<int> m_crackTextures;
 
 		Phase m_phase{ Phase::Intact };
 		int m_hitCount{ 0 };
