@@ -177,6 +177,40 @@ namespace infrastructure::graphics
 		 */
 		void setModelTexture(int modelHandle, int imageHandle) override;
 
+		/**
+		 * @brief モデルが持つフレームの数を取得する
+		 * @param modelHandle モデルハンドル
+		 * @return フレーム数。失敗時は 0
+		 */
+		[[nodiscard]] int getModelFrameCount(int modelHandle) override;
+
+		/**
+		 * @brief フレームが持つ頂点の中心（ローカル座標）を取得する
+		 * @param modelHandle モデルハンドル
+		 * @param frameIndex フレーム番号
+		 * @return 頂点AABBの中心。失敗時はゼロベクトル
+		 */
+		[[nodiscard]] core::Vector3 getModelFrameCenter(int modelHandle, int frameIndex) override;
+
+		/**
+		 * @brief フレームを個別に動かす（破片の飛散に使う）
+		 * @param modelHandle モデルハンドル
+		 * @param frameIndex フレーム番号
+		 * @param pivot 回転・拡大の支点（ローカル座標）
+		 * @param position pivotを合わせるワールド座標
+		 * @param rotation 回転（ラジアン）
+		 * @param scale 拡大率
+		 */
+		void setModelFrameTransform(int modelHandle, int frameIndex,
+		    const core::Vector3& pivot, const core::Vector3& position,
+		    const core::Vector3& rotation, float scale) override;
+
+		/**
+		 * @brief setModelFrameTransformで加えた変換をすべて解除する
+		 * @param modelHandle モデルハンドル
+		 */
+		void resetModelFrameTransforms(int modelHandle) override;
+
 	  private:
 		// applyDeathDissolveで初回に保存する、マテリアルの元のディフューズ色とエミッシブ色
 		struct MaterialColors

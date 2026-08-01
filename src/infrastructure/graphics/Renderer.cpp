@@ -425,6 +425,58 @@ namespace infrastructure::graphics
 		return GetDrawCallCount();
 	}
 
+	int Renderer::getModelFrameCount(int modelHandle)
+	{
+		if (modelHandle == -1)
+			return 0;
+
+		const int count{ MV1GetFrameNum(modelHandle) };
+		return count < 0 ? 0 : count;
+	}
+
+	core::Vector3 Renderer::getModelFrameCenter(int modelHandle, int frameIndex)
+	{
+		if (modelHandle == -1)
+			return {};
+
+		const VECTOR maxPosition{ MV1GetFrameMaxVertexLocalPosition(modelHandle, frameIndex) };
+		const VECTOR minPosition{ MV1GetFrameMinVertexLocalPosition(modelHandle, frameIndex) };
+		return {
+			(maxPosition.x + minPosition.x) * 0.5f,
+			(maxPosition.y + minPosition.y) * 0.5f,
+			(maxPosition.z + minPosition.z) * 0.5f
+		};
+	}
+
+	void Renderer::setModelFrameTransform(int modelHandle, int frameIndex,
+	    const core::Vector3& pivot, const core::Vector3& position,
+	    const core::Vector3& rotation, float scale)
+	{
+		if (modelHandle == -1)
+			return;
+
+		// 支点を原点へ寄せてから拡大・回転し、最後に目的地へ運ぶ。
+		// この順でないと、破片が自分の重心ではなくモデル原点まわりで回ってしまう
+		MATRIX matrix{ MGetTranslate(VGet(-pivot.x, -pivot.y, -pivot.z)) };
+		matrix = MMult(matrix, MGetScale(VGet(scale, scale, scale)));
+		matrix = MMult(matrix, MGetRotX(rotation.x));
+		matrix = MMult(matrix, MGetRotY(rotation.y));
+		matrix = MMult(matrix, MGetRotZ(rotation.z));
+		matrix = MMult(matrix, MGetTranslate(VGet(position.x, position.y, position.z)));
+
+		MV1SetFrameUserLocalWorldMatrix(modelHandle, frameIndex, matrix);
+	}
+
+	void Renderer::resetModelFrameTransforms(int modelHandle)
+	{
+		if (modelHandle == -1)
+			return;
+
+		const int count{ MV1GetFrameNum(modelHandle) };
+		for (int i{ 0 }; i < count; ++i)
+			MV1ResetFrameUserLocalMatrix(modelHandle, i);
+	}
+
 	void Renderer::setModelTexture(int modelHandle, int imageHandle)
 	{
 		if (modelHandle == -1 || imageHandle == -1)
