@@ -58,6 +58,11 @@ namespace infrastructure::resource
 		return m_imageRepo->loadImageById(imageId);
 	}
 
+	int ResourceManager::loadImageByPath(std::string_view path)
+	{
+		return m_imageRepo->loadImageByPath(path);
+	}
+
 	int ResourceManager::loadAnimationById(std::string_view animationId)
 	{
 		return m_animRepo->loadAnimationById(animationId);

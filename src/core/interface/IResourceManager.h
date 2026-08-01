@@ -180,5 +180,14 @@ namespace core::iface
 		 * @return 抽選表（未設定なら空）
 		 */
 		[[nodiscard]] virtual const core::data::BlockTable& getBlockTable() const noexcept = 0;
+
+		/**
+		 * @brief 画像をパスから読み込む（キャッシュ付き）
+		 *
+		 * resources.jsonへ登録するほどでもない、規則的に導けるファイルを読むのに使う
+		 * @param path 画像ファイルのパス
+		 * @return 画像ハンドル。失敗時は -1
+		 */
+		virtual int loadImageByPath(std::string_view path) = 0;
 	};
 } // namespace core::iface
