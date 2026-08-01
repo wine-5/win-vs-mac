@@ -170,6 +170,13 @@ namespace infrastructure::graphics
 		 */
 		int getDrawCallCount() override;
 
+		/**
+		 * @brief モデルに貼られているテクスチャを差し替える
+		 * @param modelHandle 対象のモデルハンドル
+		 * @param imageHandle 貼り替える画像ハンドル
+		 */
+		void setModelTexture(int modelHandle, int imageHandle) override;
+
 	  private:
 		// applyDeathDissolveで初回に保存する、マテリアルの元のディフューズ色とエミッシブ色
 		struct MaterialColors

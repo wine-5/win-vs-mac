@@ -424,4 +424,16 @@ namespace infrastructure::graphics
 	{
 		return GetDrawCallCount();
 	}
+
+	void Renderer::setModelTexture(int modelHandle, int imageHandle)
+	{
+		if (modelHandle == -1 || imageHandle == -1)
+			return;
+
+		// ブロックは1マテリアル1テクスチャの立方体だが、複数マテリアルのモデルへ
+		// 使われても破綻しないよう全マテリアルへ適用する
+		const int materialNum{ MV1GetMaterialNum(modelHandle) };
+		for (int i{ 0 }; i < materialNum; ++i)
+			MV1SetTextureGraphHandle(modelHandle, MV1GetMaterialDifMapTexture(modelHandle, i), imageHandle, TRUE);
+	}
 } // namespace infrastructure::graphics

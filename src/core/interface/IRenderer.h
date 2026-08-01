@@ -234,6 +234,20 @@ namespace core::iface
 		 */
 		virtual int getDrawCallCount() = 0;
 
+		/**
+		 * @brief モデルに貼られているテクスチャを差し替える
+		 *
+		 * ブロックのひびのように「形は変わらず絵だけが進行する」表現に使う。
+		 * モデル側は1枚のテクスチャを貼ったまま、段階ごとの画像へ差し替えればよい。
+		 *
+		 * @note モデルハンドル単位で効くため、同じブロックを複数出すなら
+		 *       duplicateModel で複製したハンドルへ適用すること。
+		 *       共有ハンドルに適用すると同じ種類のブロックが全部ひび割れる
+		 * @param modelHandle 対象のモデルハンドル
+		 * @param imageHandle 貼り替える画像ハンドル（loadImageByPath等で取得したもの）
+		 */
+		virtual void setModelTexture(int modelHandle, int imageHandle) = 0;
+
 		// 注意: 仮想関数を追加するときは必ずこの位置（末尾）へ足すこと。
 		// 途中へ挿入すると以降のvtableのスロット番号がずれ、再ビルドが漏れた
 		// 翻訳単位から別の関数が呼ばれてクラッシュする
