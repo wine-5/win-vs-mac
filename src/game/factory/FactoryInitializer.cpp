@@ -21,6 +21,9 @@ namespace
 	// 床の厚みぶん余計に沈めて、閉じる前に上端がのぞかないようにする
 	constexpr float BOSS_GATE_SINK_MARGIN{ 100.0f };
 
+	// 用意されているひび段階の数（tools/gen_crack_textures.py の STAGE_COUNT と合わせる）
+	constexpr int CRACK_STAGE_COUNT{ 3 };
+
 	/**
 	 * @brief 傾けた配置物がY方向に占める高さを求める
 	 *
@@ -65,6 +68,22 @@ namespace
 
 		std::uniform_real_distribution<float> distribution{ 0.0f, total };
 		return std::string(table.pick(distribution(rng)));
+	}
+
+	/**
+	 * @brief モデルのパスから拡張子を取り除いた土台を返す
+	 *
+	 * 割ったモデルもひびテクスチャも「元のモデル名 + 決まった接尾辞」で導ける。
+	 * ブロックが増えるたびにJSONへパスを3種類書き足すのは保守が割に合わないため、
+	 * 命名規約から組み立てる（生成側は tools/gen_fracture_models.py と
+	 * tools/gen_crack_textures.py が同じ規約で吐く）
+	 * @param modelPath モデルのパス（例: assets/model/stage/BlockZip.mqo）
+	 * @return 拡張子を除いたパス（例: assets/model/stage/BlockZip）
+	 */
+	std::string stripExtension(const std::string& modelPath)
+	{
+		const auto dot{ modelPath.find_last_of('.') };
+		return dot == std::string::npos ? modelPath : modelPath.substr(0, dot);
 	}
 } // namespace
 
@@ -131,7 +150,13 @@ namespace game::factory
 		{
 			const std::string type{ resolvePropType(prop.m_type, blockTable, rng) };
 			const auto& def{ m_resourceManager.getPropDefinition(type) };
-			const int handle{ m_resourceManager.loadModelByPath(def.m_modelPath) };
+
+			// loadModelByPath はパス単位でハンドルを使い回すため、同じ種類の配置物は
+			// 全部が同じモデルを指す。静止した床・壁ならそれでよいが、壊せるブロックは
+			// 1個ずつ見た目が変わる（ひび・破片）ので、複製して個別のハンドルを持たせる。
+			const int sharedHandle{ m_resourceManager.loadModelByPath(def.m_modelPath) };
+			const bool isDestructible{ def.m_hitsToBreak > 0 };
+			const int handle{ isDestructible ? m_resourceManager.duplicateModel(sharedHandle) : sharedHandle };
 
 			// 実寸(size) ÷ 素材実寸(baseSize) をモデルスケールにする。
 			// baseSizeが0の軸は割れないためスケール1にフォールバックする
@@ -152,6 +177,26 @@ namespace game::factory
 
 			params.m_scrollSpeedU = def.m_scrollU;
 			params.m_scrollSpeedV = def.m_scrollV;
+
+			if (isDestructible)
+			{
+				const std::string base{ stripExtension(def.m_modelPath) };
+
+				params.m_hitsToBreak = def.m_hitsToBreak;
+				// 割ったモデルも1個ずつ複製する。共有すると1個壊した瞬間に
+				// 同じ種類のブロック全部の破片が同じ動きで飛ぶ
+				params.m_fracturedHandle = m_resourceManager.duplicateModel(
+				    m_resourceManager.loadModelByPath(base + "Fractured.mqo"));
+
+				// [0]は無傷。ひびを戻す必要は無いが、段階0を配列に入れておくと
+				// 「段階＝添字」で引けて取り違えが起きない
+				params.m_crackTextures.push_back(m_resourceManager.loadImageByPath(base + ".png"));
+				for (int stage{ 1 }; stage <= CRACK_STAGE_COUNT; ++stage)
+				{
+					params.m_crackTextures.push_back(
+					    m_resourceManager.loadImageByPath(base + "_crack" + std::to_string(stage) + ".png"));
+				}
+			}
 
 			const auto collision{ constant::toPropCollision(def.m_collider) };
 			params.m_collision = collision;
