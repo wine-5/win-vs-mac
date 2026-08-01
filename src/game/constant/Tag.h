@@ -13,5 +13,8 @@ namespace game::constant
         Enemy,
         Ground,
         Wall,
-    };
+
+		// 殴って壊せる配置物。床・壁と見た目は同じ立方体だが、攻撃の対象になる点が違う。
+		Destructible,
+	};
 } // namespace game::constant
