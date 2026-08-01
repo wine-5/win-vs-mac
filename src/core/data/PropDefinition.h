@@ -18,6 +18,11 @@ namespace core::data
 		core::Vector3 m_baseSize{}; // モデル素材の実寸。size ÷ baseSize がモデルスケールになる
 		std::string m_collider{};   // "box" | "ground" | "none"
 
+		// 破壊に必要な打撃回数。0なら壊せない普通の配置物。
+		// HPではなく回数にしているのは、攻撃力が伸びても壊すのに必要な手数を一定に保つため。
+		// HP制にすると育ったビルドで一撃になり、ひびの段階が誰の目にも触れなくなる
+		int m_hitsToBreak{ 0 };
+
 		// 特別な役割。空なら普通の配置物。"bossGate" はボス出現で閉じる扉として扱う。
 		// 種類（id）ではなく役割で判定することで、見た目違いの扉を何種類でも用意できる
 		std::string m_role{};
