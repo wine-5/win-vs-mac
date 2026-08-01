@@ -4,6 +4,7 @@
 #include "game/component/visual/RenderComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
+#include "game/component/stage/DestructibleComponent.h"
 #include "game/constant/Tag.h"
 
 namespace game::stage
@@ -48,9 +49,21 @@ namespace game::stage
 			componentManager.add<component::movement::GroundSurfaceComponent>(m_entity.getId(), surface);
 		}
 
+		// 壊せる配置物は、床・壁と同じ立方体でも攻撃の対象になる点が違う。
+		// タグで種別を、Componentで壊れ方を表す
 		component::TagComponent tag{};
-		tag.m_tag = constant::Tag::Ground;
+		tag.m_tag = params.m_hitsToBreak > 0 ? constant::Tag::Destructible : constant::Tag::Ground;
 		componentManager.add<component::TagComponent>(m_entity.getId(), tag);
+
+		if (params.m_hitsToBreak > 0)
+		{
+			component::stage::DestructibleComponent destructible{};
+			destructible.m_hitsToBreak = params.m_hitsToBreak;
+			destructible.m_intactHandle = params.m_modelHandle;
+			destructible.m_fracturedHandle = params.m_fracturedHandle;
+			destructible.m_crackTextures = params.m_crackTextures;
+			componentManager.add<component::stage::DestructibleComponent>(m_entity.getId(), destructible);
+		}
 	}
 
 	core::ecs::EntityId StageProp::getId() const noexcept

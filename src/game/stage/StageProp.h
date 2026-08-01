@@ -4,6 +4,7 @@
 #include "core/ecs/Entity.h"
 #include "core/utility/Vector3.h"
 #include "game/constant/PropCollision.h"
+#include <vector>
 
 namespace game::stage
 {
@@ -31,6 +32,15 @@ namespace game::stage
 
 		float m_scrollSpeedU{ 0.0f }; // テクスチャを流す速さ（1.0でテクスチャ1枚ぶん/秒）
 		float m_scrollSpeedV{ 0.0f };
+
+		// 破壊に必要な打撃回数。0なら壊せない普通の配置物として作る
+		int m_hitsToBreak{ 0 };
+
+		// 破壊した瞬間へ差し替える「割ってあるモデル」のハンドル
+		int m_fracturedHandle{ -1 };
+
+		// ひび段階のテクスチャ。[0]が無傷で、以降が段階1〜のひび
+		std::vector<int> m_crackTextures{};
 	};
 
 	/**
