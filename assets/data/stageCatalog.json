@@ -388,6 +388,7 @@
       ],
       "editorColor": "#E8891C",
       "collider": "box",
+      "hitsToBreak": 5,
       "defaultSize": [
         110,
         110,
@@ -432,6 +433,7 @@
       ],
       "editorColor": "#8B5CF6",
       "collider": "box",
+      "hitsToBreak": 3,
       "defaultSize": [
         110,
         110,
@@ -454,6 +456,7 @@
       ],
       "editorColor": "#D9C93A",
       "collider": "box",
+      "hitsToBreak": 3,
       "defaultSize": [
         110,
         110,
@@ -476,6 +479,7 @@
       ],
       "editorColor": "#2E6FD9",
       "collider": "box",
+      "hitsToBreak": 3,
       "defaultSize": [
         110,
         110,
@@ -498,6 +502,7 @@
       ],
       "editorColor": "#1E88E5",
       "collider": "box",
+      "hitsToBreak": 3,
       "defaultSize": [
         110,
         110,
@@ -520,6 +525,7 @@
       ],
       "editorColor": "#E8542B",
       "collider": "box",
+      "hitsToBreak": 3,
       "defaultSize": [
         110,
         110,
@@ -542,6 +548,7 @@
       ],
       "editorColor": "#2FA84F",
       "collider": "box",
+      "hitsToBreak": 3,
       "defaultSize": [
         110,
         110,
@@ -564,6 +571,7 @@
       ],
       "editorColor": "#22D3EE",
       "collider": "box",
+      "hitsToBreak": 3,
       "defaultSize": [
         110,
         110,
@@ -586,6 +594,7 @@
       ],
       "editorColor": "#7C4DFF",
       "collider": "box",
+      "hitsToBreak": 3,
       "defaultSize": [
         110,
         110,
@@ -608,6 +617,7 @@
       ],
       "editorColor": "#E0417F",
       "collider": "box",
+      "hitsToBreak": 3,
       "defaultSize": [
         110,
         110,
@@ -630,6 +640,7 @@
       ],
       "editorColor": "#8A99A8",
       "collider": "box",
+      "hitsToBreak": 3,
       "defaultSize": [
         110,
         110,
