@@ -12,6 +12,9 @@ namespace
 	/// @brief 検証用のブロック（stageCatalog.json の block_zip と同じもの）
 	constexpr std::string_view BLOCK_MODEL_PATH{ "assets/model/stage/BlockZip.mqo" };
 
+	/// @brief あらかじめ割ってあるモデル（gen_fracture_models.py の出力）
+	constexpr std::string_view FRACTURED_MODEL_PATH{ "assets/model/stage/BlockZipFractured.mqo" };
+
 	/// @brief ひび段階テクスチャのパスを組み立てる土台（gen_crack_textures.py の出力に合わせる）
 	constexpr std::string_view BLOCK_TEXTURE_BASE{ "assets/model/stage/BlockZip" };
 
@@ -83,55 +86,57 @@ namespace game::scene
 	    , m_screen{ screen }
 	{
 		m_screen.setBackgroundColor(10, 15, 22);
+
+		const int source{ m_resourceManager.loadModelByPath(BLOCK_MODEL_PATH) };
+		m_blockHandle = m_resourceManager.duplicateModel(source);
+		m_itemHandle = m_resourceManager.duplicateModel(source);
+
 		buildFragments();
 		loadCrackTextures();
 
-		const int source{ m_resourceManager.loadModelByPath(BLOCK_MODEL_PATH) };
-		m_itemHandle = m_resourceManager.duplicateModel(source);
-
-		core::log::info("DebugDestruction: 破片 {} 個を生成しました", m_fragments.size());
+		core::log::info("DebugDestruction: 破片 {} 個を読み込みました", m_fragments.size());
 	}
 
 	DebugDestruction::~DebugDestruction()
 	{
-		// 複製ハンドルの見た目を元へ戻す（プールへ返る場合に赤いまま残るのを防ぐ）
-		for (const auto& fragment : m_fragments)
-			m_renderer.resetModelAppearance(fragment.m_modelHandle);
+		m_renderer.resetModelFrameTransforms(m_fracturedHandle);
+		m_renderer.resetModelAppearance(m_fracturedHandle);
 	}
 
 	void DebugDestruction::buildFragments()
 	{
-		const int source{ m_resourceManager.loadModelByPath(BLOCK_MODEL_PATH) };
+		const int source{ m_resourceManager.loadModelByPath(FRACTURED_MODEL_PATH) };
 		if (source == -1)
 		{
-			core::log::error("DebugDestruction: ブロックモデルの読み込みに失敗しました");
+			core::log::error("DebugDestruction: 割ったモデルの読み込みに失敗しました");
 			return;
 		}
 
-		// ブロックをGRID^3の格子に分け、そのマス目の中心へ小さな立方体を置く。
-		// 破片モデルを作らずに済むので、あらかじめ割ったmqoが無い段階でも試せる
-		const float cellSize{ BLOCK_SIZE / GRID };
-		const float origin{ -BLOCK_SIZE * 0.5f + cellSize * 0.5f };
+		// 割ったモデルは1体で全破片を持つ。共有ハンドルへフレーム変換を掛けると
+		// 同じモデルを使う他のブロックまで崩れるため、複製したものを使う
+		m_fracturedHandle = m_resourceManager.duplicateModel(source);
 
-		m_fragments.reserve(static_cast<std::size_t>(GRID) * GRID * GRID);
-		for (int ix{ 0 }; ix < GRID; ++ix)
+		// mqoのオブジェクト1つがmv1のフレーム1つになる。破片の重心は
+		// フレームが持つ頂点のAABB中心から得られる
+		const int frameCount{ m_renderer.getModelFrameCount(m_fracturedHandle) };
+		const float blockScale{ BLOCK_SIZE / BASE_SIZE };
+
+		m_fragments.reserve(static_cast<std::size_t>(frameCount));
+		for (int i{ 0 }; i < frameCount; ++i)
 		{
-			for (int iy{ 0 }; iy < GRID; ++iy)
-			{
-				for (int iz{ 0 }; iz < GRID; ++iz)
-				{
-					Fragment fragment{};
-					fragment.m_modelHandle = m_resourceManager.duplicateModel(source);
-					fragment.m_home = {
-						origin + ix * cellSize,
-						// ブロックの底面を床に合わせる（中心ではなく足元を原点にする）
-						FLOOR_Y + BLOCK_SIZE * 0.5f + origin + iy * cellSize,
-						origin + iz * cellSize
-					};
-					fragment.m_position = fragment.m_home;
-					m_fragments.push_back(fragment);
-				}
-			}
+			Fragment fragment{};
+			fragment.m_frameIndex = i;
+			fragment.m_pivot = m_renderer.getModelFrameCenter(m_fracturedHandle, i);
+
+			// モデルのローカル座標を、ブロックを置いた場所のワールド座標へ移す。
+			// ブロックの底面を床に合わせる（中心ではなく足元を原点にする）
+			fragment.m_home = {
+				fragment.m_pivot.x * blockScale,
+				FLOOR_Y + BLOCK_SIZE * 0.5f + fragment.m_pivot.y * blockScale,
+				fragment.m_pivot.z * blockScale
+			};
+			fragment.m_position = fragment.m_home;
+			m_fragments.push_back(fragment);
 		}
 	}
 
@@ -160,10 +165,10 @@ namespace game::scene
 		if (texture == -1)
 			return;
 
-		// 破片はそれぞれ複製ハンドルなので、1つずつ貼り替える必要がある。
-		// 複製元へ貼ると同じモデルを使う他のブロックまでひび割れてしまう
-		for (const auto& fragment : m_fragments)
-			m_renderer.setModelTexture(fragment.m_modelHandle, texture);
+		// 複製ハンドルへ貼る。複製元へ貼ると同じモデルを使う他のブロックまでひび割れてしまう。
+		// 割ったモデルにも同じ絵を貼り、破壊した瞬間に絵が変わらないようにする
+		m_renderer.setModelTexture(m_blockHandle, texture);
+		m_renderer.setModelTexture(m_fracturedHandle, texture);
 	}
 
 	void DebugDestruction::update(float deltaTime)
@@ -270,11 +275,10 @@ namespace game::scene
 				fragment.m_angular = fragment.m_angular * 0.6f;
 			}
 
-			// 後半でフェードしながら縮む。データが消えていくように見せる
+			// 後半で縮んで消える。フレーム単位ではフェードできないため縮小で見せる
 			const float fadeStart{ FRAGMENT_LIFE * 0.5f };
 			const float fade{ std::clamp((m_phaseTime - fadeStart) / (FRAGMENT_LIFE - fadeStart), 0.0f, 1.0f) };
-			fragment.m_alpha = 1.0f - fade;
-			fragment.m_scale = 1.0f - fade * 0.85f;
+			fragment.m_scale = 1.0f - fade;
 		}
 	}
 
@@ -305,9 +309,9 @@ namespace game::scene
 			fragment.m_rotation = {};
 			fragment.m_angular = {};
 			fragment.m_scale = 1.0f;
-			fragment.m_alpha = 1.0f;
-			m_renderer.resetModelAppearance(fragment.m_modelHandle);
 		}
+		m_renderer.resetModelFrameTransforms(m_fracturedHandle);
+
 		m_phase = Phase::Intact;
 		m_hitCount = 0;
 		m_phaseTime = 0.0f;
@@ -326,31 +330,29 @@ namespace game::scene
 		};
 		m_camera.setLookAt(eye, { 0.0f, CAMERA_TARGET_HEIGHT, 0.0f });
 
-		const float cellScale{ (BLOCK_SIZE / GRID) / BASE_SIZE };
-
-		// ダメージ段階では破片をわずかに外へ押し出し、隙間を「ひび」として見せる
-		const float gap{ m_phase == Phase::Intact ? m_hitCount * 2.6f : 0.0f };
 		const core::Vector3 center{ 0.0f, FLOOR_Y + BLOCK_SIZE * 0.5f, 0.0f };
 
-		for (const auto& fragment : m_fragments)
+		if (m_phase == Phase::Intact)
 		{
-			if (fragment.m_alpha <= 0.01f || fragment.m_scale <= 0.01f)
-				continue;
-
-			core::Vector3 position{ fragment.m_position };
-			if (gap > 0.0f)
+			// 無傷のあいだは1個のブロックとして描く。ひびはテクスチャが受け持つ。
+			// 打撃のたびに一瞬だけ潰れて、殴った手応えを出す
+			const float squash{ 1.0f - m_shake * 0.12f };
+			const float blockScale{ BLOCK_SIZE / BASE_SIZE };
+			m_renderer.drawModel(m_blockHandle, center, {},
+			    { blockScale / squash, blockScale * squash, blockScale / squash });
+		}
+		else
+		{
+			// 破片ごとに姿勢を差し込んでから、モデル1体ぶんを描く。
+			// 破片が何個あっても描画は1回で済む
+			const float blockScale{ BLOCK_SIZE / BASE_SIZE };
+			for (const auto& fragment : m_fragments)
 			{
-				const core::Vector3 outward{ fragment.m_home - center };
-				if (outward.lengthSq() > 0.0f)
-					position += outward.normalized() * gap;
+				m_renderer.setModelFrameTransform(m_fracturedHandle, fragment.m_frameIndex,
+				    fragment.m_pivot, fragment.m_position, fragment.m_rotation,
+				    blockScale * std::max(0.0f, fragment.m_scale));
 			}
-
-			// 破壊中は赤熱させつつフェードさせる（破断面の代わり）
-			if (m_phase == Phase::Broken)
-				m_renderer.applyDeathDissolve(fragment.m_modelHandle, 1.0f - fragment.m_alpha, fragment.m_alpha);
-
-			m_renderer.drawModel(fragment.m_modelHandle, position, fragment.m_rotation,
-			    { cellScale * fragment.m_scale, cellScale * fragment.m_scale, cellScale * fragment.m_scale });
+			m_renderer.drawModel(m_fracturedHandle, {}, {}, { 1.0f, 1.0f, 1.0f });
 		}
 
 		// アイテムと取得範囲

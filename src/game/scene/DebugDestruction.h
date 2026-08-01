@@ -67,16 +67,19 @@ namespace game::scene
 		};
 
 		/// @brief 破片1つ分の状態
+		///
+		/// 破片は「割ったモデル」のフレームなので、モデルハンドルではなく
+		/// フレーム番号で指す。描画はモデル1体ぶんで全破片まとめて行われる
 		struct Fragment
 		{
-			int m_modelHandle{ -1 };
-			core::Vector3 m_home{}; // 破壊前の位置（リセット先）
+			int m_frameIndex{ -1 };
+			core::Vector3 m_pivot{}; // 破片の重心（モデルのローカル座標）
+			core::Vector3 m_home{};  // 破壊前の重心のワールド座標
 			core::Vector3 m_position{};
 			core::Vector3 m_velocity{};
 			core::Vector3 m_rotation{}; // ラジアン
 			core::Vector3 m_angular{};  // 回転速度（ラジアン/秒）
 			float m_scale{ 1.0f };
-			float m_alpha{ 1.0f };
 		};
 
 		void buildFragments();
@@ -88,9 +91,6 @@ namespace game::scene
 		void updateFragments(float deltaTime);
 		void updateItem();
 		void drawHud();
-
-		/// @brief 1辺あたりの分割数（GRID^3 個の破片になる）
-		static constexpr int GRID{ 4 };
 
 		/// @brief ブロックの実寸（stageCatalog.json の defaultSize に合わせる）
 		static constexpr float BLOCK_SIZE{ 110.0f };
@@ -128,6 +128,13 @@ namespace game::scene
 		core::iface::IInputProvider& m_inputProvider;
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
+
+		// 無傷のあいだ描く1個ぶんのブロック
+		int m_blockHandle{ -1 };
+
+		// あらかじめ割ってあるモデル。破壊した瞬間からこちらへ切り替える。
+		// 破片は不揃いな多面体で、外側の面には元の絵の対応部分が乗る
+		int m_fracturedHandle{ -1 };
 
 		std::vector<Fragment> m_fragments;
 		int m_itemHandle{ -1 };
