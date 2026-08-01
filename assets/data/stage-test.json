@@ -45,7 +45,7 @@
       ]
     },
     {
-      "type": "block_recyclebin",
+      "type": "block_random",
       "position": [
         736.28,
         110,
@@ -99,7 +99,7 @@
       ]
     },
     {
-      "type": "block_recyclebin",
+      "type": "block_random",
       "position": [
         796.43,
         -474.87,
@@ -117,7 +117,7 @@
       ]
     },
     {
-      "type": "block_zip",
+      "type": "block_random",
       "position": [
         800,
         -474.87,
@@ -135,7 +135,7 @@
       ]
     },
     {
-      "type": "block_zip",
+      "type": "block_random",
       "position": [
         300,
         -474.87,
@@ -567,7 +567,7 @@
       ]
     },
     {
-      "type": "block_exe",
+      "type": "block_random",
       "position": [
         -3548.74,
         -1959.55,
@@ -585,7 +585,7 @@
       ]
     },
     {
-      "type": "block_dll",
+      "type": "block_random",
       "position": [
         -3438.74,
         -1959.55,
@@ -603,7 +603,7 @@
       ]
     },
     {
-      "type": "block_dll",
+      "type": "block_random",
       "position": [
         -3498.74,
         -1739.55,
@@ -621,7 +621,7 @@
       ]
     },
     {
-      "type": "block_exe",
+      "type": "block_random",
       "position": [
         -798.74,
         -1959.55,
@@ -639,7 +639,7 @@
       ]
     },
     {
-      "type": "block_dll",
+      "type": "block_random",
       "position": [
         -728.74,
         -1959.55,
@@ -657,7 +657,7 @@
       ]
     },
     {
-      "type": "block_dll",
+      "type": "block_random",
       "position": [
         -1948.74,
         -1959.55,
@@ -1035,7 +1035,7 @@
       ]
     },
     {
-      "type": "block_zip",
+      "type": "block_random",
       "position": [
         8690.22,
         -474.87,
@@ -1053,7 +1053,7 @@
       ]
     },
     {
-      "type": "block_zip",
+      "type": "block_random",
       "position": [
         8440.22,
         -474.87,
@@ -1071,7 +1071,7 @@
       ]
     },
     {
-      "type": "block_exe",
+      "type": "block_random",
       "position": [
         8468.86,
         -254.87,
@@ -1089,7 +1089,7 @@
       ]
     },
     {
-      "type": "block_exe",
+      "type": "block_random",
       "position": [
         8071.52,
         -474.87,
