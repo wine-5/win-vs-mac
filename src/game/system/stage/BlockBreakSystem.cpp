@@ -21,8 +21,11 @@ namespace game::system::stage
 
 	void BlockBreakSystem::update([[maybe_unused]] float deltaTime)
 	{
+		// 見るのは「振り始め」ではなく「当たり判定が解決された瞬間」。
+		// プレイヤーの攻撃には playerData.json の attackWindup ぶんの溜めがあり、
+		// 振り始めで判定すると剣が振り下ろされる前にひびが入る
 		const auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(m_playerId) };
-		if (attack == nullptr || !attack->m_justFired)
+		if (attack == nullptr || !attack->m_justResolved)
 			return;
 
 		// 弾はブロックを削らない。近づいて剣を振る理由を残すため

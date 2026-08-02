@@ -10,14 +10,19 @@ namespace game::system::stage
 	 * @brief プレイヤーの近接攻撃で壊せるブロックを壊すSystem
 	 *
 	 * ブロックはHPではなく打撃回数で壊れるため、AttackSystemのダメージ計算には乗せない。
-	 * 代わりに「このフレームで攻撃が成立したか」（AttackComponent.m_justFired）だけを
-	 * 見て、範囲内のブロックの打撃回数を1つ進め、ひびを進行させる。
+	 * 代わりに「このフレームで当たり判定が解決されたか」（AttackComponent.m_justResolved）
+	 * だけを見て、範囲内のブロックの打撃回数を1つ進め、ひびを進行させる。
 	 * 規定回数に達したら破壊する。
+	 *
+	 * 遅延の秒数はここでは持たない。プレイヤーの攻撃には playerData.json の
+	 * attackWindup ぶんの溜めがあり、AttackSystemがその時間を消化してから判定を解決する。
+	 * 同じ秒数をこちら側でも持つと、attackWindup を調整したときに剣とブロックで
+	 * タイミングがずれるため、解決された瞬間そのものに乗る。
 	 *
 	 * 弾では壊せない。遠距離で壊せてしまうと安全な位置から撃つだけになり、
 	 * 近づいて剣を振る理由が消えるため。
 	 *
-	 * @note AttackSystemより後に登録すること。m_justFired はAttackSystemが毎フレーム
+	 * @note AttackSystemより後に登録すること。m_justResolved はAttackSystemが毎フレーム
 	 *       立て直すため、前に置くと1フレーム古い状態を見ることになる
 	 */
 	class BlockBreakSystem : public core::ecs::ISystem
