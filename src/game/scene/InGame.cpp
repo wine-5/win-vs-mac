@@ -20,6 +20,7 @@
 #include "game/system/movement/PhysicsSystem.h"
 #include "game/system/movement/GroundingSystem.h"
 #include "game/system/movement/FallOutSystem.h"
+#include "game/system/stage/BlockBreakSystem.h"
 #include "game/system/stage/BossGateSystem.h"
 #include "game/system/movement/FootstepSystem.h"
 #include "game/component/movement/TransformComponent.h"
@@ -595,6 +596,13 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::combat::AttackSystem>(
 		    m_componentManager, m_eventBus);
 		core::probe::mark("      sys: AttackSystem");
+		// 壊せるブロックを近接攻撃で削る。打撃回数で壊れるためAttackSystemの
+		// ダメージ計算には乗せず、攻撃が成立したフレームだけを見る。
+		// m_justFired はAttackSystemが毎フレーム立て直すので必ずその後に置く
+		m_systemManager.registerSystem<game::system::stage::BlockBreakSystem>(
+		    m_componentManager, m_renderer, m_playerId);
+		core::probe::mark("      sys: BlockBreakSystem");
+
 		m_systemManager.registerSystem<game::system::visual::HitEffectSystem>(m_componentManager, m_eventBus);
 		core::probe::mark("      sys: HitEffectSystem");
 		// 死亡した敵の後始末（赤化＋ディゾルブ演出→Entity破棄＋モデルハンドルのプール返却）
