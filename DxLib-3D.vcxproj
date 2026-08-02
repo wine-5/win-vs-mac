@@ -245,6 +245,7 @@
     <ClCompile Include="src\game\utility\CliffGuard.cpp" />
     <ClCompile Include="src\game\utility\GroundQuery.cpp" />
     <ClCompile Include="src\game\utility\MiniMapProjection.cpp" />
+    <ClCompile Include="src\game\system\stage\BlockBreakSystem.cpp" />
     <ClCompile Include="src\game\system\stage\BossGateSystem.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageRepository.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageCatalogRepository.cpp" />
@@ -335,6 +336,7 @@
     <ClInclude Include="src\game\system\movement\FootstepSystem.h" />
     <ClInclude Include="src\game\system\movement\FallOutSystem.h" />
     <ClInclude Include="src\game\system\movement\GroundingSystem.h" />
+    <ClInclude Include="src\game\system\stage\BlockBreakSystem.h" />
     <ClInclude Include="src\game\system\stage\BossGateSystem.h" />
     <ClInclude Include="src\core\data\ProjectileMetadata.h" />
     <ClInclude Include="src\game\actor\EnemyBehaviors.h" />
