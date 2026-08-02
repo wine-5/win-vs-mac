@@ -41,8 +41,9 @@ namespace game::system::combat
 		{
 			auto& attack{ m_componentManager.get<component::combat::AttackComponent>(attackerId) };
 
-			// 「このフレームで攻撃を開始したか」は毎フレーム作り直す
+			// 「このフレームで攻撃を開始したか／当たったか」は毎フレーム作り直す
 			attack.m_justFired = false;
+			attack.m_justResolved = false;
 
 			// 死亡済みのEntityは攻撃を成立させない。AIは死亡時に止めているが、
 			// 倒れる直前に立った m_attackRequested が残っていると次のフレームで死体が殴ってくる
@@ -92,6 +93,7 @@ namespace game::system::combat
 						    impactEffect });
 
 					// 攻撃者が倒された場合はこのフレームへ到達しない（先頭で溜めごと打ち切る）
+					attack.m_justResolved = true;
 					resolveAttack(attackerId, attack);
 					attack.m_currentCooldown = attack.m_attackCooldown;
 				}
@@ -175,6 +177,7 @@ namespace game::system::combat
 				    attack.m_impactEffectType });
 
 			// 即座にダメージを解決する
+			attack.m_justResolved = true;
 			resolveAttack(attackerId, attack);
 
 			// クールダウンをリセット
