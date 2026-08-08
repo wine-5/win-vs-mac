@@ -46,6 +46,7 @@ namespace game::system::stage
 
 	  private:
 		void hitBlock(core::ecs::EntityId blockId);
+		void breakBlock(core::ecs::EntityId blockId);
 
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IRenderer& m_renderer;
