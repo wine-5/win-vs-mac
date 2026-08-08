@@ -14,14 +14,21 @@
 namespace
 {
 	/// @brief 破片の初速（ユニット/秒）
-	constexpr float BURST_SPEED{ 320.0f };
+	///
+	/// 硬いものは砕けた瞬間に鋭く弾け飛ぶ。ここが遅いと、ゆっくり崩れる
+	/// 柔らかいもの（スポンジ）に見える
+	constexpr float BURST_SPEED{ 620.0f };
 
 	/// @brief 破片へ加える上向きの初速の範囲（ユニット/秒）
-	constexpr float BURST_LIFT_MIN{ 140.0f };
-	constexpr float BURST_LIFT_MAX{ 360.0f };
+	///
+	/// 上へ飛ばしすぎると重さが消えるため、横へ弾ける勢いより控えめにする
+	constexpr float BURST_LIFT_MIN{ 120.0f };
+	constexpr float BURST_LIFT_MAX{ 320.0f };
 
 	/// @brief 破片の回転速度の上限（ラジアン/秒）
-	constexpr float SPIN_SPEED{ 8.0f };
+	///
+	/// 砕けた直後は速く回り、床に当たるたびに落ち着く（減衰はBlockDebrisSystem側）
+	constexpr float SPIN_SPEED{ 16.0f };
 
 	/// @brief モデル素材の実寸。ブロックのスケールは 実寸 / これ で決まっている
 	constexpr float BASE_SIZE{ 100.0f };
