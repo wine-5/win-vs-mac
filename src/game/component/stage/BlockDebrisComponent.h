@@ -18,7 +18,6 @@ namespace game::component::stage
 		core::Vector3 m_velocity{};
 		core::Vector3 m_rotation{}; // ラジアン
 		core::Vector3 m_angular{};  // 回転速度（ラジアン/秒）
-		float m_scale{ 1.0f };
 	};
 
 	/**
@@ -32,9 +31,11 @@ namespace game::component::stage
 	{
 		std::vector<BlockDebrisFragment> m_fragments{};
 
-		// 飛散が始まってからの経過時間と、破片が消えるまでの時間（秒）
+		// 飛散が始まってからの経過時間と、破片が消えるまでの時間（秒）。
+		// 空中で消えると「蒸発した」ように見えるため、床に落ちて転がりきる
+		// までの時間を見込んで長めに取る
 		float m_elapsed{ 0.0f };
-		float m_lifetime{ 1.4f };
+		float m_lifetime{ 2.4f };
 
 		// ブロックのモデルスケール。破片の重心はモデルのローカル座標なので、
 		// ワールドの位置へ直すのにこれを掛ける

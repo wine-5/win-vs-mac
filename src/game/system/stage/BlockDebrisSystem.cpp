@@ -6,26 +6,43 @@
 
 namespace
 {
+	// 破片は「硬いものが砕けた欠片」として動かす。
+	// 勢いを保ったまま飛び、床では跳ねずに転がって止まる、という挙動を狙う。
+	// 空気抵抗を強くしたり大きく弾ませたりすると、軽くて柔らかいもの（スポンジ）に見える
+
 	/// @brief 破片にかかる重力（ユニット/秒^2）
-	constexpr float GRAVITY{ 1400.0f };
+	///
+	/// プレイヤーの落下（980）より重くする。ふわりと落ちると軽い物に見えるため
+	constexpr float GRAVITY{ 2200.0f };
 
 	/// @brief 床で跳ね返るときに残る速度の割合
-	constexpr float BOUNCE_RETENTION{ 0.34f };
+	///
+	/// 硬い欠片は床で弾まず、ぶつかった勢いを失って転がる。
+	/// ここを大きくするとゴムまりのように跳ね回って重さが消える
+	constexpr float BOUNCE_RETENTION{ 0.16f };
 
 	/// @brief 床との摩擦で水平速度に掛ける係数
-	constexpr float FLOOR_FRICTION{ 0.72f };
+	constexpr float FLOOR_FRICTION{ 0.55f };
 
 	/// @brief 空気抵抗（1秒あたりに失う速度の割合）
-	constexpr float AIR_DRAG{ 0.9f };
+	///
+	/// 硬く重い欠片は空気でほとんど減速しない。ここを大きくすると
+	/// 飛び出した直後に失速し、軽いものが舞っているように見える
+	constexpr float AIR_DRAG{ 0.15f };
 
 	/// @brief 跳ねるたびに回転が落ち着く割合
-	constexpr float SPIN_DAMPING{ 0.6f };
+	constexpr float SPIN_DAMPING{ 0.35f };
 
-	/// @brief 寿命のうち、縮み始めるまでの割合
+	/// @brief 静止したと見なす速さ（ユニット/秒）
 	///
-	/// フレーム単位では半透明にできないため、縮小で消す。
-	/// 最初から縮み始めると飛んだ瞬間に小さくなって迫力が出ないので、後半だけ縮める
-	constexpr float SHRINK_START_RATIO{ 0.5f };
+	/// これを下回ったら床の上で完全に止める。細かく震え続けると
+	/// 「まだ動ける柔らかいもの」に見えてしまう
+	constexpr float REST_SPEED{ 22.0f };
+
+	/// @brief 寿命のうち、消え始めるまでの割合
+	///
+	/// 床に落ちて転がりきってから消えるように、後半だけフェードさせる
+	constexpr float FADE_START_RATIO{ 0.65f };
 } // namespace
 
 namespace game::system::stage
@@ -47,22 +64,28 @@ namespace game::system::stage
 			auto& debris{ m_componentManager.get<component::stage::BlockDebrisComponent>(entityId) };
 			debris.m_elapsed += deltaTime;
 
+			const auto* destructible{ m_componentManager.tryGet<component::stage::DestructibleComponent>(entityId) };
+			if (destructible == nullptr)
+				continue;
+
 			// 飛散し終わったブロックは以後どこからも参照されないため破棄する
 			if (debris.m_elapsed >= debris.m_lifetime)
 			{
+				// フェードのために変えた見た目を戻す。ハンドルはこのブロック専用の
+				// 複製だが、戻さずに捨てるとプールへ返ったとき透けたまま出る
+				m_renderer.resetModelAppearance(destructible->m_fracturedHandle);
 				m_componentManager.removeAll(entityId);
 				m_entityManager.destroy(core::ecs::Entity(entityId));
 				continue;
 			}
 
-			const float shrinkStart{ debris.m_lifetime * SHRINK_START_RATIO };
-			const float shrink{ std::clamp((debris.m_elapsed - shrinkStart) /
-				                               (debris.m_lifetime - shrinkStart),
+			// 後半でフェードさせる。破片は1体のモデルのフレームなので、
+			// モデルごと薄くすれば全破片が揃って消える
+			const float fadeStart{ debris.m_lifetime * FADE_START_RATIO };
+			const float fade{ std::clamp((debris.m_elapsed - fadeStart) /
+				                             (debris.m_lifetime - fadeStart),
 				0.0f, 1.0f) };
-
-			const auto* destructible{ m_componentManager.tryGet<component::stage::DestructibleComponent>(entityId) };
-			if (destructible == nullptr)
-				continue;
+			m_renderer.applyDeathDissolve(destructible->m_fracturedHandle, 0.0f, 1.0f - fade);
 
 			for (auto& fragment : debris.m_fragments)
 			{
@@ -78,13 +101,18 @@ namespace game::system::stage
 					fragment.m_velocity.x *= FLOOR_FRICTION;
 					fragment.m_velocity.z *= FLOOR_FRICTION;
 					fragment.m_angular = fragment.m_angular * SPIN_DAMPING;
-				}
 
-				fragment.m_scale = 1.0f - shrink;
+					// 転がりきったら完全に止める。細かく震え続けると重さが出ない
+					if (fragment.m_velocity.lengthSq() < REST_SPEED * REST_SPEED)
+					{
+						fragment.m_velocity = {};
+						fragment.m_angular = {};
+					}
+				}
 
 				m_renderer.setModelFrameTransform(destructible->m_fracturedHandle, fragment.m_frameIndex,
 				    fragment.m_pivot, fragment.m_position, fragment.m_rotation,
-				    debris.m_modelScale * fragment.m_scale);
+				    debris.m_modelScale);
 			}
 		}
 	}
