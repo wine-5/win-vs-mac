@@ -90,5 +90,9 @@ namespace core::utility
 		static constexpr unsigned int HUD_CRIT_RED = 0xFFE81123;    // 敵を捕捉中・危険
 		static constexpr unsigned int HUD_ACCENT = 0xFF0078D4;      // Windows 11のアクセント色
 		static constexpr unsigned int HUD_INK_FAINT = 0xFF5E708A;   // 補足情報・未装備などの控えめな文字
+		// 能力が上がったことを示す緑。強化中の黄色（HUD_CHARGE_MAX）と役割が違う。
+		// 黄色は「今この能力は強化された状態」という継続した状態、
+		// こちらは「たった今上がった」という瞬間を表す
+		static constexpr unsigned int HUD_BUFF_GREEN = 0xFF4ADE80;
 	};
 } // namespace core::utility
