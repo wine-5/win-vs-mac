@@ -43,8 +43,6 @@ namespace
 	// 区切り線と面の色
 	constexpr unsigned int SEPARATOR_COLOR{ core::utility::Color::HUD_INK };
 	constexpr int SEPARATOR_ALPHA{ 34 };
-	constexpr unsigned int BAR_FILL_COLOR{ core::utility::Color::HUD_INK };
-	constexpr int TITLE_BAR_ALPHA{ 14 }; // タイトルバーだけわずかに明るくして段差を作る
 
 	// 左右の分割（左＝ファイル一覧、右＝パラメータ）
 	constexpr int RIGHT_COLUMN_WIDTH{ 320 };
@@ -199,7 +197,9 @@ namespace game::ui::ingame
 		const int left{ (m_screen.getWidth() - width) / 2 };
 		const int top{ (m_screen.getHeight() - height) / 2 };
 
-		m_panel.draw(left, top, width, height);
+		// 光の帯は走らせない。小さなHUDでは生存確認として効くが、
+		// この大きさだと白い帯が視界を横切って読む邪魔になる
+		m_panel.draw(left, top, width, height, false);
 
 		drawTitleBar(left, top, width);
 		drawAddressBar(left, top + scaled(TITLE_BAR_HEIGHT), width);
@@ -261,13 +261,9 @@ namespace game::ui::ingame
 
 	void InventoryView::drawTitleBar(int x, int y, int width)
 	{
+		// 面の色は変えない。上下で濃さが違うと、窓が2枚重なっているように見える。
+		// 区切りは下端の線だけで足りる
 		const int barHeight{ scaled(TITLE_BAR_HEIGHT) };
-
-		// 面をわずかに明るくして、本文との段差を作る
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, TITLE_BAR_ALPHA);
-		m_uiRenderer.drawBox(x, y, x + width, y + barHeight, BAR_FILL_COLOR, true);
-		m_uiRenderer.resetBlendMode();
-
 		const int padding{ scaled(WINDOW_PADDING) };
 		const int iconSize{ scaled(TITLE_ICON_SIZE) };
 
