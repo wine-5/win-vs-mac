@@ -37,12 +37,14 @@ namespace
 	constexpr float BASE_SIZE{ 100.0f };
 
 	/// @brief 落ちる欠片のビルボードの大きさ（ワールド単位）
-	constexpr float DROP_BILLBOARD_SIZE{ 46.0f };
+	///
+	/// ブロックが110なので、その7割ほど。小さいと戦闘中の視界では見落とす
+	constexpr float DROP_BILLBOARD_SIZE{ 80.0f };
 
 	/// @brief 欠片が漂う高さ（ブロックの底面からの相対Y）
 	///
 	/// 床にめり込むと拾いにくいので、少し浮かせた位置で落ち着かせる
-	constexpr float DROP_REST_HEIGHT{ 55.0f };
+	constexpr float DROP_REST_HEIGHT{ 70.0f };
 
 	/// @brief 欠片が飛び出す勢い（水平・ユニット/秒）
 	///
