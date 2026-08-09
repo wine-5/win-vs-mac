@@ -1,5 +1,4 @@
 #pragma once
-#include <array>
 #include <string_view>
 #include <utility>
 
@@ -52,9 +51,12 @@ namespace core::constant
 	 * @brief JSONに書くSE名と列挙の対応表
 	 *
 	 * resources.json の音源定義と、敵の定義JSON（叩きつけ音など）の両方がこの名前を使う。
-	 * 対応表を1つに保つことで、書ける名前がファイルごとにずれないようにする
+	 * 対応表を1つに保つことで、書ける名前がファイルごとにずれないようにする。
+	 *
+	 * 要素数は書かずコンパイラに数えさせる。数を書くと種別を足すたびにそこも直す
+	 * 必要があり、忘れるとビルドが通らなくなるだけで何の得も無い
 	 */
-	inline constexpr std::array<std::pair<std::string_view, SeType>, 21> SE_TYPE_NAMES{ {
+	inline constexpr std::pair<std::string_view, SeType> SE_TYPE_NAMES[]{
 		{ "PlayerSwing1", SeType::PlayerSwing1 },
 		{ "PlayerSwing2", SeType::PlayerSwing2 },
 		{ "PlayerCharge", SeType::PlayerCharge },
@@ -76,7 +78,7 @@ namespace core::constant
 		{ "UiClick", SeType::UiClick },
 		{ "UiKeyPress", SeType::UiKeyPress },
 		{ "UiFileSelect", SeType::UiFileSelect },
-	} };
+	};
 
 	/**
 	 * @brief JSONに書かれたSE名を列挙へ変換する
