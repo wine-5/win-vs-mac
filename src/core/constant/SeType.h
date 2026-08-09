@@ -35,6 +35,15 @@ namespace core::constant
 		EnemyAlert, // 敵がプレイヤーを発見した
 		EnemySlam,  // Xcodeの地面叩きつけ
 
+		// ---- 壊せるブロック ----
+		BlockHit,         // ブロックを殴ったがまだ壊れない
+		BlockHitCritical, // 次の一撃で壊れる打撃（あと1回を音で知らせる）
+		BlockBreak,       // ブロックが砕けた
+
+		// ---- 拡張子の欠片 ----
+		ItemDrop,   // 欠片が出現した
+		ItemPickup, // 欠片を拾った
+
 		// ---- 進行・演出 ----
 		BattleReady, // 開始演出のREADY
 		BattleFight, // 開始演出のFIGHT!
@@ -73,6 +82,11 @@ namespace core::constant
 		{ "PlayerFootstep", SeType::PlayerFootstep },
 		{ "EnemyAlert", SeType::EnemyAlert },
 		{ "EnemySlam", SeType::EnemySlam },
+		{ "BlockHit", SeType::BlockHit },
+		{ "BlockHitCritical", SeType::BlockHitCritical },
+		{ "BlockBreak", SeType::BlockBreak },
+		{ "ItemDrop", SeType::ItemDrop },
+		{ "ItemPickup", SeType::ItemPickup },
 		{ "BattleReady", SeType::BattleReady },
 		{ "BattleFight", SeType::BattleFight },
 		{ "UiClick", SeType::UiClick },
