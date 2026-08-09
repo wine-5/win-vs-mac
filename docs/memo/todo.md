@@ -168,3 +168,40 @@
 - Bossのフェーズ2になったときに一部のUIが覚醒によって落ちる演出
 - ブロック破壊で「何が起こるか」のバリエーション（現状は拡張子ドロップのみ）
 - コミックスゾーン的な「デスクトップの上で戦う」見せ方（1-5の派生）
+
+---
+
+## 13. オンラインランキング（余裕があれば）
+
+難易度ごとのクリアタイムを全プレイヤー共通で集計し、上位3位を表示する。工数目安 2〜3日。
+
+### 構成
+
+- **バックエンド**：Supabase（無料枠 / PostgreSQL）。テーブルを作るとREST APIが自動生成されるのでサーバー側のコードは書かない
+- **通信**：WinHTTP（Windows標準。追加DLL・vcpkg不要）
+- **JSON**：`thirdparty/nlohmann/json.hpp`（導入済み）
+- **表示**：WebView2（`WebView2Host` / `ResultWindow` を流用）
+
+テーブルは `scores(id, player_name, difficulty, time_ms, created_at)` の1つのみ。
+取得は `GET /rest/v1/scores?difficulty=eq.hard&order=time_ms.asc&limit=3`。
+
+追加するファイルは `core/interface/IRankingService.h`（インターフェース）／`platform/network/WinHttpClient.*`（GET・POST）／`infrastructure/network/RankingClient.*`（JSON組み立て・パース）。Game層は `IRankingService` のみに依存させる。
+
+### タスク
+
+- [ ] `IRankingService` を定義し、まずローカルJSON実装で動かす（後からリモート実装へ差し替え）
+- [ ] Supabaseプロジェクト作成 + テーブル作成
+- [ ] RLS設定（INSERTのみ許可・UPDATE／DELETE不可）
+- [ ] `WinHttpClient` 実装
+- [ ] `RankingClient` 実装（スコア送信・上位3件取得）
+- [ ] 非同期化（`std::thread` + `std::future`、毎フレームポーリング → EventBusで通知）
+- [ ] リザルト画面にランキング表示（WebView）
+- [ ] プレイヤー名入力（文字数制限・NGワード）
+- [ ] オフライン・通信失敗時もゲームが継続できることを確認
+
+### 注意点
+
+- **通信をゲームループ内で同期呼び出ししない**（必ずフリーズする）
+- 通信失敗でゲーム進行を止めない。「送信中…」「通信失敗」の状態を持たせる
+- 書き込みキーをexeに直接埋め込まない。権限はRLSでサーバー側に寄せる
+- 不正タイム対策は「明らかに不可能な短さを弾く」程度で十分
