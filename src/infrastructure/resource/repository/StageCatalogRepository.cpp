@@ -21,6 +21,10 @@ namespace
 		def.m_collider = j["collider"].get<std::string>();
 		if (j.contains("hitsToBreak"))
 			def.m_hitsToBreak = j["hitsToBreak"];
+		if (j.contains("dropExtension"))
+			def.m_dropExtension = j["dropExtension"].get<std::string>();
+		if (j.contains("dropCount"))
+			def.m_dropCount = j["dropCount"];
 		if (j.contains("role"))
 			def.m_role = j["role"].get<std::string>();
 		if (j.contains("textureTile"))

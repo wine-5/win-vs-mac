@@ -23,6 +23,14 @@ namespace core::data
 		// HP制にすると育ったビルドで一撃になり、ひびの段階が誰の目にも触れなくなる
 		int m_hitsToBreak{ 0 };
 
+		// 壊したときに落とす拡張子の種別名（extensionBonus.json のキーと同じ綴り）。
+		// "random" なら1個ごとに種別を抽選する（ZIPのように中身が分からないブロック用）。
+		// 空なら何も落とさない
+		std::string m_dropExtension{};
+
+		// 落とす欠片の個数。ZIPは複数のファイルを含むので多めに落とす
+		int m_dropCount{ 0 };
+
 		// 特別な役割。空なら普通の配置物。"bossGate" はボス出現で閉じる扉として扱う。
 		// 種類（id）ではなく役割で判定することで、見た目違いの扉を何種類でも用意できる
 		std::string m_role{};
