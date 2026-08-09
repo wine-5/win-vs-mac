@@ -270,6 +270,14 @@ namespace game::scene
 		 */
 		void drawProjectileModels();
 
+		/**
+		 * @brief 落ちている拡張子の欠片を描画する
+		 *
+		 * 装備スロットと同じアイコンを、光るビルボードとして浮かせて描く。
+		 * 発光させるのは「拾えるもの」だと一目で分かるようにするため。
+		 */
+		void drawExtensionPickups();
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IRenderer& m_renderer;
 		core::iface::IUIRenderer& m_uiRenderer;

@@ -3,6 +3,7 @@
 #include "core/constant/UI.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/component/stage/ExtensionPickupComponent.h"
 #include "game/component/visual/WeaponAttachComponent.h"
 #include "game/component/combat/AimComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
@@ -75,6 +76,9 @@ namespace game::scene
 
 		// 弾を描く。プレイヤーのWindow弾はビルボード、敵のタブ弾など3Dモデルはモデルで描画する
 		drawProjectileModels();
+
+		// 壊したブロックから落ちた拡張子の欠片。壁の裏では隠れてほしいので3D描画フェーズで描く
+		drawExtensionPickups();
 
 		// DEBUG: 当たり判定等のワールド空間デバッグ可視化（リリース時に削除）
 		if (m_debugGizmoView)
@@ -442,6 +446,31 @@ namespace game::scene
 			const int x{ centerX + static_cast<int>(std::cos(angle) * radius) };
 			const int y{ centerY + static_cast<int>(std::sin(angle) * radius) };
 			m_uiRenderer.drawCircle(x, y, dotRadius, litColor, true, 1);
+		}
+	}
+
+	void InGameView::drawExtensionPickups()
+	{
+		// 拾えるものだと分かるよう、ゆっくり明滅させる
+		constexpr float PULSE_SPEED{ 3.4f };
+		constexpr int BRIGHTNESS_BASE{ 90 };
+		constexpr int BRIGHTNESS_SWING{ 45 };
+
+		const auto pickups{ m_componentManager.getAllEntities<component::stage::ExtensionPickupComponent>() };
+		for (const auto id : pickups)
+		{
+			const auto* render{ m_componentManager.tryGet<component::visual::RenderComponent>(id) };
+			if (render == nullptr || !render->m_isVisible || render->m_billboardImage == -1)
+				continue;
+
+			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(id) };
+			const auto& pickup{ m_componentManager.get<component::stage::ExtensionPickupComponent>(id) };
+
+			const float pulse{ std::sin(pickup.m_elapsed * PULSE_SPEED) };
+			const int brightness{ BRIGHTNESS_BASE + static_cast<int>(pulse * BRIGHTNESS_SWING) };
+
+			m_renderer.drawGlowBillboard(render->m_billboardImage, transform.m_position,
+			    render->m_billboardSize, 0.0f, brightness);
 		}
 	}
 
