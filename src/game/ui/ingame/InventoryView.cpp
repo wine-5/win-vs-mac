@@ -8,6 +8,7 @@
 #include "game/component/combat/ExtensionInventoryComponent.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/combat/PlayerStatsComponent.h"
+#include "game/component/combat/PlayerStatBaseComponent.h"
 #include "game/constant/ExtensionIconId.h"
 #include "game/data/FileEquipmentData.h"
 #include <algorithm>
@@ -77,6 +78,13 @@ namespace
 	constexpr int STAT_ICON_SIZE{ 30 };
 	constexpr int STAT_LABEL_GAP{ 10 };
 	constexpr int STAT_FONT_SIZE{ 19 };
+
+	// 強化されている項目の見せ方。左下HUDと同じ色を使い、
+	// 「黄色＝強化されている」という意味を画面ごとにずらさない
+	constexpr unsigned int STAT_BOOSTED_COLOR{ core::utility::Color::HUD_CHARGE_MAX };
+	constexpr int STAT_DELTA_FONT_SIZE{ 16 };
+	constexpr int STAT_DELTA_GAP{ 10 };         // 現在値と増分の間隔
+	constexpr float STAT_BOOST_EPSILON{ 0.5f }; // これ未満の差は出さない（整数表示で0になるため）
 
 	// 能力値アイコンの画像ID（左下HUD・セレクト画面と同じ並び）
 	constexpr std::array<const char*, 8> STAT_ICON_IMAGE_IDS{
@@ -429,6 +437,21 @@ namespace game::ui::ingame
 			stats[STAT_INDEX_BRNG] = player->m_projectileRange;
 		}
 
+		// 強化前の値。現在値と突き合わせて「どれだけ上がっているか」を出す。
+		// 数値だけでは、それが素の値なのか拡張子で伸びたものなのか分からない
+		std::array<float, STAT_COUNT> baseStats{};
+		if (const auto* base{ m_componentManager.tryGet<component::combat::PlayerStatBaseComponent>(playerId) })
+		{
+			baseStats[STAT_INDEX_HP] = base->m_maxHp;
+			baseStats[STAT_INDEX_ATK] = base->m_attackPower;
+			baseStats[STAT_INDEX_DEF] = base->m_defence;
+			baseStats[STAT_INDEX_SPD] = base->m_moveSpeed;
+			baseStats[STAT_INDEX_RNG] = base->m_attackRange;
+			baseStats[STAT_INDEX_CRIT] = base->m_criticalRate * 100.0f;
+			baseStats[STAT_INDEX_BSPD] = base->m_projectileSpeed;
+			baseStats[STAT_INDEX_BRNG] = base->m_projectileRange;
+		}
+
 		const int captionFontSize{ scaled(SECTION_FONT_SIZE) };
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(x, y, m_captionStats.c_str(),
@@ -458,12 +481,34 @@ namespace game::ui::ingame
 			else
 				std::snprintf(valueText, sizeof(valueText), "%d", static_cast<int>(stats[i]));
 
+			// 素の値を上回っていれば強化中として色を変える。
+			// 出どころ（装備ファイル・拾った拡張子）は問わない
+			const float delta{ stats[i] - baseStats[i] };
+			const bool isBoosted{ delta >= STAT_BOOST_EPSILON };
+
 			// 数値は右寄せ。桁が動いても右端が揃い、増えたことを見比べやすい
 			m_uiRenderer.setFont(core::constant::ui::MONO_FONT_NAME);
 			const int valueWidth{ m_uiRenderer.getTextWidth(valueText, fontSize) };
 			m_uiRenderer.drawText(x + width - valueWidth,
 			    rowY + (rowHeight - fontSize) / 2, valueText,
-			    core::utility::Color::HUD_INK, fontSize);
+			    isBoosted ? STAT_BOOSTED_COLOR : core::utility::Color::HUD_INK, fontSize);
+
+			// 増分は現在値の左へ添える。いくつ伸びたかが分かると、
+			// どの拡張子が効いているのかを結び付けられる
+			if (isBoosted)
+			{
+				char deltaText[32]{};
+				if (i == STAT_INDEX_CRIT)
+					std::snprintf(deltaText, sizeof(deltaText), "+%d%%", static_cast<int>(delta));
+				else
+					std::snprintf(deltaText, sizeof(deltaText), "+%d", static_cast<int>(delta));
+
+				const int deltaFontSize{ scaled(STAT_DELTA_FONT_SIZE) };
+				const int deltaWidth{ m_uiRenderer.getTextWidth(deltaText, deltaFontSize) };
+				m_uiRenderer.drawText(x + width - valueWidth - scaled(STAT_DELTA_GAP) - deltaWidth,
+				    rowY + (rowHeight - deltaFontSize) / 2, deltaText,
+				    STAT_BOOSTED_COLOR, deltaFontSize);
+			}
 			m_uiRenderer.resetFont();
 
 			rowY += rowHeight;
