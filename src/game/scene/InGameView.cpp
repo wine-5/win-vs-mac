@@ -30,6 +30,7 @@
 #include "game/ui/ingame/EquipmentSlotView.h"
 #include "game/ui/ingame/ObjectiveView.h"
 #include "game/ui/ingame/InGameStatusView.h"
+#include "game/ui/ingame/InventoryView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
 #include "game/ui/ingame/BossHUDView.h"
 #include "game/ui/ingame/MiniMapView.h"
@@ -157,6 +158,11 @@ namespace game::scene
 		if (m_battleStartSystem)
 			m_battleStartSystem->draw();
 
+		// インベントリ。画面を覆うので他のHUDより手前に描く。
+		// ただし死亡の暗転よりは奥（死んだ瞬間に持ち物が前面に残ると締まらない）
+		if (m_isInventoryOpen && m_inventoryView)
+			m_inventoryView->draw(playerId);
+
 		// プレイヤー死亡時の暗転。画面の全てを覆って暗くするため最後に描く
 		if (m_playerDeathSystem)
 			m_playerDeathSystem->draw();
@@ -245,6 +251,16 @@ namespace game::scene
 	void InGameView::setInGameStatusView(ui::ingame::InGameStatusView* view)
 	{
 		m_statusView = view;
+	}
+
+	void InGameView::setInventoryView(ui::ingame::InventoryView* view)
+	{
+		m_inventoryView = view;
+	}
+
+	void InGameView::setInventoryOpen(bool isOpen)
+	{
+		m_isInventoryOpen = isOpen;
 	}
 
 	void InGameView::setObjectiveView(ui::ingame::ObjectiveView* view)
