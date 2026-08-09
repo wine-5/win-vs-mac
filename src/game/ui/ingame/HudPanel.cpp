@@ -33,7 +33,7 @@ namespace game::ui::ingame
 	{
 	}
 
-	void HudPanel::draw(int x, int y, int width, int height)
+	void HudPanel::draw(int x, int y, int width, int height, bool withSweep)
 	{
 		const int radius{ PANEL_RADIUS * m_screen.getHeight() / BASE_SCREEN_HEIGHT };
 
@@ -45,7 +45,8 @@ namespace game::ui::ingame
 
 		m_uiRenderer.resetBlendMode();
 
-		drawSweep(x, y, width, height);
+		if (withSweep)
+			drawSweep(x, y, width, height);
 	}
 
 	void HudPanel::drawSweep(int x, int y, int width, int height)
