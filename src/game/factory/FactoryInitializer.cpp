@@ -24,6 +24,9 @@ namespace
 	// 用意されているひび段階の数（tools/gen_crack_textures.py の STAGE_COUNT と合わせる）
 	constexpr int CRACK_STAGE_COUNT{ 3 };
 
+	// stageCatalog.json の dropExtension に書くと「種別を抽選する」意味になる綴り
+	constexpr std::string_view RANDOM_DROP_KEY{ "random" };
+
 	/**
 	 * @brief 傾けた配置物がY方向に占める高さを求める
 	 *
@@ -196,6 +199,13 @@ namespace game::factory
 					params.m_crackTextures.push_back(
 					    m_resourceManager.loadImageByPath(base + "_crack" + std::to_string(stage) + ".png"));
 				}
+
+				// "random" は「壊すまで中身が分からない」ブロック用の特別な指定。
+				// 種別は落とす瞬間に1個ずつ抽選する
+				params.m_dropCount = def.m_dropCount;
+				params.m_isDropRandom = def.m_dropExtension == RANDOM_DROP_KEY;
+				if (!params.m_isDropRandom)
+					params.m_dropType = core::data::toExtensionType(def.m_dropExtension);
 			}
 
 			const auto collision{ constant::toPropCollision(def.m_collider) };
