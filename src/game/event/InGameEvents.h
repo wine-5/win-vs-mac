@@ -4,6 +4,7 @@
 #include "core/constant/EffectType.h"
 #include "core/constant/SeType.h"
 #include "core/data/MacMetadata.h"
+#include "core/data/FileExtensionType.h"
 #include "core/utility/Vector3.h"
 #include "game/constant/AnimationState.h"
 #include "game/constant/EnemyType.h"
@@ -270,6 +271,68 @@ namespace game::event
 		BossAppearedEvent() = default;
 		explicit BossAppearedEvent(core::ecs::EntityId id)
 		    : m_entityId{ id }
+		{
+		}
+	};
+
+	/**
+	 * @brief 壊せるブロックが破壊されたときに発行されるイベント
+	 *
+	 * 音・カメラシェイクなど、破壊に反応する演出はこれを購読する。
+	 * 破壊そのものの処理（破片・ドロップ）はBlockBreakSystemが済ませている
+	 */
+	struct BlockBrokenEvent : public core::iface::IGameEvent
+	{
+		/** @brief 壊れたブロックのEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief 壊れた位置（ワールド座標） */
+		core::Vector3 m_position{};
+
+		BlockBrokenEvent() = default;
+		BlockBrokenEvent(core::ecs::EntityId id, const core::Vector3& position)
+		    : m_entityId{ id }
+		    , m_position{ position }
+		{
+		}
+	};
+
+	/**
+	 * @brief 壊せるブロックを殴ったが、まだ壊れていないときに発行されるイベント
+	 *
+	 * 打撃音を鳴らすために使う。壊れた場合は BlockBrokenEvent が飛ぶので、
+	 * こちらは「手応えはあったがまだ残っている」打撃だけを表す
+	 */
+	struct BlockHitEvent : public core::iface::IGameEvent
+	{
+		/** @brief 殴られたブロックのEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief 次の一撃で壊れるか（音を変えて「あと1回」を知らせる） */
+		bool m_isLastHit{ false };
+
+		BlockHitEvent() = default;
+		BlockHitEvent(core::ecs::EntityId id, bool isLastHit)
+		    : m_entityId{ id }
+		    , m_isLastHit{ isLastHit }
+		{
+		}
+	};
+
+	/**
+	 * @brief 拡張子の欠片を拾ったときに発行されるイベント
+	 *
+	 * パラメータへの反映・音・HUDの更新はこれを購読する。
+	 * 拾う判定（当たり判定）と、拾った結果（能力の変化）を分けるためのイベント
+	 */
+	struct ExtensionPickedUpEvent : public core::iface::IGameEvent
+	{
+		/** @brief 拾った拡張子の種別 */
+		core::data::FileExtensionType m_type{ core::data::FileExtensionType::Unknown };
+
+		ExtensionPickedUpEvent() = default;
+		explicit ExtensionPickedUpEvent(core::data::FileExtensionType type)
+		    : m_type{ type }
 		{
 		}
 	};
