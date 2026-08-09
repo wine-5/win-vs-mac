@@ -3,6 +3,7 @@
 #include "core/constant/UI.h"
 #include "core/utility/Color.h"
 #include "core/utility/Log.h"
+#include "core/utility/MathConstants.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/PlayerStatsComponent.h"
@@ -52,15 +53,24 @@ namespace
 	constexpr int DELTA_POPUP_RISE{ 18 };        // 浮き上がる距離（1080p基準）
 	constexpr int DELTA_POPUP_GAP{ 4 };          // 数値との間隔（1080p基準）
 	constexpr float DELTA_POPUP_EPSILON{ 0.5f }; // これ未満の変化は出さない（整数表示で0になるため）
-	constexpr unsigned int DELTA_UP_COLOR{ core::utility::Color::HUD_CHARGE_MAX };
-	constexpr unsigned int DELTA_DOWN_COLOR{ core::utility::Color::HUD_CRIT_RED };
+	// 上昇を示す緑。強化中を示す黄色（STAT_BOOSTED_COLOR）と同じ色にすると、
+	// 「元から強化されている」のか「今上がった」のかが見分けられない。
+	// 能力が下がる経路は無いので、下降用の色は用意しない
+	constexpr unsigned int DELTA_UP_COLOR{ core::utility::Color::HUD_BUFF_GREEN };
 
 	// 能力が変わった直後にパネルの縁を光らせる。強調の保持時間より早く消して、
 	// 「今起きた」ことだけを伝える（ずっと光っていると異常の合図に見える）
-	constexpr int PANEL_GLOW_ALPHA{ 200 };
+	constexpr int PANEL_GLOW_ALPHA{ 160 };
 	constexpr float PANEL_GLOW_FADE{ 3.0f }; // 保持時間の1/3で消えきる速さ
 	constexpr int PANEL_GLOW_RADIUS{ 8 };
 	constexpr int PANEL_GLOW_THICKNESS{ 2 };
+
+	// 取得の瞬間に枠が外へ膨らんで戻る。光るだけでは「表示が変わった」に留まり、
+	// 「手に入れた」という手応えが出ない。枠が動くと反応として伝わる
+	constexpr float PANEL_POP_DURATION{ 0.34f };
+	constexpr int PANEL_POP_INFLATE{ 10 };  // 外へ広がる量（1080p基準）
+	constexpr int PANEL_POP_THICKNESS{ 3 }; // 膨らんだ枠の太さ（1080p基準）
+	constexpr int PANEL_POP_ALPHA{ 255 };
 
 	// 能力値の並び。セレクト画面（パラメータウィンドウ）と同じ8項目・同じアイコン・同じ順序で使う。
 	// 順序が違うと「セレクトで見たあの位置の値」を探し直すことになるため、必ず揃える。
@@ -285,6 +295,7 @@ namespace game::ui::ingame
 				m_changedIndex = i;
 				m_changedDelta = stats[i] - m_previousStats[i];
 				m_changeHighlight = CHANGE_HOLD_DURATION;
+				m_panelPop = PANEL_POP_DURATION;
 
 				// 変わった項目が裏のページなら即座にそちらへ送る（Item取得を見逃さないため）
 				const int page{ i / STATS_PER_PAGE };
@@ -301,6 +312,9 @@ namespace game::ui::ingame
 
 		if (m_changeHighlight > 0.0f)
 			m_changeHighlight -= deltaTime;
+
+		if (m_panelPop > 0.0f)
+			m_panelPop = std::max(0.0f, m_panelPop - deltaTime);
 
 		// スライド中の進行
 		if (m_slideProgress < 1.0f)
@@ -344,7 +358,7 @@ namespace game::ui::ingame
 		const bool isChanged{ index == m_changedIndex && m_changeHighlight > 0.0f };
 		unsigned int color{ core::utility::Color::HUD_INK };
 		if (isChanged)
-			color = core::utility::Color::HUD_CHARGE_MAX;
+			color = DELTA_UP_COLOR;
 		else if (isBoosted)
 			color = STAT_BOOSTED_COLOR;
 
@@ -358,24 +372,62 @@ namespace game::ui::ingame
 
 		// 変化した項目には増減量を浮かび上がらせる。数値が変わったことは色でも分かるが、
 		// 「いくつ増えたか」は元の値を覚えていないと分からないため、差分そのものを見せる
-		if (isChanged && std::abs(m_changedDelta) >= DELTA_POPUP_EPSILON)
+		if (isChanged && m_changedDelta >= DELTA_POPUP_EPSILON)
 		{
 			const float progress{ 1.0f - m_changeHighlight / CHANGE_HOLD_DURATION };
 			const int rise{ static_cast<int>(scaled(DELTA_POPUP_RISE) * progress) };
 			const int popupAlpha{ static_cast<int>(alpha * std::clamp(1.0f - progress, 0.0f, 1.0f)) };
 
 			char deltaText[16]{};
-			std::snprintf(deltaText, sizeof(deltaText), "%+d", static_cast<int>(m_changedDelta));
+			std::snprintf(deltaText, sizeof(deltaText), "+%d", static_cast<int>(m_changedDelta));
 
 			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, popupAlpha);
 			m_uiRenderer.drawText(x + iconSize + scaled(STAT_VALUE_GAP), textY - rise - scaled(DELTA_POPUP_GAP),
-			    deltaText,
-			    m_changedDelta > 0.0f ? DELTA_UP_COLOR : DELTA_DOWN_COLOR,
-			    scaled(DELTA_POPUP_FONT_SIZE));
+			    deltaText, DELTA_UP_COLOR, scaled(DELTA_POPUP_FONT_SIZE));
 			m_uiRenderer.resetBlendMode();
 		}
 
 		m_uiRenderer.resetFont();
+	}
+
+	void PlayerHUDView::drawStatChangeReaction(int x, int y, int width, int height)
+	{
+		if (m_changeHighlight <= 0.0f)
+			return;
+
+		// 枠が外へ膨らんで戻る。中身は動かさず枠だけを動かすので、
+		// 数値を読んでいる最中でもレイアウトが揺れない
+		if (m_panelPop > 0.0f)
+		{
+			const float popProgress{ 1.0f - m_panelPop / PANEL_POP_DURATION };
+
+			// 一気に開いてゆっくり戻る。等速で往復すると呼吸のように見えて反応に見えない
+			const float swell{ std::sin(popProgress * core::utility::PI) };
+			const int inflate{ static_cast<int>(scaled(PANEL_POP_INFLATE) * swell) };
+			const int popAlpha{ static_cast<int>(PANEL_POP_ALPHA * swell) };
+
+			if (popAlpha > 0)
+			{
+				m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, popAlpha);
+				m_uiRenderer.drawRoundedBox(x - inflate, y - inflate,
+				    width + inflate * 2, height + inflate * 2,
+				    scaled(PANEL_GLOW_RADIUS) + inflate, DELTA_UP_COLOR, false,
+				    scaled(PANEL_POP_THICKNESS));
+				m_uiRenderer.resetBlendMode();
+			}
+		}
+
+		// 膨らみが収まった後も、しばらく縁を光らせて「今変わった」状態を保つ
+		const float progress{ 1.0f - m_changeHighlight / CHANGE_HOLD_DURATION };
+		const int glowAlpha{ static_cast<int>(
+			PANEL_GLOW_ALPHA * std::clamp(1.0f - progress * PANEL_GLOW_FADE, 0.0f, 1.0f)) };
+		if (glowAlpha <= 0)
+			return;
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, glowAlpha);
+		m_uiRenderer.drawRoundedBox(x, y, width, height,
+		    scaled(PANEL_GLOW_RADIUS), DELTA_UP_COLOR, false, scaled(PANEL_GLOW_THICKNESS));
+		m_uiRenderer.resetBlendMode();
 	}
 
 	void PlayerHUDView::drawStatPage(int x, int y, int cellWidth,
@@ -422,22 +474,7 @@ namespace game::ui::ingame
 		const int panelY{ m_screen.getHeight() - scaled(PANEL_MARGIN) - panelHeight };
 
 		m_panel.draw(panelX, panelY, panelWidth, panelHeight);
-
-		// 能力が変わった直後はパネルの縁を光らせる。数値の変化だけでは
-		// 画面中央を見ている最中に気づけないため、面ごと反応させて視線を呼ぶ
-		if (m_changeHighlight > 0.0f)
-		{
-			const float progress{ 1.0f - m_changeHighlight / CHANGE_HOLD_DURATION };
-			const int glowAlpha{ static_cast<int>(PANEL_GLOW_ALPHA * std::clamp(1.0f - progress * PANEL_GLOW_FADE, 0.0f, 1.0f)) };
-			if (glowAlpha > 0)
-			{
-				m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, glowAlpha);
-				m_uiRenderer.drawRoundedBox(panelX, panelY, panelWidth, panelHeight,
-				    scaled(PANEL_GLOW_RADIUS), core::utility::Color::HUD_CHARGE_MAX, false,
-				    scaled(PANEL_GLOW_THICKNESS));
-				m_uiRenderer.resetBlendMode();
-			}
-		}
+		drawStatChangeReaction(panelX, panelY, panelWidth, panelHeight);
 
 		// 左に見出し、右にHPの実数値。数値は桁が動いても右端が揃うよう右寄せで置く
 		const int padding{ scaled(PANEL_PADDING) };
