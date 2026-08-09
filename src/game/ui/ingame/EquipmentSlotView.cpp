@@ -1,9 +1,10 @@
-#include "EquipmentSlotView.h"
+﻿#include "EquipmentSlotView.h"
 #include "core/constant/UI.h"
 #include "core/interface/IResourceManager.h"
 #include "core/utility/Color.h"
 #include "core/utility/Log.h"
 #include "game/data/FileEquipmentData.h"
+#include "game/constant/ExtensionIconId.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -47,19 +48,6 @@ namespace
 	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono" };
 	constexpr const char* EMPTY_LABEL{ "--" };
 
-	// 拡張子アイコンの画像ID（resources.json）。セレクト画面と同じ絵柄を128pxへ縮小したもの
-	constexpr const char* EMPTY_ICON_IMAGE_ID{ "ext-emp" };
-	constexpr std::array<std::pair<core::data::FileExtensionType, const char*>, 9> ICON_IMAGE_IDS{ {
-		{ core::data::FileExtensionType::Executable, "ext-exe" },
-		{ core::data::FileExtensionType::Document, "ext-doc" },
-		{ core::data::FileExtensionType::Image, "ext-img" },
-		{ core::data::FileExtensionType::Audio, "ext-aud" },
-		{ core::data::FileExtensionType::SourceCode, "ext-src" },
-		{ core::data::FileExtensionType::Shortcut, "ext-lnk" },
-		{ core::data::FileExtensionType::Video, "ext-vid" },
-		{ core::data::FileExtensionType::Archive, "ext-arc" },
-		{ core::data::FileExtensionType::Unknown, "ext-etc" },
-	} };
 
 	/**
 	 * @brief 拡張子種別の表示名を返す
@@ -177,17 +165,20 @@ namespace game::ui::ingame
 	{
 		// アイコンは毎フレーム引き直さず、生成時に一度だけ読み込む。
 		// 失敗しても描画は続けられる（文字表示へ退避する）ため、記録に留める
-		for (const auto& [type, imageId] : ICON_IMAGE_IDS)
+		for (int i{ 0 }; i < static_cast<int>(core::data::FileExtensionType::Count); ++i)
 		{
+			const auto type{ static_cast<core::data::FileExtensionType>(i) };
+			const std::string imageId{ constant::toExtensionIconId(type) };
 			const int handle{ resourceManager.loadImageById(imageId) };
 			if (handle == -1)
-				core::log::error("装備スロットの拡張子アイコン '{}' の読み込みに失敗しました", imageId);
-			m_iconHandles[static_cast<int>(type)] = handle;
+				core::log::error("装備スロットの拡張子アイコン '{}' の読み込みに失敗しました", imageId.c_str());
+			m_iconHandles[i] = handle;
 		}
 
-		m_emptyIconHandle = resourceManager.loadImageById(EMPTY_ICON_IMAGE_ID);
+		const std::string emptyIconId{ constant::extension_icon_id::EMPTY };
+		m_emptyIconHandle = resourceManager.loadImageById(emptyIconId);
 		if (m_emptyIconHandle == -1)
-			core::log::error("装備スロットの空きアイコン '{}' の読み込みに失敗しました", EMPTY_ICON_IMAGE_ID);
+			core::log::error("装備スロットの空きアイコン '{}' の読み込みに失敗しました", emptyIconId.c_str());
 	}
 
 	int EquipmentSlotView::getIconHandle(core::data::FileExtensionType type) const
