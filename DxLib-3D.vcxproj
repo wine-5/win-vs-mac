@@ -189,6 +189,7 @@
     <ClCompile Include="src\game\scene\Title.cpp" />
     <ClCompile Include="src\game\scene\TitleView.cpp" />
     <ClCompile Include="src\game\system\combat\AttackSystem.cpp" />
+    <ClCompile Include="src\game\system\combat\ExtensionEquipSystem.cpp" />
     <ClCompile Include="src\game\system\camera\CameraSystem.cpp" />
     <ClCompile Include="src\game\system\combat\TargetingSystem.cpp" />
     <ClCompile Include="src\game\event\AudioEventListener.cpp" />
@@ -416,6 +417,7 @@
     <ClInclude Include="src\game\scene\Title.h" />
     <ClInclude Include="src\game\scene\TitleView.h" />
     <ClInclude Include="src\game\system\combat\AttackSystem.h" />
+    <ClInclude Include="src\game\system\combat\ExtensionEquipSystem.h" />
     <ClInclude Include="src\game\system\camera\CameraSystem.h" />
     <ClInclude Include="src\game\system\camera\ChargeZoomSystem.h" />
     <ClInclude Include="src\game\system\visual\BattleStartSystem.h" />
