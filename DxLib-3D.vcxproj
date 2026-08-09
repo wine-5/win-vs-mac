@@ -332,6 +332,7 @@
     <ClInclude Include="src\game\constant\PropRole.h" />
     <ClInclude Include="src\game\component\stage\BossGateComponent.h" />
     <ClInclude Include="src\game\component\stage\DestructibleComponent.h" />
+    <ClInclude Include="src\game\component\stage\ExtensionPickupComponent.h" />
     <ClInclude Include="src\game\component\stage\BlockDebrisComponent.h" />
     <ClInclude Include="src\game\component\movement\GroundSurfaceComponent.h" />
     <ClInclude Include="src\game\component\movement\FallRecoveryComponent.h" />
