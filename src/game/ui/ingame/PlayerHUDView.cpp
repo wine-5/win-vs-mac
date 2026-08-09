@@ -46,6 +46,22 @@ namespace
 	constexpr float CHANGE_HOLD_DURATION{ 3.0f }; // 値が変わった項目を留めて強調する長さ（秒）
 	constexpr float EXPAND_SPEED{ 6.0f };         // Tabで開閉する速さ（1.0を割る秒数の逆数）
 
+	// 変化量のポップアップ。色が変わるだけでは「いくつ増えたか」が分からないため、
+	// 差分そのものを浮かび上がらせて消す
+	constexpr int DELTA_POPUP_FONT_SIZE{ 17 };
+	constexpr int DELTA_POPUP_RISE{ 18 };        // 浮き上がる距離（1080p基準）
+	constexpr int DELTA_POPUP_GAP{ 4 };          // 数値との間隔（1080p基準）
+	constexpr float DELTA_POPUP_EPSILON{ 0.5f }; // これ未満の変化は出さない（整数表示で0になるため）
+	constexpr unsigned int DELTA_UP_COLOR{ core::utility::Color::HUD_CHARGE_MAX };
+	constexpr unsigned int DELTA_DOWN_COLOR{ core::utility::Color::HUD_CRIT_RED };
+
+	// 能力が変わった直後にパネルの縁を光らせる。強調の保持時間より早く消して、
+	// 「今起きた」ことだけを伝える（ずっと光っていると異常の合図に見える）
+	constexpr int PANEL_GLOW_ALPHA{ 200 };
+	constexpr float PANEL_GLOW_FADE{ 3.0f }; // 保持時間の1/3で消えきる速さ
+	constexpr int PANEL_GLOW_RADIUS{ 8 };
+	constexpr int PANEL_GLOW_THICKNESS{ 2 };
+
 	// 能力値の並び。セレクト画面（パラメータウィンドウ）と同じ8項目・同じアイコン・同じ順序で使う。
 	// 順序が違うと「セレクトで見たあの位置の値」を探し直すことになるため、必ず揃える。
 	// 前半4つがページ0、後半4つがページ1になる
@@ -267,6 +283,7 @@ namespace game::ui::ingame
 					continue;
 
 				m_changedIndex = i;
+				m_changedDelta = stats[i] - m_previousStats[i];
 				m_changeHighlight = CHANGE_HOLD_DURATION;
 
 				// 変わった項目が裏のページなら即座にそちらへ送る（Item取得を見逃さないため）
@@ -338,6 +355,26 @@ namespace game::ui::ingame
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
 		m_uiRenderer.drawText(x + iconSize + scaled(STAT_VALUE_GAP), textY, text, color, fontSize);
 		m_uiRenderer.resetBlendMode();
+
+		// 変化した項目には増減量を浮かび上がらせる。数値が変わったことは色でも分かるが、
+		// 「いくつ増えたか」は元の値を覚えていないと分からないため、差分そのものを見せる
+		if (isChanged && std::abs(m_changedDelta) >= DELTA_POPUP_EPSILON)
+		{
+			const float progress{ 1.0f - m_changeHighlight / CHANGE_HOLD_DURATION };
+			const int rise{ static_cast<int>(scaled(DELTA_POPUP_RISE) * progress) };
+			const int popupAlpha{ static_cast<int>(alpha * std::clamp(1.0f - progress, 0.0f, 1.0f)) };
+
+			char deltaText[16]{};
+			std::snprintf(deltaText, sizeof(deltaText), "%+d", static_cast<int>(m_changedDelta));
+
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, popupAlpha);
+			m_uiRenderer.drawText(x + iconSize + scaled(STAT_VALUE_GAP), textY - rise - scaled(DELTA_POPUP_GAP),
+			    deltaText,
+			    m_changedDelta > 0.0f ? DELTA_UP_COLOR : DELTA_DOWN_COLOR,
+			    scaled(DELTA_POPUP_FONT_SIZE));
+			m_uiRenderer.resetBlendMode();
+		}
+
 		m_uiRenderer.resetFont();
 	}
 
@@ -385,6 +422,22 @@ namespace game::ui::ingame
 		const int panelY{ m_screen.getHeight() - scaled(PANEL_MARGIN) - panelHeight };
 
 		m_panel.draw(panelX, panelY, panelWidth, panelHeight);
+
+		// 能力が変わった直後はパネルの縁を光らせる。数値の変化だけでは
+		// 画面中央を見ている最中に気づけないため、面ごと反応させて視線を呼ぶ
+		if (m_changeHighlight > 0.0f)
+		{
+			const float progress{ 1.0f - m_changeHighlight / CHANGE_HOLD_DURATION };
+			const int glowAlpha{ static_cast<int>(PANEL_GLOW_ALPHA * std::clamp(1.0f - progress * PANEL_GLOW_FADE, 0.0f, 1.0f)) };
+			if (glowAlpha > 0)
+			{
+				m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, glowAlpha);
+				m_uiRenderer.drawRoundedBox(panelX, panelY, panelWidth, panelHeight,
+				    scaled(PANEL_GLOW_RADIUS), core::utility::Color::HUD_CHARGE_MAX, false,
+				    scaled(PANEL_GLOW_THICKNESS));
+				m_uiRenderer.resetBlendMode();
+			}
+		}
 
 		// 左に見出し、右にHPの実数値。数値は桁が動いても右端が揃うよう右寄せで置く
 		const int padding{ scaled(PANEL_PADDING) };

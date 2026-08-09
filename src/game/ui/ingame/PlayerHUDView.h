@@ -190,6 +190,7 @@ namespace game::ui::ingame
 		float m_expandProgress{ 0.0f };  // Tabで開く進行（0.0で閉、1.0で全項目表示）
 		float m_changeHighlight{ 0.0f }; // 値が変わった項目を強調する残り秒数
 		int m_changedIndex{ -1 };        // 直近で値が変わった項目（無ければ-1）
+		float m_changedDelta{ 0.0f };    // 直近の変化量（「+9」のように増減量を見せる）
 		std::array<float, STAT_COUNT> m_previousStats{};
 		bool m_hasPreviousStats{ false };
 
