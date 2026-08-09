@@ -22,5 +22,6 @@ namespace core::input
 
 		Shift, // ダッシュ用
 		Tab,   // 押している間だけステータス一覧を開く
+		E,     // インベントリの開閉
 	};
 } // namespace core::input
