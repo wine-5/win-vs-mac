@@ -15,6 +15,7 @@
 #include "game/component/visual/EffectComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
 #include "game/component/combat/PlayerStatsComponent.h"
+#include "game/component/combat/ExtensionInventoryComponent.h"
 #include "game/component/camera/CameraComponent.h"
 #include "game/component/visual/LightComponent.h"
 #include "game/component/camera/CameraEffectComponent.h"
@@ -93,6 +94,9 @@ namespace game::actor
 		// 強化前の値の控え。弾の性能だけはここでは分からないので（弾定義を読むのはSystemの組み立て時）、
 		// 呼び出し側が後から書き足す
 		componentManager.add<component::combat::PlayerStatBaseComponent>(m_entity.getId(), statBase);
+
+		// 道中で拾う拡張子の入れ物。空でも先に付けておく（拾わせる側は器の有無を気にしない）
+		componentManager.add<component::combat::ExtensionInventoryComponent>(m_entity.getId(), {});
 
 		// プレイヤーに追従する点光源。虚無の中で自機が沈まないようにしつつ、
 		// 「自機が周囲を照らす」演出も兼ねる。頭上に置いて上から当てる
