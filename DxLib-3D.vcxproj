@@ -386,6 +386,7 @@
     <ClInclude Include="src\game\constant\EnemyAnimationState.h" />
     <ClInclude Include="src\game\constant\MacAwakenTiming.h" />
     <ClInclude Include="src\game\constant\EnemyType.h" />
+    <ClInclude Include="src\game\constant\ExtensionIconId.h" />
     <ClInclude Include="src\game\constant\MetadataKeys.h" />
     <ClInclude Include="src\game\data\EnemyData.h" />
     <ClInclude Include="src\game\data\FileEquipmentData.h" />
