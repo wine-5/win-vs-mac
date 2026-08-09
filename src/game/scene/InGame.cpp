@@ -49,6 +49,7 @@
 #include "game/constant/PropId.h"
 #include "core/interface/IEffectFactory.h"
 #include "game/system/combat/AttackSystem.h"
+#include "game/system/combat/ExtensionEquipSystem.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/PlayerStatsComponent.h"
@@ -614,6 +615,11 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::stage::ExtensionPickupSystem>(
 		    m_componentManager, m_entityManager, m_eventBus, m_playerId);
 		core::probe::mark("      sys: ExtensionPickupSystem");
+
+		// 拾った拡張子をプレイヤーの能力へ乗せる。取得の直後に反映したいので取得の次に置く
+		m_systemManager.registerSystem<game::system::combat::ExtensionEquipSystem>(
+		    m_componentManager, m_eventBus, m_resourceManager, m_playerId);
+		core::probe::mark("      sys: ExtensionEquipSystem");
 
 		m_systemManager.registerSystem<game::system::visual::HitEffectSystem>(m_componentManager, m_eventBus);
 		core::probe::mark("      sys: HitEffectSystem");
