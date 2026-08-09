@@ -22,6 +22,7 @@
 #include "game/system/movement/FallOutSystem.h"
 #include "game/system/stage/BlockBreakSystem.h"
 #include "game/system/stage/BlockDebrisSystem.h"
+#include "game/system/stage/ExtensionPickupSystem.h"
 #include "game/system/stage/BossGateSystem.h"
 #include "game/system/movement/FootstepSystem.h"
 #include "game/component/movement/TransformComponent.h"
@@ -601,13 +602,18 @@ namespace game::scene
 		// ダメージ計算には乗せず、攻撃が成立したフレームだけを見る。
 		// m_justFired はAttackSystemが毎フレーム立て直すので必ずその後に置く
 		m_systemManager.registerSystem<game::system::stage::BlockBreakSystem>(
-		    m_componentManager, m_entityManager, m_renderer, m_resourceManager, m_playerId);
+		    m_componentManager, m_entityManager, m_renderer, m_resourceManager, m_eventBus, m_playerId);
 		core::probe::mark("      sys: BlockBreakSystem");
 
 		// 壊れたブロックの破片を飛散させる。壊れた直後から動かしたいので破壊の直後に置く
 		m_systemManager.registerSystem<game::system::stage::BlockDebrisSystem>(
 		    m_componentManager, m_entityManager, m_renderer);
 		core::probe::mark("      sys: BlockDebrisSystem");
+
+		// 落ちた欠片の落下・浮遊・取得。破壊の直後に生成されるので破片の次に置く
+		m_systemManager.registerSystem<game::system::stage::ExtensionPickupSystem>(
+		    m_componentManager, m_entityManager, m_eventBus, m_playerId);
+		core::probe::mark("      sys: ExtensionPickupSystem");
 
 		m_systemManager.registerSystem<game::system::visual::HitEffectSystem>(m_componentManager, m_eventBus);
 		core::probe::mark("      sys: HitEffectSystem");
