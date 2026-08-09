@@ -1,4 +1,4 @@
-#include "StageProp.h"
+﻿#include "StageProp.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/movement/GroundSurfaceComponent.h"
 #include "game/component/visual/RenderComponent.h"
@@ -62,6 +62,9 @@ namespace game::stage
 			destructible.m_intactHandle = params.m_modelHandle;
 			destructible.m_fracturedHandle = params.m_fracturedHandle;
 			destructible.m_crackTextures = params.m_crackTextures;
+			destructible.m_dropType = params.m_dropType;
+			destructible.m_dropCount = params.m_dropCount;
+			destructible.m_isDropRandom = params.m_isDropRandom;
 			componentManager.add<component::stage::DestructibleComponent>(m_entity.getId(), destructible);
 		}
 	}

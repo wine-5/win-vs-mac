@@ -1,4 +1,5 @@
 #pragma once
+#include "core/data/FileExtensionType.h"
 #include <vector>
 
 namespace game::component::stage
@@ -18,6 +19,14 @@ namespace game::component::stage
 
 		// これまでに受けた打撃回数
 		int m_hitCount{ 0 };
+
+		// 壊したときに落とす拡張子の種別と個数
+		core::data::FileExtensionType m_dropType{ core::data::FileExtensionType::Unknown };
+		int m_dropCount{ 0 };
+
+		// 種別を1個ごとに抽選するか。ZIPのように「中身が分からない」ブロック用。
+		// trueのとき m_dropType は使わない
+		bool m_isDropRandom{ false };
 
 		// 無傷のあいだ描くモデル
 		int m_intactHandle{ -1 };

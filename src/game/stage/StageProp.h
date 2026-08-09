@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/EntityManager.h"
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
 #include "core/utility/Vector3.h"
+#include "core/data/FileExtensionType.h"
 #include "game/constant/PropCollision.h"
 #include <vector>
 
@@ -41,6 +42,11 @@ namespace game::stage
 
 		// ひび段階のテクスチャ。[0]が無傷で、以降が段階1〜のひび
 		std::vector<int> m_crackTextures{};
+
+		// 壊したときに落とす拡張子の種別と個数。種別を抽選する場合は m_isDropRandom
+		core::data::FileExtensionType m_dropType{ core::data::FileExtensionType::Unknown };
+		int m_dropCount{ 0 };
+		bool m_isDropRandom{ false };
 	};
 
 	/**
