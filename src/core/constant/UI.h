@@ -19,7 +19,12 @@ namespace core::constant
         // デフォルトのフォントサイズ比率
         constexpr float DEFAULT_FONT_SIZE_RATIO = FONT_SIZE_NORMAL_RATIO;
 
-        // ブレンドモード（DxLib の DX_BLENDMODE_ * と対応）
+		// フォント名。数値・英字は等幅（Cascadia）、日本語を含みうる文はNoto Sans JPで描く
+		constexpr const char* MONO_FONT_NAME = "Cascadia Mono";
+		constexpr const char* MONO_SEMIBOLD_FONT_NAME = "Cascadia Mono SemiBold";
+		constexpr const char* UI_FONT_NAME = "Noto Sans JP";
+
+		// ブレンドモード（DxLib の DX_BLENDMODE_ * と対応）
         constexpr int BLEND_MODE_NONE = 0;
         constexpr int BLEND_MODE_ALPHA = 1;
 		constexpr int BLEND_MODE_ADD = 2; // 加算合成（発光表現に使う）

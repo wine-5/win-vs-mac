@@ -45,7 +45,6 @@ namespace
 	constexpr int ORBIT_ALPHA{ 210 };              // 加算合成の強さ（粒ごとの明暗は色側で付ける）
 	constexpr float ORBIT_PHASE_PER_SLOT{ 0.33f }; // スロットごとに位相をずらして同期させない
 
-	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono" };
 	constexpr const char* EMPTY_LABEL{ "--" };
 
 
@@ -235,7 +234,7 @@ namespace game::ui::ingame
 		const int iconX{ centerX - iconSize / 2 };
 		const int iconY{ y + scaled(ICON_Y) };
 
-		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::MONO_FONT_NAME);
 
 		if (!hasSelection)
 		{

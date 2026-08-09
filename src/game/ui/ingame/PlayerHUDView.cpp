@@ -118,10 +118,6 @@ namespace
 	constexpr unsigned int LOW_PULSE_COLOR{ 0xFFE81123 };
 	constexpr int LOW_PULSE_ALPHA{ 130 }; // 脈動の最も明るいときの強さ
 
-	// フォント。数値・英字は等幅、日本語を含みうるラベルはNoto Sans JPで描く
-	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono" };
-	constexpr const char* UI_FONT_NAME{ "Noto Sans JP" };
-
 	constexpr const char* STATUS_LABEL{ "PLAYER STATUS" };
 } // namespace
 
@@ -365,7 +361,7 @@ namespace game::ui::ingame
 		const int fontSize{ scaled(STAT_FONT_SIZE) };
 		const int textY{ y + (rowHeight - fontSize) / 2 };
 
-		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::MONO_FONT_NAME);
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
 		m_uiRenderer.drawText(x + iconSize + scaled(STAT_VALUE_GAP), textY, text, color, fontSize);
 		m_uiRenderer.resetBlendMode();
@@ -478,7 +474,7 @@ namespace game::ui::ingame
 
 		// 左に見出し、右にHPの実数値。数値は桁が動いても右端が揃うよう右寄せで置く
 		const int padding{ scaled(PANEL_PADDING) };
-		m_uiRenderer.setFont(UI_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(panelX + padding, panelY + scaled(LABEL_Y), STATUS_LABEL,
 		    core::utility::Color::HUD_INK, scaled(LABEL_FONT_SIZE));
 
@@ -486,7 +482,7 @@ namespace game::ui::ingame
 		std::snprintf(hpText, sizeof(hpText), "HP %d / %d",
 		    static_cast<int>(health.m_currentHp), static_cast<int>(health.m_maxHp));
 
-		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::MONO_FONT_NAME);
 		const int valueFontSize{ scaled(VALUE_FONT_SIZE) };
 		const int valueWidth{ m_uiRenderer.getTextWidth(hpText, valueFontSize) };
 		m_uiRenderer.drawText(panelX + panelWidth - padding - valueWidth, panelY + scaled(LABEL_Y),

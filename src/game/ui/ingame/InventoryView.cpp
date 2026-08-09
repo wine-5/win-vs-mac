@@ -73,9 +73,6 @@ namespace
 	constexpr int STAT_INDEX_BSPD{ 6 };
 	constexpr int STAT_INDEX_BRNG{ 7 };
 
-	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono" };
-	constexpr const char* UI_FONT_NAME{ "Noto Sans JP" };
-
 	constexpr const char* TITLE_TEXT{ "INVENTORY" };
 
 	/**
@@ -156,7 +153,7 @@ namespace game::ui::ingame
 		m_panel.draw(left + leftWidth + gap, top, rightWidth, height);
 
 		const int padding{ scaled(PANEL_PADDING) };
-		m_uiRenderer.setFont(UI_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(left + padding, top + scaled(TITLE_Y), TITLE_TEXT,
 		    core::utility::Color::HUD_INK, scaled(TITLE_FONT_SIZE));
 		m_uiRenderer.resetFont();
@@ -203,7 +200,7 @@ namespace game::ui::ingame
 		drawStats(left + leftWidth + gap, top, rightWidth, playerId);
 
 		// 閉じ方の案内。開いたはいいが閉じ方が分からない、を起こさない
-		m_uiRenderer.setFont(UI_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		const int hintWidth{ m_uiRenderer.getTextWidth(m_captionHint.c_str(), scaled(HINT_FONT_SIZE)) };
 		m_uiRenderer.drawText((m_screen.getWidth() - hintWidth) / 2,
 		    top + height + scaled(HINT_BOTTOM_MARGIN), m_captionHint.c_str(),
@@ -214,7 +211,7 @@ namespace game::ui::ingame
 	int InventoryView::drawSection(int x, int y, int width, const std::string& caption,
 	    const std::vector<core::data::FileExtensionType>& types, bool isDimmed)
 	{
-		m_uiRenderer.setFont(UI_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(x, y, caption.c_str(),
 		    core::utility::Color::HUD_INK_FAINT, scaled(SECTION_FONT_SIZE));
 		m_uiRenderer.resetFont();
@@ -292,7 +289,7 @@ namespace game::ui::ingame
 				m_uiRenderer.drawImage(m_statIconHandles[i], x + padding,
 				    rowY + (rowHeight - iconSize) / 2, iconSize, iconSize);
 
-			m_uiRenderer.setFont(UI_FONT_NAME);
+			m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 			m_uiRenderer.drawText(x + padding + iconSize + scaled(STAT_LABEL_GAP),
 			    rowY + (rowHeight - fontSize) / 2, m_statLabels[i].c_str(),
 			    core::utility::Color::HUD_INK_FAINT, fontSize);
@@ -305,7 +302,7 @@ namespace game::ui::ingame
 				std::snprintf(valueText, sizeof(valueText), "%d", static_cast<int>(stats[i]));
 
 			// 数値は右寄せ。桁が動いても右端が揃い、増えたことを見比べやすい
-			m_uiRenderer.setFont(MONO_FONT_NAME);
+			m_uiRenderer.setFont(core::constant::ui::MONO_FONT_NAME);
 			const int valueWidth{ m_uiRenderer.getTextWidth(valueText, fontSize) };
 			m_uiRenderer.drawText(x + width - padding - valueWidth,
 			    rowY + (rowHeight - fontSize) / 2, valueText,

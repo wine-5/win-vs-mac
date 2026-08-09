@@ -37,7 +37,6 @@ namespace
 	// 覚醒フェーズの赤と競合して状態が読めなくなる
 	constexpr unsigned int BAR_COLOR{ 0xFFE81123 };
 
-	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono SemiBold" };
 	constexpr const char* BOSS_NAME{ "MacBook" };
 	constexpr const char* PHASE_NORMAL_TEXT{ "PHASE 1" };
 	constexpr const char* PHASE_AWAKENED_TEXT{ "PHASE 2 - AWAKENED" };
@@ -81,7 +80,7 @@ namespace game::ui::ingame
 
 		const int padding{ scaled(PANEL_PADDING) };
 
-		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::MONO_SEMIBOLD_FONT_NAME);
 		m_uiRenderer.drawText(panelX + padding, panelY + scaled(NAME_Y), BOSS_NAME,
 		    core::utility::Color::HUD_INK, scaled(NAME_FONT_SIZE));
 		m_uiRenderer.resetFont();
@@ -108,7 +107,7 @@ namespace game::ui::ingame
 			                                 : core::utility::Color::HUD_ACCENT };
 
 		const int fontSize{ scaled(PILL_FONT_SIZE) };
-		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::MONO_SEMIBOLD_FONT_NAME);
 		const int textWidth{ m_uiRenderer.getTextWidth(text, fontSize) };
 
 		const int padding{ scaled(PILL_PADDING) };

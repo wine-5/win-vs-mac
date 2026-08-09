@@ -1,5 +1,6 @@
 #include "InGameStatusView.h"
 #include "core/base/ServiceLocator.h"
+#include "core/constant/UI.h"
 #include "core/interface/IStringConverter.h"
 #include "core/utility/Color.h"
 #include <algorithm>
@@ -33,9 +34,6 @@ namespace
 	// Hardのバッジ色（危険を示す赤）とNormalのバッジ色（Windows 11のアクセント）
 	constexpr unsigned int BADGE_COLOR_HARD{ core::utility::Color::HUD_CRIT_RED };
 	constexpr unsigned int BADGE_COLOR_NORMAL{ core::utility::Color::HUD_ACCENT };
-
-	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono SemiBold" };
-	constexpr const char* UI_FONT_NAME{ "Noto Sans JP" };
 
 	constexpr const char* CAPTION_TEXT{ "経過時間" };
 
@@ -79,7 +77,7 @@ namespace game::ui::ingame
 
 		const int padding{ scaled(PANEL_PADDING) };
 
-		m_uiRenderer.setFont(UI_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(panelX + padding, panelY + scaled(CAPTION_Y), m_captionText.c_str(),
 		    core::utility::Color::HUD_INK, scaled(CAPTION_FONT_SIZE));
 
@@ -106,7 +104,7 @@ namespace game::ui::ingame
 		char timeText[8]{};
 		std::snprintf(timeText, sizeof(timeText), "%02d:%02d", totalSeconds / 60, totalSeconds % 60);
 
-		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::MONO_SEMIBOLD_FONT_NAME);
 		m_uiRenderer.drawText(panelX + padding, panelY + scaled(TIME_Y), timeText,
 		    core::utility::Color::HUD_INK, scaled(TIME_FONT_SIZE));
 		m_uiRenderer.resetFont();
