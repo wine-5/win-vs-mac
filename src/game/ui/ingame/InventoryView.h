@@ -111,10 +111,13 @@ namespace game::ui::ingame
 		 * @param caption 見出し（Shift_JIS変換済み）
 		 * @param types 並べる拡張子種別
 		 * @param isDimmed 効果が乗っていない扱いで淡く描くか
+		 * @param maxBottom これを超える位置には描かない（窓の外へはみ出させない）。
+		 *                 収まらなかったぶんは「他 n 件」として件数だけ示す
 		 * @return 描画に使った高さ
 		 */
 		int drawSection(int x, int y, int width, const std::string& caption,
-		    const std::vector<core::data::FileExtensionType>& types, bool isDimmed);
+		    const std::vector<core::data::FileExtensionType>& types, bool isDimmed,
+		    int maxBottom);
 
 		/**
 		 * @brief マス目1つ（枠＋アイコン＋ファイル名）を描く
@@ -156,6 +159,7 @@ namespace game::ui::ingame
 		std::string m_captionStats{};
 		std::string m_captionHint{};
 		std::string m_captionEmptySlot{};
+		std::string m_captionOverflow{};
 		std::array<std::string, STAT_COUNT> m_statLabels{};
 	};
 } // namespace game::ui::ingame

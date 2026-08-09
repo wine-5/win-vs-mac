@@ -184,6 +184,7 @@ namespace game::ui::ingame
 		m_captionStats = toDrawable("いまの能力");
 		m_captionHint = toDrawable("E : 閉じる");
 		m_captionEmptySlot = toDrawable("空き");
+		m_captionOverflow = toDrawable(" 件は表示しきれません");
 	}
 
 	int InventoryView::scaled(int value) const
@@ -246,14 +247,17 @@ namespace game::ui::ingame
 		const int contentTop{ top + scaled(TITLE_BAR_HEIGHT) + scaled(ADDRESS_BAR_HEIGHT) + padding };
 		const int listWidth{ width - rightWidth - padding * 3 };
 
+		// 一覧が使ってよい下限。ここを超えるとステータスバーへ重なる
+		const int listBottom{ top + height - scaled(STATUS_BAR_HEIGHT) - padding };
+
 		int y{ contentTop };
-		y += drawSection(left + padding, y, listWidth, m_captionCarried, carried, false);
+		y += drawSection(left + padding, y, listWidth, m_captionCarried, carried, false, listBottom);
 		y += scaled(SECTION_GAP);
-		y += drawSection(left + padding, y, listWidth, m_captionAcquired, equipped, false);
+		y += drawSection(left + padding, y, listWidth, m_captionAcquired, equipped, false, listBottom);
 		if (!unequipped.empty())
 		{
 			y += scaled(SECTION_GAP);
-			drawSection(left + padding, y, listWidth, m_captionUnequipped, unequipped, true);
+			drawSection(left + padding, y, listWidth, m_captionUnequipped, unequipped, true, listBottom);
 		}
 
 		// 左右の区切り線。エクスプローラーのペイン分割に相当する
@@ -332,7 +336,8 @@ namespace game::ui::ingame
 	}
 
 	int InventoryView::drawSection(int x, int y, int width, const std::string& caption,
-	    const std::vector<core::data::FileExtensionType>& types, bool isDimmed)
+	    const std::vector<core::data::FileExtensionType>& types, bool isDimmed,
+	    int maxBottom)
 	{
 		const int captionFontSize{ scaled(SECTION_FONT_SIZE) };
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
@@ -349,17 +354,42 @@ namespace game::ui::ingame
 		// 1行に収まる前提で書くと拾い集めたときに窓からはみ出す
 		const int perRow{ std::max(1, (width + slotGap) / (slotWidth + slotGap)) };
 
-		int row{ 0 };
-		for (std::size_t i{ 0 }; i < types.size(); ++i)
+		// 窓に収まる行数を先に出す。はみ出したぶんを黙って描くと
+		// ステータスバーの上へ重なって読めなくなる
+		const int available{ maxBottom - slotTop };
+		const int maxRows{ std::max(0, (available + slotGap) / (slotHeight + slotGap)) };
+		const int totalRows{ (static_cast<int>(types.size()) + perRow - 1) / perRow };
+		const int drawnRows{ std::min(totalRows, maxRows) };
+
+		const std::size_t drawnCount{ static_cast<std::size_t>(drawnRows) * perRow };
+		for (std::size_t i{ 0 }; i < types.size() && i < drawnCount; ++i)
 		{
 			const int column{ static_cast<int>(i) % perRow };
-			row = static_cast<int>(i) / perRow;
+			const int row{ static_cast<int>(i) / perRow };
 			drawSlot(x + column * (slotWidth + slotGap),
 			    slotTop + row * (slotHeight + slotGap), types[i], isDimmed);
 		}
 
-		const int rowCount{ types.empty() ? 0 : row + 1 };
-		return slotTop - y + rowCount * (slotHeight + slotGap) - slotGap;
+		int usedHeight{ slotTop - y + drawnRows * (slotHeight + slotGap) - slotGap };
+		if (drawnRows <= 0)
+			usedHeight = slotTop - y;
+
+		// 収まらなかったぶんは件数だけ示す。黙って消すと「拾ったはずのものが無い」
+		// と受け取られてしまう
+		if (types.size() > drawnCount)
+		{
+			char overflowText[64]{};
+			std::snprintf(overflowText, sizeof(overflowText), "+ %d",
+			    static_cast<int>(types.size() - drawnCount));
+			const std::string label{ std::string(overflowText) + m_captionOverflow };
+
+			m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
+			m_uiRenderer.drawText(x, y + usedHeight + scaled(SECTION_CAPTION_GAP), label.c_str(),
+			    core::utility::Color::HUD_INK_FAINT, scaled(SECTION_FONT_SIZE));
+			m_uiRenderer.resetFont();
+			usedHeight += scaled(SECTION_CAPTION_GAP) + scaled(SECTION_FONT_SIZE);
+		}
+		return usedHeight;
 	}
 
 	void InventoryView::drawSlot(int x, int y, core::data::FileExtensionType type, bool isDimmed)
