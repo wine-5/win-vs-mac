@@ -601,7 +601,7 @@ namespace game::scene
 		// ダメージ計算には乗せず、攻撃が成立したフレームだけを見る。
 		// m_justFired はAttackSystemが毎フレーム立て直すので必ずその後に置く
 		m_systemManager.registerSystem<game::system::stage::BlockBreakSystem>(
-		    m_componentManager, m_renderer, m_playerId);
+		    m_componentManager, m_entityManager, m_renderer, m_resourceManager, m_playerId);
 		core::probe::mark("      sys: BlockBreakSystem");
 
 		// 壊れたブロックの破片を飛散させる。壊れた直後から動かしたいので破壊の直後に置く
