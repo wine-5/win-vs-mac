@@ -50,7 +50,7 @@ namespace
 	constexpr int ARROW_TAIL{ 3 }; // 後端のくびれ
 
 	// 発見されている間の赤い警告（1080p基準）
-	constexpr unsigned int COLOR_ALERT{ 0xFFE81123 };
+	constexpr unsigned int COLOR_ALERT{ core::utility::Color::HUD_CRIT_RED };
 	// マップ全体に薄く被せる赤。地形が読める濃さに留める
 	constexpr int ALERT_WASH_ALPHA{ 54 };
 	// 縁のにじみ。層ごとに位置をずらして描くので、濃淡は層ごとの不透明度で作る
@@ -67,8 +67,8 @@ namespace
 	// 敵・ボスの点（1080p基準）
 	constexpr int ENEMY_MARKER_SIZE{ 3 };
 	constexpr int BOSS_MARKER_SIZE{ 5 };
-	constexpr unsigned int COLOR_ENEMY{ 0xFFE81123 };
-	constexpr unsigned int COLOR_BOSS{ 0xFFFFC83D };
+	constexpr unsigned int COLOR_ENEMY{ core::utility::Color::HUD_CRIT_RED };
+	constexpr unsigned int COLOR_BOSS{ core::utility::Color::HUD_CHARGE_MAX };
 	constexpr int MARKER_ALPHA{ 255 };
 	constexpr int MARKER_OUTSIDE_ALPHA{ 140 }; // 範囲外＝方向だけを示している点
 

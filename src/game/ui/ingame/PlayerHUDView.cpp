@@ -92,7 +92,7 @@ namespace
 	constexpr int STAT_INDEX_BRNG{ 7 };
 
 	// 素の値より上がっている項目の色。装備ファイル・Itemなど強化の出どころは問わない
-	constexpr unsigned int STAT_BOOSTED_COLOR{ 0xFFFFC83D };
+	constexpr unsigned int STAT_BOOSTED_COLOR{ core::utility::Color::HUD_CHARGE_MAX };
 	// 強化とみなす下限。浮動小数の誤差で素の値と同じものが光らないようにする
 	constexpr float STAT_BOOST_EPSILON{ 0.001f };
 
@@ -103,19 +103,19 @@ namespace
 
 	// HP残量に応じたバーの色。Windows 11のプログレスバーに倣い単色で塗る
 	constexpr unsigned int BAR_COLOR_HIGH{ 0xFF36D07B };
-	constexpr unsigned int BAR_COLOR_MID{ 0xFFFFC83D };
-	constexpr unsigned int BAR_COLOR_LOW{ 0xFFE81123 };
+	constexpr unsigned int BAR_COLOR_MID{ core::utility::Color::HUD_CHARGE_MAX };
+	constexpr unsigned int BAR_COLOR_LOW{ core::utility::Color::HUD_CRIT_RED };
 	constexpr float BAR_MID_THRESHOLD{ 0.5f };
 
 	// 被弾演出
-	constexpr unsigned int BAR_RESIDUAL_COLOR{ 0xFFE81123 }; // 削られた分を示す残像
+	constexpr unsigned int BAR_RESIDUAL_COLOR{ core::utility::Color::HUD_CRIT_RED }; // 削られた分を示す残像
 	constexpr float DAMAGE_FLASH_DURATION{ 0.20f };          // 白フラッシュの長さ（秒）
 	constexpr int DAMAGE_FLASH_ALPHA{ 190 };                 // 白フラッシュの強さ
 	constexpr float RESIDUAL_HOLD_DURATION{ 0.35f };         // 残像が縮み始めるまでの待ち（秒）
 	constexpr float RESIDUAL_DECAY_PER_SECOND{ 0.55f };      // 残像が縮む速さ（残量比／秒）
 
 	// 低HPの警告脈動（点滅のリズムは LowHealthPulse.h と共有する）
-	constexpr unsigned int LOW_PULSE_COLOR{ 0xFFE81123 };
+	constexpr unsigned int LOW_PULSE_COLOR{ core::utility::Color::HUD_CRIT_RED };
 	constexpr int LOW_PULSE_ALPHA{ 130 }; // 脈動の最も明るいときの強さ
 
 	constexpr const char* STATUS_LABEL{ "PLAYER STATUS" };

@@ -35,7 +35,7 @@ namespace
 
 	// ボスのHPバーは常に赤。残量で色を変えると「あと少し」が伝わりにくくなるうえ、
 	// 覚醒フェーズの赤と競合して状態が読めなくなる
-	constexpr unsigned int BAR_COLOR{ 0xFFE81123 };
+	constexpr unsigned int BAR_COLOR{ core::utility::Color::HUD_CRIT_RED };
 
 	constexpr const char* BOSS_NAME{ "MacBook" };
 	constexpr const char* PHASE_NORMAL_TEXT{ "PHASE 1" };
