@@ -8,8 +8,9 @@ namespace game
 	 */
 	enum class PauseReason
 	{
-		None,           // ポーズしていない
-		Menu,           // ポーズメニュー（Esc）を開いている
+		None,      // ポーズしていない
+		Menu,      // ポーズメニュー（Esc）を開いている
+		Inventory, // インベントリ（E）を開いている
 	};
 
 	/**
