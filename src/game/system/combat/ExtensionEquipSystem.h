@@ -26,11 +26,6 @@ namespace game::system::combat
 	class ExtensionEquipSystem : public core::ecs::ISystem
 	{
 	  public:
-		/// @brief InGame中に能力へ乗せられる拡張子の個数
-		///
-		/// セレクト画面の3つと合わせて最大6つになる（設計上の取り決め）
-		static constexpr int MAX_INGAME_SLOTS{ 3 };
-
 		/**
 		 * @brief ExtensionEquipSystemのコンストラクタ
 		 * @param componentManager ComponentManagerの参照
@@ -49,12 +44,6 @@ namespace game::system::combat
 		 */
 		void update(float deltaTime) override;
 
-		/**
-		 * @brief InGameで拾って効果が乗っている拡張子の数を取得する
-		 * @return 反映済みの個数
-		 */
-		[[nodiscard]] int getEquippedCount() const noexcept;
-
 	  private:
 		void applyBonus(core::data::FileExtensionType type);
 
@@ -64,9 +53,6 @@ namespace game::system::combat
 
 		// イベント中にECSを触らず、次のupdateでまとめて反映する
 		std::vector<core::data::FileExtensionType> m_pending{};
-
-		// 効果を反映済みの個数（MAX_INGAME_SLOTSで頭打ち）
-		int m_equippedCount{ 0 };
 
 		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される
 		std::vector<core::base::EventBus::Subscription> m_subscriptions{};

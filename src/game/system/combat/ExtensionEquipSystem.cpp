@@ -2,6 +2,7 @@
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/combat/PlayerStatsComponent.h"
+#include "game/component/combat/ExtensionInventoryComponent.h"
 #include "game/event/InGameEvents.h"
 #include "core/utility/Log.h"
 #include <algorithm>
@@ -28,26 +29,27 @@ namespace game::system::combat
 		if (m_pending.empty())
 			return;
 
+		auto* inventory{ m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId) };
+		if (inventory == nullptr)
+		{
+			m_pending.clear();
+			return;
+		}
+
 		for (const auto type : m_pending)
 		{
-			if (m_equippedCount >= MAX_INGAME_SLOTS)
-			{
-				// 枠が埋まっている。捨てるか差し替えるかを選ばせるのが本来の設計だが、
-				// インベントリが入るまでは黙って持ち越さず捨てる
-				core::log::info("拡張子を拾ったが枠が埋まっています（{}/{}）",
-				    m_equippedCount, MAX_INGAME_SLOTS);
-				continue;
-			}
+			// 拾ったものは捨てずに全部持たせる。捨ててしまうと
+			// 「何を捨てて何を挿すか」という選択がそもそも発生しない
+			const bool willEquip{ inventory->equippedCount() <
+				                  component::combat::ExtensionInventoryComponent::MAX_EQUIPPED };
+			inventory->m_acquired.push_back(type);
 
-			applyBonus(type);
-			++m_equippedCount;
+			// 挿せる枠が空いていたぶんだけ、その場で効果を乗せる。
+			// 埋まっている場合はリネームブロックで入れ替えるまで効果は乗らない
+			if (willEquip)
+				applyBonus(type);
 		}
 		m_pending.clear();
-	}
-
-	int ExtensionEquipSystem::getEquippedCount() const noexcept
-	{
-		return m_equippedCount;
 	}
 
 	void ExtensionEquipSystem::applyBonus(core::data::FileExtensionType type)
