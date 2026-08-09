@@ -1,4 +1,4 @@
-#include "BlockBreakSystem.h"
+﻿#include "BlockBreakSystem.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
@@ -6,6 +6,8 @@
 #include "game/component/stage/DestructibleComponent.h"
 #include "game/component/stage/BlockDebrisComponent.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/component/stage/ExtensionPickupComponent.h"
+#include "game/constant/ExtensionIconId.h"
 #include "core/utility/Log.h"
 #include <algorithm>
 #include <cmath>
@@ -33,6 +35,23 @@ namespace
 	/// @brief モデル素材の実寸。ブロックのスケールは 実寸 / これ で決まっている
 	constexpr float BASE_SIZE{ 100.0f };
 
+	/// @brief 落ちる欠片のビルボードの大きさ（ワールド単位）
+	constexpr float DROP_BILLBOARD_SIZE{ 46.0f };
+
+	/// @brief 欠片が漂う高さ（ブロックの底面からの相対Y）
+	///
+	/// 床にめり込むと拾いにくいので、少し浮かせた位置で落ち着かせる
+	constexpr float DROP_REST_HEIGHT{ 55.0f };
+
+	/// @brief 欠片が飛び出す勢い（水平・ユニット/秒）
+	///
+	/// 複数落とすブロックで同じ場所に重ならないよう、軽く散らす
+	constexpr float DROP_BURST_SPEED{ 130.0f };
+
+	/// @brief 欠片が飛び出す勢い（上向き・ユニット/秒）
+	constexpr float DROP_BURST_LIFT_MIN{ 260.0f };
+	constexpr float DROP_BURST_LIFT_MAX{ 400.0f };
+
 	/**
 	 * @brief 範囲内の一様乱数を返す
 	 * @param min 最小値
@@ -45,15 +64,34 @@ namespace
 		std::uniform_real_distribution<float> distribution{ min, max };
 		return distribution(engine);
 	}
+
+	/**
+	 * @brief 拡張子の種別を1つ抽選する
+	 *
+	 * 「中身が分からない」ブロック（ZIPなど）が落とすものを決める。
+	 * 実PCの拡張子ヒストグラムからドロップを決める仕組みが入るまでの暫定で、
+	 * 今は全種別を等確率で引く
+	 * @return 抽選した種別
+	 */
+	core::data::FileExtensionType randomExtensionType()
+	{
+		const int count{ static_cast<int>(core::data::FileExtensionType::Count) };
+		const int index{ static_cast<int>(randomRange(0.0f, static_cast<float>(count))) };
+		return static_cast<core::data::FileExtensionType>(std::min(index, count - 1));
+	}
 } // namespace
 
 namespace game::system::stage
 {
 	BlockBreakSystem::BlockBreakSystem(core::ecs::ComponentManager& componentManager,
+	    core::ecs::EntityManager& entityManager,
 	    core::iface::IRenderer& renderer,
+	    core::iface::IResourceManager& resourceManager,
 	    core::ecs::EntityId playerId)
 	    : m_componentManager{ componentManager }
+	    , m_entityManager{ entityManager }
 	    , m_renderer{ renderer }
+	    , m_resourceManager{ resourceManager }
 	    , m_playerId{ playerId }
 	{
 	}
@@ -172,5 +210,48 @@ namespace game::system::stage
 		}
 
 		m_componentManager.add<component::stage::BlockDebrisComponent>(blockId, debris);
+
+		spawnDrops(blockId);
+	}
+
+	void BlockBreakSystem::spawnDrops(core::ecs::EntityId blockId)
+	{
+		const auto& destructible{ m_componentManager.get<component::stage::DestructibleComponent>(blockId) };
+		if (destructible.m_dropCount <= 0)
+			return;
+
+		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(blockId) };
+		const float restY{ transform.m_position.y - transform.m_scale.y * BASE_SIZE * 0.5f + DROP_REST_HEIGHT };
+
+		for (int i{ 0 }; i < destructible.m_dropCount; ++i)
+		{
+			// 抽選するブロック（ZIPなど）は1個ごとに種別を引く。
+			// まとめて引くと3個とも同じ拡張子になり、中身が詰まっている感じが出ない
+			const auto type{ destructible.m_isDropRandom ? randomExtensionType() : destructible.m_dropType };
+
+			core::ecs::Entity entity{ m_entityManager.create() };
+			const auto dropId{ entity.getId() };
+
+			component::movement::TransformComponent dropTransform{};
+			dropTransform.m_position = transform.m_position;
+			m_componentManager.add<component::movement::TransformComponent>(dropId, dropTransform);
+
+			// 見た目は装備スロットと同じ拡張子アイコン。
+			// 「壊したブロックの絵」「落ちた欠片の絵」「スロットに入る絵」が揃う
+			component::visual::RenderComponent render{};
+			render.m_billboardImage = m_resourceManager.loadImageById(constant::toExtensionIconId(type));
+			render.m_billboardSize = DROP_BILLBOARD_SIZE;
+			m_componentManager.add<component::visual::RenderComponent>(dropId, render);
+
+			component::stage::ExtensionPickupComponent pickup{};
+			pickup.m_type = type;
+			pickup.m_restY = restY;
+			pickup.m_velocity = {
+				randomRange(-DROP_BURST_SPEED, DROP_BURST_SPEED),
+				randomRange(DROP_BURST_LIFT_MIN, DROP_BURST_LIFT_MAX),
+				randomRange(-DROP_BURST_SPEED, DROP_BURST_SPEED)
+			};
+			m_componentManager.add<component::stage::ExtensionPickupComponent>(dropId, pickup);
+		}
 	}
 } // namespace game::system::stage

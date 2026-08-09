@@ -1,7 +1,9 @@
-#pragma once
+﻿#pragma once
 #include "core/ecs/ISystem.h"
 #include "core/ecs/ComponentManager.h"
+#include "core/ecs/EntityManager.h"
 #include "core/ecs/Entity.h"
+#include "core/interface/IResourceManager.h"
 #include "core/interface/IRenderer.h"
 
 namespace game::system::stage
@@ -31,11 +33,15 @@ namespace game::system::stage
 		/**
 		 * @brief BlockBreakSystemのコンストラクタ
 		 * @param componentManager ComponentManagerの参照
+		 * @param entityManager 拡張子の欠片を生成するためのEntityManager
 		 * @param renderer ひびテクスチャの差し替えに使う描画インターフェース
+		 * @param resourceManager 欠片のアイコン画像を読むリソース管理インターフェース
 		 * @param playerId プレイヤーのEntityID
 		 */
 		BlockBreakSystem(core::ecs::ComponentManager& componentManager,
+		    core::ecs::EntityManager& entityManager,
 		    core::iface::IRenderer& renderer,
+		    core::iface::IResourceManager& resourceManager,
 		    core::ecs::EntityId playerId);
 
 		/**
@@ -47,9 +53,12 @@ namespace game::system::stage
 	  private:
 		void hitBlock(core::ecs::EntityId blockId);
 		void breakBlock(core::ecs::EntityId blockId);
+		void spawnDrops(core::ecs::EntityId blockId);
 
 		core::ecs::ComponentManager& m_componentManager;
+		core::ecs::EntityManager& m_entityManager;
 		core::iface::IRenderer& m_renderer;
+		core::iface::IResourceManager& m_resourceManager;
 		core::ecs::EntityId m_playerId;
 	};
 } // namespace game::system::stage
