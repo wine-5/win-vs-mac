@@ -419,14 +419,11 @@ namespace game::scene
 
 		logPlayerParameters("装備後");
 
-		initializer.initializePlayer(m_playerData);
+		// 控えた素の値も一緒に渡す。Playerのコンポーネント一式はPlayerクラスが組み立てる
+		initializer.initializePlayer(m_playerData, base);
 		core::probe::mark("    spawn: initializePlayer");
 
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
-
-		// 弾の素の性能はまだ分からない（弾定義を読むのはsetupSystems）。
-		// そちらで残りを埋めるため、ここでは先に器だけ付けておく
-		m_componentManager.add<component::combat::PlayerStatBaseComponent>(m_playerId, base);
 
 		// プレイヤー専用コンポーネント（CameraComponent、AimComponent、PlayerChargeComponent）
 		// は Player.cpp のコンストラクタで初期化済

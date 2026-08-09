@@ -126,7 +126,8 @@ namespace game::factory
 		}
 	}
 
-	void FactoryInitializer::initializePlayer(const data::PlayerData& playerData)
+	void FactoryInitializer::initializePlayer(const data::PlayerData& playerData,
+	    const component::combat::PlayerStatBaseComponent& statBase)
 	{
 		int playerHandle{m_resourceManager.loadModelById(constant::model_id::PLAYER)};
 
@@ -136,7 +137,7 @@ namespace game::factory
 		// 敵は複製ハンドル＋プール返却時のデタッチで済むが、プレイヤーは複製しないのでここで行う
 		m_resourceManager.detachAllAnimations(playerHandle);
 
-		m_factoryManager.getPlayerFactory().create(playerHandle, playerData);
+		m_factoryManager.getPlayerFactory().create(playerHandle, playerData, statBase);
 	}
 
 	void FactoryInitializer::initializeProps()

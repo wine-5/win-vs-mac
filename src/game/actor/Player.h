@@ -5,6 +5,7 @@
 #include "core/utility/Vector3.h"
 #include "core/interface/IResourceManager.h"
 #include "game/data/PlayerData.h"
+#include "game/component/combat/PlayerStatBaseComponent.h"
 
 namespace game::actor
 {
@@ -14,25 +15,29 @@ namespace game::actor
 	class Player
 	{
 	public:
-		/**
-		 * @brief Playerのコンストラクタ
-		 * @param entityManager EntityManagerの参照
-		 * @param componentManager ComponentManagerの参照
-		 * @param resourceManager アニメーションハンドル取得用のIResourceManager
-		 * @param modelHandle モデルハンドル
-		 * @param playerData プレイヤーのデータ
-		 */
-		Player(core::ecs::EntityManager& entityManager,
-			core::ecs::ComponentManager& componentManager,
-			core::iface::IResourceManager& resourceManager,
-			int modelHandle,
-			const data::PlayerData& playerData);
+	  /**
+	   * @brief Playerのコンストラクタ
+	   * @param entityManager EntityManagerの参照
+	   * @param componentManager ComponentManagerの参照
+	   * @param resourceManager アニメーションハンドル取得用のIResourceManager
+	   * @param modelHandle モデルハンドル
+	   * @param playerData プレイヤーのデータ（装備ボーナス適用後）
+	   * @param statBase 装備ボーナス適用前の能力値。HUDが「今この能力は強化されているか」を
+	   *                 判定する基準になる。playerDataは適用後の値なので復元できず、
+	   *                 適用前に控えたものを外から受け取る必要がある
+	   */
+	  Player(core::ecs::EntityManager& entityManager,
+		  core::ecs::ComponentManager& componentManager,
+		  core::iface::IResourceManager& resourceManager,
+		  int modelHandle,
+		  const data::PlayerData& playerData,
+		  const component::combat::PlayerStatBaseComponent& statBase);
 
-		/**
-		 * @brief PlayerのEntityIDを取得する
-		 * @return EntityID
-		 */
-		core::ecs::EntityId getId() const noexcept;
+	  /**
+	   * @brief PlayerのEntityIDを取得する
+	   * @return EntityID
+	   */
+	  core::ecs::EntityId getId() const noexcept;
 
 	private:
 	  /**

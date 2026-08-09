@@ -1,4 +1,4 @@
-﻿#include "PlayerFactory.h"
+#include "PlayerFactory.h"
 #include <cassert>
 
 namespace game::factory
@@ -13,14 +13,16 @@ namespace game::factory
 	{
 	}
 
-	void PlayerFactory::create(int modelHandle, const data::PlayerData& playerData)
+	void PlayerFactory::create(int modelHandle, const data::PlayerData& playerData,
+	    const component::combat::PlayerStatBaseComponent& statBase)
 	{
 		m_player = std::make_unique<actor::Player>(
-			m_entityManager,
-			m_componentManager,
-			m_resourceManager,
-			modelHandle,
-			playerData);
+		    m_entityManager,
+		    m_componentManager,
+		    m_resourceManager,
+		    modelHandle,
+		    playerData,
+		    statBase);
 	}
 
 	actor::Player& PlayerFactory::getPlayer() const

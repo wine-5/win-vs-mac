@@ -28,11 +28,12 @@
 namespace game::actor
 {
 	Player::Player(core::ecs::EntityManager& entityManager,
-		core::ecs::ComponentManager& componentManager,
-		core::iface::IResourceManager& resourceManager,
-		int modelHandle,
-		const data::PlayerData& playerData)
-		: m_entity{entityManager.create()}
+	    core::ecs::ComponentManager& componentManager,
+	    core::iface::IResourceManager& resourceManager,
+	    int modelHandle,
+	    const data::PlayerData& playerData,
+	    const component::combat::PlayerStatBaseComponent& statBase)
+	    : m_entity{ entityManager.create() }
 	{
 		component::movement::TransformComponent transform{};
 		transform.m_scale = playerData.getScale();
@@ -88,6 +89,10 @@ namespace game::actor
 		component::combat::PlayerStatsComponent stats{};
 		stats.m_moveSpeed = playerData.getMoveSpeed();
 		componentManager.add<component::combat::PlayerStatsComponent>(m_entity.getId(), stats);
+
+		// 強化前の値の控え。弾の性能だけはここでは分からないので（弾定義を読むのはSystemの組み立て時）、
+		// 呼び出し側が後から書き足す
+		componentManager.add<component::combat::PlayerStatBaseComponent>(m_entity.getId(), statBase);
 
 		// プレイヤーに追従する点光源。虚無の中で自機が沈まないようにしつつ、
 		// 「自機が周囲を照らす」演出も兼ねる。頭上に置いて上から当てる

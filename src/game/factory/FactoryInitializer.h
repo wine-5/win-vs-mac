@@ -28,9 +28,11 @@ namespace game::factory
 
 	  /**
 	   * @brief Playerを初期化
-	   * @param playerData Playerのデータ
+	   * @param playerData Playerのデータ（装備ボーナス適用後）
+	   * @param statBase 装備ボーナス適用前の能力値の控え
 	   */
-	  void initializePlayer(const data::PlayerData& playerData);
+	  void initializePlayer(const data::PlayerData& playerData,
+		  const component::combat::PlayerStatBaseComponent& statBase);
 
 	  /**
 	   * @brief stageData.jsonのprops[]から配置物（床・壁など）を一括生成する
