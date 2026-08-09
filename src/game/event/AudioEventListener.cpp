@@ -32,6 +32,18 @@ namespace game::event
 		m_subscriptions.push_back(m_eventBus.subscribe<EnemyAlertedEvent>(
 		    [this](const EnemyAlertedEvent& e)
 		    { onEnemyAlerted(e); }));
+
+		m_subscriptions.push_back(m_eventBus.subscribe<BlockHitEvent>(
+		    [this](const BlockHitEvent& e)
+		    { onBlockHit(e); }));
+
+		m_subscriptions.push_back(m_eventBus.subscribe<BlockBrokenEvent>(
+		    [this](const BlockBrokenEvent& e)
+		    { onBlockBroken(e); }));
+
+		m_subscriptions.push_back(m_eventBus.subscribe<ExtensionPickedUpEvent>(
+		    [this](const ExtensionPickedUpEvent& e)
+		    { onExtensionPickedUp(e); }));
 	}
 
 	void AudioEventListener::onAttackStart(const AttackStartEvent& e)
@@ -97,5 +109,36 @@ namespace game::event
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio)
 			audio->playSe(core::constant::SeType::EnemyAlert);
+	}
+
+	void AudioEventListener::onBlockHit(const BlockHitEvent& e)
+	{
+		// 壊れていない打撃。プレイヤーはこの音の回数で「あと何回で壊れるか」を測るため、
+		// 次で壊れるときだけ音を変えて予告する
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio)
+			audio->playSe(e.m_isLastHit
+			                  ? core::constant::SeType::BlockHitCritical
+			                  : core::constant::SeType::BlockHit);
+	}
+
+	void AudioEventListener::onBlockBroken(const BlockBrokenEvent& /*e*/)
+	{
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (!audio)
+			return;
+
+		audio->playSe(core::constant::SeType::BlockBreak);
+
+		// 欠片の出現音は破砕音に重ねる。壊した直後に「何か出た」を届けたいので、
+		// 拾うまで待たずにここで鳴らす
+		audio->playSe(core::constant::SeType::ItemDrop);
+	}
+
+	void AudioEventListener::onExtensionPickedUp(const ExtensionPickedUpEvent& /*e*/)
+	{
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio)
+			audio->playSe(core::constant::SeType::ItemPickup);
 	}
 } // namespace game::event

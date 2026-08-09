@@ -27,6 +27,9 @@ namespace game::event
 	  void onEnemyDead(const EnemyDeadEvent& e);
 	  void onPlayerDead(const PlayerDeadEvent& e);
 	  void onEnemyAlerted(const EnemyAlertedEvent& e);
+	  void onBlockHit(const BlockHitEvent& e);
+	  void onBlockBroken(const BlockBrokenEvent& e);
+	  void onExtensionPickedUp(const ExtensionPickedUpEvent& e);
 
 	  core::base::EventBus& m_eventBus;
 	  core::ecs::EntityId m_playerId{};
