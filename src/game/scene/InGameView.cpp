@@ -453,8 +453,17 @@ namespace game::scene
 	{
 		// 拾えるものだと分かるよう、ゆっくり明滅させる
 		constexpr float PULSE_SPEED{ 3.4f };
-		constexpr int BRIGHTNESS_BASE{ 90 };
-		constexpr int BRIGHTNESS_SWING{ 45 };
+		constexpr int BRIGHTNESS_BASE{ 55 };
+		constexpr int BRIGHTNESS_SWING{ 35 };
+
+		// 足元に置く目印（遠くからでも「そこに何かある」と分かるように）。
+		// 色はHUDの溜めと同じシアンで、床に敷くので薄く透かす
+		constexpr float MARKER_RADIUS{ 46.0f };
+		constexpr int MARKER_ALPHA{ 0x50 };
+		constexpr unsigned int MARKER_COLOR{
+			(core::utility::Color::HUD_CHARGE_CYAN & 0x00FFFFFFu) | (MARKER_ALPHA << 24)
+		};
+		constexpr float MARKER_HEIGHT{ 2.0f };
 
 		const auto pickups{ m_componentManager.getAllEntities<component::stage::ExtensionPickupComponent>() };
 		for (const auto id : pickups)
@@ -466,9 +475,20 @@ namespace game::scene
 			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(id) };
 			const auto& pickup{ m_componentManager.get<component::stage::ExtensionPickupComponent>(id) };
 
+			// 足元の目印。浮いている欠片は床と離れていて位置が掴みにくいため、
+			// 真下に円を描いて「どこに落ちているか」を示す
+			m_renderer.drawGroundCircle({ transform.m_position.x, pickup.m_restY - MARKER_HEIGHT,
+			                                transform.m_position.z },
+			    MARKER_RADIUS, MARKER_COLOR, true);
+
+			// まず通常合成で絵をそのまま描く。拡張子アイコンは暗い紙なので、
+			// 加算合成だけで描くと暗い部分が何も足されず、ラベルの色しか見えない
+			m_renderer.drawBillboard(render->m_billboardImage, transform.m_position,
+			    render->m_billboardSize, 0.0f);
+
+			// その上へ光を重ねて明滅させる。輪郭と記号だけが脈打ち、拾えるものだと分かる
 			const float pulse{ std::sin(pickup.m_elapsed * PULSE_SPEED) };
 			const int brightness{ BRIGHTNESS_BASE + static_cast<int>(pulse * BRIGHTNESS_SWING) };
-
 			m_renderer.drawGlowBillboard(render->m_billboardImage, transform.m_position,
 			    render->m_billboardSize, 0.0f, brightness);
 		}
