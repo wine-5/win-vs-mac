@@ -20,9 +20,13 @@ namespace game::ui::ingame
 	/**
 	 * @brief Eキーで開く拡張子インベントリを描画するView
 	 *
-	 * 持っている拡張子と、今の能力値を並べて見せる。
-	 * 拡張子だけを並べても「それを挿すと何がどうなるか」が分からないため、
-	 * 能力値と同じ画面へ置いて突き合わせられるようにしている。
+	 * Windowsのエクスプローラーの窓として見せる。タイトルバー・アドレスバー・
+	 * マス目のグリッド・ステータスバーを備え、拡張子を「フォルダに入っている
+	 * ファイル」として並べる。
+	 *
+	 * ただアイコンを並べるとHUDの延長にしか見えず、持ち物を覗いている感じが出ない。
+	 * 窓の体裁とマス目があることで「置き場」に見え、ファイルを扱うゲームだという
+	 * 世界観にもそのまま繋がる。
 	 *
 	 * 拡張子は出どころと状態で3つに分ける。
 	 *   持ち込み   … セレクト画面で選んだもの（プレイ中は変えられない）
@@ -68,7 +72,37 @@ namespace game::ui::ingame
 		[[nodiscard]] int scaled(int value) const;
 
 		/**
-		 * @brief 見出しと拡張子アイコンの並びを1区分ぶん描く
+		 * @brief 窓のタイトルバーを描く
+		 *
+		 * この画面が何なのかを最初に伝える。開いた瞬間に目に入る位置へ置く
+		 * @param x 窓左上のX座標
+		 * @param y 窓左上のY座標
+		 * @param width 窓の幅
+		 */
+		void drawTitleBar(int x, int y, int width);
+
+		/**
+		 * @brief アドレスバー（パンくず）を描く
+		 *
+		 * エクスプローラーの体裁を作ると同時に、「今どの区分を見ているのか」を
+		 * 一言で説明する場所にもなる
+		 * @param x 窓左上のX座標
+		 * @param y アドレスバー上端のY座標
+		 * @param width 窓の幅
+		 */
+		void drawAddressBar(int x, int y, int width);
+
+		/**
+		 * @brief ステータスバー（所持数と閉じ方）を描く
+		 * @param x 窓左上のX座標
+		 * @param y 窓下端のY座標
+		 * @param width 窓の幅
+		 * @param itemCount 所持している拡張子の総数
+		 */
+		void drawStatusBar(int x, int y, int width, int itemCount);
+
+		/**
+		 * @brief 見出しとマス目の並びを1区分ぶん描く
 		 *
 		 * 横に並べきれない場合は折り返す。
 		 * @param x 区分の左上X座標
@@ -83,19 +117,19 @@ namespace game::ui::ingame
 		    const std::vector<core::data::FileExtensionType>& types, bool isDimmed);
 
 		/**
-		 * @brief 拡張子アイコンを1つ描く
-		 * @param x アイコン左上のX座標
-		 * @param y アイコン左上のY座標
-		 * @param type 拡張子種別（Count を渡すと空きスロットとして描く）
+		 * @brief マス目1つ（枠＋アイコン＋ファイル名）を描く
+		 * @param x マス左上のX座標
+		 * @param y マス左上のY座標
+		 * @param type 拡張子種別（Count を渡すと空きマスとして描く）
 		 * @param isDimmed 淡く描くか
 		 */
-		void drawExtensionIcon(int x, int y, core::data::FileExtensionType type, bool isDimmed);
+		void drawSlot(int x, int y, core::data::FileExtensionType type, bool isDimmed);
 
 		/**
 		 * @brief 能力値の一覧を描く
-		 * @param x パネル左上のX座標
-		 * @param y パネル左上のY座標
-		 * @param width パネルの幅
+		 * @param x 一覧の左上X座標
+		 * @param y 一覧の左上Y座標
+		 * @param width 使える幅
 		 * @param playerId プレイヤーのEntityID
 		 */
 		void drawStats(int x, int y, int width, core::ecs::EntityId playerId);
@@ -106,7 +140,7 @@ namespace game::ui::ingame
 		const data::FileEquipmentData& m_equipmentData;
 		HudPanel m_panel;
 
-		// 拡張子アイコン（FileExtensionTypeの並び順）と空きスロットのアイコン
+		// 拡張子アイコン（FileExtensionTypeの並び順）と空きマスのアイコン
 		std::array<int, static_cast<int>(core::data::FileExtensionType::Count)> m_iconHandles{};
 		int m_emptyIconHandle{ -1 };
 
@@ -114,10 +148,14 @@ namespace game::ui::ingame
 		std::array<int, STAT_COUNT> m_statIconHandles{};
 
 		// DxLibの描画はShift_JISを期待するため、日本語は生成時に一度だけ変換して持つ
+		std::string m_title{};
+		std::string m_addressText{};
 		std::string m_captionCarried{};
 		std::string m_captionAcquired{};
 		std::string m_captionUnequipped{};
+		std::string m_captionStats{};
 		std::string m_captionHint{};
+		std::string m_captionEmptySlot{};
 		std::array<std::string, STAT_COUNT> m_statLabels{};
 	};
 } // namespace game::ui::ingame

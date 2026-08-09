@@ -19,38 +19,66 @@ namespace
 	constexpr int BASE_SCREEN_HEIGHT{ 1080 };
 
 	// 画面全体を覆う暗幕。奥のゲーム画面を残したまま、手前の文字を読めるようにする
-	constexpr int BACKDROP_ALPHA{ 168 };
+	constexpr int BACKDROP_ALPHA{ 176 };
 
-	// 2枚のパネルの配置（1080p基準）。左に拡張子、右に能力値
-	constexpr int PANEL_GAP{ 24 };
-	constexpr int LEFT_PANEL_WIDTH{ 620 };
-	constexpr int RIGHT_PANEL_WIDTH{ 380 };
-	constexpr int PANEL_HEIGHT{ 520 };
-	constexpr int PANEL_PADDING{ 28 };
+	// 窓の大きさ（1080p基準）
+	constexpr int WINDOW_WIDTH{ 1040 };
+	constexpr int WINDOW_HEIGHT{ 600 };
+	constexpr int WINDOW_PADDING{ 26 };
 
-	// 見出し
-	constexpr int TITLE_FONT_SIZE{ 24 };
-	constexpr int TITLE_Y{ 20 };
-	constexpr int SECTION_FONT_SIZE{ 19 };
-	constexpr int SECTION_GAP{ 22 }; // 区分どうしの間隔
+	// タイトルバー
+	constexpr int TITLE_BAR_HEIGHT{ 52 };
+	constexpr int TITLE_FONT_SIZE{ 22 };
+	constexpr int TITLE_ICON_SIZE{ 22 };
+	constexpr int TITLE_ICON_GAP{ 12 };
 
-	// 拡張子アイコンの並び
-	constexpr int ICON_SIZE{ 84 };
-	constexpr int ICON_GAP{ 12 };
-	constexpr int ICON_CAPTION_GAP{ 10 };   // 見出しとアイコンの間隔
+	// アドレスバー（パンくず）
+	constexpr int ADDRESS_BAR_HEIGHT{ 44 };
+	constexpr int ADDRESS_FONT_SIZE{ 17 };
+
+	// ステータスバー
+	constexpr int STATUS_BAR_HEIGHT{ 44 };
+	constexpr int STATUS_FONT_SIZE{ 17 };
+
+	// 区切り線と面の色
+	constexpr unsigned int SEPARATOR_COLOR{ core::utility::Color::HUD_INK };
+	constexpr int SEPARATOR_ALPHA{ 34 };
+	constexpr unsigned int BAR_FILL_COLOR{ core::utility::Color::HUD_INK };
+	constexpr int TITLE_BAR_ALPHA{ 14 }; // タイトルバーだけわずかに明るくして段差を作る
+
+	// 左右の分割（左＝ファイル一覧、右＝パラメータ）
+	constexpr int RIGHT_COLUMN_WIDTH{ 320 };
+
+	// 区分の見出し
+	constexpr int SECTION_FONT_SIZE{ 18 };
+	constexpr int SECTION_GAP{ 18 };        // 区分どうしの間隔
+	constexpr int SECTION_CAPTION_GAP{ 8 }; // 見出しとマス目の間隔
+
+	// マス目（スロット）
+	constexpr int SLOT_WIDTH{ 96 };
+	constexpr int SLOT_HEIGHT{ 116 };
+	constexpr int SLOT_GAP{ 10 };
+	constexpr int SLOT_RADIUS{ 4 }; // Windows 11のコントロールの角丸
+	constexpr int SLOT_ICON_SIZE{ 56 };
+	constexpr int SLOT_ICON_TOP{ 10 };
+	constexpr int SLOT_NAME_FONT_SIZE{ 14 };
+	constexpr int SLOT_NAME_GAP{ 8 }; // アイコンとファイル名の間隔
+
+	constexpr unsigned int SLOT_FILL_COLOR{ 0xFF0E1420 };
+	constexpr int SLOT_FILL_ALPHA{ 150 };
+	constexpr unsigned int SLOT_BORDER_COLOR{ 0xFF8CAAD2 };
+	constexpr int SLOT_BORDER_ALPHA{ 60 };
+	constexpr int SLOT_EMPTY_BORDER_ALPHA{ 26 }; // 空きマスは枠だけ残して薄くする
+
 	constexpr int ICON_ALPHA_OPAQUE{ 255 }; // 効果が乗っているものはそのままの濃さで描く
-	constexpr int EMPTY_ICON_ALPHA{ 90 };   // 空きスロットの薄さ
-	constexpr int DIMMED_ICON_ALPHA{ 130 }; // 効果が乗っていないものの薄さ
+	constexpr int EMPTY_ICON_ALPHA{ 60 };   // 空きマスの薄さ
+	constexpr int DIMMED_ICON_ALPHA{ 140 }; // 効果が乗っていないものの薄さ
 
 	// 能力値の並び
-	constexpr int STAT_ROW_HEIGHT{ 50 };
-	constexpr int STAT_ICON_SIZE{ 34 };
-	constexpr int STAT_LABEL_GAP{ 12 };
-	constexpr int STAT_FONT_SIZE{ 20 };
-
-	// 閉じ方の案内
-	constexpr int HINT_FONT_SIZE{ 18 };
-	constexpr int HINT_BOTTOM_MARGIN{ 24 };
+	constexpr int STAT_ROW_HEIGHT{ 44 };
+	constexpr int STAT_ICON_SIZE{ 30 };
+	constexpr int STAT_LABEL_GAP{ 10 };
+	constexpr int STAT_FONT_SIZE{ 19 };
 
 	// 能力値アイコンの画像ID（左下HUD・セレクト画面と同じ並び）
 	constexpr std::array<const char*, 8> STAT_ICON_IMAGE_IDS{
@@ -73,7 +101,29 @@ namespace
 	constexpr int STAT_INDEX_BSPD{ 6 };
 	constexpr int STAT_INDEX_BRNG{ 7 };
 
-	constexpr const char* TITLE_TEXT{ "INVENTORY" };
+	/**
+	 * @brief 拡張子種別に対応する擬似ファイル名を返す
+	 *
+	 * 種別名（IMG・AUD）だけを並べると分類表に見えてしまう。
+	 * ファイル名を添えることで「フォルダの中身を見ている」ことが伝わる
+	 * @param type 拡張子種別
+	 * @return 表示するファイル名
+	 */
+	const char* toFileName(core::data::FileExtensionType type)
+	{
+		switch (type)
+		{
+		case core::data::FileExtensionType::Executable: return "tool.exe";
+		case core::data::FileExtensionType::Document: return "readme.txt";
+		case core::data::FileExtensionType::Image: return "icon.png";
+		case core::data::FileExtensionType::Audio: return "bgm.mp3";
+		case core::data::FileExtensionType::SourceCode: return "main.cpp";
+		case core::data::FileExtensionType::Shortcut: return "link.lnk";
+		case core::data::FileExtensionType::Video: return "clip.mp4";
+		case core::data::FileExtensionType::Archive: return "data.zip";
+		default: return "unknown.dat";
+		}
+	}
 
 	/**
 	 * @brief UTF-8の文字列をDxLibが期待するShift_JISへ変換する
@@ -120,10 +170,14 @@ namespace game::ui::ingame
 		}
 
 		// 日本語は変換結果が毎フレーム同じなので、生成時に一度だけ変換して保持する
-		m_captionCarried = toDrawable("持ち込み");
-		m_captionAcquired = toDrawable("道中で拾った");
+		m_title = toDrawable("インベントリ");
+		m_addressText = toDrawable("PC  >  拡張子  >  所持しているもの");
+		m_captionCarried = toDrawable("持ち込み（セレクト画面で選んだもの）");
+		m_captionAcquired = toDrawable("道中で拾った（効果あり）");
 		m_captionUnequipped = toDrawable("未装備（付け替え待ち）");
+		m_captionStats = toDrawable("いまの能力");
 		m_captionHint = toDrawable("E : 閉じる");
+		m_captionEmptySlot = toDrawable("空き");
 	}
 
 	int InventoryView::scaled(int value) const
@@ -140,23 +194,15 @@ namespace game::ui::ingame
 		    core::utility::Color::BLACK, true);
 		m_uiRenderer.resetBlendMode();
 
-		const int leftWidth{ scaled(LEFT_PANEL_WIDTH) };
-		const int rightWidth{ scaled(RIGHT_PANEL_WIDTH) };
-		const int height{ scaled(PANEL_HEIGHT) };
-		const int gap{ scaled(PANEL_GAP) };
-
-		const int totalWidth{ leftWidth + gap + rightWidth };
-		const int left{ (m_screen.getWidth() - totalWidth) / 2 };
+		const int width{ scaled(WINDOW_WIDTH) };
+		const int height{ scaled(WINDOW_HEIGHT) };
+		const int left{ (m_screen.getWidth() - width) / 2 };
 		const int top{ (m_screen.getHeight() - height) / 2 };
 
-		m_panel.draw(left, top, leftWidth, height);
-		m_panel.draw(left + leftWidth + gap, top, rightWidth, height);
+		m_panel.draw(left, top, width, height);
 
-		const int padding{ scaled(PANEL_PADDING) };
-		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
-		m_uiRenderer.drawText(left + padding, top + scaled(TITLE_Y), TITLE_TEXT,
-		    core::utility::Color::HUD_INK, scaled(TITLE_FONT_SIZE));
-		m_uiRenderer.resetFont();
+		drawTitleBar(left, top, width);
+		drawAddressBar(left, top + scaled(TITLE_BAR_HEIGHT), width);
 
 		// 持ち込み（セレクト画面で選んだもの）
 		std::vector<core::data::FileExtensionType> carried{};
@@ -180,80 +226,190 @@ namespace game::ui::ingame
 					unequipped.push_back(inventory->m_acquired[i]);
 			}
 		}
+		const int itemCount{ static_cast<int>(equipped.size() + unequipped.size()) };
 
-		// 埋まっていない枠も空きとして見せる。何個挿せるかが分からないと
+		// 埋まっていない枠も空きマスとして見せる。何個挿せるかが分からないと
 		// 「拾ってきて挿す」という行動につながらない
 		while (equipped.size() < component::combat::ExtensionInventoryComponent::MAX_EQUIPPED)
 			equipped.push_back(core::data::FileExtensionType::Count);
 
-		const int contentX{ left + padding };
-		const int contentWidth{ leftWidth - padding * 2 };
-		int y{ top + scaled(TITLE_Y) + scaled(TITLE_FONT_SIZE) + scaled(SECTION_GAP) };
+		const int padding{ scaled(WINDOW_PADDING) };
+		const int rightWidth{ scaled(RIGHT_COLUMN_WIDTH) };
+		const int contentTop{ top + scaled(TITLE_BAR_HEIGHT) + scaled(ADDRESS_BAR_HEIGHT) + padding };
+		const int listWidth{ width - rightWidth - padding * 3 };
 
-		y += drawSection(contentX, y, contentWidth, m_captionCarried, carried, false);
+		int y{ contentTop };
+		y += drawSection(left + padding, y, listWidth, m_captionCarried, carried, false);
 		y += scaled(SECTION_GAP);
-		y += drawSection(contentX, y, contentWidth, m_captionAcquired, equipped, false);
-		y += scaled(SECTION_GAP);
+		y += drawSection(left + padding, y, listWidth, m_captionAcquired, equipped, false);
 		if (!unequipped.empty())
-			drawSection(contentX, y, contentWidth, m_captionUnequipped, unequipped, true);
+		{
+			y += scaled(SECTION_GAP);
+			drawSection(left + padding, y, listWidth, m_captionUnequipped, unequipped, true);
+		}
 
-		drawStats(left + leftWidth + gap, top, rightWidth, playerId);
+		// 左右の区切り線。エクスプローラーのペイン分割に相当する
+		const int dividerX{ left + width - rightWidth - padding * 2 };
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SEPARATOR_ALPHA);
+		m_uiRenderer.drawLine(dividerX, contentTop - padding / 2,
+		    dividerX, top + height - scaled(STATUS_BAR_HEIGHT) - padding / 2, SEPARATOR_COLOR, 1);
+		m_uiRenderer.resetBlendMode();
+
+		drawStats(dividerX + padding, contentTop, rightWidth, playerId);
+		drawStatusBar(left, top + height - scaled(STATUS_BAR_HEIGHT), width, itemCount);
+	}
+
+	void InventoryView::drawTitleBar(int x, int y, int width)
+	{
+		const int barHeight{ scaled(TITLE_BAR_HEIGHT) };
+
+		// 面をわずかに明るくして、本文との段差を作る
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, TITLE_BAR_ALPHA);
+		m_uiRenderer.drawBox(x, y, x + width, y + barHeight, BAR_FILL_COLOR, true);
+		m_uiRenderer.resetBlendMode();
+
+		const int padding{ scaled(WINDOW_PADDING) };
+		const int iconSize{ scaled(TITLE_ICON_SIZE) };
+
+		// フォルダを表す四角。専用の画像を持たずに済ませ、色だけで「フォルダ」を示す
+		m_uiRenderer.drawRoundedBox(x + padding, y + (barHeight - iconSize) / 2,
+		    iconSize, iconSize, scaled(SLOT_RADIUS), core::utility::Color::HUD_CHARGE_MAX, true, 1);
+
+		const int fontSize{ scaled(TITLE_FONT_SIZE) };
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
+		m_uiRenderer.drawText(x + padding + iconSize + scaled(TITLE_ICON_GAP),
+		    y + (barHeight - fontSize) / 2, m_title.c_str(),
+		    core::utility::Color::HUD_INK, fontSize);
+		m_uiRenderer.resetFont();
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SEPARATOR_ALPHA);
+		m_uiRenderer.drawLine(x, y + barHeight, x + width, y + barHeight, SEPARATOR_COLOR, 1);
+		m_uiRenderer.resetBlendMode();
+	}
+
+	void InventoryView::drawAddressBar(int x, int y, int width)
+	{
+		const int barHeight{ scaled(ADDRESS_BAR_HEIGHT) };
+		const int fontSize{ scaled(ADDRESS_FONT_SIZE) };
+
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
+		m_uiRenderer.drawText(x + scaled(WINDOW_PADDING), y + (barHeight - fontSize) / 2,
+		    m_addressText.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
+		m_uiRenderer.resetFont();
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SEPARATOR_ALPHA);
+		m_uiRenderer.drawLine(x, y + barHeight, x + width, y + barHeight, SEPARATOR_COLOR, 1);
+		m_uiRenderer.resetBlendMode();
+	}
+
+	void InventoryView::drawStatusBar(int x, int y, int width, int itemCount)
+	{
+		const int barHeight{ scaled(STATUS_BAR_HEIGHT) };
+		const int fontSize{ scaled(STATUS_FONT_SIZE) };
+		const int padding{ scaled(WINDOW_PADDING) };
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SEPARATOR_ALPHA);
+		m_uiRenderer.drawLine(x, y, x + width, y, SEPARATOR_COLOR, 1);
+		m_uiRenderer.resetBlendMode();
+
+		char countText[32]{};
+		std::snprintf(countText, sizeof(countText), "%d", itemCount);
+		const std::string countLabel{ std::string(countText) + toDrawable(" 個の項目") };
+
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
+		m_uiRenderer.drawText(x + padding, y + (barHeight - fontSize) / 2,
+		    countLabel.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
 
 		// 閉じ方の案内。開いたはいいが閉じ方が分からない、を起こさない
-		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
-		const int hintWidth{ m_uiRenderer.getTextWidth(m_captionHint.c_str(), scaled(HINT_FONT_SIZE)) };
-		m_uiRenderer.drawText((m_screen.getWidth() - hintWidth) / 2,
-		    top + height + scaled(HINT_BOTTOM_MARGIN), m_captionHint.c_str(),
-		    core::utility::Color::HUD_INK_FAINT, scaled(HINT_FONT_SIZE));
+		const int hintWidth{ m_uiRenderer.getTextWidth(m_captionHint.c_str(), fontSize) };
+		m_uiRenderer.drawText(x + width - padding - hintWidth, y + (barHeight - fontSize) / 2,
+		    m_captionHint.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
 		m_uiRenderer.resetFont();
 	}
 
 	int InventoryView::drawSection(int x, int y, int width, const std::string& caption,
 	    const std::vector<core::data::FileExtensionType>& types, bool isDimmed)
 	{
+		const int captionFontSize{ scaled(SECTION_FONT_SIZE) };
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(x, y, caption.c_str(),
-		    core::utility::Color::HUD_INK_FAINT, scaled(SECTION_FONT_SIZE));
+		    core::utility::Color::HUD_INK_FAINT, captionFontSize);
 		m_uiRenderer.resetFont();
 
-		const int iconSize{ scaled(ICON_SIZE) };
-		const int iconGap{ scaled(ICON_GAP) };
-		const int iconTop{ y + scaled(SECTION_FONT_SIZE) + scaled(ICON_CAPTION_GAP) };
+		const int slotWidth{ scaled(SLOT_WIDTH) };
+		const int slotHeight{ scaled(SLOT_HEIGHT) };
+		const int slotGap{ scaled(SLOT_GAP) };
+		const int slotTop{ y + captionFontSize + scaled(SECTION_CAPTION_GAP) };
 
 		// 横に並べきれなくなったら折り返す。所持数に上限を設けていないため、
-		// 1行に収まる前提で書くと拾い集めたときに画面外へはみ出す
-		const int perRow{ std::max(1, (width + iconGap) / (iconSize + iconGap)) };
+		// 1行に収まる前提で書くと拾い集めたときに窓からはみ出す
+		const int perRow{ std::max(1, (width + slotGap) / (slotWidth + slotGap)) };
 
 		int row{ 0 };
 		for (std::size_t i{ 0 }; i < types.size(); ++i)
 		{
 			const int column{ static_cast<int>(i) % perRow };
 			row = static_cast<int>(i) / perRow;
-			drawExtensionIcon(x + column * (iconSize + iconGap),
-			    iconTop + row * (iconSize + iconGap), types[i], isDimmed);
+			drawSlot(x + column * (slotWidth + slotGap),
+			    slotTop + row * (slotHeight + slotGap), types[i], isDimmed);
 		}
 
 		const int rowCount{ types.empty() ? 0 : row + 1 };
-		return iconTop - y + rowCount * (iconSize + iconGap) - iconGap;
+		return slotTop - y + rowCount * (slotHeight + slotGap) - slotGap;
 	}
 
-	void InventoryView::drawExtensionIcon(int x, int y, core::data::FileExtensionType type, bool isDimmed)
+	void InventoryView::drawSlot(int x, int y, core::data::FileExtensionType type, bool isDimmed)
 	{
 		const bool isEmpty{ type == core::data::FileExtensionType::Count };
-		const int handle{ isEmpty ? m_emptyIconHandle : m_iconHandles[static_cast<int>(type)] };
-		if (handle == -1)
-			return;
+		const int slotWidth{ scaled(SLOT_WIDTH) };
+		const int slotHeight{ scaled(SLOT_HEIGHT) };
+		const int radius{ scaled(SLOT_RADIUS) };
 
-		const int size{ scaled(ICON_SIZE) };
-		int alpha{ ICON_ALPHA_OPAQUE };
-		if (isEmpty)
-			alpha = EMPTY_ICON_ALPHA;
-		else if (isDimmed)
-			alpha = DIMMED_ICON_ALPHA;
+		// マス目の面と枠。これがあることで「置き場」に見え、
+		// アイコンが宙に浮いている状態から抜け出す
+		if (!isEmpty)
+		{
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SLOT_FILL_ALPHA);
+			m_uiRenderer.drawRoundedBox(x, y, slotWidth, slotHeight, radius, SLOT_FILL_COLOR, true, 1);
+			m_uiRenderer.resetBlendMode();
+		}
 
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
-		m_uiRenderer.drawImage(handle, x, y, size, size);
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+		    isEmpty ? SLOT_EMPTY_BORDER_ALPHA : SLOT_BORDER_ALPHA);
+		m_uiRenderer.drawRoundedBox(x, y, slotWidth, slotHeight, radius, SLOT_BORDER_COLOR, false, 1);
 		m_uiRenderer.resetBlendMode();
+
+		const int handle{ isEmpty ? m_emptyIconHandle : m_iconHandles[static_cast<int>(type)] };
+		const int iconSize{ scaled(SLOT_ICON_SIZE) };
+		if (handle != -1)
+		{
+			int alpha{ ICON_ALPHA_OPAQUE };
+			if (isEmpty)
+				alpha = EMPTY_ICON_ALPHA;
+			else if (isDimmed)
+				alpha = DIMMED_ICON_ALPHA;
+
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+			m_uiRenderer.drawImage(handle, x + (slotWidth - iconSize) / 2,
+			    y + scaled(SLOT_ICON_TOP), iconSize, iconSize);
+			m_uiRenderer.resetBlendMode();
+		}
+
+		// ファイル名。種別名だけを並べると分類表に見えるため、名前を添えて
+		// 「フォルダの中身を見ている」ことを伝える
+		const int nameFontSize{ scaled(SLOT_NAME_FONT_SIZE) };
+		const std::string name{ isEmpty ? m_captionEmptySlot : std::string(toFileName(type)) };
+		const int nameY{ y + scaled(SLOT_ICON_TOP) + iconSize + scaled(SLOT_NAME_GAP) };
+
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
+		const int nameWidth{ m_uiRenderer.getTextWidth(name.c_str(), nameFontSize) };
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+		    isEmpty ? EMPTY_ICON_ALPHA : ICON_ALPHA_OPAQUE);
+		m_uiRenderer.drawText(x + (slotWidth - nameWidth) / 2, nameY, name.c_str(),
+		    isDimmed ? core::utility::Color::HUD_INK_FAINT : core::utility::Color::HUD_INK,
+		    nameFontSize);
+		m_uiRenderer.resetBlendMode();
+		m_uiRenderer.resetFont();
 	}
 
 	void InventoryView::drawStats(int x, int y, int width, core::ecs::EntityId playerId)
@@ -277,20 +433,25 @@ namespace game::ui::ingame
 			stats[STAT_INDEX_BRNG] = player->m_projectileRange;
 		}
 
-		const int padding{ scaled(PANEL_PADDING) };
+		const int captionFontSize{ scaled(SECTION_FONT_SIZE) };
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
+		m_uiRenderer.drawText(x, y, m_captionStats.c_str(),
+		    core::utility::Color::HUD_INK_FAINT, captionFontSize);
+		m_uiRenderer.resetFont();
+
 		const int iconSize{ scaled(STAT_ICON_SIZE) };
 		const int rowHeight{ scaled(STAT_ROW_HEIGHT) };
 		const int fontSize{ scaled(STAT_FONT_SIZE) };
 
-		int rowY{ y + scaled(TITLE_Y) };
+		int rowY{ y + captionFontSize + scaled(SECTION_CAPTION_GAP) };
 		for (int i{ 0 }; i < STAT_COUNT; ++i)
 		{
 			if (m_statIconHandles[i] != -1)
-				m_uiRenderer.drawImage(m_statIconHandles[i], x + padding,
+				m_uiRenderer.drawImage(m_statIconHandles[i], x,
 				    rowY + (rowHeight - iconSize) / 2, iconSize, iconSize);
 
 			m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
-			m_uiRenderer.drawText(x + padding + iconSize + scaled(STAT_LABEL_GAP),
+			m_uiRenderer.drawText(x + iconSize + scaled(STAT_LABEL_GAP),
 			    rowY + (rowHeight - fontSize) / 2, m_statLabels[i].c_str(),
 			    core::utility::Color::HUD_INK_FAINT, fontSize);
 			m_uiRenderer.resetFont();
@@ -304,7 +465,7 @@ namespace game::ui::ingame
 			// 数値は右寄せ。桁が動いても右端が揃い、増えたことを見比べやすい
 			m_uiRenderer.setFont(core::constant::ui::MONO_FONT_NAME);
 			const int valueWidth{ m_uiRenderer.getTextWidth(valueText, fontSize) };
-			m_uiRenderer.drawText(x + width - padding - valueWidth,
+			m_uiRenderer.drawText(x + width - valueWidth,
 			    rowY + (rowHeight - fontSize) / 2, valueText,
 			    core::utility::Color::HUD_INK, fontSize);
 			m_uiRenderer.resetFont();
