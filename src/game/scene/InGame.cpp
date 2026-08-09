@@ -906,7 +906,13 @@ namespace game::scene
 		else if (!m_pauseManager.isPaused())
 			m_pauseManager.pause(PauseReason::Inventory);
 
-		m_view.setInventoryOpen(m_pauseManager.isPausedBy(PauseReason::Inventory));
+		const bool isOpen{ m_pauseManager.isPausedBy(PauseReason::Inventory) };
+		m_view.setInventoryOpen(isOpen);
+
+		// 開いている間はカーソルを出す。隠したままだとマウスを中央へ戻す処理
+		// （getMouseDelta）が止まり、カーソルが端まで流れていく。
+		// その状態で閉じると溜まったぶんが一度に効いてカメラが飛ぶ
+		m_inputProvider.setMouseCursorVisible(isOpen);
 	}
 
 	void InGame::draw()
