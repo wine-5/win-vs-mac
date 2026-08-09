@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "IScene.h"
 #include <vector>
 #include <unordered_set>
@@ -54,6 +54,7 @@ namespace game
 		class EquipmentSlotView; // 前方宣言
 		class ObjectiveView;     // 前方宣言
 		class InGameStatusView;  // 前方宣言
+		class InventoryView;     // 前方宣言
 		class LowHealthVignetteView; // 前方宣言
 		class BossHUDView;           // 前方宣言
 		class MiniMapView;           // 前方宣言
@@ -118,6 +119,15 @@ namespace game::scene
 		void spawnEntities();
 		void setupSystems();
 		void setupEvents();
+
+		/**
+		 * @brief Eキーによるインベントリの開閉を処理する
+		 *
+		 * 開いている間は時間を止める（PauseReason::Inventory）。
+		 * ポーズメニューと同時に開くと、どちらのキーが効いているのか
+		 * 分からなくなるため、他の理由で止まっている間は開かない
+		 */
+		void updateInventory();
 
 		/**
 		 * @brief プレイヤーの現在のパラメータをログへ出力する
@@ -204,6 +214,9 @@ namespace game::scene
 		// 目標表示（左上）のView
 		std::unique_ptr<ui::ingame::ObjectiveView> m_objectiveView;
 		std::unique_ptr<ui::ingame::InGameStatusView> m_statusView;
+
+		// 拡張子インベントリ（Eキーで開閉）
+		std::unique_ptr<ui::ingame::InventoryView> m_inventoryView;
 
 		// 低HP警告のビネットのView
 		std::unique_ptr<ui::ingame::LowHealthVignetteView> m_lowHealthVignetteView;

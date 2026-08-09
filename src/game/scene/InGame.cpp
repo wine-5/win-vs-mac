@@ -93,6 +93,7 @@
 #include "game/ui/ingame/EquipmentSlotView.h"
 #include "game/ui/ingame/ObjectiveView.h"
 #include "game/ui/ingame/InGameStatusView.h"
+#include "game/ui/ingame/InventoryView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
 #include "game/ui/ingame/BossHUDView.h"
 #include "game/ui/ingame/MiniMapView.h"
@@ -314,6 +315,14 @@ namespace game::scene
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
 		    m_gameManager.getDifficulty());
 		m_view.setInGameStatusView(m_statusView.get());
+
+		m_inventoryView = std::make_unique<ui::ingame::InventoryView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager,
+		    m_resourceManager,
+		    m_fileEquipmentData);
+		m_view.setInventoryView(m_inventoryView.get());
 
 		m_lowHealthVignetteView = std::make_unique<ui::ingame::LowHealthVignetteView>(
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
@@ -868,6 +877,13 @@ namespace game::scene
 		// ヒットストップ中はSystemへ渡す時間に倍率を掛ける（0なら何も進まない）。
 		// 経過時間の計測もここへ揃える。止まっている間もタイマーだけ進むと、
 		// 画面が止まっているのに右上の秒数だけ動いて不自然になる
+		updateInventory();
+
+		// インベントリを開いている間は時間を止める。読む画面なので、
+		// 読んでいる最中に殴られるのはプレイヤーの落ち度ではなく設計の落ち度になる
+		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
+			return;
+
 		const float scaledDeltaTime{ m_hitStop.apply(deltaTime) };
 
 		// 開始演出（READY）の間はまだ動けないので、クリアタイムの計測も始めない。
@@ -876,6 +892,21 @@ namespace game::scene
 		    (m_battleStartSystem == nullptr || !m_battleStartSystem->isPreparing()))
 			m_elapsedTime += scaledDeltaTime;
 		m_systemManager.update(scaledDeltaTime);
+	}
+
+	void InGame::updateInventory()
+	{
+		if (!m_inputProvider.isKeyPressed(core::input::KeyCode::E))
+			return;
+
+		// 別の理由（ポーズメニュー）で止まっている間は開かない。
+		// 2つの画面が重なると、どちらのキーが効いているのか分からなくなる
+		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
+			m_pauseManager.resume();
+		else if (!m_pauseManager.isPaused())
+			m_pauseManager.pause(PauseReason::Inventory);
+
+		m_view.setInventoryOpen(m_pauseManager.isPausedBy(PauseReason::Inventory));
 	}
 
 	void InGame::draw()
