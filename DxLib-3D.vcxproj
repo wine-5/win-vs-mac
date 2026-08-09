@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -383,6 +383,7 @@
     <ClInclude Include="src\game\component\EnemyTypeComponent.h" />
     <ClInclude Include="src\game\component\combat\AttackComponent.h" />
     <ClInclude Include="src\game\component\visual\EffectComponent.h" />
+    <ClInclude Include="src\game\component\combat\ExtensionInventoryComponent.h" />
     <ClInclude Include="src\game\component\combat\HealthComponent.h" />
     <ClInclude Include="src\game\component\visual\HitEffectComponent.h" />
     <ClInclude Include="src\game\component\TagComponent.h" />
