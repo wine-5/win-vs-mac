@@ -8,6 +8,7 @@
 #include "game/component/visual/RenderComponent.h"
 #include "game/component/stage/ExtensionPickupComponent.h"
 #include "game/constant/ExtensionIconId.h"
+#include "game/event/InGameEvents.h"
 #include "core/utility/Log.h"
 #include <algorithm>
 #include <cmath>
@@ -87,11 +88,13 @@ namespace game::system::stage
 	    core::ecs::EntityManager& entityManager,
 	    core::iface::IRenderer& renderer,
 	    core::iface::IResourceManager& resourceManager,
+	    core::base::EventBus& eventBus,
 	    core::ecs::EntityId playerId)
 	    : m_componentManager{ componentManager }
 	    , m_entityManager{ entityManager }
 	    , m_renderer{ renderer }
 	    , m_resourceManager{ resourceManager }
+	    , m_eventBus{ eventBus }
 	    , m_playerId{ playerId }
 	{
 	}
@@ -159,7 +162,14 @@ namespace game::system::stage
 		}
 
 		if (destructible.isBroken())
+		{
 			breakBlock(blockId);
+			return;
+		}
+
+		// まだ壊れていない打撃。次で壊れるかを渡して「あと1回」を音で知らせられるようにする
+		m_eventBus.publish(event::BlockHitEvent{ blockId,
+		    destructible.m_hitCount + 1 >= destructible.m_hitsToBreak });
 	}
 
 	void BlockBreakSystem::breakBlock(core::ecs::EntityId blockId)
@@ -212,6 +222,8 @@ namespace game::system::stage
 		m_componentManager.add<component::stage::BlockDebrisComponent>(blockId, debris);
 
 		spawnDrops(blockId);
+
+		m_eventBus.publish(event::BlockBrokenEvent{ blockId, transform.m_position });
 	}
 
 	void BlockBreakSystem::spawnDrops(core::ecs::EntityId blockId)

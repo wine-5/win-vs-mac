@@ -4,6 +4,7 @@
 #include "core/ecs/EntityManager.h"
 #include "core/ecs/Entity.h"
 #include "core/interface/IResourceManager.h"
+#include "core/base/EventBus.h"
 #include "core/interface/IRenderer.h"
 
 namespace game::system::stage
@@ -36,12 +37,14 @@ namespace game::system::stage
 		 * @param entityManager 拡張子の欠片を生成するためのEntityManager
 		 * @param renderer ひびテクスチャの差し替えに使う描画インターフェース
 		 * @param resourceManager 欠片のアイコン画像を読むリソース管理インターフェース
+		 * @param eventBus 打撃・破壊を知らせるためのEventBus
 		 * @param playerId プレイヤーのEntityID
 		 */
 		BlockBreakSystem(core::ecs::ComponentManager& componentManager,
 		    core::ecs::EntityManager& entityManager,
 		    core::iface::IRenderer& renderer,
 		    core::iface::IResourceManager& resourceManager,
+		    core::base::EventBus& eventBus,
 		    core::ecs::EntityId playerId);
 
 		/**
@@ -59,6 +62,7 @@ namespace game::system::stage
 		core::ecs::EntityManager& m_entityManager;
 		core::iface::IRenderer& m_renderer;
 		core::iface::IResourceManager& m_resourceManager;
+		core::base::EventBus& m_eventBus;
 		core::ecs::EntityId m_playerId;
 	};
 } // namespace game::system::stage
