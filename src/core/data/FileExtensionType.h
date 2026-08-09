@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include <string_view>
+#include <utility>
 
 namespace core::data
 {
@@ -21,4 +23,37 @@ namespace core::data
 		// 必ず末尾に置くこと（種別を追加しても配列サイズが自動で追従する）
 		Count
 	};
+
+	/**
+	 * @brief JSONに書く種別名と列挙の対応表
+	 *
+	 * extensionBonus.json のキーと、stageCatalog.json のドロップ指定が同じ名前を使う。
+	 * 表を1つに保つことで、種別を足したときに片方だけ古いまま残ることを防ぐ
+	 */
+	inline constexpr std::pair<std::string_view, FileExtensionType> EXTENSION_TYPE_NAMES[]{
+		{ "executable", FileExtensionType::Executable },
+		{ "document", FileExtensionType::Document },
+		{ "image", FileExtensionType::Image },
+		{ "audio", FileExtensionType::Audio },
+		{ "sourceCode", FileExtensionType::SourceCode },
+		{ "shortcut", FileExtensionType::Shortcut },
+		{ "video", FileExtensionType::Video },
+		{ "archive", FileExtensionType::Archive },
+		{ "unknown", FileExtensionType::Unknown },
+	};
+
+	/**
+	 * @brief 種別名を FileExtensionType へ変換する
+	 * @param name 種別名（例: "image"）
+	 * @return 対応する種別。表に無ければ Unknown
+	 */
+	[[nodiscard]] constexpr FileExtensionType toExtensionType(std::string_view name) noexcept
+	{
+		for (const auto& [key, type] : EXTENSION_TYPE_NAMES)
+		{
+			if (key == name)
+				return type;
+		}
+		return FileExtensionType::Unknown;
+	}
 } // namespace core::data

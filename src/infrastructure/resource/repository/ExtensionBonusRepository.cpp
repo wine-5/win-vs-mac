@@ -1,4 +1,4 @@
-#include "ExtensionBonusRepository.h"
+﻿#include "ExtensionBonusRepository.h"
 #include <fstream>
 #include <stdexcept>
 #include <string>
@@ -10,18 +10,6 @@ namespace
 {
 	constexpr const char* BONUS_CONFIG_PATH{ "assets/data/extensionBonus.json" };
 
-	// JSONのキー名と FileExtensionType の対応。enumの並びと1対1で保つこと
-	constexpr std::pair<std::string_view, core::data::FileExtensionType> TYPE_KEYS[]{
-		{ "executable", core::data::FileExtensionType::Executable },
-		{ "document", core::data::FileExtensionType::Document },
-		{ "image", core::data::FileExtensionType::Image },
-		{ "audio", core::data::FileExtensionType::Audio },
-		{ "sourceCode", core::data::FileExtensionType::SourceCode },
-		{ "shortcut", core::data::FileExtensionType::Shortcut },
-		{ "video", core::data::FileExtensionType::Video },
-		{ "archive", core::data::FileExtensionType::Archive },
-		{ "unknown", core::data::FileExtensionType::Unknown },
-	};
 } // namespace
 
 namespace infrastructure::resource::repository
@@ -37,7 +25,7 @@ namespace infrastructure::resource::repository
 			throw std::runtime_error{ std::string{ BONUS_CONFIG_PATH } + ": 必須キー 'bonuses' がありません" };
 
 		const auto& bonuses = j["bonuses"];
-		for (const auto& [key, type] : TYPE_KEYS)
+		for (const auto& [key, type] : core::data::EXTENSION_TYPE_NAMES)
 		{
 			const std::string name{ key };
 			if (!bonuses.contains(name))
