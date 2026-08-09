@@ -172,6 +172,7 @@
     <ClCompile Include="src\game\system\visual\BackgroundParticleSystem.cpp" />
     <ClCompile Include="src\game\system\visual\HardAuraVisualsSystem.cpp" />
     <ClCompile Include="src\game\ui\ingame\InGameStatusView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\InventoryView.cpp" />
     <ClCompile Include="src\game\system\camera\DamageShakeSystem.cpp" />
     <ClCompile Include="src\game\system\ai\MeleeChaseAISystem.cpp" />
     <ClCompile Include="src\game\system\ai\RangeKeepAISystem.cpp" />
@@ -426,6 +427,7 @@
     <ClInclude Include="src\game\system\visual\BackgroundParticleSystem.h" />
     <ClInclude Include="src\game\system\visual\HardAuraVisualsSystem.h" />
     <ClInclude Include="src\game\ui\ingame\InGameStatusView.h" />
+    <ClInclude Include="src\game\ui\ingame\InventoryView.h" />
     <ClInclude Include="src\game\system\camera\DamageShakeSystem.h" />
     <ClInclude Include="src\game\system\ai\MeleeChaseAISystem.h" />
     <ClInclude Include="src\game\system\ai\RangeKeepAISystem.h" />
