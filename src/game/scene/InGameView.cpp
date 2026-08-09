@@ -109,40 +109,46 @@ namespace game::scene
 		if (m_damagePopupSystem)
 			m_damagePopupSystem->draw();
 
-		// プレイヤーステータス（左下のHP）。演出より手前・レティクルと同じHUD層に描く
-		if (m_playerHUDView)
-			m_playerHUDView->draw(playerId);
+		// インベントリを開いている間は常設のHUDを描かない。
+		// インベントリの下地は半透明なので、そのまま描くとパネルや光の帯が
+		// 透けて重なり、読ませたい内容の上にノイズが乗る
+		if (!m_isInventoryOpen)
+		{
+			// プレイヤーステータス（左下のHP）。演出より手前・レティクルと同じHUD層に描く
+			if (m_playerHUDView)
+				m_playerHUDView->draw(playerId);
 
-		// 装備スロット（右下）
-		if (m_equipmentSlotView)
-			m_equipmentSlotView->draw();
+			// 装備スロット（右下）
+			if (m_equipmentSlotView)
+				m_equipmentSlotView->draw();
 
-		// 目標（左上）。開始演出のミッションが中央から流れ着くまでは伏せておく
-		// （同じ内容が中央と左上に同時に出ていると、どちらを見ればよいのか分からない）
-		if (m_objectiveView &&
-		    (m_battleStartSystem == nullptr || m_battleStartSystem->isObjectiveRevealed()))
-			m_objectiveView->draw(remainingEnemyCount, bossId != core::ecs::INVALID_ENTITY_ID);
+			// 目標（左上）。開始演出のミッションが中央から流れ着くまでは伏せておく
+			// （同じ内容が中央と左上に同時に出ていると、どちらを見ればよいのか分からない）
+			if (m_objectiveView &&
+			    (m_battleStartSystem == nullptr || m_battleStartSystem->isObjectiveRevealed()))
+				m_objectiveView->draw(remainingEnemyCount, bossId != core::ecs::INVALID_ENTITY_ID);
 
-		// 難易度と経過時間（右上）
-		if (m_statusView)
-			m_statusView->draw(elapsedTime);
+			// 難易度と経過時間（右上）
+			if (m_statusView)
+				m_statusView->draw(elapsedTime);
 
-		// ボスHP（上中央）。出現していなければ描かれない
-		if (m_bossHUDView)
-			m_bossHUDView->draw(bossId);
+			// ボスHP（上中央）。出現していなければ描かれない
+			if (m_bossHUDView)
+				m_bossHUDView->draw(bossId);
 
-		// ミニマップ（右上・難易度パネルの下）
-		if (m_miniMapView)
-			m_miniMapView->draw(playerId);
+			// ミニマップ（右上・難易度パネルの下）
+			if (m_miniMapView)
+				m_miniMapView->draw(playerId);
 
-		// 低HP警告のビネット。四隅を赤く染めるが、下の隅はHUDのパネルが占めているため、
-		// パネルより手前に描かないと下2つの隅が隠れてしまう。
-		// 画面全体が危険な状態なので、HUDごと赤く染まるほうが表現としても正しい
-		if (m_lowHealthVignetteView)
-			m_lowHealthVignetteView->draw(playerId);
+			// 低HP警告のビネット。四隅を赤く染めるが、下の隅はHUDのパネルが占めているため、
+			// パネルより手前に描かないと下2つの隅が隠れてしまう。
+			// 画面全体が危険な状態なので、HUDごと赤く染まるほうが表現としても正しい
+			if (m_lowHealthVignetteView)
+				m_lowHealthVignetteView->draw(playerId);
 
-		// 照準レティクル（HUD）は最前面に描く
-		drawReticle(playerId);
+			// 照準レティクル（HUD）は最前面に描く
+			drawReticle(playerId);
+		}
 
 		// DEBUG: デバッグHUD（FPS等の統計・カメラ状態ラベル）（リリース時に削除）
 		// 敵数はAIComponentを持つEntity数から数える（IDリストを引き回さない）
