@@ -1,9 +1,12 @@
 #pragma once
 #include "core/data/FileExtensionType.h"
+#include "core/ecs/ComponentManager.h"
+#include "core/ecs/Entity.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include <chrono>
 #include <unordered_map>
+#include <vector>
 
 namespace core::iface
 {
@@ -35,11 +38,15 @@ namespace game::ui::ingame
 		 * @param screen 画面サイズ取得のインターフェース
 		 * @param equipmentData 装備中のファイル情報（所有はGameManager）
 		 * @param resourceManager 拡張子アイコンの読み込みに使うIResourceManager
+		 * @param componentManager 道中で拾った拡張子を読むComponentManagerの参照
+		 * @param playerId プレイヤーのEntityID
 		 */
 		EquipmentSlotView(core::iface::IUIRenderer& uiRenderer,
 		    core::iface::IScreen& screen,
 		    const data::FileEquipmentData& equipmentData,
-		    core::iface::IResourceManager& resourceManager);
+		    core::iface::IResourceManager& resourceManager,
+		    core::ecs::ComponentManager& componentManager,
+		    core::ecs::EntityId playerId);
 
 		/**
 		 * @brief 装備スロットを描画する
@@ -93,9 +100,21 @@ namespace game::ui::ingame
 		 */
 		void drawOrbitingGlow(int x, int y, int size, float phaseOffset);
 
+		/**
+		 * @brief 道中で拾って効果が乗っている拡張子を集める
+		 *
+		 * 効果が乗るのは先頭のMAX_EQUIPPED個だけなので、そのぶんだけを返す。
+		 * 枠が埋まっていない位置は「空き」として Count を入れ、
+		 * あと何個挿せるのかが枠の数で分かるようにする
+		 * @return 表示する拡張子種別の並び（要素数は持ち込みの枠数と同じ）
+		 */
+		[[nodiscard]] std::vector<core::data::FileExtensionType> collectAcquired() const;
+
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
 		const data::FileEquipmentData& m_equipmentData;
+		core::ecs::ComponentManager& m_componentManager;
+		core::ecs::EntityId m_playerId;
 
 		// 拡張子種別ごとのアイコン画像ハンドル。生成時に一度だけ読み込む
 		std::unordered_map<int, int> m_iconHandles{};

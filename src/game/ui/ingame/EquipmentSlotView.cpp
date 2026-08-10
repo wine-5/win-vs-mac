@@ -5,6 +5,7 @@
 #include "core/utility/Color.h"
 #include "core/utility/Log.h"
 #include "game/data/FileEquipmentData.h"
+#include "game/component/combat/ExtensionInventoryComponent.h"
 #include "game/constant/ExtensionIconId.h"
 #include "game/utility/ExtensionBonusLabel.h"
 #include <algorithm>
@@ -40,6 +41,12 @@ namespace
 
 	constexpr const char* EMPTY_LABEL{ "--" };
 
+	// 表示するページ。3枠しか置けないため、持ち込みと道中で拾ったぶんを交互に見せる。
+	// 枠を6つ並べると視界の右下がふさがり、戦闘中に見えない場所が増える
+	constexpr int PAGE_CARRIED{ 0 };  // セレクト画面で選んだもの
+	constexpr int PAGE_ACQUIRED{ 1 }; // 道中で拾ったもの
+	constexpr int PAGE_COUNT{ 2 };
+	constexpr float PAGE_INTERVAL{ 5.0f }; // 自動で切り替わる間隔（秒。左下HUDと揃える）
 
 	/**
 	 * @brief 拡張子種別の表示名を返す
@@ -70,10 +77,14 @@ namespace game::ui::ingame
 	EquipmentSlotView::EquipmentSlotView(core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
 	    const data::FileEquipmentData& equipmentData,
-	    core::iface::IResourceManager& resourceManager)
+	    core::iface::IResourceManager& resourceManager,
+	    core::ecs::ComponentManager& componentManager,
+	    core::ecs::EntityId playerId)
 	    : m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_equipmentData{ equipmentData }
+	    , m_componentManager{ componentManager }
+	    , m_playerId{ playerId }
 	{
 		// アイコンは毎フレーム引き直さず、生成時に一度だけ読み込む。
 		// 失敗しても描画は続けられる（文字表示へ退避する）ため、記録に留める
@@ -104,9 +115,43 @@ namespace game::ui::ingame
 		return value * m_screen.getHeight() / BASE_SCREEN_HEIGHT;
 	}
 
+	std::vector<core::data::FileExtensionType> EquipmentSlotView::collectAcquired() const
+	{
+		constexpr int SLOT_COUNT{ data::FileEquipmentData::MAX_SLOTS };
+
+		std::vector<core::data::FileExtensionType> acquired(
+		    SLOT_COUNT, core::data::FileExtensionType::Count);
+
+		const auto* inventory{
+			m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId)
+		};
+		if (inventory == nullptr)
+			return acquired;
+
+		const int count{ std::min(inventory->equippedCount(), SLOT_COUNT) };
+		for (int i{ 0 }; i < count; ++i)
+			acquired[i] = inventory->m_acquired[i];
+		return acquired;
+	}
+
 	void EquipmentSlotView::draw()
 	{
 		constexpr int SLOT_COUNT{ data::FileEquipmentData::MAX_SLOTS };
+
+		const auto acquired{ collectAcquired() };
+
+		// 何も拾っていないうちはページを送らない。空の枠へ切り替わっても
+		// 見るものが無く、持ち込みを確認したいときに邪魔になるだけ
+		const bool hasAcquired{ std::any_of(acquired.begin(), acquired.end(),
+			[](core::data::FileExtensionType type)
+			{ return type != core::data::FileExtensionType::Count; }) };
+
+		const float elapsed{ std::chrono::duration<float>(
+			std::chrono::steady_clock::now() - m_startTime)
+			    .count() };
+		const int page{ hasAcquired
+			                ? static_cast<int>(elapsed / PAGE_INTERVAL) % PAGE_COUNT
+			                : 0 };
 
 		const int slotSize{ scaled(SLOT_SIZE) };
 		const int gap{ scaled(SLOT_GAP) };
@@ -119,8 +164,14 @@ namespace game::ui::ingame
 		for (int i{ 0 }; i < SLOT_COUNT; ++i)
 		{
 			const int x{ startX + i * (slotSize + gap) };
-			const bool hasSelection{ m_equipmentData.hasSelection(i) };
-			drawSlot(x, y, slotSize, m_equipmentData.getExtensionType(i), hasSelection);
+
+			const bool isCarriedPage{ page == PAGE_CARRIED };
+			const auto type{ isCarriedPage ? m_equipmentData.getExtensionType(i) : acquired[i] };
+			const bool hasSelection{ isCarriedPage
+				                         ? m_equipmentData.hasSelection(i)
+				                         : type != core::data::FileExtensionType::Count };
+
+			drawSlot(x, y, slotSize, type, hasSelection);
 
 			// 装備中のスロットだけ縁を光の粒が回り続ける（起動中であることの表現）
 			if (hasSelection)

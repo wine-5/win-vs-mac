@@ -311,7 +311,9 @@ namespace game::scene
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
 		    m_fileEquipmentData,
-		    m_resourceManager);
+		    m_resourceManager,
+		    m_componentManager,
+		    m_playerId);
 		m_view.setEquipmentSlotView(m_equipmentSlotView.get());
 
 		m_objectiveView = std::make_unique<ui::ingame::ObjectiveView>(
