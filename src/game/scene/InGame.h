@@ -136,6 +136,29 @@ namespace game::scene
 		void updateInventory();
 
 		/**
+		 * @brief リネーム端末の前でのF2による付け替え画面の開閉を処理する
+		 *
+		 * どこでも開けるインベントリ（Eキー）と違い、端末の前でしか開かない。
+		 * 「付け替えるためにブロックを探す」という道中の目的を作るための制限
+		 */
+		void updateRenameTerminal();
+
+		/**
+		 * @brief 付け替え画面での選択操作を処理する
+		 *
+		 * 掴む→もう1つ選ぶ、の2手で入れ替える。1手で入れ替えると
+		 * どれと交換されたのかが分からないまま能力だけが変わる
+		 */
+		void updateSwapSelection();
+
+		/**
+		 * @brief インベントリの開閉をまとめて反映する
+		 * @param isOpen 開くならtrue
+		 * @param isSwapMode 付け替え操作を受け付ける状態で開くか
+		 */
+		void setInventoryOpen(bool isOpen, bool isSwapMode);
+
+		/**
 		 * @brief プレイヤーの現在のパラメータをログへ出力する
 		 *
 		 * 装備ファイルのボーナスが実際にパラメータへ乗っているかを、
@@ -229,6 +252,13 @@ namespace game::scene
 
 		// 付け替え端末への接近判定（所有はSystemManager）。近くにいる端末をViewへ渡す
 		system::stage::RenameTerminalSystem* m_renameTerminalSystem{ nullptr };
+
+		// 付け替え操作の状態。位置は ExtensionInventoryComponent::m_acquired 上の添字で、
+		// -1 は「掴んでいない」。操作を受け取るのはシーン、描くのはView、
+		// 能力の差し替えはSystemと役割を分けている
+		bool m_isSwapMode{ false };
+		int m_swapCursorIndex{ 0 };
+		int m_swapHeldIndex{ -1 };
 
 		// 低HP警告のビネットのView
 		std::unique_ptr<ui::ingame::LowHealthVignetteView> m_lowHealthVignetteView;

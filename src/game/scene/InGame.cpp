@@ -55,6 +55,7 @@
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/PlayerStatsComponent.h"
 #include "game/component/combat/PlayerStatBaseComponent.h"
+#include "game/component/combat/ExtensionInventoryComponent.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/AnimationId.h"
 #include "game/constant/ProjectileId.h"
@@ -898,11 +899,16 @@ namespace game::scene
 		// 経過時間の計測もここへ揃える。止まっている間もタイマーだけ進むと、
 		// 画面が止まっているのに右上の秒数だけ動いて不自然になる
 		updateInventory();
+		updateRenameTerminal();
 
 		// インベントリを開いている間は時間を止める。読む画面なので、
-		// 読んでいる最中に殴られるのはプレイヤーの落ち度ではなく設計の落ち度になる
+		// 読んでいる最中に殴られるのはプレイヤーの落ち度ではなく設計の落ち度になる。
+		// ただし付け替えの操作だけは止まっている間に受け付ける
 		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
+		{
+			updateSwapSelection();
 			return;
+		}
 
 		const float scaledDeltaTime{ m_hitStop.apply(deltaTime) };
 
@@ -927,17 +933,112 @@ namespace game::scene
 		// 別の理由（ポーズメニュー）で止まっている間は開かない。
 		// 2つの画面が重なると、どちらのキーが効いているのか分からなくなる
 		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
-			m_pauseManager.resume();
+			setInventoryOpen(false, false);
 		else if (!m_pauseManager.isPaused())
-			m_pauseManager.pause(PauseReason::Inventory);
+			setInventoryOpen(true, false);
+	}
 
-		const bool isOpen{ m_pauseManager.isPausedBy(PauseReason::Inventory) };
+	void InGame::updateRenameTerminal()
+	{
+		if (!m_inputProvider.isKeyPressed(core::input::KeyCode::F2))
+			return;
+
+		// 開いている間はF2でも閉じられる。開いたキーで閉じられないと、
+		// 閉じ方を探すことになる
+		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
+		{
+			setInventoryOpen(false, false);
+			return;
+		}
+		if (m_pauseManager.isPaused())
+			return;
+
+		// 端末の前でのみ開く。どこでも付け替えられるなら、端末を探す理由が無くなる
+		if (m_renameTerminalSystem == nullptr ||
+		    m_renameTerminalSystem->getNearTerminalId() == core::ecs::INVALID_ENTITY_ID)
+			return;
+
+		setInventoryOpen(true, true);
+	}
+
+	void InGame::setInventoryOpen(bool isOpen, bool isSwapMode)
+	{
+		if (isOpen)
+			m_pauseManager.pause(PauseReason::Inventory);
+		else
+			m_pauseManager.resume();
+
+		m_isSwapMode = isOpen && isSwapMode;
+		m_swapCursorIndex = 0;
+		m_swapHeldIndex = -1;
+
 		m_view.setInventoryOpen(isOpen);
+		if (m_inventoryView)
+			m_inventoryView->setSelection(m_isSwapMode ? m_swapCursorIndex : -1, -1);
 
 		// 開いている間はカーソルを出す。隠したままだとマウスを中央へ戻す処理
 		// （getMouseDelta）が止まり、カーソルが端まで流れていく。
 		// その状態で閉じると溜まったぶんが一度に効いてカメラが飛ぶ
 		m_inputProvider.setMouseCursorVisible(isOpen);
+	}
+
+	void InGame::updateSwapSelection()
+	{
+		if (!m_isSwapMode)
+			return;
+
+		const auto* inventory{
+			m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId)
+		};
+		if (inventory == nullptr || inventory->m_acquired.empty())
+			return;
+
+		const int count{ static_cast<int>(inventory->m_acquired.size()) };
+
+		// 拾ったぶんが減ることは無いが、掴んだまま何かで数が変わっても
+		// 範囲外を指さないようにしておく
+		m_swapCursorIndex = std::clamp(m_swapCursorIndex, 0, count - 1);
+
+		int delta{ 0 };
+		if (m_inputProvider.isKeyPressed(core::input::KeyCode::Left) ||
+		    m_inputProvider.isKeyPressed(core::input::KeyCode::A))
+			delta = -1;
+		else if (m_inputProvider.isKeyPressed(core::input::KeyCode::Right) ||
+		         m_inputProvider.isKeyPressed(core::input::KeyCode::D))
+			delta = 1;
+
+		// 端で止めずに巻き戻す。装備中と未装備は隣り合っているので、
+		// 一周させたほうが「どれと入れ替えるか」を見比べやすい
+		if (delta != 0)
+			m_swapCursorIndex = (m_swapCursorIndex + delta + count) % count;
+
+		if (m_inputProvider.isKeyPressed(core::input::KeyCode::Enter) ||
+		    m_inputProvider.isKeyPressed(core::input::KeyCode::Space))
+		{
+			if (m_swapHeldIndex < 0)
+			{
+				m_swapHeldIndex = m_swapCursorIndex;
+			}
+			else if (m_swapHeldIndex == m_swapCursorIndex)
+			{
+				// 同じマスをもう一度選んだら掴み直し。取り消せないと、
+				// 間違えて掴んだときに意図しない入れ替えを強いられる
+				m_swapHeldIndex = -1;
+			}
+			else
+			{
+				// 装備中と未装備の組み合わせだけが意味を持つ。
+				// どちらを先に掴んだかは問わない
+				const bool isHeldEquipped{ inventory->isEquipped(m_swapHeldIndex) };
+				m_eventBus.publish(event::ExtensionSwapRequestedEvent{
+				    isHeldEquipped ? m_swapHeldIndex : m_swapCursorIndex,
+				    isHeldEquipped ? m_swapCursorIndex : m_swapHeldIndex });
+				m_swapHeldIndex = -1;
+			}
+		}
+
+		if (m_inventoryView)
+			m_inventoryView->setSelection(m_swapCursorIndex, m_swapHeldIndex);
 	}
 
 	void InGame::draw()
