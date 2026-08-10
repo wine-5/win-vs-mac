@@ -139,27 +139,25 @@ namespace game::ui::ingame
 
 	std::vector<core::data::FileExtensionType> EquipmentSlotView::collectAcquired() const
 	{
-		constexpr int SLOT_COUNT{ data::FileEquipmentData::MAX_SLOTS };
-
-		std::vector<core::data::FileExtensionType> acquired(
-		    SLOT_COUNT, core::data::FileExtensionType::Count);
-
 		const auto* inventory{
 			m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId)
 		};
 		if (inventory == nullptr)
-			return acquired;
+			return {};
 
-		const int count{ std::min(inventory->equippedCount(), SLOT_COUNT) };
-		for (int i{ 0 }; i < count; ++i)
+		// 枠の数はRAMブロックで増えるので、持ち込み側の3つ固定とは分けて数える。
+		// 埋まっていない位置は空きとして残し、あと何個挿せるかを枠の数で示す
+		std::vector<core::data::FileExtensionType> acquired(
+		    inventory->m_maxEquipped, core::data::FileExtensionType::Count);
+
+		const int count{ inventory->equippedCount() };
+		for (int i{ 0 }; i < count && i < inventory->m_maxEquipped; ++i)
 			acquired[i] = inventory->m_acquired[i];
 		return acquired;
 	}
 
 	void EquipmentSlotView::draw()
 	{
-		constexpr int SLOT_COUNT{ data::FileEquipmentData::MAX_SLOTS };
-
 		const auto acquired{ collectAcquired() };
 
 		// 何も拾っていないうちはページを送らない。空の枠へ切り替わっても
@@ -182,9 +180,15 @@ namespace game::ui::ingame
 			                           : 1.0f };
 		const int slideOffset{ static_cast<int>(scaled(SLIDE_OFFSET) * (1.0f - slideProgress)) };
 
+		// 表示する枠の数はページで変わる。持ち込みは3つ固定、
+		// 道中で拾ったぶんは増えた枠の数だけ並ぶ
+		const int slotCount{ page == PAGE_CARRIED
+			                     ? data::FileEquipmentData::MAX_SLOTS
+			                     : static_cast<int>(acquired.size()) };
+
 		const int slotSize{ scaled(SLOT_SIZE) };
 		const int gap{ scaled(SLOT_GAP) };
-		const int totalWidth{ slotSize * SLOT_COUNT + gap * (SLOT_COUNT - 1) };
+		const int totalWidth{ slotSize * slotCount + gap * (slotCount - 1) };
 
 		// 右下アンカー。幅はモニタのアスペクト比で変わるため必ず実際の画面幅から逆算する
 		const int startX{ m_screen.getWidth() - scaled(MARGIN) - totalWidth };
@@ -194,7 +198,7 @@ namespace game::ui::ingame
 		    y - scaled(PAGE_LABEL_GAP) - scaled(PAGE_LABEL_PADDING_Y) - scaled(PAGE_LABEL_FONT_SIZE),
 		    totalWidth, page);
 
-		for (int i{ 0 }; i < SLOT_COUNT; ++i)
+		for (int i{ 0 }; i < slotCount; ++i)
 		{
 			const int x{ startX + i * (slotSize + gap) };
 
