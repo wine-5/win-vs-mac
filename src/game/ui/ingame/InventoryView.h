@@ -5,6 +5,7 @@
 #include "core/interface/IScreen.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/data/FileExtensionType.h"
+#include "game/utility/PlayerStats.h"
 #include "HudPanel.h"
 #include <array>
 #include <chrono>
@@ -80,6 +81,14 @@ namespace game::ui::ingame
 		 * @param isSwapMode 付け替え中ならtrue
 		 */
 		void setSwapMode(bool isSwapMode) noexcept;
+
+		/**
+		 * @brief 能力値の増減表示を消して比較の基準を取り直す
+		 *
+		 * 開閉をまたいで前回の値を覚えていると、閉じている間に拾ったぶんの変化を
+		 * 「今の入れ替えで起きたこと」として見せてしまう。開くたびに呼ぶ
+		 */
+		void resetStatChanges() noexcept;
 
 		/**
 		 * @brief 画面座標がどのマスの上にあるかを返す
@@ -188,6 +197,22 @@ namespace game::ui::ingame
 		    bool isCursor, bool isHeld);
 
 		/**
+		 * @brief 前フレームからの能力値の変化を拾う
+		 *
+		 * 開いている間は時間が止まっているため、値が動くのは付け替えたときだけ。
+		 * 変化を検知すること自体が「入れ替えが起きた」の合図になるので、
+		 * イベントを引き回さずに増減を出せる
+		 * @param stats このフレームの現在値
+		 */
+		void trackStatChanges(const utility::PlayerStatValues& stats);
+
+		/**
+		 * @brief 増減表示の濃さを返す
+		 * @return 不透明度（0なら表示しない）
+		 */
+		[[nodiscard]] int changeFlashAlpha() const;
+
+		/**
 		 * @brief 能力値の一覧を描く
 		 * @param x 一覧の左上X座標
 		 * @param y 一覧の左上Y座標
@@ -219,6 +244,13 @@ namespace game::ui::ingame
 		// 周回演出の基準時刻。描画経路からしか呼ばれずdeltaTimeを受け取らないため、
 		// 経過時間は壁時計から求める（時間停止中も回り続けてよい演出）
 		std::chrono::steady_clock::time_point m_startTime{ std::chrono::steady_clock::now() };
+
+		// 入れ替えの増減表示。前フレームの値と突き合わせて変化を拾い、
+		// 拾った時刻から一定時間だけ出す
+		utility::PlayerStatValues m_previousStats{};
+		utility::PlayerStatValues m_changeAmounts{};
+		bool m_hasPreviousStats{ false };
+		std::chrono::steady_clock::time_point m_changeTime{};
 
 		// 付け替え操作の状態。位置は m_acquired 上の添字で、-1 は「無し」
 		bool m_isSwapMode{ false };

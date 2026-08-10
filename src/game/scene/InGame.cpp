@@ -987,6 +987,7 @@ namespace game::scene
 		{
 			m_inventoryView->setSwapMode(m_isSwapMode);
 			m_inventoryView->setSelection(-1, -1);
+			m_inventoryView->resetStatChanges();
 		}
 
 		// 開いている間はカーソルを出す。隠したままだとマウスを中央へ戻す処理

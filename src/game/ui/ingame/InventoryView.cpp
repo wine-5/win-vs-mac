@@ -111,6 +111,13 @@ namespace
 	constexpr int STAT_DELTA_GAP{ 10 };         // 現在値と増分の間隔
 	constexpr float STAT_BOOST_EPSILON{ 0.5f }; // これ未満の差は出さない（整数表示で0になるため）
 
+	// 入れ替えた直後だけ出す増減。上がった項目と下がった項目を同時に見せて、
+	// 何を得て何を失ったのかを一度に伝える
+	constexpr float STAT_CHANGE_FLASH_DURATION{ 2.4f }; // 出しておく秒数
+	constexpr float STAT_CHANGE_FADE_START{ 1.6f };     // ここから薄くしていく
+	constexpr unsigned int STAT_UP_COLOR{ core::utility::Color::HUD_BUFF_GREEN };
+	constexpr unsigned int STAT_DOWN_COLOR{ core::utility::Color::HUD_CRIT_RED };
+
 	// 能力値アイコンの画像ID（左下HUD・セレクト画面と同じ並び）
 	constexpr std::array<const char*, 8> STAT_ICON_IMAGE_IDS{
 		"stat-hp", "stat-atk", "stat-def", "stat-spd",
@@ -234,6 +241,13 @@ namespace game::ui::ingame
 	void InventoryView::setSwapMode(bool isSwapMode) noexcept
 	{
 		m_isSwapMode = isSwapMode;
+	}
+
+	void InventoryView::resetStatChanges() noexcept
+	{
+		m_hasPreviousStats = false;
+		m_changeAmounts = {};
+		m_changeTime = {};
 	}
 
 	int InventoryView::findSlotIndexAt(int screenX, int screenY) const noexcept
@@ -599,6 +613,54 @@ namespace game::ui::ingame
 		}
 	}
 
+	void InventoryView::trackStatChanges(const utility::PlayerStatValues& stats)
+	{
+		if (!m_hasPreviousStats)
+		{
+			// 開いた直後は比較する相手が無い。ここで差を出すと、
+			// 前に開いたときからの変化を「今起きたこと」として見せてしまう
+			m_previousStats = stats;
+			m_hasPreviousStats = true;
+			return;
+		}
+
+		utility::PlayerStatValues changes{};
+		bool hasChange{ false };
+		for (int i{ 0 }; i < STAT_COUNT; ++i)
+		{
+			changes[i] = stats[i] - m_previousStats[i];
+			if (std::abs(changes[i]) >= STAT_BOOST_EPSILON)
+				hasChange = true;
+		}
+
+		// 開いている間は時間が止まっているため、値が動くのは付け替えたときだけ。
+		// 変化の検知そのものが「入れ替えが起きた」の合図になる
+		if (hasChange)
+		{
+			m_changeAmounts = changes;
+			m_changeTime = std::chrono::steady_clock::now();
+		}
+		m_previousStats = stats;
+	}
+
+	int InventoryView::changeFlashAlpha() const
+	{
+		const float elapsed{ std::chrono::duration<float>(
+			std::chrono::steady_clock::now() - m_changeTime)
+			    .count() };
+		if (elapsed >= STAT_CHANGE_FLASH_DURATION)
+			return 0;
+
+		// 出しっぱなしにすると累計の増分と見分けが付かなくなるため、
+		// 最後だけ薄くして自然に消す
+		if (elapsed <= STAT_CHANGE_FADE_START)
+			return ICON_ALPHA_OPAQUE;
+
+		const float fade{ 1.0f - (elapsed - STAT_CHANGE_FADE_START) /
+			                         (STAT_CHANGE_FLASH_DURATION - STAT_CHANGE_FADE_START) };
+		return static_cast<int>(ICON_ALPHA_OPAQUE * fade);
+	}
+
 	void InventoryView::drawStats(int x, int y, int width, core::ecs::EntityId playerId)
 	{
 		const auto stats{ utility::collectPlayerStats(m_componentManager, playerId) };
@@ -606,6 +668,8 @@ namespace game::ui::ingame
 		// 強化前の値。現在値と突き合わせて「どれだけ上がっているか」を出す。
 		// 数値だけでは、それが素の値なのか拡張子で伸びたものなのか分からない
 		const auto baseStats{ utility::collectPlayerBaseStats(m_componentManager, playerId) };
+
+		trackStatChanges(stats);
 
 		const int captionFontSize{ scaled(SECTION_FONT_SIZE) };
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
@@ -648,21 +712,39 @@ namespace game::ui::ingame
 			    rowY + (rowHeight - fontSize) / 2, valueText,
 			    isBoosted ? STAT_BOOSTED_COLOR : core::utility::Color::HUD_INK, fontSize);
 
+			// 入れ替えた直後だけは、素の値との差ではなく「今どれだけ動いたか」を出す。
+			// 累計の増分しか出さないと、入れ替えで下がった項目が「まだ強化されている」
+			// としか見えず、何を失ったのかに気付けない
+			const float changeAmount{ m_changeAmounts[i] };
+			const bool isChanging{ changeFlashAlpha() > 0 &&
+				                   std::abs(changeAmount) >= STAT_BOOST_EPSILON };
+
 			// 増分は現在値の左へ添える。いくつ伸びたかが分かると、
 			// どの拡張子が効いているのかを結び付けられる
-			if (isBoosted)
+			if (isChanging || isBoosted)
 			{
+				const float shownDelta{ isChanging ? changeAmount : delta };
+				const char* format{ i == utility::STAT_INDEX_CRIT ? "%+d%%" : "%+d" };
+
 				char deltaText[32]{};
-				if (i == utility::STAT_INDEX_CRIT)
-					std::snprintf(deltaText, sizeof(deltaText), "+%d%%", static_cast<int>(delta));
-				else
-					std::snprintf(deltaText, sizeof(deltaText), "+%d", static_cast<int>(delta));
+				std::snprintf(deltaText, sizeof(deltaText), format, static_cast<int>(shownDelta));
+
+				unsigned int deltaColor{ STAT_BOOSTED_COLOR };
+				if (isChanging)
+					deltaColor = changeAmount > 0.0f ? STAT_UP_COLOR : STAT_DOWN_COLOR;
 
 				const int deltaFontSize{ scaled(STAT_DELTA_FONT_SIZE) };
 				const int deltaWidth{ m_uiRenderer.getTextWidth(deltaText, deltaFontSize) };
+
+				if (isChanging)
+					m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, changeFlashAlpha());
+
 				m_uiRenderer.drawText(x + width - valueWidth - scaled(STAT_DELTA_GAP) - deltaWidth,
 				    rowY + (rowHeight - deltaFontSize) / 2, deltaText,
-				    STAT_BOOSTED_COLOR, deltaFontSize);
+				    deltaColor, deltaFontSize);
+
+				if (isChanging)
+					m_uiRenderer.resetBlendMode();
 			}
 			m_uiRenderer.resetFont();
 
