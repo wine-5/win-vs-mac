@@ -12,6 +12,7 @@
 #include "core/base/ServiceLocator.h"
 #include "core/constant/SeType.h"
 #include "core/data/ResultData.h"
+#include "core/data/FileExtensionType.h"
 #include "core/utility/MathConstants.h"
 /* game層 */
 #include "game/factory/FactoryInitializer.h"
@@ -1124,6 +1125,16 @@ namespace game::scene
 		{
 			if (m_fileEquipmentData.hasSelection(i))
 				result.m_usedFiles.push_back(m_fileEquipmentData.getFilePath(i));
+		}
+
+		// 道中で拾ったぶん。持ち込みと分けて持つことで、リザルトで
+		// 「何を持ち込んで、何を拾って強くなったか」を並べて見せられる
+		if (const auto* inventory{
+		        m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId) })
+		{
+			for (const auto type : inventory->m_acquired)
+				result.m_acquiredExtensions.emplace_back(core::data::toExtensionName(type));
+			result.m_equippedExtensionCount = inventory->equippedCount();
 		}
 
 		m_gameManager.setResultData(result);
