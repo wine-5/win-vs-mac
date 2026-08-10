@@ -56,7 +56,15 @@ namespace game::system::combat
 		 */
 		void removeBonus(core::data::FileExtensionType type);
 
+		/**
+		 * @brief 装備中の1つと未装備の1つを入れ替える
+		 * @param equippedIndex 抜く側（装備中）の位置
+		 * @param unequippedIndex 挿す側（未装備）の位置
+		 */
+		void swapEquipped(int equippedIndex, int unequippedIndex);
+
 		core::ecs::ComponentManager& m_componentManager;
+		core::base::EventBus& m_eventBus;
 		core::iface::IResourceManager& m_resourceManager;
 		core::ecs::EntityId m_playerId;
 

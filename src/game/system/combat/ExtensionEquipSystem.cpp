@@ -14,6 +14,7 @@ namespace game::system::combat
 	    core::iface::IResourceManager& resourceManager,
 	    core::ecs::EntityId playerId)
 	    : m_componentManager{ componentManager }
+	    , m_eventBus{ eventBus }
 	    , m_resourceManager{ resourceManager }
 	    , m_playerId{ playerId }
 	{
@@ -21,6 +22,13 @@ namespace game::system::combat
 		    [this](const event::ExtensionPickedUpEvent& e)
 		    {
 			    m_pending.push_back(e.m_type);
+		    }));
+
+		// 拾ったぶんと違い、入れ替えはその場で反映する。
+		m_subscriptions.push_back(eventBus.subscribe<event::ExtensionSwapRequestedEvent>(
+		    [this](const event::ExtensionSwapRequestedEvent& e)
+		    {
+			    swapEquipped(e.m_equippedIndex, e.m_unequippedIndex);
 		    }));
 	}
 
@@ -50,6 +58,34 @@ namespace game::system::combat
 				applyBonus(type);
 		}
 		m_pending.clear();
+	}
+
+	void ExtensionEquipSystem::swapEquipped(int equippedIndex, int unequippedIndex)
+	{
+		auto* inventory{ m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId) };
+		if (inventory == nullptr)
+			return;
+
+		const int count{ static_cast<int>(inventory->m_acquired.size()) };
+		if (equippedIndex < 0 || equippedIndex >= count || unequippedIndex < 0 || unequippedIndex >= count)
+			return;
+
+		// 装備中どうし・未装備どうしを入れ替えても能力は変わらない。
+		// 見た目だけ動いて何も起きないと、操作が効いていないと誤解される
+		if (!inventory->isEquipped(equippedIndex) || inventory->isEquipped(unequippedIndex))
+			return;
+
+		const auto removedType{ inventory->m_acquired[equippedIndex] };
+		const auto addedType{ inventory->m_acquired[unequippedIndex] };
+
+		std::swap(inventory->m_acquired[equippedIndex], inventory->m_acquired[unequippedIndex]);
+
+		removeBonus(removedType);
+		applyBonus(addedType);
+
+		m_eventBus.publish(event::ExtensionSwappedEvent{ addedType, removedType });
+
+		core::log::info("拡張子を入れ替え: 装備[{}] <-> 未装備[{}]", equippedIndex, unequippedIndex);
 	}
 
 	void ExtensionEquipSystem::applyBonus(core::data::FileExtensionType type)
