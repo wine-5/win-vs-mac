@@ -447,6 +447,7 @@
     <ClInclude Include="src\game\component\combat\DeathComponent.h" />
     <ClInclude Include="src\game\component\ai\AlertComponent.h" />
     <ClInclude Include="src\game\ui\FadeTransition.h" />
+    <ClInclude Include="src\game\utility\ExtensionBonusLabel.h" />
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
     <ClInclude Include="src\game\utility\CliffGuard.h" />
     <ClInclude Include="src\game\utility\GroundQuery.h" />
