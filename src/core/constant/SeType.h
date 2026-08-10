@@ -52,6 +52,7 @@ namespace core::constant
 		ExtensionGrab, // インベントリでマスを掴んだ
 		ExtensionDrop, // 掴んでいたものを置いた・取り消した
 		ExtensionSwap, // 装備中と未装備を入れ替えた
+		ExtensionRejected, // 動かせない枠へ落とそうとして弾かれた
 
 		// ---- UI ----
 		UiClick,      // ボタンなどを押した
@@ -103,6 +104,7 @@ namespace core::constant
 		{ "ExtensionGrab", SeType::ExtensionGrab },
 		{ "ExtensionDrop", SeType::ExtensionDrop },
 		{ "ExtensionSwap", SeType::ExtensionSwap },
+		{ "ExtensionRejected", SeType::ExtensionRejected },
 		{ "InventoryOpen", SeType::InventoryOpen },
 		{ "PauseOpen", SeType::PauseOpen },
 		{ "UiClose", SeType::UiClose },
