@@ -1,12 +1,29 @@
 #!/usr/bin/env python3
-"""RAMブロック（壊すと装備できる枠が1つ増えるブロック）のテクスチャ(PNG)を生成する。
+"""RAMブロック（壊すと拡張子を挿せる枠が1つ増えるブロック）のテクスチャ(PNG)を生成する。
 
-メモリモジュールの基板をそのまま面に貼る。緑の基板・金色の端子・黒いチップという
-並びは実物を見たことがある人なら一目で分かるので、文字を置かずに何のブロックか伝わる。
+面に描くのは「枠が1つ増える」という変化そのもの。
 
-他のブロックが暗い青灰なのに対してこれだけ緑にしてあるのは、
-道中で見つけたときに「あれは違うものだ」と遠くから気付かせるため。
-壊すと枠が増える一点物で、拡張子ブロックのように何度も出るものではない。
+      [  +  ]  +1
+          ↑
+    [DOC][IMG][AUD]
+
+いま埋まっているマスを下に置き、その上へ矢印を向けて破線の空きマスを足す。
+下から上へ伸ばすのは、増える・積み上がるという向きが上だから。
+横一列ではなく縦に積むのは、正方形の面では縦のほうが空きマスを大きく取れるため。
+マス目を4つ並べるだけだと「もともとそういう絵」なのか「増える」のかが読めないため、
+矢印を挟んで変化として見せる。
+
+メモリモジュールの基板を描く案もあったが、実物を知っている人にも
+「メモリだ」までしか伝わらず、それが装備枠の話だとは繋がらない。
+インベントリで毎回見ているマス目と拡張子アイコンをそのまま面へ持ってくれば、
+既に持っている知識だけで「あの枠が増えるのだ」と読める。
+
+文字（「所持上限+1」「CAPACITY UP」など）は入れない。
+このブロックを見るのは数メートル離れた3D空間からで、語は潰れて読めない。
+数字の +1 だけは記号として距離に耐えるので残す。
+
+矢印と＋を黄色にしているのは、HUDが「強化されている」を黄色で示しているため。
+色の意味を画面ごとにずらさない。
 
 出力（assets/model/stage/ 配下）:
     BlockRam.png … 512x512 テクスチャ
@@ -16,83 +33,135 @@
 """
 import os
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
+ICON_DIR = os.path.join("assets", "images", "ui", "ingame", "ext")
 OUT_DIR = os.path.join("assets", "model", "stage")
 OUT_NAME = "BlockRam.png"
 
 # テクスチャの一辺（他のブロックテクスチャに合わせる）
 SIZE = 512
 
-# 基板の緑。彩度を上げすぎると他のHUDの緑（強化を示す色）と意味が混ざるので抑える
-BOARD_COLOR = (26, 74, 52)
+# 下地の緑（基板）。彩度を上げすぎるとHUDの緑（強化を示す色）と意味が混ざるので抑える
+BOARD_COLOR = (24, 66, 48)
 BOARD_EDGE_COLOR = (46, 112, 80)
 BORDER_WIDTH = 6
 BORDER_INSET = 10
 
-# 端子（基板の下端に並ぶ金色の接点）
-PIN_COLOR = (198, 162, 74)
-PIN_AREA_TOP = 404
-PIN_HEIGHT = 74
-PIN_WIDTH = 14
-PIN_GAP = 10
-PIN_MARGIN_X = 30
+# 埋まっているマス（上に3つ並ぶ）
+FILLED_ICONS = ["doc", "img", "aud"]
+FILLED_SIZE = 116
+FILLED_GAP = 12
+FILLED_FILL = (16, 40, 30)
+FILLED_BORDER = (70, 140, 105)
+ICON_RATIO = 0.72 # マスに対するアイコンの大きさ
+ROW_TOP = 344     # マス列の上端（面の下側に置く）
 
-# 端子を左右に分ける切り欠き。実物のDIMMにある位置合わせの溝
-NOTCH_WIDTH = 26
-NOTCH_CENTER_RATIO = 0.42  # 中央からわずかに左（実物と同じく非対称）
+# 矢印（変化を示す）。下から上へ向ける
+ARROW_HEIGHT = 56
+ARROW_THICKNESS = 18
+ARROW_HEAD = 34
+ARROW_TOP = 270
+ARROW_COLOR = (255, 200, 61)
 
-# チップ（黒い四角）。4つ並べるとメモリモジュールらしくなる
-CHIP_COLOR = (18, 22, 28)
-CHIP_EDGE_COLOR = (54, 62, 72)
-CHIP_TOP = 150
-CHIP_HEIGHT = 190
-CHIP_WIDTH = 96
-CHIP_GAP = 20
+# 増える枠（破線の空きマス）。埋まっているマスより一回り大きく描く
+EMPTY_SIZE = 208
+EMPTY_TOP = 46
+EMPTY_BORDER = (255, 200, 61)
+EMPTY_DASH = 20
+EMPTY_GAP = 13
+EMPTY_WIDTH = 6
 
-# 基板の上端に走る配線。細い線を数本引くだけで「回路」に見える
-TRACE_COLOR = (58, 138, 100)
-TRACE_TOP = 70
-TRACE_GAP = 16
-TRACE_COUNT = 4
+# 空きマスに重ねる＋
+PLUS_COLOR = (255, 200, 61)
+PLUS_LENGTH = 116
+PLUS_THICKNESS = 28
 
-# 面の中央をわずかに明るくする。均一だと平らな板に見えて厚みが出ない
-GLOW_COLOR = (74, 222, 128, 40)
-GLOW_RATIO = 0.72
+# 空きマスの右へ添える +1。語ではなく数字なので距離でも潰れにくい
+COUNT_TEXT = "+1"
+COUNT_FONT_SIZE = 76
+COUNT_GAP = 14 # 空きマスとの間隔
+COUNT_COLOR = (255, 200, 61)
 
+SLOT_RADIUS = 8
 
-def draw_pins(draw):
-    """基板下端の端子列を描く（切り欠きで左右に分かれる）"""
-    notch_center = int(SIZE * NOTCH_CENTER_RATIO)
-    notch_left = notch_center - NOTCH_WIDTH // 2
-    notch_right = notch_center + NOTCH_WIDTH // 2
-
-    x = PIN_MARGIN_X
-    while x + PIN_WIDTH < SIZE - PIN_MARGIN_X:
-        if not (notch_left <= x <= notch_right):
-            draw.rectangle((x, PIN_AREA_TOP, x + PIN_WIDTH, PIN_AREA_TOP + PIN_HEIGHT),
-                           fill=PIN_COLOR)
-        x += PIN_WIDTH + PIN_GAP
+# 面の中央をうっすら明るくする。均一だと平らな板に見えて厚みが出ない
+GLOW_COLOR = (74, 222, 128, 38)
+GLOW_RATIO = 0.74
 
 
-def draw_chips(draw):
-    """基板の中央に並ぶチップを描く"""
-    total = CHIP_WIDTH * 4 + CHIP_GAP * 3
-    left = (SIZE - total) // 2
+def load_font(names, size):
+    """Windowsのシステムフォントを名前で探して読む。無ければデフォルト"""
+    for name in names:
+        path = os.path.join(os.environ.get("WINDIR", "C:/Windows"), "Fonts", name)
+        if os.path.exists(path):
+            try:
+                return ImageFont.truetype(path, size)
+            except OSError:
+                pass
+    return ImageFont.load_default()
 
-    for i in range(4):
-        x = left + i * (CHIP_WIDTH + CHIP_GAP)
-        draw.rectangle((x, CHIP_TOP, x + CHIP_WIDTH, CHIP_TOP + CHIP_HEIGHT),
-                       fill=CHIP_COLOR, outline=CHIP_EDGE_COLOR, width=2)
+
+def paste_icon(image, key, x, y, size):
+    """拡張子アイコンをマスの中央へ貼る"""
+    path = os.path.join(ICON_DIR, f"{key}.png")
+    if not os.path.exists(path):
+        print(f"  警告: {path} が見つかりません")
+        return
+
+    icon = Image.open(path).convert("RGBA")
+
+    # 素材ごとに透明な余白の量が違うため、切り落としてから大きさを揃える
+    bounds = icon.getbbox()
+    if bounds:
+        icon = icon.crop(bounds)
+
+    box = size * ICON_RATIO
+    scale = min(box / icon.width, box / icon.height)
+    icon = icon.resize((max(1, round(icon.width * scale)),
+                        max(1, round(icon.height * scale))), Image.LANCZOS)
+    image.paste(icon, (x + (size - icon.width) // 2, y + (size - icon.height) // 2), icon)
 
 
-def draw_traces(draw):
-    """基板上端の配線を描く"""
-    for i in range(TRACE_COUNT):
-        y = TRACE_TOP + i * TRACE_GAP
-        # 左右で長さを変える。すべて同じ長さだと模様に見えて回路に見えない
-        right = SIZE - PIN_MARGIN_X - (i % 2) * 60
-        draw.line((PIN_MARGIN_X, y, right, y), fill=TRACE_COLOR, width=3)
+def draw_dashed_rect(draw, x, y, size):
+    """破線の四角を描く
+
+    実線にすると埋まっているマスと同じに見える。
+    破線は「まだ何も入っていない場所」の記号として広く通じる
+    """
+    def dashes(start, end):
+        pos = start
+        while pos < end:
+            yield pos, min(pos + EMPTY_DASH, end)
+            pos += EMPTY_DASH + EMPTY_GAP
+
+    for a, b in dashes(x, x + size):
+        draw.line((a, y, b, y), fill=EMPTY_BORDER, width=EMPTY_WIDTH)
+        draw.line((a, y + size, b, y + size), fill=EMPTY_BORDER, width=EMPTY_WIDTH)
+    for a, b in dashes(y, y + size):
+        draw.line((x, a, x, b), fill=EMPTY_BORDER, width=EMPTY_WIDTH)
+        draw.line((x + size, a, x + size, b), fill=EMPTY_BORDER, width=EMPTY_WIDTH)
+
+
+def draw_arrow_up(draw, center_x, y):
+    """上向きの矢印を描く（yは上端＝矢じりの先）"""
+    body_top = y + ARROW_HEAD
+
+    draw.rectangle((center_x - ARROW_THICKNESS // 2, body_top,
+                    center_x + ARROW_THICKNESS // 2, y + ARROW_HEIGHT), fill=ARROW_COLOR)
+    draw.polygon([(center_x, y),
+                  (center_x - ARROW_HEAD // 2, body_top),
+                  (center_x + ARROW_HEAD // 2, body_top)], fill=ARROW_COLOR)
+
+
+def draw_plus(draw, center_x, center_y):
+    """空きマスに重ねる＋を描く"""
+    half = PLUS_LENGTH // 2
+    thin = PLUS_THICKNESS // 2
+    draw.rectangle((center_x - half, center_y - thin, center_x + half, center_y + thin),
+                   fill=PLUS_COLOR)
+    draw.rectangle((center_x - thin, center_y - half, center_x + thin, center_y + half),
+                   fill=PLUS_COLOR)
 
 
 def main():
@@ -101,9 +170,30 @@ def main():
     image = Image.new("RGBA", (SIZE, SIZE), BOARD_COLOR + (255,))
     draw = ImageDraw.Draw(image)
 
-    draw_traces(draw)
-    draw_chips(draw)
-    draw_pins(draw)
+    # 下に埋まったマス3つ、上に空きマス。間を上向きの矢印で繋ぐ
+    filled_total = FILLED_SIZE * len(FILLED_ICONS) + FILLED_GAP * (len(FILLED_ICONS) - 1)
+    left = (SIZE - filled_total) // 2
+    center_x = SIZE // 2
+
+    for i, key in enumerate(FILLED_ICONS):
+        x = left + i * (FILLED_SIZE + FILLED_GAP)
+        draw.rounded_rectangle((x, ROW_TOP, x + FILLED_SIZE, ROW_TOP + FILLED_SIZE),
+                               radius=SLOT_RADIUS, fill=FILLED_FILL, outline=FILLED_BORDER, width=3)
+        paste_icon(image, key, x, ROW_TOP, FILLED_SIZE)
+        draw = ImageDraw.Draw(image)
+
+    draw_arrow_up(draw, center_x, ARROW_TOP)
+
+    empty_x = center_x - EMPTY_SIZE // 2
+    draw_dashed_rect(draw, empty_x, EMPTY_TOP, EMPTY_SIZE)
+    draw_plus(draw, center_x, EMPTY_TOP + EMPTY_SIZE // 2)
+
+    # 空きマスの右へ +1 を添える
+    font = load_font(["segoeuib.ttf", "arialbd.ttf", "consola.ttf"], COUNT_FONT_SIZE)
+    box = draw.textbbox((0, 0), COUNT_TEXT, font=font)
+    draw.text((empty_x + EMPTY_SIZE + COUNT_GAP,
+               EMPTY_TOP + (EMPTY_SIZE - COUNT_FONT_SIZE) // 2), COUNT_TEXT,
+              font=font, fill=COUNT_COLOR)
 
     glow = Image.new("RGBA", image.size, (0, 0, 0, 0))
     glow_draw = ImageDraw.Draw(glow)
