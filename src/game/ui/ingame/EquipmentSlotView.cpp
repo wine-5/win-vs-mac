@@ -52,8 +52,13 @@ namespace
 
 	// どちらのページを見ているかの見出し。これが無いと、切り替わった瞬間に
 	// 「装備が勝手に変わった」と読めてしまう
-	constexpr int PAGE_LABEL_FONT_SIZE{ 17 };
-	constexpr int PAGE_LABEL_GAP{ 6 }; // 見出しとスロットの間隔
+	constexpr int PAGE_LABEL_FONT_SIZE{ 18 };
+	constexpr int PAGE_LABEL_GAP{ 8 }; // 見出しとスロットの間隔
+
+	// 見出しの下敷き。HUDの背後はステージの絵で、明るい床の上では
+	// 文字色をどう選んでも沈む。スロットと同じ暗い面を敷いて読めるようにする
+	constexpr int PAGE_LABEL_PADDING_X{ 10 };
+	constexpr int PAGE_LABEL_PADDING_Y{ 4 };
 
 	// 切り替えは下から浮き上がらせる。瞬間的に絵が入れ替わると、
 	// 切り替わったのか元から違ったのかが分からない
@@ -185,7 +190,8 @@ namespace game::ui::ingame
 		const int startX{ m_screen.getWidth() - scaled(MARGIN) - totalWidth };
 		const int y{ m_screen.getHeight() - scaled(MARGIN) - slotSize + slideOffset };
 
-		drawPageLabel(startX, y - scaled(PAGE_LABEL_GAP) - scaled(PAGE_LABEL_FONT_SIZE),
+		drawPageLabel(startX,
+		    y - scaled(PAGE_LABEL_GAP) - scaled(PAGE_LABEL_PADDING_Y) - scaled(PAGE_LABEL_FONT_SIZE),
 		    totalWidth, page);
 
 		for (int i{ 0 }; i < SLOT_COUNT; ++i)
@@ -209,12 +215,23 @@ namespace game::ui::ingame
 	void EquipmentSlotView::drawPageLabel(int x, int y, int width, int page)
 	{
 		const int fontSize{ scaled(PAGE_LABEL_FONT_SIZE) };
+		const int paddingX{ scaled(PAGE_LABEL_PADDING_X) };
+		const int paddingY{ scaled(PAGE_LABEL_PADDING_Y) };
 
-		// スロットの並びと右端を揃える。左寄せだと枠の幅が変わったときにずれる
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		const int textWidth{ m_uiRenderer.getTextWidth(m_pageLabels[page].c_str(), fontSize) };
-		m_uiRenderer.drawText(x + width - textWidth, y, m_pageLabels[page].c_str(),
-		    core::utility::Color::HUD_INK_FAINT, fontSize);
+
+		// スロットの並びと右端を揃える。左寄せだと枠の幅が変わったときにずれる
+		const int textX{ x + width - textWidth };
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SLOT_FILL_ALPHA);
+		m_uiRenderer.drawRoundedBox(textX - paddingX, y - paddingY,
+		    textWidth + paddingX * 2, fontSize + paddingY * 2, scaled(SLOT_RADIUS),
+		    SLOT_FILL_COLOR, true, 1);
+		m_uiRenderer.resetBlendMode();
+
+		m_uiRenderer.drawText(textX, y, m_pageLabels[page].c_str(),
+		    core::utility::Color::HUD_INK, fontSize);
 		m_uiRenderer.resetFont();
 	}
 
