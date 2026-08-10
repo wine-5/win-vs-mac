@@ -980,12 +980,14 @@ namespace game::scene
 			m_pauseManager.resume();
 
 		m_isSwapMode = isOpen && isSwapMode;
-		m_swapCursorIndex = 0;
 		m_swapHeldIndex = -1;
 
 		m_view.setInventoryOpen(isOpen);
 		if (m_inventoryView)
-			m_inventoryView->setSelection(m_isSwapMode ? m_swapCursorIndex : -1, -1);
+		{
+			m_inventoryView->setSwapMode(m_isSwapMode);
+			m_inventoryView->setSelection(-1, -1);
+		}
 
 		// 開いている間はカーソルを出す。隠したままだとマウスを中央へ戻す処理
 		// （getMouseDelta）が止まり、カーソルが端まで流れていく。
@@ -1004,35 +1006,32 @@ namespace game::scene
 		if (inventory == nullptr || inventory->m_acquired.empty())
 			return;
 
-		const int count{ static_cast<int>(inventory->m_acquired.size()) };
+		if (m_inventoryView == nullptr)
+			return;
 
-		// 拾ったぶんが減ることは無いが、掴んだまま何かで数が変わっても
-		// 範囲外を指さないようにしておく
-		m_swapCursorIndex = std::clamp(m_swapCursorIndex, 0, count - 1);
+		int mouseX{ 0 };
+		int mouseY{ 0 };
+		m_inputProvider.getMousePosition(mouseX, mouseY);
+		const int hoveredIndex{ m_inventoryView->findSlotIndexAt(mouseX, mouseY) };
 
-		int delta{ 0 };
-		if (m_inputProvider.isKeyPressed(core::input::KeyCode::Left) ||
-		    m_inputProvider.isKeyPressed(core::input::KeyCode::A))
-			delta = -1;
-		else if (m_inputProvider.isKeyPressed(core::input::KeyCode::Right) ||
-		         m_inputProvider.isKeyPressed(core::input::KeyCode::D))
-			delta = 1;
+		// 押した瞬間だけを拾う。押しっぱなしを毎フレーム見ると、
+		// 1回のクリックの間に掴むと離すを何度も繰り返してしまう
+		const bool isDown{ m_inputProvider.isMouseLeftPressed() };
+		const bool isClicked{ isDown && !m_wasMouseLeftDown };
+		m_wasMouseLeftDown = isDown;
 
-		// 端で止めずに巻き戻す。装備中と未装備は隣り合っているので、
-		// 一周させたほうが「どれと入れ替えるか」を見比べやすい
-		if (delta != 0)
-			m_swapCursorIndex = (m_swapCursorIndex + delta + count) % count;
-
-		if (m_inputProvider.isKeyPressed(core::input::KeyCode::Enter) ||
-		    m_inputProvider.isKeyPressed(core::input::KeyCode::Space))
+		if (isClicked)
 		{
-			if (m_swapHeldIndex < 0)
-				m_swapHeldIndex = m_swapCursorIndex;
-			else if (m_swapHeldIndex == m_swapCursorIndex)
+			if (hoveredIndex < 0)
 			{
-				// 同じマスをもう一度選んだら掴み直し。取り消せないと、
+				// マスの外を押したら掴んでいたものを置く。取り消せないと、
 				// 間違えて掴んだときに意図しない入れ替えを強いられる
 				m_swapHeldIndex = -1;
+			}
+			else if (m_swapHeldIndex < 0 || m_swapHeldIndex == hoveredIndex)
+			{
+				// 何も掴んでいなければ掴む。同じマスをもう一度押したら離す
+				m_swapHeldIndex = m_swapHeldIndex == hoveredIndex ? -1 : hoveredIndex;
 			}
 			else
 			{
@@ -1040,14 +1039,13 @@ namespace game::scene
 				// どちらを先に掴んだかは問わない
 				const bool isHeldEquipped{ inventory->isEquipped(m_swapHeldIndex) };
 				m_eventBus.publish(event::ExtensionSwapRequestedEvent{
-				    isHeldEquipped ? m_swapHeldIndex : m_swapCursorIndex,
-				    isHeldEquipped ? m_swapCursorIndex : m_swapHeldIndex });
+				    isHeldEquipped ? m_swapHeldIndex : hoveredIndex,
+				    isHeldEquipped ? hoveredIndex : m_swapHeldIndex });
 				m_swapHeldIndex = -1;
 			}
 		}
 
-		if (m_inventoryView)
-			m_inventoryView->setSelection(m_swapCursorIndex, m_swapHeldIndex);
+		m_inventoryView->setSelection(hoveredIndex, m_swapHeldIndex);
 	}
 
 	void InGame::draw()

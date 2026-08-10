@@ -73,6 +73,15 @@ namespace game::ui::ingame
 		void setSelection(int cursorIndex, int heldIndex) noexcept;
 
 		/**
+		 * @brief 付け替え操作を受け付ける状態かを設定する
+		 *
+		 * 選択位置とは別に持つ。マウスがマスの外にある間は選択位置が無くなるが、
+		 * 付け替え中であることに変わりはなく、案内まで消えると操作が分からなくなる
+		 * @param isSwapMode 付け替え中ならtrue
+		 */
+		void setSwapMode(bool isSwapMode) noexcept;
+
+		/**
 		 * @brief 画面座標がどのマスの上にあるかを返す
 		 *
 		 * マスの位置はレイアウトを組む描画側しか知らないため、当たり判定もここが持つ。
@@ -99,18 +108,6 @@ namespace game::ui::ingame
 		 * @return 経過秒数
 		 */
 		[[nodiscard]] float elapsedSeconds() const;
-
-		/**
-		 * @brief 付け替え操作の最中かを返す
-		 *
-		 * 選択位置を渡されているかどうかがそのまま「付け替え中か」になる。
-		 * 同じ状態を表す旗を別に持つと、片方だけ更新されたときに食い違う
-		 * @return 付け替え中ならtrue
-		 */
-		[[nodiscard]] bool isSwapMode() const noexcept
-		{
-			return m_cursorIndex >= 0;
-		}
 
 		/**
 		 * @brief 窓のタイトルバーを描く
@@ -223,7 +220,8 @@ namespace game::ui::ingame
 		// 経過時間は壁時計から求める（時間停止中も回り続けてよい演出）
 		std::chrono::steady_clock::time_point m_startTime{ std::chrono::steady_clock::now() };
 
-		// 付け替え操作の選択位置（m_acquired 上の添字）。-1 は「無し」
+		// 付け替え操作の状態。位置は m_acquired 上の添字で、-1 は「無し」
+		bool m_isSwapMode{ false };
 		int m_cursorIndex{ -1 };
 		int m_heldIndex{ -1 };
 

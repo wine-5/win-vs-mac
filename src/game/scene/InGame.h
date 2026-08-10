@@ -144,10 +144,11 @@ namespace game::scene
 		void updateRenameTerminal();
 
 		/**
-		 * @brief 付け替え画面での選択操作を処理する
+		 * @brief 付け替え画面でのマス選択を処理する
 		 *
-		 * 掴む→もう1つ選ぶ、の2手で入れ替える。1手で入れ替えると
-		 * どれと交換されたのかが分からないまま能力だけが変わる
+		 * 掴む→もう1つ押す、の2手で入れ替える。1手で入れ替えると
+		 * どれと交換されたのかが分からないまま能力だけが変わる。
+		 * マスの位置はViewしか知らないため、指しているマスはViewへ問い合わせる
 		 */
 		void updateSwapSelection();
 
@@ -257,8 +258,10 @@ namespace game::scene
 		// -1 は「掴んでいない」。操作を受け取るのはシーン、描くのはView、
 		// 能力の差し替えはSystemと役割を分けている
 		bool m_isSwapMode{ false };
-		int m_swapCursorIndex{ 0 };
 		int m_swapHeldIndex{ -1 };
+
+		// マウス左ボタンの前フレームの状態。押した瞬間だけを取り出すために持つ
+		bool m_wasMouseLeftDown{ false };
 
 		// 低HP警告のビネットのView
 		std::unique_ptr<ui::ingame::LowHealthVignetteView> m_lowHealthVignetteView;

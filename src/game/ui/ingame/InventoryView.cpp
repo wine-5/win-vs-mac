@@ -210,7 +210,7 @@ namespace game::ui::ingame
 
 		// 付け替え中は操作が増える。どのキーで何ができるかを出しておかないと、
 		// 掴んだあとで進み方が分からなくなる
-		m_captionSwapHint = toDrawable("← → : 選ぶ    Enter : 入れ替え    F2 / Esc : 閉じる");
+		m_captionSwapHint = toDrawable("クリックで掴む    別のマスをクリックで入れ替え    F2 / Esc : 閉じる");
 		m_captionEmptySlot = toDrawable("空き");
 		m_captionOverflow = toDrawable(" 件は表示しきれません");
 	}
@@ -229,6 +229,11 @@ namespace game::ui::ingame
 	{
 		m_cursorIndex = cursorIndex;
 		m_heldIndex = heldIndex;
+	}
+
+	void InventoryView::setSwapMode(bool isSwapMode) noexcept
+	{
+		m_isSwapMode = isSwapMode;
 	}
 
 	int InventoryView::findSlotIndexAt(int screenX, int screenY) const noexcept
@@ -362,7 +367,7 @@ namespace game::ui::ingame
 		const int fontSize{ scaled(ADDRESS_FONT_SIZE) };
 
 		// 付け替え中は行き先を変える。同じ窓でも今やっていることが違うと示す
-		const std::string& address{ isSwapMode() ? m_addressSwapText : m_addressText };
+		const std::string& address{ m_isSwapMode ? m_addressSwapText : m_addressText };
 
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(x + scaled(WINDOW_PADDING), y + (barHeight - fontSize) / 2,
@@ -393,7 +398,7 @@ namespace game::ui::ingame
 		    countLabel.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
 
 		// 操作の案内。開いたはいいが閉じ方が分からない、を起こさない
-		const std::string& hint{ isSwapMode() ? m_captionSwapHint : m_captionHint };
+		const std::string& hint{ m_isSwapMode ? m_captionSwapHint : m_captionHint };
 		const int hintWidth{ m_uiRenderer.getTextWidth(hint.c_str(), fontSize) };
 		m_uiRenderer.drawText(x + width - padding - hintWidth, y + (barHeight - fontSize) / 2,
 		    hint.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
