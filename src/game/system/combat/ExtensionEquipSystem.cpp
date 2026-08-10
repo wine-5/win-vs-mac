@@ -28,7 +28,7 @@ namespace game::system::combat
 		m_subscriptions.push_back(eventBus.subscribe<event::ExtensionSwapRequestedEvent>(
 		    [this](const event::ExtensionSwapRequestedEvent& e)
 		    {
-			    swapEquipped(e.m_equippedIndex, e.m_unequippedIndex);
+			    swapEquipped(e.m_fromIndex, e.m_toIndex);
 		    }));
 	}
 
@@ -60,32 +60,42 @@ namespace game::system::combat
 		m_pending.clear();
 	}
 
-	void ExtensionEquipSystem::swapEquipped(int equippedIndex, int unequippedIndex)
+	void ExtensionEquipSystem::swapEquipped(int fromIndex, int toIndex)
 	{
 		auto* inventory{ m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId) };
 		if (inventory == nullptr)
 			return;
 
 		const int count{ static_cast<int>(inventory->m_acquired.size()) };
-		if (equippedIndex < 0 || equippedIndex >= count || unequippedIndex < 0 || unequippedIndex >= count)
+		if (fromIndex < 0 || fromIndex >= count || toIndex < 0 || toIndex >= count)
+			return;
+		if (fromIndex == toIndex)
 			return;
 
-		// 装備中どうし・未装備どうしを入れ替えても能力は変わらない。
-		// 見た目だけ動いて何も起きないと、操作が効いていないと誤解される
-		if (!inventory->isEquipped(equippedIndex) || inventory->isEquipped(unequippedIndex))
+		const auto fromType{ inventory->m_acquired[fromIndex] };
+		const auto toType{ inventory->m_acquired[toIndex] };
+
+		std::swap(inventory->m_acquired[fromIndex], inventory->m_acquired[toIndex]);
+
+		// 同じ区分どうしなら並び替えただけで、能力は動かない。
+		// 拾ったものを見やすく並べたいという操作は通してよい
+		if (inventory->isEquipped(fromIndex) == inventory->isEquipped(toIndex))
+		{
+			core::log::info("拡張子を並び替え: [{}] <-> [{}]", fromIndex, toIndex);
 			return;
+		}
 
-		const auto removedType{ inventory->m_acquired[equippedIndex] };
-		const auto addedType{ inventory->m_acquired[unequippedIndex] };
-
-		std::swap(inventory->m_acquired[equippedIndex], inventory->m_acquired[unequippedIndex]);
+		// 装備中の側から見て、抜けたものと入ったものを決める
+		const bool isFromEquipped{ inventory->isEquipped(fromIndex) };
+		const auto removedType{ isFromEquipped ? fromType : toType };
+		const auto addedType{ isFromEquipped ? toType : fromType };
 
 		removeBonus(removedType);
 		applyBonus(addedType);
 
 		m_eventBus.publish(event::ExtensionSwappedEvent{ addedType, removedType });
 
-		core::log::info("拡張子を入れ替え: 装備[{}] <-> 未装備[{}]", equippedIndex, unequippedIndex);
+		core::log::info("拡張子を入れ替え: [{}] <-> [{}]", fromIndex, toIndex);
 	}
 
 	void ExtensionEquipSystem::applyBonus(core::data::FileExtensionType type)

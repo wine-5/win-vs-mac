@@ -57,11 +57,14 @@ namespace game::system::combat
 		void removeBonus(core::data::FileExtensionType type);
 
 		/**
-		 * @brief 装備中の1つと未装備の1つを入れ替える
-		 * @param equippedIndex 抜く側（装備中）の位置
-		 * @param unequippedIndex 挿す側（未装備）の位置
+		 * @brief 持っている拡張子の位置を2つ入れ替える
+		 *
+		 * 装備中と未装備をまたぐ場合だけ能力が動く。同じ区分どうしなら
+		 * 並び替えただけなので、位置は入れ替えるが能力には触らない
+		 * @param fromIndex 掴んだ側の位置
+		 * @param toIndex 落とした側の位置
 		 */
-		void swapEquipped(int equippedIndex, int unequippedIndex);
+		void swapEquipped(int fromIndex, int toIndex);
 
 		core::ecs::ComponentManager& m_componentManager;
 		core::base::EventBus& m_eventBus;
