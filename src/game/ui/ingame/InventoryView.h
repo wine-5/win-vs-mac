@@ -60,6 +60,17 @@ namespace game::ui::ingame
 		 */
 		void draw(core::ecs::EntityId playerId);
 
+		/**
+		 * @brief 付け替え操作の選択位置を設定する
+		 *
+		 * 位置の管理と入れ替えの実行はシーン側が持ち、こちらは受け取った位置を
+		 * 描くだけにする。操作をキーからマウスへ変えても描画側を触らずに済む。
+		 * @param cursorIndex 今いる位置（ExtensionInventoryComponent::m_acquired 上の添字）。
+		 *                    -1 なら選択そのものを表示しない
+		 * @param heldIndex 掴んでいる位置（同上）。-1 なら何も掴んでいない
+		 */
+		void setSelection(int cursorIndex, int heldIndex) noexcept;
+
 	  private:
 		/// @brief 能力値の項目数（左下HUD・セレクト画面と同じ8項目）
 		static constexpr int STAT_COUNT{ 8 };
@@ -113,11 +124,13 @@ namespace game::ui::ingame
 		 * @param isDimmed 効果が乗っていない扱いで淡く描くか
 		 * @param maxBottom これを超える位置には描かない（窓の外へはみ出させない）。
 		 *                 収まらなかったぶんは「他 n 件」として件数だけ示す
+		 * @param selectableBaseIndex この区分の先頭が m_acquired 上のどの位置にあたるか。
+		 *                            -1 なら付け替えの対象外（持ち込みは道中で動かせない）
 		 * @return 描画に使った高さ
 		 */
 		int drawSection(int x, int y, int width, const std::string& caption,
 		    const std::vector<core::data::FileExtensionType>& types, bool isDimmed,
-		    int maxBottom);
+		    int maxBottom, int selectableBaseIndex);
 
 		/**
 		 * @brief マス目1つ（枠＋アイコン＋ファイル名）を描く
@@ -125,8 +138,11 @@ namespace game::ui::ingame
 		 * @param y マス左上のY座標
 		 * @param type 拡張子種別（Count を渡すと空きマスとして描く）
 		 * @param isDimmed 淡く描くか
+		 * @param isCursor 選択位置として強調するか
+		 * @param isHeld 掴んでいる（入れ替え相手を待っている）ものとして強調するか
 		 */
-		void drawSlot(int x, int y, core::data::FileExtensionType type, bool isDimmed);
+		void drawSlot(int x, int y, core::data::FileExtensionType type, bool isDimmed,
+		    bool isCursor, bool isHeld);
 
 		/**
 		 * @brief 能力値の一覧を描く
@@ -142,6 +158,10 @@ namespace game::ui::ingame
 		core::ecs::ComponentManager& m_componentManager;
 		const data::FileEquipmentData& m_equipmentData;
 		HudPanel m_panel;
+
+		// 付け替え操作の選択位置（m_acquired 上の添字）。-1 は「無し」
+		int m_cursorIndex{ -1 };
+		int m_heldIndex{ -1 };
 
 		// 拡張子アイコン（FileExtensionTypeの並び順）と空きマスのアイコン
 		std::array<int, static_cast<int>(core::data::FileExtensionType::Count)> m_iconHandles{};

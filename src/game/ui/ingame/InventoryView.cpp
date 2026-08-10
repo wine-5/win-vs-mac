@@ -73,6 +73,15 @@ namespace
 	constexpr int SLOT_BORDER_ALPHA{ 60 };
 	constexpr int SLOT_EMPTY_BORDER_ALPHA{ 26 }; // 空きマスは枠だけ残して薄くする
 
+	// 付け替え操作の選択（今いるマス）と掴んでいるマス。
+	// 今いるマスは枠を強く、掴んでいるマスは面ごと染めて区別する。
+	// 枠の強さだけで2種類を表そうとすると、どちらが動く側なのか読めない
+	constexpr unsigned int CURSOR_COLOR{ core::utility::Color::HUD_ACCENT };
+	constexpr int CURSOR_THICKNESS{ 3 };
+	constexpr int CURSOR_MARGIN{ 3 }; // マスの外側へ広げる量。中身を隠さないため
+	constexpr unsigned int HELD_COLOR{ core::utility::Color::HUD_CHARGE_MAX };
+	constexpr int HELD_FILL_ALPHA{ 70 };
+
 	constexpr int ICON_ALPHA_OPAQUE{ 255 }; // 効果が乗っているものはそのままの濃さで描く
 	constexpr int EMPTY_ICON_ALPHA{ 60 };   // 空きマスの薄さ
 	constexpr int DIMMED_ICON_ALPHA{ 140 }; // 効果が乗っていないものの薄さ
@@ -201,6 +210,12 @@ namespace game::ui::ingame
 		return value * m_screen.getHeight() / BASE_SCREEN_HEIGHT;
 	}
 
+	void InventoryView::setSelection(int cursorIndex, int heldIndex) noexcept
+	{
+		m_cursorIndex = cursorIndex;
+		m_heldIndex = heldIndex;
+	}
+
 	void InventoryView::draw(core::ecs::EntityId playerId)
 	{
 		// 奥のゲーム画面を暗く落として、手前の文字を読めるようにする。
@@ -259,14 +274,21 @@ namespace game::ui::ingame
 		// 一覧が使ってよい下限。ここを超えるとステータスバーへ重なる
 		const int listBottom{ top + height - scaled(STATUS_BAR_HEIGHT) - padding };
 
+		// 付け替えで動かせるのは道中で拾ったものだけ。持ち込みはセレクト画面で決めたもので、
+		// 走っている最中には変えられないため選択の対象から外す
+		constexpr int NOT_SELECTABLE{ -1 };
+		const int unequippedBaseIndex{ component::combat::ExtensionInventoryComponent::MAX_EQUIPPED };
+
 		int y{ contentTop };
-		y += drawSection(left + padding, y, listWidth, m_captionCarried, carried, false, listBottom);
+		y += drawSection(left + padding, y, listWidth, m_captionCarried, carried, false, listBottom,
+		    NOT_SELECTABLE);
 		y += scaled(SECTION_GAP);
-		y += drawSection(left + padding, y, listWidth, m_captionAcquired, equipped, false, listBottom);
+		y += drawSection(left + padding, y, listWidth, m_captionAcquired, equipped, false, listBottom, 0);
 		if (!unequipped.empty())
 		{
 			y += scaled(SECTION_GAP);
-			drawSection(left + padding, y, listWidth, m_captionUnequipped, unequipped, true, listBottom);
+			drawSection(left + padding, y, listWidth, m_captionUnequipped, unequipped, true, listBottom,
+			    unequippedBaseIndex);
 		}
 
 		// 左右の区切り線。エクスプローラーのペイン分割に相当する
@@ -346,7 +368,7 @@ namespace game::ui::ingame
 
 	int InventoryView::drawSection(int x, int y, int width, const std::string& caption,
 	    const std::vector<core::data::FileExtensionType>& types, bool isDimmed,
-	    int maxBottom)
+	    int maxBottom, int selectableBaseIndex)
 	{
 		const int captionFontSize{ scaled(SECTION_FONT_SIZE) };
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
@@ -375,8 +397,14 @@ namespace game::ui::ingame
 		{
 			const int column{ static_cast<int>(i) % perRow };
 			const int row{ static_cast<int>(i) / perRow };
+
+			const bool isSelectable{ selectableBaseIndex >= 0 };
+			const int acquiredIndex{ isSelectable ? selectableBaseIndex + static_cast<int>(i) : -1 };
+
 			drawSlot(x + column * (slotWidth + slotGap),
-			    slotTop + row * (slotHeight + slotGap), types[i], isDimmed);
+			    slotTop + row * (slotHeight + slotGap), types[i], isDimmed,
+			    isSelectable && acquiredIndex == m_cursorIndex,
+			    isSelectable && acquiredIndex == m_heldIndex);
 		}
 
 		int usedHeight{ slotTop - y + drawnRows * (slotHeight + slotGap) - slotGap };
@@ -401,12 +429,22 @@ namespace game::ui::ingame
 		return usedHeight;
 	}
 
-	void InventoryView::drawSlot(int x, int y, core::data::FileExtensionType type, bool isDimmed)
+	void InventoryView::drawSlot(int x, int y, core::data::FileExtensionType type, bool isDimmed,
+	    bool isCursor, bool isHeld)
 	{
 		const bool isEmpty{ type == core::data::FileExtensionType::Count };
 		const int slotWidth{ scaled(SLOT_WIDTH) };
 		const int slotHeight{ scaled(SLOT_HEIGHT) };
 		const int radius{ scaled(SLOT_RADIUS) };
+
+		// 掴んでいるマスは面ごと染める。枠だけだと選択位置と見分けが付かず、
+		// どちらが動く側なのか分からなくなる
+		if (isHeld)
+		{
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, HELD_FILL_ALPHA);
+			m_uiRenderer.drawRoundedBox(x, y, slotWidth, slotHeight, radius, HELD_COLOR, true, 1);
+			m_uiRenderer.resetBlendMode();
+		}
 
 		// マス目の面と枠。これがあることで「置き場」に見え、
 		// アイコンが宙に浮いている状態から抜け出す
@@ -469,6 +507,16 @@ namespace game::ui::ingame
 		}
 		m_uiRenderer.resetBlendMode();
 		m_uiRenderer.resetFont();
+
+		// 選択位置の枠は最後に、マスの外側へ描く。中身の上へ重ねると
+		// アイコンやボーナス表記が枠に食われて読めなくなる
+		if (isCursor)
+		{
+			const int margin{ scaled(CURSOR_MARGIN) };
+			m_uiRenderer.drawRoundedBox(x - margin, y - margin,
+			    slotWidth + margin * 2, slotHeight + margin * 2,
+			    radius + margin, CURSOR_COLOR, false, scaled(CURSOR_THICKNESS));
+		}
 	}
 
 	void InventoryView::drawStats(int x, int y, int width, core::ecs::EntityId playerId)
