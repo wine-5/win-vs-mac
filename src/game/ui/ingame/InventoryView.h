@@ -7,6 +7,7 @@
 #include "core/data/FileExtensionType.h"
 #include "HudPanel.h"
 #include <array>
+#include <chrono>
 #include <string>
 #include <vector>
 
@@ -81,6 +82,12 @@ namespace game::ui::ingame
 		 * @return 現在の画面高さに合わせた長さ（ピクセル）
 		 */
 		[[nodiscard]] int scaled(int value) const;
+
+		/**
+		 * @brief 演出の基準時刻からの経過秒数を返す
+		 * @return 経過秒数
+		 */
+		[[nodiscard]] float elapsedSeconds() const;
 
 		/**
 		 * @brief 付け替え操作の最中かを返す
@@ -186,6 +193,10 @@ namespace game::ui::ingame
 		core::ecs::ComponentManager& m_componentManager;
 		const data::FileEquipmentData& m_equipmentData;
 		HudPanel m_panel;
+
+		// 周回演出の基準時刻。描画経路からしか呼ばれずdeltaTimeを受け取らないため、
+		// 経過時間は壁時計から求める（時間停止中も回り続けてよい演出）
+		std::chrono::steady_clock::time_point m_startTime{ std::chrono::steady_clock::now() };
 
 		// 付け替え操作の選択位置（m_acquired 上の添字）。-1 は「無し」
 		int m_cursorIndex{ -1 };

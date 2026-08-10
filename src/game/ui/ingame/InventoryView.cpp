@@ -1,4 +1,5 @@
 #include "InventoryView.h"
+#include "OrbitGlow.h"
 #include "core/base/ServiceLocator.h"
 #include "core/constant/UI.h"
 #include "core/interface/IStringConverter.h"
@@ -226,6 +227,11 @@ namespace game::ui::ingame
 		return value * m_screen.getHeight() / BASE_SCREEN_HEIGHT;
 	}
 
+	float InventoryView::elapsedSeconds() const
+	{
+		return std::chrono::duration<float>(std::chrono::steady_clock::now() - m_startTime).count();
+	}
+
 	void InventoryView::setSelection(int cursorIndex, int heldIndex) noexcept
 	{
 		m_cursorIndex = cursorIndex;
@@ -450,10 +456,20 @@ namespace game::ui::ingame
 			const bool isSelectable{ selectableBaseIndex >= 0 };
 			const int acquiredIndex{ isSelectable ? selectableBaseIndex + static_cast<int>(i) : -1 };
 
-			drawSlot(x + column * (slotWidth + slotGap),
-			    slotTop + row * (slotHeight + slotGap), types[i], isDimmed,
+			const int slotX{ x + column * (slotWidth + slotGap) };
+			const int slotY{ slotTop + row * (slotHeight + slotGap) };
+
+			drawSlot(slotX, slotY, types[i], isDimmed,
 			    isSelectable && acquiredIndex == m_cursorIndex,
 			    isSelectable && acquiredIndex == m_heldIndex);
+
+			// 効果が乗っているマスだけ縁に光を回す。右下HUDと同じ規則にして、
+			// 「回っている＝効いている」の意味が画面ごとにずれないようにする。
+			// 止まった窓は死んで見えるので、動きの出どころとしても効く
+			if (!isDimmed && types[i] != core::data::FileExtensionType::Count)
+				orbit_glow::draw(m_uiRenderer, slotX, slotY, slotWidth, slotHeight,
+				    elapsedSeconds(), static_cast<float>(i) * orbit_glow::PHASE_PER_SLOT,
+				    scaled(orbit_glow::DOT_RADIUS));
 		}
 
 		int usedHeight{ slotTop - y + drawnRows * (slotHeight + slotGap) - slotGap };
