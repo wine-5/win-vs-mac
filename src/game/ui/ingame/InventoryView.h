@@ -195,17 +195,30 @@ namespace game::ui::ingame
 		    const std::vector<core::data::FileExtensionType>& types, bool isDimmed,
 		    int maxBottom, int selectableBaseIndex);
 
+		/// @brief マス目1つの見せ方。旗が増えるたびに引数を足すと呼び出し側が読めなくなる
+		struct SlotStyle
+		{
+			/// @brief 効果が乗っていない扱いで淡く描くか
+			bool m_isDimmed{ false };
+
+			/// @brief 選択位置として強調するか
+			bool m_isCursor{ false };
+
+			/// @brief 掴んでいる（入れ替え相手を待っている）ものとして強調するか
+			bool m_isHeld{ false };
+
+			/// @brief 道中では動かせない枠か（持ち込み）
+			bool m_isLocked{ false };
+		};
+
 		/**
 		 * @brief マス目1つ（枠＋アイコン＋ファイル名）を描く
 		 * @param x マス左上のX座標
 		 * @param y マス左上のY座標
 		 * @param type 拡張子種別（Count を渡すと空きマスとして描く）
-		 * @param isDimmed 淡く描くか
-		 * @param isCursor 選択位置として強調するか
-		 * @param isHeld 掴んでいる（入れ替え相手を待っている）ものとして強調するか
+		 * @param style 見せ方
 		 */
-		void drawSlot(int x, int y, core::data::FileExtensionType type, bool isDimmed,
-		    bool isCursor, bool isHeld);
+		void drawSlot(int x, int y, core::data::FileExtensionType type, const SlotStyle& style);
 
 		/**
 		 * @brief 前フレームからの能力値の変化を拾う

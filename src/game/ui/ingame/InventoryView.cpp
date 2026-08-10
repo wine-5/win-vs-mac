@@ -519,9 +519,13 @@ namespace game::ui::ingame
 			if (isSelectable)
 				m_slotBounds.push_back({ slotX, slotY, slotWidth, slotHeight, acquiredIndex });
 
-			drawSlot(slotX, slotY, types[i], isDimmed,
-			    isSelectable && acquiredIndex == m_cursorIndex,
-			    isSelectable && acquiredIndex == m_heldIndex);
+			SlotStyle style{};
+			style.m_isDimmed = isDimmed;
+			style.m_isCursor = isSelectable && acquiredIndex == m_cursorIndex;
+			style.m_isHeld = isSelectable && acquiredIndex == m_heldIndex;
+			style.m_isLocked = !isSelectable;
+
+			drawSlot(slotX, slotY, types[i], style);
 
 			// 効果が乗っているマスだけ縁に光を回す。右下HUDと同じ規則にして、
 			// 「回っている＝効いている」の意味が画面ごとにずれないようにする。
@@ -560,9 +564,13 @@ namespace game::ui::ingame
 		return usedHeight;
 	}
 
-	void InventoryView::drawSlot(int x, int y, core::data::FileExtensionType type, bool isDimmed,
-	    bool isCursor, bool isHeld)
+	void InventoryView::drawSlot(int x, int y, core::data::FileExtensionType type,
+	    const SlotStyle& style)
 	{
+		const bool isDimmed{ style.m_isDimmed };
+		const bool isCursor{ style.m_isCursor };
+		const bool isHeld{ style.m_isHeld };
+
 		const bool isEmpty{ type == core::data::FileExtensionType::Count };
 		const int slotWidth{ scaled(SLOT_WIDTH) };
 		const int slotHeight{ scaled(SLOT_HEIGHT) };
