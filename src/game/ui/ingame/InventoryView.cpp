@@ -201,11 +201,11 @@ namespace game::ui::ingame
 		m_captionUnequipped = toDrawable("未装備（付け替え待ち）");
 		m_captionStats = toDrawable("現在の能力");
 		m_addressSwapText = toDrawable("PC  >  拡張子  >  付け替え");
-		m_captionHint = toDrawable("E : 閉じる");
+		m_captionHint = toDrawable("E / Esc : 閉じる");
 
 		// 付け替え中は操作が増える。どのキーで何ができるかを出しておかないと、
 		// 掴んだあとで進み方が分からなくなる
-		m_captionSwapHint = toDrawable("← → : 選ぶ    Enter : 入れ替え    F2 : 閉じる");
+		m_captionSwapHint = toDrawable("← → : 選ぶ    Enter : 入れ替え    F2 / Esc : 閉じる");
 		m_captionEmptySlot = toDrawable("空き");
 		m_captionOverflow = toDrawable(" 件は表示しきれません");
 	}
