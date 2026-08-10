@@ -10,6 +10,9 @@
 Windowsのリネームは名前だけを選択するが、本作で書き換えるのは拡張子なので、
 選択範囲を拡張子側へ置く。絵と遊びを一致させることを優先している。
 
+下地は白。壊して素材を得るブロックが全て暗色なので、面の色だけで
+「これは壊す物ではない」と遠くからでも見分けられるようにしている。
+
 アイコンは assets/images/ui/ingame/ext/ の素材を使い回す。
 ブロック・インベントリ・装備スロットと同じ絵なので、
 「あのアイコンを入れ替えるのだ」と既に持っている知識で読める。
@@ -31,54 +34,55 @@ OUT_NAME = "BlockRename.png"
 # テクスチャの一辺（他のブロックテクスチャに合わせる）
 SIZE = 512
 
-# 面の下地と縁（拡張子ブロックと同系の暗色）
-BACKGROUND = (17, 20, 26)
-BORDER_COLOR = (44, 58, 74)
+# 面の下地と縁。アイテムブロックは全て暗色なので、こちらだけ白い面にして
+# 「壊すブロックではない・操作する設備だ」を色だけで見分けられるようにする
+BACKGROUND = (244, 246, 249)
+BORDER_COLOR = (198, 205, 216)
 BORDER_WIDTH = 6
-BORDER_INSET = 10
+BORDER_INSET = 6
 
 # Windows 11のアクセント色。選択範囲の反転と矢印に使う
 ACCENT = (0, 120, 212)
-ACCENT_BRIGHT = (64, 170, 255)
-ACCENT_GLOW = (34, 140, 230, 60)
+ACCENT_BRIGHT = (0, 103, 192)
+ACCENT_GLOW = (0, 120, 212, 70)
 
-# 文字色
-TEXT_BRIGHT = (234, 241, 251)
-TEXT_FAINT = (140, 170, 210)
+# 文字色（白地なので暗い側を主役にする）
+TEXT_BRIGHT = (250, 252, 255)
+TEXT_FAINT = (60, 68, 82)
 
 # 操作キーの案内。何をするブロックかより先に「押すキー」が目に入るよう、
 # 一番上へ大きく置く
 HINT_TEXT = "F2"
-HINT_FONT_SIZE = 84
-HINT_TOP = 34
+HINT_FONT_SIZE = 132
+HINT_TOP = 10
 
 # 入れ替えを示す2つのアイコン（左が今挿さっているもの、右が挿し替える先）
 ICON_FROM = "arc"
 ICON_TO = "img"
-ICON_SIZE = 120
-ICON_TOP = 158
-ICON_SPACING = 210 # 2つのアイコンの中心どうしの間隔
+ICON_SIZE = 172
+ICON_TOP = 152
+ICON_SPACING = 292 # 2つのアイコンの中心どうしの間隔
 
 # 入れ替えの矢印（双方向）
-ARROW_WIDTH = 96
-ARROW_THICKNESS = 9
-ARROW_HEAD = 26
-ARROW_GAP = 20 # 上下の矢印の間隔
+ARROW_WIDTH = 128
+ARROW_THICKNESS = 14
+ARROW_HEAD = 36
+ARROW_GAP = 34 # 上下の矢印の間隔
 
 # 名前を編集している欄
-FIELD_WIDTH = 380
-FIELD_HEIGHT = 66
-FIELD_TOP = 356
-FIELD_RADIUS = 6
-FIELD_FILL = (12, 18, 28)
+FIELD_WIDTH = 468
+FIELD_HEIGHT = 96
+FIELD_TOP = 374
+FIELD_RADIUS = 8
+FIELD_FILL = (255, 255, 255)
 
 NAME_TEXT = "data"
 
 # 矢印の先（ICON_TO）に対応する拡張子を書く。欄の中身とアイコンが食い違うと、
 # 何が何に変わるのかが読み取れない
 EXT_TEXT = ".png"
-FIELD_FONT_SIZE = 36
-CARET_WIDTH = 3
+FIELD_FONT_SIZE = 54
+CARET_WIDTH = 4
 
 
 def load_font(names, size):
