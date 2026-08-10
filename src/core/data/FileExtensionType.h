@@ -56,4 +56,22 @@ namespace core::data
 		}
 		return FileExtensionType::Unknown;
 	}
+
+	/**
+	 * @brief FileExtensionType を種別名へ変換する
+	 *
+	 * 種別を外（JSON・WebViewのリザルト画面）へ渡すときに使う。
+	 * toExtensionType と同じ表を引くので、名前が片方向だけずれることがない
+	 * @param type 拡張子種別
+	 * @return 種別名（表に無ければ "unknown"）
+	 */
+	[[nodiscard]] constexpr std::string_view toExtensionName(FileExtensionType type) noexcept
+	{
+		for (const auto& [key, value] : EXTENSION_TYPE_NAMES)
+		{
+			if (value == type)
+				return key;
+		}
+		return "unknown";
+	}
 } // namespace core::data
