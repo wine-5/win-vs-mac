@@ -27,5 +27,17 @@ namespace core::data
 
         /** @brief 使用したファイルのパス一覧 */
         std::vector<std::string> m_usedFiles{};
-    };
+
+		/**
+		 * @brief 道中で拾った拡張子の種別名一覧（拾った順）
+		 *
+		 * 持ち込んだファイル（m_usedFiles）とは分けて持つ。
+		 * 出どころが違うものを混ぜると、リザルトで「何を持ち込んで何を拾ったか」を
+		 * 分けて見せられなくなる
+		 */
+		std::vector<std::string> m_acquiredExtensions{};
+
+		/** @brief そのうち能力に乗っていた個数（先頭から数えた装備中のぶん） */
+		int m_equippedExtensionCount{ 0 };
+	};
 } // namespace core::data
