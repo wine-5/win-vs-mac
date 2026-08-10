@@ -65,6 +65,7 @@ namespace game::stage
 			destructible.m_dropType = params.m_dropType;
 			destructible.m_dropCount = params.m_dropCount;
 			destructible.m_isDropRandom = params.m_isDropRandom;
+			destructible.m_grantsEquipSlot = params.m_grantsEquipSlot;
 			componentManager.add<component::stage::DestructibleComponent>(m_entity.getId(), destructible);
 		}
 	}

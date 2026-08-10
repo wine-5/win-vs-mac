@@ -47,6 +47,9 @@ namespace game::stage
 		core::data::FileExtensionType m_dropType{ core::data::FileExtensionType::Unknown };
 		int m_dropCount{ 0 };
 		bool m_isDropRandom{ false };
+
+		// 壊すと拡張子を挿せる枠が1つ増えるか（RAMブロック）
+		bool m_grantsEquipSlot{ false };
 	};
 
 	/**

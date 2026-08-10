@@ -31,6 +31,10 @@ namespace core::data
 		// 落とす欠片の個数。ZIPは複数のファイルを含むので多めに落とす
 		int m_dropCount{ 0 };
 
+		// 壊すと拡張子を挿せる枠が1つ増えるか（RAMブロック）。
+		// 欠片を落とすのとは別の報酬なので、dropExtension とは独立に持つ
+		bool m_grantsEquipSlot{ false };
+
 		// 特別な役割。空なら普通の配置物。"bossGate" はボス出現で閉じる扉として扱う。
 		// 種類（id）ではなく役割で判定することで、見た目違いの扉を何種類でも用意できる
 		std::string m_role{};

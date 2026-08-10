@@ -28,6 +28,10 @@ namespace game::component::stage
 		// trueのとき m_dropType は使わない
 		bool m_isDropRandom{ false };
 
+		// 壊すと拡張子を挿せる枠が1つ増えるか（RAMブロック）。
+		// 欠片とは別の報酬なので、落とす種別・個数とは独立に持つ
+		bool m_grantsEquipSlot{ false };
+
 		// 無傷のあいだ描くモデル
 		int m_intactHandle{ -1 };
 

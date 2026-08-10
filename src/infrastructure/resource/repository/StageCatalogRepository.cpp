@@ -25,6 +25,8 @@ namespace
 			def.m_dropExtension = j["dropExtension"].get<std::string>();
 		if (j.contains("dropCount"))
 			def.m_dropCount = j["dropCount"];
+		if (j.contains("grantsEquipSlot"))
+			def.m_grantsEquipSlot = j["grantsEquipSlot"];
 		if (j.contains("role"))
 			def.m_role = j["role"].get<std::string>();
 		if (j.contains("textureTile"))

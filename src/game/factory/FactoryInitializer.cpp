@@ -206,6 +206,7 @@ namespace game::factory
 				// 種別は落とす瞬間に1個ずつ抽選する
 				params.m_dropCount = def.m_dropCount;
 				params.m_isDropRandom = def.m_dropExtension == RANDOM_DROP_KEY;
+				params.m_grantsEquipSlot = def.m_grantsEquipSlot;
 				if (!params.m_isDropRandom)
 					params.m_dropType = core::data::toExtensionType(def.m_dropExtension);
 			}
