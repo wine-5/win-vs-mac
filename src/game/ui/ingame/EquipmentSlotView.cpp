@@ -41,6 +41,11 @@ namespace
 	constexpr int SLOT_BORDER_ALPHA{ 46 };         // 約18%
 	constexpr int SLOT_ACCENT_BORDER_ALPHA{ 200 }; // 装備済みスロットの枠
 
+	// セレクト画面で選んだ枠は道中では変えられない。インベントリの固定枠と同じ赤で示し、
+	// 「触れない枠」の色を画面ごとにずらさない
+	constexpr unsigned int LOCKED_BORDER_COLOR{ core::utility::Color::HUD_LOCKED_RED };
+	constexpr int LOCKED_BORDER_ALPHA{ 170 };
+
 	constexpr const char* EMPTY_LABEL{ "--" };
 
 	// 表示するページ。3枠しか置けないため、持ち込みと道中で拾ったぶんを交互に見せる。
@@ -186,17 +191,23 @@ namespace game::ui::ingame
 			                     ? data::FileEquipmentData::MAX_SLOTS
 			                     : static_cast<int>(acquired.size()) };
 
-		const int slotSize{ scaled(SLOT_SIZE) };
+		// 枠の数が変わっても並び全体の幅は変えず、1つあたりを小さくして詰める。
+		// ページが切り替わるたびに右下のかたまりが伸び縮みすると、
+		// その動き自体が目を引いて戦闘から意識を逸らす
+		constexpr int BASE_SLOT_COUNT{ data::FileEquipmentData::MAX_SLOTS };
+		const int baseSlotSize{ scaled(SLOT_SIZE) };
 		const int gap{ scaled(SLOT_GAP) };
-		const int totalWidth{ slotSize * slotCount + gap * (slotCount - 1) };
+		const int totalWidth{ baseSlotSize * BASE_SLOT_COUNT + gap * (BASE_SLOT_COUNT - 1) };
+		const int slotSize{ (totalWidth - gap * (slotCount - 1)) / slotCount };
 
 		// 右下アンカー。幅はモニタのアスペクト比で変わるため必ず実際の画面幅から逆算する
 		const int startX{ m_screen.getWidth() - scaled(MARGIN) - totalWidth };
 		const int y{ m_screen.getHeight() - scaled(MARGIN) - slotSize + slideOffset };
 
-		drawPageLabel(startX,
-		    y - scaled(PAGE_LABEL_GAP) - scaled(PAGE_LABEL_PADDING_Y) - scaled(PAGE_LABEL_FONT_SIZE),
-		    totalWidth, page);
+		// 見出しは枠の大きさに関わらず同じ高さへ置く。マスが小さくなったぶん
+		// 見出しまで下がると、ページが替わるたびに文字が上下してしまう
+		const int labelTop{ m_screen.getHeight() - scaled(MARGIN) - baseSlotSize + slideOffset - scaled(PAGE_LABEL_GAP) - scaled(PAGE_LABEL_PADDING_Y) - scaled(PAGE_LABEL_FONT_SIZE) };
+		drawPageLabel(startX, labelTop, totalWidth, page);
 
 		for (int i{ 0 }; i < slotCount; ++i)
 		{
@@ -208,7 +219,7 @@ namespace game::ui::ingame
 				                         ? m_equipmentData.hasSelection(i)
 				                         : type != core::data::FileExtensionType::Count };
 
-			drawSlot(x, y, slotSize, type, hasSelection);
+			drawSlot(x, y, slotSize, type, hasSelection, isCarriedPage);
 
 			// 装備中のスロットだけ縁を光の粒が回り続ける（起動中であることの表現）
 			if (hasSelection)
@@ -239,24 +250,35 @@ namespace game::ui::ingame
 		m_uiRenderer.resetFont();
 	}
 
-	void EquipmentSlotView::drawSlot(int x, int y, int size, core::data::FileExtensionType type, bool hasSelection)
+	void EquipmentSlotView::drawSlot(int x, int y, int size, core::data::FileExtensionType type,
+	    bool hasSelection, bool isLocked)
 	{
-		const int radius{ scaled(SLOT_RADIUS) };
+		// マスを小さく描くときは中身も一緒に縮める。枠だけ詰めると中身がはみ出す
+		const auto fit = [this, size](int scaledValue)
+		{ return scaledValue * size / std::max(1, scaled(SLOT_SIZE)); };
+
+		const int radius{ fit(scaled(SLOT_RADIUS)) };
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SLOT_FILL_ALPHA);
 		m_uiRenderer.drawRoundedBox(x, y, size, size, radius, SLOT_FILL_COLOR, true, 1);
 
-		// 装備済みはアクセント色の枠で締める。空きは枠を薄いままにして視線を集めない
-		const unsigned int borderColor{ hasSelection ? core::utility::Color::HUD_ACCENT : SLOT_BORDER_COLOR };
-		const int borderAlpha{ hasSelection ? SLOT_ACCENT_BORDER_ALPHA : SLOT_BORDER_ALPHA };
+		// 装備済みはアクセント色の枠で締める。空きは枠を薄いままにして視線を集めない。
+		// 道中では変えられない枠は、中身の有無に関わらず赤で締める
+		unsigned int borderColor{ hasSelection ? core::utility::Color::HUD_ACCENT : SLOT_BORDER_COLOR };
+		int borderAlpha{ hasSelection ? SLOT_ACCENT_BORDER_ALPHA : SLOT_BORDER_ALPHA };
+		if (isLocked)
+		{
+			borderColor = LOCKED_BORDER_COLOR;
+			borderAlpha = LOCKED_BORDER_ALPHA;
+		}
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, borderAlpha);
 		m_uiRenderer.drawRoundedBox(x, y, size, size, radius, borderColor, false, 1);
 		m_uiRenderer.resetBlendMode();
 
 		const int centerX{ x + size / 2 };
-		const int iconSize{ scaled(ICON_SIZE) };
+		const int iconSize{ fit(scaled(ICON_SIZE)) };
 		const int iconX{ centerX - iconSize / 2 };
-		const int iconY{ y + scaled(ICON_Y) };
+		const int iconY{ y + fit(scaled(ICON_Y)) };
 
 		m_uiRenderer.setFont(core::constant::ui::MONO_FONT_NAME);
 
@@ -266,8 +288,8 @@ namespace game::ui::ingame
 			if (m_emptyIconHandle != -1)
 				m_uiRenderer.drawImage(m_emptyIconHandle, iconX, iconY, iconSize, iconSize);
 			else
-				drawCenteredText(centerX, y + scaled(TYPE_LABEL_Y), EMPTY_LABEL,
-				    core::utility::Color::HUD_INK_FAINT, scaled(TYPE_FONT_SIZE));
+				drawCenteredText(centerX, y + fit(scaled(TYPE_LABEL_Y)), EMPTY_LABEL,
+				    core::utility::Color::HUD_INK_FAINT, fit(scaled(TYPE_FONT_SIZE)));
 			m_uiRenderer.resetFont();
 			return;
 		}
@@ -277,14 +299,14 @@ namespace game::ui::ingame
 		if (iconHandle != -1)
 			m_uiRenderer.drawImage(iconHandle, iconX, iconY, iconSize, iconSize);
 		else
-			drawCenteredText(centerX, y + scaled(TYPE_LABEL_Y), toTypeLabel(type),
-			    core::utility::Color::HUD_INK, scaled(TYPE_FONT_SIZE));
+			drawCenteredText(centerX, y + fit(scaled(TYPE_LABEL_Y)), toTypeLabel(type),
+			    core::utility::Color::HUD_INK, fit(scaled(TYPE_FONT_SIZE)));
 
 		// 何を強化するかを併記する。装備の効果は開始時のステータス補正としてのみ
 		// 現れるため、種別名だけでは何の役に立っているのか分からない
 		const std::string bonusLabel{ utility::ExtensionBonusLabel::toLabel(type) };
-		drawCenteredText(centerX, y + scaled(BONUS_LABEL_Y), bonusLabel.c_str(),
-		    core::utility::Color::HUD_INK_FAINT, scaled(BONUS_FONT_SIZE));
+		drawCenteredText(centerX, y + fit(scaled(BONUS_LABEL_Y)), bonusLabel.c_str(),
+		    core::utility::Color::HUD_INK_FAINT, fit(scaled(BONUS_FONT_SIZE)));
 
 		m_uiRenderer.resetFont();
 	}

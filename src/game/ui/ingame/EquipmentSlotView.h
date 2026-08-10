@@ -79,8 +79,10 @@ namespace game::ui::ingame
 		 * @param size スロットの一辺の長さ
 		 * @param type 装備中の拡張子種別
 		 * @param hasSelection 装備済みかどうか（falseなら空きスロットとして描く）
+		 * @param isLocked 道中では変えられない枠か（持ち込み。赤い縁で示す）
 		 */
-		void drawSlot(int x, int y, int size, core::data::FileExtensionType type, bool hasSelection);
+		void drawSlot(int x, int y, int size, core::data::FileExtensionType type,
+		    bool hasSelection, bool isLocked);
 
 		/**
 		 * @brief 指定範囲の中央にテキストを描画する
