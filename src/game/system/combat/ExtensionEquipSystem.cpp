@@ -48,8 +48,7 @@ namespace game::system::combat
 		{
 			// 拾ったものは捨てずに全部持たせる。捨ててしまうと
 			// 「何を捨てて何を挿すか」という選択がそもそも発生しない
-			const bool willEquip{ inventory->equippedCount() <
-				                  component::combat::ExtensionInventoryComponent::MAX_EQUIPPED };
+			const bool willEquip{ inventory->equippedCount() < inventory->m_maxEquipped };
 			inventory->m_acquired.push_back(type);
 
 			// 挿せる枠が空いていたぶんだけ、その場で効果を乗せる。

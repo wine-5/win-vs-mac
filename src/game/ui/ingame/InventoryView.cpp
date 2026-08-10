@@ -370,8 +370,12 @@ namespace game::ui::ingame
 		// 運んでいる最中のアイコンをカーソルの位置へ描くために覚えておく
 		auto draggedType{ core::data::FileExtensionType::Count };
 
+		// 挿せる個数はRAMブロックで増えるため、コンポーネントから読む
+		int maxEquipped{ component::combat::ExtensionInventoryComponent::DEFAULT_MAX_EQUIPPED };
+
 		if (const auto* inventory{ m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(playerId) })
 		{
+			maxEquipped = inventory->m_maxEquipped;
 			for (std::size_t i{ 0 }; i < inventory->m_acquired.size(); ++i)
 			{
 				if (static_cast<int>(i) == m_heldIndex)
@@ -387,7 +391,7 @@ namespace game::ui::ingame
 
 		// 埋まっていない枠も空きマスとして見せる。何個挿せるかが分からないと
 		// 「拾ってきて挿す」という行動につながらない
-		while (equipped.size() < component::combat::ExtensionInventoryComponent::MAX_EQUIPPED)
+		while (static_cast<int>(equipped.size()) < maxEquipped)
 			equipped.push_back(core::data::FileExtensionType::Count);
 
 		const int padding{ scaled(WINDOW_PADDING) };
@@ -401,7 +405,7 @@ namespace game::ui::ingame
 		// 付け替えで動かせるのは道中で拾ったものだけ。持ち込みはセレクト画面で決めたもので、
 		// 走っている最中には変えられないため選択の対象から外す
 		constexpr int NOT_SELECTABLE{ -1 };
-		const int unequippedBaseIndex{ component::combat::ExtensionInventoryComponent::MAX_EQUIPPED };
+		const int unequippedBaseIndex{ maxEquipped };
 
 		// 左は枠数の決まっている区分。3つずつなので幅を固定し、余った右側を所持一覧へ渡す
 		const int columnWidth{ scaled(SECTION_COLUMN_WIDTH) };
