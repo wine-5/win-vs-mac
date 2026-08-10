@@ -81,7 +81,7 @@ namespace
 namespace game::ui::ingame::orbit_glow
 {
 	void draw(core::iface::IUIRenderer& uiRenderer, int x, int y, int width, int height,
-	    float elapsedSeconds, float phaseOffset, int dotRadius)
+	    float elapsedSeconds, float phaseOffset, int dotRadius, unsigned int color)
 	{
 		const float head{ elapsedSeconds / PERIOD + phaseOffset };
 		const int radius{ std::max(2, dotRadius) };
@@ -105,7 +105,7 @@ namespace game::ui::ingame::orbit_glow
 				pointOnRectPerimeter(x, y, width, height, cometHead - i * TRAIL_SPACING, dotX, dotY);
 
 				uiRenderer.drawCircle(dotX, dotY, std::max(1, static_cast<int>(radius * fade)),
-				    scaleBrightness(core::utility::Color::HUD_CHARGE_CYAN, fade * fade), true, 1);
+				    scaleBrightness(color, fade * fade), true, 1);
 			}
 		}
 

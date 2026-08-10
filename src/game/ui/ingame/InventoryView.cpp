@@ -598,7 +598,7 @@ namespace game::ui::ingame
 			if (!isDimmed && types[i] != core::data::FileExtensionType::Count)
 				orbit_glow::draw(m_uiRenderer, slotX, slotY, slotWidth, slotHeight,
 				    elapsedSeconds(), static_cast<float>(i) * orbit_glow::PHASE_PER_SLOT,
-				    scaled(orbit_glow::DOT_RADIUS));
+				    scaled(orbit_glow::DOT_RADIUS), core::utility::Color::HUD_CHARGE_CYAN);
 
 			// 動かせない区分には錠前を付ける。見出しの文字より先に目へ入り、
 			// 掴もうとする前に「ここは触れない」と分かる

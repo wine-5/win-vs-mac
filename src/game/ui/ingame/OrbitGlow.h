@@ -23,7 +23,8 @@ namespace game::ui::ingame::orbit_glow
 	 * @param elapsedSeconds 演出の基準時刻からの経過秒数
 	 * @param phaseOffset 周回位相のずらし量（0.0〜1.0）
 	 * @param dotRadius 先頭の粒の半径（画面サイズに合わせた値）
+	 * @param color 粒の色。マスの縁と揃えると、1つのマスが主張する色が1つで済む
 	 */
 	void draw(core::iface::IUIRenderer& uiRenderer, int x, int y, int width, int height,
-	    float elapsedSeconds, float phaseOffset, int dotRadius);
+	    float elapsedSeconds, float phaseOffset, int dotRadius, unsigned int color);
 } // namespace game::ui::ingame::orbit_glow
