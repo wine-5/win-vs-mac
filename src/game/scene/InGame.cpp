@@ -996,6 +996,17 @@ namespace game::scene
 		m_inputProvider.setMouseCursorVisible(isOpen);
 	}
 
+	void InGame::requestSwap(
+	    const component::combat::ExtensionInventoryComponent& inventory, int targetIndex)
+	{
+		// 装備中と未装備の組み合わせだけが意味を持つ。どちらを先に掴んだかは問わない
+		const bool isHeldEquipped{ inventory.isEquipped(m_swapHeldIndex) };
+		m_eventBus.publish(event::ExtensionSwapRequestedEvent{
+		    isHeldEquipped ? m_swapHeldIndex : targetIndex,
+		    isHeldEquipped ? targetIndex : m_swapHeldIndex });
+		m_swapHeldIndex = -1;
+	}
+
 	void InGame::updateSwapSelection()
 	{
 		if (!m_isSwapMode)
@@ -1015,13 +1026,14 @@ namespace game::scene
 		m_inputProvider.getMousePosition(mouseX, mouseY);
 		const int hoveredIndex{ m_inventoryView->findSlotIndexAt(mouseX, mouseY) };
 
-		// 押した瞬間だけを拾う。押しっぱなしを毎フレーム見ると、
+		// 押した瞬間と離した瞬間を取り出す。押しっぱなしを毎フレーム見ると、
 		// 1回のクリックの間に掴むと離すを何度も繰り返してしまう
 		const bool isDown{ m_inputProvider.isMouseLeftPressed() };
-		const bool isClicked{ isDown && !m_wasMouseLeftDown };
+		const bool isPressed{ isDown && !m_wasMouseLeftDown };
+		const bool isReleased{ !isDown && m_wasMouseLeftDown };
 		m_wasMouseLeftDown = isDown;
 
-		if (isClicked)
+		if (isPressed)
 		{
 			if (hoveredIndex < 0)
 			{
@@ -1036,16 +1048,22 @@ namespace game::scene
 			}
 			else
 			{
-				// 装備中と未装備の組み合わせだけが意味を持つ。
-				// どちらを先に掴んだかは問わない
-				const bool isHeldEquipped{ inventory->isEquipped(m_swapHeldIndex) };
-				m_eventBus.publish(event::ExtensionSwapRequestedEvent{
-				    isHeldEquipped ? m_swapHeldIndex : hoveredIndex,
-				    isHeldEquipped ? hoveredIndex : m_swapHeldIndex });
-				m_swapHeldIndex = -1;
+				// 掴んだまま別のマスを押した場合はその場で入れ替える
+				requestSwap(*inventory, hoveredIndex);
 			}
 		}
+		else if (isReleased && m_swapHeldIndex >= 0 && hoveredIndex >= 0 &&
+		         hoveredIndex != m_swapHeldIndex)
+		{
+			// 掴んだまま別のマスへ運んで離した（ドラッグ＆ドロップ）。
+			// 掴む・置くの2クリックと、運んで離すの1動作の両方を受けることで、
+			// どちらのつもりで触っても同じ結果になる
+			requestSwap(*inventory, hoveredIndex);
+		}
 
+		// ボタンを押している間だけ運んでいる扱いにする。離したあとも掴んだままなら、
+		// 2クリックで置く操作の途中とみなす
+		m_inventoryView->setDragging(isDown && m_swapHeldIndex >= 0, mouseX, mouseY);
 		m_inventoryView->setSelection(hoveredIndex, m_swapHeldIndex);
 	}
 

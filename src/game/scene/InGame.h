@@ -47,6 +47,11 @@ namespace game
 		class RenameTerminalSystem; // 前方宣言
 	} // namespace system::stage
 
+	namespace component::combat
+	{
+		struct ExtensionInventoryComponent; // 前方宣言
+	} // namespace component::combat
+
 	namespace ui::debug
 	{
 		class DebugGizmoView; // DEBUG: 前方宣言（リリース時に削除）
@@ -151,6 +156,16 @@ namespace game::scene
 		 * マスの位置はViewしか知らないため、指しているマスはViewへ問い合わせる
 		 */
 		void updateSwapSelection();
+
+		/**
+		 * @brief 掴んでいるものと指定のマスの入れ替えを要求する
+		 *
+		 * クリックで置いた場合とドラッグして離した場合の両方から呼ぶ
+		 * @param inventory プレイヤーの拡張子インベントリ
+		 * @param targetIndex 入れ替え相手の位置（m_acquired 上の添字）
+		 */
+		void requestSwap(const component::combat::ExtensionInventoryComponent& inventory,
+		    int targetIndex);
 
 		/**
 		 * @brief インベントリの開閉をまとめて反映する
