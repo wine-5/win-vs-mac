@@ -1179,6 +1179,24 @@
       ]
     },
     {
+      "type": "block_plain",
+      "position": [
+        -220,
+        55.0,
+        104.68
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        110,
+        110,
+        110
+      ]
+    },
+    {
       "type": "block_rename",
       "position": [
         0,
