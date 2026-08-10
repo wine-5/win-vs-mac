@@ -44,6 +44,10 @@ namespace game::event
 		m_subscriptions.push_back(m_eventBus.subscribe<ExtensionPickedUpEvent>(
 		    [this](const ExtensionPickedUpEvent& e)
 		    { onExtensionPickedUp(e); }));
+
+		m_subscriptions.push_back(m_eventBus.subscribe<ExtensionSwappedEvent>(
+		    [this](const ExtensionSwappedEvent& e)
+		    { onExtensionSwapped(e); }));
 	}
 
 	void AudioEventListener::onAttackStart(const AttackStartEvent& e)
@@ -140,5 +144,14 @@ namespace game::event
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (audio)
 			audio->playSe(core::constant::SeType::ItemPickup);
+	}
+
+	void AudioEventListener::onExtensionSwapped(const ExtensionSwappedEvent& /*e*/)
+	{
+		// 入れ替えが実際に起きたときだけ鳴らす。要求（クリック）ではなく結果を購読しているので、
+		// 何も起きなかったときに音だけ鳴ることはない
+		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
+		if (audio)
+			audio->playSe(core::constant::SeType::ExtensionSwap);
 	}
 } // namespace game::event
