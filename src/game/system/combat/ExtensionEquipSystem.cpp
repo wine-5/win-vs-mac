@@ -24,6 +24,14 @@ namespace game::system::combat
 			    m_pending.push_back(e.m_type);
 		    }));
 
+		// 枠が増えたら、境界の外にあった拡張子がそのまま装備中になる。
+		// 位置は動かないので、効果を乗せるだけでよい
+		m_subscriptions.push_back(eventBus.subscribe<event::EquipSlotGainedEvent>(
+		    [this](const event::EquipSlotGainedEvent& e)
+		    {
+			    promoteToEquipped(e.m_maxEquipped);
+		    }));
+
 		// 拾ったぶんと違い、入れ替えはその場で反映する。
 		m_subscriptions.push_back(eventBus.subscribe<event::ExtensionSwapRequestedEvent>(
 		    [this](const event::ExtensionSwapRequestedEvent& e)
@@ -57,6 +65,22 @@ namespace game::system::combat
 				applyBonus(type);
 		}
 		m_pending.clear();
+	}
+
+	void ExtensionEquipSystem::promoteToEquipped(int maxEquipped)
+	{
+		const auto* inventory{ m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId) };
+		if (inventory == nullptr)
+			return;
+
+		// 増えた枠に入るのは、境界のすぐ外にあったもの1つだけ。
+		// まだ何も拾っていなければ枠が空くだけで、乗せるものは無い
+		const int promotedIndex{ maxEquipped - 1 };
+		if (promotedIndex < 0 || promotedIndex >= static_cast<int>(inventory->m_acquired.size()))
+			return;
+
+		applyBonus(inventory->m_acquired[promotedIndex]);
+		core::log::info("枠が増えて装備中になった: [{}]", promotedIndex);
 	}
 
 	void ExtensionEquipSystem::swapEquipped(int fromIndex, int toIndex)

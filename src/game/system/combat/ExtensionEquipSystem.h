@@ -66,6 +66,15 @@ namespace game::system::combat
 		 */
 		void swapEquipped(int fromIndex, int toIndex);
 
+		/**
+		 * @brief 枠が増えて装備中へ繰り上がった拡張子の効果を乗せる
+		 *
+		 * 枠を増やす側（BlockBreakSystem）は個数だけを動かす。
+		 * 能力の計算はこのSystemに集約したいので、繰り上がりの反映はここで行う
+		 * @param maxEquipped 増えたあとの枠数
+		 */
+		void promoteToEquipped(int maxEquipped);
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::base::EventBus& m_eventBus;
 		core::iface::IResourceManager& m_resourceManager;
