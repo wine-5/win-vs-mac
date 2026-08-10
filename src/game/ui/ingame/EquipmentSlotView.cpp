@@ -44,7 +44,16 @@ namespace
 	// セレクト画面で選んだ枠は道中では変えられない。インベントリの固定枠と同じ赤で示し、
 	// 「触れない枠」の色を画面ごとにずらさない
 	constexpr unsigned int LOCKED_BORDER_COLOR{ core::utility::Color::HUD_LOCKED_RED };
-	constexpr int LOCKED_BORDER_ALPHA{ 170 };
+
+	// RAMブロックで増えた枠。強化を示す緑で、もともとの枠と見分ける
+	constexpr unsigned int GAINED_BORDER_COLOR{ core::utility::Color::HUD_BUFF_GREEN };
+
+	// 意味のある縁は太くする。1pxのままだと色を付けても背景に紛れて読めない
+	constexpr int MEANINGFUL_BORDER_THICKNESS{ 3 };
+	constexpr int MEANINGFUL_BORDER_ALPHA{ 255 };
+
+	// 上下2段に分けたときの段の間隔
+	constexpr int ROW_GAP{ 12 };
 
 	constexpr const char* EMPTY_LABEL{ "--" };
 
@@ -191,40 +200,72 @@ namespace game::ui::ingame
 			                     ? data::FileEquipmentData::MAX_SLOTS
 			                     : static_cast<int>(acquired.size()) };
 
-		// 枠の数が変わっても並び全体の幅は変えず、1つあたりを小さくして詰める。
-		// ページが切り替わるたびに右下のかたまりが伸び縮みすると、
-		// その動き自体が目を引いて戦闘から意識を逸らす
+		// もともとの3枠を下段に、増えたぶんを上段へ載せる。
+		//     [][]
+		//   [][][]
+		// 横一列に伸ばすと右下のかたまりが広がって視界を削るうえ、
+		// 段を分けることで「下がもともと、上が増えたぶん」と役割も読める
 		constexpr int BASE_SLOT_COUNT{ data::FileEquipmentData::MAX_SLOTS };
+		const int bottomCount{ std::min(slotCount, BASE_SLOT_COUNT) };
+		const int topCount{ slotCount - bottomCount };
+
 		const int baseSlotSize{ scaled(SLOT_SIZE) };
 		const int gap{ scaled(SLOT_GAP) };
 		const int totalWidth{ baseSlotSize * BASE_SLOT_COUNT + gap * (BASE_SLOT_COUNT - 1) };
-		const int slotSize{ (totalWidth - gap * (slotCount - 1)) / slotCount };
+
+		// 段に4つ以上並ぶときだけ縮めて幅に収める。並び全体の幅は変えない
+		const auto rowSlotSize = [&](int count)
+		{
+			return count <= BASE_SLOT_COUNT ? baseSlotSize
+			                                : (totalWidth - gap * (count - 1)) / count;
+		};
+
+		const int bottomSize{ rowSlotSize(bottomCount) };
+		const int topSize{ topCount > 0 ? rowSlotSize(topCount) : 0 };
 
 		// 右下アンカー。幅はモニタのアスペクト比で変わるため必ず実際の画面幅から逆算する
-		const int startX{ m_screen.getWidth() - scaled(MARGIN) - totalWidth };
-		const int y{ m_screen.getHeight() - scaled(MARGIN) - slotSize + slideOffset };
+		const int right{ m_screen.getWidth() - scaled(MARGIN) };
+		const int bottomY{ m_screen.getHeight() - scaled(MARGIN) - bottomSize + slideOffset };
+		const int topY{ bottomY - scaled(ROW_GAP) - topSize };
 
-		// 見出しは枠の大きさに関わらず同じ高さへ置く。マスが小さくなったぶん
-		// 見出しまで下がると、ページが替わるたびに文字が上下してしまう
-		const int labelTop{ m_screen.getHeight() - scaled(MARGIN) - baseSlotSize + slideOffset - scaled(PAGE_LABEL_GAP) - scaled(PAGE_LABEL_PADDING_Y) - scaled(PAGE_LABEL_FONT_SIZE) };
-		drawPageLabel(startX, labelTop, totalWidth, page);
-
-		for (int i{ 0 }; i < slotCount; ++i)
+		// 段ごとに中央へ寄せる。上段が少ないときに左端へ寄ると、
+		// 下段との関係が崩れて別の並びに見える
+		const auto drawRow = [&](int firstIndex, int count, int size, int rowY, SlotAccent accent)
 		{
-			const int x{ startX + i * (slotSize + gap) };
+			if (count <= 0)
+				return;
 
-			const bool isCarriedPage{ page == PAGE_CARRIED };
-			const auto type{ isCarriedPage ? m_equipmentData.getExtensionType(i) : acquired[i] };
-			const bool hasSelection{ isCarriedPage
-				                         ? m_equipmentData.hasSelection(i)
-				                         : type != core::data::FileExtensionType::Count };
+			const int rowWidth{ size * count + gap * (count - 1) };
+			const int rowLeft{ right - totalWidth + (totalWidth - rowWidth) / 2 };
 
-			drawSlot(x, y, slotSize, type, hasSelection, isCarriedPage);
+			for (int i{ 0 }; i < count; ++i)
+			{
+				const int index{ firstIndex + i };
+				const int x{ rowLeft + i * (size + gap) };
 
-			// 装備中のスロットだけ縁を光の粒が回り続ける（起動中であることの表現）
-			if (hasSelection)
-				drawOrbitingGlow(x, y, slotSize, i * orbit_glow::PHASE_PER_SLOT);
-		}
+				const bool isCarriedPage{ page == PAGE_CARRIED };
+				const auto type{ isCarriedPage ? m_equipmentData.getExtensionType(index)
+					                           : acquired[index] };
+				const bool hasSelection{ isCarriedPage
+					                         ? m_equipmentData.hasSelection(index)
+					                         : type != core::data::FileExtensionType::Count };
+
+				drawSlot(x, rowY, size, type, hasSelection, accent);
+
+				// 装備中のスロットだけ縁を光の粒が回り続ける（起動中であることの表現）
+				if (hasSelection)
+					drawOrbitingGlow(x, rowY, size, index * orbit_glow::PHASE_PER_SLOT);
+			}
+		};
+
+		const SlotAccent bottomAccent{ page == PAGE_CARRIED ? SlotAccent::Locked
+			                                                : SlotAccent::Normal };
+
+		const int labelTop{ (topCount > 0 ? topY : bottomY) - scaled(PAGE_LABEL_GAP) - scaled(PAGE_LABEL_PADDING_Y) - scaled(PAGE_LABEL_FONT_SIZE) };
+		drawPageLabel(right - totalWidth, labelTop, totalWidth, page);
+
+		drawRow(0, bottomCount, bottomSize, bottomY, bottomAccent);
+		drawRow(bottomCount, topCount, topSize, topY, SlotAccent::Gained);
 	}
 
 	void EquipmentSlotView::drawPageLabel(int x, int y, int width, int page)
@@ -251,7 +292,7 @@ namespace game::ui::ingame
 	}
 
 	void EquipmentSlotView::drawSlot(int x, int y, int size, core::data::FileExtensionType type,
-	    bool hasSelection, bool isLocked)
+	    bool hasSelection, SlotAccent accent)
 	{
 		// マスを小さく描くときは中身も一緒に縮める。枠だけ詰めると中身がはみ出す
 		const auto fit = [this, size](int scaledValue)
@@ -263,16 +304,30 @@ namespace game::ui::ingame
 		m_uiRenderer.drawRoundedBox(x, y, size, size, radius, SLOT_FILL_COLOR, true, 1);
 
 		// 装備済みはアクセント色の枠で締める。空きは枠を薄いままにして視線を集めない。
-		// 道中では変えられない枠は、中身の有無に関わらず赤で締める
+		// 道中では変えられない枠は赤、増えた枠は緑で、中身の有無に関わらず締める
 		unsigned int borderColor{ hasSelection ? core::utility::Color::HUD_ACCENT : SLOT_BORDER_COLOR };
 		int borderAlpha{ hasSelection ? SLOT_ACCENT_BORDER_ALPHA : SLOT_BORDER_ALPHA };
-		if (isLocked)
+		bool isMeaningful{ hasSelection };
+
+		if (accent == SlotAccent::Locked)
 		{
 			borderColor = LOCKED_BORDER_COLOR;
-			borderAlpha = LOCKED_BORDER_ALPHA;
+			isMeaningful = true;
 		}
+		else if (accent == SlotAccent::Gained)
+		{
+			borderColor = GAINED_BORDER_COLOR;
+			isMeaningful = true;
+		}
+
+		if (isMeaningful)
+			borderAlpha = MEANINGFUL_BORDER_ALPHA;
+
+		// 意味のある縁は太くする。1pxのままだと色を付けても背景に紛れて読めない
+		const int thickness{ isMeaningful ? scaled(MEANINGFUL_BORDER_THICKNESS) : 1 };
+
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, borderAlpha);
-		m_uiRenderer.drawRoundedBox(x, y, size, size, radius, borderColor, false, 1);
+		m_uiRenderer.drawRoundedBox(x, y, size, size, radius, borderColor, false, thickness);
 		m_uiRenderer.resetBlendMode();
 
 		const int centerX{ x + size / 2 };

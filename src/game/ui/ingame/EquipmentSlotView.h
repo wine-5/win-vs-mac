@@ -56,6 +56,14 @@ namespace game::ui::ingame
 		void draw();
 
 	  private:
+		/// @brief マスの縁が表す意味。色で役割を見分けさせる
+		enum class SlotAccent
+		{
+			Normal, // 道中で拾って装備しているもの・空き枠
+			Locked, // セレクト画面で選んだ枠（道中では変えられない）
+			Gained  // RAMブロックで増えた枠
+		};
+
 		/**
 		 * @brief 1080p基準の長さを現在の画面サイズに合わせて変換する
 		 * @param value 1080pでの長さ（ピクセル）
@@ -79,10 +87,10 @@ namespace game::ui::ingame
 		 * @param size スロットの一辺の長さ
 		 * @param type 装備中の拡張子種別
 		 * @param hasSelection 装備済みかどうか（falseなら空きスロットとして描く）
-		 * @param isLocked 道中では変えられない枠か（持ち込み。赤い縁で示す）
+		 * @param accent 縁の意味づけ
 		 */
 		void drawSlot(int x, int y, int size, core::data::FileExtensionType type,
-		    bool hasSelection, bool isLocked);
+		    bool hasSelection, SlotAccent accent);
 
 		/**
 		 * @brief 指定範囲の中央にテキストを描画する
