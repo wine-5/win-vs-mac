@@ -105,7 +105,7 @@
     { "type": "ExtensionGrab",    "path": "assets/audio/se/se_extension_grab.mp3",    "volume":0.5 },
     { "type": "ExtensionDrop",    "path": "assets/audio/se/se_extension_drop.mp3",    "volume":0.6 },
     { "type": "ExtensionSwap",    "path": "assets/audio/se/se_extension_swap.mp3",    "volume":0.9 },
-    { "type": "ExtensionRejected","path": "assets/audio/se/se_extension_rejected.mp3","volume":0.6 },
+    { "type": "ExtensionRejected","path": "assets/audio/se/se_extension_rejected.mp3","volume":0.85 },
     { "type": "InventoryOpen",    "path": "assets/audio/se/se_inventory_open.mp3",    "volume":1.0 },
     { "type": "PauseOpen",        "path": "assets/audio/se/se_pause_open.mp3",        "volume":1.0 },
     { "type": "UiClose",          "path": "assets/audio/se/se_ui_close.mp3",          "volume":0.7 },
