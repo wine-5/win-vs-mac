@@ -77,7 +77,7 @@
     { "type": "ResultLose", "path": "assets/audio/bgm/bgm_result_bad.ogg",    "volume":0.8, "useFade": false }
   ],
   "se": [
-    { "type": "PlayerSwing1",     "path": "assets/audio/se/se_swing1.mp3",            "volume":0.5 },
+    { "type": "PlayerSwing1",     "path": "assets/audio/se/se_swing1.mp3",            "volume":0.7 },
     { "type": "PlayerSwing2",     "path": "assets/audio/se/se_swing2.mp3",            "volume":0.7 },
     { "type": "PlayerCharge",     "path": "assets/audio/se/se_charge.mp3",            "volume":0.6 },
     { "type": "PlayerChargeReady","path": "assets/audio/se/se_charge_ready.mp3",      "volume":0.7 },
@@ -105,8 +105,8 @@
     { "type": "ExtensionGrab",    "path": "assets/audio/se/se_extension_grab.mp3",    "volume":0.5 },
     { "type": "ExtensionDrop",    "path": "assets/audio/se/se_extension_drop.mp3",    "volume":0.6 },
     { "type": "ExtensionSwap",    "path": "assets/audio/se/se_extension_swap.mp3",    "volume":0.9 },
-    { "type": "InventoryOpen",    "path": "assets/audio/se/se_inventory_open.mp3",    "volume":0.7 },
-    { "type": "PauseOpen",        "path": "assets/audio/se/se_pause_open.mp3",        "volume":0.7 },
+    { "type": "InventoryOpen",    "path": "assets/audio/se/se_inventory_open.mp3",    "volume":1.0 },
+    { "type": "PauseOpen",        "path": "assets/audio/se/se_pause_open.mp3",        "volume":1.0 },
     { "type": "UiClose",          "path": "assets/audio/se/se_ui_close.mp3",          "volume":0.7 },
     { "type": "UiFileSelect",     "path": "assets/audio/se/se_file_select.mp3",       "volume":1.0 }
   ]
