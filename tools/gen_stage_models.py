@@ -62,6 +62,9 @@ MANIFEST = [
     ("BlockExtSourceCode", "BlockExtSourceCode.png"),
     ("BlockExtVideo",      "BlockExtVideo.png"),
     ("BlockExtUnknown",    "BlockExtUnknown.png"),
+    # ⑥ 拡張子の付け替え端末（gen_rename_texture.py が吐くテクスチャを貼る）。
+    #    壊せない設置物なので、ひび・破片は用意しない
+    ("BlockRename",        "BlockRename.png"),
 ]
 
 # ---- 100x100x100 立方体の頂点 ----
