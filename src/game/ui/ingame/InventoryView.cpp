@@ -16,6 +16,7 @@
 #include "game/utility/ExtensionBonusLabel.h"
 #include "game/utility/PlayerStats.h"
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
 
 namespace
@@ -111,6 +112,12 @@ namespace
 	// 3枠ぶん出しっぱなしにすると、読む画面なのに警告色が視界を占めてしまう
 	constexpr unsigned int LOCKED_COLOR{ core::utility::Color::HUD_LOCKED_RED };
 	constexpr int LOCKED_BORDER_ALPHA{ 150 };
+
+	// 弾いたときの震え。左右に細かく往復させて「入らない」ことを動きで返す
+	constexpr float LOCKED_SHAKE_DURATION{ 0.34f }; // 震えている長さ（秒）
+	constexpr int LOCKED_SHAKE_AMPLITUDE{ 6 };      // 振れ幅（1080p基準）
+	constexpr float LOCKED_SHAKE_CYCLES{ 3.0f };    // 往復する回数
+	constexpr int LOCKED_SHAKE_BORDER_ALPHA{ 255 }; // 震えている間は枠を強く出す
 
 	constexpr int ICON_ALPHA_OPAQUE{ 255 }; // 効果が乗っているものはそのままの濃さで描く
 	constexpr int EMPTY_ICON_ALPHA{ 60 };   // 空きマスの薄さ
@@ -279,11 +286,48 @@ namespace game::ui::ingame
 	{
 		for (const auto& bounds : m_slotBounds)
 		{
+			if (bounds.m_isLocked)
+				continue;
+
 			if (screenX >= bounds.m_x && screenX < bounds.m_x + bounds.m_width &&
 			    screenY >= bounds.m_y && screenY < bounds.m_y + bounds.m_height)
 				return bounds.m_acquiredIndex;
 		}
 		return -1;
+	}
+
+	bool InventoryView::isLockedSlotAt(int screenX, int screenY) const noexcept
+	{
+		for (const auto& bounds : m_slotBounds)
+		{
+			if (!bounds.m_isLocked)
+				continue;
+
+			if (screenX >= bounds.m_x && screenX < bounds.m_x + bounds.m_width &&
+			    screenY >= bounds.m_y && screenY < bounds.m_y + bounds.m_height)
+				return true;
+		}
+		return false;
+	}
+
+	void InventoryView::startLockedShake() noexcept
+	{
+		m_lockedShakeTime = std::chrono::steady_clock::now();
+	}
+
+	int InventoryView::lockedShakeOffset() const
+	{
+		const float elapsed{ std::chrono::duration<float>(
+			std::chrono::steady_clock::now() - m_lockedShakeTime)
+			    .count() };
+		if (elapsed >= LOCKED_SHAKE_DURATION)
+			return 0;
+
+		// 終わりに向けて振れ幅を落とす。同じ幅で止まると切れたように見える
+		const float decay{ 1.0f - elapsed / LOCKED_SHAKE_DURATION };
+		const float phase{ elapsed / LOCKED_SHAKE_DURATION * LOCKED_SHAKE_CYCLES *
+			               core::utility::TWO_PI };
+		return static_cast<int>(scaled(LOCKED_SHAKE_AMPLITUDE) * decay * std::sin(phase));
 	}
 
 	void InventoryView::draw(core::ecs::EntityId playerId)
@@ -521,8 +565,13 @@ namespace game::ui::ingame
 			const int slotX{ x + column * (slotWidth + slotGap) };
 			const int slotY{ slotTop + row * (slotHeight + slotGap) };
 
-			if (isSelectable)
-				m_slotBounds.push_back({ slotX, slotY, slotWidth, slotHeight, acquiredIndex });
+			// 固定された枠も位置を覚えておく。何も無い場所へ落としたのか、
+			// 固定された枠へ落とそうとしたのかを分けて扱うため
+			m_slotBounds.push_back({ slotX, slotY, slotWidth, slotHeight, acquiredIndex,
+			    !isSelectable });
+
+			// 弾いている最中は固定された枠だけを左右に震わせる
+			const int shakeX{ isSelectable ? 0 : lockedShakeOffset() };
 
 			SlotStyle style{};
 			style.m_isDimmed = isDimmed;
@@ -530,7 +579,7 @@ namespace game::ui::ingame
 			style.m_isHeld = isSelectable && acquiredIndex == m_heldIndex;
 			style.m_isLocked = !isSelectable;
 
-			drawSlot(slotX, slotY, types[i], style);
+			drawSlot(slotX + shakeX, slotY, types[i], style);
 
 			// 効果が乗っているマスだけ縁に光を回す。右下HUDと同じ規則にして、
 			// 「回っている＝効いている」の意味が画面ごとにずれないようにする。
@@ -543,7 +592,7 @@ namespace game::ui::ingame
 			// 動かせない区分には錠前を付ける。見出しの文字より先に目へ入り、
 			// 掴もうとする前に「ここは触れない」と分かる
 			if (!isSelectable)
-				drawLockBadge(slotX + slotWidth - scaled(LOCK_MARGIN) - scaled(LOCK_SIZE),
+				drawLockBadge(slotX + shakeX + slotWidth - scaled(LOCK_MARGIN) - scaled(LOCK_SIZE),
 				    slotY + scaled(LOCK_MARGIN));
 		}
 
@@ -604,7 +653,11 @@ namespace game::ui::ingame
 		const unsigned int borderColor{ style.m_isLocked ? LOCKED_COLOR : SLOT_BORDER_COLOR };
 		int borderAlpha{ isEmpty ? SLOT_EMPTY_BORDER_ALPHA : SLOT_BORDER_ALPHA };
 		if (style.m_isLocked)
-			borderAlpha = LOCKED_BORDER_ALPHA;
+		{
+			// 弾いている間だけ枠を強く出す。常時この濃さだと警告色が視界を占める
+			borderAlpha = lockedShakeOffset() != 0 ? LOCKED_SHAKE_BORDER_ALPHA
+			                                       : LOCKED_BORDER_ALPHA;
+		}
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, borderAlpha);
 		m_uiRenderer.drawRoundedBox(x, y, slotWidth, slotHeight, radius, borderColor, false, 1);

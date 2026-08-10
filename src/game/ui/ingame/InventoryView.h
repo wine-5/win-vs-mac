@@ -112,6 +112,25 @@ namespace game::ui::ingame
 		 */
 		[[nodiscard]] int findSlotIndexAt(int screenX, int screenY) const noexcept;
 
+		/**
+		 * @brief 画面座標が動かせない枠（持ち込み）の上にあるかを返す
+		 *
+		 * 何も無い場所へ落としたのか、固定された枠へ落とそうとしたのかを分けるために使う。
+		 * 前者は取り消し、後者は弾いたことを伝える必要がある
+		 * @param screenX 画面上のX座標
+		 * @param screenY 画面上のY座標
+		 * @return 固定された枠の上ならtrue
+		 */
+		[[nodiscard]] bool isLockedSlotAt(int screenX, int screenY) const noexcept;
+
+		/**
+		 * @brief 固定された枠を弾く演出を始める
+		 *
+		 * 落とせなかったことを、音だけでなく動きでも返す。無反応だと
+		 * 操作が効いていないのか、そういう仕様なのかが区別できない
+		 */
+		void startLockedShake() noexcept;
+
 	  private:
 		/// @brief 能力値の項目数（左下HUD・セレクト画面と同じ8項目）
 		static constexpr int STAT_COUNT{ 8 };
@@ -247,6 +266,12 @@ namespace game::ui::ingame
 		void drawLockBadge(int x, int y);
 
 		/**
+		 * @brief 弾く演出の横ずれ量を返す
+		 * @return 左右にずらす量（ピクセル。演出中でなければ0）
+		 */
+		[[nodiscard]] int lockedShakeOffset() const;
+
+		/**
 		 * @brief 運んでいる最中のアイコンをカーソルの位置へ描く
 		 * @param type 運んでいる拡張子種別（Count なら何も描かない）
 		 */
@@ -275,6 +300,9 @@ namespace game::ui::ingame
 			int m_width{ 0 };
 			int m_height{ 0 };
 			int m_acquiredIndex{ -1 };
+
+			/// @brief 道中では動かせない枠か（このときは m_acquiredIndex を使わない）
+			bool m_isLocked{ false };
 		};
 
 		// 描画のたびに組み直す。窓の大きさや折り返しが変わっても、
@@ -296,6 +324,9 @@ namespace game::ui::ingame
 		bool m_isSwapMode{ false };
 		int m_cursorIndex{ -1 };
 		int m_heldIndex{ -1 };
+
+		// 固定枠を弾いた時刻。ここから一定時間だけ左右に震わせる
+		std::chrono::steady_clock::time_point m_lockedShakeTime{};
 
 		// 掴んだものを運んでいる最中か。運んでいる間だけカーソルにアイコンを付ける
 		bool m_isDragging{ false };
