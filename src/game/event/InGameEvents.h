@@ -298,6 +298,24 @@ namespace game::event
 	};
 
 	/**
+	 * @brief 拡張子を挿せる枠が増えたときに発行されるイベント
+	 *
+	 * RAMブロックを壊すと飛ぶ。枠が増えたことの反映（能力の再計算）と、
+	 * 音・HUDの演出を分けるためにイベントにしてある
+	 */
+	struct EquipSlotGainedEvent : public core::iface::IGameEvent
+	{
+		/** @brief 増えたあとの枠数 */
+		int m_maxEquipped{ 0 };
+
+		EquipSlotGainedEvent() = default;
+		explicit EquipSlotGainedEvent(int maxEquipped)
+		    : m_maxEquipped{ maxEquipped }
+		{
+		}
+	};
+
+	/**
 	 * @brief 壊せるブロックを殴ったが、まだ壊れていないときに発行されるイベント
 	 *
 	 * 打撃音を鳴らすために使う。壊れた場合は BlockBrokenEvent が飛ぶので、
