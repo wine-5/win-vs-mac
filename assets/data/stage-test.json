@@ -1197,6 +1197,24 @@
       ]
     },
     {
+      "type": "block_ram",
+      "position": [
+        220,
+        65.0,
+        104.68
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        130,
+        130,
+        130
+      ]
+    },
+    {
       "type": "block_rename",
       "position": [
         0,
@@ -1212,6 +1230,78 @@
         170,
         170,
         170
+      ]
+    },
+    {
+      "type": "block_random",
+      "position": [
+        150.1,
+        55,
+        652.97
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        110,
+        110,
+        110
+      ]
+    },
+    {
+      "type": "block_random",
+      "position": [
+        163.39,
+        55,
+        652.97
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        110,
+        110,
+        110
+      ]
+    },
+    {
+      "type": "block_random",
+      "position": [
+        126.83,
+        55,
+        652.97
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        110,
+        110,
+        110
+      ]
+    },
+    {
+      "type": "block_random",
+      "position": [
+        93.67,
+        55,
+        652.97
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        110,
+        110,
+        110
       ]
     }
   ],
