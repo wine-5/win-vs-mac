@@ -5,6 +5,7 @@
 #include "core/utility/Log.h"
 #include "game/data/FileEquipmentData.h"
 #include "game/constant/ExtensionIconId.h"
+#include "game/utility/ExtensionBonusLabel.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -69,31 +70,6 @@ namespace
 		}
 	}
 
-	/**
-	 * @brief 拡張子種別が何を強化するかを返す
-	 *
-	 * 装備の効果は開始時のステータス補正としてのみ現れるため、
-	 * 種別名だけでは何の役に立っているのか分からない。効果を併記する
-	 * @param type 拡張子種別
-	 * @return 強化される項目の短い表記
-	 */
-	const char* toBonusLabel(core::data::FileExtensionType type)
-	{
-		switch (type)
-		{
-		case core::data::FileExtensionType::Executable: return "ATK+";
-		case core::data::FileExtensionType::Document: return "SPD+";
-		case core::data::FileExtensionType::Image: return "DEF+";
-		case core::data::FileExtensionType::Audio: return "HP+";
-		// このViewはShift_JIS変換を通していないため、表記はASCIIに限る。
-		// B.は弾（Window弾）のこと。SPD+（移動速度）・RNG+（攻撃範囲）と紛れないよう区別する
-		case core::data::FileExtensionType::SourceCode: return "CRIT+";
-		case core::data::FileExtensionType::Shortcut: return "B.SPD+";
-		case core::data::FileExtensionType::Video: return "B.RNG+";
-		case core::data::FileExtensionType::Archive: return "ALL+";
-		default: return "RNG+";
-		}
-	}
 
 	/**
 	 * @brief 色の明るさを倍率で落とす
@@ -256,7 +232,10 @@ namespace game::ui::ingame
 			drawCenteredText(centerX, y + scaled(TYPE_LABEL_Y), toTypeLabel(type),
 			    core::utility::Color::HUD_INK, scaled(TYPE_FONT_SIZE));
 
-		drawCenteredText(centerX, y + scaled(BONUS_LABEL_Y), toBonusLabel(type),
+		// 何を強化するかを併記する。装備の効果は開始時のステータス補正としてのみ
+		// 現れるため、種別名だけでは何の役に立っているのか分からない
+		const std::string bonusLabel{ utility::ExtensionBonusLabel::toLabel(type) };
+		drawCenteredText(centerX, y + scaled(BONUS_LABEL_Y), bonusLabel.c_str(),
 		    core::utility::Color::HUD_INK_FAINT, scaled(BONUS_FONT_SIZE));
 
 		m_uiRenderer.resetFont();
