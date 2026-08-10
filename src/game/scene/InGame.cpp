@@ -1,4 +1,4 @@
-﻿#include "InGame.h"
+#include "InGame.h"
 
 /* core層 */
 #include "core/interface/ILogger.h"
@@ -23,6 +23,7 @@
 #include "game/system/stage/BlockBreakSystem.h"
 #include "game/system/stage/BlockDebrisSystem.h"
 #include "game/system/stage/ExtensionPickupSystem.h"
+#include "game/system/stage/RenameTerminalSystem.h"
 #include "game/system/stage/BossGateSystem.h"
 #include "game/system/movement/FootstepSystem.h"
 #include "game/component/movement/TransformComponent.h"
@@ -94,6 +95,7 @@
 #include "game/ui/ingame/ObjectiveView.h"
 #include "game/ui/ingame/InGameStatusView.h"
 #include "game/ui/ingame/InventoryView.h"
+#include "game/ui/ingame/InteractPromptView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
 #include "game/ui/ingame/BossHUDView.h"
 #include "game/ui/ingame/MiniMapView.h"
@@ -323,6 +325,13 @@ namespace game::scene
 		    m_resourceManager,
 		    m_fileEquipmentData);
 		m_view.setInventoryView(m_inventoryView.get());
+
+		m_interactPromptView = std::make_unique<ui::ingame::InteractPromptView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    m_renderer,
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager);
+		m_view.setInteractPromptView(m_interactPromptView.get());
 
 		m_lowHealthVignetteView = std::make_unique<ui::ingame::LowHealthVignetteView>(
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
@@ -622,6 +631,11 @@ namespace game::scene
 		    m_componentManager, m_entityManager, m_eventBus, m_playerId);
 		core::probe::mark("      sys: ExtensionPickupSystem");
 
+		// 拡張子の付け替え端末への接近判定。案内の表示とF2の受付がこの結果を見る
+		m_renameTerminalSystem = m_systemManager.registerSystem<game::system::stage::RenameTerminalSystem>(
+		    m_componentManager, m_playerId);
+		core::probe::mark("      sys: RenameTerminalSystem");
+
 		// 拾った拡張子をプレイヤーの能力へ乗せる。取得の直後に反映したいので取得の次に置く
 		m_systemManager.registerSystem<game::system::combat::ExtensionEquipSystem>(
 		    m_componentManager, m_eventBus, m_resourceManager, m_playerId);
@@ -892,6 +906,11 @@ namespace game::scene
 		    (m_battleStartSystem == nullptr || !m_battleStartSystem->isPreparing()))
 			m_elapsedTime += scaledDeltaTime;
 		m_systemManager.update(scaledDeltaTime);
+
+		// 近くにいる端末をViewへ渡す。判定はSystem、表示はViewと分けているので、
+		// 案内の見た目を変えても判定側を触らずに済む
+		if (m_renameTerminalSystem)
+			m_view.setInteractTarget(m_renameTerminalSystem->getNearTerminalId());
 	}
 
 	void InGame::updateInventory()

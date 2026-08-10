@@ -42,6 +42,11 @@ namespace game
 		class BattleStartSystem; // 前方宣言
 	} // namespace system::visual
 
+	namespace system::stage
+	{
+		class RenameTerminalSystem; // 前方宣言
+	} // namespace system::stage
+
 	namespace ui::debug
 	{
 		class DebugGizmoView; // DEBUG: 前方宣言（リリース時に削除）
@@ -55,6 +60,7 @@ namespace game
 		class ObjectiveView;     // 前方宣言
 		class InGameStatusView;  // 前方宣言
 		class InventoryView;     // 前方宣言
+		class InteractPromptView;    // 前方宣言
 		class LowHealthVignetteView; // 前方宣言
 		class BossHUDView;           // 前方宣言
 		class MiniMapView;           // 前方宣言
@@ -217,6 +223,12 @@ namespace game::scene
 
 		// 拡張子インベントリ（Eキーで開閉）
 		std::unique_ptr<ui::ingame::InventoryView> m_inventoryView;
+
+		// 設置物への接近案内（吹き出し）
+		std::unique_ptr<ui::ingame::InteractPromptView> m_interactPromptView;
+
+		// 付け替え端末への接近判定（所有はSystemManager）。近くにいる端末をViewへ渡す
+		system::stage::RenameTerminalSystem* m_renameTerminalSystem{ nullptr };
 
 		// 低HP警告のビネットのView
 		std::unique_ptr<ui::ingame::LowHealthVignetteView> m_lowHealthVignetteView;
