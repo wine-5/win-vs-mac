@@ -58,6 +58,14 @@ namespace game::system::stage
 		void breakBlock(core::ecs::EntityId blockId);
 		void spawnDrops(core::ecs::EntityId blockId);
 
+		/**
+		 * @brief 壊したブロックが枠を増やすものなら、装備できる個数を1つ増やす
+		 *
+		 * 欠片のドロップとは別の報酬。増えた枠は EquipSlotGainedEvent で知らせる
+		 * @param blockId 壊れたブロックのEntityId
+		 */
+		void grantEquipSlot(core::ecs::EntityId blockId);
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::ecs::EntityManager& m_entityManager;
 		core::iface::IRenderer& m_renderer;

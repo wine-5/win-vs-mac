@@ -10,6 +10,7 @@
 #include "game/constant/ExtensionIconId.h"
 #include "game/event/InGameEvents.h"
 #include "core/utility/Log.h"
+#include "game/component/combat/ExtensionInventoryComponent.h"
 #include <algorithm>
 #include <cmath>
 #include <random>
@@ -226,8 +227,30 @@ namespace game::system::stage
 		m_componentManager.add<component::stage::BlockDebrisComponent>(blockId, debris);
 
 		spawnDrops(blockId);
+		grantEquipSlot(blockId);
 
 		m_eventBus.publish(event::BlockBrokenEvent{ blockId, transform.m_position });
+	}
+
+	void BlockBreakSystem::grantEquipSlot(core::ecs::EntityId blockId)
+	{
+		const auto& destructible{ m_componentManager.get<component::stage::DestructibleComponent>(blockId) };
+		if (!destructible.m_grantsEquipSlot)
+			return;
+
+		auto* inventory{
+			m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId)
+		};
+		if (inventory == nullptr)
+			return;
+
+		++inventory->m_maxEquipped;
+
+		// 枠が増えたことで、既に拾ってあった未装備の先頭が装備中へ繰り上がる。
+		// 位置は動かさずに境界だけが動くので、並びはそのまま保たれる
+		m_eventBus.publish(event::EquipSlotGainedEvent{ inventory->m_maxEquipped });
+
+		core::log::info("装備できる枠が増えた: {}", inventory->m_maxEquipped);
 	}
 
 	void BlockBreakSystem::spawnDrops(core::ecs::EntityId blockId)
