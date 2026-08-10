@@ -11,6 +11,7 @@
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/visual/LightComponent.h"
 #include "game/component/stage/BossGateComponent.h"
+#include "game/component/stage/RenameTerminalComponent.h"
 #include <cmath>
 #include <algorithm>
 #include <random>
@@ -261,6 +262,13 @@ namespace game::factory
 				gate.m_closedY = prop.m_position.y;
 				gate.m_openY = params.m_position.y;
 				m_componentManager.add<component::stage::BossGateComponent>(propId, gate);
+			}
+
+			// 拡張子の付け替え端末。壊せない設置物なので、破壊まわりの設定は持たない
+			if (def.m_role == constant::prop_role::RENAME_TERMINAL)
+			{
+				m_componentManager.add<component::stage::RenameTerminalComponent>(
+				    propId, component::stage::RenameTerminalComponent{});
 			}
 		}
 	}
