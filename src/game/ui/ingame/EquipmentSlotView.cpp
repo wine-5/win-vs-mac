@@ -122,8 +122,8 @@ namespace game::ui::ingame
 
 		// DxLibの描画はShift_JISを期待する。毎フレーム同じ結果なので生成時に一度だけ変換する
 		auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
-		m_pageLabels[PAGE_CARRIED] = converter ? converter->utf8ToShiftJis("持ち込み") : "持ち込み";
-		m_pageLabels[PAGE_ACQUIRED] = converter ? converter->utf8ToShiftJis("道中で拾った") : "道中で拾った";
+		m_pageLabels[PAGE_CARRIED] = converter ? converter->utf8ToShiftJis("セレクト画面で選択") : "セレクト画面で選択";
+		m_pageLabels[PAGE_ACQUIRED] = converter ? converter->utf8ToShiftJis("道中で取得") : "道中で取得";
 	}
 
 	int EquipmentSlotView::getIconHandle(core::data::FileExtensionType type) const

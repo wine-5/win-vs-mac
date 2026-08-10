@@ -232,8 +232,8 @@ namespace game::ui::ingame
 		m_addressText = toDrawable("PC  >  拡張子  >  所持しているもの");
 		// 見出しは区分の幅に収まる長さにする。はみ出すと隣の区分の見出しへ重なり、
 		// どちらも読めなくなる（説明はアドレスバーとステータスバーが担う）
-		m_captionCarried = toDrawable("持ち込み（変更不可）");
-		m_captionAcquired = toDrawable("道中で拾った（効果あり）");
+		m_captionCarried = toDrawable("セレクト画面で選択（変更不可）");
+		m_captionAcquired = toDrawable("道中で取得（装備中）");
 		m_captionUnequipped = toDrawable("所持一覧（未装備）");
 		m_captionNoUnequipped = toDrawable("拾ったものはすべて装備中です");
 		m_captionStats = toDrawable("現在の能力");
