@@ -47,6 +47,15 @@ namespace game::system::combat
 	  private:
 		void applyBonus(core::data::FileExtensionType type);
 
+		/**
+		 * @brief 装備から外した拡張子のボーナスを取り消す
+		 *
+		 * applyBonus の逆。入れ替えは「外す→挿す」の2手で表すので、
+		 * 足した値をそのまま引けるようにしておく
+		 * @param type 外す拡張子の種別
+		 */
+		void removeBonus(core::data::FileExtensionType type);
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IResourceManager& m_resourceManager;
 		core::ecs::EntityId m_playerId;

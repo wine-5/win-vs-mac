@@ -83,4 +83,36 @@ namespace game::system::combat
 			stats->m_projectileRange += bonus.projectileRange;
 		}
 	}
+
+	void ExtensionEquipSystem::removeBonus(core::data::FileExtensionType type)
+	{
+		const auto& bonus{ m_resourceManager.getExtensionBonus(type) };
+
+		if (auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(m_playerId) })
+		{
+			attack->m_attackPower -= bonus.atk;
+			attack->m_attackRange -= bonus.attackRange;
+			// 加算時に1.0で頭打ちにしているぶん、引くと0を下回りうる
+			attack->m_criticalRate = std::max(attack->m_criticalRate - bonus.criticalRate, 0.0f);
+		}
+
+		if (auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(m_playerId) })
+		{
+			// 現在HPも同じだけ減らす。上限だけ下げて現在値を据え置くと、
+			// HP強化を挿しては外すだけで全快でき、入れ替えが回復手段になってしまう
+			constexpr float MIN_HP_AFTER_REMOVE{ 1.0f };
+
+			health->m_maxHp -= bonus.hp;
+			health->m_defence -= bonus.def;
+			health->m_currentHp = std::clamp(health->m_currentHp - bonus.hp,
+			    MIN_HP_AFTER_REMOVE, health->m_maxHp);
+		}
+
+		if (auto* stats{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(m_playerId) })
+		{
+			stats->m_moveSpeed -= bonus.spd;
+			stats->m_projectileSpeed -= bonus.projectileSpeed;
+			stats->m_projectileRange -= bonus.projectileRange;
+		}
+	}
 } // namespace game::system::combat
