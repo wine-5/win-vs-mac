@@ -55,6 +55,11 @@ namespace
 	constexpr int PAGE_LABEL_FONT_SIZE{ 17 };
 	constexpr int PAGE_LABEL_GAP{ 6 }; // 見出しとスロットの間隔
 
+	// 切り替えは下から浮き上がらせる。瞬間的に絵が入れ替わると、
+	// 切り替わったのか元から違ったのかが分からない
+	constexpr float SLIDE_DURATION{ 0.30f }; // 切り替えアニメの長さ（秒）
+	constexpr int SLIDE_OFFSET{ 12 };        // スライドの振れ幅（1080p基準）
+
 	/**
 	 * @brief 拡張子種別の表示名を返す
 	 * @param type 拡張子種別
@@ -165,13 +170,20 @@ namespace game::ui::ingame
 			                ? static_cast<int>(elapsed / PAGE_INTERVAL) % PAGE_COUNT
 			                : 0 };
 
+		// ページが変わった直後だけ下から持ち上げる。送っていないときは動かさない
+		const float sincePageChange{ std::fmod(elapsed, PAGE_INTERVAL) };
+		const float slideProgress{ hasAcquired
+			                           ? std::min(sincePageChange / SLIDE_DURATION, 1.0f)
+			                           : 1.0f };
+		const int slideOffset{ static_cast<int>(scaled(SLIDE_OFFSET) * (1.0f - slideProgress)) };
+
 		const int slotSize{ scaled(SLOT_SIZE) };
 		const int gap{ scaled(SLOT_GAP) };
 		const int totalWidth{ slotSize * SLOT_COUNT + gap * (SLOT_COUNT - 1) };
 
 		// 右下アンカー。幅はモニタのアスペクト比で変わるため必ず実際の画面幅から逆算する
 		const int startX{ m_screen.getWidth() - scaled(MARGIN) - totalWidth };
-		const int y{ m_screen.getHeight() - scaled(MARGIN) - slotSize };
+		const int y{ m_screen.getHeight() - scaled(MARGIN) - slotSize + slideOffset };
 
 		drawPageLabel(startX, y - scaled(PAGE_LABEL_GAP) - scaled(PAGE_LABEL_FONT_SIZE),
 		    totalWidth, page);
