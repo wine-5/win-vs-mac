@@ -22,6 +22,7 @@ namespace infrastructure
 		{ core::input::KeyCode::Shift, KEY_INPUT_LSHIFT },
 		{ core::input::KeyCode::Tab, KEY_INPUT_TAB },
 		{ core::input::KeyCode::E, KEY_INPUT_E },
+		{ core::input::KeyCode::F2, KEY_INPUT_F2 },
 	};
 
 	InputManager::InputManager()
