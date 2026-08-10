@@ -259,17 +259,23 @@ namespace game::scene
 		if (screen)
 			screen->setFog(true, VOID_R, VOID_G, VOID_B, FOG_START, FOG_END);
 
-		// ライティングを有効化して立体感を出す。環境光は「模様が潰れない下限」を確保しつつ
-		// 低めにして虚無の暗さを残し、上からの平行光で面の向きを分からせる
+		// ライティングを有効化して立体感を出す。環境光は青みを残して虚無の冷たさを、
+		// 上からの平行光で面の向きを示す。
+		//
+		// 【重要】環境光と平行光の和は255を超えないこと。配置物のマテリアルは
+		// amb(1.0) dif(1.0) なので、和が255を超えると最も光の当たる面が白へ飽和する。
+		// 暗いテクスチャでは気付けないが、明るい面（リネーム端末）を置くと絵が消える
 		auto* lighting{ core::base::ServiceLocator::get<core::iface::ILighting>() };
 		if (lighting)
 		{
-			constexpr int AMBIENT_R{ 150 };
-			constexpr int AMBIENT_G{ 160 };
-			constexpr int AMBIENT_B{ 180 };
+			constexpr int AMBIENT_R{ 88 };
+			constexpr int AMBIENT_G{ 94 };
+			constexpr int AMBIENT_B{ 105 };
+			constexpr int DIRECTIONAL_LEVEL{ 150 };
 			lighting->setEnabled(true);
 			lighting->setAmbient(AMBIENT_R, AMBIENT_G, AMBIENT_B);
-			lighting->setDirectionalLight(core::Vector3{ -0.3f, -1.0f, 0.4f }, 255, 255, 255);
+			lighting->setDirectionalLight(core::Vector3{ -0.3f, -1.0f, 0.4f },
+			    DIRECTIONAL_LEVEL, DIRECTIONAL_LEVEL, DIRECTIONAL_LEVEL);
 		}
 
 		// 3人称マウス視点のためカーソルを非表示にする（表示の切り替えは DebugFlags.h で行う）
