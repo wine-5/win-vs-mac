@@ -173,6 +173,7 @@
     <ClCompile Include="src\game\system\visual\HardAuraVisualsSystem.cpp" />
     <ClCompile Include="src\game\ui\ingame\InGameStatusView.cpp" />
     <ClCompile Include="src\game\ui\ingame\InventoryView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\InteractPromptView.cpp" />
     <ClCompile Include="src\game\system\camera\DamageShakeSystem.cpp" />
     <ClCompile Include="src\game\system\ai\MeleeChaseAISystem.cpp" />
     <ClCompile Include="src\game\system\ai\RangeKeepAISystem.cpp" />
@@ -250,6 +251,7 @@
     <ClCompile Include="src\game\system\stage\BlockBreakSystem.cpp" />
     <ClCompile Include="src\game\system\stage\BlockDebrisSystem.cpp" />
     <ClCompile Include="src\game\system\stage\ExtensionPickupSystem.cpp" />
+    <ClCompile Include="src\game\system\stage\RenameTerminalSystem.cpp" />
     <ClCompile Include="src\game\system\stage\BossGateSystem.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageRepository.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageCatalogRepository.cpp" />
@@ -336,6 +338,7 @@
     <ClInclude Include="src\game\component\stage\BossGateComponent.h" />
     <ClInclude Include="src\game\component\stage\DestructibleComponent.h" />
     <ClInclude Include="src\game\component\stage\ExtensionPickupComponent.h" />
+    <ClInclude Include="src\game\component\stage\RenameTerminalComponent.h" />
     <ClInclude Include="src\game\component\stage\BlockDebrisComponent.h" />
     <ClInclude Include="src\game\component\movement\GroundSurfaceComponent.h" />
     <ClInclude Include="src\game\component\movement\FallRecoveryComponent.h" />
@@ -345,6 +348,7 @@
     <ClInclude Include="src\game\system\stage\BlockBreakSystem.h" />
     <ClInclude Include="src\game\system\stage\BlockDebrisSystem.h" />
     <ClInclude Include="src\game\system\stage\ExtensionPickupSystem.h" />
+    <ClInclude Include="src\game\system\stage\RenameTerminalSystem.h" />
     <ClInclude Include="src\game\system\stage\BossGateSystem.h" />
     <ClInclude Include="src\core\data\ProjectileMetadata.h" />
     <ClInclude Include="src\game\actor\EnemyBehaviors.h" />
@@ -428,6 +432,7 @@
     <ClInclude Include="src\game\system\visual\HardAuraVisualsSystem.h" />
     <ClInclude Include="src\game\ui\ingame\InGameStatusView.h" />
     <ClInclude Include="src\game\ui\ingame\InventoryView.h" />
+    <ClInclude Include="src\game\ui\ingame\InteractPromptView.h" />
     <ClInclude Include="src\game\system\camera\DamageShakeSystem.h" />
     <ClInclude Include="src\game\system\ai\MeleeChaseAISystem.h" />
     <ClInclude Include="src\game\system\ai\RangeKeepAISystem.h" />
