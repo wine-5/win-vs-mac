@@ -1012,6 +1012,18 @@ namespace game::scene
 	{
 		// 装備中と未装備の組み合わせだけが意味を持つ。どちらを先に掴んだかは問わない
 		const bool isHeldEquipped{ inventory.isEquipped(m_swapHeldIndex) };
+
+		// 同じ区分どうしを入れ替えても能力は変わらない。System側でも弾いているが、
+		// そこで静かに握り潰すと画面には何も返らず、操作が効いていないように見える
+		if (isHeldEquipped == inventory.isEquipped(targetIndex))
+		{
+			if (m_inventoryView)
+				m_inventoryView->startRejectShake(
+				    ui::ingame::InventoryView::ShakeTarget::Selected);
+			playUiSe(core::constant::SeType::ExtensionRejected);
+			return;
+		}
+
 		m_eventBus.publish(event::ExtensionSwapRequestedEvent{
 		    isHeldEquipped ? m_swapHeldIndex : targetIndex,
 		    isHeldEquipped ? targetIndex : m_swapHeldIndex });
@@ -1049,7 +1061,8 @@ namespace game::scene
 		const bool isOverLocked{ m_inventoryView->isLockedSlotAt(mouseX, mouseY) };
 		if ((isPressed || isReleased) && isOverLocked && m_swapHeldIndex >= 0)
 		{
-			m_inventoryView->startLockedShake();
+			m_inventoryView->startRejectShake(
+			    ui::ingame::InventoryView::ShakeTarget::Locked);
 			playUiSe(core::constant::SeType::ExtensionRejected);
 			m_inventoryView->setSelection(hoveredIndex, m_swapHeldIndex);
 			m_inventoryView->setDragging(isDown && m_swapHeldIndex >= 0, mouseX, mouseY);
