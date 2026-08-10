@@ -1,4 +1,5 @@
 #include "PlayerHUDView.h"
+#include "game/utility/PlayerStats.h"
 #include "LowHealthPulse.h"
 #include "core/constant/UI.h"
 #include "core/utility/Color.h"
@@ -79,17 +80,6 @@ namespace
 		"stat-hp", "stat-atk", "stat-def", "stat-spd",
 		"stat-rng", "stat-crit", "stat-bspd", "stat-brng"
 	};
-
-	// STAT_ICON_IMAGE_IDS 上の位置。値を詰める側と並びがずれないよう名前で参照する
-	constexpr int STAT_INDEX_HP{ 0 };
-	constexpr int STAT_INDEX_ATK{ 1 };
-	constexpr int STAT_INDEX_DEF{ 2 };
-	constexpr int STAT_INDEX_SPD{ 3 };
-	constexpr int STAT_INDEX_RNG{ 4 };
-	// 会心率だけは割合なので百分率で見せる。この位置だけ書式が変わる
-	constexpr int STAT_INDEX_CRIT{ 5 };
-	constexpr int STAT_INDEX_BSPD{ 6 };
-	constexpr int STAT_INDEX_BRNG{ 7 };
 
 	// 素の値より上がっている項目の色。装備ファイル・Itemなど強化の出どころは問わない
 	constexpr unsigned int STAT_BOOSTED_COLOR{ core::utility::Color::HUD_CHARGE_MAX };
@@ -224,45 +214,12 @@ namespace game::ui::ingame
 
 	std::array<float, PlayerHUDView::STAT_COUNT> PlayerHUDView::collectStats(core::ecs::EntityId playerId) const
 	{
-		std::array<float, STAT_COUNT> stats{};
-
-		if (const auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(playerId) })
-		{
-			stats[STAT_INDEX_ATK] = attack->m_attackPower;
-			stats[STAT_INDEX_RNG] = attack->m_attackRange;
-			stats[STAT_INDEX_CRIT] = attack->m_criticalRate * core::utility::RATIO_TO_PERCENT; // 割合を百分率へ
-		}
-		if (const auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(playerId) })
-		{
-			stats[STAT_INDEX_HP] = health->m_maxHp;
-			stats[STAT_INDEX_DEF] = health->m_defence;
-		}
-		if (const auto* player{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(playerId) })
-		{
-			stats[STAT_INDEX_SPD] = player->m_moveSpeed;
-			stats[STAT_INDEX_BSPD] = player->m_projectileSpeed;
-			stats[STAT_INDEX_BRNG] = player->m_projectileRange;
-		}
-		return stats;
+		return utility::collectPlayerStats(m_componentManager, playerId);
 	}
 
 	std::array<float, PlayerHUDView::STAT_COUNT> PlayerHUDView::collectBaseStats(core::ecs::EntityId playerId) const
 	{
-		std::array<float, STAT_COUNT> stats{};
-
-		const auto* base{ m_componentManager.tryGet<component::combat::PlayerStatBaseComponent>(playerId) };
-		if (base == nullptr)
-			return stats; // 控えが無ければ強化なし扱い（全項目が素の色になる）
-
-		stats[STAT_INDEX_HP] = base->m_maxHp;
-		stats[STAT_INDEX_ATK] = base->m_attackPower;
-		stats[STAT_INDEX_DEF] = base->m_defence;
-		stats[STAT_INDEX_SPD] = base->m_moveSpeed;
-		stats[STAT_INDEX_RNG] = base->m_attackRange;
-		stats[STAT_INDEX_CRIT] = base->m_criticalRate * core::utility::RATIO_TO_PERCENT; // 現在値と同じ百分率へ揃える
-		stats[STAT_INDEX_BSPD] = base->m_projectileSpeed;
-		stats[STAT_INDEX_BRNG] = base->m_projectileRange;
-		return stats;
+		return utility::collectPlayerBaseStats(m_componentManager, playerId);
 	}
 
 	void PlayerHUDView::updatePaging(const std::array<float, STAT_COUNT>& stats, bool isExpanded, float deltaTime)
@@ -344,7 +301,7 @@ namespace game::ui::ingame
 		}
 
 		char text[16]{};
-		if (index == STAT_INDEX_CRIT)
+		if (index == utility::STAT_INDEX_CRIT)
 			std::snprintf(text, sizeof(text), "%d%%", static_cast<int>(value));
 		else
 			std::snprintf(text, sizeof(text), "%d", static_cast<int>(value));

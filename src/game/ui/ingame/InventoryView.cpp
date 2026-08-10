@@ -14,6 +14,7 @@
 #include "game/constant/ExtensionIconId.h"
 #include "game/data/FileEquipmentData.h"
 #include "game/utility/ExtensionBonusLabel.h"
+#include "game/utility/PlayerStats.h"
 #include <algorithm>
 #include <cstdio>
 
@@ -120,16 +121,6 @@ namespace
 	constexpr std::array<const char*, 8> STAT_LABELS{
 		"HP", "攻撃", "防御", "速度", "射程", "会心", "弾速", "飛距離"
 	};
-
-	// STAT_ICON_IMAGE_IDS 上の位置。値を詰める側と並びがずれないよう名前で参照する
-	constexpr int STAT_INDEX_HP{ 0 };
-	constexpr int STAT_INDEX_ATK{ 1 };
-	constexpr int STAT_INDEX_DEF{ 2 };
-	constexpr int STAT_INDEX_SPD{ 3 };
-	constexpr int STAT_INDEX_RNG{ 4 };
-	constexpr int STAT_INDEX_CRIT{ 5 }; // 会心だけは割合なので百分率で見せる
-	constexpr int STAT_INDEX_BSPD{ 6 };
-	constexpr int STAT_INDEX_BRNG{ 7 };
 
 	/**
 	 * @brief 拡張子種別に対応する擬似ファイル名を返す
@@ -605,39 +596,11 @@ namespace game::ui::ingame
 
 	void InventoryView::drawStats(int x, int y, int width, core::ecs::EntityId playerId)
 	{
-		std::array<float, STAT_COUNT> stats{};
-		if (const auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(playerId) })
-		{
-			stats[STAT_INDEX_ATK] = attack->m_attackPower;
-			stats[STAT_INDEX_RNG] = attack->m_attackRange;
-			stats[STAT_INDEX_CRIT] = attack->m_criticalRate * core::utility::RATIO_TO_PERCENT; // 割合を百分率へ
-		}
-		if (const auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(playerId) })
-		{
-			stats[STAT_INDEX_HP] = health->m_maxHp;
-			stats[STAT_INDEX_DEF] = health->m_defence;
-		}
-		if (const auto* player{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(playerId) })
-		{
-			stats[STAT_INDEX_SPD] = player->m_moveSpeed;
-			stats[STAT_INDEX_BSPD] = player->m_projectileSpeed;
-			stats[STAT_INDEX_BRNG] = player->m_projectileRange;
-		}
+		const auto stats{ utility::collectPlayerStats(m_componentManager, playerId) };
 
 		// 強化前の値。現在値と突き合わせて「どれだけ上がっているか」を出す。
 		// 数値だけでは、それが素の値なのか拡張子で伸びたものなのか分からない
-		std::array<float, STAT_COUNT> baseStats{};
-		if (const auto* base{ m_componentManager.tryGet<component::combat::PlayerStatBaseComponent>(playerId) })
-		{
-			baseStats[STAT_INDEX_HP] = base->m_maxHp;
-			baseStats[STAT_INDEX_ATK] = base->m_attackPower;
-			baseStats[STAT_INDEX_DEF] = base->m_defence;
-			baseStats[STAT_INDEX_SPD] = base->m_moveSpeed;
-			baseStats[STAT_INDEX_RNG] = base->m_attackRange;
-			baseStats[STAT_INDEX_CRIT] = base->m_criticalRate * core::utility::RATIO_TO_PERCENT;
-			baseStats[STAT_INDEX_BSPD] = base->m_projectileSpeed;
-			baseStats[STAT_INDEX_BRNG] = base->m_projectileRange;
-		}
+		const auto baseStats{ utility::collectPlayerBaseStats(m_componentManager, playerId) };
 
 		const int captionFontSize{ scaled(SECTION_FONT_SIZE) };
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
@@ -663,7 +626,7 @@ namespace game::ui::ingame
 			m_uiRenderer.resetFont();
 
 			char valueText[32]{};
-			if (i == STAT_INDEX_CRIT)
+			if (i == utility::STAT_INDEX_CRIT)
 				std::snprintf(valueText, sizeof(valueText), "%d%%", static_cast<int>(stats[i]));
 			else
 				std::snprintf(valueText, sizeof(valueText), "%d", static_cast<int>(stats[i]));
@@ -685,7 +648,7 @@ namespace game::ui::ingame
 			if (isBoosted)
 			{
 				char deltaText[32]{};
-				if (i == STAT_INDEX_CRIT)
+				if (i == utility::STAT_INDEX_CRIT)
 					std::snprintf(deltaText, sizeof(deltaText), "+%d%%", static_cast<int>(delta));
 				else
 					std::snprintf(deltaText, sizeof(deltaText), "+%d", static_cast<int>(delta));
