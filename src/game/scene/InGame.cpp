@@ -982,6 +982,9 @@ namespace game::scene
 		m_isSwapMode = isOpen && isSwapMode;
 		m_swapHeldIndex = -1;
 
+		// 開閉は場面が切り替わる合図。時間が止まる／動き出すことを音でも示す
+		playUiSe(isOpen ? core::constant::SeType::InventoryOpen : core::constant::SeType::UiClose);
+
 		m_view.setInventoryOpen(isOpen);
 		if (m_inventoryView)
 		{
@@ -994,6 +997,12 @@ namespace game::scene
 		// （getMouseDelta）が止まり、カーソルが端まで流れていく。
 		// その状態で閉じると溜まったぶんが一度に効いてカメラが飛ぶ
 		m_inputProvider.setMouseCursorVisible(isOpen);
+	}
+
+	void InGame::playUiSe(core::constant::SeType seType) const
+	{
+		if (auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() })
+			audio->playSe(seType);
 	}
 
 	void InGame::requestSwap(
@@ -1039,12 +1048,17 @@ namespace game::scene
 			{
 				// マスの外を押したら掴んでいたものを置く。取り消せないと、
 				// 間違えて掴んだときに意図しない入れ替えを強いられる
+				if (m_swapHeldIndex >= 0)
+					playUiSe(core::constant::SeType::ExtensionDrop);
 				m_swapHeldIndex = -1;
 			}
 			else if (m_swapHeldIndex < 0 || m_swapHeldIndex == hoveredIndex)
 			{
 				// 何も掴んでいなければ掴む。同じマスをもう一度押したら離す
-				m_swapHeldIndex = m_swapHeldIndex == hoveredIndex ? -1 : hoveredIndex;
+				const bool isReleasing{ m_swapHeldIndex == hoveredIndex };
+				playUiSe(isReleasing ? core::constant::SeType::ExtensionDrop
+				                     : core::constant::SeType::ExtensionGrab);
+				m_swapHeldIndex = isReleasing ? -1 : hoveredIndex;
 			}
 			else
 			{

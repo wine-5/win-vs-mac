@@ -14,6 +14,7 @@
 #include "core/interface/IAnimator.h"
 #include "core/interface/IEffectFactory.h"
 #include "core/base/EventBus.h"
+#include "core/constant/SeType.h"
 
 /* game層のインクルード */
 #include "game/factory/FactoryManager.h"
@@ -166,6 +167,15 @@ namespace game::scene
 		 */
 		void requestSwap(const component::combat::ExtensionInventoryComponent& inventory,
 		    int targetIndex);
+
+		/**
+		 * @brief UI操作の効果音を鳴らす
+		 *
+		 * 掴む・置く・開閉はイベントを介さずシーンが直接受け取る操作なので、
+		 * 音もここから鳴らす（入れ替えの成立音だけは結果のイベントを購読して鳴らす）
+		 * @param seType 鳴らすSEの種別
+		 */
+		void playUiSe(core::constant::SeType seType) const;
 
 		/**
 		 * @brief インベントリの開閉をまとめて反映する
