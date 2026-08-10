@@ -1050,8 +1050,7 @@ namespace game::scene
 		if ((isPressed || isReleased) && isOverLocked && m_swapHeldIndex >= 0)
 		{
 			m_inventoryView->startLockedShake();
-			// 専用の拒否音が入るまでは置く音で代用する（locked_slot_sound_spec.md）
-			playUiSe(core::constant::SeType::ExtensionDrop);
+			playUiSe(core::constant::SeType::ExtensionRejected);
 			m_inventoryView->setSelection(hoveredIndex, m_swapHeldIndex);
 			m_inventoryView->setDragging(isDown && m_swapHeldIndex >= 0, mouseX, mouseY);
 			return;
