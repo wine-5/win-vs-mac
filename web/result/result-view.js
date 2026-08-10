@@ -248,7 +248,7 @@ const ResultView = (function () {
     // ランク文字が着弾する瞬間（CSSの rankStamp の遅延0.25s＋落下ぶんに合わせている）
     const RANK_IMPACT_MS = 520;
 
-    // 着弾に鳴らすSE。Sだけ会心音にして特別扱いする
+    // 着弾に鳴らすSE。Sだけクリティカル音にして特別扱いする
     const RANK_IMPACT_SE = { S: 'Critical', A: 'HitChargedWindow' };
 
     /**
