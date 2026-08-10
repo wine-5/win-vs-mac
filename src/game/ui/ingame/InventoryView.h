@@ -123,13 +123,21 @@ namespace game::ui::ingame
 		 */
 		[[nodiscard]] bool isLockedSlotAt(int screenX, int screenY) const noexcept;
 
+		/// @brief 弾く演出で震わせる対象
+		enum class ShakeTarget
+		{
+			Locked,  // 動かせない枠（持ち込み）すべて
+			Selected // 掴んでいるマスと、落とそうとしたマス
+		};
+
 		/**
-		 * @brief 固定された枠を弾く演出を始める
+		 * @brief 入れ替えを弾く演出を始める
 		 *
 		 * 落とせなかったことを、音だけでなく動きでも返す。無反応だと
 		 * 操作が効いていないのか、そういう仕様なのかが区別できない
+		 * @param target 震わせる対象
 		 */
-		void startLockedShake() noexcept;
+		void startRejectShake(ShakeTarget target) noexcept;
 
 	  private:
 		/// @brief 能力値の項目数（左下HUD・セレクト画面と同じ8項目）
@@ -228,6 +236,9 @@ namespace game::ui::ingame
 
 			/// @brief 道中では動かせない枠か（持ち込み）
 			bool m_isLocked{ false };
+
+			/// @brief いま弾かれて震えているか
+			bool m_isRejected{ false };
 		};
 
 		/**
@@ -269,7 +280,7 @@ namespace game::ui::ingame
 		 * @brief 弾く演出の横ずれ量を返す
 		 * @return 左右にずらす量（ピクセル。演出中でなければ0）
 		 */
-		[[nodiscard]] int lockedShakeOffset() const;
+		[[nodiscard]] int rejectShakeOffset() const;
 
 		/**
 		 * @brief 運んでいる最中のアイコンをカーソルの位置へ描く
@@ -326,7 +337,8 @@ namespace game::ui::ingame
 		int m_heldIndex{ -1 };
 
 		// 固定枠を弾いた時刻。ここから一定時間だけ左右に震わせる
-		std::chrono::steady_clock::time_point m_lockedShakeTime{};
+		std::chrono::steady_clock::time_point m_rejectShakeTime{};
+		ShakeTarget m_shakeTarget{ ShakeTarget::Locked };
 
 		// 掴んだものを運んでいる最中か。運んでいる間だけカーソルにアイコンを付ける
 		bool m_isDragging{ false };

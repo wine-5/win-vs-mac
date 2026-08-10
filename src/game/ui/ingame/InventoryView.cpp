@@ -114,10 +114,10 @@ namespace
 	constexpr int LOCKED_BORDER_ALPHA{ 150 };
 
 	// 弾いたときの震え。左右に細かく往復させて「入らない」ことを動きで返す
-	constexpr float LOCKED_SHAKE_DURATION{ 0.34f }; // 震えている長さ（秒）
-	constexpr int LOCKED_SHAKE_AMPLITUDE{ 6 };      // 振れ幅（1080p基準）
-	constexpr float LOCKED_SHAKE_CYCLES{ 3.0f };    // 往復する回数
-	constexpr int LOCKED_SHAKE_BORDER_ALPHA{ 255 }; // 震えている間は枠を強く出す
+	constexpr float SHAKE_DURATION{ 0.34f }; // 震えている長さ（秒）
+	constexpr int SHAKE_AMPLITUDE{ 6 };      // 振れ幅（1080p基準）
+	constexpr float SHAKE_CYCLES{ 3.0f };    // 往復する回数
+	constexpr int SHAKE_BORDER_ALPHA{ 255 }; // 震えている間は枠を強く出す
 
 	constexpr int ICON_ALPHA_OPAQUE{ 255 }; // 効果が乗っているものはそのままの濃さで描く
 	constexpr int EMPTY_ICON_ALPHA{ 60 };   // 空きマスの薄さ
@@ -310,24 +310,24 @@ namespace game::ui::ingame
 		return false;
 	}
 
-	void InventoryView::startLockedShake() noexcept
+	void InventoryView::startRejectShake(ShakeTarget target) noexcept
 	{
-		m_lockedShakeTime = std::chrono::steady_clock::now();
+		m_rejectShakeTime = std::chrono::steady_clock::now();
+		m_shakeTarget = target;
 	}
 
-	int InventoryView::lockedShakeOffset() const
+	int InventoryView::rejectShakeOffset() const
 	{
 		const float elapsed{ std::chrono::duration<float>(
-			std::chrono::steady_clock::now() - m_lockedShakeTime)
+			std::chrono::steady_clock::now() - m_rejectShakeTime)
 			    .count() };
-		if (elapsed >= LOCKED_SHAKE_DURATION)
+		if (elapsed >= SHAKE_DURATION)
 			return 0;
 
 		// 終わりに向けて振れ幅を落とす。同じ幅で止まると切れたように見える
-		const float decay{ 1.0f - elapsed / LOCKED_SHAKE_DURATION };
-		const float phase{ elapsed / LOCKED_SHAKE_DURATION * LOCKED_SHAKE_CYCLES *
-			               core::utility::TWO_PI };
-		return static_cast<int>(scaled(LOCKED_SHAKE_AMPLITUDE) * decay * std::sin(phase));
+		const float decay{ 1.0f - elapsed / SHAKE_DURATION };
+		const float phase{ elapsed / SHAKE_DURATION * SHAKE_CYCLES * core::utility::TWO_PI };
+		return static_cast<int>(scaled(SHAKE_AMPLITUDE) * decay * std::sin(phase));
 	}
 
 	void InventoryView::draw(core::ecs::EntityId playerId)
@@ -570,14 +570,21 @@ namespace game::ui::ingame
 			m_slotBounds.push_back({ slotX, slotY, slotWidth, slotHeight, acquiredIndex,
 			    !isSelectable });
 
-			// 弾いている最中は固定された枠だけを左右に震わせる
-			const int shakeX{ isSelectable ? 0 : lockedShakeOffset() };
+			// 弾いた対象だけを左右に震わせる。関わっていないマスまで動くと、
+			// 何が拒否されたのかが分からなくなる
+			const bool isShakeTarget{
+				m_shakeTarget == ShakeTarget::Locked
+				    ? !isSelectable
+				    : isSelectable && (acquiredIndex == m_heldIndex || acquiredIndex == m_cursorIndex)
+			};
+			const int shakeX{ isShakeTarget ? rejectShakeOffset() : 0 };
 
 			SlotStyle style{};
 			style.m_isDimmed = isDimmed;
 			style.m_isCursor = isSelectable && acquiredIndex == m_cursorIndex;
 			style.m_isHeld = isSelectable && acquiredIndex == m_heldIndex;
 			style.m_isLocked = !isSelectable;
+			style.m_isRejected = shakeX != 0;
 
 			drawSlot(slotX + shakeX, slotY, types[i], style);
 
@@ -650,14 +657,16 @@ namespace game::ui::ingame
 
 		// 動かせない枠は赤で締める。中身の有無に関わらず同じ色にして、
 		// 「この列は触れない」という単位で読ませる
-		const unsigned int borderColor{ style.m_isLocked ? LOCKED_COLOR : SLOT_BORDER_COLOR };
+		const unsigned int borderColor{ style.m_isLocked || style.m_isRejected
+			                                ? LOCKED_COLOR
+			                                : SLOT_BORDER_COLOR };
 		int borderAlpha{ isEmpty ? SLOT_EMPTY_BORDER_ALPHA : SLOT_BORDER_ALPHA };
 		if (style.m_isLocked)
-		{
-			// 弾いている間だけ枠を強く出す。常時この濃さだと警告色が視界を占める
-			borderAlpha = lockedShakeOffset() != 0 ? LOCKED_SHAKE_BORDER_ALPHA
-			                                       : LOCKED_BORDER_ALPHA;
-		}
+			borderAlpha = LOCKED_BORDER_ALPHA;
+
+		// 弾かれている間は赤を強く出す。常時この濃さだと警告色が視界を占める
+		if (style.m_isRejected)
+			borderAlpha = SHAKE_BORDER_ALPHA;
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, borderAlpha);
 		m_uiRenderer.drawRoundedBox(x, y, slotWidth, slotHeight, radius, borderColor, false, 1);
