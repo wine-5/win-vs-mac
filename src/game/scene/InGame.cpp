@@ -1044,6 +1044,19 @@ namespace game::scene
 		const bool isReleased{ !isDown && m_wasMouseLeftDown };
 		m_wasMouseLeftDown = isDown;
 
+		// 動かせない枠へ落とそうとしたら弾く。掴んだままにしておくのは、
+		// 拒否された操作で持ち物の状態まで変わるとやり直しが面倒になるため
+		const bool isOverLocked{ m_inventoryView->isLockedSlotAt(mouseX, mouseY) };
+		if ((isPressed || isReleased) && isOverLocked && m_swapHeldIndex >= 0)
+		{
+			m_inventoryView->startLockedShake();
+			// 専用の拒否音が入るまでは置く音で代用する（locked_slot_sound_spec.md）
+			playUiSe(core::constant::SeType::ExtensionDrop);
+			m_inventoryView->setSelection(hoveredIndex, m_swapHeldIndex);
+			m_inventoryView->setDragging(isDown && m_swapHeldIndex >= 0, mouseX, mouseY);
+			return;
+		}
+
 		if (isPressed)
 		{
 			if (hoveredIndex < 0)
