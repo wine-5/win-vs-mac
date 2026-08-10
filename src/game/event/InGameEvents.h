@@ -336,4 +336,54 @@ namespace game::event
 		{
 		}
 	};
+
+	/**
+	 * @brief リネーム端末で装備中の拡張子を入れ替えるよう要求するイベント
+	 *
+	 * 発行するのは操作を受け取ったUI側、実際に能力を差し替えるのはSystem側。
+	 * 分けておくことで、操作をキーからマウスへ変えても能力の計算に触らずに済む。
+	 *
+	 * 位置はどちらも ExtensionInventoryComponent::m_acquired 上の添字で表す。
+	 * 装備中かどうかは添字が MAX_EQUIPPED 未満かで決まるので、
+	 * 2つを入れ替えれば「挿す・抜く」がそのまま表現できる
+	 */
+	struct ExtensionSwapRequestedEvent : public core::iface::IGameEvent
+	{
+		/** @brief 抜く側（装備中）の位置 */
+		int m_equippedIndex{ -1 };
+
+		/** @brief 挿す側（未装備）の位置 */
+		int m_unequippedIndex{ -1 };
+
+		ExtensionSwapRequestedEvent() = default;
+		ExtensionSwapRequestedEvent(int equippedIndex, int unequippedIndex)
+		    : m_equippedIndex{ equippedIndex }
+		    , m_unequippedIndex{ unequippedIndex }
+		{
+		}
+	};
+
+	/**
+	 * @brief 拡張子の入れ替えが実際に行われたときに発行されるイベント
+	 *
+	 * 音・HUDの演出はこれを購読する。要求（UIの操作）と結果（能力の変化）を
+	 * 分けておかないと、範囲外の指定などで入れ替えが起きなかったときにも
+	 * 音だけ鳴ってしまう
+	 */
+	struct ExtensionSwappedEvent : public core::iface::IGameEvent
+	{
+		/** @brief 新しく装備された拡張子の種別 */
+		core::data::FileExtensionType m_equippedType{ core::data::FileExtensionType::Unknown };
+
+		/** @brief 装備から外れた拡張子の種別 */
+		core::data::FileExtensionType m_unequippedType{ core::data::FileExtensionType::Unknown };
+
+		ExtensionSwappedEvent() = default;
+		ExtensionSwappedEvent(core::data::FileExtensionType equippedType,
+		    core::data::FileExtensionType unequippedType)
+		    : m_equippedType{ equippedType }
+		    , m_unequippedType{ unequippedType }
+		{
+		}
+	};
 } // namespace game::event
