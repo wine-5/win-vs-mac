@@ -35,9 +35,9 @@ namespace
 	constexpr int BONUS_FONT_SIZE{ 19 };
 
 	// スロットの塗りと枠。色と不透明度を分けて持つ（DxLibのブレンドはアルファを別途指定するため）
-	constexpr unsigned int SLOT_FILL_COLOR{ 0xFF0E1420 };
+	constexpr unsigned int SLOT_FILL_COLOR{ core::utility::Color::HUD_PANEL_FILL };
 	constexpr int SLOT_FILL_ALPHA{ 184 }; // 約72%
-	constexpr unsigned int SLOT_BORDER_COLOR{ 0xFF8CAAD2 };
+	constexpr unsigned int SLOT_BORDER_COLOR{ core::utility::Color::HUD_PANEL_BORDER };
 	constexpr int SLOT_BORDER_ALPHA{ 46 };         // 約18%
 	constexpr int SLOT_ACCENT_BORDER_ALPHA{ 200 }; // 装備済みスロットの枠
 

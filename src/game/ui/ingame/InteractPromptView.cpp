@@ -21,7 +21,7 @@ namespace
 	constexpr int TAIL_WIDTH{ 18 }; // 下向きの三角（対象を指す尻尾）
 	constexpr int TAIL_HEIGHT{ 12 };
 
-	constexpr unsigned int FILL_COLOR{ 0xFF0E1420 };
+	constexpr unsigned int FILL_COLOR{ core::utility::Color::HUD_PANEL_FILL };
 	constexpr int FILL_ALPHA{ 224 };
 	constexpr unsigned int BORDER_COLOR{ core::utility::Color::HUD_ACCENT };
 

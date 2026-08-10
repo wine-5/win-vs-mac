@@ -79,9 +79,9 @@ namespace
 	constexpr int SLOT_BONUS_FONT_SIZE{ 16 };
 	constexpr int SLOT_BONUS_GAP{ 4 }; // ファイル名とボーナス表記の間隔
 
-	constexpr unsigned int SLOT_FILL_COLOR{ 0xFF0E1420 };
+	constexpr unsigned int SLOT_FILL_COLOR{ core::utility::Color::HUD_PANEL_FILL };
 	constexpr int SLOT_FILL_ALPHA{ 150 };
-	constexpr unsigned int SLOT_BORDER_COLOR{ 0xFF8CAAD2 };
+	constexpr unsigned int SLOT_BORDER_COLOR{ core::utility::Color::HUD_PANEL_BORDER };
 	constexpr int SLOT_BORDER_ALPHA{ 60 };
 	constexpr int SLOT_EMPTY_BORDER_ALPHA{ 26 }; // 空きマスは枠だけ残して薄くする
 
@@ -105,7 +105,12 @@ namespace
 	constexpr int LOCK_MARGIN{ 8 };         // マスの右上からの余白
 	constexpr int LOCK_SHACKLE_RADIUS{ 5 }; // つるの半径
 	constexpr int LOCK_BODY_HEIGHT{ 11 };   // 本体の高さ
-	constexpr int LOCK_ALPHA{ 170 };
+	constexpr int LOCK_ALPHA{ 200 };
+
+	// 固定された枠の色。常時は落ち着いた赤にする。HUDの「危険」と同じ鮮やかな赤を
+	// 3枠ぶん出しっぱなしにすると、読む画面なのに警告色が視界を占めてしまう
+	constexpr unsigned int LOCKED_COLOR{ core::utility::Color::HUD_LOCKED_RED };
+	constexpr int LOCKED_BORDER_ALPHA{ 150 };
 
 	constexpr int ICON_ALPHA_OPAQUE{ 255 }; // 効果が乗っているものはそのままの濃さで描く
 	constexpr int EMPTY_ICON_ALPHA{ 60 };   // 空きマスの薄さ
@@ -594,9 +599,15 @@ namespace game::ui::ingame
 			m_uiRenderer.resetBlendMode();
 		}
 
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
-		    isEmpty ? SLOT_EMPTY_BORDER_ALPHA : SLOT_BORDER_ALPHA);
-		m_uiRenderer.drawRoundedBox(x, y, slotWidth, slotHeight, radius, SLOT_BORDER_COLOR, false, 1);
+		// 動かせない枠は赤で締める。中身の有無に関わらず同じ色にして、
+		// 「この列は触れない」という単位で読ませる
+		const unsigned int borderColor{ style.m_isLocked ? LOCKED_COLOR : SLOT_BORDER_COLOR };
+		int borderAlpha{ isEmpty ? SLOT_EMPTY_BORDER_ALPHA : SLOT_BORDER_ALPHA };
+		if (style.m_isLocked)
+			borderAlpha = LOCKED_BORDER_ALPHA;
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, borderAlpha);
+		m_uiRenderer.drawRoundedBox(x, y, slotWidth, slotHeight, radius, borderColor, false, 1);
 		m_uiRenderer.resetBlendMode();
 
 		const int handle{ isEmpty ? m_emptyIconHandle : m_iconHandles[static_cast<int>(type)] };
@@ -717,9 +728,9 @@ namespace game::ui::ingame
 
 		// つるは円の輪郭で描き、下半分を本体で隠す。専用の画像を持たずに済ませる
 		m_uiRenderer.drawCircle(centerX, y + shackleRadius + 1, shackleRadius,
-		    core::utility::Color::HUD_INK, false, 2);
+		    LOCKED_COLOR, false, 2);
 		m_uiRenderer.drawRoundedBox(x, y + size - bodyHeight, size, bodyHeight,
-		    scaled(SLOT_RADIUS), core::utility::Color::HUD_INK, true, 1);
+		    scaled(SLOT_RADIUS), LOCKED_COLOR, true, 1);
 
 		m_uiRenderer.resetBlendMode();
 	}
