@@ -406,6 +406,29 @@
       "scrollV": 0.0
     },
     {
+      "id": "block_rename",
+      "displayName": "リネーム端末",
+      "model": "assets/model/stage/BlockRename.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#0078D4",
+      "collider": "box",
+      "role": "renameTerminal",
+      "defaultSize": [
+        110,
+        110,
+        110
+      ],
+      "texture": "assets/model/stage/BlockRename.png",
+      "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
       "id": "block_ext_archive",
       "displayName": "アーカイブブロック",
       "model": "assets/model/stage/BlockExtArchive.mqo",
