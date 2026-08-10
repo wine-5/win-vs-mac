@@ -50,6 +50,16 @@ namespace
 	// 左右の分割（左＝ファイル一覧、右＝パラメータ）
 	constexpr int RIGHT_COLUMN_WIDTH{ 320 };
 
+	// 一覧側の左右分割。左は枠数の決まっている区分（持ち込み・装備中）を縦に積み、
+	// 右は数が決まらない所持一覧を置く。左だけに積むと右が丸ごと空いてしまう
+	constexpr int SECTION_COLUMN_WIDTH{ 308 }; // スロット3つぶん（96*3 + 10*2）
+	constexpr int SECTION_COLUMN_GAP{ 26 };
+
+	// 所持一覧を囲む枠。区分の見出しだけだと、どこまでが所持一覧なのか境目が無い
+	constexpr int PANE_PADDING{ 14 };
+	constexpr int PANE_RADIUS{ 6 };
+	constexpr int PANE_BORDER_ALPHA{ 40 };
+
 	// 区分の見出し
 	constexpr int SECTION_FONT_SIZE{ 18 };
 	constexpr int SECTION_GAP{ 18 };        // 区分どうしの間隔
@@ -198,7 +208,8 @@ namespace game::ui::ingame
 		m_addressText = toDrawable("PC  >  拡張子  >  所持しているもの");
 		m_captionCarried = toDrawable("持ち込み（セレクト画面で選んだもの）");
 		m_captionAcquired = toDrawable("道中で拾った（効果あり）");
-		m_captionUnequipped = toDrawable("未装備（付け替え待ち）");
+		m_captionUnequipped = toDrawable("所持一覧（未装備・付け替え待ち）");
+		m_captionNoUnequipped = toDrawable("拾ったものはすべて装備中です");
 		m_captionStats = toDrawable("現在の能力");
 		m_addressSwapText = toDrawable("PC  >  拡張子  >  付け替え");
 		m_captionHint = toDrawable("E / Esc : 閉じる");
@@ -284,17 +295,18 @@ namespace game::ui::ingame
 		constexpr int NOT_SELECTABLE{ -1 };
 		const int unequippedBaseIndex{ component::combat::ExtensionInventoryComponent::MAX_EQUIPPED };
 
+		// 左は枠数の決まっている区分。3つずつなので幅を固定し、余った右側を所持一覧へ渡す
+		const int columnWidth{ scaled(SECTION_COLUMN_WIDTH) };
+		const int columnGap{ scaled(SECTION_COLUMN_GAP) };
+
 		int y{ contentTop };
-		y += drawSection(left + padding, y, listWidth, m_captionCarried, carried, false, listBottom,
+		y += drawSection(left + padding, y, columnWidth, m_captionCarried, carried, false, listBottom,
 		    NOT_SELECTABLE);
 		y += scaled(SECTION_GAP);
-		y += drawSection(left + padding, y, listWidth, m_captionAcquired, equipped, false, listBottom, 0);
-		if (!unequipped.empty())
-		{
-			y += scaled(SECTION_GAP);
-			drawSection(left + padding, y, listWidth, m_captionUnequipped, unequipped, true, listBottom,
-			    unequippedBaseIndex);
-		}
+		drawSection(left + padding, y, columnWidth, m_captionAcquired, equipped, false, listBottom, 0);
+
+		drawHoldingPane(left + padding + columnWidth + columnGap, contentTop,
+		    listWidth - columnWidth - columnGap, listBottom, unequipped, unequippedBaseIndex);
 
 		// 左右の区切り線。エクスプローラーのペイン分割に相当する
 		const int dividerX{ left + width - rightWidth - padding * 2 };
@@ -373,6 +385,34 @@ namespace game::ui::ingame
 		m_uiRenderer.drawText(x + width - padding - hintWidth, y + (barHeight - fontSize) / 2,
 		    hint.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
 		m_uiRenderer.resetFont();
+	}
+
+	void InventoryView::drawHoldingPane(int x, int y, int width, int maxBottom,
+	    const std::vector<core::data::FileExtensionType>& types, int baseIndex)
+	{
+		const int pad{ scaled(PANE_PADDING) };
+
+		// 枠は先に描く。あとから重ねるとマス目や文字の上に線が乗る
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, PANE_BORDER_ALPHA);
+		m_uiRenderer.drawRoundedBox(x - pad, y - pad, width + pad * 2,
+		    maxBottom - y + pad * 2, scaled(PANE_RADIUS), SLOT_BORDER_COLOR, false, 1);
+		m_uiRenderer.resetBlendMode();
+
+		if (types.empty())
+		{
+			// 空でも見出しは残す。枠だけがあって何も書いていないと、
+			// 表示が壊れているのか中身が無いのかを区別できない
+			const int captionFontSize{ scaled(SECTION_FONT_SIZE) };
+			m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
+			m_uiRenderer.drawText(x, y, m_captionUnequipped.c_str(),
+			    core::utility::Color::HUD_INK_FAINT, captionFontSize);
+			m_uiRenderer.drawText(x, y + captionFontSize + scaled(SECTION_CAPTION_GAP),
+			    m_captionNoUnequipped.c_str(), core::utility::Color::HUD_INK_FAINT, captionFontSize);
+			m_uiRenderer.resetFont();
+			return;
+		}
+
+		drawSection(x, y, width, m_captionUnequipped, types, true, maxBottom - pad, baseIndex);
 	}
 
 	int InventoryView::drawSection(int x, int y, int width, const std::string& caption,

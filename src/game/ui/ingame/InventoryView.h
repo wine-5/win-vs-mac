@@ -125,6 +125,22 @@ namespace game::ui::ingame
 		void drawStatusBar(int x, int y, int width, int itemCount);
 
 		/**
+		 * @brief 所持一覧（未装備）のペインを描く
+		 *
+		 * 枠数の決まっている区分（持ち込み・装備中）は3つずつしか無く、
+		 * 左に積むと右が丸ごと空く。数が決まらない所持一覧をそこへ置き、
+		 * 枠で囲って「ここが持ち物の置き場」だと分かるようにする
+		 * @param x ペインの左上X座標
+		 * @param y ペインの左上Y座標
+		 * @param width 使える幅
+		 * @param maxBottom これを超える位置には描かない
+		 * @param types 並べる拡張子種別（未装備のもの）
+		 * @param baseIndex 先頭が m_acquired 上のどの位置にあたるか
+		 */
+		void drawHoldingPane(int x, int y, int width, int maxBottom,
+		    const std::vector<core::data::FileExtensionType>& types, int baseIndex);
+
+		/**
 		 * @brief 見出しとマス目の並びを1区分ぶん描く
 		 *
 		 * 横に並べきれない場合は折り返す。
@@ -188,6 +204,7 @@ namespace game::ui::ingame
 		std::string m_captionCarried{};
 		std::string m_captionAcquired{};
 		std::string m_captionUnequipped{};
+		std::string m_captionNoUnequipped{};
 		std::string m_captionStats{};
 		std::string m_addressSwapText{};
 		std::string m_captionHint{};
