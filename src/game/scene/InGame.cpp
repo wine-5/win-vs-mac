@@ -927,6 +927,17 @@ namespace game::scene
 
 	void InGame::updateInventory()
 	{
+		// 開いたキーが何であれEscで閉じられるようにする。「とりあえずEscで戻れる」は
+		// どの画面でも共通の期待なので、ここだけ効かないと閉じ方を探すことになる。
+		// ポーズメニュー側（Application）はインベントリで止まっている間はEscを見ないので、
+		// ここで閉じてもメニューが続けて開くことはない
+		if (m_pauseManager.isPausedBy(PauseReason::Inventory) &&
+		    m_inputProvider.isKeyPressed(core::input::KeyCode::Escape))
+		{
+			setInventoryOpen(false, false);
+			return;
+		}
+
 		if (!m_inputProvider.isKeyPressed(core::input::KeyCode::E))
 			return;
 
@@ -1016,9 +1027,7 @@ namespace game::scene
 		    m_inputProvider.isKeyPressed(core::input::KeyCode::Space))
 		{
 			if (m_swapHeldIndex < 0)
-			{
 				m_swapHeldIndex = m_swapCursorIndex;
-			}
 			else if (m_swapHeldIndex == m_swapCursorIndex)
 			{
 				// 同じマスをもう一度選んだら掴み直し。取り消せないと、
