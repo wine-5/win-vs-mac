@@ -48,10 +48,18 @@ namespace core::constant
 		BattleReady, // 開始演出のREADY
 		BattleFight, // 開始演出のFIGHT!
 
+		// ---- 拡張子の付け替え ----
+		ExtensionGrab, // インベントリでマスを掴んだ
+		ExtensionDrop, // 掴んでいたものを置いた・取り消した
+		ExtensionSwap, // 装備中と未装備を入れ替えた
+
 		// ---- UI ----
 		UiClick,      // ボタンなどを押した
 		UiKeyPress,   // 選択の移動・キー入力
 		UiFileSelect, // 装備するファイルを決定した
+		InventoryOpen, // インベントリを開いた
+		PauseOpen,     // ポーズメニューを開いた
+		UiClose,       // 画面を閉じた（インベントリ・ポーズで共用）
 
 		// 今後追加したら SE_TYPE_NAMES にも追加を忘れないように
 	};
@@ -92,6 +100,12 @@ namespace core::constant
 		{ "UiClick", SeType::UiClick },
 		{ "UiKeyPress", SeType::UiKeyPress },
 		{ "UiFileSelect", SeType::UiFileSelect },
+		{ "ExtensionGrab", SeType::ExtensionGrab },
+		{ "ExtensionDrop", SeType::ExtensionDrop },
+		{ "ExtensionSwap", SeType::ExtensionSwap },
+		{ "InventoryOpen", SeType::InventoryOpen },
+		{ "PauseOpen", SeType::PauseOpen },
+		{ "UiClose", SeType::UiClose },
 	};
 
 	/**
