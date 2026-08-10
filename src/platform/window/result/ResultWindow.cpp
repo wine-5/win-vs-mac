@@ -160,8 +160,10 @@ namespace platform::window::result
             j["killCount"]        = data.m_killCount;
             j["totalDamageTaken"] = data.m_totalDamageTaken;
             j["usedFiles"]        = data.m_usedFiles;
+			j["acquiredExtensions"] = data.m_acquiredExtensions;
+			j["equippedExtensionCount"] = data.m_equippedExtensionCount;
 
-            std::string jsonStr = j.dump();
+			std::string jsonStr = j.dump();
             m_webView.postMessage(jsonStr);
         }
 		catch (const std::exception& e)
