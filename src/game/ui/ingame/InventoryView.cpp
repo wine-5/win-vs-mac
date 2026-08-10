@@ -3,6 +3,7 @@
 #include "core/constant/UI.h"
 #include "core/interface/IStringConverter.h"
 #include "core/utility/Color.h"
+#include "core/utility/MathConstants.h"
 #include "core/utility/Log.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/ExtensionInventoryComponent.h"
@@ -453,7 +454,7 @@ namespace game::ui::ingame
 		{
 			stats[STAT_INDEX_ATK] = attack->m_attackPower;
 			stats[STAT_INDEX_RNG] = attack->m_attackRange;
-			stats[STAT_INDEX_CRIT] = attack->m_criticalRate * 100.0f; // 割合を百分率へ
+			stats[STAT_INDEX_CRIT] = attack->m_criticalRate * core::utility::RATIO_TO_PERCENT; // 割合を百分率へ
 		}
 		if (const auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(playerId) })
 		{
@@ -477,7 +478,7 @@ namespace game::ui::ingame
 			baseStats[STAT_INDEX_DEF] = base->m_defence;
 			baseStats[STAT_INDEX_SPD] = base->m_moveSpeed;
 			baseStats[STAT_INDEX_RNG] = base->m_attackRange;
-			baseStats[STAT_INDEX_CRIT] = base->m_criticalRate * 100.0f;
+			baseStats[STAT_INDEX_CRIT] = base->m_criticalRate * core::utility::RATIO_TO_PERCENT;
 			baseStats[STAT_INDEX_BSPD] = base->m_projectileSpeed;
 			baseStats[STAT_INDEX_BRNG] = base->m_projectileRange;
 		}

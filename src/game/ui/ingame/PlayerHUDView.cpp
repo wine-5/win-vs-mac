@@ -1,4 +1,4 @@
-﻿#include "PlayerHUDView.h"
+#include "PlayerHUDView.h"
 #include "LowHealthPulse.h"
 #include "core/constant/UI.h"
 #include "core/utility/Color.h"
@@ -230,7 +230,7 @@ namespace game::ui::ingame
 		{
 			stats[STAT_INDEX_ATK] = attack->m_attackPower;
 			stats[STAT_INDEX_RNG] = attack->m_attackRange;
-			stats[STAT_INDEX_CRIT] = attack->m_criticalRate * 100.0f; // 割合を百分率へ
+			stats[STAT_INDEX_CRIT] = attack->m_criticalRate * core::utility::RATIO_TO_PERCENT; // 割合を百分率へ
 		}
 		if (const auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(playerId) })
 		{
@@ -259,7 +259,7 @@ namespace game::ui::ingame
 		stats[STAT_INDEX_DEF] = base->m_defence;
 		stats[STAT_INDEX_SPD] = base->m_moveSpeed;
 		stats[STAT_INDEX_RNG] = base->m_attackRange;
-		stats[STAT_INDEX_CRIT] = base->m_criticalRate * 100.0f; // 現在値と同じ百分率へ揃える
+		stats[STAT_INDEX_CRIT] = base->m_criticalRate * core::utility::RATIO_TO_PERCENT; // 現在値と同じ百分率へ揃える
 		stats[STAT_INDEX_BSPD] = base->m_projectileSpeed;
 		stats[STAT_INDEX_BRNG] = base->m_projectileRange;
 		return stats;
