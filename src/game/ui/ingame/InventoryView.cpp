@@ -240,8 +240,22 @@ namespace game::ui::ingame
 		m_heldIndex = heldIndex;
 	}
 
+	int InventoryView::findSlotIndexAt(int screenX, int screenY) const noexcept
+	{
+		for (const auto& bounds : m_slotBounds)
+		{
+			if (screenX >= bounds.m_x && screenX < bounds.m_x + bounds.m_width &&
+			    screenY >= bounds.m_y && screenY < bounds.m_y + bounds.m_height)
+				return bounds.m_acquiredIndex;
+		}
+		return -1;
+	}
+
 	void InventoryView::draw(core::ecs::EntityId playerId)
 	{
+		// マスの位置はこのフレームのレイアウトから組み直す
+		m_slotBounds.clear();
+
 		// 奥のゲーム画面を暗く落として、手前の文字を読めるようにする。
 		// 真っ黒で覆わないのは「今どこに立っているか」を見失わせないため
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, BACKDROP_ALPHA);
@@ -460,6 +474,9 @@ namespace game::ui::ingame
 
 			const int slotX{ x + column * (slotWidth + slotGap) };
 			const int slotY{ slotTop + row * (slotHeight + slotGap) };
+
+			if (isSelectable)
+				m_slotBounds.push_back({ slotX, slotY, slotWidth, slotHeight, acquiredIndex });
 
 			drawSlot(slotX, slotY, types[i], isDimmed,
 			    isSelectable && acquiredIndex == m_cursorIndex,

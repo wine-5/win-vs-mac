@@ -72,6 +72,17 @@ namespace game::ui::ingame
 		 */
 		void setSelection(int cursorIndex, int heldIndex) noexcept;
 
+		/**
+		 * @brief 画面座標がどのマスの上にあるかを返す
+		 *
+		 * マスの位置はレイアウトを組む描画側しか知らないため、当たり判定もここが持つ。
+		 * 位置は直前のフレームの描画結果を使うが、1フレームのずれは見えない
+		 * @param screenX 画面上のX座標
+		 * @param screenY 画面上のY座標
+		 * @return 指しているマスの m_acquired 上の位置。どのマスでもなければ -1
+		 */
+		[[nodiscard]] int findSlotIndexAt(int screenX, int screenY) const noexcept;
+
 	  private:
 		/// @brief 能力値の項目数（左下HUD・セレクト画面と同じ8項目）
 		static constexpr int STAT_COUNT{ 8 };
@@ -193,6 +204,20 @@ namespace game::ui::ingame
 		core::ecs::ComponentManager& m_componentManager;
 		const data::FileEquipmentData& m_equipmentData;
 		HudPanel m_panel;
+
+		/// @brief 付け替えで選べるマスの位置と、それが m_acquired 上のどこかの対応
+		struct SlotBounds
+		{
+			int m_x{ 0 };
+			int m_y{ 0 };
+			int m_width{ 0 };
+			int m_height{ 0 };
+			int m_acquiredIndex{ -1 };
+		};
+
+		// 描画のたびに組み直す。窓の大きさや折り返しが変わっても、
+		// 当たり判定を別に計算し直さずに済む
+		std::vector<SlotBounds> m_slotBounds{};
 
 		// 周回演出の基準時刻。描画経路からしか呼ばれずdeltaTimeを受け取らないため、
 		// 経過時間は壁時計から求める（時間停止中も回り続けてよい演出）
