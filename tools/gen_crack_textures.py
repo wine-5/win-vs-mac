@@ -83,6 +83,7 @@ DEFAULT_TARGETS = [
     "BlockExtSourceCode",
     "BlockExtVideo",
     "BlockExtUnknown",
+    "BlockRam",
 ]
 
 

@@ -65,7 +65,10 @@ MANIFEST = [
     # ⑥ 中身のない普通のブロック（gen_plain_block_texture.py が吐くテクスチャを貼る）。
     #    壊せない足場・地形として置く物なので、ひび・破片は用意しない
     ("BlockPlain",         "BlockPlain.png"),
-    # ⑦ 拡張子の付け替え端末（gen_rename_texture.py が吐くテクスチャを貼る）。
+    # ⑦ RAMブロック（gen_ram_block_texture.py が吐くテクスチャを貼る）。
+    #    壊すと拡張子を挿せる枠が1つ増える
+    ("BlockRam",           "BlockRam.png"),
+    # ⑧ 拡張子の付け替え端末（gen_rename_texture.py が吐くテクスチャを貼る）。
     #    壊せない設置物なので、ひび・破片は用意しない
     ("BlockRename",        "BlockRename.png"),
 ]
