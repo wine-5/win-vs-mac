@@ -41,8 +41,6 @@ MANIFEST = [
     # ② System32（システム深層）
     ("FloorMemory",      "FloorMemory.png"),
     ("WallTerminal",     "WallTerminal.png"),
-    ("BlockDll",         "BlockDll.png"),
-    ("BlockExe",         "BlockExe.png"),
     ("WallRegistry",     "WallRegistry.png"),
     ("WallData",         "WallData.png"),
     # ③ Program Files（アプリ格納庫・UAC関門）
