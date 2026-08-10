@@ -1,4 +1,5 @@
 ﻿#include "EquipmentSlotView.h"
+#include "OrbitGlow.h"
 #include "core/constant/UI.h"
 #include "core/interface/IResourceManager.h"
 #include "core/utility/Color.h"
@@ -37,15 +38,6 @@ namespace
 	constexpr int SLOT_BORDER_ALPHA{ 46 };         // 約18%
 	constexpr int SLOT_ACCENT_BORDER_ALPHA{ 200 }; // 装備済みスロットの枠
 
-	// 縁を周回する光の粒（装備中のスロットのみ）
-	constexpr float ORBIT_PERIOD{ 3.2f };          // 一周にかける秒数
-	constexpr int ORBIT_COMET_COUNT{ 2 };          // 同時に回る粒の列の数（外周上で等間隔に配置する）
-	constexpr int ORBIT_TRAIL_COUNT{ 16 };         // 1列あたりの粒の数（後ろほど淡くなる）
-	constexpr float ORBIT_TRAIL_SPACING{ 0.011f }; // 粒どうしの間隔（周回全体を1.0とした割合）
-	constexpr int ORBIT_DOT_RADIUS{ 3 };           // 先頭の粒の半径（1080p基準）
-	constexpr int ORBIT_ALPHA{ 210 };              // 加算合成の強さ（粒ごとの明暗は色側で付ける）
-	constexpr float ORBIT_PHASE_PER_SLOT{ 0.33f }; // スロットごとに位相をずらして同期させない
-
 	constexpr const char* EMPTY_LABEL{ "--" };
 
 
@@ -71,61 +63,6 @@ namespace
 	}
 
 
-	/**
-	 * @brief 色の明るさを倍率で落とす
-	 *
-	 * 加算合成では色を暗くすることが透明度を下げることと同じ意味になる。
-	 * 粒ごとにブレンドモードを設定し直さずに済ませるため、明暗は色側で付ける
-	 * @param color 元の色（ARGB形式：0xAARRGGBB）
-	 * @param scale 明るさの倍率（0.0〜1.0）
-	 * @return 暗くした色
-	 */
-	unsigned int scaleBrightness(unsigned int color, float scale)
-	{
-		auto channel = [&](int shift)
-		{ return static_cast<int>(((color >> shift) & 0xFFu) * scale); };
-		return core::utility::Color::argb(255, channel(16), channel(8), channel(0));
-	}
-
-	/**
-	 * @brief 正方形の外周上の点を求める
-	 *
-	 * 角丸ぶんのズレは半径4pxと小さく、粒が角を通る一瞬しか出ないため無視する
-	 * @param x 左上のX座標
-	 * @param y 左上のY座標
-	 * @param size 一辺の長さ
-	 * @param t 外周をひと回りする進行度（0.0〜1.0。0.0が左上で時計回り）
-	 * @param outX 求めたX座標の格納先
-	 * @param outY 求めたY座標の格納先
-	 */
-	void pointOnSquarePerimeter(int x, int y, int size, float t, int& outX, int& outY)
-	{
-		// 0.0〜1.0の範囲へ丸めてから、上→右→下→左の4辺に割り当てる
-		const float wrapped{ t - std::floor(t) };
-		const float edge{ wrapped * 4.0f };
-		const int side{ static_cast<int>(edge) };
-		const int along{ static_cast<int>((edge - side) * size) };
-
-		switch (side)
-		{
-		case 0:
-			outX = x + along;
-			outY = y;
-			break; // 上辺（左→右）
-		case 1:
-			outX = x + size;
-			outY = y + along;
-			break; // 右辺（上→下）
-		case 2:
-			outX = x + size - along;
-			outY = y + size;
-			break; // 下辺（右→左）
-		default:
-			outX = x;
-			outY = y + size - along;
-			break; // 左辺（下→上）
-		}
-	}
 } // namespace
 
 namespace game::ui::ingame
@@ -187,7 +124,7 @@ namespace game::ui::ingame
 
 			// 装備中のスロットだけ縁を光の粒が回り続ける（起動中であることの表現）
 			if (hasSelection)
-				drawOrbitingGlow(x, y, slotSize, i * ORBIT_PHASE_PER_SLOT);
+				drawOrbitingGlow(x, y, slotSize, i * orbit_glow::PHASE_PER_SLOT);
 		}
 	}
 
@@ -246,34 +183,9 @@ namespace game::ui::ingame
 		const float elapsed{ std::chrono::duration<float>(
 			std::chrono::steady_clock::now() - m_startTime)
 			    .count() };
-		const float head{ elapsed / ORBIT_PERIOD + phaseOffset };
 
-		const int dotRadius{ std::max(2, scaled(ORBIT_DOT_RADIUS)) };
-
-		// 加算合成で重ねると、粒が枠線の上を通るときに芯が白く抜けて発光して見える。
-		// 粒ごとの明暗はアルファではなく色で付けるため、ブレンドの設定は1回で済む
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, ORBIT_ALPHA);
-
-		for (int comet{ 0 }; comet < ORBIT_COMET_COUNT; ++comet)
-		{
-			// 列を外周上で等間隔に散らす（2列なら向かい合う位置になる）
-			const float cometHead{ head + static_cast<float>(comet) / ORBIT_COMET_COUNT };
-
-			for (int i{ 0 }; i < ORBIT_TRAIL_COUNT; ++i)
-			{
-				// 後続ほど過去の位置に置き、暗く小さくして尾を引かせる
-				const float fade{ 1.0f - static_cast<float>(i) / ORBIT_TRAIL_COUNT };
-
-				int dotX{ 0 };
-				int dotY{ 0 };
-				pointOnSquarePerimeter(x, y, size, cometHead - i * ORBIT_TRAIL_SPACING, dotX, dotY);
-
-				m_uiRenderer.drawCircle(dotX, dotY, std::max(1, static_cast<int>(dotRadius * fade)),
-				    scaleBrightness(core::utility::Color::HUD_CHARGE_CYAN, fade * fade), true, 1);
-			}
-		}
-
-		m_uiRenderer.resetBlendMode();
+		orbit_glow::draw(m_uiRenderer, x, y, size, size, elapsed, phaseOffset,
+		    scaled(orbit_glow::DOT_RADIUS));
 	}
 
 	void EquipmentSlotView::drawCenteredText(int centerX, int y, const char* text, unsigned int color, int fontSize)

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -173,6 +173,7 @@
     <ClCompile Include="src\game\system\visual\HardAuraVisualsSystem.cpp" />
     <ClCompile Include="src\game\ui\ingame\InGameStatusView.cpp" />
     <ClCompile Include="src\game\ui\ingame\InventoryView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\OrbitGlow.cpp" />
     <ClCompile Include="src\game\ui\ingame\InteractPromptView.cpp" />
     <ClCompile Include="src\game\system\camera\DamageShakeSystem.cpp" />
     <ClCompile Include="src\game\system\ai\MeleeChaseAISystem.cpp" />
@@ -432,6 +433,7 @@
     <ClInclude Include="src\game\system\visual\HardAuraVisualsSystem.h" />
     <ClInclude Include="src\game\ui\ingame\InGameStatusView.h" />
     <ClInclude Include="src\game\ui\ingame\InventoryView.h" />
+    <ClInclude Include="src\game\ui\ingame\OrbitGlow.h" />
     <ClInclude Include="src\game\ui\ingame\InteractPromptView.h" />
     <ClInclude Include="src\game\system\camera\DamageShakeSystem.h" />
     <ClInclude Include="src\game\system\ai\MeleeChaseAISystem.h" />
