@@ -99,6 +99,14 @@ namespace
 	constexpr int DRAG_ICON_SIZE{ 56 };
 	constexpr int DRAG_ICON_ALPHA{ 200 };
 
+	// 動かせないマスに付ける南京錠。持ち込みの枠は道中では変えられないが、
+	// 見た目が他のマスと同じだと「ここへ落とせる」と読めてしまう
+	constexpr int LOCK_SIZE{ 20 };          // 錠前の幅（1080p基準）
+	constexpr int LOCK_MARGIN{ 8 };         // マスの右上からの余白
+	constexpr int LOCK_SHACKLE_RADIUS{ 5 }; // つるの半径
+	constexpr int LOCK_BODY_HEIGHT{ 11 };   // 本体の高さ
+	constexpr int LOCK_ALPHA{ 170 };
+
 	constexpr int ICON_ALPHA_OPAQUE{ 255 }; // 効果が乗っているものはそのままの濃さで描く
 	constexpr int EMPTY_ICON_ALPHA{ 60 };   // 空きマスの薄さ
 	constexpr int DIMMED_ICON_ALPHA{ 140 }; // 効果が乗っていないものの薄さ
@@ -212,7 +220,7 @@ namespace game::ui::ingame
 		m_addressText = toDrawable("PC  >  拡張子  >  所持しているもの");
 		// 見出しは区分の幅に収まる長さにする。はみ出すと隣の区分の見出しへ重なり、
 		// どちらも読めなくなる（説明はアドレスバーとステータスバーが担う）
-		m_captionCarried = toDrawable("持ち込み（セレクト画面）");
+		m_captionCarried = toDrawable("持ち込み（変更不可）");
 		m_captionAcquired = toDrawable("道中で拾った（効果あり）");
 		m_captionUnequipped = toDrawable("所持一覧（未装備）");
 		m_captionNoUnequipped = toDrawable("拾ったものはすべて装備中です");
@@ -522,6 +530,12 @@ namespace game::ui::ingame
 				orbit_glow::draw(m_uiRenderer, slotX, slotY, slotWidth, slotHeight,
 				    elapsedSeconds(), static_cast<float>(i) * orbit_glow::PHASE_PER_SLOT,
 				    scaled(orbit_glow::DOT_RADIUS));
+
+			// 動かせない区分には錠前を付ける。見出しの文字より先に目へ入り、
+			// 掴もうとする前に「ここは触れない」と分かる
+			if (!isSelectable)
+				drawLockBadge(slotX + slotWidth - scaled(LOCK_MARGIN) - scaled(LOCK_SIZE),
+				    slotY + scaled(LOCK_MARGIN));
 		}
 
 		int usedHeight{ slotTop - y + drawnRows * (slotHeight + slotGap) - slotGap };
@@ -682,6 +696,24 @@ namespace game::ui::ingame
 		const float fade{ 1.0f - (elapsed - STAT_CHANGE_FADE_START) /
 			                         (STAT_CHANGE_FLASH_DURATION - STAT_CHANGE_FADE_START) };
 		return static_cast<int>(ICON_ALPHA_OPAQUE * fade);
+	}
+
+	void InventoryView::drawLockBadge(int x, int y)
+	{
+		const int size{ scaled(LOCK_SIZE) };
+		const int shackleRadius{ scaled(LOCK_SHACKLE_RADIUS) };
+		const int bodyHeight{ scaled(LOCK_BODY_HEIGHT) };
+		const int centerX{ x + size / 2 };
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, LOCK_ALPHA);
+
+		// つるは円の輪郭で描き、下半分を本体で隠す。専用の画像を持たずに済ませる
+		m_uiRenderer.drawCircle(centerX, y + shackleRadius + 1, shackleRadius,
+		    core::utility::Color::HUD_INK, false, 2);
+		m_uiRenderer.drawRoundedBox(x, y + size - bodyHeight, size, bodyHeight,
+		    scaled(SLOT_RADIUS), core::utility::Color::HUD_INK, true, 1);
+
+		m_uiRenderer.resetBlendMode();
 	}
 
 	void InventoryView::drawDraggedIcon(core::data::FileExtensionType type)

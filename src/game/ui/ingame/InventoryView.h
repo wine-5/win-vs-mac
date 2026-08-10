@@ -224,6 +224,16 @@ namespace game::ui::ingame
 		[[nodiscard]] int changeFlashAlpha() const;
 
 		/**
+		 * @brief 動かせないマスに付ける南京錠を描く
+		 *
+		 * 見た目が他のマスと同じだと「ここへ落とせる」と読めてしまう。
+		 * 見出しの文字より先に目へ入る記号で、掴もうとする前に伝える
+		 * @param x 錠前左上のX座標
+		 * @param y 錠前左上のY座標
+		 */
+		void drawLockBadge(int x, int y);
+
+		/**
 		 * @brief 運んでいる最中のアイコンをカーソルの位置へ描く
 		 * @param type 運んでいる拡張子種別（Count なら何も描かない）
 		 */
