@@ -105,6 +105,21 @@ const ResultView = (function () {
             + '</section>';
     }
 
+    /* 拾った拡張子の種別名を、代表的な拡張子の見た目へ直す表。
+       内部の種別名（image / audio）のまま出しても、ゲーム中に見ていたアイコンや
+       ファイル名と結び付かない */
+    const EXT_LABELS = {
+        executable: 'exe',
+        document: 'txt',
+        image: 'png',
+        audio: 'mp3',
+        sourceCode: 'cpp',
+        shortcut: 'lnk',
+        video: 'mp4',
+        archive: 'zip',
+        unknown: 'dat'
+    };
+
     /**
      * 補助スタットのタイル群を組み立てる
      * @param {object} data リザルトデータ
@@ -114,7 +129,8 @@ const ResultView = (function () {
         const tiles = [
             { label: '撃破数', value: String(data.killCount || 0), unit: '体' },
             { label: '被ダメージ', value: String(Math.floor(data.totalDamageTaken || 0)), unit: '' },
-            { label: '使用ファイル', value: String((data.usedFiles || []).length), unit: '個' }
+            { label: '使用ファイル', value: String((data.usedFiles || []).length), unit: '個' },
+            { label: '拾った拡張子', value: String((data.acquiredExtensions || []).length), unit: '個' }
         ];
 
         return '<section class="stat-tiles">'
@@ -153,6 +169,34 @@ const ResultView = (function () {
     }
 
     /**
+     * 道中で拾った拡張子のバッジ列を組み立てる
+     * @param {object} data リザルトデータ
+     * @returns {string} HTML文字列
+     */
+    function buildAcquiredSection(data) {
+        const acquired = data.acquiredExtensions || [];
+        if (acquired.length === 0) return '';
+
+        /* 能力に乗っていたのは先頭から数えたぶんだけ。持っていただけのものと
+           同じ見た目にすると、何が効いていたのかが分からなくなる */
+        const equippedCount = data.equippedExtensionCount || 0;
+
+        const badges = acquired.map(function (type, index) {
+            const ext = EXT_LABELS[type] || 'dat';
+            const isEquipped = index < equippedCount;
+            return '<span class="result-file-badge' + (isEquipped ? '' : ' is-unequipped') + '">'
+                + '<span class="result-file-ext">.' + ResultLogic.escapeHtml(ext) + '</span>'
+                + (isEquipped ? '装備' : '所持')
+                + '</span>';
+        }).join('');
+
+        return '<section class="result-files">'
+            + '<div class="section-label">ACQUIRED EXTENSIONS</div>'
+            + '<div class="result-file-badges">' + badges + '</div>'
+            + '</section>';
+    }
+
+    /**
      * 操作ボタン行を組み立てる
      * @param {string} retryLabel リトライ側の文言
      * @returns {string} HTML文字列
@@ -174,6 +218,7 @@ const ResultView = (function () {
             + buildTimePanel(data)
             + buildStatTiles(data)
             + buildFileSection(data)
+            + buildAcquiredSection(data)
             + buildButtons('もう一度')
             + '</div></div>';
     }
