@@ -14,4 +14,10 @@ namespace core::utility
 
 	/// @brief ラジアンを度へ変換する係数（度で受け取るAPIへ計算結果を渡すときに使う）
 	constexpr float RAD_TO_DEG{ 180.0f / PI };
+
+	/// @brief 割合（0.0〜1.0）を百分率へ変換する係数
+	///
+	/// 会心率やCPU使用率のように、内部では割合で持ち表示だけ百分率にする値で使う。
+	/// 生の100を書くと「なぜ100倍しているのか」が読み取れず、単位の変換だと分からない
+	constexpr float RATIO_TO_PERCENT{ 100.0f };
 } // namespace core::utility
