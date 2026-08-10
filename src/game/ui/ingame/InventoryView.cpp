@@ -26,34 +26,34 @@ namespace
 	constexpr int BACKDROP_ALPHA{ 176 };
 
 	// 窓の大きさ（1080p基準）
-	constexpr int WINDOW_WIDTH{ 1040 };
-	constexpr int WINDOW_HEIGHT{ 600 };
+	constexpr int WINDOW_WIDTH{ 1280 };
+	constexpr int WINDOW_HEIGHT{ 760 };
 	constexpr int WINDOW_PADDING{ 26 };
 
 	// タイトルバー
 	constexpr int TITLE_BAR_HEIGHT{ 52 };
-	constexpr int TITLE_FONT_SIZE{ 22 };
-	constexpr int TITLE_ICON_SIZE{ 22 };
+	constexpr int TITLE_FONT_SIZE{ 25 };
+	constexpr int TITLE_ICON_SIZE{ 25 };
 	constexpr int TITLE_ICON_GAP{ 12 };
 
 	// アドレスバー（パンくず）
 	constexpr int ADDRESS_BAR_HEIGHT{ 44 };
-	constexpr int ADDRESS_FONT_SIZE{ 17 };
+	constexpr int ADDRESS_FONT_SIZE{ 19 };
 
 	// ステータスバー
 	constexpr int STATUS_BAR_HEIGHT{ 44 };
-	constexpr int STATUS_FONT_SIZE{ 17 };
+	constexpr int STATUS_FONT_SIZE{ 19 };
 
 	// 区切り線と面の色
 	constexpr unsigned int SEPARATOR_COLOR{ core::utility::Color::HUD_INK };
 	constexpr int SEPARATOR_ALPHA{ 34 };
 
 	// 左右の分割（左＝ファイル一覧、右＝パラメータ）
-	constexpr int RIGHT_COLUMN_WIDTH{ 320 };
+	constexpr int RIGHT_COLUMN_WIDTH{ 360 };
 
 	// 一覧側の左右分割。左は枠数の決まっている区分（持ち込み・装備中）を縦に積み、
 	// 右は数が決まらない所持一覧を置く。左だけに積むと右が丸ごと空いてしまう
-	constexpr int SECTION_COLUMN_WIDTH{ 308 }; // スロット3つぶん（96*3 + 10*2）
+	constexpr int SECTION_COLUMN_WIDTH{ 356 }; // スロット3つぶん（112*3 + 10*2）
 	constexpr int SECTION_COLUMN_GAP{ 26 };
 
 	// 所持一覧を囲む枠。区分の見出しだけだと、どこまでが所持一覧なのか境目が無い
@@ -62,20 +62,20 @@ namespace
 	constexpr int PANE_BORDER_ALPHA{ 40 };
 
 	// 区分の見出し
-	constexpr int SECTION_FONT_SIZE{ 18 };
+	constexpr int SECTION_FONT_SIZE{ 20 };
 	constexpr int SECTION_GAP{ 18 };        // 区分どうしの間隔
 	constexpr int SECTION_CAPTION_GAP{ 8 }; // 見出しとマス目の間隔
 
 	// マス目（スロット）
-	constexpr int SLOT_WIDTH{ 96 };
-	constexpr int SLOT_HEIGHT{ 138 }; // アイコン＋ファイル名＋ボーナス表記の3段ぶん
+	constexpr int SLOT_WIDTH{ 112 };
+	constexpr int SLOT_HEIGHT{ 158 }; // アイコン＋ファイル名＋ボーナス表記の3段ぶん
 	constexpr int SLOT_GAP{ 10 };
 	constexpr int SLOT_RADIUS{ 4 }; // Windows 11のコントロールの角丸
-	constexpr int SLOT_ICON_SIZE{ 56 };
+	constexpr int SLOT_ICON_SIZE{ 66 };
 	constexpr int SLOT_ICON_TOP{ 10 };
-	constexpr int SLOT_NAME_FONT_SIZE{ 14 };
+	constexpr int SLOT_NAME_FONT_SIZE{ 16 };
 	constexpr int SLOT_NAME_GAP{ 8 }; // アイコンとファイル名の間隔
-	constexpr int SLOT_BONUS_FONT_SIZE{ 14 };
+	constexpr int SLOT_BONUS_FONT_SIZE{ 16 };
 	constexpr int SLOT_BONUS_GAP{ 4 }; // ファイル名とボーナス表記の間隔
 
 	constexpr unsigned int SLOT_FILL_COLOR{ 0xFF0E1420 };
@@ -98,15 +98,15 @@ namespace
 	constexpr int DIMMED_ICON_ALPHA{ 140 }; // 効果が乗っていないものの薄さ
 
 	// 能力値の並び
-	constexpr int STAT_ROW_HEIGHT{ 44 };
-	constexpr int STAT_ICON_SIZE{ 30 };
+	constexpr int STAT_ROW_HEIGHT{ 50 };
+	constexpr int STAT_ICON_SIZE{ 34 };
 	constexpr int STAT_LABEL_GAP{ 10 };
-	constexpr int STAT_FONT_SIZE{ 19 };
+	constexpr int STAT_FONT_SIZE{ 22 };
 
 	// 強化されている項目の見せ方。左下HUDと同じ色を使い、
 	// 「黄色＝強化されている」という意味を画面ごとにずらさない
 	constexpr unsigned int STAT_BOOSTED_COLOR{ core::utility::Color::HUD_CHARGE_MAX };
-	constexpr int STAT_DELTA_FONT_SIZE{ 16 };
+	constexpr int STAT_DELTA_FONT_SIZE{ 18 };
 	constexpr int STAT_DELTA_GAP{ 10 };         // 現在値と増分の間隔
 	constexpr float STAT_BOOST_EPSILON{ 0.5f }; // これ未満の差は出さない（整数表示で0になるため）
 
@@ -207,9 +207,11 @@ namespace game::ui::ingame
 		// 日本語は変換結果が毎フレーム同じなので、生成時に一度だけ変換して保持する
 		m_title = toDrawable("インベントリ");
 		m_addressText = toDrawable("PC  >  拡張子  >  所持しているもの");
-		m_captionCarried = toDrawable("持ち込み（セレクト画面で選んだもの）");
+		// 見出しは区分の幅に収まる長さにする。はみ出すと隣の区分の見出しへ重なり、
+		// どちらも読めなくなる（説明はアドレスバーとステータスバーが担う）
+		m_captionCarried = toDrawable("持ち込み（セレクト画面）");
 		m_captionAcquired = toDrawable("道中で拾った（効果あり）");
-		m_captionUnequipped = toDrawable("所持一覧（未装備・付け替え待ち）");
+		m_captionUnequipped = toDrawable("所持一覧（未装備）");
 		m_captionNoUnequipped = toDrawable("拾ったものはすべて装備中です");
 		m_captionStats = toDrawable("現在の能力");
 		m_addressSwapText = toDrawable("PC  >  拡張子  >  付け替え");
