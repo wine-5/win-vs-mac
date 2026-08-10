@@ -222,50 +222,6 @@
       "scrollV": 0.0
     },
     {
-      "id": "block_dll",
-      "displayName": "DLLブロック",
-      "model": "assets/model/stage/BlockDll.mqo",
-      "baseSize": [
-        100,
-        100,
-        100
-      ],
-      "editorColor": "#D29922",
-      "collider": "box",
-      "defaultSize": [
-        110,
-        110,
-        110
-      ],
-      "texture": "assets/model/stage/BlockDll.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
-    },
-    {
-      "id": "block_exe",
-      "displayName": "EXEブロック",
-      "model": "assets/model/stage/BlockExe.mqo",
-      "baseSize": [
-        100,
-        100,
-        100
-      ],
-      "editorColor": "#D29922",
-      "collider": "box",
-      "defaultSize": [
-        110,
-        110,
-        110
-      ],
-      "texture": "assets/model/stage/BlockExe.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
-    },
-    {
       "id": "wall_registry",
       "displayName": "レジストリ壁",
       "model": "assets/model/stage/WallRegistry.mqo",
