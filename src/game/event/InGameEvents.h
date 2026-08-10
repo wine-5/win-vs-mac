@@ -338,27 +338,28 @@ namespace game::event
 	};
 
 	/**
-	 * @brief リネーム端末で装備中の拡張子を入れ替えるよう要求するイベント
+	 * @brief リネーム端末で拡張子の位置を入れ替えるよう要求するイベント
 	 *
 	 * 発行するのは操作を受け取ったUI側、実際に能力を差し替えるのはSystem側。
 	 * 分けておくことで、操作をキーからマウスへ変えても能力の計算に触らずに済む。
 	 *
 	 * 位置はどちらも ExtensionInventoryComponent::m_acquired 上の添字で表す。
 	 * 装備中かどうかは添字が MAX_EQUIPPED 未満かで決まるので、
-	 * 2つを入れ替えれば「挿す・抜く」がそのまま表現できる
+	 * 2つを入れ替えれば「挿す・抜く」も「並び替え」も同じ形で表せる。
+	 * どちらが装備中かを名前に含めないのは、同じ区分どうしの並び替えも通すため
 	 */
 	struct ExtensionSwapRequestedEvent : public core::iface::IGameEvent
 	{
-		/** @brief 抜く側（装備中）の位置 */
-		int m_equippedIndex{ -1 };
+		/** @brief 掴んだ側の位置 */
+		int m_fromIndex{ -1 };
 
-		/** @brief 挿す側（未装備）の位置 */
-		int m_unequippedIndex{ -1 };
+		/** @brief 落とした側の位置 */
+		int m_toIndex{ -1 };
 
 		ExtensionSwapRequestedEvent() = default;
-		ExtensionSwapRequestedEvent(int equippedIndex, int unequippedIndex)
-		    : m_equippedIndex{ equippedIndex }
-		    , m_unequippedIndex{ unequippedIndex }
+		ExtensionSwapRequestedEvent(int fromIndex, int toIndex)
+		    : m_fromIndex{ fromIndex }
+		    , m_toIndex{ toIndex }
 		{
 		}
 	};
