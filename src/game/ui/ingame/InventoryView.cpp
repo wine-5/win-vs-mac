@@ -222,7 +222,7 @@ namespace game::ui::ingame
 
 		// 付け替え中は操作が増える。どのキーで何ができるかを出しておかないと、
 		// 掴んだあとで進み方が分からなくなる
-		m_captionSwapHint = toDrawable("クリックで掴む    別のマスをクリックで入れ替え    F2 / Esc : 閉じる");
+		m_captionSwapHint = toDrawable("ドラッグして入れ替え    F2 / Esc : 閉じる");
 		m_captionEmptySlot = toDrawable("空き");
 		m_captionOverflow = toDrawable(" 件は表示しきれません");
 	}
