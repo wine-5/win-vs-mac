@@ -199,8 +199,13 @@ namespace game::ui::ingame
 		m_captionCarried = toDrawable("持ち込み（セレクト画面で選んだもの）");
 		m_captionAcquired = toDrawable("道中で拾った（効果あり）");
 		m_captionUnequipped = toDrawable("未装備（付け替え待ち）");
-		m_captionStats = toDrawable("いまの能力");
+		m_captionStats = toDrawable("現在の能力");
+		m_addressSwapText = toDrawable("PC  >  拡張子  >  付け替え");
 		m_captionHint = toDrawable("E : 閉じる");
+
+		// 付け替え中は操作が増える。どのキーで何ができるかを出しておかないと、
+		// 掴んだあとで進み方が分からなくなる
+		m_captionSwapHint = toDrawable("← → : 選ぶ    Enter : 入れ替え    F2 : 閉じる");
 		m_captionEmptySlot = toDrawable("空き");
 		m_captionOverflow = toDrawable(" 件は表示しきれません");
 	}
@@ -331,9 +336,12 @@ namespace game::ui::ingame
 		const int barHeight{ scaled(ADDRESS_BAR_HEIGHT) };
 		const int fontSize{ scaled(ADDRESS_FONT_SIZE) };
 
+		// 付け替え中は行き先を変える。同じ窓でも今やっていることが違うと示す
+		const std::string& address{ isSwapMode() ? m_addressSwapText : m_addressText };
+
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(x + scaled(WINDOW_PADDING), y + (barHeight - fontSize) / 2,
-		    m_addressText.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
+		    address.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
 		m_uiRenderer.resetFont();
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SEPARATOR_ALPHA);
@@ -359,10 +367,11 @@ namespace game::ui::ingame
 		m_uiRenderer.drawText(x + padding, y + (barHeight - fontSize) / 2,
 		    countLabel.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
 
-		// 閉じ方の案内。開いたはいいが閉じ方が分からない、を起こさない
-		const int hintWidth{ m_uiRenderer.getTextWidth(m_captionHint.c_str(), fontSize) };
+		// 操作の案内。開いたはいいが閉じ方が分からない、を起こさない
+		const std::string& hint{ isSwapMode() ? m_captionSwapHint : m_captionHint };
+		const int hintWidth{ m_uiRenderer.getTextWidth(hint.c_str(), fontSize) };
 		m_uiRenderer.drawText(x + width - padding - hintWidth, y + (barHeight - fontSize) / 2,
-		    m_captionHint.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
+		    hint.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
 		m_uiRenderer.resetFont();
 	}
 

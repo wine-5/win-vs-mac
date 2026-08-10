@@ -83,6 +83,18 @@ namespace game::ui::ingame
 		[[nodiscard]] int scaled(int value) const;
 
 		/**
+		 * @brief 付け替え操作の最中かを返す
+		 *
+		 * 選択位置を渡されているかどうかがそのまま「付け替え中か」になる。
+		 * 同じ状態を表す旗を別に持つと、片方だけ更新されたときに食い違う
+		 * @return 付け替え中ならtrue
+		 */
+		[[nodiscard]] bool isSwapMode() const noexcept
+		{
+			return m_cursorIndex >= 0;
+		}
+
+		/**
 		 * @brief 窓のタイトルバーを描く
 		 *
 		 * この画面が何なのかを最初に伝える。開いた瞬間に目に入る位置へ置く
@@ -177,7 +189,9 @@ namespace game::ui::ingame
 		std::string m_captionAcquired{};
 		std::string m_captionUnequipped{};
 		std::string m_captionStats{};
+		std::string m_addressSwapText{};
 		std::string m_captionHint{};
+		std::string m_captionSwapHint{};
 		std::string m_captionEmptySlot{};
 		std::string m_captionOverflow{};
 
