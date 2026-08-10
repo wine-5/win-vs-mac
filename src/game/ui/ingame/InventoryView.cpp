@@ -405,6 +405,10 @@ namespace game::ui::ingame
 		// 付け替えで動かせるのは道中で拾ったものだけ。持ち込みはセレクト画面で決めたもので、
 		// 走っている最中には変えられないため選択の対象から外す
 		constexpr int NOT_SELECTABLE{ -1 };
+
+		// 2段に分けるのは装備中の区分だけ。持ち込みは3つ固定で、
+		// 所持一覧は数が決まらないので素直に折り返す
+		constexpr int NO_SPLIT{ 0 };
 		const int unequippedBaseIndex{ maxEquipped };
 
 		// 左は枠数の決まっている区分。3つずつなので幅を固定し、余った右側を所持一覧へ渡す
@@ -413,9 +417,10 @@ namespace game::ui::ingame
 
 		int y{ contentTop };
 		y += drawSection(left + padding, y, columnWidth, m_captionCarried, carried, false, listBottom,
-		    NOT_SELECTABLE);
+		    NOT_SELECTABLE, NO_SPLIT);
 		y += scaled(SECTION_GAP);
-		drawSection(left + padding, y, columnWidth, m_captionAcquired, equipped, false, listBottom, 0);
+		drawSection(left + padding, y, columnWidth, m_captionAcquired, equipped, false, listBottom, 0,
+		    component::combat::ExtensionInventoryComponent::DEFAULT_MAX_EQUIPPED);
 
 		drawHoldingPane(left + padding + columnWidth + columnGap, contentTop,
 		    listWidth - columnWidth - columnGap, listBottom, unequipped, unequippedBaseIndex);
@@ -528,12 +533,14 @@ namespace game::ui::ingame
 			return;
 		}
 
-		drawSection(x, y, width, m_captionUnequipped, types, true, maxBottom - pad, baseIndex);
+		// 所持一覧は数が決まらないので段に分けず、素直に折り返す
+		constexpr int NO_SPLIT{ 0 };
+		drawSection(x, y, width, m_captionUnequipped, types, true, maxBottom - pad, baseIndex, NO_SPLIT);
 	}
 
 	int InventoryView::drawSection(int x, int y, int width, const std::string& caption,
 	    const std::vector<core::data::FileExtensionType>& types, bool isDimmed,
-	    int maxBottom, int selectableBaseIndex)
+	    int maxBottom, int selectableBaseIndex, int splitBaseCount)
 	{
 		const int captionFontSize{ scaled(SECTION_FONT_SIZE) };
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
@@ -550,23 +557,49 @@ namespace game::ui::ingame
 		// 1行に収まる前提で書くと拾い集めたときに窓からはみ出す
 		const int perRow{ std::max(1, (width + slotGap) / (slotWidth + slotGap)) };
 
+		// もともとの枠より増えているときは、増えたぶんを上段へ載せて2段にする。
+		//     [][]
+		//   [][][]
+		// 右下HUDと同じ並びにして、どちらを見ても同じ形で読めるようにする
+		const int extraCount{ splitBaseCount > 0 && static_cast<int>(types.size()) > splitBaseCount
+			                      ? static_cast<int>(types.size()) - splitBaseCount
+			                      : 0 };
+		const bool isSplit{ extraCount > 0 };
+
 		// 窓に収まる行数を先に出す。はみ出したぶんを黙って描くと
 		// ステータスバーの上へ重なって読めなくなる
 		const int available{ maxBottom - slotTop };
 		const int maxRows{ std::max(0, (available + slotGap) / (slotHeight + slotGap)) };
-		const int totalRows{ (static_cast<int>(types.size()) + perRow - 1) / perRow };
+		const int totalRows{ isSplit ? 2 : (static_cast<int>(types.size()) + perRow - 1) / perRow };
 		const int drawnRows{ std::min(totalRows, maxRows) };
 
-		const std::size_t drawnCount{ static_cast<std::size_t>(drawnRows) * perRow };
+		// 2段に分けるときは段ごとに中央へ寄せる。左端に揃えると、
+		// 少ないほうの段が片側へ寄って別の並びに見える
+		const int baseRowWidth{ isSplit
+			                        ? slotWidth * splitBaseCount + slotGap * (splitBaseCount - 1)
+			                        : 0 };
+		const auto rowLeft = [&](int count)
+		{
+			const int rowWidth{ slotWidth * count + slotGap * (count - 1) };
+			return x + (baseRowWidth - rowWidth) / 2;
+		};
+
+		const std::size_t drawnCount{ isSplit
+			                              ? types.size()
+			                              : static_cast<std::size_t>(drawnRows) * perRow };
 		for (std::size_t i{ 0 }; i < types.size() && i < drawnCount; ++i)
 		{
-			const int column{ static_cast<int>(i) % perRow };
-			const int row{ static_cast<int>(i) / perRow };
-
 			const bool isSelectable{ selectableBaseIndex >= 0 };
 			const int acquiredIndex{ isSelectable ? selectableBaseIndex + static_cast<int>(i) : -1 };
 
-			const int slotX{ x + column * (slotWidth + slotGap) };
+			// 2段のときは、もともとの枠を下段（行1）、増えたぶんを上段（行0）へ置く
+			const int index{ static_cast<int>(i) };
+			const bool isExtra{ isSplit && index >= splitBaseCount };
+			const int column{ isSplit ? (isExtra ? index - splitBaseCount : index) : index % perRow };
+			const int row{ isSplit ? (isExtra ? 0 : 1) : index / perRow };
+
+			const int left{ isSplit ? rowLeft(isExtra ? extraCount : splitBaseCount) : x };
+			const int slotX{ left + column * (slotWidth + slotGap) };
 			const int slotY{ slotTop + row * (slotHeight + slotGap) };
 
 			// 固定された枠も位置を覚えておく。何も無い場所へ落としたのか、

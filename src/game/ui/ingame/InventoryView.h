@@ -216,11 +216,13 @@ namespace game::ui::ingame
 		 *                 収まらなかったぶんは「他 n 件」として件数だけ示す
 		 * @param selectableBaseIndex この区分の先頭が m_acquired 上のどの位置にあたるか。
 		 *                            -1 なら付け替えの対象外（持ち込みは道中で動かせない）
+		 * @param splitBaseCount もともとの枠数。これを超えたぶんは上段へ載せて2段に並べる。
+		 *                       0なら分けずに素直に折り返す
 		 * @return 描画に使った高さ
 		 */
 		int drawSection(int x, int y, int width, const std::string& caption,
 		    const std::vector<core::data::FileExtensionType>& types, bool isDimmed,
-		    int maxBottom, int selectableBaseIndex);
+		    int maxBottom, int selectableBaseIndex, int splitBaseCount);
 
 		/// @brief マス目1つの見せ方。旗が増えるたびに引数を足すと呼び出し側が読めなくなる
 		struct SlotStyle
