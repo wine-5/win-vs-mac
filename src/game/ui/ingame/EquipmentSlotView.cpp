@@ -8,6 +8,8 @@
 #include "game/component/combat/ExtensionInventoryComponent.h"
 #include "game/constant/ExtensionIconId.h"
 #include "game/utility/ExtensionBonusLabel.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IStringConverter.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -47,6 +49,11 @@ namespace
 	constexpr int PAGE_ACQUIRED{ 1 }; // 道中で拾ったもの
 	constexpr int PAGE_COUNT{ 2 };
 	constexpr float PAGE_INTERVAL{ 5.0f }; // 自動で切り替わる間隔（秒。左下HUDと揃える）
+
+	// どちらのページを見ているかの見出し。これが無いと、切り替わった瞬間に
+	// 「装備が勝手に変わった」と読めてしまう
+	constexpr int PAGE_LABEL_FONT_SIZE{ 17 };
+	constexpr int PAGE_LABEL_GAP{ 6 }; // 見出しとスロットの間隔
 
 	/**
 	 * @brief 拡張子種別の表示名を返す
@@ -102,6 +109,11 @@ namespace game::ui::ingame
 		m_emptyIconHandle = resourceManager.loadImageById(emptyIconId);
 		if (m_emptyIconHandle == -1)
 			core::log::error("装備スロットの空きアイコン '{}' の読み込みに失敗しました", emptyIconId.c_str());
+
+		// DxLibの描画はShift_JISを期待する。毎フレーム同じ結果なので生成時に一度だけ変換する
+		auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+		m_pageLabels[PAGE_CARRIED] = converter ? converter->utf8ToShiftJis("持ち込み") : "持ち込み";
+		m_pageLabels[PAGE_ACQUIRED] = converter ? converter->utf8ToShiftJis("道中で拾った") : "道中で拾った";
 	}
 
 	int EquipmentSlotView::getIconHandle(core::data::FileExtensionType type) const
@@ -161,6 +173,9 @@ namespace game::ui::ingame
 		const int startX{ m_screen.getWidth() - scaled(MARGIN) - totalWidth };
 		const int y{ m_screen.getHeight() - scaled(MARGIN) - slotSize };
 
+		drawPageLabel(startX, y - scaled(PAGE_LABEL_GAP) - scaled(PAGE_LABEL_FONT_SIZE),
+		    totalWidth, page);
+
 		for (int i{ 0 }; i < SLOT_COUNT; ++i)
 		{
 			const int x{ startX + i * (slotSize + gap) };
@@ -177,6 +192,18 @@ namespace game::ui::ingame
 			if (hasSelection)
 				drawOrbitingGlow(x, y, slotSize, i * orbit_glow::PHASE_PER_SLOT);
 		}
+	}
+
+	void EquipmentSlotView::drawPageLabel(int x, int y, int width, int page)
+	{
+		const int fontSize{ scaled(PAGE_LABEL_FONT_SIZE) };
+
+		// スロットの並びと右端を揃える。左寄せだと枠の幅が変わったときにずれる
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
+		const int textWidth{ m_uiRenderer.getTextWidth(m_pageLabels[page].c_str(), fontSize) };
+		m_uiRenderer.drawText(x + width - textWidth, y, m_pageLabels[page].c_str(),
+		    core::utility::Color::HUD_INK_FAINT, fontSize);
+		m_uiRenderer.resetFont();
 	}
 
 	void EquipmentSlotView::drawSlot(int x, int y, int size, core::data::FileExtensionType type, bool hasSelection)

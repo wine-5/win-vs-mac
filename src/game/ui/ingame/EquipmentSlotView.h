@@ -4,7 +4,9 @@
 #include "core/ecs/Entity.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include <array>
 #include <chrono>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -60,6 +62,15 @@ namespace game::ui::ingame
 		 * @return 現在の画面高さに合わせた長さ（ピクセル）
 		 */
 		[[nodiscard]] int scaled(int value) const;
+
+		/**
+		 * @brief どちらのページを見ているかの見出しを描く
+		 * @param x スロットの並びの左端X座標
+		 * @param y 見出し上端のY座標
+		 * @param width スロットの並びの幅
+		 * @param page 表示中のページ
+		 */
+		void drawPageLabel(int x, int y, int width, int page);
 
 		/**
 		 * @brief スロット1枠を描画する
@@ -120,6 +131,9 @@ namespace game::ui::ingame
 		std::unordered_map<int, int> m_iconHandles{};
 		// 空きスロットに描くアイコンの画像ハンドル
 		int m_emptyIconHandle{ -1 };
+
+		// ページの見出し（Shift_JIS変換済み。添字はページ番号）
+		std::array<std::string, 2> m_pageLabels{};
 
 		// 周回演出の基準時刻。描画経路からしか呼ばれずdeltaTimeを受け取らないため、
 		// 経過時間は壁時計から求める
