@@ -12,6 +12,7 @@
 #include "game/component/combat/PlayerStatBaseComponent.h"
 #include "game/constant/ExtensionIconId.h"
 #include "game/data/FileEquipmentData.h"
+#include "game/utility/ExtensionBonusLabel.h"
 #include <algorithm>
 #include <cstdio>
 
@@ -56,13 +57,15 @@ namespace
 
 	// マス目（スロット）
 	constexpr int SLOT_WIDTH{ 96 };
-	constexpr int SLOT_HEIGHT{ 116 };
+	constexpr int SLOT_HEIGHT{ 138 }; // アイコン＋ファイル名＋ボーナス表記の3段ぶん
 	constexpr int SLOT_GAP{ 10 };
 	constexpr int SLOT_RADIUS{ 4 }; // Windows 11のコントロールの角丸
 	constexpr int SLOT_ICON_SIZE{ 56 };
 	constexpr int SLOT_ICON_TOP{ 10 };
 	constexpr int SLOT_NAME_FONT_SIZE{ 14 };
 	constexpr int SLOT_NAME_GAP{ 8 }; // アイコンとファイル名の間隔
+	constexpr int SLOT_BONUS_FONT_SIZE{ 14 };
+	constexpr int SLOT_BONUS_GAP{ 4 }; // ファイル名とボーナス表記の間隔
 
 	constexpr unsigned int SLOT_FILL_COLOR{ 0xFF0E1420 };
 	constexpr int SLOT_FILL_ALPHA{ 150 };
@@ -165,6 +168,11 @@ namespace game::ui::ingame
 			m_iconHandles[i] = resourceManager.loadImageById(imageId);
 			if (m_iconHandles[i] == -1)
 				core::log::error("インベントリの拡張子アイコン '{}' の読み込みに失敗しました", imageId.c_str());
+
+			// 何をどれだけ上げるかを併記する。アイコンとファイル名だけでは
+			// 「どれと入れ替えるべきか」を判断できない
+			m_bonusLabels[i] = utility::ExtensionBonusLabel::format(
+			    type, resourceManager.getExtensionBonus(type));
 		}
 
 		const std::string emptyIconId{ constant::extension_icon_id::EMPTY };
@@ -443,6 +451,22 @@ namespace game::ui::ingame
 		m_uiRenderer.drawText(x + (slotWidth - nameWidth) / 2, nameY, name.c_str(),
 		    isDimmed ? core::utility::Color::HUD_INK_FAINT : core::utility::Color::HUD_INK,
 		    nameFontSize);
+		m_uiRenderer.resetBlendMode();
+
+		// 何をどれだけ上げるか。これが無いと、どれを挿すべきかを
+		// 覚えているかどうかの勝負になってしまう
+		if (!isEmpty)
+		{
+			const std::string& bonus{ m_bonusLabels[static_cast<int>(type)] };
+			const int bonusFontSize{ scaled(SLOT_BONUS_FONT_SIZE) };
+			const int bonusWidth{ m_uiRenderer.getTextWidth(bonus.c_str(), bonusFontSize) };
+
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+			    isDimmed ? DIMMED_ICON_ALPHA : ICON_ALPHA_OPAQUE);
+			m_uiRenderer.drawText(x + (slotWidth - bonusWidth) / 2,
+			    nameY + nameFontSize + scaled(SLOT_BONUS_GAP), bonus.c_str(),
+			    STAT_BOOSTED_COLOR, bonusFontSize);
+		}
 		m_uiRenderer.resetBlendMode();
 		m_uiRenderer.resetFont();
 	}

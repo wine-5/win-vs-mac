@@ -160,6 +160,10 @@ namespace game::ui::ingame
 		std::string m_captionHint{};
 		std::string m_captionEmptySlot{};
 		std::string m_captionOverflow{};
+
+		// 拡張子ごとの「何をどれだけ上げるか」の表記（例: "DEF+3"）。
+		// extensionBonus.json はプレイ中に変わらないので生成時に組み立てて持つ
+		std::array<std::string, static_cast<int>(core::data::FileExtensionType::Count)> m_bonusLabels{};
 		std::array<std::string, STAT_COUNT> m_statLabels{};
 	};
 } // namespace game::ui::ingame
