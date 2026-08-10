@@ -61,7 +61,7 @@ namespace game::utility
 			case core::data::FileExtensionType::Document: return bonus.spd;
 			case core::data::FileExtensionType::Image: return bonus.def;
 			case core::data::FileExtensionType::Audio: return bonus.hp;
-			// 会心率は確率なので、表示は百分率へ直す
+			// クリティカル率は確率なので、表示は百分率へ直す
 			case core::data::FileExtensionType::SourceCode: return bonus.criticalRate * core::utility::RATIO_TO_PERCENT;
 			case core::data::FileExtensionType::Shortcut: return bonus.projectileSpeed;
 			case core::data::FileExtensionType::Video: return bonus.projectileRange;

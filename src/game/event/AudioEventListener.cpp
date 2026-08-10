@@ -81,7 +81,7 @@ namespace game::event
 		if (e.m_seType != core::constant::SeType::None)
 			audio->playSe(e.m_seType);
 
-		// 会心は命中音に重ねて鳴らす。与えたときだけで、被弾側では鳴らさない
+		// クリティカルは命中音に重ねて鳴らす。与えたときだけで、被弾側では鳴らさない
 		// （やられた側で派手な音が鳴ると、褒められているのか分からなくなる）
 		if (e.m_isCritical && e.m_targetId != m_playerId)
 			audio->playSe(core::constant::SeType::Critical);

@@ -380,7 +380,7 @@ namespace platform::window::select
 			const char* m_statId;
 			const char* m_label;
 			float core::data::FileExtensionBonus::* m_member;
-			float m_scale; // 会心率は確率なので%へ直してから見せる
+			float m_scale; // クリティカル率は確率なので%へ直してから見せる
 		};
 		constexpr StatField STAT_FIELDS[] = {
 			{ "hp", "HP", &core::data::FileExtensionBonus::hp, 1.0f },

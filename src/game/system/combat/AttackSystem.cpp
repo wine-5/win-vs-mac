@@ -24,7 +24,7 @@ namespace game::system::combat
 	{
 		// 攻撃力 → 防御力の減算 → クリティカルの倍化 の順で組む。
 		// クリティカルを防御より後ろに置くのは、先に倍化すると防御の高い相手ほど
-		// 減算で旨味が消えてしまい「会心が出た手応え」が無くなるため
+		// 減算で旨味が消えてしまい「クリティカルが出た手応え」が無くなるため
 		auto base{ std::make_unique<attack::BaseAttackHandler>(m_componentManager) };
 		auto defense{ std::make_unique<attack::DefenseHandler>(m_componentManager) };
 		auto critical{ std::make_unique<attack::CriticalHandler>(m_componentManager) };

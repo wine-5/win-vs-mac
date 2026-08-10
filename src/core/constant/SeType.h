@@ -19,7 +19,7 @@ namespace core::constant
 		PlayerChargeRelease, // 溜めを解いて撃った
 		HitWindow,       // Window弾が命中した
 		HitChargedWindow, // 溜め撃ちのWindow弾が命中した
-		Critical,         // 会心の一撃が出た
+		Critical,         // クリティカルの一撃が出た
 
 		// ---- 被弾・撃破 ----
 		HitEnemy,        // 敵がダメージを受けた

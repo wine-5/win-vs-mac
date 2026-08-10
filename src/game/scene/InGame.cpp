@@ -400,7 +400,7 @@ namespace game::scene
 
 	void InGame::logPlayerParameters(const char* label) const
 	{
-		core::log::info("Player[{}] HP={} ATK={} DEF={} SPD={} 攻撃範囲={} クールダウン={} 会心率={} 会心倍率={}",
+		core::log::info("Player[{}] HP={} ATK={} DEF={} SPD={} 攻撃範囲={} クールダウン={} クリティカル率={} クリティカル倍率={}",
 		    label,
 		    m_playerData.getMaxHp(),
 		    m_playerData.getAttackPower(),
@@ -758,9 +758,9 @@ namespace game::scene
 				if (e.m_targetId == m_playerId)
 					m_totalDamageTaken += e.m_damage;
 
-				// クリティカルの瞬間に一拍止めて会心の手応えを作る。
-				// 与えたときだけで、被弾側では止めない（操作不能時間は理不尽に感じるため）
-				if (e.m_isCritical && e.m_targetId != m_playerId)
+			    // クリティカルの瞬間に一拍止めて手応えを作る。
+			    // 与えたときだけで、被弾側では止めない（操作不能時間は理不尽に感じるため）
+			    if (e.m_isCritical && e.m_targetId != m_playerId)
 					m_hitStop.requestOnCritical(); }));
 		// プレイヤー死亡演出の完了イベントの購読。
 		// HPが尽きた瞬間（PlayerDeadEvent）ではなく、死亡アニメと暗転を見せ終えてから遷移する。

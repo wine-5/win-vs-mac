@@ -144,7 +144,7 @@ namespace
 
 	// 能力値のラベル（UTF-8。生成時にShift_JISへ変換して持つ）
 	constexpr std::array<const char*, 8> STAT_LABELS{
-		"HP", "攻撃", "防御", "速度", "射程", "会心", "弾速", "飛距離"
+		"HP", "攻撃", "防御", "速度", "射程", "クリティカル", "弾速", "飛距離"
 	};
 
 	/**

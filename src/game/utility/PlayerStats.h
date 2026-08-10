@@ -15,7 +15,7 @@ namespace game::utility
 	inline constexpr int STAT_INDEX_DEF{ 2 };
 	inline constexpr int STAT_INDEX_SPD{ 3 };
 	inline constexpr int STAT_INDEX_RNG{ 4 };
-	/// @brief 会心率だけは割合なので百分率で持つ。この位置だけ書式が変わる
+	/// @brief クリティカル率だけは割合なので百分率で持つ。この位置だけ書式が変わる
 	inline constexpr int STAT_INDEX_CRIT{ 5 };
 	inline constexpr int STAT_INDEX_BSPD{ 6 };
 	inline constexpr int STAT_INDEX_BRNG{ 7 };

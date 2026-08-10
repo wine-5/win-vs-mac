@@ -13,7 +13,7 @@ namespace core::data
         Document,   // .txt .pdf .docx → SPD+
         Image,      // .png .jpg .bmp  → DEF+
         Audio,      // .mp3 .wav .flac → HP+
-		SourceCode, // .cpp .h .py .js → 会心率+
+		SourceCode, // .cpp .h .py .js → クリティカル率+
 		Shortcut,   // .lnk .url       → Window弾の弾速+
 		Video,      // .mp4 .avi .mkv  → Window弾の飛距離+
 		Archive,    // .zip .7z .rar   → 全パラメータ小+

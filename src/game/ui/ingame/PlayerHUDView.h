@@ -104,7 +104,7 @@ namespace game::ui::ingame
 		/**
 		 * @brief 8項目の現在値を集める
 		 *
-		 * HP・防御は HealthComponent、攻撃・射程・会心は AttackComponent、
+		 * HP・防御は HealthComponent、攻撃・射程・クリティカルは AttackComponent、
 		 * 移動速度と弾の性能は PlayerStatsComponent から、いずれも毎フレーム生値を読む。
 		 * Itemがコンポーネントを書き換えれば表示は自動で追従する
 		 * @param playerId プレイヤーのEntityID

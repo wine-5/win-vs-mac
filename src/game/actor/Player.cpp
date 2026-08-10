@@ -67,7 +67,7 @@ namespace game::actor
 		attack.m_attackCooldown = playerData.getAttackCooldown();
 		// 振り下ろしの瞬間にダメージが出るよう、アニメーションの溜め分だけ判定を遅らせる
 		attack.m_windupDelay = playerData.getAttackWindup();
-		// クリティカル（会心）。発生率が0なら CriticalHandler は素通りする
+		// クリティカル（クリティカル）。発生率が0なら CriticalHandler は素通りする
 		attack.m_criticalRate = playerData.getCriticalRate();
 		attack.m_criticalMultiplier = playerData.getCriticalMultiplier();
 		componentManager.add<component::combat::AttackComponent>(m_entity.getId(), attack);
