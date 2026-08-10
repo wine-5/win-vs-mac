@@ -418,9 +418,9 @@
       "collider": "box",
       "role": "renameTerminal",
       "defaultSize": [
-        110,
-        110,
-        110
+        170,
+        170,
+        170
       ],
       "texture": "assets/model/stage/BlockRename.png",
       "textureTile": 0,
