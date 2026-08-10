@@ -12,4 +12,7 @@ namespace game::constant::prop_role
 
 	// ボス出現で閉じ、入り口を塞ぐ扉
 	constexpr std::string_view BOSS_GATE = "bossGate";
+
+	// 近づくと拡張子を付け替えられる端末。壊せない設置物
+	constexpr std::string_view RENAME_TERMINAL = "renameTerminal";
 } // namespace game::constant::prop_role
