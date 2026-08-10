@@ -1,4 +1,4 @@
-{
+﻿{
   "props": [
     {
       "id": "path_corridor",
@@ -422,6 +422,30 @@
         110
       ],
       "texture": "assets/model/stage/BlockPlain.png",
+      "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
+      "id": "block_ram",
+      "displayName": "RAMブロック",
+      "model": "assets/model/stage/BlockRam.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#3FB950",
+      "collider": "box",
+      "hitsToBreak": 5,
+      "grantsEquipSlot": true,
+      "defaultSize": [
+        130,
+        130,
+        130
+      ],
+      "texture": "assets/model/stage/BlockRam.png",
       "textureTile": 0,
       "slideAccel": 0.0,
       "scrollU": 0.0,
