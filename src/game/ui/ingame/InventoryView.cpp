@@ -94,6 +94,11 @@ namespace
 	constexpr unsigned int HELD_COLOR{ core::utility::Color::HUD_CHARGE_MAX };
 	constexpr int HELD_FILL_ALPHA{ 70 };
 
+	// 運んでいる最中にカーソルへ付いて回るアイコン。半透明にして、
+	// 下のマスが透けて見えるようにする（落とし先を隠さない）
+	constexpr int DRAG_ICON_SIZE{ 56 };
+	constexpr int DRAG_ICON_ALPHA{ 200 };
+
 	constexpr int ICON_ALPHA_OPAQUE{ 255 }; // 効果が乗っているものはそのままの濃さで描く
 	constexpr int EMPTY_ICON_ALPHA{ 60 };   // 空きマスの薄さ
 	constexpr int DIMMED_ICON_ALPHA{ 140 }; // 効果が乗っていないものの薄さ
@@ -243,6 +248,13 @@ namespace game::ui::ingame
 		m_isSwapMode = isSwapMode;
 	}
 
+	void InventoryView::setDragging(bool isDragging, int screenX, int screenY) noexcept
+	{
+		m_isDragging = isDragging;
+		m_dragX = screenX;
+		m_dragY = screenY;
+	}
+
 	void InventoryView::resetStatChanges() noexcept
 	{
 		m_hasPreviousStats = false;
@@ -297,10 +309,17 @@ namespace game::ui::ingame
 		// 道中で拾ったもの。先頭が装備中、それ以降が未装備
 		std::vector<core::data::FileExtensionType> equipped{};
 		std::vector<core::data::FileExtensionType> unequipped{};
+
+		// 運んでいる最中のアイコンをカーソルの位置へ描くために覚えておく
+		auto draggedType{ core::data::FileExtensionType::Count };
+
 		if (const auto* inventory{ m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(playerId) })
 		{
 			for (std::size_t i{ 0 }; i < inventory->m_acquired.size(); ++i)
 			{
+				if (static_cast<int>(i) == m_heldIndex)
+					draggedType = inventory->m_acquired[i];
+
 				if (inventory->isEquipped(static_cast<int>(i)))
 					equipped.push_back(inventory->m_acquired[i]);
 				else
@@ -349,6 +368,10 @@ namespace game::ui::ingame
 
 		drawStats(dividerX + padding, contentTop, rightWidth, playerId);
 		drawStatusBar(left, top + height - scaled(STATUS_BAR_HEIGHT), width, itemCount);
+
+		// 運んでいるアイコンは最後に描く。マス目や枠の下に潜ると、
+		// どこまで運んできたのかが見えなくなる
+		drawDraggedIcon(draggedType);
 	}
 
 	void InventoryView::drawTitleBar(int x, int y, int width)
@@ -659,6 +682,23 @@ namespace game::ui::ingame
 		const float fade{ 1.0f - (elapsed - STAT_CHANGE_FADE_START) /
 			                         (STAT_CHANGE_FLASH_DURATION - STAT_CHANGE_FADE_START) };
 		return static_cast<int>(ICON_ALPHA_OPAQUE * fade);
+	}
+
+	void InventoryView::drawDraggedIcon(core::data::FileExtensionType type)
+	{
+		if (!m_isDragging || type == core::data::FileExtensionType::Count)
+			return;
+
+		const int handle{ m_iconHandles[static_cast<int>(type)] };
+		if (handle == -1)
+			return;
+
+		// カーソルの中心へ置く。カーソルの右下へずらすと、落とし先のマスを
+		// 指しているつもりの位置と実際の判定位置がずれる
+		const int size{ scaled(DRAG_ICON_SIZE) };
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, DRAG_ICON_ALPHA);
+		m_uiRenderer.drawImage(handle, m_dragX - size / 2, m_dragY - size / 2, size, size);
+		m_uiRenderer.resetBlendMode();
 	}
 
 	void InventoryView::drawStats(int x, int y, int width, core::ecs::EntityId playerId)

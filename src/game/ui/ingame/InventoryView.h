@@ -91,6 +91,17 @@ namespace game::ui::ingame
 		void resetStatChanges() noexcept;
 
 		/**
+		 * @brief 掴んだものを運んでいる最中かを設定する
+		 *
+		 * 運んでいる間はアイコンをカーソルへ付いて回らせる。掴んだマスの色だけでは
+		 * 「今それを持っている」感じが出ず、どこへ落とすのかも伝わらない
+		 * @param isDragging 運んでいる最中ならtrue
+		 * @param screenX カーソルのX座標
+		 * @param screenY カーソルのY座標
+		 */
+		void setDragging(bool isDragging, int screenX, int screenY) noexcept;
+
+		/**
 		 * @brief 画面座標がどのマスの上にあるかを返す
 		 *
 		 * マスの位置はレイアウトを組む描画側しか知らないため、当たり判定もここが持つ。
@@ -213,6 +224,12 @@ namespace game::ui::ingame
 		[[nodiscard]] int changeFlashAlpha() const;
 
 		/**
+		 * @brief 運んでいる最中のアイコンをカーソルの位置へ描く
+		 * @param type 運んでいる拡張子種別（Count なら何も描かない）
+		 */
+		void drawDraggedIcon(core::data::FileExtensionType type);
+
+		/**
 		 * @brief 能力値の一覧を描く
 		 * @param x 一覧の左上X座標
 		 * @param y 一覧の左上Y座標
@@ -256,6 +273,11 @@ namespace game::ui::ingame
 		bool m_isSwapMode{ false };
 		int m_cursorIndex{ -1 };
 		int m_heldIndex{ -1 };
+
+		// 掴んだものを運んでいる最中か。運んでいる間だけカーソルにアイコンを付ける
+		bool m_isDragging{ false };
+		int m_dragX{ 0 };
+		int m_dragY{ 0 };
 
 		// 拡張子アイコン（FileExtensionTypeの並び順）と空きマスのアイコン
 		std::array<int, static_cast<int>(core::data::FileExtensionType::Count)> m_iconHandles{};
