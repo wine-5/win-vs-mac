@@ -118,8 +118,19 @@ namespace game::ui::ingame
 		 * @param y スロット左上のY座標
 		 * @param size スロットの一辺の長さ
 		 * @param phaseOffset 周回位相のずらし量（0.0〜1.0。スロットごとに変えて同期させない）
+		 * @param color 粒の色（縁と揃える）
 		 */
-		void drawOrbitingGlow(int x, int y, int size, float phaseOffset);
+		void drawOrbitingGlow(int x, int y, int size, float phaseOffset, unsigned int color);
+
+		/**
+		 * @brief マスの縁の色を求める
+		 *
+		 * 縁と光の粒で同じ色を使うため、決め方を1か所に置く
+		 * @param hasSelection 装備済みかどうか
+		 * @param accent 縁の意味づけ
+		 * @return 縁の色（ARGB形式：0xAARRGGBB）
+		 */
+		[[nodiscard]] unsigned int borderColor(bool hasSelection, SlotAccent accent) const;
 
 		/**
 		 * @brief 道中で拾って効果が乗っている拡張子を集める

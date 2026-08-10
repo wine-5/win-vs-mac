@@ -223,9 +223,14 @@ namespace game::ui::ingame
 		const int bottomSize{ rowSlotSize(bottomCount) };
 		const int topSize{ topCount > 0 ? rowSlotSize(topCount) : 0 };
 
-		// 右下アンカー。幅はモニタのアスペクト比で変わるため必ず実際の画面幅から逆算する
+		// 右下アンカー。幅はモニタのアスペクト比で変わるため必ず実際の画面幅から逆算する。
+		// 見出しは並びの下へ置く。上に置くと段数によって高さが変わり、
+		// ページが替わるたびに文字だけが上下して読みづらい
 		const int right{ m_screen.getWidth() - scaled(MARGIN) };
-		const int bottomY{ m_screen.getHeight() - scaled(MARGIN) - bottomSize + slideOffset };
+		const int labelHeight{ scaled(PAGE_LABEL_FONT_SIZE) + scaled(PAGE_LABEL_PADDING_Y) * 2 };
+		const int labelTop{ m_screen.getHeight() - scaled(MARGIN) - labelHeight + slideOffset };
+
+		const int bottomY{ labelTop - scaled(PAGE_LABEL_GAP) - bottomSize };
 		const int topY{ bottomY - scaled(ROW_GAP) - topSize };
 
 		// 段ごとに中央へ寄せる。上段が少ないときに左端へ寄ると、
@@ -252,17 +257,19 @@ namespace game::ui::ingame
 
 				drawSlot(x, rowY, size, type, hasSelection, accent);
 
-				// 装備中のスロットだけ縁を光の粒が回り続ける（起動中であることの表現）
+				// 装備中のスロットだけ縁を光の粒が回り続ける（起動中であることの表現）。
+				// 色は縁と揃える。別の色で回すと、1つのマスが2つの色を主張してしまう
 				if (hasSelection)
-					drawOrbitingGlow(x, rowY, size, index * orbit_glow::PHASE_PER_SLOT);
+					drawOrbitingGlow(x, rowY, size, index * orbit_glow::PHASE_PER_SLOT,
+					    borderColor(hasSelection, accent));
 			}
 		};
 
 		const SlotAccent bottomAccent{ page == PAGE_CARRIED ? SlotAccent::Locked
 			                                                : SlotAccent::Normal };
 
-		const int labelTop{ (topCount > 0 ? topY : bottomY) - scaled(PAGE_LABEL_GAP) - scaled(PAGE_LABEL_PADDING_Y) - scaled(PAGE_LABEL_FONT_SIZE) };
-		drawPageLabel(right - totalWidth, labelTop, totalWidth, page);
+		drawPageLabel(right - totalWidth, labelTop + scaled(PAGE_LABEL_PADDING_Y),
+		    totalWidth, page);
 
 		drawRow(0, bottomCount, bottomSize, bottomY, bottomAccent);
 		drawRow(bottomCount, topCount, topSize, topY, SlotAccent::Gained);
@@ -303,31 +310,14 @@ namespace game::ui::ingame
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SLOT_FILL_ALPHA);
 		m_uiRenderer.drawRoundedBox(x, y, size, size, radius, SLOT_FILL_COLOR, true, 1);
 
-		// 装備済みはアクセント色の枠で締める。空きは枠を薄いままにして視線を集めない。
-		// 道中では変えられない枠は赤、増えた枠は緑で、中身の有無に関わらず締める
-		unsigned int borderColor{ hasSelection ? core::utility::Color::HUD_ACCENT : SLOT_BORDER_COLOR };
-		int borderAlpha{ hasSelection ? SLOT_ACCENT_BORDER_ALPHA : SLOT_BORDER_ALPHA };
-		bool isMeaningful{ hasSelection };
-
-		if (accent == SlotAccent::Locked)
-		{
-			borderColor = LOCKED_BORDER_COLOR;
-			isMeaningful = true;
-		}
-		else if (accent == SlotAccent::Gained)
-		{
-			borderColor = GAINED_BORDER_COLOR;
-			isMeaningful = true;
-		}
-
-		if (isMeaningful)
-			borderAlpha = MEANINGFUL_BORDER_ALPHA;
-
-		// 意味のある縁は太くする。1pxのままだと色を付けても背景に紛れて読めない
+		// 意味のある縁は太く濃くする。1pxのままだと色を付けても背景に紛れて読めない
+		const bool isMeaningful{ hasSelection || accent != SlotAccent::Normal };
+		const int borderAlpha{ isMeaningful ? MEANINGFUL_BORDER_ALPHA : SLOT_BORDER_ALPHA };
 		const int thickness{ isMeaningful ? scaled(MEANINGFUL_BORDER_THICKNESS) : 1 };
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, borderAlpha);
-		m_uiRenderer.drawRoundedBox(x, y, size, size, radius, borderColor, false, thickness);
+		m_uiRenderer.drawRoundedBox(x, y, size, size, radius,
+		    borderColor(hasSelection, accent), false, thickness);
 		m_uiRenderer.resetBlendMode();
 
 		const int centerX{ x + size / 2 };
@@ -366,14 +356,27 @@ namespace game::ui::ingame
 		m_uiRenderer.resetFont();
 	}
 
-	void EquipmentSlotView::drawOrbitingGlow(int x, int y, int size, float phaseOffset)
+	unsigned int EquipmentSlotView::borderColor(bool hasSelection, SlotAccent accent) const
+	{
+		// 道中では変えられない枠は赤、増えた枠は緑。中身の有無に関わらず役割を優先する
+		if (accent == SlotAccent::Locked)
+			return LOCKED_BORDER_COLOR;
+		if (accent == SlotAccent::Gained)
+			return GAINED_BORDER_COLOR;
+
+		// 装備済みはアクセント色。空きは薄いままにして視線を集めない
+		return hasSelection ? core::utility::Color::HUD_ACCENT : SLOT_BORDER_COLOR;
+	}
+
+	void EquipmentSlotView::drawOrbitingGlow(int x, int y, int size, float phaseOffset,
+	    unsigned int color)
 	{
 		const float elapsed{ std::chrono::duration<float>(
 			std::chrono::steady_clock::now() - m_startTime)
 			    .count() };
 
 		orbit_glow::draw(m_uiRenderer, x, y, size, size, elapsed, phaseOffset,
-		    scaled(orbit_glow::DOT_RADIUS));
+		    scaled(orbit_glow::DOT_RADIUS), color);
 	}
 
 	void EquipmentSlotView::drawCenteredText(int centerX, int y, const char* text, unsigned int color, int fontSize)
