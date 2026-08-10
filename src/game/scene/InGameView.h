@@ -40,6 +40,7 @@ namespace game::ui::ingame
 	class ObjectiveView;     // 前方宣言
 	class InGameStatusView;  // 前方宣言
 	class InventoryView;     // 前方宣言
+	class InteractPromptView;    // 前方宣言
 	class LowHealthVignetteView; // 前方宣言
 	class BossHUDView;           // 前方宣言
 	class MiniMapView;           // 前方宣言
@@ -208,6 +209,18 @@ namespace game::scene
 		void setInventoryOpen(bool isOpen);
 
 		/**
+		 * @brief 設置物への接近案内（吹き出し）Viewを設定する
+		 * @param view InteractPromptViewのポインタ（所有はInGame）
+		 */
+		void setInteractPromptView(ui::ingame::InteractPromptView* view);
+
+		/**
+		 * @brief 案内を出す対象のEntityIDを設定する
+		 * @param targetId 対象のEntityID（範囲内に無ければ INVALID_ENTITY_ID）
+		 */
+		void setInteractTarget(core::ecs::EntityId targetId);
+
+		/**
 		 * @brief 低HP警告のビネットViewを設定する
 		 * @param view LowHealthVignetteViewのポインタ（所有はInGame）
 		 */
@@ -340,6 +353,10 @@ namespace game::scene
 		// 拡張子インベントリ（Eキー）の描画元（所有はInGame）。開いている間だけ描く
 		ui::ingame::InventoryView* m_inventoryView{ nullptr };
 		bool m_isInventoryOpen{ false };
+
+		// 設置物への接近案内（吹き出し）の描画元（所有はInGame）
+		ui::ingame::InteractPromptView* m_interactPromptView{ nullptr };
+		core::ecs::EntityId m_interactTargetId{ core::ecs::INVALID_ENTITY_ID };
 
 		// 低HP警告のビネットの描画元（所有はInGame）
 		ui::ingame::LowHealthVignetteView* m_lowHealthVignetteView{ nullptr };

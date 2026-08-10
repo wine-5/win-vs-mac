@@ -31,6 +31,7 @@
 #include "game/ui/ingame/ObjectiveView.h"
 #include "game/ui/ingame/InGameStatusView.h"
 #include "game/ui/ingame/InventoryView.h"
+#include "game/ui/ingame/InteractPromptView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
 #include "game/ui/ingame/BossHUDView.h"
 #include "game/ui/ingame/MiniMapView.h"
@@ -145,6 +146,11 @@ namespace game::scene
 			// 画面全体が危険な状態なので、HUDごと赤く染まるほうが表現としても正しい
 			if (m_lowHealthVignetteView)
 				m_lowHealthVignetteView->draw(playerId);
+
+			// 近づいた設置物の案内（吹き出し）。対象の頭上に出るので
+			// 他のHUDより先に描き、レティクルには被らせない
+			if (m_interactPromptView)
+				m_interactPromptView->draw(m_interactTargetId);
 
 			// 照準レティクル（HUD）は最前面に描く
 			drawReticle(playerId);
@@ -267,6 +273,16 @@ namespace game::scene
 	void InGameView::setInventoryOpen(bool isOpen)
 	{
 		m_isInventoryOpen = isOpen;
+	}
+
+	void InGameView::setInteractPromptView(ui::ingame::InteractPromptView* view)
+	{
+		m_interactPromptView = view;
+	}
+
+	void InGameView::setInteractTarget(core::ecs::EntityId targetId)
+	{
+		m_interactTargetId = targetId;
 	}
 
 	void InGameView::setObjectiveView(ui::ingame::ObjectiveView* view)
