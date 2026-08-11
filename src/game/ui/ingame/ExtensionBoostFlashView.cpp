@@ -28,6 +28,14 @@ namespace
 	constexpr int MESSAGE_GAP{ 12 };       // 数字と説明文の間隔
 	constexpr int MESSAGE_CENTER_Y{ 300 }; // 画面上端からの位置。中央だと自機と重なる
 
+	// 文字の下敷き。3D空間の上へ直接置くと、背景の明るさ次第で白文字が溶ける。
+	// 影や縁取りでも読めるようにはできるが、背景が何色でも同じ濃さで読めるのは下敷きだけ
+	constexpr int PANEL_PADDING_X{ 40 };
+	constexpr int PANEL_PADDING_Y{ 22 };
+	constexpr int PANEL_RADIUS{ 8 };
+	constexpr int PANEL_FILL_ALPHA{ 200 };
+	constexpr int PANEL_BORDER_THICKNESS{ 2 };
+
 	/**
 	 * @brief UTF-8の文字列をDxLibが期待するShift_JISへ変換する
 	 * @param text UTF-8の文字列
@@ -132,14 +140,31 @@ namespace game::ui::ingame
 		const int messageFontSize{ scaled(MESSAGE_FONT_SIZE) };
 		const int top{ scaled(MESSAGE_CENTER_Y) + offsetY };
 
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
-
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		const int countWidth{ m_uiRenderer.getTextWidth(countText, countFontSize) };
+		const int messageWidth{ m_uiRenderer.getTextWidth(m_message.c_str(), messageFontSize) };
+
+		// 下敷きは2行を囲める大きさにする。行ごとに敷くと段差が出て札が2枚に見える
+		const int textWidth{ std::max(countWidth, messageWidth) };
+		const int textHeight{ countFontSize + scaled(MESSAGE_GAP) + messageFontSize };
+		const int panelX{ centerX - textWidth / 2 - scaled(PANEL_PADDING_X) };
+		const int panelY{ top - scaled(PANEL_PADDING_Y) };
+		const int panelWidth{ textWidth + scaled(PANEL_PADDING_X) * 2 };
+		const int panelHeight{ textHeight + scaled(PANEL_PADDING_Y) * 2 };
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+		    PANEL_FILL_ALPHA * alpha / 255);
+		m_uiRenderer.drawRoundedBox(panelX, panelY, panelWidth, panelHeight,
+		    scaled(PANEL_RADIUS), core::utility::Color::HUD_PANEL_FILL, true, 1);
+		m_uiRenderer.resetBlendMode();
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+		m_uiRenderer.drawRoundedBox(panelX, panelY, panelWidth, panelHeight,
+		    scaled(PANEL_RADIUS), core::utility::Color::HUD_EXTENSION_BOOST_VIOLET, false,
+		    scaled(PANEL_BORDER_THICKNESS));
+
 		m_uiRenderer.drawText(centerX - countWidth / 2, top, countText,
 		    core::utility::Color::HUD_EXTENSION_BOOST_VIOLET, countFontSize);
-
-		const int messageWidth{ m_uiRenderer.getTextWidth(m_message.c_str(), messageFontSize) };
 		m_uiRenderer.drawText(centerX - messageWidth / 2,
 		    top + countFontSize + scaled(MESSAGE_GAP), m_message.c_str(),
 		    core::utility::Color::HUD_INK, messageFontSize);
