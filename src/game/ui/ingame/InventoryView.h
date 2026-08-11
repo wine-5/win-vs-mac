@@ -294,6 +294,24 @@ namespace game::ui::ingame
 		void drawDraggedIcon(core::data::FileExtensionType type);
 
 		/**
+		 * @brief 倍率が変わっていればボーナス表記を作り直す
+		 *
+		 * 表記は毎フレーム組み立てるには重いので、倍率が動いたときだけ作り直す。
+		 * 素の値を出したままだと、マスの「HP+150」と右の「+300」が食い違う
+		 * @param multiplier いま掛かっている倍率
+		 */
+		void refreshBonusLabels(float multiplier);
+
+		/**
+		 * @brief 倍率が掛かっていることを示すバッジを描く
+		 * @param x バッジ左上のX座標
+		 * @param y バッジ左上のY座標
+		 * @param multiplier いま掛かっている倍率
+		 * @return 描画に使った高さ
+		 */
+		int drawMultiplierBadge(int x, int y, float multiplier);
+
+		/**
 		 * @brief 能力値の一覧を描く
 		 * @param x 一覧の左上X座標
 		 * @param y 一覧の左上Y座標
@@ -302,9 +320,13 @@ namespace game::ui::ingame
 		 */
 		void drawStats(int x, int y, int width, core::ecs::EntityId playerId);
 
+		// ボーナス表記を組み立てたときの倍率。これが変わったら作り直す
+		float m_labelMultiplier{ 1.0f };
+
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
 		core::ecs::ComponentManager& m_componentManager;
+		core::iface::IResourceManager& m_resourceManager;
 		const data::FileEquipmentData& m_equipmentData;
 		HudPanel m_panel;
 
@@ -370,6 +392,7 @@ namespace game::ui::ingame
 		std::string m_captionSwapHint{};
 		std::string m_captionEmptySlot{};
 		std::string m_captionOverflow{};
+		std::string m_captionMultiplier{};
 
 		// 拡張子ごとの「何をどれだけ上げるか」の表記（例: "DEF+3"）。
 		// extensionBonus.json はプレイ中に変わらないので生成時に組み立てて持つ

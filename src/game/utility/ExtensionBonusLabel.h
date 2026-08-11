@@ -74,14 +74,16 @@ namespace game::utility
 		 * @brief 「能力名＋上昇量」の表記を組み立てる
 		 * @param type 拡張子種別
 		 * @param bonus 種別に対応するボーナス値
+		 * @param scale 上昇量へ掛ける倍率（ギャンブルボックスの当たり）。
+		 *              素の値を出したままだと、実際に乗っている量と食い違う
 		 * @return 表示する文字列（例: "DEF+3" / "CRIT+8%" / "ALL+"）
 		 */
 		[[nodiscard]] static std::string format(core::data::FileExtensionType type,
-		    const core::data::FileExtensionBonus& bonus)
+		    const core::data::FileExtensionBonus& bonus, float scale = 1.0f)
 		{
 			std::string text{ toLabel(type) };
 
-			const float amount{ toAmount(type, bonus) };
+			const float amount{ toAmount(type, bonus) * scale };
 			if (amount <= 0.0f)
 				return text;
 

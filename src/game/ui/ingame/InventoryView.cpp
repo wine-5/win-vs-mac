@@ -137,6 +137,19 @@ namespace
 	// 強化されている項目の見せ方。左下HUDと同じ色を使い、
 	// 「黄色＝強化されている」という意味を画面ごとにずらさない
 	constexpr unsigned int STAT_BOOSTED_COLOR{ core::utility::Color::HUD_CHARGE_MAX };
+
+	// 倍率が掛かっているときの色。強化中の黄より一段特別な状態なので色を分ける
+	constexpr unsigned int BOOSTED_MULTIPLIER_COLOR{ core::utility::Color::HUD_JACKPOT_VIOLET };
+
+	// 倍率が掛かっているときに光の粒を速める割合（右下HUDと揃える）
+	constexpr float BOOSTED_SPEED_SCALE{ 1.5f };
+
+	// 倍率バッジ
+	constexpr int BADGE_PADDING_X{ 10 };
+	constexpr int BADGE_PADDING_Y{ 5 };
+	constexpr int BADGE_RADIUS{ 4 };
+	constexpr int BADGE_FONT_SIZE{ 17 };
+	constexpr int BADGE_FILL_ALPHA{ 46 };
 	constexpr int STAT_DELTA_FONT_SIZE{ 18 };
 	constexpr int STAT_DELTA_GAP{ 10 };         // 現在値と増分の間隔
 	constexpr float STAT_BOOST_EPSILON{ 0.5f }; // これ未満の差は出さない（整数表示で0になるため）
@@ -205,6 +218,7 @@ namespace game::ui::ingame
 	    : m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_componentManager{ componentManager }
+	    , m_resourceManager{ resourceManager }
 	    , m_equipmentData{ equipmentData }
 	    , m_panel{ uiRenderer, screen }
 	{
@@ -242,6 +256,7 @@ namespace game::ui::ingame
 		m_captionUnequipped = toDrawable("所持一覧（未装備）");
 		m_captionNoUnequipped = toDrawable("拾ったものはすべて装備中です");
 		m_captionStats = toDrawable("現在の能力");
+		m_captionMultiplier = toDrawable("拡張子の効果");
 		m_addressSwapText = toDrawable("PC  >  拡張子  >  付け替え");
 		m_captionHint = toDrawable("E / Esc : 閉じる");
 
@@ -635,9 +650,17 @@ namespace game::ui::ingame
 			// 「回っている＝効いている」の意味が画面ごとにずれないようにする。
 			// 止まった窓は死んで見えるので、動きの出どころとしても効く
 			if (!isDimmed && types[i] != core::data::FileExtensionType::Count)
+			{
+				// 倍率が掛かっているときは紫・列を倍・速めにする。右下HUDと同じ規則にして、
+				// どちらの画面を見ても「当たっている」が同じ形で読めるようにする
+				const bool boosted{ m_labelMultiplier > 1.0f };
 				orbit_glow::draw(m_uiRenderer, slotX, slotY, slotWidth, slotHeight,
-				    elapsedSeconds(), static_cast<float>(i) * orbit_glow::PHASE_PER_SLOT,
-				    scaled(orbit_glow::DOT_RADIUS), core::utility::Color::HUD_CHARGE_CYAN);
+				    boosted ? elapsedSeconds() * BOOSTED_SPEED_SCALE : elapsedSeconds(),
+				    static_cast<float>(i) * orbit_glow::PHASE_PER_SLOT,
+				    scaled(orbit_glow::DOT_RADIUS),
+				    boosted ? BOOSTED_MULTIPLIER_COLOR : core::utility::Color::HUD_CHARGE_CYAN,
+				    boosted ? orbit_glow::COMET_COUNT_BOOSTED : orbit_glow::COMET_COUNT);
+			}
 
 			// 動かせない区分には錠前を付ける。見出しの文字より先に目へ入り、
 			// 掴もうとする前に「ここは触れない」と分かる
@@ -866,6 +889,49 @@ namespace game::ui::ingame
 		m_uiRenderer.resetBlendMode();
 	}
 
+	void InventoryView::refreshBonusLabels(float multiplier)
+	{
+		if (multiplier == m_labelMultiplier)
+			return;
+
+		for (int i{ 0 }; i < static_cast<int>(core::data::FileExtensionType::Count); ++i)
+		{
+			const auto type{ static_cast<core::data::FileExtensionType>(i) };
+			m_bonusLabels[i] = utility::ExtensionBonusLabel::format(
+			    type, m_resourceManager.getExtensionBonus(type), multiplier);
+		}
+		m_labelMultiplier = multiplier;
+	}
+
+	int InventoryView::drawMultiplierBadge(int x, int y, float multiplier)
+	{
+		// 色と粒の本数だけでは「何が起きたのか」までは伝わらない。
+		// 滅多に出ない状態なので、一度だけ言葉で説明しておく
+		char text[64]{};
+		std::snprintf(text, sizeof(text), "%s x%g", m_captionMultiplier.c_str(), multiplier);
+
+		const int fontSize{ scaled(BADGE_FONT_SIZE) };
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
+		const int textWidth{ m_uiRenderer.getTextWidth(text, fontSize) };
+
+		const int paddingX{ scaled(BADGE_PADDING_X) };
+		const int paddingY{ scaled(BADGE_PADDING_Y) };
+		const int width{ textWidth + paddingX * 2 };
+		const int height{ fontSize + paddingY * 2 };
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, BADGE_FILL_ALPHA);
+		m_uiRenderer.drawRoundedBox(x, y, width, height, scaled(BADGE_RADIUS),
+		    BOOSTED_MULTIPLIER_COLOR, true, 1);
+		m_uiRenderer.resetBlendMode();
+		m_uiRenderer.drawRoundedBox(x, y, width, height, scaled(BADGE_RADIUS),
+		    BOOSTED_MULTIPLIER_COLOR, false, 1);
+
+		m_uiRenderer.drawText(x + paddingX, y + paddingY, text, BOOSTED_MULTIPLIER_COLOR, fontSize);
+		m_uiRenderer.resetFont();
+
+		return height + paddingY;
+	}
+
 	void InventoryView::drawStats(int x, int y, int width, core::ecs::EntityId playerId)
 	{
 		const auto stats{ utility::collectPlayerStats(m_componentManager, playerId) };
@@ -876,17 +942,28 @@ namespace game::ui::ingame
 
 		trackStatChanges(stats);
 
+		// 表記に使う倍率はここで確定させる。マスの「HP+300」と右の値を同じ根拠で出す
+		const float multiplier{ utility::playerBonusMultiplier(m_componentManager, playerId) };
+		refreshBonusLabels(multiplier);
+		const unsigned int boostedColor{ multiplier > 1.0f ? BOOSTED_MULTIPLIER_COLOR
+			                                               : STAT_BOOSTED_COLOR };
+
 		const int captionFontSize{ scaled(SECTION_FONT_SIZE) };
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(x, y, m_captionStats.c_str(),
 		    core::utility::Color::HUD_INK_FAINT, captionFontSize);
 		m_uiRenderer.resetFont();
 
+		int headerHeight{ captionFontSize };
+		if (multiplier > 1.0f)
+			headerHeight += drawMultiplierBadge(x, y + captionFontSize + scaled(BADGE_PADDING_Y),
+			    multiplier);
+
 		const int iconSize{ scaled(STAT_ICON_SIZE) };
 		const int rowHeight{ scaled(STAT_ROW_HEIGHT) };
 		const int fontSize{ scaled(STAT_FONT_SIZE) };
 
-		int rowY{ y + captionFontSize + scaled(SECTION_CAPTION_GAP) };
+		int rowY{ y + headerHeight + scaled(SECTION_CAPTION_GAP) };
 		for (int i{ 0 }; i < STAT_COUNT; ++i)
 		{
 			if (m_statIconHandles[i] != -1)
@@ -915,7 +992,7 @@ namespace game::ui::ingame
 			const int valueWidth{ m_uiRenderer.getTextWidth(valueText, fontSize) };
 			m_uiRenderer.drawText(x + width - valueWidth,
 			    rowY + (rowHeight - fontSize) / 2, valueText,
-			    isBoosted ? STAT_BOOSTED_COLOR : core::utility::Color::HUD_INK, fontSize);
+			    isBoosted ? boostedColor : core::utility::Color::HUD_INK, fontSize);
 
 			// 入れ替えた直後だけは、素の値との差ではなく「今どれだけ動いたか」を出す。
 			// 累計の増分しか出さないと、入れ替えで下がった項目が「まだ強化されている」
@@ -934,7 +1011,7 @@ namespace game::ui::ingame
 				char deltaText[32]{};
 				std::snprintf(deltaText, sizeof(deltaText), format, static_cast<int>(shownDelta));
 
-				unsigned int deltaColor{ STAT_BOOSTED_COLOR };
+				unsigned int deltaColor{ boostedColor };
 				if (isChanging)
 					deltaColor = changeAmount > 0.0f ? STAT_UP_COLOR : STAT_DOWN_COLOR;
 
