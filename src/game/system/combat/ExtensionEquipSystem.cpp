@@ -32,6 +32,13 @@ namespace game::system::combat
 			    promoteToEquipped(e.m_maxEquipped);
 		    }));
 
+		// 隔離フォルダの当たり。倍率は装備中のものへ即座に掛ける
+		m_subscriptions.push_back(eventBus.subscribe<event::ExtensionBonusMultipliedEvent>(
+		    [this](const event::ExtensionBonusMultipliedEvent& e)
+		    {
+			    multiplyBonuses(e.m_multiplier);
+		    }));
+
 		// 拾ったぶんと違い、入れ替えはその場で反映する。
 		m_subscriptions.push_back(eventBus.subscribe<event::ExtensionSwapRequestedEvent>(
 		    [this](const event::ExtensionSwapRequestedEvent& e)
@@ -121,7 +128,48 @@ namespace game::system::combat
 		core::log::info("拡張子を入れ替え: [{}] <-> [{}]", fromIndex, toIndex);
 	}
 
+	float ExtensionEquipSystem::bonusMultiplier()
+	{
+		const auto* inventory{
+			m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId)
+		};
+		return inventory != nullptr ? inventory->m_bonusMultiplier : 1.0f;
+	}
+
+	void ExtensionEquipSystem::multiplyBonuses(float multiplier)
+	{
+		auto* inventory{
+			m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId)
+		};
+		if (inventory == nullptr)
+			return;
+
+		// 重ねがけしない。既に同じかそれ以上が掛かっているなら何もしない
+		if (multiplier <= inventory->m_bonusMultiplier)
+			return;
+
+		// 既に乗っているぶんとの差だけを足す。掛け直すために一度全部外すと、
+		// HPの下限（1）で切り上げが起きて素の値からずれる
+		const float delta{ multiplier - inventory->m_bonusMultiplier };
+		const int equipped{ inventory->equippedCount() };
+		for (int i{ 0 }; i < equipped; ++i)
+			addBonus(inventory->m_acquired[i], delta);
+
+		// 倍率を先に書き換えると、上のループが新しい倍率で二重に掛かる
+		inventory->m_bonusMultiplier = multiplier;
+	}
+
 	void ExtensionEquipSystem::applyBonus(core::data::FileExtensionType type)
+	{
+		addBonus(type, bonusMultiplier());
+	}
+
+	void ExtensionEquipSystem::removeBonus(core::data::FileExtensionType type)
+	{
+		subtractBonus(type, bonusMultiplier());
+	}
+
+	void ExtensionEquipSystem::addBonus(core::data::FileExtensionType type, float scale)
 	{
 		const auto& bonus{ m_resourceManager.getExtensionBonus(type) };
 
@@ -129,40 +177,40 @@ namespace game::system::combat
 		// PlayerDataへ足しても既に生成済みのコンポーネントには伝わらないため、直接触る
 		if (auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(m_playerId) })
 		{
-			attack->m_attackPower += bonus.atk;
-			attack->m_attackRange += bonus.attackRange;
+			attack->m_attackPower += bonus.atk * scale;
+			attack->m_attackRange += bonus.attackRange * scale;
 			// 発生率は確率なので1.0（必ず出る）を超えないよう頭打ちにする
-			attack->m_criticalRate = std::min(attack->m_criticalRate + bonus.criticalRate, 1.0f);
+			attack->m_criticalRate = std::min(attack->m_criticalRate + bonus.criticalRate * scale, 1.0f);
 		}
 
 		if (auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(m_playerId) })
 		{
-			health->m_maxHp += bonus.hp;
-			health->m_defence += bonus.def;
+			health->m_maxHp += bonus.hp * scale;
+			health->m_defence += bonus.def * scale;
 
 			// 最大HPが増えたぶんはその場で回復させる。増えたのに減ったままだと
 			// 「拾って強くなった」感じが出ない
-			health->m_currentHp = std::min(health->m_currentHp + bonus.hp, health->m_maxHp);
+			health->m_currentHp = std::min(health->m_currentHp + bonus.hp * scale, health->m_maxHp);
 		}
 
 		if (auto* stats{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(m_playerId) })
 		{
-			stats->m_moveSpeed += bonus.spd;
-			stats->m_projectileSpeed += bonus.projectileSpeed;
-			stats->m_projectileRange += bonus.projectileRange;
+			stats->m_moveSpeed += bonus.spd * scale;
+			stats->m_projectileSpeed += bonus.projectileSpeed * scale;
+			stats->m_projectileRange += bonus.projectileRange * scale;
 		}
 	}
 
-	void ExtensionEquipSystem::removeBonus(core::data::FileExtensionType type)
+	void ExtensionEquipSystem::subtractBonus(core::data::FileExtensionType type, float scale)
 	{
 		const auto& bonus{ m_resourceManager.getExtensionBonus(type) };
 
 		if (auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(m_playerId) })
 		{
-			attack->m_attackPower -= bonus.atk;
-			attack->m_attackRange -= bonus.attackRange;
+			attack->m_attackPower -= bonus.atk * scale;
+			attack->m_attackRange -= bonus.attackRange * scale;
 			// 加算時に1.0で頭打ちにしているぶん、引くと0を下回りうる
-			attack->m_criticalRate = std::max(attack->m_criticalRate - bonus.criticalRate, 0.0f);
+			attack->m_criticalRate = std::max(attack->m_criticalRate - bonus.criticalRate * scale, 0.0f);
 		}
 
 		if (auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(m_playerId) })
@@ -171,17 +219,17 @@ namespace game::system::combat
 			// HP強化を挿しては外すだけで全快でき、入れ替えが回復手段になってしまう
 			constexpr float MIN_HP_AFTER_REMOVE{ 1.0f };
 
-			health->m_maxHp -= bonus.hp;
-			health->m_defence -= bonus.def;
-			health->m_currentHp = std::clamp(health->m_currentHp - bonus.hp,
+			health->m_maxHp -= bonus.hp * scale;
+			health->m_defence -= bonus.def * scale;
+			health->m_currentHp = std::clamp(health->m_currentHp - bonus.hp * scale,
 			    MIN_HP_AFTER_REMOVE, health->m_maxHp);
 		}
 
 		if (auto* stats{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(m_playerId) })
 		{
-			stats->m_moveSpeed -= bonus.spd;
-			stats->m_projectileSpeed -= bonus.projectileSpeed;
-			stats->m_projectileRange -= bonus.projectileRange;
+			stats->m_moveSpeed -= bonus.spd * scale;
+			stats->m_projectileSpeed -= bonus.projectileSpeed * scale;
+			stats->m_projectileRange -= bonus.projectileRange * scale;
 		}
 	}
 } // namespace game::system::combat

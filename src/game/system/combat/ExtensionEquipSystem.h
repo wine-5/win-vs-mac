@@ -75,6 +75,36 @@ namespace game::system::combat
 		 */
 		void promoteToEquipped(int maxEquipped);
 
+		/**
+		 * @brief 装備中の拡張子の効果へ倍率を掛ける（隔離フォルダの当たり）
+		 *
+		 * 既に掛かっているぶんとの差だけを足すので、掛けたあとに拡張子を
+		 * 挿し外ししても倍率は保たれる。重ねがけはせず、いま掛かっている倍率と
+		 * 同じかそれ以下なら何もしない
+		 * @param multiplier 掛けたあとの倍率（1.0が素）
+		 */
+		void multiplyBonuses(float multiplier);
+
+		/**
+		 * @brief いま装備中の拡張子へ掛かっている倍率を返す
+		 * @return 倍率（持ち物が無ければ1.0）
+		 */
+		[[nodiscard]] float bonusMultiplier();
+
+		/**
+		 * @brief 拡張子1つぶんの効果を倍率つきで足す
+		 * @param type 拡張子の種別
+		 * @param scale 掛ける倍率
+		 */
+		void addBonus(core::data::FileExtensionType type, float scale);
+
+		/**
+		 * @brief 拡張子1つぶんの効果を倍率つきで引く
+		 * @param type 拡張子の種別
+		 * @param scale 掛ける倍率
+		 */
+		void subtractBonus(core::data::FileExtensionType type, float scale);
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::base::EventBus& m_eventBus;
 		core::iface::IResourceManager& m_resourceManager;

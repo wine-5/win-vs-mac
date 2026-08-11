@@ -316,6 +316,24 @@ namespace game::event
 	};
 
 	/**
+	 * @brief 装備中の拡張子の効果へ倍率が掛かったときに発行されるイベント
+	 *
+	 * 隔離フォルダの当たりを引くと飛ぶ。能力への反映（ExtensionEquipSystem）と、
+	 * 音・HUDの演出を分けるためにイベントにしてある
+	 */
+	struct ExtensionBonusMultipliedEvent : public core::iface::IGameEvent
+	{
+		/** @brief 掛かったあとの倍率（1.0が素） */
+		float m_multiplier{ 1.0f };
+
+		ExtensionBonusMultipliedEvent() = default;
+		explicit ExtensionBonusMultipliedEvent(float multiplier)
+		    : m_multiplier{ multiplier }
+		{
+		}
+	};
+
+	/**
 	 * @brief 壊せるブロックを殴ったが、まだ壊れていないときに発行されるイベント
 	 *
 	 * 打撃音を鳴らすために使う。壊れた場合は BlockBrokenEvent が飛ぶので、

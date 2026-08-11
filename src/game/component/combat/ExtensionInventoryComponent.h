@@ -31,6 +31,11 @@ namespace game::component::combat
 		// 定数ではなく持ち主ごとの値として持つ
 		int m_maxEquipped{ DEFAULT_MAX_EQUIPPED };
 
+		// 装備中の拡張子の効果へ掛かる倍率。隔離フォルダの当たりを引くと上がる。
+		// 効果を足し引きするのは拡張子を挿し外しした瞬間だけなので、
+		// 倍率もその都度この値を見て掛ける。あとから素の値を計算し直す仕組みは無い
+		float m_bonusMultiplier{ 1.0f };
+
 		/**
 		 * @brief 装備中（効果が乗っている）の個数を返す
 		 * @return 装備中の個数（0〜m_maxEquipped）
