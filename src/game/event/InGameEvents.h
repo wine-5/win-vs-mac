@@ -318,7 +318,7 @@ namespace game::event
 	/**
 	 * @brief 装備中の拡張子の効果へ倍率が掛かったときに発行されるイベント
 	 *
-	 * 隔離フォルダの当たりを引くと飛ぶ。能力への反映（ExtensionEquipSystem）と、
+	 * ギャンブルボックスの当たりを引くと飛ぶ。能力への反映（ExtensionEquipSystem）と、
 	 * 音・HUDの演出を分けるためにイベントにしてある
 	 */
 	struct ExtensionBonusMultipliedEvent : public core::iface::IGameEvent

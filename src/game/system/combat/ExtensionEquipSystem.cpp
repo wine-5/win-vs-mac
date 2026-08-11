@@ -32,7 +32,7 @@ namespace game::system::combat
 			    promoteToEquipped(e.m_maxEquipped);
 		    }));
 
-		// 隔離フォルダの当たり。倍率は装備中のものへ即座に掛ける
+		// ギャンブルボックスの当たり。倍率は装備中のものへ即座に掛ける
 		m_subscriptions.push_back(eventBus.subscribe<event::ExtensionBonusMultipliedEvent>(
 		    [this](const event::ExtensionBonusMultipliedEvent& e)
 		    {

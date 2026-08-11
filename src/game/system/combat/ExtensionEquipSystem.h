@@ -76,7 +76,7 @@ namespace game::system::combat
 		void promoteToEquipped(int maxEquipped);
 
 		/**
-		 * @brief 装備中の拡張子の効果へ倍率を掛ける（隔離フォルダの当たり）
+		 * @brief 装備中の拡張子の効果へ倍率を掛ける（ギャンブルボックスの当たり）
 		 *
 		 * 既に掛かっているぶんとの差だけを足すので、掛けたあとに拡張子を
 		 * 挿し外ししても倍率は保たれる。重ねがけはせず、いま掛かっている倍率と

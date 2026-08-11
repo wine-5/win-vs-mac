@@ -52,7 +52,7 @@ namespace game::stage
 		// 壊すと拡張子を挿せる枠が1つ増えるか（RAMブロック）
 		bool m_grantsEquipSlot{ false };
 
-		// 壊したときに湧く敵の種類と数（隔離フォルダ）。0体なら敵は出ない
+		// 壊したときに湧く敵の種類と数（ギャンブルボックス）。0体なら敵は出ない
 		constant::EnemyType m_spawnEnemyType{ constant::EnemyType::Xcode };
 		int m_spawnEnemyCount{ 0 };
 

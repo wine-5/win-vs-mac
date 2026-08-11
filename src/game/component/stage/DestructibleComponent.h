@@ -33,7 +33,7 @@ namespace game::component::stage
 		// 欠片とは別の報酬なので、落とす種別・個数とは独立に持つ
 		bool m_grantsEquipSlot{ false };
 
-		// 壊したときに湧く敵の種類と数（隔離フォルダ）。0体なら敵は出ない
+		// 壊したときに湧く敵の種類と数（ギャンブルボックス）。0体なら敵は出ない
 		constant::EnemyType m_spawnEnemyType{ constant::EnemyType::Xcode };
 		int m_spawnEnemyCount{ 0 };
 

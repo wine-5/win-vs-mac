@@ -43,7 +43,7 @@ namespace
 	/// ブロックが110なので、その7割ほど。小さいと戦闘中の視界では見落とす
 	constexpr float DROP_BILLBOARD_SIZE{ 80.0f };
 
-	/// @brief 隔離フォルダから出る敵を散らす半径（ワールド単位）
+	/// @brief ギャンブルボックスから出る敵を散らす半径（ワールド単位）
 	///
 	/// ブロックの実寸（130前後）より少し内側。離しすぎると壊した場所と
 	/// 出てきた場所が結び付かず、ブロックのせいで湧いたのだと分からない
@@ -237,7 +237,7 @@ namespace game::system::stage
 
 		spawnDrops(blockId);
 		grantEquipSlot(blockId);
-		resolveQuarantine(blockId);
+		resolveGamble(blockId);
 
 		m_eventBus.publish(event::BlockBrokenEvent{ blockId, transform.m_position });
 	}
@@ -263,7 +263,7 @@ namespace game::system::stage
 		core::log::info("装備できる枠が増えた: {}", inventory->m_maxEquipped);
 	}
 
-	void BlockBreakSystem::resolveQuarantine(core::ecs::EntityId blockId)
+	void BlockBreakSystem::resolveGamble(core::ecs::EntityId blockId)
 	{
 		const auto& destructible{ m_componentManager.get<component::stage::DestructibleComponent>(blockId) };
 		if (destructible.m_spawnEnemyCount <= 0)
@@ -275,7 +275,7 @@ namespace game::system::stage
 		{
 			m_eventBus.publish(
 			    event::ExtensionBonusMultipliedEvent{ destructible.m_jackpotStatMultiplier });
-			core::log::info("隔離フォルダの当たり: 装備中の拡張子の効果が {} 倍",
+			core::log::info("ギャンブルボックスの当たり: 装備中の拡張子の効果が {} 倍",
 			    destructible.m_jackpotStatMultiplier);
 			return;
 		}
@@ -298,7 +298,7 @@ namespace game::system::stage
 			m_enemySpawner.spawn(destructible.m_spawnEnemyType, position);
 		}
 
-		core::log::info("隔離フォルダの外れ: 敵が {} 体出現", destructible.m_spawnEnemyCount);
+		core::log::info("ギャンブルボックスの外れ: 敵が {} 体出現", destructible.m_spawnEnemyCount);
 	}
 
 	void BlockBreakSystem::spawnDrops(core::ecs::EntityId blockId)
