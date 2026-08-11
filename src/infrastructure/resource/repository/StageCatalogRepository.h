@@ -12,6 +12,10 @@ namespace infrastructure::resource::repository
 	 *
 	 * type（id）→ モデルパス・素材実寸・コライダー種別 の解決を提供する。
 	 * enemies/boss はエディタ専用の情報のため、ゲーム側が読むpropsのみを保持する。
+	 *
+	 * ブロックの抽選表だけは stageBalance.json から読む。素材の定義と違って
+	 * 繰り返し数値を触る対象なので、モデルパスや大きさと同居させない。
+	 * 両者は id で結び付くため、突き合わせはこのクラスが受け持つ。
 	 */
 	class StageCatalogRepository
 	{
@@ -37,6 +41,14 @@ namespace infrastructure::resource::repository
 		[[nodiscard]] const core::data::BlockTable& getBlockTable() const noexcept;
 
 	  private:
+		/**
+		 * @brief stageBalance.json から抽選表を読み込む
+		 *
+		 * props を読んだあとに呼ぶこと。表の type が実在する種類かを
+		 * その場で突き合わせるため、props が空だと全件エラーになる
+		 */
+		void loadBlockTable();
+
 		std::unordered_map<std::string, core::data::PropDefinition> m_props{};
 		core::data::BlockTable m_blockTable{};
 	};

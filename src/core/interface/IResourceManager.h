@@ -176,7 +176,7 @@ namespace core::iface
 		 * @brief 破壊可能ブロックの抽選表を取得する
 		 *
 		 * ステージに置かれた汎用ブロックを実際の種類へ置き換えるのに使う。
-		 * 重みの調整はstageCatalog.jsonのblockTableで行う
+		 * 重みの調整はstageBalance.jsonのblockTableで行う
 		 * @return 抽選表（未設定なら空）
 		 */
 		[[nodiscard]] virtual const core::data::BlockTable& getBlockTable() const noexcept = 0;

@@ -83,7 +83,7 @@ namespace
 	 * ここは意図して等確率にしてある。ZIPは開けるまで中身が分からないものであり、
 	 * レア度を設計してしまうと「狙って掘る」対象になって、
 	 * 種類の決まっている拡張子ブロックとの役割が重なる。
-	 * どのブロックが出やすいかは stageCatalog.json の blockTable で調整する
+	 * どのブロックが出やすいかは stageBalance.json の blockTable で調整する
 	 * @return 抽選した種別
 	 */
 	core::data::FileExtensionType randomExtensionType()

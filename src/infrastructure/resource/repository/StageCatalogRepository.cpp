@@ -74,17 +74,30 @@ namespace infrastructure::resource::repository
 			m_props[def.m_id] = def;
 		}
 
-		// 抽選表は無くても動く（配置がすべて具体的な種類なら不要）ため、存在チェックのみで済ませる
-		if (j.contains("blockTable") && j["blockTable"].contains("entries"))
-		{
-			for (const auto& entry : j["blockTable"]["entries"])
-			{
-				const auto type{ entry["type"].get<std::string>() };
-				if (m_props.find(type) == m_props.end())
-					throw std::runtime_error("blockTableの '" + type + "' がpropsに存在しません");
+		loadBlockTable();
+	}
 
-				m_blockTable.m_entries.push_back({ type, entry["weight"].get<float>() });
-			}
+	void StageCatalogRepository::loadBlockTable()
+	{
+		std::ifstream file("assets/data/stageBalance.json");
+		if (!file.is_open())
+			throw std::runtime_error("assets/data/stageBalance.jsonを開けませんでした");
+
+		const nlohmann::json j = nlohmann::json::parse(file);
+
+		// 抽選表そのものは無くても動く（配置がすべて具体的な種類なら不要）
+		if (!j.contains("blockTable") || !j["blockTable"].contains("entries"))
+			return;
+
+		for (const auto& entry : j["blockTable"]["entries"])
+		{
+			// カタログを跨いだ突き合わせ。ここで止めないと、idを書き間違えた種類が
+			// 「抽選には入っているが実体が無い」まま起動し、出現しない理由が分からなくなる
+			const auto type{ entry["type"].get<std::string>() };
+			if (m_props.find(type) == m_props.end())
+				throw std::runtime_error("stageBalance.jsonのblockTableの '" + type + "' がstageCatalog.jsonのpropsに存在しません");
+
+			m_blockTable.m_entries.push_back({ type, entry["weight"].get<float>() });
 		}
 	}
 

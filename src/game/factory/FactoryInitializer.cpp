@@ -52,7 +52,7 @@ namespace
 	 * block_random は「壊せるブロックがある」という配置だけを表し、
 	 * 実際の中身はプレイのたびに抽選で決まる。それ以外の種類はそのまま返す。
 	 * @param type ステージ配置に書かれた種類ID
-	 * @param table 抽選表（stageCatalog.jsonのblockTable）
+	 * @param table 抽選表（stageBalance.jsonのblockTable）
 	 * @param rng 乱数エンジン
 	 * @return 実際に生成する種類ID
 	 */
