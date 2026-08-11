@@ -12,10 +12,12 @@ namespace game::system::combat
 	ExtensionEquipSystem::ExtensionEquipSystem(core::ecs::ComponentManager& componentManager,
 	    core::base::EventBus& eventBus,
 	    core::iface::IResourceManager& resourceManager,
+	    const data::FileEquipmentData& equipmentData,
 	    core::ecs::EntityId playerId)
 	    : m_componentManager{ componentManager }
 	    , m_eventBus{ eventBus }
 	    , m_resourceManager{ resourceManager }
+	    , m_equipmentData{ equipmentData }
 	    , m_playerId{ playerId }
 	{
 		m_subscriptions.push_back(eventBus.subscribe<event::ExtensionPickedUpEvent>(
@@ -151,6 +153,16 @@ namespace game::system::combat
 		// 既に乗っているぶんとの差だけを足す。掛け直すために一度全部外すと、
 		// HPの下限（1）で切り上げが起きて素の値からずれる
 		const float delta{ multiplier - inventory->m_bonusMultiplier };
+
+		// 持ち込みも対象にする。
+		// 持ち込みの効果は生成時にPlayerDataへ焼き込まれてからコンポーネントへ入るため、
+		// ここでは m_acquired と同じように差分を足すだけでよい
+		for (int i{ 0 }; i < data::FileEquipmentData::MAX_SLOTS; ++i)
+		{
+			if (m_equipmentData.hasSelection(i))
+				addBonus(m_equipmentData.getExtensionType(i), delta);
+		}
+
 		const int equipped{ inventory->equippedCount() };
 		for (int i{ 0 }; i < equipped; ++i)
 			addBonus(inventory->m_acquired[i], delta);

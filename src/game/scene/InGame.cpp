@@ -649,7 +649,7 @@ namespace game::scene
 
 		// 拾った拡張子をプレイヤーの能力へ乗せる。取得の直後に反映したいので取得の次に置く
 		m_systemManager.registerSystem<game::system::combat::ExtensionEquipSystem>(
-		    m_componentManager, m_eventBus, m_resourceManager, m_playerId);
+		    m_componentManager, m_eventBus, m_resourceManager, m_fileEquipmentData, m_playerId);
 		core::probe::mark("      sys: ExtensionEquipSystem");
 
 		m_systemManager.registerSystem<game::system::visual::HitEffectSystem>(m_componentManager, m_eventBus);

@@ -5,6 +5,7 @@
 #include "core/base/EventBus.h"
 #include "core/data/FileExtensionType.h"
 #include "core/interface/IResourceManager.h"
+#include "game/data/FileEquipmentData.h"
 #include <vector>
 
 namespace game::system::combat
@@ -31,11 +32,13 @@ namespace game::system::combat
 		 * @param componentManager ComponentManagerの参照
 		 * @param eventBus ExtensionPickedUpEvent購読用のEventBus
 		 * @param resourceManager 拡張子ボーナスを引くリソース管理インターフェース
+		 * @param equipmentData セレクト画面で選んだファイル（持ち込み）
 		 * @param playerId プレイヤーのEntityID
 		 */
 		ExtensionEquipSystem(core::ecs::ComponentManager& componentManager,
 		    core::base::EventBus& eventBus,
 		    core::iface::IResourceManager& resourceManager,
+		    const data::FileEquipmentData& equipmentData,
 		    core::ecs::EntityId playerId);
 
 		/**
@@ -108,6 +111,7 @@ namespace game::system::combat
 		core::ecs::ComponentManager& m_componentManager;
 		core::base::EventBus& m_eventBus;
 		core::iface::IResourceManager& m_resourceManager;
+		const data::FileEquipmentData& m_equipmentData;
 		core::ecs::EntityId m_playerId;
 
 		// イベント中にECSを触らず、次のupdateでまとめて反映する
