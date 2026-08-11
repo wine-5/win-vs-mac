@@ -158,6 +158,9 @@
   .pal-item:hover { border-color: var(--accent-dim); }
   .pal-item.disabled { opacity: 0.35; cursor: default; }
   .pal-swatch { width: 22px; height: 14px; border-radius: 2px; }
+  /* 配置物はテクスチャそのものを出す。種類が増えると色だけでは見分けが付かず、
+     名前を1つずつ読むことになるため。色チップのままの敵・光より一回り大きくする */
+  .pal-swatch.tex { width: 28px; height: 28px; }
   .pal-name { font-size: 11px; white-space: nowrap; }
 
   /* ---------- dialog ---------- */
@@ -1343,16 +1346,27 @@ function renderInspector() {
 function renderPalette() {
   const root = document.getElementById('palette');
   root.innerHTML = '<span class="pal-label">パレット:</span>';
-  const add = (name, color, onClick, disabled) => {
+  const add = (name, color, onClick, disabled, texture) => {
     const d = document.createElement('div');
     d.className = 'pal-item' + (disabled ? ' disabled' : '');
     const sw = document.createElement('div'); sw.className = 'pal-swatch'; sw.style.background = color;
+
+    /* テクスチャがあるものは絵を出す。色は読み込みに失敗したときの下地として残す。
+       background-size はショートハンドの background で auto に戻されるため、
+       クラス側ではなくここで指定しないと絵が原寸のまま左上に出る */
+    if (texture) {
+      sw.classList.add('tex');
+      sw.style.backgroundImage = 'url("' + assetUrl(texture) + '")';
+      sw.style.backgroundSize = 'cover';
+      sw.style.backgroundPosition = 'center';
+    }
+
     const nm = document.createElement('div'); nm.className = 'pal-name'; nm.textContent = name;
     d.append(sw, nm);
     if (!disabled) d.onclick = onClick;
     root.appendChild(d);
   };
-  for (const p of catalog.props) add(p.displayName, p.editorColor, () => addProp(p.id));
+  for (const p of catalog.props) add(p.displayName, p.editorColor, () => addProp(p.id), false, p.texture);
   for (const e of catalog.enemies) add(e.displayName, e.editorColor, () => addSpawn(e.id));
   for (const preset of LIGHT_PRESETS) add('光 ' + preset.name, lightColorHex(preset.color), () => addLight(preset));
   add(catalog.boss.displayName, catalog.boss.editorColor, null, true);  /* 常に1体・追加不可 */
