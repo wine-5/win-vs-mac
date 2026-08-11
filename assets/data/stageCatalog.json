@@ -4,68 +4,63 @@
       "id": "path_corridor",
       "displayName": "パス通路",
       "model": "assets/model/stage/PathCorridor.mqo",
+      "texture": "assets/model/stage/PathCorridor.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#0078D4",
-      "collider": "ground",
       "defaultSize": [
         800,
         20,
         2000
       ],
-      "texture": "assets/model/stage/PathCorridor.png",
+      "collider": "ground",
+      "editorColor": "#0078D4",
       "textureTile": 800,
-      "slideAccel": 900.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "tuning": {
+        "slideAccel": 900.0
+      }
     },
     {
       "id": "path_conveyor",
       "displayName": "動く歩道",
       "model": "assets/model/stage/PathCorridor.mqo",
+      "texture": "assets/model/stage/PathCorridor.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#00B7C3",
-      "collider": "ground",
       "defaultSize": [
         1000,
         20,
         2000
       ],
-      "texture": "assets/model/stage/PathCorridor.png",
+      "collider": "ground",
+      "editorColor": "#00B7C3",
       "textureTile": 800,
-      "slideAccel": 0.0,
-      "conveyorSpeed": 400.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "tuning": {
+        "conveyorSpeed": 400.0
+      }
     },
     {
       "id": "floor_apple",
       "displayName": "アリーナ床",
       "model": "assets/model/stage/FloorApple.mqo",
+      "texture": "assets/model/stage/FloorApple.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#E8E8ED",
-      "collider": "ground",
       "defaultSize": [
         3000,
         20,
         3000
       ],
-      "texture": "assets/model/stage/FloorApple.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "ground",
+      "editorColor": "#E8E8ED"
     },
     {
       "id": "wall_data",
@@ -77,655 +72,574 @@
         100,
         100
       ],
-      "editorColor": "#00A4EF",
-      "collider": "box",
       "defaultSize": [
         1600,
         900,
         40
       ],
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
+      "collider": "box",
+      "editorColor": "#00A4EF",
       "scrollV": -0.12
     },
     {
       "id": "floor_desktop",
       "displayName": "デスクトップ床",
       "model": "assets/model/stage/FloorDesktop.mqo",
+      "texture": "assets/model/stage/FloorDesktop.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#0067C0",
-      "collider": "ground",
       "defaultSize": [
         1000,
         20,
         1000
       ],
-      "texture": "assets/model/stage/FloorDesktop.png",
-      "textureTile": 600,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "ground",
+      "editorColor": "#0067C0",
+      "textureTile": 600
     },
     {
       "id": "block_folder",
       "displayName": "フォルダブロック",
       "model": "assets/model/stage/BlockFolder.mqo",
+      "texture": "assets/model/stage/BlockFolder.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#0067C0",
-      "collider": "box",
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockFolder.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#0067C0"
     },
     {
       "id": "block_recyclebin",
       "displayName": "ごみ箱ブロック",
       "model": "assets/model/stage/BlockRecycleBin.mqo",
+      "texture": "assets/model/stage/BlockRecycleBin.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#0067C0",
-      "collider": "box",
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockRecycleBin.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#0067C0"
     },
     {
       "id": "wall_explorer",
       "displayName": "エクスプローラー壁",
       "model": "assets/model/stage/WallExplorer.mqo",
+      "texture": "assets/model/stage/WallExplorer.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#0067C0",
-      "collider": "box",
       "defaultSize": [
         1600,
         900,
         40
       ],
-      "texture": "assets/model/stage/WallExplorer.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#0067C0"
     },
     {
       "id": "floor_memory",
       "displayName": "メモリマップ床",
       "model": "assets/model/stage/FloorMemory.mqo",
+      "texture": "assets/model/stage/FloorMemory.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#3FB950",
-      "collider": "ground",
       "defaultSize": [
         1000,
         20,
         1000
       ],
-      "texture": "assets/model/stage/FloorMemory.png",
-      "textureTile": 1400,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "ground",
+      "editorColor": "#3FB950",
+      "textureTile": 1400
     },
     {
       "id": "wall_terminal",
       "displayName": "ターミナル壁",
       "model": "assets/model/stage/WallTerminal.mqo",
+      "texture": "assets/model/stage/WallTerminal.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#3FB950",
-      "collider": "box",
       "defaultSize": [
         1600,
         900,
         40
       ],
-      "texture": "assets/model/stage/WallTerminal.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#3FB950"
     },
     {
       "id": "wall_registry",
       "displayName": "レジストリ壁",
       "model": "assets/model/stage/WallRegistry.mqo",
+      "texture": "assets/model/stage/WallRegistry.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#3FB950",
-      "collider": "box",
       "defaultSize": [
         1600,
         900,
         40
       ],
-      "texture": "assets/model/stage/WallRegistry.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#3FB950"
     },
     {
       "id": "gate_uac",
       "displayName": "UACゲート",
       "model": "assets/model/stage/GateUac.mqo",
+      "texture": "assets/model/stage/GateUac.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#E8891C",
-      "collider": "box",
       "defaultSize": [
         1600,
         900,
         40
       ],
-      "texture": "assets/model/stage/GateUac.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#E8891C"
     },
     {
       "id": "gate_boss",
       "displayName": "ボス扉(出現で閉)",
       "model": "assets/model/stage/GateUac.mqo",
+      "texture": "assets/model/stage/GateUac.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#E81123",
-      "collider": "box",
-      "role": "bossGate",
       "defaultSize": [
         1600,
         900,
         40
       ],
-      "texture": "assets/model/stage/GateUac.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#E81123",
+      "role": "bossGate"
     },
     {
       "id": "slope_boss",
       "displayName": "ボス坂(出現でせり上がり)",
       "model": "assets/model/stage/PathCorridor.mqo",
+      "texture": "assets/model/stage/PathCorridor.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#E81123",
-      "collider": "ground",
-      "role": "bossGate",
       "defaultSize": [
         800,
         20,
         2000
       ],
-      "texture": "assets/model/stage/PathCorridor.png",
-      "textureTile": 800,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "ground",
+      "editorColor": "#E81123",
+      "role": "bossGate",
+      "textureTile": 800
     },
     {
       "id": "pillar_app",
       "displayName": "アプリ柱",
       "model": "assets/model/stage/PillarApp.mqo",
+      "texture": "assets/model/stage/PillarApp.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#E8891C",
-      "collider": "box",
       "defaultSize": [
         200,
         500,
         200
       ],
-      "texture": "assets/model/stage/PillarApp.png",
-      "textureTile": 500,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#E8891C",
+      "textureTile": 500
     },
     {
       "id": "block_zip",
       "displayName": "ZIPブロック",
       "model": "assets/model/stage/BlockZip.mqo",
+      "texture": "assets/model/stage/BlockZip.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#E8891C",
-      "collider": "box",
-      "hitsToBreak": 5,
-      "dropExtension": "random",
-      "dropCount": 3,
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockZip.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#E8891C",
+      "tuning": {
+        "hitsToBreak": 5,
+        "dropExtension": "random",
+        "dropCount": 3
+      }
     },
     {
       "id": "wall_danger",
       "displayName": "危険警告壁",
       "model": "assets/model/stage/WallDanger.mqo",
+      "texture": "assets/model/stage/WallDanger.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#E81123",
-      "collider": "box",
       "defaultSize": [
         1600,
         900,
         40
       ],
-      "texture": "assets/model/stage/WallDanger.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#E81123"
     },
     {
       "id": "block_random",
       "displayName": "ランダムブロック",
       "model": "assets/model/stage/BlockZip.mqo",
+      "texture": "assets/model/stage/BlockZip.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#8B5CF6",
-      "collider": "box",
-      "hitsToBreak": 3,
-      "dropExtension": "random",
-      "dropCount": 1,
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockZip.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#8B5CF6",
+      "tuning": {
+        "hitsToBreak": 3,
+        "dropExtension": "random",
+        "dropCount": 1
+      }
     },
     {
       "id": "block_plain",
       "displayName": "普通のブロック",
       "model": "assets/model/stage/BlockPlain.mqo",
+      "texture": "assets/model/stage/BlockPlain.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#5A6572",
-      "collider": "box",
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockPlain.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#5A6572"
     },
     {
       "id": "block_ram",
       "displayName": "RAMブロック",
       "model": "assets/model/stage/BlockRam.mqo",
+      "texture": "assets/model/stage/BlockRam.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#3FB950",
-      "collider": "box",
-      "hitsToBreak": 5,
-      "grantsEquipSlot": true,
       "defaultSize": [
         130,
         130,
         130
       ],
-      "texture": "assets/model/stage/BlockRam.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#3FB950",
+      "tuning": {
+        "hitsToBreak": 5,
+        "grantsEquipSlot": true
+      }
     },
     {
       "id": "block_gamble",
       "_comment": "壊すと jackpotChance の確率で装備中の拡張子の効果が jackpotStatMultiplier 倍になり、外れると spawnEnemyType の敵が spawnEnemyCount 体出る。分の悪い賭けだが当たりが破格なので壊す手が伸びる。倍率は重ねがけせず、一度掛かったら以降の当たりでは伸びない。走破を変える一点物なのでblockTableの抽選には入れず、エディタで手置きする",
       "displayName": "ギャンブルボックス",
       "model": "assets/model/stage/BlockGamble.mqo",
+      "texture": "assets/model/stage/BlockGamble.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#D13438",
-      "collider": "box",
-      "hitsToBreak": 5,
-      "spawnEnemyType": "xcode",
-      "spawnEnemyCount": 2,
-      "jackpotChance": 0.1,
-      "jackpotStatMultiplier": 2.0,
       "defaultSize": [
         130,
         130,
         130
       ],
-      "texture": "assets/model/stage/BlockGamble.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#D13438",
+      "tuning": {
+        "hitsToBreak": 5,
+        "spawnEnemyType": "xcode",
+        "spawnEnemyCount": 2,
+        "jackpotChance": 0.1,
+        "jackpotStatMultiplier": 2.0
+      }
     },
     {
       "id": "block_rename",
       "displayName": "リネーム端末",
       "model": "assets/model/stage/BlockRename.mqo",
+      "texture": "assets/model/stage/BlockRename.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#0078D4",
-      "collider": "box",
-      "role": "renameTerminal",
       "defaultSize": [
         170,
         170,
         170
       ],
-      "texture": "assets/model/stage/BlockRename.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#0078D4",
+      "role": "renameTerminal"
     },
     {
       "id": "block_ext_archive",
       "displayName": "アーカイブブロック",
       "model": "assets/model/stage/BlockExtArchive.mqo",
+      "texture": "assets/model/stage/BlockExtArchive.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#D9C93A",
-      "collider": "box",
-      "hitsToBreak": 3,
-      "dropExtension": "archive",
-      "dropCount": 1,
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockExtArchive.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#D9C93A",
+      "tuning": {
+        "hitsToBreak": 3,
+        "dropExtension": "archive",
+        "dropCount": 1
+      }
     },
     {
       "id": "block_ext_audio",
       "displayName": "オーディオブロック",
       "model": "assets/model/stage/BlockExtAudio.mqo",
+      "texture": "assets/model/stage/BlockExtAudio.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#2E6FD9",
-      "collider": "box",
-      "hitsToBreak": 3,
-      "dropExtension": "audio",
-      "dropCount": 1,
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockExtAudio.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#2E6FD9",
+      "tuning": {
+        "hitsToBreak": 3,
+        "dropExtension": "audio",
+        "dropCount": 1
+      }
     },
     {
       "id": "block_ext_document",
       "displayName": "ドキュメントブロック",
       "model": "assets/model/stage/BlockExtDocument.mqo",
+      "texture": "assets/model/stage/BlockExtDocument.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#1E88E5",
-      "collider": "box",
-      "hitsToBreak": 3,
-      "dropExtension": "document",
-      "dropCount": 1,
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockExtDocument.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#1E88E5",
+      "tuning": {
+        "hitsToBreak": 3,
+        "dropExtension": "document",
+        "dropCount": 1
+      }
     },
     {
       "id": "block_ext_executable",
       "displayName": "実行ファイルブロック",
       "model": "assets/model/stage/BlockExtExecutable.mqo",
+      "texture": "assets/model/stage/BlockExtExecutable.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#E8542B",
-      "collider": "box",
-      "hitsToBreak": 3,
-      "dropExtension": "executable",
-      "dropCount": 1,
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockExtExecutable.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#E8542B",
+      "tuning": {
+        "hitsToBreak": 3,
+        "dropExtension": "executable",
+        "dropCount": 1
+      }
     },
     {
       "id": "block_ext_image",
       "displayName": "画像ブロック",
       "model": "assets/model/stage/BlockExtImage.mqo",
+      "texture": "assets/model/stage/BlockExtImage.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#2FA84F",
-      "collider": "box",
-      "hitsToBreak": 3,
-      "dropExtension": "image",
-      "dropCount": 1,
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockExtImage.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#2FA84F",
+      "tuning": {
+        "hitsToBreak": 3,
+        "dropExtension": "image",
+        "dropCount": 1
+      }
     },
     {
       "id": "block_ext_shortcut",
       "displayName": "ショートカットブロック",
       "model": "assets/model/stage/BlockExtShortcut.mqo",
+      "texture": "assets/model/stage/BlockExtShortcut.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#22D3EE",
-      "collider": "box",
-      "hitsToBreak": 3,
-      "dropExtension": "shortcut",
-      "dropCount": 1,
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockExtShortcut.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#22D3EE",
+      "tuning": {
+        "hitsToBreak": 3,
+        "dropExtension": "shortcut",
+        "dropCount": 1
+      }
     },
     {
       "id": "block_ext_sourcecode",
       "displayName": "ソースコードブロック",
       "model": "assets/model/stage/BlockExtSourceCode.mqo",
+      "texture": "assets/model/stage/BlockExtSourceCode.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#7C4DFF",
-      "collider": "box",
-      "hitsToBreak": 3,
-      "dropExtension": "sourceCode",
-      "dropCount": 1,
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockExtSourceCode.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#7C4DFF",
+      "tuning": {
+        "hitsToBreak": 3,
+        "dropExtension": "sourceCode",
+        "dropCount": 1
+      }
     },
     {
       "id": "block_ext_video",
       "displayName": "動画ブロック",
       "model": "assets/model/stage/BlockExtVideo.mqo",
+      "texture": "assets/model/stage/BlockExtVideo.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#E0417F",
-      "collider": "box",
-      "hitsToBreak": 3,
-      "dropExtension": "video",
-      "dropCount": 1,
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockExtVideo.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#E0417F",
+      "tuning": {
+        "hitsToBreak": 3,
+        "dropExtension": "video",
+        "dropCount": 1
+      }
     },
     {
       "id": "block_ext_unknown",
       "displayName": "不明ファイルブロック",
       "model": "assets/model/stage/BlockExtUnknown.mqo",
+      "texture": "assets/model/stage/BlockExtUnknown.png",
       "baseSize": [
         100,
         100,
         100
       ],
-      "editorColor": "#8A99A8",
-      "collider": "box",
-      "hitsToBreak": 3,
-      "dropExtension": "unknown",
-      "dropCount": 1,
       "defaultSize": [
         110,
         110,
         110
       ],
-      "texture": "assets/model/stage/BlockExtUnknown.png",
-      "textureTile": 0,
-      "slideAccel": 0.0,
-      "scrollU": 0.0,
-      "scrollV": 0.0
+      "collider": "box",
+      "editorColor": "#8A99A8",
+      "tuning": {
+        "hitsToBreak": 3,
+        "dropExtension": "unknown",
+        "dropCount": 1
+      }
     }
   ],
   "enemies": [

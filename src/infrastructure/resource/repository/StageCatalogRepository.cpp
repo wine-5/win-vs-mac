@@ -19,34 +19,42 @@ namespace
 		def.m_baseSize.y = j["baseSize"][1];
 		def.m_baseSize.z = j["baseSize"][2];
 		def.m_collider = j["collider"].get<std::string>();
-		if (j.contains("hitsToBreak"))
-			def.m_hitsToBreak = j["hitsToBreak"];
-		if (j.contains("dropExtension"))
-			def.m_dropExtension = j["dropExtension"].get<std::string>();
-		if (j.contains("dropCount"))
-			def.m_dropCount = j["dropCount"];
-		if (j.contains("grantsEquipSlot"))
-			def.m_grantsEquipSlot = j["grantsEquipSlot"];
-		if (j.contains("spawnEnemyType"))
-			def.m_spawnEnemyType = j["spawnEnemyType"].get<std::string>();
-		if (j.contains("spawnEnemyCount"))
-			def.m_spawnEnemyCount = j["spawnEnemyCount"];
-		if (j.contains("jackpotChance"))
-			def.m_jackpotChance = j["jackpotChance"];
-		if (j.contains("jackpotStatMultiplier"))
-			def.m_jackpotStatMultiplier = j["jackpotStatMultiplier"];
 		if (j.contains("role"))
 			def.m_role = j["role"].get<std::string>();
 		if (j.contains("textureTile"))
 			def.m_textureTile = j["textureTile"];
-		if (j.contains("slideAccel"))
-			def.m_slideAccel = j["slideAccel"];
-		if (j.contains("conveyorSpeed"))
-			def.m_conveyorSpeed = j["conveyorSpeed"];
 		if (j.contains("scrollU"))
 			def.m_scrollU = j["scrollU"];
 		if (j.contains("scrollV"))
 			def.m_scrollV = j["scrollV"];
+
+		// バランス調整で触る値は tuning にまとめてある。
+		// モデルパスや大きさと同じ並びに混ぜると、数値を調整したいときに
+		// 素材の定義を1件ずつ読み飛ばすことになる
+		if (!j.contains("tuning"))
+			return def;
+
+		const auto& tuning{ j["tuning"] };
+		if (tuning.contains("hitsToBreak"))
+			def.m_hitsToBreak = tuning["hitsToBreak"];
+		if (tuning.contains("dropExtension"))
+			def.m_dropExtension = tuning["dropExtension"].get<std::string>();
+		if (tuning.contains("dropCount"))
+			def.m_dropCount = tuning["dropCount"];
+		if (tuning.contains("grantsEquipSlot"))
+			def.m_grantsEquipSlot = tuning["grantsEquipSlot"];
+		if (tuning.contains("spawnEnemyType"))
+			def.m_spawnEnemyType = tuning["spawnEnemyType"].get<std::string>();
+		if (tuning.contains("spawnEnemyCount"))
+			def.m_spawnEnemyCount = tuning["spawnEnemyCount"];
+		if (tuning.contains("jackpotChance"))
+			def.m_jackpotChance = tuning["jackpotChance"];
+		if (tuning.contains("jackpotStatMultiplier"))
+			def.m_jackpotStatMultiplier = tuning["jackpotStatMultiplier"];
+		if (tuning.contains("slideAccel"))
+			def.m_slideAccel = tuning["slideAccel"];
+		if (tuning.contains("conveyorSpeed"))
+			def.m_conveyorSpeed = tuning["conveyorSpeed"];
 		return def;
 	}
 } // namespace
