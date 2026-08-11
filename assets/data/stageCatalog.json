@@ -452,6 +452,34 @@
       "scrollV": 0.0
     },
     {
+      "id": "block_quarantine",
+      "_comment": "壊すと jackpotChance の確率で装備中の拡張子の効果が jackpotStatMultiplier 倍になり、外れると spawnEnemyType の敵が spawnEnemyCount 体出る。分の悪い賭けだが当たりが破格なので壊す手が伸びる。倍率は重ねがけせず、一度掛かったら以降の当たりでは伸びない。走破を変える一点物なのでblockTableの抽選には入れず、エディタで手置きする",
+      "displayName": "隔離フォルダ",
+      "model": "assets/model/stage/BlockQuarantine.mqo",
+      "baseSize": [
+        100,
+        100,
+        100
+      ],
+      "editorColor": "#D13438",
+      "collider": "box",
+      "hitsToBreak": 5,
+      "spawnEnemyType": "xcode",
+      "spawnEnemyCount": 2,
+      "jackpotChance": 0.1,
+      "jackpotStatMultiplier": 2.0,
+      "defaultSize": [
+        130,
+        130,
+        130
+      ],
+      "texture": "assets/model/stage/BlockQuarantine.png",
+      "textureTile": 0,
+      "slideAccel": 0.0,
+      "scrollU": 0.0,
+      "scrollV": 0.0
+    },
+    {
       "id": "block_rename",
       "displayName": "リネーム端末",
       "model": "assets/model/stage/BlockRename.mqo",

@@ -27,6 +27,14 @@ namespace
 			def.m_dropCount = j["dropCount"];
 		if (j.contains("grantsEquipSlot"))
 			def.m_grantsEquipSlot = j["grantsEquipSlot"];
+		if (j.contains("spawnEnemyType"))
+			def.m_spawnEnemyType = j["spawnEnemyType"].get<std::string>();
+		if (j.contains("spawnEnemyCount"))
+			def.m_spawnEnemyCount = j["spawnEnemyCount"];
+		if (j.contains("jackpotChance"))
+			def.m_jackpotChance = j["jackpotChance"];
+		if (j.contains("jackpotStatMultiplier"))
+			def.m_jackpotStatMultiplier = j["jackpotStatMultiplier"];
 		if (j.contains("role"))
 			def.m_role = j["role"].get<std::string>();
 		if (j.contains("textureTile"))

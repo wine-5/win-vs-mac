@@ -209,6 +209,16 @@ namespace game::factory
 				params.m_grantsEquipSlot = def.m_grantsEquipSlot;
 				if (!params.m_isDropRandom)
 					params.m_dropType = core::data::toExtensionType(def.m_dropExtension);
+
+				// 敵の種類名はここで解決しておく。壊した瞬間に文字列を引くと、
+				// 綴り違いが「壊したのに何も起きない」という形で初めて表に出る
+				params.m_jackpotChance = def.m_jackpotChance;
+				params.m_jackpotStatMultiplier = def.m_jackpotStatMultiplier;
+				if (!def.m_spawnEnemyType.empty())
+				{
+					params.m_spawnEnemyType = constant::toEnemyType(def.m_spawnEnemyType);
+					params.m_spawnEnemyCount = def.m_spawnEnemyCount;
+				}
 			}
 
 			const auto collision{ constant::toPropCollision(def.m_collider) };

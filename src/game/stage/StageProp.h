@@ -4,6 +4,7 @@
 #include "core/ecs/Entity.h"
 #include "core/utility/Vector3.h"
 #include "core/data/FileExtensionType.h"
+#include "game/constant/EnemyType.h"
 #include "game/constant/PropCollision.h"
 #include <vector>
 
@@ -50,6 +51,14 @@ namespace game::stage
 
 		// 壊すと拡張子を挿せる枠が1つ増えるか（RAMブロック）
 		bool m_grantsEquipSlot{ false };
+
+		// 壊したときに湧く敵の種類と数（隔離フォルダ）。0体なら敵は出ない
+		constant::EnemyType m_spawnEnemyType{ constant::EnemyType::Xcode };
+		int m_spawnEnemyCount{ 0 };
+
+		// 敵の代わりに当たりを引く確率と、当たったときの能力倍率
+		float m_jackpotChance{ 0.0f };
+		float m_jackpotStatMultiplier{ 1.0f };
 	};
 
 	/**

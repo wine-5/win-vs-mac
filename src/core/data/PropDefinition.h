@@ -35,6 +35,18 @@ namespace core::data
 		// 欠片を落とすのとは別の報酬なので、dropExtension とは独立に持つ
 		bool m_grantsEquipSlot{ false };
 
+		// 壊したときに湧く敵の種類名（"xcode" / "safari"）と数。空なら敵は出ない。
+		// 種類ではなく「壊すと敵が出る」という振る舞いで持つので、
+		// 見た目違いのブロックへ同じ性質を付けられる
+		std::string m_spawnEnemyType{};
+		int m_spawnEnemyCount{ 0 };
+
+		// 敵の代わりに当たりを引く確率（0〜1）と、当たったときに装備中の拡張子の効果へ
+		// 掛ける倍率。分の悪い賭けを成立させるのは当たりの大きさなので、
+		// 確率と倍率は必ず対で調整する
+		float m_jackpotChance{ 0.0f };
+		float m_jackpotStatMultiplier{ 1.0f };
+
 		// 特別な役割。空なら普通の配置物。"bossGate" はボス出現で閉じる扉として扱う。
 		// 種類（id）ではなく役割で判定することで、見た目違いの扉を何種類でも用意できる
 		std::string m_role{};

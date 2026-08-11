@@ -1,5 +1,6 @@
 #pragma once
 #include "core/data/FileExtensionType.h"
+#include "game/constant/EnemyType.h"
 #include <vector>
 
 namespace game::component::stage
@@ -31,6 +32,15 @@ namespace game::component::stage
 		// 壊すと拡張子を挿せる枠が1つ増えるか（RAMブロック）。
 		// 欠片とは別の報酬なので、落とす種別・個数とは独立に持つ
 		bool m_grantsEquipSlot{ false };
+
+		// 壊したときに湧く敵の種類と数（隔離フォルダ）。0体なら敵は出ない
+		constant::EnemyType m_spawnEnemyType{ constant::EnemyType::Xcode };
+		int m_spawnEnemyCount{ 0 };
+
+		// 敵の代わりに当たりを引く確率（0〜1）と、当たったときに装備中の拡張子の
+		// 効果へ掛ける倍率。倍率は重ねがけせず、一度掛かったら以降の当たりでは伸びない
+		float m_jackpotChance{ 0.0f };
+		float m_jackpotStatMultiplier{ 1.0f };
 
 		// 無傷のあいだ描くモデル
 		int m_intactHandle{ -1 };
