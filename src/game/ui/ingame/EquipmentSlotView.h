@@ -123,6 +123,12 @@ namespace game::ui::ingame
 		void drawOrbitingGlow(int x, int y, int size, float phaseOffset, unsigned int color);
 
 		/**
+		 * @brief 装備中の拡張子へ倍率が掛かっているかを返す
+		 * @return 掛かっていればtrue（ギャンブルボックスの当たりを引いた状態）
+		 */
+		[[nodiscard]] bool isBonusBoosted() const;
+
+		/**
 		 * @brief マスの縁の色を求める
 		 *
 		 * 縁と光の粒で同じ色を使うため、決め方を1か所に置く

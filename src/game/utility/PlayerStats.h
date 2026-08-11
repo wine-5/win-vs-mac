@@ -46,4 +46,16 @@ namespace game::utility
 	 */
 	[[nodiscard]] PlayerStatValues collectPlayerBaseStats(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId playerId);
+
+	/**
+	 * @brief 装備中の拡張子へ掛かっている倍率を返す（ギャンブルボックスの当たり）
+	 *
+	 * 見せ方を変えるために複数のViewが同じ値を必要とするため、読み出しを1か所に置く。
+	 * どのViewも同じ条件で切り替わり、画面ごとに「当たっている／いない」がずれない
+	 * @param componentManager ComponentManagerの参照
+	 * @param playerId プレイヤーのEntityID
+	 * @return 倍率（持ち物が無ければ1.0＝素）
+	 */
+	[[nodiscard]] float playerBonusMultiplier(core::ecs::ComponentManager& componentManager,
+	    core::ecs::EntityId playerId);
 } // namespace game::utility

@@ -4,6 +4,7 @@
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/combat/PlayerStatsComponent.h"
 #include "game/component/combat/PlayerStatBaseComponent.h"
+#include "game/component/combat/ExtensionInventoryComponent.h"
 
 namespace game::utility
 {
@@ -50,5 +51,14 @@ namespace game::utility
 		stats[STAT_INDEX_BSPD] = base->m_projectileSpeed;
 		stats[STAT_INDEX_BRNG] = base->m_projectileRange;
 		return stats;
+	}
+
+	float playerBonusMultiplier(core::ecs::ComponentManager& componentManager,
+	    core::ecs::EntityId playerId)
+	{
+		const auto* inventory{
+			componentManager.tryGet<component::combat::ExtensionInventoryComponent>(playerId)
+		};
+		return inventory != nullptr ? inventory->m_bonusMultiplier : 1.0f;
 	}
 } // namespace game::utility

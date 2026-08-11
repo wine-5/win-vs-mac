@@ -8,6 +8,7 @@
 #include "game/component/combat/ExtensionInventoryComponent.h"
 #include "game/constant/ExtensionIconId.h"
 #include "game/utility/ExtensionBonusLabel.h"
+#include "game/utility/PlayerStats.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IStringConverter.h"
 #include <algorithm>
@@ -47,6 +48,10 @@ namespace
 
 	// RAMブロックで増えた枠。強化を示す緑で、もともとの枠と見分ける
 	constexpr unsigned int GAINED_BORDER_COLOR{ core::utility::Color::HUD_BUFF_GREEN };
+
+	// 倍率が掛かっているときに光の粒を速める割合。
+	// 上げすぎると粒が線に見えて本数が数えられなくなり、倍率の手掛かりが消える
+	constexpr float BOOSTED_SPEED_SCALE{ 1.5f };
 
 	// 意味のある縁は太くする。1pxのままだと色を付けても背景に紛れて読めない
 	constexpr int MEANINGFUL_BORDER_THICKNESS{ 3 };
@@ -258,10 +263,13 @@ namespace game::ui::ingame
 				drawSlot(x, rowY, size, type, hasSelection, accent);
 
 				// 装備中のスロットだけ縁を光の粒が回り続ける（起動中であることの表現）。
-				// 色は縁と揃える。別の色で回すと、1つのマスが2つの色を主張してしまう
+				// 色は縁と揃える。別の色で回すと、1つのマスが2つの色を主張してしまう。
+				// ただし倍率が掛かっているときだけは紫で回す。滅多に無い状態なので、
+				// 縁の意味より「いま特別な状態だ」を優先して伝える
 				if (hasSelection)
 					drawOrbitingGlow(x, rowY, size, index * orbit_glow::PHASE_PER_SLOT,
-					    borderColor(hasSelection, accent));
+					    isBonusBoosted() ? core::utility::Color::HUD_JACKPOT_VIOLET
+					                     : borderColor(hasSelection, accent));
 			}
 		};
 
@@ -368,15 +376,31 @@ namespace game::ui::ingame
 		return hasSelection ? core::utility::Color::HUD_ACCENT : SLOT_BORDER_COLOR;
 	}
 
+	bool EquipmentSlotView::isBonusBoosted() const
+	{
+		return utility::playerBonusMultiplier(m_componentManager, m_playerId) > 1.0f;
+	}
+
 	void EquipmentSlotView::drawOrbitingGlow(int x, int y, int size, float phaseOffset,
 	    unsigned int color)
 	{
-		const float elapsed{ std::chrono::duration<float>(
+		float elapsed{ std::chrono::duration<float>(
 			std::chrono::steady_clock::now() - m_startTime)
 			    .count() };
 
+		// 倍率が掛かっているときは列を倍にして速さも上げる。
+		// 列の本数は数えられるので「2列→4列＝2倍」と理屈が通る。
+		// 速さは単独では気付けない（比べる相手が無い）が、本数と併せると勢いが乗る
+		const bool boosted{ isBonusBoosted() };
+		int cometCount{ orbit_glow::COMET_COUNT };
+		if (boosted)
+		{
+			cometCount = orbit_glow::COMET_COUNT_BOOSTED;
+			elapsed *= BOOSTED_SPEED_SCALE;
+		}
+
 		orbit_glow::draw(m_uiRenderer, x, y, size, size, elapsed, phaseOffset,
-		    scaled(orbit_glow::DOT_RADIUS), color);
+		    scaled(orbit_glow::DOT_RADIUS), color, cometCount);
 	}
 
 	void EquipmentSlotView::drawCenteredText(int centerX, int y, const char* text, unsigned int color, int fontSize)
