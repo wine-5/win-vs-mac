@@ -9,6 +9,12 @@ namespace game::ui::ingame::orbit_glow
 	/// @brief スロットごとに位相をずらす量。同じ量ずつずらして同期させない
 	inline constexpr float PHASE_PER_SLOT{ 0.33f };
 
+	/// @brief 同時に回る粒の列の数（外周上で等間隔に並ぶ）
+	inline constexpr int COMET_COUNT{ 2 };
+
+	/// @brief 倍率が掛かっているときの列の数。増えた本数がそのまま倍率の強さに見える
+	inline constexpr int COMET_COUNT_BOOSTED{ 4 };
+
 	/**
 	 * @brief 矩形の縁に沿って光の粒を周回させる
 	 *
@@ -24,7 +30,9 @@ namespace game::ui::ingame::orbit_glow
 	 * @param phaseOffset 周回位相のずらし量（0.0〜1.0）
 	 * @param dotRadius 先頭の粒の半径（画面サイズに合わせた値）
 	 * @param color 粒の色。マスの縁と揃えると、1つのマスが主張する色が1つで済む
+	 * @param cometCount 同時に回る列の数。強化されている状態を本数で示すために変えられる
 	 */
 	void draw(core::iface::IUIRenderer& uiRenderer, int x, int y, int width, int height,
-	    float elapsedSeconds, float phaseOffset, int dotRadius, unsigned int color);
+	    float elapsedSeconds, float phaseOffset, int dotRadius, unsigned int color,
+	    int cometCount = COMET_COUNT);
 } // namespace game::ui::ingame::orbit_glow

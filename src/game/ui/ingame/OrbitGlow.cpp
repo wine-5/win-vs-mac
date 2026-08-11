@@ -8,7 +8,6 @@ namespace
 {
 	// 縁を周回する光の粒
 	constexpr float PERIOD{ 3.2f };          // 一周にかける秒数
-	constexpr int COMET_COUNT{ 2 };          // 同時に回る粒の列の数（外周上で等間隔に配置する）
 	constexpr int TRAIL_COUNT{ 16 };         // 1列あたりの粒の数（後ろほど淡くなる）
 	constexpr float TRAIL_SPACING{ 0.011f }; // 粒どうしの間隔（周回全体を1.0とした割合）
 	constexpr int ALPHA{ 210 };              // 加算合成の強さ（粒ごとの明暗は色側で付ける）
@@ -81,19 +80,21 @@ namespace
 namespace game::ui::ingame::orbit_glow
 {
 	void draw(core::iface::IUIRenderer& uiRenderer, int x, int y, int width, int height,
-	    float elapsedSeconds, float phaseOffset, int dotRadius, unsigned int color)
+	    float elapsedSeconds, float phaseOffset, int dotRadius, unsigned int color,
+	    int cometCount)
 	{
 		const float head{ elapsedSeconds / PERIOD + phaseOffset };
 		const int radius{ std::max(2, dotRadius) };
+		const int comets{ std::max(1, cometCount) };
 
 		// 加算合成で重ねると、粒が枠線の上を通るときに芯が白く抜けて発光して見える。
 		// 粒ごとの明暗はアルファではなく色で付けるため、ブレンドの設定は1回で済む
 		uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, ALPHA);
 
-		for (int comet{ 0 }; comet < COMET_COUNT; ++comet)
+		for (int comet{ 0 }; comet < comets; ++comet)
 		{
 			// 列を外周上で等間隔に散らす（2列なら向かい合う位置になる）
-			const float cometHead{ head + static_cast<float>(comet) / COMET_COUNT };
+			const float cometHead{ head + static_cast<float>(comet) / comets };
 
 			for (int i{ 0 }; i < TRAIL_COUNT; ++i)
 			{
