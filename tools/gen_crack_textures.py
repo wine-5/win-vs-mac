@@ -84,7 +84,7 @@ DEFAULT_TARGETS = [
     "BlockExtVideo",
     "BlockExtUnknown",
     "BlockRam",
-    "BlockQuarantine",
+    "BlockGamble",
 ]
 
 
