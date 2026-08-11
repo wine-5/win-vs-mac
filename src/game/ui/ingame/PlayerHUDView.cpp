@@ -92,7 +92,7 @@ namespace
 	constexpr int BAR_GROOVE_ALPHA{ 20 }; // バーの溝（白をごく薄く敷く）
 
 	// HP残量に応じたバーの色。Windows 11のプログレスバーに倣い単色で塗る
-	constexpr unsigned int BAR_COLOR_HIGH{ 0xFF36D07B };
+	constexpr unsigned int BAR_COLOR_HIGH{ core::utility::Color::HUD_BAR_GREEN };
 	constexpr unsigned int BAR_COLOR_MID{ core::utility::Color::HUD_CHARGE_MAX };
 	constexpr unsigned int BAR_COLOR_LOW{ core::utility::Color::HUD_CRIT_RED };
 	constexpr float BAR_MID_THRESHOLD{ 0.5f };

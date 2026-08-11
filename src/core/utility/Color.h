@@ -94,6 +94,9 @@ namespace core::utility
 		// 黄色は「今この能力は強化された状態」という継続した状態、
 		// こちらは「たった今上がった」という瞬間を表す
 		static constexpr unsigned int HUD_BUFF_GREEN = 0xFF4ADE80;
+		// HPが十分あるときのバーの緑。上がったことを示す HUD_BUFF_GREEN より暗くしてある。
+		// バーは塗る面積が広く、同じ明るさだと画面の中でいちばん目立つ色になってしまう
+		static constexpr unsigned int HUD_BAR_GREEN = 0xFF36D07B;
 
 		// HUDのパネル・マス目の面と枠。窓・スロット・吹き出し・バーの溝まで
 		// すべて同じ2色で組み、画面ごとに濃さが違って見えないようにする
