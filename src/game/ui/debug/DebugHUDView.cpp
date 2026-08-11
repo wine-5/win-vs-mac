@@ -2,6 +2,7 @@
 #include "core/interface/IPerformanceDataProvider.h"
 #include "core/interface/IEffectFactory.h" // DEBUG: リリース時に削除
 #include "core/interface/IRenderer.h"
+#include "core/utility/Color.h"
 #include "core/utility/MathConstants.h"
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
@@ -15,7 +16,7 @@ namespace
 	constexpr int STATS_FONT_SIZE{ 22 };
 	constexpr int STATS_LINE_HEIGHT{ 26 };
 	constexpr int STATS_MARGIN{ 16 };
-	constexpr unsigned int STATS_TEXT_COLOR{ 0xFFFFFF00 }; // 黄色（ARGB）
+	constexpr unsigned int STATS_TEXT_COLOR{ core::utility::Color::YELLOW };
 	constexpr int STATS_LINE_COUNT{ 7 };                   // 右上に並べる統計の行数
 } // namespace
 
