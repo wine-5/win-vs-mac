@@ -6,6 +6,7 @@
 #include "core/interface/IResourceManager.h"
 #include "core/base/EventBus.h"
 #include "core/interface/IRenderer.h"
+#include "game/factory/EnemySpawner.h"
 
 namespace game::system::stage
 {
@@ -38,6 +39,7 @@ namespace game::system::stage
 		 * @param renderer ひびテクスチャの差し替えに使う描画インターフェース
 		 * @param resourceManager 欠片のアイコン画像を読むリソース管理インターフェース
 		 * @param eventBus 打撃・破壊を知らせるためのEventBus
+		 * @param enemySpawner 隔離フォルダを壊したときに敵を出すスポナー
 		 * @param playerId プレイヤーのEntityID
 		 */
 		BlockBreakSystem(core::ecs::ComponentManager& componentManager,
@@ -45,6 +47,7 @@ namespace game::system::stage
 		    core::iface::IRenderer& renderer,
 		    core::iface::IResourceManager& resourceManager,
 		    core::base::EventBus& eventBus,
+		    factory::EnemySpawner& enemySpawner,
 		    core::ecs::EntityId playerId);
 
 		/**
@@ -66,11 +69,21 @@ namespace game::system::stage
 		 */
 		void grantEquipSlot(core::ecs::EntityId blockId);
 
+		/**
+		 * @brief 隔離フォルダの中身を決める（当たりか、敵か）
+		 *
+		 * 当たりと敵は排他。当たりを先に引き、外れたぶんが敵になる。
+		 * 両方が同時に起きると「敵は出たが報酬ももらえた」になり、賭けが成立しない
+		 * @param blockId 壊れたブロックのEntityId
+		 */
+		void resolveQuarantine(core::ecs::EntityId blockId);
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::ecs::EntityManager& m_entityManager;
 		core::iface::IRenderer& m_renderer;
 		core::iface::IResourceManager& m_resourceManager;
 		core::base::EventBus& m_eventBus;
+		factory::EnemySpawner& m_enemySpawner;
 		core::ecs::EntityId m_playerId;
 	};
 } // namespace game::system::stage

@@ -10,6 +10,7 @@
 #include "game/constant/ExtensionIconId.h"
 #include "game/event/InGameEvents.h"
 #include "core/utility/Log.h"
+#include "core/utility/MathConstants.h"
 #include "game/component/combat/ExtensionInventoryComponent.h"
 #include <algorithm>
 #include <cmath>
@@ -41,6 +42,12 @@ namespace
 	///
 	/// ブロックが110なので、その7割ほど。小さいと戦闘中の視界では見落とす
 	constexpr float DROP_BILLBOARD_SIZE{ 80.0f };
+
+	/// @brief 隔離フォルダから出る敵を散らす半径（ワールド単位）
+	///
+	/// ブロックの実寸（130前後）より少し内側。離しすぎると壊した場所と
+	/// 出てきた場所が結び付かず、ブロックのせいで湧いたのだと分からない
+	constexpr float ENEMY_SPAWN_SPREAD{ 110.0f };
 
 	/// @brief 欠片が漂う高さ（ブロックの底面からの相対Y）
 	///
@@ -94,12 +101,14 @@ namespace game::system::stage
 	    core::iface::IRenderer& renderer,
 	    core::iface::IResourceManager& resourceManager,
 	    core::base::EventBus& eventBus,
+	    factory::EnemySpawner& enemySpawner,
 	    core::ecs::EntityId playerId)
 	    : m_componentManager{ componentManager }
 	    , m_entityManager{ entityManager }
 	    , m_renderer{ renderer }
 	    , m_resourceManager{ resourceManager }
 	    , m_eventBus{ eventBus }
+	    , m_enemySpawner{ enemySpawner }
 	    , m_playerId{ playerId }
 	{
 	}
@@ -228,6 +237,7 @@ namespace game::system::stage
 
 		spawnDrops(blockId);
 		grantEquipSlot(blockId);
+		resolveQuarantine(blockId);
 
 		m_eventBus.publish(event::BlockBrokenEvent{ blockId, transform.m_position });
 	}
@@ -251,6 +261,44 @@ namespace game::system::stage
 		m_eventBus.publish(event::EquipSlotGainedEvent{ inventory->m_maxEquipped });
 
 		core::log::info("装備できる枠が増えた: {}", inventory->m_maxEquipped);
+	}
+
+	void BlockBreakSystem::resolveQuarantine(core::ecs::EntityId blockId)
+	{
+		const auto& destructible{ m_componentManager.get<component::stage::DestructibleComponent>(blockId) };
+		if (destructible.m_spawnEnemyCount <= 0)
+			return;
+
+		// 当たりを先に引く。外れたぶんがそのまま敵になるので、
+		// 「敵は出たが報酬ももらえた」という中途半端な結果は起きない
+		if (randomRange(0.0f, 1.0f) < destructible.m_jackpotChance)
+		{
+			m_eventBus.publish(
+			    event::ExtensionBonusMultipliedEvent{ destructible.m_jackpotStatMultiplier });
+			core::log::info("隔離フォルダの当たり: 装備中の拡張子の効果が {} 倍",
+			    destructible.m_jackpotStatMultiplier);
+			return;
+		}
+
+		const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(blockId) };
+
+		// 敵はブロックの底面の高さから出す。中心の高さから出すと宙に浮いて現れる
+		const float floorY{ transform.m_position.y - transform.m_scale.y * BASE_SIZE * 0.5f };
+
+		for (int i{ 0 }; i < destructible.m_spawnEnemyCount; ++i)
+		{
+			// ブロックのあった一点へ重ねて出すと敵どうしが押し合って弾かれるため、
+			// 元の位置を中心に円状へ散らす
+			const float angle{ core::utility::TWO_PI * static_cast<float>(i) / static_cast<float>(destructible.m_spawnEnemyCount) };
+			const core::Vector3 position{
+				transform.m_position.x + std::cos(angle) * ENEMY_SPAWN_SPREAD,
+				floorY,
+				transform.m_position.z + std::sin(angle) * ENEMY_SPAWN_SPREAD
+			};
+			m_enemySpawner.spawn(destructible.m_spawnEnemyType, position);
+		}
+
+		core::log::info("隔離フォルダの外れ: 敵が {} 体出現", destructible.m_spawnEnemyCount);
 	}
 
 	void BlockBreakSystem::spawnDrops(core::ecs::EntityId blockId)
