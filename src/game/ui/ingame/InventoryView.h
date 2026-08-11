@@ -239,6 +239,9 @@ namespace game::ui::ingame
 			/// @brief 道中では動かせない枠か（持ち込み）
 			bool m_isLocked{ false };
 
+			/// @brief RAMブロックで増えた枠か
+			bool m_isGained{ false };
+
 			/// @brief いま弾かれて震えているか
 			bool m_isRejected{ false };
 		};

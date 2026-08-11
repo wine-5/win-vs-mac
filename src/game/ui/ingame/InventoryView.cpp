@@ -113,6 +113,11 @@ namespace
 	constexpr unsigned int LOCKED_COLOR{ core::utility::Color::HUD_LOCKED_RED };
 	constexpr int LOCKED_BORDER_ALPHA{ 150 };
 
+	// RAMブロックで増えた枠。強化を示す緑で、もともとの枠と見分ける。
+	// 右下HUDと同じ色にして、「増えた枠」の意味を画面ごとにずらさない
+	constexpr unsigned int GAINED_COLOR{ core::utility::Color::HUD_BUFF_GREEN };
+	constexpr int GAINED_BORDER_ALPHA{ 150 };
+
 	// 弾いたときの震え。左右に細かく往復させて「入らない」ことを動きで返す
 	constexpr float SHAKE_DURATION{ 0.34f }; // 震えている長さ（秒）
 	constexpr int SHAKE_AMPLITUDE{ 6 };      // 振れ幅（1080p基準）
@@ -621,6 +626,7 @@ namespace game::ui::ingame
 			style.m_isCursor = isSelectable && acquiredIndex == m_cursorIndex;
 			style.m_isHeld = isSelectable && acquiredIndex == m_heldIndex;
 			style.m_isLocked = !isSelectable;
+			style.m_isGained = isExtra;
 			style.m_isRejected = shakeX != 0;
 
 			drawSlot(slotX + shakeX, slotY, types[i], style);
@@ -692,18 +698,27 @@ namespace game::ui::ingame
 			m_uiRenderer.resetBlendMode();
 		}
 
-		// 動かせない枠は赤で締める。中身の有無に関わらず同じ色にして、
-		// 「この列は触れない」という単位で読ませる
-		const unsigned int borderColor{ style.m_isLocked || style.m_isRejected
-			                                ? LOCKED_COLOR
-			                                : SLOT_BORDER_COLOR };
+		// 増えた枠は緑、動かせない枠は赤で締める。どちらも中身の有無に関わらず
+		// 同じ色にして、「この枠が何なのか」という単位で読ませる
+		unsigned int borderColor{ SLOT_BORDER_COLOR };
 		int borderAlpha{ isEmpty ? SLOT_EMPTY_BORDER_ALPHA : SLOT_BORDER_ALPHA };
+		if (style.m_isGained)
+		{
+			borderColor = GAINED_COLOR;
+			borderAlpha = GAINED_BORDER_ALPHA;
+		}
 		if (style.m_isLocked)
+		{
+			borderColor = LOCKED_COLOR;
 			borderAlpha = LOCKED_BORDER_ALPHA;
+		}
 
 		// 弾かれている間は赤を強く出す。常時この濃さだと警告色が視界を占める
 		if (style.m_isRejected)
+		{
+			borderColor = LOCKED_COLOR;
 			borderAlpha = SHAKE_BORDER_ALPHA;
+		}
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, borderAlpha);
 		m_uiRenderer.drawRoundedBox(x, y, slotWidth, slotHeight, radius, borderColor, false, 1);
