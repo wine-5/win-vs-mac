@@ -39,8 +39,8 @@ namespace game::component::stage
 
 		// 敵の代わりに当たりを引く確率（0〜1）と、当たったときに装備中の拡張子の
 		// 効果へ掛ける倍率。倍率は重ねがけせず、一度掛かったら以降の当たりでは伸びない
-		float m_jackpotChance{ 0.0f };
-		float m_jackpotStatMultiplier{ 1.0f };
+		float m_extensionBoostChance{ 0.0f };
+		float m_extensionBoostMultiplier{ 1.0f };
 
 		// 無傷のあいだ描くモデル
 		int m_intactHandle{ -1 };

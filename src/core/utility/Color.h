@@ -97,7 +97,7 @@ namespace core::utility
 		// ギャンブルボックスの当たりで倍率が掛かっていることを示す紫。
 		// 青＝装備中／赤＝触れない／緑＝上がった／黄＝強化されている、はすべて埋まっているため、
 		// まだどこにも意味を持たせていない色を当てる。滅多に出ないものほど色が独立している必要がある
-		static constexpr unsigned int HUD_JACKPOT_VIOLET = 0xFFC084FC;
+		static constexpr unsigned int HUD_EXTENSION_BOOST_VIOLET = 0xFFC084FC;
 		// HPが十分あるときのバーの緑。上がったことを示す HUD_BUFF_GREEN より暗くしてある。
 		// バーは塗る面積が広く、同じ明るさだと画面の中でいちばん目立つ色になってしまう
 		static constexpr unsigned int HUD_BAR_GREEN = 0xFF36D07B;

@@ -268,7 +268,7 @@ namespace game::ui::ingame
 				// 縁の意味より「いま特別な状態だ」を優先して伝える
 				if (hasSelection)
 					drawOrbitingGlow(x, rowY, size, index * orbit_glow::PHASE_PER_SLOT,
-					    isBonusBoosted() ? core::utility::Color::HUD_JACKPOT_VIOLET
+					    isBonusBoosted() ? core::utility::Color::HUD_EXTENSION_BOOST_VIOLET
 					                     : borderColor(hasSelection, accent));
 			}
 		};

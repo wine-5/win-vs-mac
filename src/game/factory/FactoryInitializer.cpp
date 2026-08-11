@@ -212,8 +212,8 @@ namespace game::factory
 
 				// 敵の種類名はここで解決しておく。壊した瞬間に文字列を引くと、
 				// 綴り違いが「壊したのに何も起きない」という形で初めて表に出る
-				params.m_jackpotChance = def.m_jackpotChance;
-				params.m_jackpotStatMultiplier = def.m_jackpotStatMultiplier;
+				params.m_extensionBoostChance = def.m_extensionBoostChance;
+				params.m_extensionBoostMultiplier = def.m_extensionBoostMultiplier;
 				if (!def.m_spawnEnemyType.empty())
 				{
 					params.m_spawnEnemyType = constant::toEnemyType(def.m_spawnEnemyType);

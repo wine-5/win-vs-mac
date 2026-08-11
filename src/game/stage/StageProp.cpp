@@ -68,8 +68,8 @@ namespace game::stage
 			destructible.m_grantsEquipSlot = params.m_grantsEquipSlot;
 			destructible.m_spawnEnemyType = params.m_spawnEnemyType;
 			destructible.m_spawnEnemyCount = params.m_spawnEnemyCount;
-			destructible.m_jackpotChance = params.m_jackpotChance;
-			destructible.m_jackpotStatMultiplier = params.m_jackpotStatMultiplier;
+			destructible.m_extensionBoostChance = params.m_extensionBoostChance;
+			destructible.m_extensionBoostMultiplier = params.m_extensionBoostMultiplier;
 			componentManager.add<component::stage::DestructibleComponent>(m_entity.getId(), destructible);
 		}
 	}

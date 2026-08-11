@@ -139,7 +139,7 @@ namespace
 	constexpr unsigned int STAT_BOOSTED_COLOR{ core::utility::Color::HUD_CHARGE_MAX };
 
 	// 倍率が掛かっているときの色。強化中の黄より一段特別な状態なので色を分ける
-	constexpr unsigned int BOOSTED_MULTIPLIER_COLOR{ core::utility::Color::HUD_JACKPOT_VIOLET };
+	constexpr unsigned int BOOSTED_MULTIPLIER_COLOR{ core::utility::Color::HUD_EXTENSION_BOOST_VIOLET };
 
 	// 倍率が掛かっているときに光の粒を速める割合（右下HUDと揃える）
 	constexpr float BOOSTED_SPEED_SCALE{ 1.5f };

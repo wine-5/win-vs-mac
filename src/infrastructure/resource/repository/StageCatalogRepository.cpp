@@ -47,10 +47,10 @@ namespace
 			def.m_spawnEnemyType = tuning["spawnEnemyType"].get<std::string>();
 		if (tuning.contains("spawnEnemyCount"))
 			def.m_spawnEnemyCount = tuning["spawnEnemyCount"];
-		if (tuning.contains("jackpotChance"))
-			def.m_jackpotChance = tuning["jackpotChance"];
-		if (tuning.contains("jackpotStatMultiplier"))
-			def.m_jackpotStatMultiplier = tuning["jackpotStatMultiplier"];
+		if (tuning.contains("extensionBoostChance"))
+			def.m_extensionBoostChance = tuning["extensionBoostChance"];
+		if (tuning.contains("extensionBoostMultiplier"))
+			def.m_extensionBoostMultiplier = tuning["extensionBoostMultiplier"];
 		if (tuning.contains("slideAccel"))
 			def.m_slideAccel = tuning["slideAccel"];
 		if (tuning.contains("conveyorSpeed"))

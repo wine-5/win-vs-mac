@@ -391,7 +391,7 @@
     },
     {
       "id": "block_gamble",
-      "_comment": "壊すと jackpotChance の確率で装備中の拡張子の効果が jackpotStatMultiplier 倍になり、外れると spawnEnemyType の敵が spawnEnemyCount 体出る。分の悪い賭けだが当たりが破格なので壊す手が伸びる。倍率は重ねがけせず、一度掛かったら以降の当たりでは伸びない。走破を変える一点物なのでblockTableの抽選には入れず、エディタで手置きする",
+      "_comment": "壊すと extensionBoostChance の確率で装備中の拡張子の効果が extensionBoostMultiplier 倍になり、外れると spawnEnemyType の敵が spawnEnemyCount 体出る。分の悪い賭けだが当たりが破格なので壊す手が伸びる。倍率は重ねがけせず、一度掛かったら以降の当たりでは伸びない。走破を変える一点物なのでblockTableの抽選には入れず、エディタで手置きする",
       "displayName": "ギャンブルボックス",
       "model": "assets/model/stage/BlockGamble.mqo",
       "texture": "assets/model/stage/BlockGamble.png",
@@ -408,11 +408,11 @@
       "collider": "box",
       "editorColor": "#D13438",
       "tuning": {
-        "hitsToBreak": 5,
+        "hitsToBreak": 3,
         "spawnEnemyType": "xcode",
         "spawnEnemyCount": 2,
-        "jackpotChance": 0.1,
-        "jackpotStatMultiplier": 2.0
+        "extensionBoostChance": 1.0,
+        "extensionBoostMultiplier": 2.0
       }
     },
     {

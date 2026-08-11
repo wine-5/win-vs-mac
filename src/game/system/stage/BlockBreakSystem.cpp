@@ -271,12 +271,12 @@ namespace game::system::stage
 
 		// 当たりを先に引く。外れたぶんがそのまま敵になるので、
 		// 「敵は出たが報酬ももらえた」という中途半端な結果は起きない
-		if (randomRange(0.0f, 1.0f) < destructible.m_jackpotChance)
+		if (randomRange(0.0f, 1.0f) < destructible.m_extensionBoostChance)
 		{
 			m_eventBus.publish(
-			    event::ExtensionBonusMultipliedEvent{ destructible.m_jackpotStatMultiplier });
+			    event::ExtensionBonusMultipliedEvent{ destructible.m_extensionBoostMultiplier });
 			core::log::info("ギャンブルボックスの当たり: 装備中の拡張子の効果が {} 倍",
-			    destructible.m_jackpotStatMultiplier);
+			    destructible.m_extensionBoostMultiplier);
 			return;
 		}
 

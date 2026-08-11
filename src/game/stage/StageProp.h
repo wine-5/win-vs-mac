@@ -57,8 +57,8 @@ namespace game::stage
 		int m_spawnEnemyCount{ 0 };
 
 		// 敵の代わりに当たりを引く確率と、当たったときの能力倍率
-		float m_jackpotChance{ 0.0f };
-		float m_jackpotStatMultiplier{ 1.0f };
+		float m_extensionBoostChance{ 0.0f };
+		float m_extensionBoostMultiplier{ 1.0f };
 	};
 
 	/**
