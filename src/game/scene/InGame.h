@@ -68,6 +68,7 @@ namespace game
 		class InventoryView;     // 前方宣言
 		class InteractPromptView;    // 前方宣言
 		class LowHealthVignetteView; // 前方宣言
+		class ExtensionBoostFlashView; // 前方宣言
 		class BossHUDView;           // 前方宣言
 		class MiniMapView;           // 前方宣言
 		class EnemyHealthBarView;    // 前方宣言
@@ -290,6 +291,7 @@ namespace game::scene
 
 		// 低HP警告のビネットのView
 		std::unique_ptr<ui::ingame::LowHealthVignetteView> m_lowHealthVignetteView;
+		std::unique_ptr<ui::ingame::ExtensionBoostFlashView> m_extensionBoostFlashView;
 
 		// ボスHP（上中央）のView
 		std::unique_ptr<ui::ingame::BossHUDView> m_bossHUDView;

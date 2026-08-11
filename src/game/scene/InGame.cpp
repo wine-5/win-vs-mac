@@ -99,6 +99,7 @@
 #include "game/ui/ingame/InventoryView.h"
 #include "game/ui/ingame/InteractPromptView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
+#include "game/ui/ingame/ExtensionBoostFlashView.h"
 #include "game/ui/ingame/BossHUDView.h"
 #include "game/ui/ingame/MiniMapView.h"
 #include "game/ui/ingame/EnemyHealthBarView.h"
@@ -349,6 +350,12 @@ namespace game::scene
 		    m_componentManager,
 		    m_resourceManager);
 		m_view.setLowHealthVignetteView(m_lowHealthVignetteView.get());
+
+		m_extensionBoostFlashView = std::make_unique<ui::ingame::ExtensionBoostFlashView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager);
+		m_view.setExtensionBoostFlashView(m_extensionBoostFlashView.get());
 
 		m_bossHUDView = std::make_unique<ui::ingame::BossHUDView>(
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),

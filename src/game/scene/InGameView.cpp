@@ -33,6 +33,7 @@
 #include "game/ui/ingame/InventoryView.h"
 #include "game/ui/ingame/InteractPromptView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
+#include "game/ui/ingame/ExtensionBoostFlashView.h"
 #include "game/ui/ingame/BossHUDView.h"
 #include "game/ui/ingame/MiniMapView.h"
 #include "game/ui/ingame/EnemyHealthBarView.h"
@@ -146,6 +147,11 @@ namespace game::scene
 			// 画面全体が危険な状態なので、HUDごと赤く染まるほうが表現としても正しい
 			if (m_lowHealthVignetteView)
 				m_lowHealthVignetteView->draw(playerId);
+
+			// 当たりの閃光は他のHUDより手前。画面全体を一度だけ光らせるものなので、
+			// 下に置くとスロットや数値の裏へ回って気付けない
+			if (m_extensionBoostFlashView)
+				m_extensionBoostFlashView->draw(playerId);
 
 			// 近づいた設置物の案内（吹き出し）。対象の頭上に出るので
 			// 他のHUDより先に描き、レティクルには被らせない
@@ -293,6 +299,11 @@ namespace game::scene
 	void InGameView::setLowHealthVignetteView(ui::ingame::LowHealthVignetteView* view)
 	{
 		m_lowHealthVignetteView = view;
+	}
+
+	void InGameView::setExtensionBoostFlashView(ui::ingame::ExtensionBoostFlashView* view)
+	{
+		m_extensionBoostFlashView = view;
 	}
 
 	void InGameView::setMiniMapView(ui::ingame::MiniMapView* view)

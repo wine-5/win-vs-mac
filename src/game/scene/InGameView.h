@@ -41,7 +41,8 @@ namespace game::ui::ingame
 	class InGameStatusView;  // 前方宣言
 	class InventoryView;     // 前方宣言
 	class InteractPromptView;    // 前方宣言
-	class LowHealthVignetteView; // 前方宣言
+	class LowHealthVignetteView;
+	class ExtensionBoostFlashView; // 前方宣言
 	class BossHUDView;           // 前方宣言
 	class MiniMapView;           // 前方宣言
 	class EnemyHealthBarView;    // 前方宣言
@@ -227,6 +228,12 @@ namespace game::scene
 		void setLowHealthVignetteView(ui::ingame::LowHealthVignetteView* view);
 
 		/**
+		 * @brief ギャンブルボックスの当たりを知らせるViewを設定する
+		 * @param view 設定するView（所有はInGame側）
+		 */
+		void setExtensionBoostFlashView(ui::ingame::ExtensionBoostFlashView* view);
+
+		/**
 		 * @brief ボスHP（上中央のHUD）Viewを設定する
 		 * @param view BossHUDViewのポインタ（所有はInGame）
 		 */
@@ -360,6 +367,9 @@ namespace game::scene
 
 		// 低HP警告のビネットの描画元（所有はInGame）
 		ui::ingame::LowHealthVignetteView* m_lowHealthVignetteView{ nullptr };
+
+		/// @brief 当たりを引いた瞬間の閃光とメッセージ
+		ui::ingame::ExtensionBoostFlashView* m_extensionBoostFlashView{ nullptr };
 
 		// ボスHP（上中央のHUD）の描画元（所有はInGame）
 		ui::ingame::BossHUDView* m_bossHUDView{ nullptr };
