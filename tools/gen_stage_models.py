@@ -71,6 +71,8 @@ MANIFEST = [
     # ⑧ 拡張子の付け替え端末（gen_rename_texture.py が吐くテクスチャを貼る）。
     #    壊せない設置物なので、ひび・破片は用意しない
     ("BlockRename",        "BlockRename.png"),
+    # ⑨ 隔離フォルダ。壊すと高確率で敵が出るが、低確率で装備中の拡張子の効果が2倍になる
+    ("BlockQuarantine",    "BlockQuarantine.png"),
 ]
 
 # ---- 100x100x100 立方体の頂点 ----

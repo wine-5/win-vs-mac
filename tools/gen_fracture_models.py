@@ -59,6 +59,7 @@ DEFAULT_TARGETS = [
     "BlockExtVideo",
     "BlockExtUnknown",
     "BlockRam",
+    "BlockQuarantine",
 ]
 
 # 六面体の各面を (どの角を使うか, 面の向き) で表す。
