@@ -1601,11 +1601,30 @@ async function loadStageFromServer() {
   }
 }
 
+/**
+ * カタログに無い種類が配置に混ざっていないかを調べて知らせる。
+ *
+ * ゲーム側はこれを見つけると起動時に例外で落ちるが、そこで初めて気付くと
+ * 原因がステージなのかカタログなのか分からない。種類名を変えたあとに
+ * 古いタブから保存すると実際に起きるので、開いた時点で名指しする。
+ */
+function warnUnknownPropTypes() {
+  const known = new Set(catalog.props.map(p => p.id));
+  const unknown = [...new Set(state.props.map(p => p.type).filter(t => !known.has(t)))];
+  if (!unknown.length) return;
+
+  showDialog('カタログに無い配置物',
+    'このステージには stageCatalog.json に存在しない種類が含まれています。<br>'
+    + 'このまま保存するとゲームが起動できません。<br><br>'
+    + unknown.map(t => '・' + t).join('<br>'), null);
+}
+
 (async function init() {
   await loadCatalogFromServer();
   /* 実ファイルを正とし、読めなかったときだけ自動保存から復元する */
   if (!await loadStageFromServer())
     tryRestore();
+  warnUnknownPropTypes();
   renderPalette();
   rebuildScene();
   resize();
