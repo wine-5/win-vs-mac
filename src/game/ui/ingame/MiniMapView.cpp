@@ -41,7 +41,7 @@ namespace
 	constexpr float FAR_LAYER_DIM{ 0.33f }; // 高さが離れた床を薄める割合
 
 	// パネルの上にもう一段沈める暗幕。地形の線が背景に埋もれないようにする
-	constexpr unsigned int MAP_BACKGROUND{ 0xFF060A12 };
+	constexpr unsigned int MAP_BACKGROUND{ core::utility::Color::MAP_BACKGROUND_NAVY };
 	constexpr int MAP_BACKGROUND_ALPHA{ 128 };
 
 	// 自機の矢印（1080p基準）
@@ -75,9 +75,9 @@ namespace
 	// 床の色。配置物の種類（stageCatalog.jsonのid）はゲーム層まで降りてこないため、
 	// GroundSurfaceComponentが持つ「振る舞い」で塗り分ける。
 	// プレイヤーにとっても見た目より「滑るのか・運ばれるのか」のほうが役に立つ
-	constexpr unsigned int COLOR_FLOOR{ 0xFF0067C0 };    // 普通の足場
-	constexpr unsigned int COLOR_SLOPE{ 0xFF3FB950 };    // 滑る坂
-	constexpr unsigned int COLOR_CONVEYOR{ 0xFF00B7C3 }; // 動く歩道
+	constexpr unsigned int COLOR_FLOOR{ core::utility::Color::MAP_FLOOR_BLUE };
+	constexpr unsigned int COLOR_SLOPE{ core::utility::Color::MAP_SLOPE_GREEN };
+	constexpr unsigned int COLOR_CONVEYOR{ core::utility::Color::MAP_CONVEYOR_CYAN };
 } // namespace
 
 namespace game::ui::ingame

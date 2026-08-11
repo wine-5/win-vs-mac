@@ -107,6 +107,16 @@ namespace core::utility
 		// 出しっぱなしにする色なので、警告と同じ強さだと視界を占領してしまう
 		static constexpr unsigned int HUD_LOCKED_RED = 0xFFC0524F;
 
+		// ========== ミニマップ用の色 ==========
+
+		// パネルの上にもう一段沈める暗幕。HUD_PANEL_FILL より暗くして地形の線を浮かせる
+		static constexpr unsigned int MAP_BACKGROUND_NAVY = 0xFF060A12;
+
+		// 床の塗り分け。見た目ではなく「滑るのか・運ばれるのか」という振る舞いで分ける
+		static constexpr unsigned int MAP_FLOOR_BLUE = 0xFF0067C0;    // 普通の足場
+		static constexpr unsigned int MAP_SLOPE_GREEN = 0xFF3FB950;   // 滑る坂
+		static constexpr unsigned int MAP_CONVEYOR_CYAN = 0xFF00B7C3; // 動く歩道
+
 		// ========== メニュー（ポーズなどの項目リスト）用の色 ==========
 
 		// 選択中の項目。非選択の薄いグレーと色相・明度の両方で離し、
