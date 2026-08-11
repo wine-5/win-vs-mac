@@ -103,5 +103,12 @@ namespace core::utility
 		// 道中では動かせないものを示す赤。危険を表す HUD_CRIT_RED より彩度を落としてある。
 		// 出しっぱなしにする色なので、警告と同じ強さだと視界を占領してしまう
 		static constexpr unsigned int HUD_LOCKED_RED = 0xFFC0524F;
+
+		// ========== メニュー（ポーズなどの項目リスト）用の色 ==========
+
+		// 選択中の項目。非選択の薄いグレーと色相・明度の両方で離し、
+		// 色を見分けにくい環境でもどれを選んでいるか分かるようにする
+		static constexpr unsigned int MENU_SELECTED_GOLD = 0xFFFFD700;
+		static constexpr unsigned int MENU_UNSELECTED_GRAY = 0xFFC8C8C8;
 	};
 } // namespace core::utility
