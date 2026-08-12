@@ -1,9 +1,10 @@
-# 次にやること（引き継ぎ）
+﻿# 次にやること（引き継ぎ）
 
-最終更新: 2026-08-11 / ブランチ `feature/item`
+最終更新: 2026-08-13 / ブランチ `feature/item`
 
-拡張子の「壊す → 拾う → 効く → 付け替える」ループは一通り動く状態まで実装した。
-このファイルは、その続きを別の担当が引き取るためのメモ。
+拡張子の「壊す → 拾う → 効く → 付け替える」ループと、ギャンブルボックス（当たりで能力2倍）
+まで実装が終わり、レベルデザインも一段落した。
+**残っている大きな作業はメモリ削減ひとつ。** PRを出す前にこれを通したい。
 
 ---
 
@@ -14,132 +15,143 @@
 | [CLAUDE.md](../CLAUDE.md) | アーキテクチャ・命名・コミット規約。**最優先** |
 | [docs/architecture/architecture.md](architecture/architecture.md) | レイヤー構成 |
 | [docs/conventions/naming_convention.md](conventions/naming_convention.md) | 命名の詳細 |
-| [docs/design/extension_swap_design.md](design/extension_swap_design.md) | 拡張子の付け替えの設計 |
 
 ### 作業前に必ず守ること
 
 - **ビルド**：`MSBuild.exe DxLib-3D.vcxproj /p:Configuration=Debug /p:Platform=x64`
   （MSBuildは `C:\Program Files\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\`）
-  ゲームが起動したままだと `LNK1168` / `WebView2Loader.dll` のコピー失敗になる。**先に閉じる**
+  ゲームが起動したままだと `LNK1168` になる。**先に閉じる**
 - **コミット**：1コミット＝1つの小さな部品。実装 → 即コミット → 次、の順で進める。
   メッセージは日本語一行の Conventional Commits。`push` は絶対にしない
 - **ツールと生成物は別コミット**にする（`tools/gen_*.py` と `assets/` を混ぜない）
 - `git add` は自分が触ったファイルだけを明示列挙する。`git add -A` は使わない
-  （同じリポジトリで別の担当が並行作業しているため）
-
-### いま未コミットのまま残っているもの（他担当の変更。触らないこと）
-
-- `src/Application.cpp` … 開始シーンを `DebugDestruction` → `InGame` に変えている行
-- `src/core/constant/DebugFlags.h`
-- `assets/data/stage-test.json` … 差分あり（RAMブロック配置は別担当が編集中の可能性）
+- **エディタ（`tools/stage-editor/`）を開いたままステージを編集しない。**
+  タブを開いた時点の状態が保存されるので、その間にJSONを直すと書き戻される
+- **見た目に触ったらスクリーンショットを撮って自分の目で確かめる。**
+  数値が良くなっても絵が壊れていることがある（実際に、モデルを軽くしたら
+  テクスチャ参照が切れて全キャラが真っ白になった）。変更前後を同じ時刻で撮って比べる
 
 ---
 
-## 1. 動作確認が済んでいないもの（最初にここから）
+## 1. メモリ削減（メインタスク）
 
-実装は入っているが、実機での確認がまだ。**新しい機能を足す前にこれを潰す。**
+**着手時 1,858MB → 現在 1,488MB → 目標 1,000MB以下**（Release・プライベートバイト実測）。
 
-### 1-1. RAMブロック（装備枠 +1）
+### 測り方
 
-- テスト用ステージのプレイヤー正面右（x=220）に1つ置いてある
+数値を推測で語らない。`WRITE_DEBUG_LOG_FILES` を `true` にして Release をビルドすると
+`memory_probe.txt` に「計測地点・使用量・直前からの増分」が出る
+（[DebugFlags.h](../src/core/constant/DebugFlags.h)。プローブは stash ではなく本流に入っている）。
+細かく見たいときは `Application.cpp` の `PROBE_INTERVAL_FRAMES` を小さくする。
+
+- **Debug は Release の約2倍**（1,858MB のとき Debug は同条件で計測していない）。**必ず Release で測る**
+- プローブを有効にすると 10MB 程度増える。無効のまま外から測るなら
+  `Get-Process ... PrivateMemorySize64` を1秒ごとに取ればよい
+- 起動〜20秒でプラトーに達する。リークは無い
+
+### 実測の内訳（2026-08-13・25kモデル適用前）
+
+| 区間 | 増分 |
+|---|---|
+| `enemy_xcode` 初回展開（140,172ポリゴン） | +243MB |
+| `InGame: loadResources`（`Player.mv1` 140,210ポリゴン） | +225MB |
+| `DxLib_Init` | +155MB（動かせない） |
+| `spawn: initializeProps`（配置物79個。**ほぼブロックのテクスチャ**） | +187MB → 対策後 129MB |
+| `frame 60`（`Mac.mv1` 100,000ポリゴン＋初回描画） | +108MB |
+| `enemy_safari` 初回展開（100,000ポリゴン） | +103MB |
+| フォント最初の1つ（DxLibのフォント基盤の初期化込み） | +67MB |
+| `EffectFactory`（`Effekseer_Init(8000)`） | +52MB |
+| `spawn: initializePlayer`（`PlayerSword.mv1`） | +50MB |
+| タブ3種 | +41MB |
+| `AudioManager` | +38MB |
+| フォント2つ目以降（1つあたり約4MB） | +40MB |
+
+**主因はテクスチャではなくモデルの展開量**（キャラ4体で約670MB）。
+
+### 否定された前提（蒸し返さない）
+
+| 説 | 実測 |
+|---|---|
+| 画像212枚・展開1,080MBが主因 | **誤り**。常駐しているモデルテクスチャは合計約84MB。`dumpModelStats` の `texMB` で確認できる |
+| `Player.fbm` / `PlayerModelTexture.fbm` の1024px群が効いている | **誤り**。どちらも実行時に読まれていない。フォルダごと退避しても増減ゼロ。没になったVRoid期の残骸で、ディスク22MBのみ |
+| `Player.mv1` はテクスチャを内蔵している | **誤り**。`Pura_model_tex.fbm\Pura_basecolor.jpeg` を**相対パスで外部参照**している。他の3体も同様（`Xcode_model_tex.fbm` など） |
+| WebView2 が主因 | **誤り**。ゲーム本体プロセス単体で 1,858MB あった |
+
+### 済んだこと
+
+| 施策 | 効果 |
+|---|---|
+| ミッション演出のフォントサイズを8px刻みに量子化 | **-302MB** |
+| ブロックのひびテクスチャを256pxへ縮小 | **-58MB** |
+
+フォントの件は `UIRenderer` が**サイズごとにフォントハンドルを作って二度と消さない**のが原因。
+拡縮アニメの途中でサイズを1pxずつ変えると1フレームごとに約4MBのフォントが増え続ける。
+**文字サイズをアニメーションさせるときは必ずサイズを丸めること。**
+
+### 残っている削減候補（効果順）
+
+| # | 対象 | 見込み | 内容 |
+|---|---|---|---|
+| 1 | **キャラ4体を25,000ポリゴンへ** | **-370MB** | `tools/decimate_fbx.py` で実施済み。元FBXは Downloads にある（`PuraFinal/Pura_model_tex.fbx` / `XCodeModel/Xcode_model_tex.fbx` / `BossMac/Mac_model_tex.fbx` / `SafariModel/Safari_lowpoly.fbx`）。**出力FBXの名前は元と同じにすること**（違う名前にすると `.fbm` の参照先が変わって真っ白になる）。mv1化は DxLibModelViewer 手作業 |
+| 2 | ブロックの基本テクスチャも256pxへ | -86MB | ひびは実施済み。基本テクスチャは拡張子アイコンを読ませる絵なので、近づいたときの潰れ具合を見てから決める |
+| 3 | `Effekseer_Init(8000)` → `4000` / `2000` | -26 / -39MB | 上限を超えたパーティクルは黙って出なくなる。ボス戦の実際の同時数を測ってから決める |
+| 4 | 配置物の破片モデルを破壊時に生成する | 未計測 | いまは壊れる前から `<Name>Fractured.mqo` を1個ずつ複製している |
+| 5 | `.fbx` ・重複 `.fbm` ・ogg置換済みの mp3 の削除 | ディスク約70MB | メモリには効かない。配布サイズ用 |
+
+縮小には [tools/reduce_stage_textures.py](../tools/reduce_stage_textures.py) が使える
+（`--src` で外部PNGを取り込み、`--all` で `assets/model/stage/` を一括縮小。`--size` で解像度を指定）。
+
+---
+
+## 2. 動作確認が済んでいないもの
+
+### 2-1. ギャンブルボックス
+
+`stageBalance.json` ではなく [stageCatalog.json](../assets/data/stageCatalog.json) の
+`block_gamble` → `tuning` で調整する。
+
+- `extensionBoostChance` を一時的に `1.0` にすれば必ず当たるので、演出をまとめて確認できる
+- **確認が終わったら `0.2` へ戻すこと**
 - 期待する挙動
-  1. 5回殴ると壊れる（ひびが3段階で入る）
-  2. 右下HUDの「道中で取得」ページが4枠になる（下3つ・上1つ、上段は緑の縁）
-  3. 未装備の拡張子を持っていた場合、その先頭が装備中へ繰り上がり**能力値が上がる**
-  4. インベントリ（E）でも4枠目が現れる
-- 関連：[BlockBreakSystem::grantEquipSlot](../src/game/system/stage/BlockBreakSystem.cpp)、
-  [ExtensionEquipSystem::promoteToEquipped](../src/game/system/combat/ExtensionEquipSystem.cpp)
+  1. 4回殴ると壊れる
+  2. 8割は Xcode が2体、円状に湧く
+  3. 2割で画面が紫に光り、中央に `x2` と「拡張子の効果が上がった」が出る
+  4. 右下HUDの光の粒が紫・4列・速くなる
+  5. インベントリ（E）で能力値と増分が紫、マスの表記が倍の値、
+     「現在の能力」の下に `拡張子の効果 x2` のバッジ
 
-### 1-2. 2段レイアウトの見え方
+### 2-2. RAMブロック
 
-右下HUDとインベントリの両方で、枠が4つ以上のときに下3つ・上Nの2段になる。
-段の中央寄せと、見出しの位置が動かないことを確認する。
+- 5回殴ると壊れ、**取得音**が鳴る
+- 右下HUDが「道中で取得」ページへ4秒固定され、下からせり上がる
+- 増えた枠は緑の縁。インベントリ（E）でも同じ緑
 
-### 1-3. リザルトの拡張子表示
+### 2-3. 敵の攻撃力を上げたぶんの手触り
 
-クリアかゲームオーバーまで進めて、`ACQUIRED EXTENSIONS` のバッジ列が出るか確認する。
-装備中は濃く、所持だけのものは薄く出る。
+拡張子でプレイヤーが伸びるぶんを相殺するため、攻撃力だけ上げてある（HPは据え置き）。
 
----
+| 敵 | Normal | Hard |
+|---|---|---|
+| Xcode | 55 → 70 | 88 → 112 |
+| Safari | 24 → 32 | 41 → 55 |
+| Mac | 40 → 55 | 68 → 94 |
 
-## 2. 隔離フォルダ（未着手・いちばん大きい）
-
-**壊すと敵が出るブロック。ただし低確率で当たりが混ざる。**
-
-### 決まっていること
-
-- ただ敵が出るだけでは壊す動機がないので、**低確率で報酬**を混ぜる
-- 案：8割は敵が出る／2割は「ウイルスとして隔離されていた拡張子」が丸ごと手に入る
-- 実在のウイルス対策ソフトの隔離フォルダに、誤検知で隔離された無害なファイルが
-  入っていることがある、という現実の挙動をそのまま遊びにする
-
-### 決まっていないこと（実装前に相談すること）
-
-- 確率（8:2 が妥当か）
-- 当たりのときに何個・どの種別が手に入るか
-- 敵が出るときの種類と数
-- 壊す前に「危険」と分かるべきか（分かってもなお壊したくなる設計にできるか）
-
-### 実装の見通し
-
-既存の仕組みでほぼ足りる。新しい仕組みを作る前に、下記を使い回せないか検討すること。
-
-1. テクスチャ：`tools/gen_*_texture.py` を1本追加（**文字は入れない**。
-   ブロックの面は距離があって語が読めない。記号と色で伝える）
-2. モデル・ひび・破片：`tools/gen_stage_models.py` の MANIFEST、
-   `tools/gen_crack_textures.py` と `tools/gen_fracture_models.py` の
-   `DEFAULT_TARGETS` に名前を足して実行するだけ
-3. カタログ：`assets/data/stageCatalog.json` にエントリを足す。
-   壊したときの効果は `grantsEquipSlot` と同じ要領で
-   `PropDefinition` → `StageProp` → `DestructibleComponent` へ流す
-4. 破壊時の処理：`BlockBreakSystem::breakBlock` から分岐。
-   敵の出現は `EnemySpawner` が既にある
-5. エディタ対応は不要（起動時に `stageCatalog.json` を読んでパレットを作る）
+**HPを上げてはいけない。** 敵を倒しても報酬が無いため、
+HPを増やすと「時間はかかるが得るものはない」戦闘が増えるだけになる。
+攻撃力は減算式ダメージの分母側なので、**育ちすぎたビルドにだけ強く効く**という性質がある。
 
 ---
 
 ## 3. 細かい残り
 
-### 3-1. `BlockZip.png` に文字が残っている
+### 3-1. 検証シーン `DebugDestruction` は削除済み
 
-他のブロックからは文字を消したが、これだけ `.zip` の文字が残っている。
-`tools/gen_stage_textures.py` 系で作り直すか、手で消す。
-消したあとは **ひびテクスチャも作り直すこと**（ひびは元テクスチャに重ねて生成するため、
-先に元を直さないと古い絵のまま残る）。
+`START_FROM_DEBUG_SCENE` は `START_FROM_IN_GAME` へ改名した。
+BIOSから始めたいときは [DebugFlags.h](../src/core/constant/DebugFlags.h) で `false` にする。
 
-```
-python tools/gen_crack_textures.py BlockZip
-```
-
-### 3-2. インベントリの「増えた枠」に色が付いていない
-
-右下HUDでは増えた枠を緑の縁（`Color::HUD_BUFF_GREEN`）で示しているが、
-インベントリ側は並びだけで色は付けていない。揃えるかどうかは要判断。
-揃えるなら [InventoryView::SlotStyle](../src/game/ui/ingame/InventoryView.h) に
-旗を1つ足して `drawSlot` の縁の色を分ける。
-
-### 3-3. 単発の16進数色が残っている
-
-HUDの共通2色（面・枠）と固定色は `Color.h` へ集約済み
-（`HUD_PANEL_FILL` / `HUD_PANEL_BORDER` / `HUD_LOCKED_RED`）。
-以下にはまだ直書きが残っている。
-
-- `src/game/ui/ingame/MiniMapView.cpp`
-- `src/game/ui/ingame/PlayerHUDView.cpp`
-- `src/game/ui/pause/PauseMenuView.cpp`
-- `src/game/ui/debug/DebugHUDView.cpp`（黄色は `Color::YELLOW` で足りる）
-
-### 3-4. 検証シーン `DebugDestruction` の削除
-
-破壊の検証用に作った捨てシーン。本編が安定したら消す。
-参照箇所：`SceneFactory.cpp` / `SceneFactory.h` / `SceneType.h` / `DebugDestruction.*`、
-`DebugFlags.h` の `START_FROM_DEBUG_SCENE`、`Application.cpp` の開始シーン分岐。
-
-### 3-5. 音が未生成のもの
+### 3-2. 音が未生成のもの
 
 音源はリポジトリ所有者が作る。実装側で足りていないものは今のところ無い。
-新しく必要になったら [locked_slot_sound_spec.md](design/locked_slot_sound_spec.md) と
-同じ形式で仕様を書いてから依頼する。
 
 ---
 
@@ -149,34 +161,45 @@ HUDの共通2色（面・枠）と固定色は `Color.h` へ集約済み
 |---|---|
 | 実PCの拡張子ヒストグラムからドロップを決める | 企業のPCではフォルダの走査・アップロードがセキュリティ上できないことが多い |
 | ZIPブロックの中身を重み付き抽選にする | 開けるまで中身が分からないものにレア度を付けると、拡張子ブロックと役割が重なる。等確率は意図した設計 |
-| RAMブロックを `blockTable` の抽選に入れる | 枠が増える一点物。ランダムに何個も出るとバランスが壊れる。エディタで手置きする |
-| ブロックのテクスチャに説明文を入れる | 数メートル離れた3D空間から見るので語は潰れて読めない。記号・色・数字で伝える |
+| RAM・ギャンブルボックスを `blockTable` の抽選に入れる | 走破を変える一点物。ランダムに何個も出るとバランスが壊れる。エディタで手置きする |
+| ブロックのテクスチャに説明文を入れる | 数メートル離れた3D空間から見るので語は潰れて読めない（`BlockZip.png` の `.zip` だけは例外として残す判断をした） |
+| ギャンブルの倍率を重ねがけできるようにする | 2倍で基準値の約3倍になる。3倍まで許すと防御特化ビルドが Mac の通常攻撃まで無効化する |
+| 敵のHPを上げてバランスを取る | 上記2-3のとおり |
+| prop固有の数値を `stageBalance.json` へ出す | `hitsToBreak` はそのブロックの定義そのもの。外へ出すと2ファイルへidを書くことになり、書き忘れると黙って壊せないブロックが生まれる |
 
 ---
 
-## 5. 今回入れたものの要点（引き継ぎ用の地図）
+## 5. データの置き場（迷ったとき）
 
-| 機能 | 主なファイル |
+| 内容 | ファイル |
 |---|---|
-| ブロック破壊・ひび・破片 | `system/stage/BlockBreakSystem`、`BlockDebrisSystem` |
-| 欠片のドロップと取得 | `system/stage/ExtensionPickupSystem` |
-| 能力への反映・入れ替え | `system/combat/ExtensionEquipSystem` |
-| 持ち物 | `component/combat/ExtensionInventoryComponent`（`m_maxEquipped` は可変） |
-| インベントリ（E） | `ui/ingame/InventoryView` |
-| 右下スロット | `ui/ingame/EquipmentSlotView` |
-| 付け替え端末（F2） | `system/stage/RenameTerminalSystem`、`ui/ingame/InteractPromptView` |
-| 光の粒（共通部品） | `ui/ingame/OrbitGlow` |
-| 能力値の収集（共通） | `game/utility/PlayerStats` |
+| 配置物の素材定義（モデル・絵・大きさ・当たり判定） | `assets/data/stageCatalog.json` の `props[]` |
+| 配置物ごとの調整値（打撃回数・ドロップ・確率・倍率） | 同上の各propの `tuning` |
+| ブロックの抽選表（グローバルなバランス） | `assets/data/stageBalance.json` |
+| 拡張子のボーナス値 | `assets/data/extensionBonus.json` |
+| 敵のパラメータ | `assets/data/enemies/*.json`（`gameplay` が Normal、`hard` が上書き） |
+| ステージの配置 | `assets/data/stage-test.json`（ゲームが読むのはこれだけ） |
 
-### 設計上の約束
+`stageBalance.json` の `type` は `stageCatalog.json` の `props` に存在するidでなければならず、
+食い違うと**起動時に例外で止まる**。黙って出現しなくなるのを防ぐため意図的にそうしてある。
+
+---
+
+## 6. 設計上の約束
 
 - **色の意味を画面ごとにずらさない**
-  青＝装備中／赤＝道中で変えられない／緑＝増えた枠・上がった値／黄＝強化されている
+  青＝装備中／赤＝道中で変えられない／緑＝増えた枠・上がった値／黄＝強化されている／
+  紫＝ギャンブルの当たりで倍率が掛かっている。
+  色は [Color.h](../src/core/utility/Color.h) に集約する。Viewへ16進数を直書きしない
 - **判定と表示を分ける**
-  マスの位置はViewだけが知る（`findSlotIndexAt`）。操作の解釈はシーン、
-  能力の計算はSystem
+  マスの位置はViewだけが知る（`findSlotIndexAt`）。操作の解釈はシーン、能力の計算はSystem
 - **拒否された操作は必ず何かを返す**
-  無反応だと「操作が効いていない」と読まれる。固定枠へ落とすと震えて音が鳴る
-- **入れ替えは即時反映**
-  インベントリを開いている間は時間が止まりSystemのupdateが回らないため、
-  付け替えだけはイベントの購読側で同期的に処理している
+  無反応だと「操作が効いていない」と読まれる
+- **Viewはイベントを購読しない**
+  状態の変化そのものを合図にする（`ExtensionBoostFlashView` は倍率、
+  `EquipmentSlotView` は枠数を前フレームと突き合わせている）。
+  演出のためだけに配線を増やさない
+- **1フレームに複数回 update が回りうる**
+  `Application` は処理落ちを取り戻すため最大5回 update する。
+  開閉のように「1押しで1回だけ起こしたい」操作は `isKeyPressed` ではなく
+  `consumeKeyPress` を使う（前者は同じ1押しに対して update の回数だけ true を返す）
