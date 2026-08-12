@@ -144,7 +144,14 @@ namespace infrastructure::graphics
 		void resetClipArea() override;
 
 	  private:
-        std::string m_defaultFontName{};
+		/**
+		 * @brief 現在のフォント名と指定サイズに対応するフォントハンドルを返す
+		 * @param fontSize フォントサイズ
+		 * @return フォントハンドル（未生成なら生成してキャッシュする）
+		 */
+		[[nodiscard]] int resolveFontHandle(int fontSize) const;
+
+		std::string m_defaultFontName{};
         std::string m_currentFontName{};
         // mutable: getTextWidth はフォントハンドルを遅延生成してキャッシュする
         // キャッシュは内部実装の詳細であり論理的な const 性を損なわないため mutable としている
