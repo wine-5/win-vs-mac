@@ -303,7 +303,7 @@
       "collider": "box",
       "editorColor": "#E8891C",
       "tuning": {
-        "hitsToBreak": 5,
+        "hitsToBreak": 4,
         "dropExtension": "random",
         "dropCount": 3
       }
@@ -408,10 +408,10 @@
       "collider": "box",
       "editorColor": "#D13438",
       "tuning": {
-        "hitsToBreak": 3,
+        "hitsToBreak": 4,
         "spawnEnemyType": "xcode",
         "spawnEnemyCount": 2,
-        "extensionBoostChance": 1.0,
+        "extensionBoostChance": 0.2,
         "extensionBoostMultiplier": 2.0
       }
     },
@@ -452,7 +452,7 @@
       "collider": "box",
       "editorColor": "#D9C93A",
       "tuning": {
-        "hitsToBreak": 3,
+        "hitsToBreak": 2,
         "dropExtension": "archive",
         "dropCount": 1
       }
@@ -475,7 +475,7 @@
       "collider": "box",
       "editorColor": "#2E6FD9",
       "tuning": {
-        "hitsToBreak": 3,
+        "hitsToBreak": 2,
         "dropExtension": "audio",
         "dropCount": 1
       }
@@ -498,7 +498,7 @@
       "collider": "box",
       "editorColor": "#1E88E5",
       "tuning": {
-        "hitsToBreak": 3,
+        "hitsToBreak": 2,
         "dropExtension": "document",
         "dropCount": 1
       }
@@ -521,7 +521,7 @@
       "collider": "box",
       "editorColor": "#E8542B",
       "tuning": {
-        "hitsToBreak": 3,
+        "hitsToBreak": 2,
         "dropExtension": "executable",
         "dropCount": 1
       }
@@ -544,7 +544,7 @@
       "collider": "box",
       "editorColor": "#2FA84F",
       "tuning": {
-        "hitsToBreak": 3,
+        "hitsToBreak": 2,
         "dropExtension": "image",
         "dropCount": 1
       }
@@ -567,7 +567,7 @@
       "collider": "box",
       "editorColor": "#22D3EE",
       "tuning": {
-        "hitsToBreak": 3,
+        "hitsToBreak": 2,
         "dropExtension": "shortcut",
         "dropCount": 1
       }
@@ -590,7 +590,7 @@
       "collider": "box",
       "editorColor": "#7C4DFF",
       "tuning": {
-        "hitsToBreak": 3,
+        "hitsToBreak": 2,
         "dropExtension": "sourceCode",
         "dropCount": 1
       }
@@ -613,7 +613,7 @@
       "collider": "box",
       "editorColor": "#E0417F",
       "tuning": {
-        "hitsToBreak": 3,
+        "hitsToBreak": 2,
         "dropExtension": "video",
         "dropCount": 1
       }
@@ -636,7 +636,7 @@
       "collider": "box",
       "editorColor": "#8A99A8",
       "tuning": {
-        "hitsToBreak": 3,
+        "hitsToBreak": 2,
         "dropExtension": "unknown",
         "dropCount": 1
       }

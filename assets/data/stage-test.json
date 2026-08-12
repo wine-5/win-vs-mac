@@ -45,24 +45,6 @@
       ]
     },
     {
-      "type": "block_random",
-      "position": [
-        736.28,
-        55,
-        -52
-      ],
-      "rotation": [
-        0,
-        -17,
-        0
-      ],
-      "size": [
-        110,
-        110,
-        110
-      ]
-    },
-    {
       "type": "floor_desktop",
       "position": [
         475.26,
@@ -99,7 +81,7 @@
       ]
     },
     {
-      "type": "block_random",
+      "type": "block_plain",
       "position": [
         796.43,
         -529.87,
@@ -117,7 +99,7 @@
       ]
     },
     {
-      "type": "block_random",
+      "type": "block_plain",
       "position": [
         800,
         -529.87,
@@ -126,24 +108,6 @@
       "rotation": [
         0,
         63,
-        0
-      ],
-      "size": [
-        110,
-        110,
-        110
-      ]
-    },
-    {
-      "type": "block_random",
-      "position": [
-        300,
-        -529.87,
-        6133.36
-      ],
-      "rotation": [
-        0,
-        -29,
         0
       ],
       "size": [
@@ -567,7 +531,7 @@
       ]
     },
     {
-      "type": "block_random",
+      "type": "block_plain",
       "position": [
         -3548.74,
         -2014.5500000000002,
@@ -585,7 +549,7 @@
       ]
     },
     {
-      "type": "block_random",
+      "type": "block_plain",
       "position": [
         -3438.74,
         -2014.5500000000002,
@@ -603,7 +567,7 @@
       ]
     },
     {
-      "type": "block_random",
+      "type": "block_plain",
       "position": [
         -3498.74,
         -1904.5500000000002,
@@ -621,7 +585,7 @@
       ]
     },
     {
-      "type": "block_random",
+      "type": "block_plain",
       "position": [
         -798.74,
         -2014.5500000000002,
@@ -639,7 +603,7 @@
       ]
     },
     {
-      "type": "block_random",
+      "type": "block_plain",
       "position": [
         -728.74,
         -2014.5500000000002,
@@ -657,7 +621,7 @@
       ]
     },
     {
-      "type": "block_random",
+      "type": "block_plain",
       "position": [
         -1948.74,
         -2014.5500000000002,
@@ -1035,61 +999,7 @@
       ]
     },
     {
-      "type": "block_random",
-      "position": [
-        8690.22,
-        -529.87,
-        7862.7
-      ],
-      "rotation": [
-        0,
-        -46,
-        0
-      ],
-      "size": [
-        110,
-        110,
-        110
-      ]
-    },
-    {
-      "type": "block_random",
-      "position": [
-        8440.22,
-        -529.87,
-        7712.7
-      ],
-      "rotation": [
-        0,
-        29,
-        0
-      ],
-      "size": [
-        110,
-        110,
-        110
-      ]
-    },
-    {
-      "type": "block_random",
-      "position": [
-        8468.86,
-        -419.87,
-        7741.34
-      ],
-      "rotation": [
-        0,
-        6,
-        0
-      ],
-      "size": [
-        110,
-        110,
-        110
-      ]
-    },
-    {
-      "type": "block_random",
+      "type": "block_plain",
       "position": [
         8071.52,
         -529.87,
@@ -1197,11 +1107,65 @@
       ]
     },
     {
-      "type": "block_ram",
+      "type": "block_rename",
       "position": [
-        220,
-        65.0,
-        104.68
+        636.37,
+        85,
+        1191.88
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        170,
+        170,
+        170
+      ]
+    },
+    {
+      "type": "block_zip",
+      "position": [
+        -4761.55,
+        -529.74,
+        12163.75
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        110,
+        110,
+        110
+      ]
+    },
+    {
+      "type": "block_rename",
+      "position": [
+        -5264.72,
+        -499.74,
+        12050.05
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        170,
+        170,
+        170
+      ]
+    },
+    {
+      "type": "block_gamble",
+      "position": [
+        8544.5,
+        -519.87,
+        9547.6
       ],
       "rotation": [
         0,
@@ -1215,11 +1179,65 @@
       ]
     },
     {
+      "type": "block_ram",
+      "position": [
+        4759.68,
+        -446.79,
+        9591.6
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        130,
+        130,
+        130
+      ]
+    },
+    {
+      "type": "block_random",
+      "position": [
+        -7.7,
+        223.12,
+        1267.81
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        110,
+        110,
+        110
+      ]
+    },
+    {
+      "type": "block_random",
+      "position": [
+        803.25,
+        -529.87,
+        4238.11
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        110,
+        110,
+        110
+      ]
+    },
+    {
       "type": "block_rename",
       "position": [
-        0,
-        85,
-        815.21
+        7430.56,
+        -499.87,
+        8326.45
       ],
       "rotation": [
         0,
@@ -1235,9 +1253,9 @@
     {
       "type": "block_random",
       "position": [
-        150.1,
-        55,
-        652.97
+        8557.45,
+        -529.87,
+        7729.93
       ],
       "rotation": [
         0,
@@ -1251,11 +1269,11 @@
       ]
     },
     {
-      "type": "block_random",
+      "type": "block_zip",
       "position": [
-        163.39,
-        55,
-        652.97
+        -739.87,
+        -2148.55,
+        18889.24
       ],
       "rotation": [
         0,
@@ -1269,11 +1287,65 @@
       ]
     },
     {
+      "type": "block_rename",
+      "position": [
+        -2733.74,
+        -1984.55,
+        22000.46
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        170,
+        170,
+        170
+      ]
+    },
+    {
       "type": "block_random",
       "position": [
-        126.83,
-        55,
-        652.97
+        8517.99,
+        -529.87,
+        7664.52
+      ],
+      "rotation": [
+        0,
+        -54.84,
+        0
+      ],
+      "size": [
+        110,
+        110,
+        110
+      ]
+    },
+    {
+      "type": "block_random",
+      "position": [
+        -45.19,
+        -529.87,
+        6295.81
+      ],
+      "rotation": [
+        0,
+        -44.14,
+        0
+      ],
+      "size": [
+        110,
+        110,
+        110
+      ]
+    },
+    {
+      "type": "block_random",
+      "position": [
+        8425.32,
+        -529.87,
+        8654.47
       ],
       "rotation": [
         0,
@@ -1287,11 +1359,11 @@
       ]
     },
     {
-      "type": "block_random",
+      "type": "block_plain",
       "position": [
-        93.67,
-        55,
-        652.97
+        5355,
+        -529.87,
+        5565.05
       ],
       "rotation": [
         0,
@@ -1302,6 +1374,42 @@
         110,
         110,
         110
+      ]
+    },
+    {
+      "type": "block_plain",
+      "position": [
+        6245,
+        -529.87,
+        5953.03
+      ],
+      "rotation": [
+        0,
+        -50.45,
+        0
+      ],
+      "size": [
+        110,
+        110,
+        110
+      ]
+    },
+    {
+      "type": "block_ram",
+      "position": [
+        -4771.55,
+        -519.74,
+        11960.66
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "size": [
+        130,
+        130,
+        130
       ]
     }
   ],
