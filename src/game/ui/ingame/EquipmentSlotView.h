@@ -129,6 +129,17 @@ namespace game::ui::ingame
 		[[nodiscard]] bool isBonusBoosted() const;
 
 		/**
+		 * @brief 枠が増えた直後かを調べ、増えていれば演出を始める
+		 *
+		 * RAMブロックは何も落とさないため、壊しても手元に増えた実感が出ない。
+		 * 増えた瞬間だけ「道中で取得」のページへ固定して、増えた枠を見せる。
+		 * イベントは購読せず、枠数の変化そのものを合図にする（インベントリの増減表示と同じ）
+		 * @param maxEquipped いまの枠数
+		 * @return 演出中ならtrue
+		 */
+		[[nodiscard]] bool updateSlotGained(int maxEquipped);
+
+		/**
 		 * @brief マスの縁の色を求める
 		 *
 		 * 縁と光の粒で同じ色を使うため、決め方を1か所に置く
@@ -161,6 +172,11 @@ namespace game::ui::ingame
 
 		// ページの見出し（Shift_JIS変換済み。添字はページ番号）
 		std::array<std::string, 2> m_pageLabels{};
+
+		// 枠が増えた瞬間を拾うための前フレームの枠数と、演出を始めた時刻
+		int m_previousMaxEquipped{ -1 };
+		std::chrono::steady_clock::time_point m_slotGainedTime{};
+		bool m_isSlotGained{ false };
 
 		// 周回演出の基準時刻。描画経路からしか呼ばれずdeltaTimeを受け取らないため、
 		// 経過時間は壁時計から求める

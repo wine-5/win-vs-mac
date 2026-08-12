@@ -69,6 +69,10 @@ namespace
 	constexpr int PAGE_COUNT{ 2 };
 	constexpr float PAGE_INTERVAL{ 5.0f }; // 自動で切り替わる間隔（秒。左下HUDと揃える）
 
+	// 枠が増えたときに「道中で取得」を出しっぱなしにする長さ（秒）。
+	// 自動送りに任せると、増えた直後に持ち込みのページが出て見逃す
+	constexpr float SLOT_GAINED_HOLD{ 4.0f };
+
 	// どちらのページを見ているかの見出し。これが無いと、切り替わった瞬間に
 	// 「装備が勝手に変わった」と読めてしまう
 	constexpr int PAGE_LABEL_FONT_SIZE{ 18 };
@@ -188,13 +192,23 @@ namespace game::ui::ingame
 		const float elapsed{ std::chrono::duration<float>(
 			std::chrono::steady_clock::now() - m_startTime)
 			    .count() };
-		const int page{ hasAcquired
-			                ? static_cast<int>(elapsed / PAGE_INTERVAL) % PAGE_COUNT
-			                : 0 };
 
-		// ページが変わった直後だけ下から持ち上げる。送っていないときは動かさない
-		const float sincePageChange{ std::fmod(elapsed, PAGE_INTERVAL) };
-		const float slideProgress{ hasAcquired
+		// 枠が増えた直後は自動送りを止めて「道中で取得」に固定する。
+		// RAMブロックは何も落とさないので、ここを見せないと壊した手応えが残らない
+		const bool isSlotGained{ updateSlotGained(static_cast<int>(acquired.size())) };
+		const int page{ isSlotGained ? PAGE_ACQUIRED
+			                         : (hasAcquired
+			                                   ? static_cast<int>(elapsed / PAGE_INTERVAL) % PAGE_COUNT
+			                                   : 0) };
+
+		// ページが変わった直後だけ下から持ち上げる。送っていないときは動かさない。
+		// 枠が増えたときも同じ動きで入れて、切り替わったことを目に留める
+		const float sincePageChange{ isSlotGained
+			                             ? std::chrono::duration<float>(
+			                                   std::chrono::steady_clock::now() - m_slotGainedTime)
+			                                   .count()
+			                             : std::fmod(elapsed, PAGE_INTERVAL) };
+		const float slideProgress{ (hasAcquired || isSlotGained)
 			                           ? std::min(sincePageChange / SLIDE_DURATION, 1.0f)
 			                           : 1.0f };
 		const int slideOffset{ static_cast<int>(scaled(SLIDE_OFFSET) * (1.0f - slideProgress)) };
@@ -374,6 +388,34 @@ namespace game::ui::ingame
 
 		// 装備済みはアクセント色。空きは薄いままにして視線を集めない
 		return hasSelection ? core::utility::Color::HUD_ACCENT : SLOT_BORDER_COLOR;
+	}
+
+	bool EquipmentSlotView::updateSlotGained(int maxEquipped)
+	{
+		// 初回は基準を取るだけ。ここで演出を始めると、開始直後に必ず一度流れてしまう
+		if (m_previousMaxEquipped < 0)
+		{
+			m_previousMaxEquipped = maxEquipped;
+			return false;
+		}
+
+		if (maxEquipped > m_previousMaxEquipped)
+		{
+			m_slotGainedTime = std::chrono::steady_clock::now();
+			m_isSlotGained = true;
+		}
+		m_previousMaxEquipped = maxEquipped;
+
+		if (!m_isSlotGained)
+			return false;
+
+		const float since{ std::chrono::duration<float>(
+			std::chrono::steady_clock::now() - m_slotGainedTime)
+			    .count() };
+		if (since >= SLOT_GAINED_HOLD)
+			m_isSlotGained = false;
+
+		return m_isSlotGained;
 	}
 
 	bool EquipmentSlotView::isBonusBoosted() const
