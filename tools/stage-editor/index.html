@@ -196,6 +196,7 @@
   <span class="sep"></span>
   <button id="btnSpace" title="ギズモの軸を切り替え">Global</button>
   <button id="btnEdgeSnap" title="端スナップ (V)：近くのオブジェクトの面へぴったり吸着">端スナップ</button>
+  <button id="btnLabels" class="active" title="名前ラベルの表示/非表示 (L)">ラベル</button>
   <span class="sep"></span>
   <button id="btnUndo" title="Ctrl+Z">Undo</button>
   <button id="btnRedo" title="Ctrl+Y">Redo</button>
@@ -206,7 +207,7 @@
   <button id="btnLoad">stageData 読込</button>
   <button id="btnCatalog">カタログ読込</button>
   <button id="btnSave" title="Ctrl+S">保存 (上書き)</button>
-  <span class="hint">Ctrl+S: 保存 / 右ドラッグ+WASD: 移動 / Q,E: 上下 / Shift: 加速 / F: フォーカス / Ctrl: グリッドスナップ / V: 端スナップ</span>
+  <span class="hint">Ctrl+S: 保存 / 右ドラッグ+WASD: 移動 / Q,E: 上下 / Shift: 加速 / F: フォーカス / Ctrl: グリッドスナップ / V: 端スナップ / L: ラベル</span>
 </div>
 
 <div id="hierarchy"></div>
@@ -298,6 +299,7 @@ let redoStack = [];
 let gizmoMode = 'translate';
 let gizmoSpace = 'world';
 let edgeSnap = false;           // 端スナップ（オブジェクト同士の面を吸着）
+let showLabels = true;          // 配置物の名前ラベルを出すか（密なステージでは邪魔になる）
 
 function defaultState() {
   return {
@@ -394,6 +396,7 @@ function makeLabelSprite(text, color) {
   const tex = new THREE.CanvasTexture(cv);
   tex.colorSpace = THREE.SRGBColorSpace;
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  sp.visible = showLabels; // 消した状態で置いた物のラベルだけが出てしまわないようにする
   sp.scale.set(w * 3.2, 44 * 3.2, 1);
   sp.renderOrder = 5;
   return sp;
@@ -928,6 +931,20 @@ function setEdgeSnap(on) {
   document.getElementById('edgeSnapBadge').style.display = on ? 'block' : 'none';
 }
 btn('btnEdgeSnap').onclick = () => setEdgeSnap(!edgeSnap);
+
+/**
+ * 名前ラベルの表示/非表示を切り替える。
+ *
+ * ラベルはSpriteとして各オブジェクトへぶら下げてある。密に置くほど文字が重なって
+ * 地形そのものが見えなくなるため、レベルデザイン中は消せる必要がある。
+ * 個別に持ち回らず、シーンを走査してSpriteだけを対象にする
+ */
+function setLabelsVisible(on) {
+  showLabels = on;
+  btn('btnLabels').classList.toggle('active', on);
+  scene.traverse(obj => { if (obj.isSprite) obj.visible = on; });
+}
+btn('btnLabels').onclick = () => setLabelsVisible(!showLabels);
 btn('btnUndo').onclick = doUndo;
 btn('btnRedo').onclick = doRedo;
 btn('btnDup').onclick = duplicateSelected;
@@ -1087,6 +1104,7 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'Delete') { deleteSelected(); return; }
   if (e.code === 'KeyF') { focusSelected(); return; }
   if (e.code === 'KeyV') { setEdgeSnap(!edgeSnap); return; }
+  if (e.code === 'KeyL') { setLabelsVisible(!showLabels); return; }
 
   /* W/E/R：右ドラッグ中はカメラ移動キーとして扱うためモード切替しない */
   if (!rmbDown && !e.ctrlKey) {
