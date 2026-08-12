@@ -255,9 +255,15 @@ namespace game::ui::ingame
 		m_captionAcquired = toDrawable("道中で取得（装備中）");
 		m_captionUnequipped = toDrawable("所持一覧（未装備）");
 		m_captionNoUnequipped = toDrawable("拾ったものはすべて装備中です");
+		m_captionSwapGuide = toDrawable("F2 の端末で付け替えできる");
 		m_captionStats = toDrawable("現在の能力");
 		m_captionMultiplier = toDrawable("拡張子の効果");
 		m_addressSwapText = toDrawable("PC  >  拡張子  >  付け替え");
+
+		// EとF2で窓の見た目がほとんど同じなため、どちらでも入れ替えられると誤解される。
+		// パンくずの行き先だけでは弱いので、いま何ができるのかを上部で言い切る
+		m_modeSwapLabel = toDrawable("拡張子を入れ替えられます");
+		m_modeViewLabel = toDrawable("見るだけ（入れ替えは F2 の端末で）");
 		m_captionHint = toDrawable("E / Esc : 閉じる");
 
 		// 付け替え中は操作が増える。どのキーで何ができるかを出しておかないと、
@@ -495,6 +501,15 @@ namespace game::ui::ingame
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(x + scaled(WINDOW_PADDING), y + (barHeight - fontSize) / 2,
 		    address.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
+
+		// できること／できないことを右端で言い切る。入れ替えられるときだけ
+		// アクセント色にして、開いた瞬間にどちらの窓かが色で分かるようにする
+		const std::string& mode{ m_isSwapMode ? m_modeSwapLabel : m_modeViewLabel };
+		const unsigned int modeColor{ m_isSwapMode ? core::utility::Color::HUD_ACCENT
+			                                       : core::utility::Color::HUD_INK_FAINT };
+		const int modeWidth{ m_uiRenderer.getTextWidth(mode.c_str(), fontSize) };
+		m_uiRenderer.drawText(x + width - scaled(WINDOW_PADDING) - modeWidth,
+		    y + (barHeight - fontSize) / 2, mode.c_str(), modeColor, fontSize);
 		m_uiRenderer.resetFont();
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SEPARATOR_ALPHA);
@@ -551,6 +566,20 @@ namespace game::ui::ingame
 			    m_captionNoUnequipped.c_str(), core::utility::Color::HUD_INK_FAINT, captionFontSize);
 			m_uiRenderer.resetFont();
 			return;
+		}
+
+		// 未装備があるときだけ付け替えの導線を出す。ここに並んでいるのは
+		// 「拾ったのに効いていないもの」で、プレイヤーが最初に「どうすれば挿せるのか」と
+		// 思う場所そのものなので、見出しの隣が一番読まれる。
+		// 未装備が無いときは操作の必要が無く、出しても読み飛ばされる情報になる
+		if (!m_isSwapMode)
+		{
+			const int captionFontSize{ scaled(SECTION_FONT_SIZE) };
+			m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
+			const int guideWidth{ m_uiRenderer.getTextWidth(m_captionSwapGuide.c_str(), captionFontSize) };
+			m_uiRenderer.drawText(x + width - guideWidth, y, m_captionSwapGuide.c_str(),
+			    core::utility::Color::HUD_ACCENT, captionFontSize);
+			m_uiRenderer.resetFont();
 		}
 
 		// 所持一覧は数が決まらないので段に分けず、素直に折り返す
