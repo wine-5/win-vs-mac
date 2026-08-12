@@ -291,10 +291,20 @@ namespace game::system::visual
 		    static_cast<int>(MISSION_CARD_ALPHA * alphaRate));
 		m_uiRenderer.drawBox(cardX, cardY, cardWidth, cardHeight, core::utility::Color::BLACK, true);
 
+		// フォントは文字サイズごとにハンドルが作られ、1つあたり数MBを確保する。
+		// 拡縮アニメの途中でサイズを1pxずつ変えると1フレームごとに別のフォントが増えるため、
+		// 段階を粗くしてハンドルの種類を抑える
+		auto fontSizeOf = [&](int value)
+		{
+			constexpr int FONT_SIZE_STEP{ 8 };
+			const int raw{ scaledBy(value) };
+			return std::max(FONT_SIZE_STEP, (raw + FONT_SIZE_STEP / 2) / FONT_SIZE_STEP * FONT_SIZE_STEP);
+		};
+
 		const int textAlpha{ static_cast<int>(255 * alphaRate) };
-		const int captionFontSize{ scaledBy(MISSION_CAPTION_FONT_SIZE) };
-		const int missionFontSize{ scaledBy(MISSION_FONT_SIZE) };
-		const int detailFontSize{ scaledBy(MISSION_DETAIL_FONT_SIZE) };
+		const int captionFontSize{ fontSizeOf(MISSION_CAPTION_FONT_SIZE) };
+		const int missionFontSize{ fontSizeOf(MISSION_FONT_SIZE) };
+		const int detailFontSize{ fontSizeOf(MISSION_DETAIL_FONT_SIZE) };
 
 		// 見出し（等幅）＋その下のアクセント線。「システムからの指令」という体裁にする
 		m_uiRenderer.setFont(core::constant::ui::MONO_SEMIBOLD_FONT_NAME);
