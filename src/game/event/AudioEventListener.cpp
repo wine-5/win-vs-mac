@@ -41,6 +41,15 @@ namespace game::event
 		    [this](const BlockBrokenEvent& e)
 		    { onBlockBroken(e); }));
 
+		// 枠が増えるのは欠片と違って拾う経路を通らないため、ここで鳴らさないと無音になる。
+		// 手に入れたことに変わりはないので、拾ったときと同じ音を使う
+		m_subscriptions.push_back(m_eventBus.subscribe<EquipSlotGainedEvent>(
+		    [](const EquipSlotGainedEvent&)
+		    {
+			    if (auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() })
+				    audio->playSe(core::constant::SeType::ItemPickup);
+		    }));
+
 		m_subscriptions.push_back(m_eventBus.subscribe<ExtensionPickedUpEvent>(
 		    [this](const ExtensionPickedUpEvent& e)
 		    { onExtensionPickedUp(e); }));
@@ -126,7 +135,7 @@ namespace game::event
 			                  : core::constant::SeType::BlockHit);
 	}
 
-	void AudioEventListener::onBlockBroken(const BlockBrokenEvent& /*e*/)
+	void AudioEventListener::onBlockBroken(const BlockBrokenEvent& e)
 	{
 		auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() };
 		if (!audio)
@@ -135,7 +144,12 @@ namespace game::event
 		audio->playSe(core::constant::SeType::BlockBreak);
 
 		// 欠片の出現音は破砕音に重ねる。壊した直後に「何か出た」を届けたいので、
-		// 拾うまで待たずにここで鳴らす
+		// 拾うまで待たずにここで鳴らす。
+		// ただし何も落とさないブロック（RAM・外れのギャンブルボックス）では鳴らさない。
+		// 出た音だけ鳴ると、落ちていない欠片を探して歩くことになる
+		if (!e.m_hasDrop)
+			return;
+
 		audio->playSe(core::constant::SeType::ItemDrop);
 	}
 

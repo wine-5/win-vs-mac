@@ -289,10 +289,19 @@ namespace game::event
 		/** @brief 壊れた位置（ワールド座標） */
 		core::Vector3 m_position{};
 
+		/**
+		 * @brief 欠片が出たか
+		 *
+		 * RAMブロックや外れのギャンブルボックスは何も落とさない。
+		 * 出ていないのに出現音を鳴らすと、拾える物を探して無駄に歩かせてしまう
+		 */
+		bool m_hasDrop{ false };
+
 		BlockBrokenEvent() = default;
-		BlockBrokenEvent(core::ecs::EntityId id, const core::Vector3& position)
+		BlockBrokenEvent(core::ecs::EntityId id, const core::Vector3& position, bool hasDrop = false)
 		    : m_entityId{ id }
 		    , m_position{ position }
+		    , m_hasDrop{ hasDrop }
 		{
 		}
 	};

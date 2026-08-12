@@ -239,7 +239,8 @@ namespace game::system::stage
 		grantEquipSlot(blockId);
 		resolveGamble(blockId);
 
-		m_eventBus.publish(event::BlockBrokenEvent{ blockId, transform.m_position });
+		m_eventBus.publish(event::BlockBrokenEvent{ blockId, transform.m_position,
+		    destructible.m_dropCount > 0 });
 	}
 
 	void BlockBreakSystem::grantEquipSlot(core::ecs::EntityId blockId)
