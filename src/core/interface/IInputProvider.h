@@ -41,6 +41,18 @@ namespace core::iface
 		virtual bool isKeyPressed(core::input::KeyCode keycode) const = 0;
 
 		/**
+		 * @brief 押された瞬間かを判定し、そのフレームぶんを消費する（1フレームに1回だけ成立）
+		 *
+		 * Applicationは1フレームに複数回 update を回すことがある（処理落ちの取り戻し）。
+		 * 前回状態の更新はフレームに1回しか行わないため、isKeyPressed は同じ1押しに対して
+		 * update の回数だけ true を返す。開閉のように「押すたびに1回だけ起こしたい」操作は
+		 * これを使う。押しっぱなしの扱いは isKeyPressed と同じ
+		 * @param keycode キーコード
+		 * @return このフレームでまだ消費されていない「押された瞬間」ならtrue
+		 */
+		virtual bool consumeKeyPress(core::input::KeyCode keycode) = 0;
+
+		/**
 		 * @brief フレーム最後に呼び出して前フレームの入力状態を更新する
 		 */
 		virtual void updatePreviousState() = 0;

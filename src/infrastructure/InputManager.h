@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "core/interface/IInputProvider.h"
 #include <unordered_map>
+#include <unordered_set>
 
 namespace infrastructure
 {
@@ -33,6 +34,13 @@ namespace infrastructure
 		 * @return 押された瞬間の場合true
 		 */
 		[[nodiscard]] bool isKeyPressed(core::input::KeyCode keycode) const override;
+
+		/**
+		 * @brief 押された瞬間かを判定し、そのフレームぶんを消費する
+		 * @param keycode キーコード
+		 * @return このフレームでまだ消費されていない「押された瞬間」ならtrue
+		 */
+		[[nodiscard]] bool consumeKeyPress(core::input::KeyCode keycode) override;
 
 		/**
 		 * @brief フレームの最後に呼び出して前フレームの状態を更新する
@@ -98,6 +106,9 @@ namespace infrastructure
 	  private:
 		std::unordered_map<core::input::KeyCode, bool> m_currentKeyState;          // captureFrameInput()でキャプチャした今フレームの状態
 		mutable std::unordered_map<core::input::KeyCode, bool> m_previousKeyState; // isKeyPressed(const)内でoperator[]により新規挿入されうる
+
+		// このフレームで既に消費した「押された瞬間」。updatePreviousState で空にする
+		std::unordered_set<core::input::KeyCode> m_consumedKeys;
 		bool m_cursorVisible{ true }; // 表示中は前回座標との差分、非表示中は中央固定差分を使う
 		int m_previousMouseX{ 0 };
 		int m_previousMouseY{ 0 };

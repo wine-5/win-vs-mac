@@ -943,13 +943,13 @@ namespace game::scene
 		// ポーズメニュー側（Application）はインベントリで止まっている間はEscを見ないので、
 		// ここで閉じてもメニューが続けて開くことはない
 		if (m_pauseManager.isPausedBy(PauseReason::Inventory) &&
-		    m_inputProvider.isKeyPressed(core::input::KeyCode::Escape))
+		    m_inputProvider.consumeKeyPress(core::input::KeyCode::Escape))
 		{
 			setInventoryOpen(false, false);
 			return;
 		}
 
-		if (!m_inputProvider.isKeyPressed(core::input::KeyCode::E))
+		if (!m_inputProvider.consumeKeyPress(core::input::KeyCode::E))
 			return;
 
 		// 別の理由（ポーズメニュー）で止まっている間は開かない。
@@ -962,7 +962,7 @@ namespace game::scene
 
 	void InGame::updateRenameTerminal()
 	{
-		if (!m_inputProvider.isKeyPressed(core::input::KeyCode::F2))
+		if (!m_inputProvider.consumeKeyPress(core::input::KeyCode::F2))
 			return;
 
 		// 開いている間はF2でも閉じられる。開いたキーで閉じられないと、
