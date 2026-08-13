@@ -189,25 +189,6 @@ namespace game::scene
 			return m_resultScene.get();
 		}
 
-		// DEBUG: 破壊演出の検証用。方式が決まったら本体へ取り込んでこのcaseごと削除する
-		case SceneType::DebugDestruction:
-		{
-			auto* camera = core::base::ServiceLocator::get<core::iface::ICamera>();
-			auto* renderer = core::base::ServiceLocator::get<core::iface::IRenderer>();
-			auto* resourceManager = core::base::ServiceLocator::get<core::iface::IResourceManager>();
-			auto* inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
-			auto* uiRenderer = core::base::ServiceLocator::get<core::iface::IUIRenderer>();
-
-			m_debugDestructionScene = std::make_unique<DebugDestruction>(
-			    *camera,
-			    *renderer,
-			    *resourceManager,
-			    *inputProvider,
-			    *uiRenderer,
-			    *screen);
-			return m_debugDestructionScene.get();
-		}
-
 		default:
 			return nullptr;
 		}
@@ -226,7 +207,6 @@ namespace game::scene
 			m_loadingScene.reset();
 			break;
 		case SceneType::InGame:     m_inGameScene.reset();     break;
-		case SceneType::DebugDestruction: m_debugDestructionScene.reset(); break; // DEBUG
 		case SceneType::Result:
 			m_resultScene.reset();
 			break;

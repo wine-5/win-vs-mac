@@ -41,7 +41,7 @@ namespace
 	constexpr float FAR_LAYER_DIM{ 0.33f }; // 高さが離れた床を薄める割合
 
 	// パネルの上にもう一段沈める暗幕。地形の線が背景に埋もれないようにする
-	constexpr unsigned int MAP_BACKGROUND{ 0xFF060A12 };
+	constexpr unsigned int MAP_BACKGROUND{ core::utility::Color::MAP_BACKGROUND_NAVY };
 	constexpr int MAP_BACKGROUND_ALPHA{ 128 };
 
 	// 自機の矢印（1080p基準）
@@ -50,7 +50,7 @@ namespace
 	constexpr int ARROW_TAIL{ 3 }; // 後端のくびれ
 
 	// 発見されている間の赤い警告（1080p基準）
-	constexpr unsigned int COLOR_ALERT{ 0xFFE81123 };
+	constexpr unsigned int COLOR_ALERT{ core::utility::Color::HUD_CRIT_RED };
 	// マップ全体に薄く被せる赤。地形が読める濃さに留める
 	constexpr int ALERT_WASH_ALPHA{ 54 };
 	// 縁のにじみ。層ごとに位置をずらして描くので、濃淡は層ごとの不透明度で作る
@@ -67,17 +67,17 @@ namespace
 	// 敵・ボスの点（1080p基準）
 	constexpr int ENEMY_MARKER_SIZE{ 3 };
 	constexpr int BOSS_MARKER_SIZE{ 5 };
-	constexpr unsigned int COLOR_ENEMY{ 0xFFE81123 };
-	constexpr unsigned int COLOR_BOSS{ 0xFFFFC83D };
+	constexpr unsigned int COLOR_ENEMY{ core::utility::Color::HUD_CRIT_RED };
+	constexpr unsigned int COLOR_BOSS{ core::utility::Color::HUD_CHARGE_MAX };
 	constexpr int MARKER_ALPHA{ 255 };
 	constexpr int MARKER_OUTSIDE_ALPHA{ 140 }; // 範囲外＝方向だけを示している点
 
 	// 床の色。配置物の種類（stageCatalog.jsonのid）はゲーム層まで降りてこないため、
 	// GroundSurfaceComponentが持つ「振る舞い」で塗り分ける。
 	// プレイヤーにとっても見た目より「滑るのか・運ばれるのか」のほうが役に立つ
-	constexpr unsigned int COLOR_FLOOR{ 0xFF0067C0 };    // 普通の足場
-	constexpr unsigned int COLOR_SLOPE{ 0xFF3FB950 };    // 滑る坂
-	constexpr unsigned int COLOR_CONVEYOR{ 0xFF00B7C3 }; // 動く歩道
+	constexpr unsigned int COLOR_FLOOR{ core::utility::Color::MAP_FLOOR_BLUE };
+	constexpr unsigned int COLOR_SLOPE{ core::utility::Color::MAP_SLOPE_GREEN };
+	constexpr unsigned int COLOR_CONVEYOR{ core::utility::Color::MAP_CONVEYOR_CYAN };
 } // namespace
 
 namespace game::ui::ingame

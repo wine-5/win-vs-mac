@@ -41,8 +41,6 @@ MANIFEST = [
     # ② System32（システム深層）
     ("FloorMemory",      "FloorMemory.png"),
     ("WallTerminal",     "WallTerminal.png"),
-    ("BlockDll",         "BlockDll.png"),
-    ("BlockExe",         "BlockExe.png"),
     ("WallRegistry",     "WallRegistry.png"),
     ("WallData",         "WallData.png"),
     # ③ Program Files（アプリ格納庫・UAC関門）
@@ -64,6 +62,17 @@ MANIFEST = [
     ("BlockExtSourceCode", "BlockExtSourceCode.png"),
     ("BlockExtVideo",      "BlockExtVideo.png"),
     ("BlockExtUnknown",    "BlockExtUnknown.png"),
+    # ⑥ 中身のない普通のブロック（gen_plain_block_texture.py が吐くテクスチャを貼る）。
+    #    壊せない足場・地形として置く物なので、ひび・破片は用意しない
+    ("BlockPlain",         "BlockPlain.png"),
+    # ⑦ RAMブロック（gen_ram_block_texture.py が吐くテクスチャを貼る）。
+    #    壊すと拡張子を挿せる枠が1つ増える
+    ("BlockRam",           "BlockRam.png"),
+    # ⑧ 拡張子の付け替え端末（gen_rename_texture.py が吐くテクスチャを貼る）。
+    #    壊せない設置物なので、ひび・破片は用意しない
+    ("BlockRename",        "BlockRename.png"),
+    # ⑨ ギャンブルボックス。壊すと高確率で敵が出るが、低確率で装備中の拡張子の効果が2倍になる
+    ("BlockGamble",        "BlockGamble.png"),
 ]
 
 # ---- 100x100x100 立方体の頂点 ----

@@ -19,8 +19,8 @@ namespace
 	constexpr int HEAD_MARGIN{ 40 }; // 頭のてっぺんからバーまでの間隔（ワールド単位）
 
 	constexpr int BAR_GROOVE_ALPHA{ 150 }; // 溝は暗く敷く（明るい背景でも輪郭が出るように）
-	constexpr unsigned int BAR_GROOVE_COLOR{ 0xFF0E1420 };
-	constexpr unsigned int BAR_FILL_COLOR{ 0xFFE81123 }; // 敵＝赤。プレイヤーの緑と取り違えない
+	constexpr unsigned int BAR_GROOVE_COLOR{ core::utility::Color::HUD_PANEL_FILL };
+	constexpr unsigned int BAR_FILL_COLOR{ core::utility::Color::HUD_CRIT_RED }; // 敵＝赤。プレイヤーの緑と取り違えない
 
 	// コライダーが無い敵向けの頭の高さ（ワールド単位）
 	constexpr float FALLBACK_HEAD_HEIGHT{ 150.0f };

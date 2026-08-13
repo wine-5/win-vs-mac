@@ -41,6 +41,13 @@ namespace game::component::combat
 		// 「攻撃した瞬間」を知りたい場合（攻撃アニメの要求など）はこれを見る
 		bool m_justFired{ false };
 
+		// このフレームで当たり判定が解決されたか（＝剣が当たる瞬間）。
+		// m_justFired は「振り始め」なので、ワインドアップのある攻撃では
+		// m_windupDelay ぶん早い。ダメージと歩調を合わせたい処理はこちらを見る。
+		// 遅延の秒数を各所で持ち直すと m_windupDelay を調整したときにずれるため、
+		// 「解決された瞬間」そのものを配る
+		bool m_justResolved{ false };
+
 		// 攻撃開始エフェクトの位置補正（ワールド単位）。手のボーン位置を基準に出すと
 		// エフェクトの絵柄によっては高すぎたり低すぎたりするため、その差を吸収する
 		core::Vector3 m_effectPositionOffset{};

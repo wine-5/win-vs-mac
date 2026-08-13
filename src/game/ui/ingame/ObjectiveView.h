@@ -32,7 +32,7 @@ namespace game::ui::ingame
 
 		/**
 		 * @brief 目標を描画する
-		 * @param remainingEnemyCount 残っている開始時配置の雑魚の数
+		 * @param remainingEnemyCount 残っている討伐対象の雑魚の数
 		 * @param isBossAppeared ボスが出現済みかどうか（trueなら討伐目標に切り替える）
 		 */
 		void draw(int remainingEnemyCount, bool isBossAppeared);

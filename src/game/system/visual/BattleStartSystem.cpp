@@ -41,13 +41,10 @@ namespace
 	constexpr float TOTAL_TIME{ FIGHT_TIME + FIGHT_HOLD + FIGHT_FADE_OUT };
 
 	// --- 見た目（1080p基準） ---
-	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono SemiBold" };
 
 	// 「Windowsの内部」という世界観に合わせ、システムメッセージのような等幅＋字間で見せる
 	constexpr const char* READY_TEXT{ "R E A D Y" };
 	constexpr const char* FIGHT_TEXT{ "F I G H T !" };
-
-	constexpr const char* UI_FONT_NAME{ "Noto Sans JP" };
 
 	// ミッションの文面。左上のObjectiveViewと同じ目標を、初見でも分かる言い回しで先に伝える
 	constexpr const char* MISSION_CAPTION{ "MISSION" };
@@ -294,13 +291,23 @@ namespace game::system::visual
 		    static_cast<int>(MISSION_CARD_ALPHA * alphaRate));
 		m_uiRenderer.drawBox(cardX, cardY, cardWidth, cardHeight, core::utility::Color::BLACK, true);
 
+		// フォントは文字サイズごとにハンドルが作られ、1つあたり数MBを確保する。
+		// 拡縮アニメの途中でサイズを1pxずつ変えると1フレームごとに別のフォントが増えるため、
+		// 段階を粗くしてハンドルの種類を抑える
+		auto fontSizeOf = [&](int value)
+		{
+			constexpr int FONT_SIZE_STEP{ 8 };
+			const int raw{ scaledBy(value) };
+			return std::max(FONT_SIZE_STEP, (raw + FONT_SIZE_STEP / 2) / FONT_SIZE_STEP * FONT_SIZE_STEP);
+		};
+
 		const int textAlpha{ static_cast<int>(255 * alphaRate) };
-		const int captionFontSize{ scaledBy(MISSION_CAPTION_FONT_SIZE) };
-		const int missionFontSize{ scaledBy(MISSION_FONT_SIZE) };
-		const int detailFontSize{ scaledBy(MISSION_DETAIL_FONT_SIZE) };
+		const int captionFontSize{ fontSizeOf(MISSION_CAPTION_FONT_SIZE) };
+		const int missionFontSize{ fontSizeOf(MISSION_FONT_SIZE) };
+		const int detailFontSize{ fontSizeOf(MISSION_DETAIL_FONT_SIZE) };
 
 		// 見出し（等幅）＋その下のアクセント線。「システムからの指令」という体裁にする
-		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::MONO_SEMIBOLD_FONT_NAME);
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, textAlpha);
 		const int captionWidth{ m_uiRenderer.getTextWidth(MISSION_CAPTION, captionFontSize) };
 		const int captionY{ centerY + scaledBy(MISSION_CAPTION_OFFSET_Y) };
@@ -313,7 +320,7 @@ namespace game::system::visual
 		    captionWidth, accentThickness, core::utility::Color::HUD_ACCENT, true);
 
 		// 本文と補足
-		m_uiRenderer.setFont(UI_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		const int missionWidth{ m_uiRenderer.getTextWidth(m_missionText.c_str(), missionFontSize) };
 		m_uiRenderer.drawText(centerX - missionWidth / 2, centerY + scaledBy(MISSION_TEXT_OFFSET_Y),
 		    m_missionText.c_str(), core::utility::Color::HUD_INK, missionFontSize);
@@ -353,7 +360,7 @@ namespace game::system::visual
 
 		const int promptFontSize{ scaled(MISSION_PROMPT_FONT_SIZE) };
 
-		m_uiRenderer.setFont(UI_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		const int promptWidth{ m_uiRenderer.getTextWidth(m_promptText.c_str(), promptFontSize) };
 
 		// 床が明るいステージでは文字だけだと沈む。文字の後ろに暗い帯を敷いて必ず読めるようにする
@@ -421,7 +428,7 @@ namespace game::system::visual
 		const int textWidth{ m_uiRenderer.getTextWidth(READY_TEXT, fontSize) };
 		const int textY{ centerY - fontSize / 2 + static_cast<int>(scaled(READY_RISE) * riseRate) };
 
-		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::MONO_SEMIBOLD_FONT_NAME);
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
 		    static_cast<int>(255 * alphaRate));
 		m_uiRenderer.drawText((screenWidth - textWidth) / 2, textY, READY_TEXT,
@@ -460,7 +467,7 @@ namespace game::system::visual
 		const int rise{ static_cast<int>(scaled(FIGHT_RISE) * (1.0f - alphaRate)) };
 		const int textY{ centerY - fontSize / 2 - rise };
 
-		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::MONO_SEMIBOLD_FONT_NAME);
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
 		    static_cast<int>(255 * alphaRate));
 		// 開戦の合図は青い床の上でも沈まないオレンジで出す。

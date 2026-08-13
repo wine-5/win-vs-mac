@@ -21,6 +21,8 @@ namespace infrastructure
 
 		{ core::input::KeyCode::Shift, KEY_INPUT_LSHIFT },
 		{ core::input::KeyCode::Tab, KEY_INPUT_TAB },
+		{ core::input::KeyCode::E, KEY_INPUT_E },
+		{ core::input::KeyCode::F2, KEY_INPUT_F2 },
 	};
 
 	InputManager::InputManager()
@@ -64,8 +66,20 @@ namespace infrastructure
 		return currentState && !previousState;
 	}
 
+	bool InputManager::consumeKeyPress(core::input::KeyCode keyCode)
+	{
+		if (!isKeyPressed(keyCode))
+			return false;
+
+		// 同じフレーム内で2度目以降は成立させない。updateが複数回回っても
+		// 「1押し＝1回」を保つ
+		return m_consumedKeys.insert(keyCode).second;
+	}
+
 	void InputManager::updatePreviousState()
 	{
+		m_consumedKeys.clear();
+
 		// captureFrameInput()でキャプチャした今フレームの状態を、次フレームの「前回状態」として保存する
 		for (const auto& [keyCode, dxKey] : KEY_MAP)
 		{

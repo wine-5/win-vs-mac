@@ -25,9 +25,10 @@ namespace core::constant
 	// フリーズやメモリ使用量を追いたいときだけtrueに戻す
 	constexpr bool WRITE_DEBUG_LOG_FILES{ false };
 
-	// 起動時にデバッグ用シーン（破壊演出の検証）から始めるか。
-	// falseなら通常どおりBIOSから始まる
-	constexpr bool START_FROM_DEBUG_SCENE{ false };
+	// 起動時にインゲームから始めるか。
+	// falseなら通常どおりBIOSから始まる。
+	// インゲームの動作を見たいだけのときにBIOS〜セレクトを毎回通らずに済ませる
+	constexpr bool START_FROM_IN_GAME{ true };
 
 	// デバッグ表示（当たり判定などのギズモ・統計HUD）を生成するか。
 	// falseならインゲームで一切作られず、更新も描画も走らない
@@ -39,7 +40,7 @@ namespace core::constant
 
 	// インゲーム中にマウスカーソルを表示するか。
 	// 本来は3人称マウス視点のため隠す。デバッグウィンドウを触りたいときだけtrue
-	constexpr bool SHOW_MOUSE_CURSOR_IN_GAME{ false };
+	constexpr bool SHOW_MOUSE_CURSOR_IN_GAME{ true };
 
 	// 連続ジャンプ（空中浮上）を許可するか。
 	// falseで通常の接地単発ジャンプ。空中移動して動作確認したいときだけtrue

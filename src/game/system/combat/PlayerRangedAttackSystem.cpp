@@ -190,7 +190,7 @@ namespace game::system::combat
 		// 壁・ブロックを抜けられるのは溜め切った弾だけ。通常撃ちは遮蔽物で止まる
 		config.m_penetratesWalls = isFullyCharged;
 
-		// 近接と同じようにクリティカルが出るよう、プレイヤーの会心設定を弾へ引き継ぐ
+		// 近接と同じようにクリティカルが出るよう、プレイヤーのクリティカル設定を弾へ引き継ぐ
 		if (auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(m_playerId) })
 		{
 			config.m_criticalRate = attack->m_criticalRate;

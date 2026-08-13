@@ -30,9 +30,6 @@ namespace
 	constexpr int BOSS_LABEL_Y{ 48 };
 	constexpr int BOSS_FONT_SIZE{ 26 };
 
-	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono SemiBold" };
-	constexpr const char* UI_FONT_NAME{ "Noto Sans JP" };
-
 	// 残り数が減ったときの反応
 	constexpr float COUNT_REACTION_DURATION{ 0.45f };
 	constexpr int COUNT_REACTION_POP{ 7 }; // 跳ね上がる最大量（1080p基準・上方向）
@@ -93,7 +90,7 @@ namespace game::ui::ingame
 		if (remainingEnemyCount == m_lastCount)
 			return;
 
-		// 初回（-1からの初期化）とボス召喚などで増えた場合は反応させない。
+		// 初回（-1からの初期化）と、ブロックから湧いて増えた場合は反応させない。
 		// 「1体倒した」という手応えを返すのが目的なので、減ったときだけ動かす
 		const bool decreased{ m_lastCount >= 0 && remainingEnemyCount < m_lastCount };
 		m_lastCount = remainingEnemyCount;
@@ -128,7 +125,7 @@ namespace game::ui::ingame
 
 		const int padding{ scaled(PANEL_PADDING) };
 
-		m_uiRenderer.setFont(UI_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(panelX + padding, panelY + scaled(CAPTION_Y), m_captionText.c_str(),
 		    core::utility::Color::HUD_INK, scaled(CAPTION_FONT_SIZE));
 
@@ -156,14 +153,14 @@ namespace game::ui::ingame
 		const int popOffset{ static_cast<int>(
 			-scaled(COUNT_REACTION_POP) * std::sin(reaction * core::utility::PI)) };
 
-		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::MONO_SEMIBOLD_FONT_NAME);
 		const int countFontSize{ scaled(COUNT_FONT_SIZE) };
 		m_uiRenderer.drawText(panelX + padding, panelY + scaled(COUNT_Y) + popOffset, countText,
 		    countColor, countFontSize);
 		const int countWidth{ m_uiRenderer.getTextWidth(countText, countFontSize) };
 		m_uiRenderer.resetFont();
 
-		m_uiRenderer.setFont(UI_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(panelX + padding + countWidth + scaled(COUNT_DETAIL_GAP),
 		    panelY + scaled(DETAIL_Y), m_detailText.c_str(),
 		    core::utility::Color::HUD_INK, scaled(DETAIL_FONT_SIZE));

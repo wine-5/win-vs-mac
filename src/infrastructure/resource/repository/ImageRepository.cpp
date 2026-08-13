@@ -20,7 +20,9 @@ namespace infrastructure::resource::repository
     {
         for (auto& [id, handle] : m_handles)
             DeleteGraph(handle);
-    }
+		for (auto& [path, handle] : m_pathHandles)
+			DeleteGraph(handle);
+	}
 
     int ImageRepository::loadImageById(std::string_view imageId)
     {
@@ -47,6 +49,25 @@ namespace infrastructure::resource::repository
         m_handles[id] = handle;
         return handle;
     }
+
+	int ImageRepository::loadImageByPath(std::string_view path)
+	{
+		const std::string key{ path };
+
+		auto handleIt{ m_pathHandles.find(key) };
+		if (handleIt != m_pathHandles.end())
+			return handleIt->second;
+
+		const int handle{ LoadGraph(key.c_str()) };
+		if (handle == -1)
+		{
+			core::log::error("画像の読み込みに失敗しました: {}", key.c_str());
+			return -1;
+		}
+
+		m_pathHandles[key] = handle;
+		return handle;
+	}
 
 	std::vector<std::string> ImageRepository::getAllIds() const
 	{

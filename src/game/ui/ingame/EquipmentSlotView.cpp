@@ -1,9 +1,16 @@
-#include "EquipmentSlotView.h"
+﻿#include "EquipmentSlotView.h"
+#include "OrbitGlow.h"
 #include "core/constant/UI.h"
 #include "core/interface/IResourceManager.h"
 #include "core/utility/Color.h"
 #include "core/utility/Log.h"
 #include "game/data/FileEquipmentData.h"
+#include "game/component/combat/ExtensionInventoryComponent.h"
+#include "game/constant/ExtensionIconId.h"
+#include "game/utility/ExtensionBonusLabel.h"
+#include "game/utility/PlayerStats.h"
+#include "core/base/ServiceLocator.h"
+#include "core/interface/IStringConverter.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -29,37 +36,57 @@ namespace
 	constexpr int BONUS_FONT_SIZE{ 19 };
 
 	// スロットの塗りと枠。色と不透明度を分けて持つ（DxLibのブレンドはアルファを別途指定するため）
-	constexpr unsigned int SLOT_FILL_COLOR{ 0xFF0E1420 };
+	constexpr unsigned int SLOT_FILL_COLOR{ core::utility::Color::HUD_PANEL_FILL };
 	constexpr int SLOT_FILL_ALPHA{ 184 }; // 約72%
-	constexpr unsigned int SLOT_BORDER_COLOR{ 0xFF8CAAD2 };
+	constexpr unsigned int SLOT_BORDER_COLOR{ core::utility::Color::HUD_PANEL_BORDER };
 	constexpr int SLOT_BORDER_ALPHA{ 46 };         // 約18%
 	constexpr int SLOT_ACCENT_BORDER_ALPHA{ 200 }; // 装備済みスロットの枠
 
-	// 縁を周回する光の粒（装備中のスロットのみ）
-	constexpr float ORBIT_PERIOD{ 3.2f };          // 一周にかける秒数
-	constexpr int ORBIT_COMET_COUNT{ 2 };          // 同時に回る粒の列の数（外周上で等間隔に配置する）
-	constexpr int ORBIT_TRAIL_COUNT{ 16 };         // 1列あたりの粒の数（後ろほど淡くなる）
-	constexpr float ORBIT_TRAIL_SPACING{ 0.011f }; // 粒どうしの間隔（周回全体を1.0とした割合）
-	constexpr int ORBIT_DOT_RADIUS{ 3 };           // 先頭の粒の半径（1080p基準）
-	constexpr int ORBIT_ALPHA{ 210 };              // 加算合成の強さ（粒ごとの明暗は色側で付ける）
-	constexpr float ORBIT_PHASE_PER_SLOT{ 0.33f }; // スロットごとに位相をずらして同期させない
+	// セレクト画面で選んだ枠は道中では変えられない。インベントリの固定枠と同じ赤で示し、
+	// 「触れない枠」の色を画面ごとにずらさない
+	constexpr unsigned int LOCKED_BORDER_COLOR{ core::utility::Color::HUD_LOCKED_RED };
 
-	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono" };
+	// RAMブロックで増えた枠。強化を示す緑で、もともとの枠と見分ける
+	constexpr unsigned int GAINED_BORDER_COLOR{ core::utility::Color::HUD_BUFF_GREEN };
+
+	// 倍率が掛かっているときに光の粒を速める割合。
+	// 上げすぎると粒が線に見えて本数が数えられなくなり、倍率の手掛かりが消える
+	constexpr float BOOSTED_SPEED_SCALE{ 1.5f };
+
+	// 意味のある縁は太くする。1pxのままだと色を付けても背景に紛れて読めない
+	constexpr int MEANINGFUL_BORDER_THICKNESS{ 3 };
+	constexpr int MEANINGFUL_BORDER_ALPHA{ 255 };
+
+	// 上下2段に分けたときの段の間隔
+	constexpr int ROW_GAP{ 12 };
+
 	constexpr const char* EMPTY_LABEL{ "--" };
 
-	// 拡張子アイコンの画像ID（resources.json）。セレクト画面と同じ絵柄を128pxへ縮小したもの
-	constexpr const char* EMPTY_ICON_IMAGE_ID{ "ext-emp" };
-	constexpr std::array<std::pair<core::data::FileExtensionType, const char*>, 9> ICON_IMAGE_IDS{ {
-		{ core::data::FileExtensionType::Executable, "ext-exe" },
-		{ core::data::FileExtensionType::Document, "ext-doc" },
-		{ core::data::FileExtensionType::Image, "ext-img" },
-		{ core::data::FileExtensionType::Audio, "ext-aud" },
-		{ core::data::FileExtensionType::SourceCode, "ext-src" },
-		{ core::data::FileExtensionType::Shortcut, "ext-lnk" },
-		{ core::data::FileExtensionType::Video, "ext-vid" },
-		{ core::data::FileExtensionType::Archive, "ext-arc" },
-		{ core::data::FileExtensionType::Unknown, "ext-etc" },
-	} };
+	// 表示するページ。3枠しか置けないため、持ち込みと道中で拾ったぶんを交互に見せる。
+	// 枠を6つ並べると視界の右下がふさがり、戦闘中に見えない場所が増える
+	constexpr int PAGE_CARRIED{ 0 };  // セレクト画面で選んだもの
+	constexpr int PAGE_ACQUIRED{ 1 }; // 道中で拾ったもの
+	constexpr int PAGE_COUNT{ 2 };
+	constexpr float PAGE_INTERVAL{ 5.0f }; // 自動で切り替わる間隔（秒。左下HUDと揃える）
+
+	// 枠が増えたときに「道中で取得」を出しっぱなしにする長さ（秒）。
+	// 自動送りに任せると、増えた直後に持ち込みのページが出て見逃す
+	constexpr float SLOT_GAINED_HOLD{ 4.0f };
+
+	// どちらのページを見ているかの見出し。これが無いと、切り替わった瞬間に
+	// 「装備が勝手に変わった」と読めてしまう
+	constexpr int PAGE_LABEL_FONT_SIZE{ 18 };
+	constexpr int PAGE_LABEL_GAP{ 8 }; // 見出しとスロットの間隔
+
+	// 見出しの下敷き。HUDの背後はステージの絵で、明るい床の上では
+	// 文字色をどう選んでも沈む。スロットと同じ暗い面を敷いて読めるようにする
+	constexpr int PAGE_LABEL_PADDING_X{ 10 };
+	constexpr int PAGE_LABEL_PADDING_Y{ 4 };
+
+	// 切り替えは下から浮き上がらせる。瞬間的に絵が入れ替わると、
+	// 切り替わったのか元から違ったのかが分からない
+	constexpr float SLIDE_DURATION{ 0.30f }; // 切り替えアニメの長さ（秒）
+	constexpr int SLIDE_OFFSET{ 12 };        // スライドの振れ幅（1080p基準）
 
 	/**
 	 * @brief 拡張子種別の表示名を返す
@@ -82,87 +109,7 @@ namespace
 		}
 	}
 
-	/**
-	 * @brief 拡張子種別が何を強化するかを返す
-	 *
-	 * 装備の効果は開始時のステータス補正としてのみ現れるため、
-	 * 種別名だけでは何の役に立っているのか分からない。効果を併記する
-	 * @param type 拡張子種別
-	 * @return 強化される項目の短い表記
-	 */
-	const char* toBonusLabel(core::data::FileExtensionType type)
-	{
-		switch (type)
-		{
-		case core::data::FileExtensionType::Executable: return "ATK+";
-		case core::data::FileExtensionType::Document: return "SPD+";
-		case core::data::FileExtensionType::Image: return "DEF+";
-		case core::data::FileExtensionType::Audio: return "HP+";
-		// このViewはShift_JIS変換を通していないため、表記はASCIIに限る。
-		// B.は弾（Window弾）のこと。SPD+（移動速度）・RNG+（攻撃範囲）と紛れないよう区別する
-		case core::data::FileExtensionType::SourceCode: return "CRIT+";
-		case core::data::FileExtensionType::Shortcut: return "B.SPD+";
-		case core::data::FileExtensionType::Video: return "B.RNG+";
-		case core::data::FileExtensionType::Archive: return "ALL+";
-		default: return "RNG+";
-		}
-	}
 
-	/**
-	 * @brief 色の明るさを倍率で落とす
-	 *
-	 * 加算合成では色を暗くすることが透明度を下げることと同じ意味になる。
-	 * 粒ごとにブレンドモードを設定し直さずに済ませるため、明暗は色側で付ける
-	 * @param color 元の色（ARGB形式：0xAARRGGBB）
-	 * @param scale 明るさの倍率（0.0〜1.0）
-	 * @return 暗くした色
-	 */
-	unsigned int scaleBrightness(unsigned int color, float scale)
-	{
-		auto channel = [&](int shift)
-		{ return static_cast<int>(((color >> shift) & 0xFFu) * scale); };
-		return core::utility::Color::argb(255, channel(16), channel(8), channel(0));
-	}
-
-	/**
-	 * @brief 正方形の外周上の点を求める
-	 *
-	 * 角丸ぶんのズレは半径4pxと小さく、粒が角を通る一瞬しか出ないため無視する
-	 * @param x 左上のX座標
-	 * @param y 左上のY座標
-	 * @param size 一辺の長さ
-	 * @param t 外周をひと回りする進行度（0.0〜1.0。0.0が左上で時計回り）
-	 * @param outX 求めたX座標の格納先
-	 * @param outY 求めたY座標の格納先
-	 */
-	void pointOnSquarePerimeter(int x, int y, int size, float t, int& outX, int& outY)
-	{
-		// 0.0〜1.0の範囲へ丸めてから、上→右→下→左の4辺に割り当てる
-		const float wrapped{ t - std::floor(t) };
-		const float edge{ wrapped * 4.0f };
-		const int side{ static_cast<int>(edge) };
-		const int along{ static_cast<int>((edge - side) * size) };
-
-		switch (side)
-		{
-		case 0:
-			outX = x + along;
-			outY = y;
-			break; // 上辺（左→右）
-		case 1:
-			outX = x + size;
-			outY = y + along;
-			break; // 右辺（上→下）
-		case 2:
-			outX = x + size - along;
-			outY = y + size;
-			break; // 下辺（右→左）
-		default:
-			outX = x;
-			outY = y + size - along;
-			break; // 左辺（下→上）
-		}
-	}
 } // namespace
 
 namespace game::ui::ingame
@@ -170,24 +117,36 @@ namespace game::ui::ingame
 	EquipmentSlotView::EquipmentSlotView(core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
 	    const data::FileEquipmentData& equipmentData,
-	    core::iface::IResourceManager& resourceManager)
+	    core::iface::IResourceManager& resourceManager,
+	    core::ecs::ComponentManager& componentManager,
+	    core::ecs::EntityId playerId)
 	    : m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_equipmentData{ equipmentData }
+	    , m_componentManager{ componentManager }
+	    , m_playerId{ playerId }
 	{
 		// アイコンは毎フレーム引き直さず、生成時に一度だけ読み込む。
 		// 失敗しても描画は続けられる（文字表示へ退避する）ため、記録に留める
-		for (const auto& [type, imageId] : ICON_IMAGE_IDS)
+		for (int i{ 0 }; i < static_cast<int>(core::data::FileExtensionType::Count); ++i)
 		{
+			const auto type{ static_cast<core::data::FileExtensionType>(i) };
+			const std::string imageId{ constant::toExtensionIconId(type) };
 			const int handle{ resourceManager.loadImageById(imageId) };
 			if (handle == -1)
-				core::log::error("装備スロットの拡張子アイコン '{}' の読み込みに失敗しました", imageId);
-			m_iconHandles[static_cast<int>(type)] = handle;
+				core::log::error("装備スロットの拡張子アイコン '{}' の読み込みに失敗しました", imageId.c_str());
+			m_iconHandles[i] = handle;
 		}
 
-		m_emptyIconHandle = resourceManager.loadImageById(EMPTY_ICON_IMAGE_ID);
+		const std::string emptyIconId{ constant::extension_icon_id::EMPTY };
+		m_emptyIconHandle = resourceManager.loadImageById(emptyIconId);
 		if (m_emptyIconHandle == -1)
-			core::log::error("装備スロットの空きアイコン '{}' の読み込みに失敗しました", EMPTY_ICON_IMAGE_ID);
+			core::log::error("装備スロットの空きアイコン '{}' の読み込みに失敗しました", emptyIconId.c_str());
+
+		// DxLibの描画はShift_JISを期待する。毎フレーム同じ結果なので生成時に一度だけ変換する
+		auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+		m_pageLabels[PAGE_CARRIED] = converter ? converter->utf8ToShiftJis("セレクト画面で選択") : "セレクト画面で選択";
+		m_pageLabels[PAGE_ACQUIRED] = converter ? converter->utf8ToShiftJis("道中で取得") : "道中で取得";
 	}
 
 	int EquipmentSlotView::getIconHandle(core::data::FileExtensionType type) const
@@ -201,50 +160,194 @@ namespace game::ui::ingame
 		return value * m_screen.getHeight() / BASE_SCREEN_HEIGHT;
 	}
 
-	void EquipmentSlotView::draw()
+	std::vector<core::data::FileExtensionType> EquipmentSlotView::collectAcquired() const
 	{
-		constexpr int SLOT_COUNT{ data::FileEquipmentData::MAX_SLOTS };
+		const auto* inventory{
+			m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId)
+		};
+		if (inventory == nullptr)
+			return {};
 
-		const int slotSize{ scaled(SLOT_SIZE) };
-		const int gap{ scaled(SLOT_GAP) };
-		const int totalWidth{ slotSize * SLOT_COUNT + gap * (SLOT_COUNT - 1) };
+		// 枠の数はRAMブロックで増えるので、持ち込み側の3つ固定とは分けて数える。
+		// 埋まっていない位置は空きとして残し、あと何個挿せるかを枠の数で示す
+		std::vector<core::data::FileExtensionType> acquired(
+		    inventory->m_maxEquipped, core::data::FileExtensionType::Count);
 
-		// 右下アンカー。幅はモニタのアスペクト比で変わるため必ず実際の画面幅から逆算する
-		const int startX{ m_screen.getWidth() - scaled(MARGIN) - totalWidth };
-		const int y{ m_screen.getHeight() - scaled(MARGIN) - slotSize };
-
-		for (int i{ 0 }; i < SLOT_COUNT; ++i)
-		{
-			const int x{ startX + i * (slotSize + gap) };
-			const bool hasSelection{ m_equipmentData.hasSelection(i) };
-			drawSlot(x, y, slotSize, m_equipmentData.getExtensionType(i), hasSelection);
-
-			// 装備中のスロットだけ縁を光の粒が回り続ける（起動中であることの表現）
-			if (hasSelection)
-				drawOrbitingGlow(x, y, slotSize, i * ORBIT_PHASE_PER_SLOT);
-		}
+		const int count{ inventory->equippedCount() };
+		for (int i{ 0 }; i < count && i < inventory->m_maxEquipped; ++i)
+			acquired[i] = inventory->m_acquired[i];
+		return acquired;
 	}
 
-	void EquipmentSlotView::drawSlot(int x, int y, int size, core::data::FileExtensionType type, bool hasSelection)
+	void EquipmentSlotView::draw()
 	{
-		const int radius{ scaled(SLOT_RADIUS) };
+		const auto acquired{ collectAcquired() };
+
+		// 何も拾っていないうちはページを送らない。空の枠へ切り替わっても
+		// 見るものが無く、持ち込みを確認したいときに邪魔になるだけ
+		const bool hasAcquired{ std::any_of(acquired.begin(), acquired.end(),
+			[](core::data::FileExtensionType type)
+			{ return type != core::data::FileExtensionType::Count; }) };
+
+		const float elapsed{ std::chrono::duration<float>(
+			std::chrono::steady_clock::now() - m_startTime)
+			    .count() };
+
+		// 枠が増えた直後は自動送りを止めて「道中で取得」に固定する。
+		// RAMブロックは何も落とさないので、ここを見せないと壊した手応えが残らない
+		const bool isSlotGained{ updateSlotGained(static_cast<int>(acquired.size())) };
+		const int page{ isSlotGained ? PAGE_ACQUIRED
+			                         : (hasAcquired
+			                                   ? static_cast<int>(elapsed / PAGE_INTERVAL) % PAGE_COUNT
+			                                   : 0) };
+
+		// ページが変わった直後だけ下から持ち上げる。送っていないときは動かさない。
+		// 枠が増えたときも同じ動きで入れて、切り替わったことを目に留める
+		const float sincePageChange{ isSlotGained
+			                             ? std::chrono::duration<float>(
+			                                   std::chrono::steady_clock::now() - m_slotGainedTime)
+			                                   .count()
+			                             : std::fmod(elapsed, PAGE_INTERVAL) };
+		const float slideProgress{ (hasAcquired || isSlotGained)
+			                           ? std::min(sincePageChange / SLIDE_DURATION, 1.0f)
+			                           : 1.0f };
+		const int slideOffset{ static_cast<int>(scaled(SLIDE_OFFSET) * (1.0f - slideProgress)) };
+
+		// 表示する枠の数はページで変わる。持ち込みは3つ固定、
+		// 道中で拾ったぶんは増えた枠の数だけ並ぶ
+		const int slotCount{ page == PAGE_CARRIED
+			                     ? data::FileEquipmentData::MAX_SLOTS
+			                     : static_cast<int>(acquired.size()) };
+
+		// もともとの3枠を下段に、増えたぶんを上段へ載せる。
+		//     [][]
+		//   [][][]
+		// 横一列に伸ばすと右下のかたまりが広がって視界を削るうえ、
+		// 段を分けることで「下がもともと、上が増えたぶん」と役割も読める
+		constexpr int BASE_SLOT_COUNT{ data::FileEquipmentData::MAX_SLOTS };
+		const int bottomCount{ std::min(slotCount, BASE_SLOT_COUNT) };
+		const int topCount{ slotCount - bottomCount };
+
+		const int baseSlotSize{ scaled(SLOT_SIZE) };
+		const int gap{ scaled(SLOT_GAP) };
+		const int totalWidth{ baseSlotSize * BASE_SLOT_COUNT + gap * (BASE_SLOT_COUNT - 1) };
+
+		// 段に4つ以上並ぶときだけ縮めて幅に収める。並び全体の幅は変えない
+		const auto rowSlotSize = [&](int count)
+		{
+			return count <= BASE_SLOT_COUNT ? baseSlotSize
+			                                : (totalWidth - gap * (count - 1)) / count;
+		};
+
+		const int bottomSize{ rowSlotSize(bottomCount) };
+		const int topSize{ topCount > 0 ? rowSlotSize(topCount) : 0 };
+
+		// 右下アンカー。幅はモニタのアスペクト比で変わるため必ず実際の画面幅から逆算する。
+		// 見出しは並びの下へ置く。上に置くと段数によって高さが変わり、
+		// ページが替わるたびに文字だけが上下して読みづらい
+		const int right{ m_screen.getWidth() - scaled(MARGIN) };
+		const int labelHeight{ scaled(PAGE_LABEL_FONT_SIZE) + scaled(PAGE_LABEL_PADDING_Y) * 2 };
+		const int labelTop{ m_screen.getHeight() - scaled(MARGIN) - labelHeight + slideOffset };
+
+		const int bottomY{ labelTop - scaled(PAGE_LABEL_GAP) - bottomSize };
+		const int topY{ bottomY - scaled(ROW_GAP) - topSize };
+
+		// 段ごとに中央へ寄せる。上段が少ないときに左端へ寄ると、
+		// 下段との関係が崩れて別の並びに見える
+		const auto drawRow = [&](int firstIndex, int count, int size, int rowY, SlotAccent accent)
+		{
+			if (count <= 0)
+				return;
+
+			const int rowWidth{ size * count + gap * (count - 1) };
+			const int rowLeft{ right - totalWidth + (totalWidth - rowWidth) / 2 };
+
+			for (int i{ 0 }; i < count; ++i)
+			{
+				const int index{ firstIndex + i };
+				const int x{ rowLeft + i * (size + gap) };
+
+				const bool isCarriedPage{ page == PAGE_CARRIED };
+				const auto type{ isCarriedPage ? m_equipmentData.getExtensionType(index)
+					                           : acquired[index] };
+				const bool hasSelection{ isCarriedPage
+					                         ? m_equipmentData.hasSelection(index)
+					                         : type != core::data::FileExtensionType::Count };
+
+				drawSlot(x, rowY, size, type, hasSelection, accent);
+
+				// 装備中のスロットだけ縁を光の粒が回り続ける（起動中であることの表現）。
+				// 色は縁と揃える。別の色で回すと、1つのマスが2つの色を主張してしまう。
+				// ただし倍率が掛かっているときだけは紫で回す。滅多に無い状態なので、
+				// 縁の意味より「いま特別な状態だ」を優先して伝える
+				if (hasSelection)
+					drawOrbitingGlow(x, rowY, size, index * orbit_glow::PHASE_PER_SLOT,
+					    isBonusBoosted() ? core::utility::Color::HUD_EXTENSION_BOOST_VIOLET
+					                     : borderColor(hasSelection, accent));
+			}
+		};
+
+		const SlotAccent bottomAccent{ page == PAGE_CARRIED ? SlotAccent::Locked
+			                                                : SlotAccent::Normal };
+
+		drawPageLabel(right - totalWidth, labelTop + scaled(PAGE_LABEL_PADDING_Y),
+		    totalWidth, page);
+
+		drawRow(0, bottomCount, bottomSize, bottomY, bottomAccent);
+		drawRow(bottomCount, topCount, topSize, topY, SlotAccent::Gained);
+	}
+
+	void EquipmentSlotView::drawPageLabel(int x, int y, int width, int page)
+	{
+		const int fontSize{ scaled(PAGE_LABEL_FONT_SIZE) };
+		const int paddingX{ scaled(PAGE_LABEL_PADDING_X) };
+		const int paddingY{ scaled(PAGE_LABEL_PADDING_Y) };
+
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
+		const int textWidth{ m_uiRenderer.getTextWidth(m_pageLabels[page].c_str(), fontSize) };
+
+		// スロットの並びと右端を揃える。左寄せだと枠の幅が変わったときにずれる
+		const int textX{ x + width - textWidth };
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SLOT_FILL_ALPHA);
+		m_uiRenderer.drawRoundedBox(textX - paddingX, y - paddingY,
+		    textWidth + paddingX * 2, fontSize + paddingY * 2, scaled(SLOT_RADIUS),
+		    SLOT_FILL_COLOR, true, 1);
+		m_uiRenderer.resetBlendMode();
+
+		m_uiRenderer.drawText(textX, y, m_pageLabels[page].c_str(),
+		    core::utility::Color::HUD_INK, fontSize);
+		m_uiRenderer.resetFont();
+	}
+
+	void EquipmentSlotView::drawSlot(int x, int y, int size, core::data::FileExtensionType type,
+	    bool hasSelection, SlotAccent accent)
+	{
+		// マスを小さく描くときは中身も一緒に縮める。枠だけ詰めると中身がはみ出す
+		const auto fit = [this, size](int scaledValue)
+		{ return scaledValue * size / std::max(1, scaled(SLOT_SIZE)); };
+
+		const int radius{ fit(scaled(SLOT_RADIUS)) };
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SLOT_FILL_ALPHA);
 		m_uiRenderer.drawRoundedBox(x, y, size, size, radius, SLOT_FILL_COLOR, true, 1);
 
-		// 装備済みはアクセント色の枠で締める。空きは枠を薄いままにして視線を集めない
-		const unsigned int borderColor{ hasSelection ? core::utility::Color::HUD_ACCENT : SLOT_BORDER_COLOR };
-		const int borderAlpha{ hasSelection ? SLOT_ACCENT_BORDER_ALPHA : SLOT_BORDER_ALPHA };
+		// 意味のある縁は太く濃くする。1pxのままだと色を付けても背景に紛れて読めない
+		const bool isMeaningful{ hasSelection || accent != SlotAccent::Normal };
+		const int borderAlpha{ isMeaningful ? MEANINGFUL_BORDER_ALPHA : SLOT_BORDER_ALPHA };
+		const int thickness{ isMeaningful ? scaled(MEANINGFUL_BORDER_THICKNESS) : 1 };
+
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, borderAlpha);
-		m_uiRenderer.drawRoundedBox(x, y, size, size, radius, borderColor, false, 1);
+		m_uiRenderer.drawRoundedBox(x, y, size, size, radius,
+		    borderColor(hasSelection, accent), false, thickness);
 		m_uiRenderer.resetBlendMode();
 
 		const int centerX{ x + size / 2 };
-		const int iconSize{ scaled(ICON_SIZE) };
+		const int iconSize{ fit(scaled(ICON_SIZE)) };
 		const int iconX{ centerX - iconSize / 2 };
-		const int iconY{ y + scaled(ICON_Y) };
+		const int iconY{ y + fit(scaled(ICON_Y)) };
 
-		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::MONO_FONT_NAME);
 
 		if (!hasSelection)
 		{
@@ -252,8 +355,8 @@ namespace game::ui::ingame
 			if (m_emptyIconHandle != -1)
 				m_uiRenderer.drawImage(m_emptyIconHandle, iconX, iconY, iconSize, iconSize);
 			else
-				drawCenteredText(centerX, y + scaled(TYPE_LABEL_Y), EMPTY_LABEL,
-				    core::utility::Color::HUD_INK_FAINT, scaled(TYPE_FONT_SIZE));
+				drawCenteredText(centerX, y + fit(scaled(TYPE_LABEL_Y)), EMPTY_LABEL,
+				    core::utility::Color::HUD_INK_FAINT, fit(scaled(TYPE_FONT_SIZE)));
 			m_uiRenderer.resetFont();
 			return;
 		}
@@ -263,48 +366,83 @@ namespace game::ui::ingame
 		if (iconHandle != -1)
 			m_uiRenderer.drawImage(iconHandle, iconX, iconY, iconSize, iconSize);
 		else
-			drawCenteredText(centerX, y + scaled(TYPE_LABEL_Y), toTypeLabel(type),
-			    core::utility::Color::HUD_INK, scaled(TYPE_FONT_SIZE));
+			drawCenteredText(centerX, y + fit(scaled(TYPE_LABEL_Y)), toTypeLabel(type),
+			    core::utility::Color::HUD_INK, fit(scaled(TYPE_FONT_SIZE)));
 
-		drawCenteredText(centerX, y + scaled(BONUS_LABEL_Y), toBonusLabel(type),
-		    core::utility::Color::HUD_INK_FAINT, scaled(BONUS_FONT_SIZE));
+		// 何を強化するかを併記する。装備の効果は開始時のステータス補正としてのみ
+		// 現れるため、種別名だけでは何の役に立っているのか分からない
+		const std::string bonusLabel{ utility::ExtensionBonusLabel::toLabel(type) };
+		drawCenteredText(centerX, y + fit(scaled(BONUS_LABEL_Y)), bonusLabel.c_str(),
+		    core::utility::Color::HUD_INK_FAINT, fit(scaled(BONUS_FONT_SIZE)));
 
 		m_uiRenderer.resetFont();
 	}
 
-	void EquipmentSlotView::drawOrbitingGlow(int x, int y, int size, float phaseOffset)
+	unsigned int EquipmentSlotView::borderColor(bool hasSelection, SlotAccent accent) const
 	{
-		const float elapsed{ std::chrono::duration<float>(
-			std::chrono::steady_clock::now() - m_startTime)
-			    .count() };
-		const float head{ elapsed / ORBIT_PERIOD + phaseOffset };
+		// 道中では変えられない枠は赤、増えた枠は緑。中身の有無に関わらず役割を優先する
+		if (accent == SlotAccent::Locked)
+			return LOCKED_BORDER_COLOR;
+		if (accent == SlotAccent::Gained)
+			return GAINED_BORDER_COLOR;
 
-		const int dotRadius{ std::max(2, scaled(ORBIT_DOT_RADIUS)) };
+		// 装備済みはアクセント色。空きは薄いままにして視線を集めない
+		return hasSelection ? core::utility::Color::HUD_ACCENT : SLOT_BORDER_COLOR;
+	}
 
-		// 加算合成で重ねると、粒が枠線の上を通るときに芯が白く抜けて発光して見える。
-		// 粒ごとの明暗はアルファではなく色で付けるため、ブレンドの設定は1回で済む
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, ORBIT_ALPHA);
-
-		for (int comet{ 0 }; comet < ORBIT_COMET_COUNT; ++comet)
+	bool EquipmentSlotView::updateSlotGained(int maxEquipped)
+	{
+		// 初回は基準を取るだけ。ここで演出を始めると、開始直後に必ず一度流れてしまう
+		if (m_previousMaxEquipped < 0)
 		{
-			// 列を外周上で等間隔に散らす（2列なら向かい合う位置になる）
-			const float cometHead{ head + static_cast<float>(comet) / ORBIT_COMET_COUNT };
-
-			for (int i{ 0 }; i < ORBIT_TRAIL_COUNT; ++i)
-			{
-				// 後続ほど過去の位置に置き、暗く小さくして尾を引かせる
-				const float fade{ 1.0f - static_cast<float>(i) / ORBIT_TRAIL_COUNT };
-
-				int dotX{ 0 };
-				int dotY{ 0 };
-				pointOnSquarePerimeter(x, y, size, cometHead - i * ORBIT_TRAIL_SPACING, dotX, dotY);
-
-				m_uiRenderer.drawCircle(dotX, dotY, std::max(1, static_cast<int>(dotRadius * fade)),
-				    scaleBrightness(core::utility::Color::HUD_CHARGE_CYAN, fade * fade), true, 1);
-			}
+			m_previousMaxEquipped = maxEquipped;
+			return false;
 		}
 
-		m_uiRenderer.resetBlendMode();
+		if (maxEquipped > m_previousMaxEquipped)
+		{
+			m_slotGainedTime = std::chrono::steady_clock::now();
+			m_isSlotGained = true;
+		}
+		m_previousMaxEquipped = maxEquipped;
+
+		if (!m_isSlotGained)
+			return false;
+
+		const float since{ std::chrono::duration<float>(
+			std::chrono::steady_clock::now() - m_slotGainedTime)
+			    .count() };
+		if (since >= SLOT_GAINED_HOLD)
+			m_isSlotGained = false;
+
+		return m_isSlotGained;
+	}
+
+	bool EquipmentSlotView::isBonusBoosted() const
+	{
+		return utility::playerBonusMultiplier(m_componentManager, m_playerId) > 1.0f;
+	}
+
+	void EquipmentSlotView::drawOrbitingGlow(int x, int y, int size, float phaseOffset,
+	    unsigned int color)
+	{
+		float elapsed{ std::chrono::duration<float>(
+			std::chrono::steady_clock::now() - m_startTime)
+			    .count() };
+
+		// 倍率が掛かっているときは列を倍にして速さも上げる。
+		// 列の本数は数えられるので「2列→4列＝2倍」と理屈が通る。
+		// 速さは単独では気付けない（比べる相手が無い）が、本数と併せると勢いが乗る
+		const bool boosted{ isBonusBoosted() };
+		int cometCount{ orbit_glow::COMET_COUNT };
+		if (boosted)
+		{
+			cometCount = orbit_glow::COMET_COUNT_BOOSTED;
+			elapsed *= BOOSTED_SPEED_SCALE;
+		}
+
+		orbit_glow::draw(m_uiRenderer, x, y, size, size, elapsed, phaseOffset,
+		    scaled(orbit_glow::DOT_RADIUS), color, cometCount);
 	}
 
 	void EquipmentSlotView::drawCenteredText(int centerX, int y, const char* text, unsigned int color, int fontSize)

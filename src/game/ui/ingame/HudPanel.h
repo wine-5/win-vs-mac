@@ -29,8 +29,11 @@ namespace game::ui::ingame
 		 * @param y パネル左上のY座標
 		 * @param width パネルの幅
 		 * @param height パネルの高さ
+		 * @param withSweep 光の帯を走らせるか。常時見えている小さなHUDでは
+		 *                  生存確認として効くが、画面を覆うような大きい面では
+		 *                  白い帯が視界を横切って読む邪魔になるため切れるようにしている
 		 */
-		void draw(int x, int y, int width, int height);
+		void draw(int x, int y, int width, int height, bool withSweep = true);
 
 	  private:
 		/**

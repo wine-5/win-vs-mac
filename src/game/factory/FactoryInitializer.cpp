@@ -11,6 +11,7 @@
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/visual/LightComponent.h"
 #include "game/component/stage/BossGateComponent.h"
+#include "game/component/stage/RenameTerminalComponent.h"
 #include <cmath>
 #include <algorithm>
 #include <random>
@@ -20,6 +21,12 @@ namespace
 	// ボス扉を開状態で沈める際、自分の高さに加えて余分に下げる量。
 	// 床の厚みぶん余計に沈めて、閉じる前に上端がのぞかないようにする
 	constexpr float BOSS_GATE_SINK_MARGIN{ 100.0f };
+
+	// 用意されているひび段階の数（tools/gen_crack_textures.py の STAGE_COUNT と合わせる）
+	constexpr int CRACK_STAGE_COUNT{ 3 };
+
+	// stageCatalog.json の dropExtension に書くと「種別を抽選する」意味になる綴り
+	constexpr std::string_view RANDOM_DROP_KEY{ "random" };
 
 	/**
 	 * @brief 傾けた配置物がY方向に占める高さを求める
@@ -45,7 +52,7 @@ namespace
 	 * block_random は「壊せるブロックがある」という配置だけを表し、
 	 * 実際の中身はプレイのたびに抽選で決まる。それ以外の種類はそのまま返す。
 	 * @param type ステージ配置に書かれた種類ID
-	 * @param table 抽選表（stageCatalog.jsonのblockTable）
+	 * @param table 抽選表（stageBalance.jsonのblockTable）
 	 * @param rng 乱数エンジン
 	 * @return 実際に生成する種類ID
 	 */
@@ -65,6 +72,22 @@ namespace
 
 		std::uniform_real_distribution<float> distribution{ 0.0f, total };
 		return std::string(table.pick(distribution(rng)));
+	}
+
+	/**
+	 * @brief モデルのパスから拡張子を取り除いた土台を返す
+	 *
+	 * 割ったモデルもひびテクスチャも「元のモデル名 + 決まった接尾辞」で導ける。
+	 * ブロックが増えるたびにJSONへパスを3種類書き足すのは保守が割に合わないため、
+	 * 命名規約から組み立てる（生成側は tools/gen_fracture_models.py と
+	 * tools/gen_crack_textures.py が同じ規約で吐く）
+	 * @param modelPath モデルのパス（例: assets/model/stage/BlockZip.mqo）
+	 * @return 拡張子を除いたパス（例: assets/model/stage/BlockZip）
+	 */
+	std::string stripExtension(const std::string& modelPath)
+	{
+		const auto dot{ modelPath.find_last_of('.') };
+		return dot == std::string::npos ? modelPath : modelPath.substr(0, dot);
 	}
 } // namespace
 
@@ -104,7 +127,8 @@ namespace game::factory
 		}
 	}
 
-	void FactoryInitializer::initializePlayer(const data::PlayerData& playerData)
+	void FactoryInitializer::initializePlayer(const data::PlayerData& playerData,
+	    const component::combat::PlayerStatBaseComponent& statBase)
 	{
 		int playerHandle{m_resourceManager.loadModelById(constant::model_id::PLAYER)};
 
@@ -114,7 +138,7 @@ namespace game::factory
 		// 敵は複製ハンドル＋プール返却時のデタッチで済むが、プレイヤーは複製しないのでここで行う
 		m_resourceManager.detachAllAnimations(playerHandle);
 
-		m_factoryManager.getPlayerFactory().create(playerHandle, playerData);
+		m_factoryManager.getPlayerFactory().create(playerHandle, playerData, statBase);
 	}
 
 	void FactoryInitializer::initializeProps()
@@ -131,7 +155,13 @@ namespace game::factory
 		{
 			const std::string type{ resolvePropType(prop.m_type, blockTable, rng) };
 			const auto& def{ m_resourceManager.getPropDefinition(type) };
-			const int handle{ m_resourceManager.loadModelByPath(def.m_modelPath) };
+
+			// loadModelByPath はパス単位でハンドルを使い回すため、同じ種類の配置物は
+			// 全部が同じモデルを指す。静止した床・壁ならそれでよいが、壊せるブロックは
+			// 1個ずつ見た目が変わる（ひび・破片）ので、複製して個別のハンドルを持たせる。
+			const int sharedHandle{ m_resourceManager.loadModelByPath(def.m_modelPath) };
+			const bool isDestructible{ def.m_hitsToBreak > 0 };
+			const int handle{ isDestructible ? m_resourceManager.duplicateModel(sharedHandle) : sharedHandle };
 
 			// 実寸(size) ÷ 素材実寸(baseSize) をモデルスケールにする。
 			// baseSizeが0の軸は割れないためスケール1にフォールバックする
@@ -152,6 +182,44 @@ namespace game::factory
 
 			params.m_scrollSpeedU = def.m_scrollU;
 			params.m_scrollSpeedV = def.m_scrollV;
+
+			if (isDestructible)
+			{
+				const std::string base{ stripExtension(def.m_modelPath) };
+
+				params.m_hitsToBreak = def.m_hitsToBreak;
+				// 割ったモデルも1個ずつ複製する。共有すると1個壊した瞬間に
+				// 同じ種類のブロック全部の破片が同じ動きで飛ぶ
+				params.m_fracturedHandle = m_resourceManager.duplicateModel(
+				    m_resourceManager.loadModelByPath(base + "Fractured.mqo"));
+
+				// [0]は無傷。ひびを戻す必要は無いが、段階0を配列に入れておくと
+				// 「段階＝添字」で引けて取り違えが起きない
+				params.m_crackTextures.push_back(m_resourceManager.loadImageByPath(base + ".png"));
+				for (int stage{ 1 }; stage <= CRACK_STAGE_COUNT; ++stage)
+				{
+					params.m_crackTextures.push_back(
+					    m_resourceManager.loadImageByPath(base + "_crack" + std::to_string(stage) + ".png"));
+				}
+
+				// "random" は「壊すまで中身が分からない」ブロック用の特別な指定。
+				// 種別は落とす瞬間に1個ずつ抽選する
+				params.m_dropCount = def.m_dropCount;
+				params.m_isDropRandom = def.m_dropExtension == RANDOM_DROP_KEY;
+				params.m_grantsEquipSlot = def.m_grantsEquipSlot;
+				if (!params.m_isDropRandom)
+					params.m_dropType = core::data::toExtensionType(def.m_dropExtension);
+
+				// 敵の種類名はここで解決しておく。壊した瞬間に文字列を引くと、
+				// 綴り違いが「壊したのに何も起きない」という形で初めて表に出る
+				params.m_extensionBoostChance = def.m_extensionBoostChance;
+				params.m_extensionBoostMultiplier = def.m_extensionBoostMultiplier;
+				if (!def.m_spawnEnemyType.empty())
+				{
+					params.m_spawnEnemyType = constant::toEnemyType(def.m_spawnEnemyType);
+					params.m_spawnEnemyCount = def.m_spawnEnemyCount;
+				}
+			}
 
 			const auto collision{ constant::toPropCollision(def.m_collider) };
 			params.m_collision = collision;
@@ -205,6 +273,13 @@ namespace game::factory
 				gate.m_closedY = prop.m_position.y;
 				gate.m_openY = params.m_position.y;
 				m_componentManager.add<component::stage::BossGateComponent>(propId, gate);
+			}
+
+			// 拡張子の付け替え端末。壊せない設置物なので、破壊まわりの設定は持たない
+			if (def.m_role == constant::prop_role::RENAME_TERMINAL)
+			{
+				m_componentManager.add<component::stage::RenameTerminalComponent>(
+				    propId, component::stage::RenameTerminalComponent{});
 			}
 		}
 	}

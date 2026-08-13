@@ -104,7 +104,7 @@ namespace game::ui::ingame
 		/**
 		 * @brief 8項目の現在値を集める
 		 *
-		 * HP・防御は HealthComponent、攻撃・射程・会心は AttackComponent、
+		 * HP・防御は HealthComponent、攻撃・射程・クリティカルは AttackComponent、
 		 * 移動速度と弾の性能は PlayerStatsComponent から、いずれも毎フレーム生値を読む。
 		 * Itemがコンポーネントを書き換えれば表示は自動で追従する
 		 * @param playerId プレイヤーのEntityID
@@ -170,6 +170,19 @@ namespace game::ui::ingame
 		 * @param page 描画するページ（0または1）
 		 * @param alpha 不透明度（0〜255）
 		 */
+		/**
+		 * @brief 能力が変わったときのパネルの反応を描画する
+		 *
+		 * 取得の瞬間に枠が外へ膨らんで戻り、そのあとしばらく縁が光る。
+		 * 中身は動かさず枠だけを動かすので、数値を読んでいる最中でも
+		 * レイアウトが揺れない
+		 * @param x パネル左上のX座標
+		 * @param y パネル左上のY座標
+		 * @param width パネルの幅
+		 * @param height パネルの高さ
+		 */
+		void drawStatChangeReaction(int x, int y, int width, int height);
+
 		void drawStatPage(int x, int y, int cellWidth,
 		    const std::array<float, STAT_COUNT>& stats,
 		    const std::array<float, STAT_COUNT>& baseStats, int page, int alpha);
@@ -190,6 +203,8 @@ namespace game::ui::ingame
 		float m_expandProgress{ 0.0f };  // Tabで開く進行（0.0で閉、1.0で全項目表示）
 		float m_changeHighlight{ 0.0f }; // 値が変わった項目を強調する残り秒数
 		int m_changedIndex{ -1 };        // 直近で値が変わった項目（無ければ-1）
+		float m_changedDelta{ 0.0f };    // 直近の変化量（「+9」のように増減量を見せる）
+		float m_panelPop{ 0.0f };        // パネルが反応して膨らむ演出の残り秒数
 		std::array<float, STAT_COUNT> m_previousStats{};
 		bool m_hasPreviousStats{ false };
 

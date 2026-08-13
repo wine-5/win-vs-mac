@@ -14,10 +14,7 @@ namespace game::scene
         Select,     // セレクト画面
         Loading,    // ローディング画面
         InGame,     // ゲーム画面
-		Result,     // リザルト画面
-
-		// DEBUG: 破壊演出の検証用。方式が決まったら本体へ取り込んで削除する
-		DebugDestruction
+		Result      // リザルト画面
 	};
 
 	/**
@@ -36,7 +33,6 @@ namespace game::scene
 		case SceneType::Loading: return "Loading";
 		case SceneType::InGame: return "InGame";
 		case SceneType::Result: return "Result";
-		case SceneType::DebugDestruction: return "DebugDestruction";
 		default: return "Unknown";
 		}
 	}

@@ -68,7 +68,7 @@ namespace platform::window::select
         // ファイルスロット数
         static constexpr int FILE_SLOT_COUNT{ 3 };
 
-		// 0.0〜1.0の確率を%表記へ直すための倍率（会心率の表示に使う）
+		// 0.0〜1.0の確率を%表記へ直すための倍率（クリティカル率の表示に使う）
 		static constexpr float PERCENT_SCALE{ 100.0f };
 
 		// ウィンドウ名

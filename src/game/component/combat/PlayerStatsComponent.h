@@ -5,7 +5,7 @@ namespace game::component::combat
 	/**
 	 * @brief プレイヤーの能力値のうち、他のコンポーネントに居場所が無いものを持つ
 	 *
-	 * 攻撃力・射程・会心率は AttackComponent、最大HP・防御力は HealthComponent が持つ。
+	 * 攻撃力・射程・クリティカル率は AttackComponent、最大HP・防御力は HealthComponent が持つ。
 	 * それらは敵とも共有する仕組みなのでここへは複製せず、二重管理を作らない。
 	 * 逆に移動速度と弾の性能はSystemがコンストラクタ引数で抱え込んでいて外から動かせなかったため、
 	 * この形で外へ出す。

@@ -58,6 +58,13 @@ namespace infrastructure::resource
 		int loadImageById(std::string_view imageId) override;
 
 		/**
+		 * @brief 画像をパスから読み込む（キャッシュ付き）
+		 * @param path 画像ファイルのパス
+		 * @return 画像ハンドル。失敗時は -1
+		 */
+		int loadImageByPath(std::string_view path) override;
+
+		/**
 		 * @brief アニメーションIDからアニメーションモデルを読み込みハンドルを返す（キャッシュ付き）
 		 * @param animationId アニメーションID
 		 * @return DxLib モデルハンドル、失敗時は -1

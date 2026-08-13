@@ -15,6 +15,7 @@
 #include "game/component/visual/EffectComponent.h"
 #include "game/component/combat/PlayerChargeComponent.h"
 #include "game/component/combat/PlayerStatsComponent.h"
+#include "game/component/combat/ExtensionInventoryComponent.h"
 #include "game/component/camera/CameraComponent.h"
 #include "game/component/visual/LightComponent.h"
 #include "game/component/camera/CameraEffectComponent.h"
@@ -28,11 +29,12 @@
 namespace game::actor
 {
 	Player::Player(core::ecs::EntityManager& entityManager,
-		core::ecs::ComponentManager& componentManager,
-		core::iface::IResourceManager& resourceManager,
-		int modelHandle,
-		const data::PlayerData& playerData)
-		: m_entity{entityManager.create()}
+	    core::ecs::ComponentManager& componentManager,
+	    core::iface::IResourceManager& resourceManager,
+	    int modelHandle,
+	    const data::PlayerData& playerData,
+	    const component::combat::PlayerStatBaseComponent& statBase)
+	    : m_entity{ entityManager.create() }
 	{
 		component::movement::TransformComponent transform{};
 		transform.m_scale = playerData.getScale();
@@ -65,7 +67,7 @@ namespace game::actor
 		attack.m_attackCooldown = playerData.getAttackCooldown();
 		// 振り下ろしの瞬間にダメージが出るよう、アニメーションの溜め分だけ判定を遅らせる
 		attack.m_windupDelay = playerData.getAttackWindup();
-		// クリティカル（会心）。発生率が0なら CriticalHandler は素通りする
+		// クリティカル（クリティカル）。発生率が0なら CriticalHandler は素通りする
 		attack.m_criticalRate = playerData.getCriticalRate();
 		attack.m_criticalMultiplier = playerData.getCriticalMultiplier();
 		componentManager.add<component::combat::AttackComponent>(m_entity.getId(), attack);
@@ -88,6 +90,13 @@ namespace game::actor
 		component::combat::PlayerStatsComponent stats{};
 		stats.m_moveSpeed = playerData.getMoveSpeed();
 		componentManager.add<component::combat::PlayerStatsComponent>(m_entity.getId(), stats);
+
+		// 強化前の値の控え。弾の性能だけはここでは分からないので（弾定義を読むのはSystemの組み立て時）、
+		// 呼び出し側が後から書き足す
+		componentManager.add<component::combat::PlayerStatBaseComponent>(m_entity.getId(), statBase);
+
+		// 道中で拾う拡張子の入れ物。空でも先に付けておく（拾わせる側は器の有無を気にしない）
+		componentManager.add<component::combat::ExtensionInventoryComponent>(m_entity.getId(), {});
 
 		// プレイヤーに追従する点光源。虚無の中で自機が沈まないようにしつつ、
 		// 「自機が周囲を照らす」演出も兼ねる。頭上に置いて上から当てる

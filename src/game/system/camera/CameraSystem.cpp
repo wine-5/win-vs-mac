@@ -46,7 +46,7 @@ namespace game::system::camera
 		{
 			// 遮蔽物として見るのはステージの配置物だけ。敵で寄られると戦闘中に画面が暴れる
 			const auto* tag{ m_componentManager.tryGet<component::TagComponent>(id) };
-			if (tag == nullptr || tag->m_tag != constant::Tag::Ground)
+			if (tag == nullptr || !constant::isStageProp(tag->m_tag))
 				continue;
 
 			const auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(id) };

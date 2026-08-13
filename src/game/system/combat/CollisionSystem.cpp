@@ -50,7 +50,7 @@ namespace game::system::combat
 				continue;
 
 			const bool isRider{ tag->m_tag == constant::Tag::Player || tag->m_tag == constant::Tag::Enemy };
-			if (!isRider && tag->m_tag != constant::Tag::Ground)
+			if (!isRider && !constant::isStageProp(tag->m_tag))
 				continue;
 
 			const auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(id) };

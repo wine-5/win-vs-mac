@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "IScene.h"
 #include <vector>
 #include <unordered_set>
@@ -14,6 +14,7 @@
 #include "core/interface/IAnimator.h"
 #include "core/interface/IEffectFactory.h"
 #include "core/base/EventBus.h"
+#include "core/constant/SeType.h"
 
 /* game層のインクルード */
 #include "game/factory/FactoryManager.h"
@@ -42,6 +43,16 @@ namespace game
 		class BattleStartSystem; // 前方宣言
 	} // namespace system::visual
 
+	namespace system::stage
+	{
+		class RenameTerminalSystem; // 前方宣言
+	} // namespace system::stage
+
+	namespace component::combat
+	{
+		struct ExtensionInventoryComponent; // 前方宣言
+	} // namespace component::combat
+
 	namespace ui::debug
 	{
 		class DebugGizmoView; // DEBUG: 前方宣言（リリース時に削除）
@@ -54,7 +65,10 @@ namespace game
 		class EquipmentSlotView; // 前方宣言
 		class ObjectiveView;     // 前方宣言
 		class InGameStatusView;  // 前方宣言
+		class InventoryView;     // 前方宣言
+		class InteractPromptView;    // 前方宣言
 		class LowHealthVignetteView; // 前方宣言
+		class ExtensionBoostFlashView; // 前方宣言
 		class BossHUDView;           // 前方宣言
 		class MiniMapView;           // 前方宣言
 		class EnemyHealthBarView;    // 前方宣言
@@ -120,6 +134,58 @@ namespace game::scene
 		void setupEvents();
 
 		/**
+		 * @brief Eキーによるインベントリの開閉を処理する
+		 *
+		 * 開いている間は時間を止める（PauseReason::Inventory）。
+		 * ポーズメニューと同時に開くと、どちらのキーが効いているのか
+		 * 分からなくなるため、他の理由で止まっている間は開かない
+		 */
+		void updateInventory();
+
+		/**
+		 * @brief リネーム端末の前でのF2による付け替え画面の開閉を処理する
+		 *
+		 * どこでも開けるインベントリ（Eキー）と違い、端末の前でしか開かない。
+		 * 「付け替えるためにブロックを探す」という道中の目的を作るための制限
+		 */
+		void updateRenameTerminal();
+
+		/**
+		 * @brief 付け替え画面でのマス選択を処理する
+		 *
+		 * 掴む→もう1つ押す、の2手で入れ替える。1手で入れ替えると
+		 * どれと交換されたのかが分からないまま能力だけが変わる。
+		 * マスの位置はViewしか知らないため、指しているマスはViewへ問い合わせる
+		 */
+		void updateSwapSelection();
+
+		/**
+		 * @brief 掴んでいるものと指定のマスの入れ替えを要求する
+		 *
+		 * クリックで置いた場合とドラッグして離した場合の両方から呼ぶ
+		 * @param inventory プレイヤーの拡張子インベントリ
+		 * @param targetIndex 入れ替え相手の位置（m_acquired 上の添字）
+		 */
+		void requestSwap(const component::combat::ExtensionInventoryComponent& inventory,
+		    int targetIndex);
+
+		/**
+		 * @brief UI操作の効果音を鳴らす
+		 *
+		 * 掴む・置く・開閉はイベントを介さずシーンが直接受け取る操作なので、
+		 * 音もここから鳴らす（入れ替えの成立音だけは結果のイベントを購読して鳴らす）
+		 * @param seType 鳴らすSEの種別
+		 */
+		void playUiSe(core::constant::SeType seType) const;
+
+		/**
+		 * @brief インベントリの開閉をまとめて反映する
+		 * @param isOpen 開くならtrue
+		 * @param isSwapMode 付け替え操作を受け付ける状態で開くか
+		 */
+		void setInventoryOpen(bool isOpen, bool isSwapMode);
+
+		/**
 		 * @brief プレイヤーの現在のパラメータをログへ出力する
 		 *
 		 * 装備ファイルのボーナスが実際にパラメータへ乗っているかを、
@@ -181,8 +247,9 @@ namespace game::scene
 		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_macId{ core::ecs::INVALID_ENTITY_ID };
 
-		// 開始時に配置した雑魚のID集合。全滅（空になる）を検知してボスを出現させる。
-		// ボスが召喚する雑魚は含めない（開始時のぶんだけを数える）
+		// 討伐対象の雑魚のID集合。全滅（空になる）を検知してボスを出現させる。
+		// 開始時の配置に加え、道中でブロックから湧いたぶんも入る。
+		// ボスが召喚する雑魚は含めない（ボス出現後に湧いたものは数えない）
 		std::unordered_set<core::ecs::EntityId> m_stageEnemyIds{};
 
 		std::unique_ptr<game::event::AudioEventListener> m_audioEventListener;
@@ -205,8 +272,27 @@ namespace game::scene
 		std::unique_ptr<ui::ingame::ObjectiveView> m_objectiveView;
 		std::unique_ptr<ui::ingame::InGameStatusView> m_statusView;
 
+		// 拡張子インベントリ（Eキーで開閉）
+		std::unique_ptr<ui::ingame::InventoryView> m_inventoryView;
+
+		// 設置物への接近案内（吹き出し）
+		std::unique_ptr<ui::ingame::InteractPromptView> m_interactPromptView;
+
+		// 付け替え端末への接近判定（所有はSystemManager）。近くにいる端末をViewへ渡す
+		system::stage::RenameTerminalSystem* m_renameTerminalSystem{ nullptr };
+
+		// 付け替え操作の状態。位置は ExtensionInventoryComponent::m_acquired 上の添字で、
+		// -1 は「掴んでいない」。操作を受け取るのはシーン、描くのはView、
+		// 能力の差し替えはSystemと役割を分けている
+		bool m_isSwapMode{ false };
+		int m_swapHeldIndex{ -1 };
+
+		// マウス左ボタンの前フレームの状態。押した瞬間だけを取り出すために持つ
+		bool m_wasMouseLeftDown{ false };
+
 		// 低HP警告のビネットのView
 		std::unique_ptr<ui::ingame::LowHealthVignetteView> m_lowHealthVignetteView;
+		std::unique_ptr<ui::ingame::ExtensionBoostFlashView> m_extensionBoostFlashView;
 
 		// ボスHP（上中央）のView
 		std::unique_ptr<ui::ingame::BossHUDView> m_bossHUDView;

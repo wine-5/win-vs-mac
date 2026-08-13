@@ -15,7 +15,7 @@ namespace core::data
 	};
 
 	/**
-	 * @brief 破壊可能ブロックの抽選表（stageCatalog.jsonのblockTable）
+	 * @brief 破壊可能ブロックの抽選表（stageBalance.jsonのblockTable）
 	 *
 	 * ステージ配置に置かれた汎用ブロックを、実際の種類へ置き換えるときに使う。
 	 * 重みは相対値として扱うため、合計を1に揃える必要はない。

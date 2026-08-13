@@ -12,9 +12,9 @@ namespace
 	constexpr int PANEL_RADIUS{ 8 }; // Windows 11のウィンドウ・パネルの角丸
 
 	// 塗りと枠。DxLibのブレンドはアルファ値を別途指定するため、色と不透明度を分けて持つ
-	constexpr unsigned int PANEL_FILL_COLOR{ 0xFF0E1420 };
+	constexpr unsigned int PANEL_FILL_COLOR{ core::utility::Color::HUD_PANEL_FILL };
 	constexpr int PANEL_FILL_ALPHA{ 184 }; // 約72%
-	constexpr unsigned int PANEL_BORDER_COLOR{ 0xFF8CAAD2 };
+	constexpr unsigned int PANEL_BORDER_COLOR{ core::utility::Color::HUD_PANEL_BORDER };
 	constexpr int PANEL_BORDER_ALPHA{ 46 }; // 約18%
 
 	// 面を横切る光の帯
@@ -33,7 +33,7 @@ namespace game::ui::ingame
 	{
 	}
 
-	void HudPanel::draw(int x, int y, int width, int height)
+	void HudPanel::draw(int x, int y, int width, int height, bool withSweep)
 	{
 		const int radius{ PANEL_RADIUS * m_screen.getHeight() / BASE_SCREEN_HEIGHT };
 
@@ -45,7 +45,8 @@ namespace game::ui::ingame
 
 		m_uiRenderer.resetBlendMode();
 
-		drawSweep(x, y, width, height);
+		if (withSweep)
+			drawSweep(x, y, width, height);
 	}
 
 	void HudPanel::drawSweep(int x, int y, int width, int height)

@@ -1,4 +1,4 @@
-﻿#include "InGame.h"
+#include "InGame.h"
 
 /* core層 */
 #include "core/interface/ILogger.h"
@@ -12,6 +12,7 @@
 #include "core/base/ServiceLocator.h"
 #include "core/constant/SeType.h"
 #include "core/data/ResultData.h"
+#include "core/data/FileExtensionType.h"
 #include "core/utility/MathConstants.h"
 /* game層 */
 #include "game/factory/FactoryInitializer.h"
@@ -20,6 +21,10 @@
 #include "game/system/movement/PhysicsSystem.h"
 #include "game/system/movement/GroundingSystem.h"
 #include "game/system/movement/FallOutSystem.h"
+#include "game/system/stage/BlockBreakSystem.h"
+#include "game/system/stage/BlockDebrisSystem.h"
+#include "game/system/stage/ExtensionPickupSystem.h"
+#include "game/system/stage/RenameTerminalSystem.h"
 #include "game/system/stage/BossGateSystem.h"
 #include "game/system/movement/FootstepSystem.h"
 #include "game/component/movement/TransformComponent.h"
@@ -46,10 +51,12 @@
 #include "game/constant/PropId.h"
 #include "core/interface/IEffectFactory.h"
 #include "game/system/combat/AttackSystem.h"
+#include "game/system/combat/ExtensionEquipSystem.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/PlayerStatsComponent.h"
 #include "game/component/combat/PlayerStatBaseComponent.h"
+#include "game/component/combat/ExtensionInventoryComponent.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/AnimationId.h"
 #include "game/constant/ProjectileId.h"
@@ -89,7 +96,10 @@
 #include "game/ui/ingame/EquipmentSlotView.h"
 #include "game/ui/ingame/ObjectiveView.h"
 #include "game/ui/ingame/InGameStatusView.h"
+#include "game/ui/ingame/InventoryView.h"
+#include "game/ui/ingame/InteractPromptView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
+#include "game/ui/ingame/ExtensionBoostFlashView.h"
 #include "game/ui/ingame/BossHUDView.h"
 #include "game/ui/ingame/MiniMapView.h"
 #include "game/ui/ingame/EnemyHealthBarView.h"
@@ -252,17 +262,23 @@ namespace game::scene
 		if (screen)
 			screen->setFog(true, VOID_R, VOID_G, VOID_B, FOG_START, FOG_END);
 
-		// ライティングを有効化して立体感を出す。環境光は「模様が潰れない下限」を確保しつつ
-		// 低めにして虚無の暗さを残し、上からの平行光で面の向きを分からせる
+		// ライティングを有効化して立体感を出す。環境光は青みを残して虚無の冷たさを、
+		// 上からの平行光で面の向きを示す。
+		//
+		// 【重要】環境光と平行光の和は255を超えないこと。配置物のマテリアルは
+		// amb(1.0) dif(1.0) なので、和が255を超えると最も光の当たる面が白へ飽和する。
+		// 暗いテクスチャでは気付けないが、明るい面（リネーム端末）を置くと絵が消える
 		auto* lighting{ core::base::ServiceLocator::get<core::iface::ILighting>() };
 		if (lighting)
 		{
-			constexpr int AMBIENT_R{ 150 };
-			constexpr int AMBIENT_G{ 160 };
-			constexpr int AMBIENT_B{ 180 };
+			constexpr int AMBIENT_R{ 88 };
+			constexpr int AMBIENT_G{ 94 };
+			constexpr int AMBIENT_B{ 105 };
+			constexpr int DIRECTIONAL_LEVEL{ 150 };
 			lighting->setEnabled(true);
 			lighting->setAmbient(AMBIENT_R, AMBIENT_G, AMBIENT_B);
-			lighting->setDirectionalLight(core::Vector3{ -0.3f, -1.0f, 0.4f }, 255, 255, 255);
+			lighting->setDirectionalLight(core::Vector3{ -0.3f, -1.0f, 0.4f },
+			    DIRECTIONAL_LEVEL, DIRECTIONAL_LEVEL, DIRECTIONAL_LEVEL);
 		}
 
 		// 3人称マウス視点のためカーソルを非表示にする（表示の切り替えは DebugFlags.h で行う）
@@ -297,7 +313,9 @@ namespace game::scene
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
 		    m_fileEquipmentData,
-		    m_resourceManager);
+		    m_resourceManager,
+		    m_componentManager,
+		    m_playerId);
 		m_view.setEquipmentSlotView(m_equipmentSlotView.get());
 
 		m_objectiveView = std::make_unique<ui::ingame::ObjectiveView>(
@@ -311,12 +329,33 @@ namespace game::scene
 		    m_gameManager.getDifficulty());
 		m_view.setInGameStatusView(m_statusView.get());
 
+		m_inventoryView = std::make_unique<ui::ingame::InventoryView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager,
+		    m_resourceManager,
+		    m_fileEquipmentData);
+		m_view.setInventoryView(m_inventoryView.get());
+
+		m_interactPromptView = std::make_unique<ui::ingame::InteractPromptView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    m_renderer,
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager);
+		m_view.setInteractPromptView(m_interactPromptView.get());
+
 		m_lowHealthVignetteView = std::make_unique<ui::ingame::LowHealthVignetteView>(
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
 		    m_componentManager,
 		    m_resourceManager);
 		m_view.setLowHealthVignetteView(m_lowHealthVignetteView.get());
+
+		m_extensionBoostFlashView = std::make_unique<ui::ingame::ExtensionBoostFlashView>(
+		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+		    m_componentManager);
+		m_view.setExtensionBoostFlashView(m_extensionBoostFlashView.get());
 
 		m_bossHUDView = std::make_unique<ui::ingame::BossHUDView>(
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
@@ -369,7 +408,7 @@ namespace game::scene
 
 	void InGame::logPlayerParameters(const char* label) const
 	{
-		core::log::info("Player[{}] HP={} ATK={} DEF={} SPD={} 攻撃範囲={} クールダウン={} 会心率={} 会心倍率={}",
+		core::log::info("Player[{}] HP={} ATK={} DEF={} SPD={} 攻撃範囲={} クールダウン={} クリティカル率={} クリティカル倍率={}",
 		    label,
 		    m_playerData.getMaxHp(),
 		    m_playerData.getAttackPower(),
@@ -415,14 +454,11 @@ namespace game::scene
 
 		logPlayerParameters("装備後");
 
-		initializer.initializePlayer(m_playerData);
+		// 控えた素の値も一緒に渡す。Playerのコンポーネント一式はPlayerクラスが組み立てる
+		initializer.initializePlayer(m_playerData, base);
 		core::probe::mark("    spawn: initializePlayer");
 
 		m_playerId = m_factoryManager.getPlayerFactory().getPlayer().getId();
-
-		// 弾の素の性能はまだ分からない（弾定義を読むのはsetupSystems）。
-		// そちらで残りを埋めるため、ここでは先に器だけ付けておく
-		m_componentManager.add<component::combat::PlayerStatBaseComponent>(m_playerId, base);
 
 		// プレイヤー専用コンポーネント（CameraComponent、AimComponent、PlayerChargeComponent）
 		// は Player.cpp のコンストラクタで初期化済
@@ -595,6 +631,34 @@ namespace game::scene
 		m_systemManager.registerSystem<game::system::combat::AttackSystem>(
 		    m_componentManager, m_eventBus);
 		core::probe::mark("      sys: AttackSystem");
+		// 壊せるブロックを近接攻撃で削る。打撃回数で壊れるためAttackSystemの
+		// ダメージ計算には乗せず、攻撃が成立したフレームだけを見る。
+		// m_justFired はAttackSystemが毎フレーム立て直すので必ずその後に置く
+		m_systemManager.registerSystem<game::system::stage::BlockBreakSystem>(
+		    m_componentManager, m_entityManager, m_renderer, m_resourceManager, m_eventBus,
+		    m_enemySpawner, m_playerId);
+		core::probe::mark("      sys: BlockBreakSystem");
+
+		// 壊れたブロックの破片を飛散させる。壊れた直後から動かしたいので破壊の直後に置く
+		m_systemManager.registerSystem<game::system::stage::BlockDebrisSystem>(
+		    m_componentManager, m_entityManager, m_renderer);
+		core::probe::mark("      sys: BlockDebrisSystem");
+
+		// 落ちた欠片の落下・浮遊・取得。破壊の直後に生成されるので破片の次に置く
+		m_systemManager.registerSystem<game::system::stage::ExtensionPickupSystem>(
+		    m_componentManager, m_entityManager, m_eventBus, m_playerId);
+		core::probe::mark("      sys: ExtensionPickupSystem");
+
+		// 拡張子の付け替え端末への接近判定。案内の表示とF2の受付がこの結果を見る
+		m_renameTerminalSystem = m_systemManager.registerSystem<game::system::stage::RenameTerminalSystem>(
+		    m_componentManager, m_playerId);
+		core::probe::mark("      sys: RenameTerminalSystem");
+
+		// 拾った拡張子をプレイヤーの能力へ乗せる。取得の直後に反映したいので取得の次に置く
+		m_systemManager.registerSystem<game::system::combat::ExtensionEquipSystem>(
+		    m_componentManager, m_eventBus, m_resourceManager, m_fileEquipmentData, m_playerId);
+		core::probe::mark("      sys: ExtensionEquipSystem");
+
 		m_systemManager.registerSystem<game::system::visual::HitEffectSystem>(m_componentManager, m_eventBus);
 		core::probe::mark("      sys: HitEffectSystem");
 		// 死亡した敵の後始末（赤化＋ディゾルブ演出→Entity破棄＋モデルハンドルのプール返却）
@@ -703,9 +767,9 @@ namespace game::scene
 				if (e.m_targetId == m_playerId)
 					m_totalDamageTaken += e.m_damage;
 
-				// クリティカルの瞬間に一拍止めて会心の手応えを作る。
-				// 与えたときだけで、被弾側では止めない（操作不能時間は理不尽に感じるため）
-				if (e.m_isCritical && e.m_targetId != m_playerId)
+			    // クリティカルの瞬間に一拍止めて手応えを作る。
+			    // 与えたときだけで、被弾側では止めない（操作不能時間は理不尽に感じるため）
+			    if (e.m_isCritical && e.m_targetId != m_playerId)
 					m_hitStop.requestOnCritical(); }));
 		// プレイヤー死亡演出の完了イベントの購読。
 		// HPが尽きた瞬間（PlayerDeadEvent）ではなく、死亡アニメと暗転を見せ終えてから遷移する。
@@ -716,6 +780,20 @@ namespace game::scene
 			    saveResultData(false);
 			    auto* sceneManager{ core::base::ServiceLocator::get<game::scene::SceneManager>() };
 			    sceneManager->changeScene(game::scene::SceneType::Result);
+		    }));
+
+		// 道中で湧いた雑魚も討伐対象に加える（ギャンブルボックスの外れなど）。
+		m_subscriptions.push_back(m_eventBus.subscribe<event::EnemySpawnedEvent>(
+		    [this](const event::EnemySpawnedEvent& e)
+		    {
+			    // ボス自身は雑魚ではないので入れない。m_macId への代入はこのイベントより
+			    // 後（spawnが返ってから）なので、IDでは判定できず敵種で見る必要がある
+			    const auto* enemyType{ m_componentManager.tryGet<component::EnemyTypeComponent>(e.m_entityId) };
+			    if (enemyType != nullptr && enemyType->m_type == constant::EnemyType::Mac)
+				    return;
+
+			    if (m_macId == core::ecs::INVALID_ENTITY_ID)
+				    m_stageEnemyIds.insert(e.m_entityId);
 		    }));
 
 		// 敵の死亡イベントの購読
@@ -845,6 +923,18 @@ namespace game::scene
 		// ヒットストップ中はSystemへ渡す時間に倍率を掛ける（0なら何も進まない）。
 		// 経過時間の計測もここへ揃える。止まっている間もタイマーだけ進むと、
 		// 画面が止まっているのに右上の秒数だけ動いて不自然になる
+		updateInventory();
+		updateRenameTerminal();
+
+		// インベントリを開いている間は時間を止める。読む画面なので、
+		// 読んでいる最中に殴られるのはプレイヤーの落ち度ではなく設計の落ち度になる。
+		// ただし付け替えの操作だけは止まっている間に受け付ける
+		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
+		{
+			updateSwapSelection();
+			return;
+		}
+
 		const float scaledDeltaTime{ m_hitStop.apply(deltaTime) };
 
 		// 開始演出（READY）の間はまだ動けないので、クリアタイムの計測も始めない。
@@ -853,6 +943,181 @@ namespace game::scene
 		    (m_battleStartSystem == nullptr || !m_battleStartSystem->isPreparing()))
 			m_elapsedTime += scaledDeltaTime;
 		m_systemManager.update(scaledDeltaTime);
+
+		// 近くにいる端末をViewへ渡す。判定はSystem、表示はViewと分けているので、
+		// 案内の見た目を変えても判定側を触らずに済む
+		if (m_renameTerminalSystem)
+			m_view.setInteractTarget(m_renameTerminalSystem->getNearTerminalId());
+	}
+
+	void InGame::updateInventory()
+	{
+		// 開いたキーが何であれEscで閉じられるようにする。「とりあえずEscで戻れる」は
+		// どの画面でも共通の期待なので、ここだけ効かないと閉じ方を探すことになる。
+		// ポーズメニュー側（Application）はインベントリで止まっている間はEscを見ないので、
+		// ここで閉じてもメニューが続けて開くことはない
+		if (m_pauseManager.isPausedBy(PauseReason::Inventory) &&
+		    m_inputProvider.consumeKeyPress(core::input::KeyCode::Escape))
+		{
+			setInventoryOpen(false, false);
+			return;
+		}
+
+		if (!m_inputProvider.consumeKeyPress(core::input::KeyCode::E))
+			return;
+
+		// 別の理由（ポーズメニュー）で止まっている間は開かない。
+		// 2つの画面が重なると、どちらのキーが効いているのか分からなくなる
+		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
+			setInventoryOpen(false, false);
+		else if (!m_pauseManager.isPaused())
+			setInventoryOpen(true, false);
+	}
+
+	void InGame::updateRenameTerminal()
+	{
+		if (!m_inputProvider.consumeKeyPress(core::input::KeyCode::F2))
+			return;
+
+		// 開いている間はF2でも閉じられる。開いたキーで閉じられないと、
+		// 閉じ方を探すことになる
+		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
+		{
+			setInventoryOpen(false, false);
+			return;
+		}
+		if (m_pauseManager.isPaused())
+			return;
+
+		// 端末の前でのみ開く。どこでも付け替えられるなら、端末を探す理由が無くなる
+		if (m_renameTerminalSystem == nullptr ||
+		    m_renameTerminalSystem->getNearTerminalId() == core::ecs::INVALID_ENTITY_ID)
+			return;
+
+		setInventoryOpen(true, true);
+	}
+
+	void InGame::setInventoryOpen(bool isOpen, bool isSwapMode)
+	{
+		if (isOpen)
+			m_pauseManager.pause(PauseReason::Inventory);
+		else
+			m_pauseManager.resume();
+
+		m_isSwapMode = isOpen && isSwapMode;
+		m_swapHeldIndex = -1;
+
+		// 開閉は場面が切り替わる合図。時間が止まる／動き出すことを音でも示す
+		playUiSe(isOpen ? core::constant::SeType::InventoryOpen : core::constant::SeType::UiClose);
+
+		m_view.setInventoryOpen(isOpen);
+		if (m_inventoryView)
+		{
+			m_inventoryView->setSwapMode(m_isSwapMode);
+			m_inventoryView->setSelection(-1, -1);
+			m_inventoryView->resetStatChanges();
+		}
+
+		// 開いている間はカーソルを出す。隠したままだとマウスを中央へ戻す処理
+		// （getMouseDelta）が止まり、カーソルが端まで流れていく。
+		// その状態で閉じると溜まったぶんが一度に効いてカメラが飛ぶ
+		m_inputProvider.setMouseCursorVisible(isOpen);
+	}
+
+	void InGame::playUiSe(core::constant::SeType seType) const
+	{
+		if (auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() })
+			audio->playSe(seType);
+	}
+
+	void InGame::requestSwap(
+	    const component::combat::ExtensionInventoryComponent& inventory, int targetIndex)
+	{
+		// 同じ区分どうしなら並び替えになる。能力は変わらないが、
+		// 見やすく並べたいという操作は通す（音だけ入れ替えと分ける）
+		if (inventory.isEquipped(m_swapHeldIndex) == inventory.isEquipped(targetIndex))
+			playUiSe(core::constant::SeType::ExtensionDrop);
+
+		m_eventBus.publish(event::ExtensionSwapRequestedEvent{ m_swapHeldIndex, targetIndex });
+		m_swapHeldIndex = -1;
+	}
+
+	void InGame::updateSwapSelection()
+	{
+		if (!m_isSwapMode)
+			return;
+
+		const auto* inventory{
+			m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId)
+		};
+		if (inventory == nullptr || inventory->m_acquired.empty())
+			return;
+
+		if (m_inventoryView == nullptr)
+			return;
+
+		int mouseX{ 0 };
+		int mouseY{ 0 };
+		m_inputProvider.getMousePosition(mouseX, mouseY);
+		const int hoveredIndex{ m_inventoryView->findSlotIndexAt(mouseX, mouseY) };
+
+		// 押した瞬間と離した瞬間を取り出す。押しっぱなしを毎フレーム見ると、
+		// 1回のクリックの間に掴むと離すを何度も繰り返してしまう
+		const bool isDown{ m_inputProvider.isMouseLeftPressed() };
+		const bool isPressed{ isDown && !m_wasMouseLeftDown };
+		const bool isReleased{ !isDown && m_wasMouseLeftDown };
+		m_wasMouseLeftDown = isDown;
+
+		// 動かせない枠へ落とそうとしたら弾く。掴んだままにしておくのは、
+		// 拒否された操作で持ち物の状態まで変わるとやり直しが面倒になるため
+		const bool isOverLocked{ m_inventoryView->isLockedSlotAt(mouseX, mouseY) };
+		if ((isPressed || isReleased) && isOverLocked && m_swapHeldIndex >= 0)
+		{
+			m_inventoryView->startRejectShake(
+			    ui::ingame::InventoryView::ShakeTarget::Locked);
+			playUiSe(core::constant::SeType::ExtensionRejected);
+			m_inventoryView->setSelection(hoveredIndex, m_swapHeldIndex);
+			m_inventoryView->setDragging(isDown && m_swapHeldIndex >= 0, mouseX, mouseY);
+			return;
+		}
+
+		if (isPressed)
+		{
+			if (hoveredIndex < 0)
+			{
+				// マスの外を押したら掴んでいたものを置く。取り消せないと、
+				// 間違えて掴んだときに意図しない入れ替えを強いられる
+				if (m_swapHeldIndex >= 0)
+					playUiSe(core::constant::SeType::ExtensionDrop);
+				m_swapHeldIndex = -1;
+			}
+			else if (m_swapHeldIndex < 0 || m_swapHeldIndex == hoveredIndex)
+			{
+				// 何も掴んでいなければ掴む。同じマスをもう一度押したら離す
+				const bool isReleasing{ m_swapHeldIndex == hoveredIndex };
+				playUiSe(isReleasing ? core::constant::SeType::ExtensionDrop
+				                     : core::constant::SeType::ExtensionGrab);
+				m_swapHeldIndex = isReleasing ? -1 : hoveredIndex;
+			}
+			else
+			{
+				// 掴んだまま別のマスを押した場合はその場で入れ替える
+				requestSwap(*inventory, hoveredIndex);
+			}
+		}
+		else if (isReleased && m_swapHeldIndex >= 0 && hoveredIndex >= 0 &&
+		         hoveredIndex != m_swapHeldIndex)
+		{
+			// 掴んだまま別のマスへ運んで離した（ドラッグ＆ドロップ）。
+			// 掴む・置くの2クリックと、運んで離すの1動作の両方を受けることで、
+			// どちらのつもりで触っても同じ結果になる
+			requestSwap(*inventory, hoveredIndex);
+		}
+
+		// ボタンを押している間だけ運んでいる扱いにする。離したあとも掴んだままなら、
+		// 2クリックで置く操作の途中とみなす
+		m_inventoryView->setDragging(isDown && m_swapHeldIndex >= 0, mouseX, mouseY);
+		m_inventoryView->setSelection(hoveredIndex, m_swapHeldIndex);
 	}
 
 	void InGame::draw()
@@ -864,8 +1129,8 @@ namespace game::scene
 
 		// 描画は InGameView へ委譲する。ボスが召喚する雑魚も実行時に増えるため、
 		// スポーン時のスナップショットではなく EnemyFactory が持つ最新の敵一覧を渡す
-		// 残り雑魚はボス出現条件そのものなので、開始時スナップショットの生き残り数を渡す
-		// （ボスが召喚する雑魚は条件に含めない）
+		// 残り雑魚はボス出現条件そのものなので、その集合の生き残り数を渡す。
+		// 道中で湧いたぶんも含み、ボスが召喚する雑魚は含めない（setupEvents参照）
 		m_view.draw(m_playerId, static_cast<int>(m_stageEnemyIds.size()), m_macId, m_elapsedTime);
 	}
 
@@ -882,6 +1147,16 @@ namespace game::scene
 		{
 			if (m_fileEquipmentData.hasSelection(i))
 				result.m_usedFiles.push_back(m_fileEquipmentData.getFilePath(i));
+		}
+
+		// 道中で拾ったぶん。持ち込みと分けて持つことで、リザルトで
+		// 「何を持ち込んで、何を拾って強くなったか」を並べて見せられる
+		if (const auto* inventory{
+		        m_componentManager.tryGet<component::combat::ExtensionInventoryComponent>(m_playerId) })
+		{
+			for (const auto type : inventory->m_acquired)
+				result.m_acquiredExtensions.emplace_back(core::data::toExtensionName(type));
+			result.m_equippedExtensionCount = inventory->equippedCount();
 		}
 
 		m_gameManager.setResultData(result);

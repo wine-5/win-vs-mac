@@ -24,13 +24,15 @@ namespace game::factory
 			core::ecs::EntityManager& entityManager,
 			core::ecs::ComponentManager& componentManager,
 			core::iface::IResourceManager& resourceManager);
-		
+
 		/**
 		 * @brief Playerオブジェクトを生成する
 		 * @param modelHandle モデルハンドル
-		 * @param playerData Playerのデータ
+		 * @param playerData Playerのデータ（装備ボーナス適用後）
+		 * @param statBase 装備ボーナス適用前の能力値の控え
 		 */
-		void create(int modelHandle, const data::PlayerData& playerData);
+		void create(int modelHandle, const data::PlayerData& playerData,
+		    const component::combat::PlayerStatBaseComponent& statBase);
 
 		/**
 		 * @brief 生成したPlayerオブジェクトを取得する

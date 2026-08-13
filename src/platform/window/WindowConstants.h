@@ -31,7 +31,7 @@ namespace platform::window
         static constexpr const char* JSON_KEY_BONUS_ATK{ "bonusAtk" };
         static constexpr const char* JSON_KEY_BONUS_DEF{ "bonusDef" };
         static constexpr const char* JSON_KEY_BONUS_SPD{ "bonusSpd" };
-		// crit は会心率（%表記）、bspd/brng は Window弾の弾速と飛距離
+		// crit はクリティカル率（%表記）、bspd/brng は Window弾の弾速と飛距離
 		static constexpr const char* JSON_KEY_BASE_RNG{ "baseRng" };
 		static constexpr const char* JSON_KEY_BONUS_RNG{ "bonusRng" };
 		static constexpr const char* JSON_KEY_BASE_CRIT{ "baseCrit" };

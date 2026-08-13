@@ -94,7 +94,7 @@ namespace platform::window::select
         static constexpr const char* EXT_TYPE_NAME_DOCUMENT{ "Document" };
         static constexpr const char* EXT_TYPE_NAME_IMAGE{ "Image" };
         static constexpr const char* EXT_TYPE_NAME_AUDIO{ "Audio" };
-		// 0.0〜1.0の確率を%表記へ直すための倍率（会心率の説明文に使う）
+		// 0.0〜1.0の確率を%表記へ直すための倍率（クリティカル率の説明文に使う）
 		static constexpr float PERCENT_SCALE{ 100.0f };
 
 		static constexpr const char* EXT_TYPE_NAME_SOURCE_CODE{ "SourceCode" };

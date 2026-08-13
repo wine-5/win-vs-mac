@@ -3,6 +3,7 @@
 #include "game/PauseManager.h"
 #include "game/ui/pause/PauseMenuController.h"
 #include "game/scene/SceneType.h"
+#include "core/constant/SeType.h"
 #include <memory>
 
 namespace game::scene
@@ -50,6 +51,14 @@ class Application
 	 * @brief Escキーによるポーズメニューの開閉と、メニュー操作の結果を処理する
 	 */
 	void updatePauseMenu();
+
+	/**
+	 * @brief UI操作の効果音を鳴らす
+	 *
+	 * ポーズの開閉はシーンをまたいで同じ操作なので、シーン側ではなくここが鳴らす
+	 * @param seType 鳴らすSEの種別
+	 */
+	void playUiSe(core::constant::SeType seType) const;
 
 	/**
 	 * @brief 指定シーンでポーズメニューを開けるかどうかを返す

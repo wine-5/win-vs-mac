@@ -25,7 +25,7 @@ OUT_DIR = os.path.join("assets", "model", "stage")
 # テクスチャの一辺（既存のブロックテクスチャに合わせる）
 SIZE = 512
 
-# 面の下地。既存の BlockZip / BlockExe と同系の暗色
+# 面の下地。既存の BlockZip と同系の暗色
 BACKGROUND = (17, 20, 26)
 
 # 面の縁。立方体の輪郭を出して「面」として認識させる

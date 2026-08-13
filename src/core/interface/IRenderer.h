@@ -234,8 +234,64 @@ namespace core::iface
 		 */
 		virtual int getDrawCallCount() = 0;
 
-		// 注意: 仮想関数を追加するときは必ずこの位置（末尾）へ足すこと。
-		// 途中へ挿入すると以降のvtableのスロット番号がずれ、再ビルドが漏れた
-		// 翻訳単位から別の関数が呼ばれてクラッシュする
+		/**
+		 * @brief モデルに貼られているテクスチャを差し替える
+		 *
+		 * ブロックのひびのように「形は変わらず絵だけが進行する」表現に使う。
+		 * モデル側は1枚のテクスチャを貼ったまま、段階ごとの画像へ差し替えればよい。
+		 *
+		 * @note モデルハンドル単位で効くため、同じブロックを複数出すなら
+		 *       duplicateModel で複製したハンドルへ適用すること。
+		 *       共有ハンドルに適用すると同じ種類のブロックが全部ひび割れる
+		 * @param modelHandle 対象のモデルハンドル
+		 * @param imageHandle 貼り替える画像ハンドル（loadImageByPath等で取得したもの）
+		 */
+		virtual void setModelTexture(int modelHandle, int imageHandle) = 0;
+
+		/**
+		 * @brief モデルが持つフレーム（ボーン・オブジェクト）の数を取得する
+		 *
+		 * あらかじめ割ったモデルでは、破片1つが1フレームになる。
+		 * その個数を知るのに使う
+		 * @param modelHandle モデルハンドル
+		 * @return フレーム数。失敗時は 0
+		 */
+		[[nodiscard]] virtual int getModelFrameCount(int modelHandle) = 0;
+
+		/**
+		 * @brief フレームが持つ頂点の中心（ローカル座標）を取得する
+		 *
+		 * 破片を「自分の重心まわりで」回すために必要な支点。これを使わないと
+		 * モデル原点を軸に回ってしまい、破片が大きく円を描いて飛んでいく
+		 * @param modelHandle モデルハンドル
+		 * @param frameIndex フレーム番号
+		 * @return 頂点AABBの中心（ローカル座標）。失敗時はゼロベクトル
+		 */
+		[[nodiscard]] virtual core::Vector3 getModelFrameCenter(int modelHandle, int frameIndex) = 0;
+
+		/**
+		 * @brief フレームを個別に動かす（破片の飛散に使う）
+		 *
+		 * pivot を原点へ寄せてから拡大・回転し、position へ運ぶ。
+		 * 指定するとそのフレームはモデル本体の位置・回転・スケールの影響を受けなくなるため、
+		 * position はワールド座標で渡すこと。
+		 *
+		 * @note 一度設定すると resetModelFrameTransforms を呼ぶまで解除されない
+		 * @param modelHandle モデルハンドル
+		 * @param frameIndex フレーム番号
+		 * @param pivot 回転・拡大の支点（getModelFrameCenterで得たローカル座標）
+		 * @param position pivotを合わせるワールド座標
+		 * @param rotation 回転（ラジアン）
+		 * @param scale 拡大率
+		 */
+		virtual void setModelFrameTransform(int modelHandle, int frameIndex,
+		    const core::Vector3& pivot, const core::Vector3& position,
+		    const core::Vector3& rotation, float scale) = 0;
+
+		/**
+		 * @brief setModelFrameTransformで加えた変換をすべて解除する
+		 * @param modelHandle モデルハンドル
+		 */
+		virtual void resetModelFrameTransforms(int modelHandle) = 0;
 	};
 } // namespace core::iface

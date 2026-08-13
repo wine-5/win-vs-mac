@@ -158,6 +158,9 @@
   .pal-item:hover { border-color: var(--accent-dim); }
   .pal-item.disabled { opacity: 0.35; cursor: default; }
   .pal-swatch { width: 22px; height: 14px; border-radius: 2px; }
+  /* 配置物はテクスチャそのものを出す。種類が増えると色だけでは見分けが付かず、
+     名前を1つずつ読むことになるため。色チップのままの敵・光より一回り大きくする */
+  .pal-swatch.tex { width: 28px; height: 28px; }
   .pal-name { font-size: 11px; white-space: nowrap; }
 
   /* ---------- dialog ---------- */
@@ -193,6 +196,7 @@
   <span class="sep"></span>
   <button id="btnSpace" title="ギズモの軸を切り替え">Global</button>
   <button id="btnEdgeSnap" title="端スナップ (V)：近くのオブジェクトの面へぴったり吸着">端スナップ</button>
+  <button id="btnLabels" class="active" title="名前ラベルの表示/非表示 (L)">ラベル</button>
   <span class="sep"></span>
   <button id="btnUndo" title="Ctrl+Z">Undo</button>
   <button id="btnRedo" title="Ctrl+Y">Redo</button>
@@ -203,7 +207,7 @@
   <button id="btnLoad">stageData 読込</button>
   <button id="btnCatalog">カタログ読込</button>
   <button id="btnSave" title="Ctrl+S">保存 (上書き)</button>
-  <span class="hint">Ctrl+S: 保存 / 右ドラッグ+WASD: 移動 / Q,E: 上下 / Shift: 加速 / F: フォーカス / Ctrl: グリッドスナップ / V: 端スナップ</span>
+  <span class="hint">Ctrl+S: 保存 / 右ドラッグ+WASD: 移動 / Q,E: 上下 / Shift: 加速 / F: フォーカス / Ctrl: グリッドスナップ / V: 端スナップ / L: ラベル</span>
 </div>
 
 <div id="hierarchy"></div>
@@ -295,6 +299,7 @@ let redoStack = [];
 let gizmoMode = 'translate';
 let gizmoSpace = 'world';
 let edgeSnap = false;           // 端スナップ（オブジェクト同士の面を吸着）
+let showLabels = true;          // 配置物の名前ラベルを出すか（密なステージでは邪魔になる）
 
 function defaultState() {
   return {
@@ -391,6 +396,7 @@ function makeLabelSprite(text, color) {
   const tex = new THREE.CanvasTexture(cv);
   tex.colorSpace = THREE.SRGBColorSpace;
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+  sp.visible = showLabels; // 消した状態で置いた物のラベルだけが出てしまわないようにする
   sp.scale.set(w * 3.2, 44 * 3.2, 1);
   sp.renderOrder = 5;
   return sp;
@@ -925,6 +931,20 @@ function setEdgeSnap(on) {
   document.getElementById('edgeSnapBadge').style.display = on ? 'block' : 'none';
 }
 btn('btnEdgeSnap').onclick = () => setEdgeSnap(!edgeSnap);
+
+/**
+ * 名前ラベルの表示/非表示を切り替える。
+ *
+ * ラベルはSpriteとして各オブジェクトへぶら下げてある。密に置くほど文字が重なって
+ * 地形そのものが見えなくなるため、レベルデザイン中は消せる必要がある。
+ * 個別に持ち回らず、シーンを走査してSpriteだけを対象にする
+ */
+function setLabelsVisible(on) {
+  showLabels = on;
+  btn('btnLabels').classList.toggle('active', on);
+  scene.traverse(obj => { if (obj.isSprite) obj.visible = on; });
+}
+btn('btnLabels').onclick = () => setLabelsVisible(!showLabels);
 btn('btnUndo').onclick = doUndo;
 btn('btnRedo').onclick = doRedo;
 btn('btnDup').onclick = duplicateSelected;
@@ -1084,6 +1104,7 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'Delete') { deleteSelected(); return; }
   if (e.code === 'KeyF') { focusSelected(); return; }
   if (e.code === 'KeyV') { setEdgeSnap(!edgeSnap); return; }
+  if (e.code === 'KeyL') { setLabelsVisible(!showLabels); return; }
 
   /* W/E/R：右ドラッグ中はカメラ移動キーとして扱うためモード切替しない */
   if (!rmbDown && !e.ctrlKey) {
@@ -1343,16 +1364,27 @@ function renderInspector() {
 function renderPalette() {
   const root = document.getElementById('palette');
   root.innerHTML = '<span class="pal-label">パレット:</span>';
-  const add = (name, color, onClick, disabled) => {
+  const add = (name, color, onClick, disabled, texture) => {
     const d = document.createElement('div');
     d.className = 'pal-item' + (disabled ? ' disabled' : '');
     const sw = document.createElement('div'); sw.className = 'pal-swatch'; sw.style.background = color;
+
+    /* テクスチャがあるものは絵を出す。色は読み込みに失敗したときの下地として残す。
+       background-size はショートハンドの background で auto に戻されるため、
+       クラス側ではなくここで指定しないと絵が原寸のまま左上に出る */
+    if (texture) {
+      sw.classList.add('tex');
+      sw.style.backgroundImage = 'url("' + assetUrl(texture) + '")';
+      sw.style.backgroundSize = 'cover';
+      sw.style.backgroundPosition = 'center';
+    }
+
     const nm = document.createElement('div'); nm.className = 'pal-name'; nm.textContent = name;
     d.append(sw, nm);
     if (!disabled) d.onclick = onClick;
     root.appendChild(d);
   };
-  for (const p of catalog.props) add(p.displayName, p.editorColor, () => addProp(p.id));
+  for (const p of catalog.props) add(p.displayName, p.editorColor, () => addProp(p.id), false, p.texture);
   for (const e of catalog.enemies) add(e.displayName, e.editorColor, () => addSpawn(e.id));
   for (const preset of LIGHT_PRESETS) add('光 ' + preset.name, lightColorHex(preset.color), () => addLight(preset));
   add(catalog.boss.displayName, catalog.boss.editorColor, null, true);  /* 常に1体・追加不可 */
@@ -1587,11 +1619,30 @@ async function loadStageFromServer() {
   }
 }
 
+/**
+ * カタログに無い種類が配置に混ざっていないかを調べて知らせる。
+ *
+ * ゲーム側はこれを見つけると起動時に例外で落ちるが、そこで初めて気付くと
+ * 原因がステージなのかカタログなのか分からない。種類名を変えたあとに
+ * 古いタブから保存すると実際に起きるので、開いた時点で名指しする。
+ */
+function warnUnknownPropTypes() {
+  const known = new Set(catalog.props.map(p => p.id));
+  const unknown = [...new Set(state.props.map(p => p.type).filter(t => !known.has(t)))];
+  if (!unknown.length) return;
+
+  showDialog('カタログに無い配置物',
+    'このステージには stageCatalog.json に存在しない種類が含まれています。<br>'
+    + 'このまま保存するとゲームが起動できません。<br><br>'
+    + unknown.map(t => '・' + t).join('<br>'), null);
+}
+
 (async function init() {
   await loadCatalogFromServer();
   /* 実ファイルを正とし、読めなかったときだけ自動保存から復元する */
   if (!await loadStageFromServer())
     tryRestore();
+  warnUnknownPropTypes();
   renderPalette();
   rebuildScene();
   resize();

@@ -1,12 +1,20 @@
-﻿{
+{
   "id": "enemy_mac",
   "category": "enemy",
   "model": {
     "path": "assets/model/enemies/mac/Mac.mv1",
-    "scale": [ 300, 300, 300 ]
+    "scale": [
+      300,
+      300,
+      300
+    ]
   },
   "collider": {
-    "size": [ 150, 260, 150 ]
+    "size": [
+      150,
+      260,
+      150
+    ]
   },
   "gameplay": {
     "moveSpeed": 240.0,
@@ -14,26 +22,66 @@
     "attackRange": 180.0,
     "maxHp": 1450.0,
     "defence": 15.0,
-    "attackPower": 40.0,
+    "attackPower": 55.0,
     "attackCooldown": 0.0
   },
   "hard": {
     "moveSpeed": 300.0,
     "maxHp": 2320.0,
     "defence": 30.0,
-    "attackPower": 68.0
+    "attackPower": 94.0
   },
-  "behaviors": [ "boss", "avoidCliff" ],
+  "behaviors": [
+    "boss",
+    "avoidCliff"
+  ],
   "animations": [
-    { "state": "Idle",    "id": "anim_mac_idle" },
-    { "state": "Walk",    "id": "anim_mac_walk",         "loop": true,  "onComplete": "Idle",  "priority": "locomotion", "speed": 1.2 },
-    { "state": "Run",     "id": "anim_mac_run",          "loop": true,  "onComplete": "Idle",  "priority": "locomotion", "speed": 1.4 },
-    { "state": "Attack1", "id": "anim_mac_swing_attack", "loop": false, "onComplete": "Idle",  "priority": "attack", "speed": 1.6 },
-    { "state": "Attack2", "id": "anim_mac_magic_attack", "loop": false, "onComplete": "Idle",  "priority": "attack", "speed": 1.6 },
-    { "state": "Dying",   "id": "anim_mac_dying",        "loop": false, "onComplete": "Dying", "priority": "dying" }
+    {
+      "state": "Idle",
+      "id": "anim_mac_idle"
+    },
+    {
+      "state": "Walk",
+      "id": "anim_mac_walk",
+      "loop": true,
+      "onComplete": "Idle",
+      "priority": "locomotion",
+      "speed": 1.2
+    },
+    {
+      "state": "Run",
+      "id": "anim_mac_run",
+      "loop": true,
+      "onComplete": "Idle",
+      "priority": "locomotion",
+      "speed": 1.4
+    },
+    {
+      "state": "Attack1",
+      "id": "anim_mac_swing_attack",
+      "loop": false,
+      "onComplete": "Idle",
+      "priority": "attack",
+      "speed": 1.6
+    },
+    {
+      "state": "Attack2",
+      "id": "anim_mac_magic_attack",
+      "loop": false,
+      "onComplete": "Idle",
+      "priority": "attack",
+      "speed": 1.6
+    },
+    {
+      "state": "Dying",
+      "id": "anim_mac_dying",
+      "loop": false,
+      "onComplete": "Dying",
+      "priority": "dying"
+    }
   ],
   "mac": {
-    "phase2HpRatio": 0.50,
+    "phase2HpRatio": 0.5,
     "actions": {
       "meleeWindup": 0.6,
       "rangedWindup": 0.9,
@@ -49,12 +97,19 @@
       "moveSpeed": 300.0,
       "actionInterval": 4.0,
       "meleeRange": 180.0,
-      "weights": { "melee": 1, "ranged": 3, "summon": 1 },
+      "weights": {
+        "melee": 1,
+        "ranged": 3,
+        "summon": 1
+      },
       "rainbowCount": 3,
       "rainbowSpreadDeg": 40.0,
       "rainbowSpeed": 600.0,
       "rainbowSpinSpeed": 0.05,
-      "summonTypes": [ "xcode", "safari" ],
+      "summonTypes": [
+        "xcode",
+        "safari"
+      ],
       "summonCount": 1,
       "summonMax": 4,
       "summonRadiusMin": 200.0,
@@ -64,13 +119,21 @@
       "moveSpeed": 400.0,
       "actionInterval": 2.0,
       "meleeRange": 180.0,
-      "weights": { "melee": 2, "ranged": 1, "summon": 3, "nova": 2 },
+      "weights": {
+        "melee": 2,
+        "ranged": 1,
+        "summon": 3,
+        "nova": 2
+      },
       "rainbowCount": 6,
       "rainbowSpreadDeg": 70.0,
       "rainbowSpeed": 1000.0,
       "rainbowSpinSpeed": 0.05,
       "novaCount": 16,
-      "summonTypes": [ "xcode", "safari" ],
+      "summonTypes": [
+        "xcode",
+        "safari"
+      ],
       "summonCount": 2,
       "summonMax": 10,
       "summonRadiusMin": 200.0,

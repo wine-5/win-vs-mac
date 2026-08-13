@@ -84,11 +84,48 @@ namespace core::utility
 		static constexpr unsigned int HUD_CHARGE_CYAN = 0xFF22D3EE; // 溜め中のシアン
 		// 溜め最大の黄色。ステージが青〜シアン基調のため、白では背景に溶けて完了が分からない
 		static constexpr unsigned int HUD_CHARGE_MAX = 0xFFFFC83D;
-		// クリティカル（会心）のオレンジ。溜め完了の黄色より赤に寄せて役割を分ける。
-		// シアン＝プレイヤーの技、オレンジ＝会心、赤＝危険、で色の意味を重複させない
+		// クリティカル（クリティカル）のオレンジ。溜め完了の黄色より赤に寄せて役割を分ける。
+		// シアン＝プレイヤーの技、オレンジ＝クリティカル、赤＝危険、で色の意味を重複させない
 		static constexpr unsigned int HUD_CRITICAL_ORANGE = 0xFFFF7A18;
 		static constexpr unsigned int HUD_CRIT_RED = 0xFFE81123;    // 敵を捕捉中・危険
 		static constexpr unsigned int HUD_ACCENT = 0xFF0078D4;      // Windows 11のアクセント色
 		static constexpr unsigned int HUD_INK_FAINT = 0xFF5E708A;   // 補足情報・未装備などの控えめな文字
+		// 能力が上がったことを示す緑。強化中の黄色（HUD_CHARGE_MAX）と役割が違う。
+		// 黄色は「今この能力は強化された状態」という継続した状態、
+		// こちらは「たった今上がった」という瞬間を表す
+		static constexpr unsigned int HUD_BUFF_GREEN = 0xFF4ADE80;
+		// ギャンブルボックスの当たりで倍率が掛かっていることを示す紫。
+		// 青＝装備中／赤＝触れない／緑＝上がった／黄＝強化されている、はすべて埋まっているため、
+		// まだどこにも意味を持たせていない色を当てる。滅多に出ないものほど色が独立している必要がある
+		static constexpr unsigned int HUD_EXTENSION_BOOST_VIOLET = 0xFFC084FC;
+		// HPが十分あるときのバーの緑。上がったことを示す HUD_BUFF_GREEN より暗くしてある。
+		// バーは塗る面積が広く、同じ明るさだと画面の中でいちばん目立つ色になってしまう
+		static constexpr unsigned int HUD_BAR_GREEN = 0xFF36D07B;
+
+		// HUDのパネル・マス目の面と枠。窓・スロット・吹き出し・バーの溝まで
+		// すべて同じ2色で組み、画面ごとに濃さが違って見えないようにする
+		static constexpr unsigned int HUD_PANEL_FILL = 0xFF0E1420;   // 面（濃紺）
+		static constexpr unsigned int HUD_PANEL_BORDER = 0xFF8CAAD2; // 枠（淡い青灰）
+
+		// 道中では動かせないものを示す赤。危険を表す HUD_CRIT_RED より彩度を落としてある。
+		// 出しっぱなしにする色なので、警告と同じ強さだと視界を占領してしまう
+		static constexpr unsigned int HUD_LOCKED_RED = 0xFFC0524F;
+
+		// ========== ミニマップ用の色 ==========
+
+		// パネルの上にもう一段沈める暗幕。HUD_PANEL_FILL より暗くして地形の線を浮かせる
+		static constexpr unsigned int MAP_BACKGROUND_NAVY = 0xFF060A12;
+
+		// 床の塗り分け。見た目ではなく「滑るのか・運ばれるのか」という振る舞いで分ける
+		static constexpr unsigned int MAP_FLOOR_BLUE = 0xFF0067C0;    // 普通の足場
+		static constexpr unsigned int MAP_SLOPE_GREEN = 0xFF3FB950;   // 滑る坂
+		static constexpr unsigned int MAP_CONVEYOR_CYAN = 0xFF00B7C3; // 動く歩道
+
+		// ========== メニュー（ポーズなどの項目リスト）用の色 ==========
+
+		// 選択中の項目。非選択の薄いグレーと色相・明度の両方で離し、
+		// 色を見分けにくい環境でもどれを選んでいるか分かるようにする
+		static constexpr unsigned int MENU_SELECTED_GOLD = 0xFFFFD700;
+		static constexpr unsigned int MENU_UNSELECTED_GRAY = 0xFFC8C8C8;
 	};
 } // namespace core::utility

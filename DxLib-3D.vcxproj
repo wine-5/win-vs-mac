@@ -172,6 +172,10 @@
     <ClCompile Include="src\game\system\visual\BackgroundParticleSystem.cpp" />
     <ClCompile Include="src\game\system\visual\HardAuraVisualsSystem.cpp" />
     <ClCompile Include="src\game\ui\ingame\InGameStatusView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\InventoryView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\OrbitGlow.cpp" />
+    <ClCompile Include="src\game\utility\PlayerStats.cpp" />
+    <ClCompile Include="src\game\ui\ingame\InteractPromptView.cpp" />
     <ClCompile Include="src\game\system\camera\DamageShakeSystem.cpp" />
     <ClCompile Include="src\game\system\ai\MeleeChaseAISystem.cpp" />
     <ClCompile Include="src\game\system\ai\RangeKeepAISystem.cpp" />
@@ -179,7 +183,6 @@
     <ClCompile Include="src\game\system\ai\DetectionSystem.cpp" />
     <ClCompile Include="src\game\system\ai\EnemyRangedAttackSystem.cpp" />
     <ClCompile Include="src\game\scene\Bios.cpp" />
-    <ClCompile Include="src\game\scene\DebugDestruction.cpp" />
     <ClCompile Include="src\game\scene\Loading.cpp" />
     <ClCompile Include="src\game\scene\Lockscreen.cpp" />
     <ClCompile Include="src\game\scene\LockscreenView.cpp" />
@@ -189,6 +192,7 @@
     <ClCompile Include="src\game\scene\Title.cpp" />
     <ClCompile Include="src\game\scene\TitleView.cpp" />
     <ClCompile Include="src\game\system\combat\AttackSystem.cpp" />
+    <ClCompile Include="src\game\system\combat\ExtensionEquipSystem.cpp" />
     <ClCompile Include="src\game\system\camera\CameraSystem.cpp" />
     <ClCompile Include="src\game\system\combat\TargetingSystem.cpp" />
     <ClCompile Include="src\game\event\AudioEventListener.cpp" />
@@ -245,6 +249,10 @@
     <ClCompile Include="src\game\utility\CliffGuard.cpp" />
     <ClCompile Include="src\game\utility\GroundQuery.cpp" />
     <ClCompile Include="src\game\utility\MiniMapProjection.cpp" />
+    <ClCompile Include="src\game\system\stage\BlockBreakSystem.cpp" />
+    <ClCompile Include="src\game\system\stage\BlockDebrisSystem.cpp" />
+    <ClCompile Include="src\game\system\stage\ExtensionPickupSystem.cpp" />
+    <ClCompile Include="src\game\system\stage\RenameTerminalSystem.cpp" />
     <ClCompile Include="src\game\system\stage\BossGateSystem.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageRepository.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\StageCatalogRepository.cpp" />
@@ -277,6 +285,7 @@
     <ClCompile Include="src\game\ui\ingame\ObjectiveView.cpp" />
     <ClCompile Include="src\game\ui\ingame\HudPanel.cpp" />
     <ClCompile Include="src\game\ui\ingame\MiniMapView.cpp" />
+    <ClCompile Include="src\game\ui\ingame\ExtensionBoostFlashView.cpp" />
     <ClCompile Include="src\game\ui\ingame\LowHealthVignetteView.cpp" />
     <ClCompile Include="src\game\ui\ingame\BossHUDView.cpp" />
     <ClCompile Include="src\game\ui\ingame\EnemyHealthBarView.cpp" />
@@ -329,11 +338,19 @@
     <ClInclude Include="src\game\constant\PropCollision.h" />
     <ClInclude Include="src\game\constant\PropRole.h" />
     <ClInclude Include="src\game\component\stage\BossGateComponent.h" />
+    <ClInclude Include="src\game\component\stage\DestructibleComponent.h" />
+    <ClInclude Include="src\game\component\stage\ExtensionPickupComponent.h" />
+    <ClInclude Include="src\game\component\stage\RenameTerminalComponent.h" />
+    <ClInclude Include="src\game\component\stage\BlockDebrisComponent.h" />
     <ClInclude Include="src\game\component\movement\GroundSurfaceComponent.h" />
     <ClInclude Include="src\game\component\movement\FallRecoveryComponent.h" />
     <ClInclude Include="src\game\system\movement\FootstepSystem.h" />
     <ClInclude Include="src\game\system\movement\FallOutSystem.h" />
     <ClInclude Include="src\game\system\movement\GroundingSystem.h" />
+    <ClInclude Include="src\game\system\stage\BlockBreakSystem.h" />
+    <ClInclude Include="src\game\system\stage\BlockDebrisSystem.h" />
+    <ClInclude Include="src\game\system\stage\ExtensionPickupSystem.h" />
+    <ClInclude Include="src\game\system\stage\RenameTerminalSystem.h" />
     <ClInclude Include="src\game\system\stage\BossGateSystem.h" />
     <ClInclude Include="src\core\data\ProjectileMetadata.h" />
     <ClInclude Include="src\game\actor\EnemyBehaviors.h" />
@@ -373,12 +390,14 @@
     <ClInclude Include="src\game\component\EnemyTypeComponent.h" />
     <ClInclude Include="src\game\component\combat\AttackComponent.h" />
     <ClInclude Include="src\game\component\visual\EffectComponent.h" />
+    <ClInclude Include="src\game\component\combat\ExtensionInventoryComponent.h" />
     <ClInclude Include="src\game\component\combat\HealthComponent.h" />
     <ClInclude Include="src\game\component\visual\HitEffectComponent.h" />
     <ClInclude Include="src\game\component\TagComponent.h" />
     <ClInclude Include="src\game\constant\EnemyAnimationState.h" />
     <ClInclude Include="src\game\constant\MacAwakenTiming.h" />
     <ClInclude Include="src\game\constant\EnemyType.h" />
+    <ClInclude Include="src\game\constant\ExtensionIconId.h" />
     <ClInclude Include="src\game\constant\MetadataKeys.h" />
     <ClInclude Include="src\game\data\EnemyData.h" />
     <ClInclude Include="src\game\data\FileEquipmentData.h" />
@@ -396,7 +415,6 @@
     <ClInclude Include="src\game\system\visual\PlayerChargeVisualsSystem.h" />
     <ClInclude Include="src\game\system\visual\CriticalVisualsSystem.h" />
     <ClInclude Include="src\game\GameManager.h" />
-    <ClInclude Include="src\game\scene\DebugDestruction.h" />
     <ClInclude Include="src\game\scene\Loading.h" />
     <ClInclude Include="src\game\scene\Lockscreen.h" />
     <ClInclude Include="src\game\scene\LockscreenView.h" />
@@ -406,6 +424,7 @@
     <ClInclude Include="src\game\scene\Title.h" />
     <ClInclude Include="src\game\scene\TitleView.h" />
     <ClInclude Include="src\game\system\combat\AttackSystem.h" />
+    <ClInclude Include="src\game\system\combat\ExtensionEquipSystem.h" />
     <ClInclude Include="src\game\system\camera\CameraSystem.h" />
     <ClInclude Include="src\game\system\camera\ChargeZoomSystem.h" />
     <ClInclude Include="src\game\system\visual\BattleStartSystem.h" />
@@ -413,6 +432,10 @@
     <ClInclude Include="src\game\system\visual\BackgroundParticleSystem.h" />
     <ClInclude Include="src\game\system\visual\HardAuraVisualsSystem.h" />
     <ClInclude Include="src\game\ui\ingame\InGameStatusView.h" />
+    <ClInclude Include="src\game\ui\ingame\InventoryView.h" />
+    <ClInclude Include="src\game\ui\ingame\OrbitGlow.h" />
+    <ClInclude Include="src\game\utility\PlayerStats.h" />
+    <ClInclude Include="src\game\ui\ingame\InteractPromptView.h" />
     <ClInclude Include="src\game\system\camera\DamageShakeSystem.h" />
     <ClInclude Include="src\game\system\ai\MeleeChaseAISystem.h" />
     <ClInclude Include="src\game\system\ai\RangeKeepAISystem.h" />
@@ -432,6 +455,7 @@
     <ClInclude Include="src\game\component\combat\DeathComponent.h" />
     <ClInclude Include="src\game\component\ai\AlertComponent.h" />
     <ClInclude Include="src\game\ui\FadeTransition.h" />
+    <ClInclude Include="src\game\utility\ExtensionBonusLabel.h" />
     <ClInclude Include="src\game\utility\FileExtensionTypeResolver.h" />
     <ClInclude Include="src\game\utility\CliffGuard.h" />
     <ClInclude Include="src\game\utility\GroundQuery.h" />
@@ -547,6 +571,7 @@
     <ClInclude Include="src\game\ui\ingame\HudPanel.h" />
     <ClInclude Include="src\game\ui\ingame\MiniMapView.h" />
     <ClInclude Include="src\game\ui\ingame\LowHealthPulse.h" />
+    <ClInclude Include="src\game\ui\ingame\ExtensionBoostFlashView.h" />
     <ClInclude Include="src\game\ui\ingame\LowHealthVignetteView.h" />
     <ClInclude Include="src\game\ui\ingame\BossHUDView.h" />
     <ClInclude Include="src\game\ui\ingame\EnemyHealthBarView.h" />

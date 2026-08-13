@@ -36,6 +36,17 @@ namespace infrastructure::resource::repository
 	  int loadImageById(std::string_view imageId);
 
 	  /**
+	   * @brief パスで画像を読み込みハンドルを返す（キャッシュ付き）
+	   *
+	   * resources.jsonへ登録するほどでもない、規則的に導けるファイルを読むのに使う。
+	   * 例えばブロックのひび段階テクスチャは「モデル名 + _crack1.png」で決まるため、
+	   * ブロックが増えるたびにIDを30件書き足すのは保守が割に合わない
+	   * @param path 画像ファイルのパス
+	   * @return DxLib 画像ハンドル、失敗時は -1
+	   */
+	  int loadImageByPath(std::string_view path);
+
+	  /**
 	   * @brief 登録されている全画像IDを取得する
 	   *
 	   * 「resources.jsonに載っている画像を全部先読みする」用途で使う。
@@ -46,5 +57,8 @@ namespace infrastructure::resource::repository
 	private:
         std::unordered_map<std::string, std::string> m_paths{};
         std::unordered_map<std::string, int>         m_handles{};
-    };
+
+		// パス指定で読んだぶん。IDのキャッシュとはキーの意味が違うため分けている
+		std::unordered_map<std::string, int> m_pathHandles{};
+	};
 } // namespace infrastructure::resource::repository

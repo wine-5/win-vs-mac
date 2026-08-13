@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <vector>
 #include "core/ecs/ComponentManager.h"
 #include "core/ecs/Entity.h"
@@ -39,7 +39,10 @@ namespace game::ui::ingame
 	class EquipmentSlotView; // 前方宣言
 	class ObjectiveView;     // 前方宣言
 	class InGameStatusView;  // 前方宣言
-	class LowHealthVignetteView; // 前方宣言
+	class InventoryView;     // 前方宣言
+	class InteractPromptView;    // 前方宣言
+	class LowHealthVignetteView;
+	class ExtensionBoostFlashView; // 前方宣言
 	class BossHUDView;           // 前方宣言
 	class MiniMapView;           // 前方宣言
 	class EnemyHealthBarView;    // 前方宣言
@@ -77,7 +80,7 @@ namespace game::scene
 		 * モデルはRenderComponentの全走査で描くため、描画対象のIDは受け取らない。
 		 * playerIdはレティクル（照準状態の表示）とプレイヤーHUDに使う
 		 * @param playerId プレイヤーのEntityID
-		 * @param remainingEnemyCount 残っている開始時配置の雑魚の数（左上の目標表示に使う）
+		 * @param remainingEnemyCount 残っている討伐対象の雑魚の数（左上の目標表示に使う）
 		 * @param bossId ボスのEntityID（未出現ならINVALID_ENTITY_ID）
 		 * @param elapsedTime インゲーム開始からの経過時間（秒。右上の状況表示に使う）
 		 */
@@ -193,10 +196,42 @@ namespace game::scene
 		void setInGameStatusView(ui::ingame::InGameStatusView* view);
 
 		/**
+		 * @brief 拡張子インベントリ（Eキー）のViewを設定する
+		 * @param view InventoryViewのポインタ（所有はInGame）
+		 */
+		void setInventoryView(ui::ingame::InventoryView* view);
+
+		/**
+		 * @brief インベントリの開閉状態を設定する
+		 *
+		 * 開いている間だけ描く。閉じているときに描くと画面を覆ってしまう
+		 * @param isOpen 開いているならtrue
+		 */
+		void setInventoryOpen(bool isOpen);
+
+		/**
+		 * @brief 設置物への接近案内（吹き出し）Viewを設定する
+		 * @param view InteractPromptViewのポインタ（所有はInGame）
+		 */
+		void setInteractPromptView(ui::ingame::InteractPromptView* view);
+
+		/**
+		 * @brief 案内を出す対象のEntityIDを設定する
+		 * @param targetId 対象のEntityID（範囲内に無ければ INVALID_ENTITY_ID）
+		 */
+		void setInteractTarget(core::ecs::EntityId targetId);
+
+		/**
 		 * @brief 低HP警告のビネットViewを設定する
 		 * @param view LowHealthVignetteViewのポインタ（所有はInGame）
 		 */
 		void setLowHealthVignetteView(ui::ingame::LowHealthVignetteView* view);
+
+		/**
+		 * @brief ギャンブルボックスの当たりを知らせるViewを設定する
+		 * @param view 設定するView（所有はInGame側）
+		 */
+		void setExtensionBoostFlashView(ui::ingame::ExtensionBoostFlashView* view);
 
 		/**
 		 * @brief ボスHP（上中央のHUD）Viewを設定する
@@ -270,6 +305,14 @@ namespace game::scene
 		 */
 		void drawProjectileModels();
 
+		/**
+		 * @brief 落ちている拡張子の欠片を描画する
+		 *
+		 * 装備スロットと同じアイコンを、光るビルボードとして浮かせて描く。
+		 * 発光させるのは「拾えるもの」だと一目で分かるようにするため。
+		 */
+		void drawExtensionPickups();
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IRenderer& m_renderer;
 		core::iface::IUIRenderer& m_uiRenderer;
@@ -314,8 +357,19 @@ namespace game::scene
 		// 状況表示（右上のHUD：難易度・経過時間）の描画元（所有はInGame）
 		ui::ingame::InGameStatusView* m_statusView{ nullptr };
 
+		// 拡張子インベントリ（Eキー）の描画元（所有はInGame）。開いている間だけ描く
+		ui::ingame::InventoryView* m_inventoryView{ nullptr };
+		bool m_isInventoryOpen{ false };
+
+		// 設置物への接近案内（吹き出し）の描画元（所有はInGame）
+		ui::ingame::InteractPromptView* m_interactPromptView{ nullptr };
+		core::ecs::EntityId m_interactTargetId{ core::ecs::INVALID_ENTITY_ID };
+
 		// 低HP警告のビネットの描画元（所有はInGame）
 		ui::ingame::LowHealthVignetteView* m_lowHealthVignetteView{ nullptr };
+
+		/// @brief 当たりを引いた瞬間の閃光とメッセージ
+		ui::ingame::ExtensionBoostFlashView* m_extensionBoostFlashView{ nullptr };
 
 		// ボスHP（上中央のHUD）の描画元（所有はInGame）
 		ui::ingame::BossHUDView* m_bossHUDView{ nullptr };

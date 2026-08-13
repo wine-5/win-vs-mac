@@ -3,6 +3,7 @@
 #include "core/constant/UI.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/component/stage/ExtensionPickupComponent.h"
 #include "game/component/visual/WeaponAttachComponent.h"
 #include "game/component/combat/AimComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
@@ -29,7 +30,10 @@
 #include "game/ui/ingame/EquipmentSlotView.h"
 #include "game/ui/ingame/ObjectiveView.h"
 #include "game/ui/ingame/InGameStatusView.h"
+#include "game/ui/ingame/InventoryView.h"
+#include "game/ui/ingame/InteractPromptView.h"
 #include "game/ui/ingame/LowHealthVignetteView.h"
+#include "game/ui/ingame/ExtensionBoostFlashView.h"
 #include "game/ui/ingame/BossHUDView.h"
 #include "game/ui/ingame/MiniMapView.h"
 #include "game/ui/ingame/EnemyHealthBarView.h"
@@ -76,6 +80,9 @@ namespace game::scene
 		// 弾を描く。プレイヤーのWindow弾はビルボード、敵のタブ弾など3Dモデルはモデルで描画する
 		drawProjectileModels();
 
+		// 壊したブロックから落ちた拡張子の欠片。壁の裏では隠れてほしいので3D描画フェーズで描く
+		drawExtensionPickups();
+
 		// DEBUG: 当たり判定等のワールド空間デバッグ可視化（リリース時に削除）
 		if (m_debugGizmoView)
 			m_debugGizmoView->draw();
@@ -104,40 +111,56 @@ namespace game::scene
 		if (m_damagePopupSystem)
 			m_damagePopupSystem->draw();
 
-		// プレイヤーステータス（左下のHP）。演出より手前・レティクルと同じHUD層に描く
-		if (m_playerHUDView)
-			m_playerHUDView->draw(playerId);
+		// インベントリを開いている間は常設のHUDを描かない。
+		// インベントリの下地は半透明なので、そのまま描くとパネルや光の帯が
+		// 透けて重なり、読ませたい内容の上にノイズが乗る
+		if (!m_isInventoryOpen)
+		{
+			// プレイヤーステータス（左下のHP）。演出より手前・レティクルと同じHUD層に描く
+			if (m_playerHUDView)
+				m_playerHUDView->draw(playerId);
 
-		// 装備スロット（右下）
-		if (m_equipmentSlotView)
-			m_equipmentSlotView->draw();
+			// 装備スロット（右下）
+			if (m_equipmentSlotView)
+				m_equipmentSlotView->draw();
 
-		// 目標（左上）。開始演出のミッションが中央から流れ着くまでは伏せておく
-		// （同じ内容が中央と左上に同時に出ていると、どちらを見ればよいのか分からない）
-		if (m_objectiveView &&
-		    (m_battleStartSystem == nullptr || m_battleStartSystem->isObjectiveRevealed()))
-			m_objectiveView->draw(remainingEnemyCount, bossId != core::ecs::INVALID_ENTITY_ID);
+			// 目標（左上）。開始演出のミッションが中央から流れ着くまでは伏せておく
+			// （同じ内容が中央と左上に同時に出ていると、どちらを見ればよいのか分からない）
+			if (m_objectiveView &&
+			    (m_battleStartSystem == nullptr || m_battleStartSystem->isObjectiveRevealed()))
+				m_objectiveView->draw(remainingEnemyCount, bossId != core::ecs::INVALID_ENTITY_ID);
 
-		// 難易度と経過時間（右上）
-		if (m_statusView)
-			m_statusView->draw(elapsedTime);
+			// 難易度と経過時間（右上）
+			if (m_statusView)
+				m_statusView->draw(elapsedTime);
 
-		// ボスHP（上中央）。出現していなければ描かれない
-		if (m_bossHUDView)
-			m_bossHUDView->draw(bossId);
+			// ボスHP（上中央）。出現していなければ描かれない
+			if (m_bossHUDView)
+				m_bossHUDView->draw(bossId);
 
-		// ミニマップ（右上・難易度パネルの下）
-		if (m_miniMapView)
-			m_miniMapView->draw(playerId);
+			// ミニマップ（右上・難易度パネルの下）
+			if (m_miniMapView)
+				m_miniMapView->draw(playerId);
 
-		// 低HP警告のビネット。四隅を赤く染めるが、下の隅はHUDのパネルが占めているため、
-		// パネルより手前に描かないと下2つの隅が隠れてしまう。
-		// 画面全体が危険な状態なので、HUDごと赤く染まるほうが表現としても正しい
-		if (m_lowHealthVignetteView)
-			m_lowHealthVignetteView->draw(playerId);
+			// 低HP警告のビネット。四隅を赤く染めるが、下の隅はHUDのパネルが占めているため、
+			// パネルより手前に描かないと下2つの隅が隠れてしまう。
+			// 画面全体が危険な状態なので、HUDごと赤く染まるほうが表現としても正しい
+			if (m_lowHealthVignetteView)
+				m_lowHealthVignetteView->draw(playerId);
 
-		// 照準レティクル（HUD）は最前面に描く
-		drawReticle(playerId);
+			// 当たりの閃光は他のHUDより手前。画面全体を一度だけ光らせるものなので、
+			// 下に置くとスロットや数値の裏へ回って気付けない
+			if (m_extensionBoostFlashView)
+				m_extensionBoostFlashView->draw(playerId);
+
+			// 近づいた設置物の案内（吹き出し）。対象の頭上に出るので
+			// 他のHUDより先に描き、レティクルには被らせない
+			if (m_interactPromptView)
+				m_interactPromptView->draw(m_interactTargetId);
+
+			// 照準レティクル（HUD）は最前面に描く
+			drawReticle(playerId);
+		}
 
 		// DEBUG: デバッグHUD（FPS等の統計・カメラ状態ラベル）（リリース時に削除）
 		// 敵数はAIComponentを持つEntity数から数える（IDリストを引き回さない）
@@ -152,6 +175,11 @@ namespace game::scene
 		// 「まだ始まっていない」ことを画面の中心で伝える
 		if (m_battleStartSystem)
 			m_battleStartSystem->draw();
+
+		// インベントリ。画面を覆うので他のHUDより手前に描く。
+		// ただし死亡の暗転よりは奥（死んだ瞬間に持ち物が前面に残ると締まらない）
+		if (m_isInventoryOpen && m_inventoryView)
+			m_inventoryView->draw(playerId);
 
 		// プレイヤー死亡時の暗転。画面の全てを覆って暗くするため最後に描く
 		if (m_playerDeathSystem)
@@ -243,6 +271,26 @@ namespace game::scene
 		m_statusView = view;
 	}
 
+	void InGameView::setInventoryView(ui::ingame::InventoryView* view)
+	{
+		m_inventoryView = view;
+	}
+
+	void InGameView::setInventoryOpen(bool isOpen)
+	{
+		m_isInventoryOpen = isOpen;
+	}
+
+	void InGameView::setInteractPromptView(ui::ingame::InteractPromptView* view)
+	{
+		m_interactPromptView = view;
+	}
+
+	void InGameView::setInteractTarget(core::ecs::EntityId targetId)
+	{
+		m_interactTargetId = targetId;
+	}
+
 	void InGameView::setObjectiveView(ui::ingame::ObjectiveView* view)
 	{
 		m_objectiveView = view;
@@ -251,6 +299,11 @@ namespace game::scene
 	void InGameView::setLowHealthVignetteView(ui::ingame::LowHealthVignetteView* view)
 	{
 		m_lowHealthVignetteView = view;
+	}
+
+	void InGameView::setExtensionBoostFlashView(ui::ingame::ExtensionBoostFlashView* view)
+	{
+		m_extensionBoostFlashView = view;
 	}
 
 	void InGameView::setMiniMapView(ui::ingame::MiniMapView* view)
@@ -442,6 +495,51 @@ namespace game::scene
 			const int x{ centerX + static_cast<int>(std::cos(angle) * radius) };
 			const int y{ centerY + static_cast<int>(std::sin(angle) * radius) };
 			m_uiRenderer.drawCircle(x, y, dotRadius, litColor, true, 1);
+		}
+	}
+
+	void InGameView::drawExtensionPickups()
+	{
+		// 拾えるものだと分かるよう、ゆっくり明滅させる
+		constexpr float PULSE_SPEED{ 3.4f };
+		constexpr int BRIGHTNESS_BASE{ 55 };
+		constexpr int BRIGHTNESS_SWING{ 35 };
+
+		// 足元に置く目印（遠くからでも「そこに何かある」と分かるように）。
+		// 色はHUDの溜めと同じシアンで、床に敷くので薄く透かす
+		constexpr float MARKER_RADIUS{ 46.0f };
+		constexpr int MARKER_ALPHA{ 0x50 };
+		constexpr unsigned int MARKER_COLOR{
+			(core::utility::Color::HUD_CHARGE_CYAN & 0x00FFFFFFu) | (MARKER_ALPHA << 24)
+		};
+		constexpr float MARKER_HEIGHT{ 2.0f };
+
+		const auto pickups{ m_componentManager.getAllEntities<component::stage::ExtensionPickupComponent>() };
+		for (const auto id : pickups)
+		{
+			const auto* render{ m_componentManager.tryGet<component::visual::RenderComponent>(id) };
+			if (render == nullptr || !render->m_isVisible || render->m_billboardImage == -1)
+				continue;
+
+			const auto& transform{ m_componentManager.get<component::movement::TransformComponent>(id) };
+			const auto& pickup{ m_componentManager.get<component::stage::ExtensionPickupComponent>(id) };
+
+			// 足元の目印。浮いている欠片は床と離れていて位置が掴みにくいため、
+			// 真下に円を描いて「どこに落ちているか」を示す
+			m_renderer.drawGroundCircle({ transform.m_position.x, pickup.m_restY - MARKER_HEIGHT,
+			                                transform.m_position.z },
+			    MARKER_RADIUS, MARKER_COLOR, true);
+
+			// まず通常合成で絵をそのまま描く。拡張子アイコンは暗い紙なので、
+			// 加算合成だけで描くと暗い部分が何も足されず、ラベルの色しか見えない
+			m_renderer.drawBillboard(render->m_billboardImage, transform.m_position,
+			    render->m_billboardSize, 0.0f);
+
+			// その上へ光を重ねて明滅させる。輪郭と記号だけが脈打ち、拾えるものだと分かる
+			const float pulse{ std::sin(pickup.m_elapsed * PULSE_SPEED) };
+			const int brightness{ BRIGHTNESS_BASE + static_cast<int>(pulse * BRIGHTNESS_SWING) };
+			m_renderer.drawGlowBillboard(render->m_billboardImage, transform.m_position,
+			    render->m_billboardSize, 0.0f, brightness);
 		}
 	}
 

@@ -20,8 +20,8 @@ namespace
 	constexpr float ITEM_WIDTH_RATIO{ 0.42f };  // 項目の当たり判定幅（画面幅比）
 
 	// 色
-	constexpr unsigned int SELECTED_COLOR{ 0xFFFFD700 };   // 選択中（金色）
-	constexpr unsigned int UNSELECTED_COLOR{ 0xFFC8C8C8 }; // 非選択（薄いグレー）
+	constexpr unsigned int SELECTED_COLOR{ core::utility::Color::MENU_SELECTED_GOLD };
+	constexpr unsigned int UNSELECTED_COLOR{ core::utility::Color::MENU_UNSELECTED_GRAY };
 } // namespace
 
 namespace game::ui::pause

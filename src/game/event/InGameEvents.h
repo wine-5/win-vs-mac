@@ -4,6 +4,7 @@
 #include "core/constant/EffectType.h"
 #include "core/constant/SeType.h"
 #include "core/data/MacMetadata.h"
+#include "core/data/FileExtensionType.h"
 #include "core/utility/Vector3.h"
 #include "game/constant/AnimationState.h"
 #include "game/constant/EnemyType.h"
@@ -270,6 +271,164 @@ namespace game::event
 		BossAppearedEvent() = default;
 		explicit BossAppearedEvent(core::ecs::EntityId id)
 		    : m_entityId{ id }
+		{
+		}
+	};
+
+	/**
+	 * @brief 壊せるブロックが破壊されたときに発行されるイベント
+	 *
+	 * 音・カメラシェイクなど、破壊に反応する演出はこれを購読する。
+	 * 破壊そのものの処理（破片・ドロップ）はBlockBreakSystemが済ませている
+	 */
+	struct BlockBrokenEvent : public core::iface::IGameEvent
+	{
+		/** @brief 壊れたブロックのEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief 壊れた位置（ワールド座標） */
+		core::Vector3 m_position{};
+
+		/**
+		 * @brief 欠片が出たか
+		 *
+		 * RAMブロックや外れのギャンブルボックスは何も落とさない。
+		 * 出ていないのに出現音を鳴らすと、拾える物を探して無駄に歩かせてしまう
+		 */
+		bool m_hasDrop{ false };
+
+		BlockBrokenEvent() = default;
+		BlockBrokenEvent(core::ecs::EntityId id, const core::Vector3& position, bool hasDrop = false)
+		    : m_entityId{ id }
+		    , m_position{ position }
+		    , m_hasDrop{ hasDrop }
+		{
+		}
+	};
+
+	/**
+	 * @brief 拡張子を挿せる枠が増えたときに発行されるイベント
+	 *
+	 * RAMブロックを壊すと飛ぶ。枠が増えたことの反映（能力の再計算）と、
+	 * 音・HUDの演出を分けるためにイベントにしてある
+	 */
+	struct EquipSlotGainedEvent : public core::iface::IGameEvent
+	{
+		/** @brief 増えたあとの枠数 */
+		int m_maxEquipped{ 0 };
+
+		EquipSlotGainedEvent() = default;
+		explicit EquipSlotGainedEvent(int maxEquipped)
+		    : m_maxEquipped{ maxEquipped }
+		{
+		}
+	};
+
+	/**
+	 * @brief 装備中の拡張子の効果へ倍率が掛かったときに発行されるイベント
+	 *
+	 * ギャンブルボックスの当たりを引くと飛ぶ。能力への反映（ExtensionEquipSystem）と、
+	 * 音・HUDの演出を分けるためにイベントにしてある
+	 */
+	struct ExtensionBonusMultipliedEvent : public core::iface::IGameEvent
+	{
+		/** @brief 掛かったあとの倍率（1.0が素） */
+		float m_multiplier{ 1.0f };
+
+		ExtensionBonusMultipliedEvent() = default;
+		explicit ExtensionBonusMultipliedEvent(float multiplier)
+		    : m_multiplier{ multiplier }
+		{
+		}
+	};
+
+	/**
+	 * @brief 壊せるブロックを殴ったが、まだ壊れていないときに発行されるイベント
+	 *
+	 * 打撃音を鳴らすために使う。壊れた場合は BlockBrokenEvent が飛ぶので、
+	 * こちらは「手応えはあったがまだ残っている」打撃だけを表す
+	 */
+	struct BlockHitEvent : public core::iface::IGameEvent
+	{
+		/** @brief 殴られたブロックのEntityId */
+		core::ecs::EntityId m_entityId{ core::ecs::INVALID_ENTITY_ID };
+
+		/** @brief 次の一撃で壊れるか（音を変えて「あと1回」を知らせる） */
+		bool m_isLastHit{ false };
+
+		BlockHitEvent() = default;
+		BlockHitEvent(core::ecs::EntityId id, bool isLastHit)
+		    : m_entityId{ id }
+		    , m_isLastHit{ isLastHit }
+		{
+		}
+	};
+
+	/**
+	 * @brief 拡張子の欠片を拾ったときに発行されるイベント
+	 *
+	 * パラメータへの反映・音・HUDの更新はこれを購読する。
+	 * 拾う判定（当たり判定）と、拾った結果（能力の変化）を分けるためのイベント
+	 */
+	struct ExtensionPickedUpEvent : public core::iface::IGameEvent
+	{
+		/** @brief 拾った拡張子の種別 */
+		core::data::FileExtensionType m_type{ core::data::FileExtensionType::Unknown };
+
+		ExtensionPickedUpEvent() = default;
+		explicit ExtensionPickedUpEvent(core::data::FileExtensionType type)
+		    : m_type{ type }
+		{
+		}
+	};
+
+	/**
+	 * @brief リネーム端末で拡張子の位置を入れ替えるよう要求するイベント
+	 *
+	 * 発行するのは操作を受け取ったUI側、実際に能力を差し替えるのはSystem側。
+	 * 分けておくことで、操作をキーからマウスへ変えても能力の計算に触らずに済む。
+	 *
+	 * 位置はどちらも ExtensionInventoryComponent::m_acquired 上の添字で表す。
+	 * 装備中かどうかは添字が m_maxEquipped 未満かで決まるので、
+	 * 2つを入れ替えれば「挿す・抜く」も「並び替え」も同じ形で表せる。
+	 * どちらが装備中かを名前に含めないのは、同じ区分どうしの並び替えも通すため
+	 */
+	struct ExtensionSwapRequestedEvent : public core::iface::IGameEvent
+	{
+		/** @brief 掴んだ側の位置 */
+		int m_fromIndex{ -1 };
+
+		/** @brief 落とした側の位置 */
+		int m_toIndex{ -1 };
+
+		ExtensionSwapRequestedEvent() = default;
+		ExtensionSwapRequestedEvent(int fromIndex, int toIndex)
+		    : m_fromIndex{ fromIndex }
+		    , m_toIndex{ toIndex }
+		{
+		}
+	};
+
+	/**
+	 * @brief 拡張子の入れ替えが実際に行われたときに発行されるイベント
+	 *
+	 * 音・HUDの演出はこれを購読する。要求（UIの操作）と結果（能力の変化）を
+	 * 分けておかないと、範囲外の指定などで入れ替えが起きなかったときにも
+	 * 音だけ鳴ってしまう
+	 */
+	struct ExtensionSwappedEvent : public core::iface::IGameEvent
+	{
+		/** @brief 新しく装備された拡張子の種別 */
+		core::data::FileExtensionType m_equippedType{ core::data::FileExtensionType::Unknown };
+
+		/** @brief 装備から外れた拡張子の種別 */
+		core::data::FileExtensionType m_unequippedType{ core::data::FileExtensionType::Unknown };
+
+		ExtensionSwappedEvent() = default;
+		ExtensionSwappedEvent(core::data::FileExtensionType equippedType,
+		    core::data::FileExtensionType unequippedType)
+		    : m_equippedType{ equippedType }
+		    , m_unequippedType{ unequippedType }
 		{
 		}
 	};

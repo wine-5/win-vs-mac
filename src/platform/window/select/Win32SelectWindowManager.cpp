@@ -284,7 +284,7 @@ namespace platform::window::select
 			read(game::constant::metadata_keys::MOVE_SPEED, stats.m_spd.m_base);
 			read(game::constant::metadata_keys::ATTACK_RANGE, stats.m_attackRange.m_base);
 
-			// 会心率は0.0〜1.0の確率で持っているが、そのままでは0.2などと出て読みにくい。
+			// クリティカル率は0.0〜1.0の確率で持っているが、そのままでは0.2などと出て読みにくい。
 			// 表示だけ%へ直す（ボーナス側も同じ倍率を掛ける）
 			float criticalRate{};
 			read(game::constant::metadata_keys::CRITICAL_RATE, criticalRate);

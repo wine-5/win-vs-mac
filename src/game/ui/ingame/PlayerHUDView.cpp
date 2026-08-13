@@ -1,8 +1,10 @@
-﻿#include "PlayerHUDView.h"
+#include "PlayerHUDView.h"
+#include "game/utility/PlayerStats.h"
 #include "LowHealthPulse.h"
 #include "core/constant/UI.h"
 #include "core/utility/Color.h"
 #include "core/utility/Log.h"
+#include "core/utility/MathConstants.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/PlayerStatsComponent.h"
@@ -46,6 +48,31 @@ namespace
 	constexpr float CHANGE_HOLD_DURATION{ 3.0f }; // 値が変わった項目を留めて強調する長さ（秒）
 	constexpr float EXPAND_SPEED{ 6.0f };         // Tabで開閉する速さ（1.0を割る秒数の逆数）
 
+	// 変化量のポップアップ。色が変わるだけでは「いくつ増えたか」が分からないため、
+	// 差分そのものを浮かび上がらせて消す
+	constexpr int DELTA_POPUP_FONT_SIZE{ 17 };
+	constexpr int DELTA_POPUP_RISE{ 18 };        // 浮き上がる距離（1080p基準）
+	constexpr int DELTA_POPUP_GAP{ 4 };          // 数値との間隔（1080p基準）
+	constexpr float DELTA_POPUP_EPSILON{ 0.5f }; // これ未満の変化は出さない（整数表示で0になるため）
+	// 上昇を示す緑。強化中を示す黄色（STAT_BOOSTED_COLOR）と同じ色にすると、
+	// 「元から強化されている」のか「今上がった」のかが見分けられない。
+	// 能力が下がる経路は無いので、下降用の色は用意しない
+	constexpr unsigned int DELTA_UP_COLOR{ core::utility::Color::HUD_BUFF_GREEN };
+
+	// 能力が変わった直後にパネルの縁を光らせる。強調の保持時間より早く消して、
+	// 「今起きた」ことだけを伝える（ずっと光っていると異常の合図に見える）
+	constexpr int PANEL_GLOW_ALPHA{ 160 };
+	constexpr float PANEL_GLOW_FADE{ 3.0f }; // 保持時間の1/3で消えきる速さ
+	constexpr int PANEL_GLOW_RADIUS{ 8 };
+	constexpr int PANEL_GLOW_THICKNESS{ 2 };
+
+	// 取得の瞬間に枠が外へ膨らんで戻る。光るだけでは「表示が変わった」に留まり、
+	// 「手に入れた」という手応えが出ない。枠が動くと反応として伝わる
+	constexpr float PANEL_POP_DURATION{ 0.34f };
+	constexpr int PANEL_POP_INFLATE{ 10 };  // 外へ広がる量（1080p基準）
+	constexpr int PANEL_POP_THICKNESS{ 3 }; // 膨らんだ枠の太さ（1080p基準）
+	constexpr int PANEL_POP_ALPHA{ 255 };
+
 	// 能力値の並び。セレクト画面（パラメータウィンドウ）と同じ8項目・同じアイコン・同じ順序で使う。
 	// 順序が違うと「セレクトで見たあの位置の値」を探し直すことになるため、必ず揃える。
 	// 前半4つがページ0、後半4つがページ1になる
@@ -54,19 +81,8 @@ namespace
 		"stat-rng", "stat-crit", "stat-bspd", "stat-brng"
 	};
 
-	// STAT_ICON_IMAGE_IDS 上の位置。値を詰める側と並びがずれないよう名前で参照する
-	constexpr int STAT_INDEX_HP{ 0 };
-	constexpr int STAT_INDEX_ATK{ 1 };
-	constexpr int STAT_INDEX_DEF{ 2 };
-	constexpr int STAT_INDEX_SPD{ 3 };
-	constexpr int STAT_INDEX_RNG{ 4 };
-	// 会心率だけは割合なので百分率で見せる。この位置だけ書式が変わる
-	constexpr int STAT_INDEX_CRIT{ 5 };
-	constexpr int STAT_INDEX_BSPD{ 6 };
-	constexpr int STAT_INDEX_BRNG{ 7 };
-
 	// 素の値より上がっている項目の色。装備ファイル・Itemなど強化の出どころは問わない
-	constexpr unsigned int STAT_BOOSTED_COLOR{ 0xFFFFC83D };
+	constexpr unsigned int STAT_BOOSTED_COLOR{ core::utility::Color::HUD_CHARGE_MAX };
 	// 強化とみなす下限。浮動小数の誤差で素の値と同じものが光らないようにする
 	constexpr float STAT_BOOST_EPSILON{ 0.001f };
 
@@ -76,25 +92,21 @@ namespace
 	constexpr int BAR_GROOVE_ALPHA{ 20 }; // バーの溝（白をごく薄く敷く）
 
 	// HP残量に応じたバーの色。Windows 11のプログレスバーに倣い単色で塗る
-	constexpr unsigned int BAR_COLOR_HIGH{ 0xFF36D07B };
-	constexpr unsigned int BAR_COLOR_MID{ 0xFFFFC83D };
-	constexpr unsigned int BAR_COLOR_LOW{ 0xFFE81123 };
+	constexpr unsigned int BAR_COLOR_HIGH{ core::utility::Color::HUD_BAR_GREEN };
+	constexpr unsigned int BAR_COLOR_MID{ core::utility::Color::HUD_CHARGE_MAX };
+	constexpr unsigned int BAR_COLOR_LOW{ core::utility::Color::HUD_CRIT_RED };
 	constexpr float BAR_MID_THRESHOLD{ 0.5f };
 
 	// 被弾演出
-	constexpr unsigned int BAR_RESIDUAL_COLOR{ 0xFFE81123 }; // 削られた分を示す残像
+	constexpr unsigned int BAR_RESIDUAL_COLOR{ core::utility::Color::HUD_CRIT_RED }; // 削られた分を示す残像
 	constexpr float DAMAGE_FLASH_DURATION{ 0.20f };          // 白フラッシュの長さ（秒）
 	constexpr int DAMAGE_FLASH_ALPHA{ 190 };                 // 白フラッシュの強さ
 	constexpr float RESIDUAL_HOLD_DURATION{ 0.35f };         // 残像が縮み始めるまでの待ち（秒）
 	constexpr float RESIDUAL_DECAY_PER_SECOND{ 0.55f };      // 残像が縮む速さ（残量比／秒）
 
 	// 低HPの警告脈動（点滅のリズムは LowHealthPulse.h と共有する）
-	constexpr unsigned int LOW_PULSE_COLOR{ 0xFFE81123 };
+	constexpr unsigned int LOW_PULSE_COLOR{ core::utility::Color::HUD_CRIT_RED };
 	constexpr int LOW_PULSE_ALPHA{ 130 }; // 脈動の最も明るいときの強さ
-
-	// フォント。数値・英字は等幅、日本語を含みうるラベルはNoto Sans JPで描く
-	constexpr const char* MONO_FONT_NAME{ "Cascadia Mono" };
-	constexpr const char* UI_FONT_NAME{ "Noto Sans JP" };
 
 	constexpr const char* STATUS_LABEL{ "PLAYER STATUS" };
 } // namespace
@@ -202,45 +214,12 @@ namespace game::ui::ingame
 
 	std::array<float, PlayerHUDView::STAT_COUNT> PlayerHUDView::collectStats(core::ecs::EntityId playerId) const
 	{
-		std::array<float, STAT_COUNT> stats{};
-
-		if (const auto* attack{ m_componentManager.tryGet<component::combat::AttackComponent>(playerId) })
-		{
-			stats[STAT_INDEX_ATK] = attack->m_attackPower;
-			stats[STAT_INDEX_RNG] = attack->m_attackRange;
-			stats[STAT_INDEX_CRIT] = attack->m_criticalRate * 100.0f; // 割合を百分率へ
-		}
-		if (const auto* health{ m_componentManager.tryGet<component::combat::HealthComponent>(playerId) })
-		{
-			stats[STAT_INDEX_HP] = health->m_maxHp;
-			stats[STAT_INDEX_DEF] = health->m_defence;
-		}
-		if (const auto* player{ m_componentManager.tryGet<component::combat::PlayerStatsComponent>(playerId) })
-		{
-			stats[STAT_INDEX_SPD] = player->m_moveSpeed;
-			stats[STAT_INDEX_BSPD] = player->m_projectileSpeed;
-			stats[STAT_INDEX_BRNG] = player->m_projectileRange;
-		}
-		return stats;
+		return utility::collectPlayerStats(m_componentManager, playerId);
 	}
 
 	std::array<float, PlayerHUDView::STAT_COUNT> PlayerHUDView::collectBaseStats(core::ecs::EntityId playerId) const
 	{
-		std::array<float, STAT_COUNT> stats{};
-
-		const auto* base{ m_componentManager.tryGet<component::combat::PlayerStatBaseComponent>(playerId) };
-		if (base == nullptr)
-			return stats; // 控えが無ければ強化なし扱い（全項目が素の色になる）
-
-		stats[STAT_INDEX_HP] = base->m_maxHp;
-		stats[STAT_INDEX_ATK] = base->m_attackPower;
-		stats[STAT_INDEX_DEF] = base->m_defence;
-		stats[STAT_INDEX_SPD] = base->m_moveSpeed;
-		stats[STAT_INDEX_RNG] = base->m_attackRange;
-		stats[STAT_INDEX_CRIT] = base->m_criticalRate * 100.0f; // 現在値と同じ百分率へ揃える
-		stats[STAT_INDEX_BSPD] = base->m_projectileSpeed;
-		stats[STAT_INDEX_BRNG] = base->m_projectileRange;
-		return stats;
+		return utility::collectPlayerBaseStats(m_componentManager, playerId);
 	}
 
 	void PlayerHUDView::updatePaging(const std::array<float, STAT_COUNT>& stats, bool isExpanded, float deltaTime)
@@ -267,7 +246,9 @@ namespace game::ui::ingame
 					continue;
 
 				m_changedIndex = i;
+				m_changedDelta = stats[i] - m_previousStats[i];
 				m_changeHighlight = CHANGE_HOLD_DURATION;
+				m_panelPop = PANEL_POP_DURATION;
 
 				// 変わった項目が裏のページなら即座にそちらへ送る（Item取得を見逃さないため）
 				const int page{ i / STATS_PER_PAGE };
@@ -284,6 +265,9 @@ namespace game::ui::ingame
 
 		if (m_changeHighlight > 0.0f)
 			m_changeHighlight -= deltaTime;
+
+		if (m_panelPop > 0.0f)
+			m_panelPop = std::max(0.0f, m_panelPop - deltaTime);
 
 		// スライド中の進行
 		if (m_slideProgress < 1.0f)
@@ -317,7 +301,7 @@ namespace game::ui::ingame
 		}
 
 		char text[16]{};
-		if (index == STAT_INDEX_CRIT)
+		if (index == utility::STAT_INDEX_CRIT)
 			std::snprintf(text, sizeof(text), "%d%%", static_cast<int>(value));
 		else
 			std::snprintf(text, sizeof(text), "%d", static_cast<int>(value));
@@ -327,18 +311,76 @@ namespace game::ui::ingame
 		const bool isChanged{ index == m_changedIndex && m_changeHighlight > 0.0f };
 		unsigned int color{ core::utility::Color::HUD_INK };
 		if (isChanged)
-			color = core::utility::Color::HUD_CHARGE_MAX;
+			color = DELTA_UP_COLOR;
 		else if (isBoosted)
 			color = STAT_BOOSTED_COLOR;
 
 		const int fontSize{ scaled(STAT_FONT_SIZE) };
 		const int textY{ y + (rowHeight - fontSize) / 2 };
 
-		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::MONO_FONT_NAME);
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
 		m_uiRenderer.drawText(x + iconSize + scaled(STAT_VALUE_GAP), textY, text, color, fontSize);
 		m_uiRenderer.resetBlendMode();
+
+		// 変化した項目には増減量を浮かび上がらせる。数値が変わったことは色でも分かるが、
+		// 「いくつ増えたか」は元の値を覚えていないと分からないため、差分そのものを見せる
+		if (isChanged && m_changedDelta >= DELTA_POPUP_EPSILON)
+		{
+			const float progress{ 1.0f - m_changeHighlight / CHANGE_HOLD_DURATION };
+			const int rise{ static_cast<int>(scaled(DELTA_POPUP_RISE) * progress) };
+			const int popupAlpha{ static_cast<int>(alpha * std::clamp(1.0f - progress, 0.0f, 1.0f)) };
+
+			char deltaText[16]{};
+			std::snprintf(deltaText, sizeof(deltaText), "+%d", static_cast<int>(m_changedDelta));
+
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, popupAlpha);
+			m_uiRenderer.drawText(x + iconSize + scaled(STAT_VALUE_GAP), textY - rise - scaled(DELTA_POPUP_GAP),
+			    deltaText, DELTA_UP_COLOR, scaled(DELTA_POPUP_FONT_SIZE));
+			m_uiRenderer.resetBlendMode();
+		}
+
 		m_uiRenderer.resetFont();
+	}
+
+	void PlayerHUDView::drawStatChangeReaction(int x, int y, int width, int height)
+	{
+		if (m_changeHighlight <= 0.0f)
+			return;
+
+		// 枠が外へ膨らんで戻る。中身は動かさず枠だけを動かすので、
+		// 数値を読んでいる最中でもレイアウトが揺れない
+		if (m_panelPop > 0.0f)
+		{
+			const float popProgress{ 1.0f - m_panelPop / PANEL_POP_DURATION };
+
+			// 一気に開いてゆっくり戻る。等速で往復すると呼吸のように見えて反応に見えない
+			const float swell{ std::sin(popProgress * core::utility::PI) };
+			const int inflate{ static_cast<int>(scaled(PANEL_POP_INFLATE) * swell) };
+			const int popAlpha{ static_cast<int>(PANEL_POP_ALPHA * swell) };
+
+			if (popAlpha > 0)
+			{
+				m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, popAlpha);
+				m_uiRenderer.drawRoundedBox(x - inflate, y - inflate,
+				    width + inflate * 2, height + inflate * 2,
+				    scaled(PANEL_GLOW_RADIUS) + inflate, DELTA_UP_COLOR, false,
+				    scaled(PANEL_POP_THICKNESS));
+				m_uiRenderer.resetBlendMode();
+			}
+		}
+
+		// 膨らみが収まった後も、しばらく縁を光らせて「今変わった」状態を保つ
+		const float progress{ 1.0f - m_changeHighlight / CHANGE_HOLD_DURATION };
+		const int glowAlpha{ static_cast<int>(
+			PANEL_GLOW_ALPHA * std::clamp(1.0f - progress * PANEL_GLOW_FADE, 0.0f, 1.0f)) };
+		if (glowAlpha <= 0)
+			return;
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ADD, glowAlpha);
+		m_uiRenderer.drawRoundedBox(x, y, width, height,
+		    scaled(PANEL_GLOW_RADIUS), DELTA_UP_COLOR, false, scaled(PANEL_GLOW_THICKNESS));
+		m_uiRenderer.resetBlendMode();
 	}
 
 	void PlayerHUDView::drawStatPage(int x, int y, int cellWidth,
@@ -385,10 +427,11 @@ namespace game::ui::ingame
 		const int panelY{ m_screen.getHeight() - scaled(PANEL_MARGIN) - panelHeight };
 
 		m_panel.draw(panelX, panelY, panelWidth, panelHeight);
+		drawStatChangeReaction(panelX, panelY, panelWidth, panelHeight);
 
 		// 左に見出し、右にHPの実数値。数値は桁が動いても右端が揃うよう右寄せで置く
 		const int padding{ scaled(PANEL_PADDING) };
-		m_uiRenderer.setFont(UI_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(panelX + padding, panelY + scaled(LABEL_Y), STATUS_LABEL,
 		    core::utility::Color::HUD_INK, scaled(LABEL_FONT_SIZE));
 
@@ -396,7 +439,7 @@ namespace game::ui::ingame
 		std::snprintf(hpText, sizeof(hpText), "HP %d / %d",
 		    static_cast<int>(health.m_currentHp), static_cast<int>(health.m_maxHp));
 
-		m_uiRenderer.setFont(MONO_FONT_NAME);
+		m_uiRenderer.setFont(core::constant::ui::MONO_FONT_NAME);
 		const int valueFontSize{ scaled(VALUE_FONT_SIZE) };
 		const int valueWidth{ m_uiRenderer.getTextWidth(hpText, valueFontSize) };
 		m_uiRenderer.drawText(panelX + panelWidth - padding - valueWidth, panelY + scaled(LABEL_Y),

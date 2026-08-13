@@ -1,4 +1,4 @@
-#include "ProjectileBlockSystem.h"
+﻿#include "ProjectileBlockSystem.h"
 #include "game/component/combat/ProjectileComponent.h"
 #include "game/component/combat/AttackComponent.h"
 #include "game/component/combat/ColliderComponent.h"
@@ -34,7 +34,7 @@ namespace game::system::combat
 		{
 			// 遮るのは配置物だけ。プレイヤー・敵のコライダーはここでは扱わない
 			const auto* tag{ m_componentManager.tryGet<component::TagComponent>(id) };
-			if (tag == nullptr || tag->m_tag != constant::Tag::Ground)
+			if (tag == nullptr || !constant::isStageProp(tag->m_tag))
 				continue;
 
 			const auto* transform{ m_componentManager.tryGet<component::movement::TransformComponent>(id) };

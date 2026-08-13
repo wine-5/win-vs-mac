@@ -18,6 +18,35 @@ namespace core::data
 		core::Vector3 m_baseSize{}; // モデル素材の実寸。size ÷ baseSize がモデルスケールになる
 		std::string m_collider{};   // "box" | "ground" | "none"
 
+		// 破壊に必要な打撃回数。0なら壊せない普通の配置物。
+		// HPではなく回数にしているのは、攻撃力が伸びても壊すのに必要な手数を一定に保つため。
+		// HP制にすると育ったビルドで一撃になり、ひびの段階が誰の目にも触れなくなる
+		int m_hitsToBreak{ 0 };
+
+		// 壊したときに落とす拡張子の種別名（extensionBonus.json のキーと同じ綴り）。
+		// "random" なら1個ごとに種別を抽選する（ZIPのように中身が分からないブロック用）。
+		// 空なら何も落とさない
+		std::string m_dropExtension{};
+
+		// 落とす欠片の個数。ZIPは複数のファイルを含むので多めに落とす
+		int m_dropCount{ 0 };
+
+		// 壊すと拡張子を挿せる枠が1つ増えるか（RAMブロック）。
+		// 欠片を落とすのとは別の報酬なので、dropExtension とは独立に持つ
+		bool m_grantsEquipSlot{ false };
+
+		// 壊したときに湧く敵の種類名（"xcode" / "safari"）と数。空なら敵は出ない。
+		// 種類ではなく「壊すと敵が出る」という振る舞いで持つので、
+		// 見た目違いのブロックへ同じ性質を付けられる
+		std::string m_spawnEnemyType{};
+		int m_spawnEnemyCount{ 0 };
+
+		// 敵の代わりに当たりを引く確率（0〜1）と、当たったときに装備中の拡張子の効果へ
+		// 掛ける倍率。分の悪い賭けを成立させるのは当たりの大きさなので、
+		// 確率と倍率は必ず対で調整する
+		float m_extensionBoostChance{ 0.0f };
+		float m_extensionBoostMultiplier{ 1.0f };
+
 		// 特別な役割。空なら普通の配置物。"bossGate" はボス出現で閉じる扉として扱う。
 		// 種類（id）ではなく役割で判定することで、見た目違いの扉を何種類でも用意できる
 		std::string m_role{};

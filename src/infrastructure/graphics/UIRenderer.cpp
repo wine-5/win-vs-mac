@@ -51,28 +51,30 @@ namespace infrastructure::graphics
 		    CORNER_SEGMENTS, color, isFilled ? TRUE : FALSE, static_cast<float>(thickness));
 	}
 
+	int UIRenderer::resolveFontHandle(int fontSize) const
+	{
+		const auto key{ std::make_pair(m_currentFontName, fontSize) };
+		auto it{ m_fontHandles.find(key) };
+		if (it != m_fontHandles.end())
+			return it->second;
+
+		const char* fontName{ m_currentFontName.empty() ? nullptr : m_currentFontName.c_str() };
+		// フォントハンドルは1つあたり約4MBを確保する。サイズ違いは別ハンドルになるため、
+		// 拡縮アニメで1pxずつサイズを変えると種類が際限なく増える。呼び出し側でサイズを丸めること
+		const int handle{ CreateFontToHandle(fontName, fontSize, -1, DX_FONTTYPE_NORMAL) };
+		m_fontHandles[key] = handle;
+		return handle;
+	}
+
 	void UIRenderer::drawText(int x, int y, const char *text, unsigned int color, int fontSize)
 	{
-		const auto key{std::make_pair(m_currentFontName, fontSize)};
-		if (m_fontHandles.find(key) == m_fontHandles.end())
-		{
-			const char *fontName{m_currentFontName.empty() ? nullptr : m_currentFontName.c_str()};
-			m_fontHandles[key] = CreateFontToHandle(fontName, fontSize, -1, DX_FONTTYPE_NORMAL);
-		}
-		DrawStringToHandle(x, y, text, color, m_fontHandles[key]);
+		DrawStringToHandle(x, y, text, color, resolveFontHandle(fontSize));
 	}
 
 	int UIRenderer::getTextWidth(const char *text, int fontSize) const
 	{
-		const auto key{ std::make_pair(m_currentFontName, fontSize) };
-		auto it{ m_fontHandles.find(key) };
-		if (it == m_fontHandles.end())
-		{
-			const char* fontName{ m_currentFontName.empty() ? nullptr : m_currentFontName.c_str() };
-			m_fontHandles[key] = CreateFontToHandle(fontName, fontSize, -1, DX_FONTTYPE_NORMAL);
-			it = m_fontHandles.find(key);
-		}
-		return GetDrawStringWidthToHandle(text, static_cast<int>(std::strlen(text)), it->second);
+		return GetDrawStringWidthToHandle(text, static_cast<int>(std::strlen(text)),
+		    resolveFontHandle(fontSize));
 	}
 
 	void UIRenderer::setBlendMode(int blendMode, int alpha)

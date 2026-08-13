@@ -2,6 +2,8 @@
 #include "core/interface/IPerformanceDataProvider.h"
 #include "core/interface/IEffectFactory.h" // DEBUG: リリース時に削除
 #include "core/interface/IRenderer.h"
+#include "core/utility/Color.h"
+#include "core/utility/MathConstants.h"
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
 #include "game/component/movement/TransformComponent.h"
@@ -14,7 +16,7 @@ namespace
 	constexpr int STATS_FONT_SIZE{ 22 };
 	constexpr int STATS_LINE_HEIGHT{ 26 };
 	constexpr int STATS_MARGIN{ 16 };
-	constexpr unsigned int STATS_TEXT_COLOR{ 0xFFFFFF00 }; // 黄色（ARGB）
+	constexpr unsigned int STATS_TEXT_COLOR{ core::utility::Color::YELLOW };
 	constexpr int STATS_LINE_COUNT{ 7 };                   // 右上に並べる統計の行数
 } // namespace
 
@@ -115,8 +117,8 @@ namespace game::ui::debug
 		std::snprintf(lines[2], sizeof(lines[2]), "Entity: %d", entityCount);
 		std::snprintf(lines[3], sizeof(lines[3]), "Enemy: %d  Bullet: %d", enemyCount, projectileCount);
 		std::snprintf(lines[4], sizeof(lines[4]), "Active Effects: %d", activeEffectCount);
-		std::snprintf(lines[5], sizeof(lines[5]), "System  CPU: %.1f%%  Mem: %.1f%%", snapshot.cpuUsage * 100.0f, snapshot.memoryUsage * 100.0f);
-		std::snprintf(lines[6], sizeof(lines[6]), "This Game  CPU: %.1f%%  Mem: %.0fMB", snapshot.processCpuUsage * 100.0f, snapshot.processMemoryUsageMB);
+		std::snprintf(lines[5], sizeof(lines[5]), "System  CPU: %.1f%%  Mem: %.1f%%", snapshot.cpuUsage * core::utility::RATIO_TO_PERCENT, snapshot.memoryUsage * core::utility::RATIO_TO_PERCENT);
+		std::snprintf(lines[6], sizeof(lines[6]), "This Game  CPU: %.1f%%  Mem: %.0fMB", snapshot.processCpuUsage * core::utility::RATIO_TO_PERCENT, snapshot.processMemoryUsageMB);
 
 		for (int i{ 0 }; i < STATS_LINE_COUNT; ++i)
 		{

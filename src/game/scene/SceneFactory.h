@@ -8,7 +8,6 @@
 #include "Loading.h"
 #include "Result.h"
 #include "Bios.h"
-#include "DebugDestruction.h" // DEBUG: 破壊演出の検証用（検証後に削除する）
 #include "core/interface/ICamera.h"
 #include "core/interface/IRenderer.h"
 #include "core/interface/IAnimator.h"
@@ -72,6 +71,5 @@ namespace game::scene
 	  std::unique_ptr<Loading> m_loadingScene{};
 	  std::unique_ptr<Result> m_resultScene{};
 	  std::unique_ptr<Bios> m_biosScene{};
-	  std::unique_ptr<DebugDestruction> m_debugDestructionScene{}; // DEBUG: 検証後に削除する
 	};
 } // namespace game::scene

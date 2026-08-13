@@ -5,6 +5,7 @@
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IAudioManager.h"
+#include "core/constant/SeType.h"
 #include "core/interface/IResourcePreloader.h"
 #include "core/input/KeyCode.h"
 #include "core/constant/DebugFlags.h"
@@ -51,9 +52,9 @@ Application::Application(int screenWidth, int screenHeight)
 	    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 	    *core::base::ServiceLocator::get<core::iface::IScreen>());
 
-	// 初期シーンを設定する（デバッグ用シーンから始めるかは DebugFlags.h で切り替える）
-	m_sceneManager->changeScene(core::constant::START_FROM_DEBUG_SCENE
-	                                ? game::scene::SceneType::DebugDestruction
+	// 初期シーンを設定する（インゲームから始めるかは DebugFlags.h で切り替える）
+	m_sceneManager->changeScene(core::constant::START_FROM_IN_GAME
+	                                ? game::scene::SceneType::InGame
 	                                : game::scene::SceneType::Bios);
 }
 
@@ -139,6 +140,12 @@ void Application::run()
 	}
 }
 
+void Application::playUiSe(core::constant::SeType seType) const
+{
+	if (auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() })
+		audio->playSe(seType);
+}
+
 void Application::updatePauseMenu()
 {
 	const auto sceneType{ m_sceneManager->getCurrentSceneType() };
@@ -150,12 +157,14 @@ void Application::updatePauseMenu()
 		{
 			m_pauseManager.resume();
 			m_sceneManager->notifyPauseChanged(false);
+			playUiSe(core::constant::SeType::UiClose);
 		}
 		else if (!m_pauseManager.isPaused() && canOpenPauseMenu(sceneType))
 		{
 			m_pauseManager.pause(game::PauseReason::Menu);
 			m_sceneManager->notifyPauseChanged(true);
 			m_pauseMenuController->open(allowBackToTitle(sceneType));
+			playUiSe(core::constant::SeType::PauseOpen);
 		}
 	}
 
@@ -168,6 +177,7 @@ void Application::updatePauseMenu()
 	case game::ui::pause::PauseMenuAction::Resume:
 		m_pauseManager.resume();
 		m_sceneManager->notifyPauseChanged(false);
+		playUiSe(core::constant::SeType::UiClose);
 		break;
 
 	case game::ui::pause::PauseMenuAction::BackToTitle:
