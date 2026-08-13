@@ -80,7 +80,7 @@ namespace game::scene
 		 * モデルはRenderComponentの全走査で描くため、描画対象のIDは受け取らない。
 		 * playerIdはレティクル（照準状態の表示）とプレイヤーHUDに使う
 		 * @param playerId プレイヤーのEntityID
-		 * @param remainingEnemyCount 残っている開始時配置の雑魚の数（左上の目標表示に使う）
+		 * @param remainingEnemyCount 残っている討伐対象の雑魚の数（左上の目標表示に使う）
 		 * @param bossId ボスのEntityID（未出現ならINVALID_ENTITY_ID）
 		 * @param elapsedTime インゲーム開始からの経過時間（秒。右上の状況表示に使う）
 		 */

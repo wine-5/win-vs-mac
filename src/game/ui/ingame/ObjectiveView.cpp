@@ -90,7 +90,7 @@ namespace game::ui::ingame
 		if (remainingEnemyCount == m_lastCount)
 			return;
 
-		// 初回（-1からの初期化）とボス召喚などで増えた場合は反応させない。
+		// 初回（-1からの初期化）と、ブロックから湧いて増えた場合は反応させない。
 		// 「1体倒した」という手応えを返すのが目的なので、減ったときだけ動かす
 		const bool decreased{ m_lastCount >= 0 && remainingEnemyCount < m_lastCount };
 		m_lastCount = remainingEnemyCount;

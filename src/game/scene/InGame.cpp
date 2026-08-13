@@ -782,6 +782,14 @@ namespace game::scene
 			    sceneManager->changeScene(game::scene::SceneType::Result);
 		    }));
 
+		// 道中で湧いた雑魚も討伐対象に加える（ギャンブルボックスの外れなど）。
+		m_subscriptions.push_back(m_eventBus.subscribe<event::EnemySpawnedEvent>(
+		    [this](const event::EnemySpawnedEvent& e)
+		    {
+			    if (m_macId == core::ecs::INVALID_ENTITY_ID)
+				    m_stageEnemyIds.insert(e.m_entityId);
+		    }));
+
 		// 敵の死亡イベントの購読
 		m_subscriptions.push_back(m_eventBus.subscribe<event::EnemyDeadEvent>([this](const event::EnemyDeadEvent& e)
 		    {
@@ -1115,8 +1123,8 @@ namespace game::scene
 
 		// 描画は InGameView へ委譲する。ボスが召喚する雑魚も実行時に増えるため、
 		// スポーン時のスナップショットではなく EnemyFactory が持つ最新の敵一覧を渡す
-		// 残り雑魚はボス出現条件そのものなので、開始時スナップショットの生き残り数を渡す
-		// （ボスが召喚する雑魚は条件に含めない）
+		// 残り雑魚はボス出現条件そのものなので、その集合の生き残り数を渡す。
+		// 道中で湧いたぶんも含み、ボスが召喚する雑魚は含めない（setupEvents参照）
 		m_view.draw(m_playerId, static_cast<int>(m_stageEnemyIds.size()), m_macId, m_elapsedTime);
 	}
 

@@ -247,8 +247,9 @@ namespace game::scene
 		core::ecs::EntityId m_playerId{core::ecs::INVALID_ENTITY_ID};
 		core::ecs::EntityId m_macId{ core::ecs::INVALID_ENTITY_ID };
 
-		// 開始時に配置した雑魚のID集合。全滅（空になる）を検知してボスを出現させる。
-		// ボスが召喚する雑魚は含めない（開始時のぶんだけを数える）
+		// 討伐対象の雑魚のID集合。全滅（空になる）を検知してボスを出現させる。
+		// 開始時の配置に加え、道中でブロックから湧いたぶんも入る。
+		// ボスが召喚する雑魚は含めない（ボス出現後に湧いたものは数えない）
 		std::unordered_set<core::ecs::EntityId> m_stageEnemyIds{};
 
 		std::unique_ptr<game::event::AudioEventListener> m_audioEventListener;
