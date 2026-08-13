@@ -786,6 +786,12 @@ namespace game::scene
 		m_subscriptions.push_back(m_eventBus.subscribe<event::EnemySpawnedEvent>(
 		    [this](const event::EnemySpawnedEvent& e)
 		    {
+			    // ボス自身は雑魚ではないので入れない。m_macId への代入はこのイベントより
+			    // 後（spawnが返ってから）なので、IDでは判定できず敵種で見る必要がある
+			    const auto* enemyType{ m_componentManager.tryGet<component::EnemyTypeComponent>(e.m_entityId) };
+			    if (enemyType != nullptr && enemyType->m_type == constant::EnemyType::Mac)
+				    return;
+
 			    if (m_macId == core::ecs::INVALID_ENTITY_ID)
 				    m_stageEnemyIds.insert(e.m_entityId);
 		    }));
