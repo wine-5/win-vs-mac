@@ -74,23 +74,6 @@ namespace
 			MV1SetMaterialAmbColor(handle, i, white);
 	}
 
-	/**
-	 * @brief モデルの背面カリングを無効にする
-	 *
-	 * 配置物は自前生成の立方体で、DxLibのカリング判定と面の巻き方向が噛み合わず
-	 * 手前の面が消えることがある。カリングを切れば巻き方向に関係なく全面が描かれる。
-	 * 両面ポリゴンを重ねる方式と違い、Zファイティングも起きない。
-	 * @param handle モデルハンドル
-	 */
-	void disableBackCulling(int handle)
-	{
-		if (handle == -1)
-			return;
-
-		const int meshNum{ MV1GetMeshNum(handle) };
-		for (int i{ 0 }; i < meshNum; ++i)
-			MV1SetMeshBackCulling(handle, i, DX_CULLING_NONE);
-	}
 } // namespace
 
 namespace infrastructure::resource::repository
@@ -221,9 +204,12 @@ namespace infrastructure::resource::repository
 		{
 			dumpModelStats(key, handle);
 			normalizeMaterialAmbient(handle);
-			// パス指定で読むのは配置物（自前生成の立方体）なので、巻き方向に左右されないよう
-			// カリングを切る。キャラクター等のID指定モデルには適用しない
-			disableBackCulling(handle);
+			// 以前はここで背面カリングを切っていた（DX_CULLING_NONE）。配置物MQOの
+			// 巻き方向が逆でDxLibから全面が「裏面」に見えており、面が消えるのを
+			// 両面描画で誤魔化していたため。ただし裏面にはシャドウマップが適用されず、
+			// 影が一切落ちない原因になっていた。
+			// 巻き方向は生成スクリプト側（tools/gen_stage_models.py・
+			// tools/gen_fracture_models.py）で直したので、既定のカリングのままでよい。
 			m_modelHandles[key] = handle;
 		}
 		return handle;
