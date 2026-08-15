@@ -90,6 +90,7 @@
 #include "game/system/visual/MacAwakenEffectSystem.h"
 #include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/system/visual/HardAuraVisualsSystem.h"
+#include "game/system/visual/RimLightVisualsSystem.h"
 #include "game/system/visual/BattleStartSystem.h"
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
@@ -752,6 +753,12 @@ namespace game::scene
 			m_gameManager.getDifficulty() == core::data::Difficulty::Hard) };
 		core::probe::mark("      sys: HardAuraVisualsSystem");
 		m_view.setHardAuraVisualsSystem(hardAura);
+
+		// 輪郭光。RimLightComponentを付けたEntityだけが対象
+		auto* rimLight{ m_systemManager.registerSystem<game::system::visual::RimLightVisualsSystem>(
+			m_componentManager, m_renderer) };
+		core::probe::mark("      sys: RimLightVisualsSystem");
+		m_view.setRimLightVisualsSystem(rimLight);
 
 		// 敵の発見演出（頭上の通知バッジ）。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
 		auto* detectionAlert{ m_systemManager.registerSystem<game::system::visual::DetectionAlertVisualsSystem>(

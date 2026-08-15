@@ -21,6 +21,7 @@
 #include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/system/visual/HardAuraVisualsSystem.h"
+#include "game/system/visual/RimLightVisualsSystem.h"
 #include "game/system/visual/BattleStartSystem.h"
 #include "game/system/combat/PlayerDeathSystem.h"
 #include "game/system/combat/PlayerRangedAttackSystem.h"
@@ -68,6 +69,11 @@ namespace game::scene
 		// かつ最初に描いて他の要素の背景に回す
 		if (m_backgroundParticleSystem)
 			m_backgroundParticleSystem->draw();
+
+		// 輪郭光。膨らませた裏面を先に描き、この直後の本体描画で内側を塗り潰させる。
+		// 影の判定を掛けたくないので受け側のパスの外で描く（発光色が暗くなるため）
+		if (m_rimLightVisualsSystem)
+			m_rimLightVisualsSystem->draw();
 
 		// 影が落ちるのは地面・壁・ブロックとキャラクター本体。モデルを描く間だけ影を効かせ、
 		// 演出やHUDには掛けない（半透明の演出に影が乗ると濁るため）
@@ -239,6 +245,11 @@ namespace game::scene
 	void InGameView::setHardAuraVisualsSystem(system::visual::HardAuraVisualsSystem* system)
 	{
 		m_hardAuraVisualsSystem = system;
+	}
+
+	void InGameView::setRimLightVisualsSystem(system::visual::RimLightVisualsSystem* system)
+	{
+		m_rimLightVisualsSystem = system;
 	}
 
 	void InGameView::setBattleStartSystem(system::visual::BattleStartSystem* system)
