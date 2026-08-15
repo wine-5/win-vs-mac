@@ -8,6 +8,7 @@
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/ILighting.h"
+#include "core/interface/IShadowMap.h"
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
 #include "core/constant/SeType.h"
@@ -89,7 +90,6 @@
 #include "game/system/visual/MacAwakenEffectSystem.h"
 #include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/system/visual/HardAuraVisualsSystem.h"
-#include "game/system/visual/ShadowVisualsSystem.h"
 #include "game/system/visual/BattleStartSystem.h"
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
@@ -230,7 +230,8 @@ namespace game::scene
 	    , m_view{ m_componentManager, m_renderer,
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
-		    m_effectFactory }
+		    m_effectFactory,
+		    *core::base::ServiceLocator::get<core::iface::IShadowMap>() }
 	{
 		loadResources();
 		core::probe::mark("  InGame: loadResources");
@@ -284,6 +285,24 @@ namespace game::scene
 			lighting->setAmbient(AMBIENT_R, AMBIENT_G, AMBIENT_B);
 			lighting->setDirectionalLight(DIRECTIONAL_LIGHT_DIRECTION,
 			    DIRECTIONAL_LEVEL, DIRECTIONAL_LEVEL, DIRECTIONAL_LEVEL);
+		}
+
+		// 影を落とすシャドウマップ。範囲はプレイヤーに追従させるので、ここでは向きと精度だけ決める。
+		// 解像度を上げるほど輪郭は締まるがVRAMと描画時間が増えるため、
+		// 「プレイヤー周辺だけを写す」前提の 2048 に留めている
+		if (auto* shadowMap{ core::base::ServiceLocator::get<core::iface::IShadowMap>() })
+		{
+			constexpr int SHADOW_RESOLUTION{ 2048 };
+
+			// 小さすぎると自分の面が自分の影に入り縞状のノイズが出る。
+			// 大きくすると足元の影が本体から離れて浮いて見える
+			constexpr float SHADOW_ADJUST_DEPTH{ 0.001f };
+
+			if (shadowMap->create(SHADOW_RESOLUTION))
+			{
+				shadowMap->setLightDirection(DIRECTIONAL_LIGHT_DIRECTION);
+				shadowMap->setAdjustDepth(SHADOW_ADJUST_DEPTH);
+			}
 		}
 
 		// 3人称マウス視点のためカーソルを非表示にする（表示の切り替えは DebugFlags.h で行う）
@@ -388,6 +407,11 @@ namespace game::scene
 		// ポーズからタイトルへ戻る経路では resume() が先に走って再び隠れてしまう。
 		// 抜け方（死亡・勝利・タイトルへ）ごとに書くと漏れるため、終了地点に一本化する
 		m_inputProvider.setMouseCursorVisible(true);
+
+		// シャドウマップはServiceLocator側がインゲームより長生きするため、
+		// シーンを抜けるときにこちらで確保を解く
+		if (auto* shadowMap{ core::base::ServiceLocator::get<core::iface::IShadowMap>() })
+			shadowMap->destroy();
 	}
 
 	void InGame::onPauseChanged(bool isPaused)
@@ -728,12 +752,6 @@ namespace game::scene
 			m_gameManager.getDifficulty() == core::data::Difficulty::Hard) };
 		core::probe::mark("      sys: HardAuraVisualsSystem");
 		m_view.setHardAuraVisualsSystem(hardAura);
-
-		// 足元の接地影。ShadowCasterComponentを付けたEntityだけが影を落とす
-		auto* shadowVisuals{ m_systemManager.registerSystem<game::system::visual::ShadowVisualsSystem>(
-			m_componentManager, m_renderer) };
-		core::probe::mark("      sys: ShadowVisualsSystem");
-		m_view.setShadowVisualsSystem(shadowVisuals);
 
 		// 敵の発見演出（頭上の通知バッジ）。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
 		auto* detectionAlert{ m_systemManager.registerSystem<game::system::visual::DetectionAlertVisualsSystem>(

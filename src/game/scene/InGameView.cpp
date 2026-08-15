@@ -21,7 +21,6 @@
 #include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/system/visual/HardAuraVisualsSystem.h"
-#include "game/system/visual/ShadowVisualsSystem.h"
 #include "game/system/visual/BattleStartSystem.h"
 #include "game/system/combat/PlayerDeathSystem.h"
 #include "game/system/combat/PlayerRangedAttackSystem.h"
@@ -48,29 +47,33 @@ namespace game::scene
 	    core::iface::IRenderer& renderer,
 	    core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
-	    core::iface::IEffectFactory& effectFactory)
+	    core::iface::IEffectFactory& effectFactory,
+	    core::iface::IShadowMap& shadowMap)
 	    : m_componentManager{ componentManager }
 	    , m_renderer{ renderer }
 	    , m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_effectFactory{ effectFactory }
+	    , m_shadowMap{ shadowMap }
 	{
 	}
 
 	void InGameView::draw(core::ecs::EntityId playerId, int remainingEnemyCount, core::ecs::EntityId bossId,
 	    float elapsedTime)
 	{
+		// 影を落とす物だけを先にシャドウマップへ焼く。ここでの描画は画面には出ない
+		drawShadowCasters(playerId);
+
 		// 虚空を流れるデータの光跡。壁や床に隠れてほしいのでモデルと同じ3D描画フェーズで、
 		// かつ最初に描いて他の要素の背景に回す
 		if (m_backgroundParticleSystem)
 			m_backgroundParticleSystem->draw();
 
+		// 影が落ちるのは地面・壁・ブロックとキャラクター本体。モデルを描く間だけ影を効かせ、
+		// 演出やHUDには掛けない（半透明の演出に影が乗ると濁るため）
+		m_shadowMap.beginReceivePass();
 		drawModels();
-
-		// 足元の接地影。地面より後に描かないと床に塗り潰される（影はZバッファへ書かないため）。
-		// Zテストは効いているので、キャラクターの手前に被ることはない
-		if (m_shadowVisualsSystem)
-			m_shadowVisualsSystem->draw();
+		m_shadowMap.endReceivePass();
 
 		// Hardの敵を包む赤いオーラ。敵モデルの直後に重ねて「体から漏れる光」に見せる
 		if (m_hardAuraVisualsSystem)
@@ -238,11 +241,6 @@ namespace game::scene
 		m_hardAuraVisualsSystem = system;
 	}
 
-	void InGameView::setShadowVisualsSystem(system::visual::ShadowVisualsSystem* system)
-	{
-		m_shadowVisualsSystem = system;
-	}
-
 	void InGameView::setBattleStartSystem(system::visual::BattleStartSystem* system)
 	{
 		m_battleStartSystem = system;
@@ -375,6 +373,56 @@ namespace game::scene
 				drawAttachedWeapon(entityId);
 			}
 		}
+	}
+
+	void InGameView::drawShadowCasters(core::ecs::EntityId playerId)
+	{
+		if (!m_shadowMap.isValid())
+			return;
+
+		const auto* playerTransform{
+			m_componentManager.tryGet<component::movement::TransformComponent>(playerId)
+		};
+		if (playerTransform == nullptr)
+			return;
+
+		// 影の写る範囲。広げるほど1ピクセルあたりの実寸が粗くなって輪郭がぼやけるので、
+		// ステージ全体ではなくプレイヤーの周囲だけを覆い、毎フレーム追従させる。
+		// プレイヤーのコライダーが 50x150 なので、この範囲なら本体が2048px中の
+		// 100px以上を占め、足元の輪郭が潰れずに残る
+		constexpr float AREA_HALF_SIZE{ 400.0f };
+		constexpr float AREA_HALF_HEIGHT{ 400.0f };
+
+		const core::Vector3 center{ playerTransform->m_position };
+		m_shadowMap.setDrawArea(center, AREA_HALF_SIZE, AREA_HALF_HEIGHT);
+
+		m_shadowMap.beginCasterPass();
+		for (const auto entityId :
+		    m_componentManager.getAllEntities<component::visual::ShadowCasterComponent>())
+		{
+			const auto* render{ m_componentManager.tryGet<component::visual::RenderComponent>(entityId) };
+			if (render == nullptr || !render->m_isVisible || render->m_modelHandle == -1)
+				continue;
+
+			const auto* transform{
+				m_componentManager.tryGet<component::movement::TransformComponent>(entityId)
+			};
+			if (transform == nullptr)
+				continue;
+
+			// 範囲の外にいるものはシャドウマップに写らない。ブロックのように数の多い種類へ
+			// 付けたときに、写らないものまで描いて二度手間にならないよう先に弾く
+			if (std::abs(transform->m_position.x - center.x) > AREA_HALF_SIZE ||
+			    std::abs(transform->m_position.z - center.z) > AREA_HALF_SIZE)
+				continue;
+
+			m_renderer.drawModel(render->m_modelHandle, transform->m_position,
+			    transform->m_rotation, transform->m_scale);
+
+			// 武器も影を落とす。本体を描いた直後でないとボーンのワールド行列が確定しない
+			drawAttachedWeapon(entityId);
+		}
+		m_shadowMap.endCasterPass();
 	}
 
 	void InGameView::drawAttachedWeapon(core::ecs::EntityId entityId)
