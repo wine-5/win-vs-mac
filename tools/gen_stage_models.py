@@ -101,16 +101,35 @@ FACES = [
 # 巻き方向を直したあともこの補正は必要。
 UV = [(1, 1), (0, 1), (0, 0), (1, 0)]
 
+# 法線マップを持つ面の光沢。上げすぎると濡れたプラスチックに見えるので控えめにする。
+# powerは大きいほどハイライトが小さく鋭くなる（金属寄り）
+SPECULAR_LEVEL = 0.35
+SPECULAR_POWER = 25.0
+
 
 def mqo_text(tex_filename):
     """指定PNGを貼った立方体のmqoテキストを返す。"""
+    # 法線マップ（<名前>_normal.png）が置いてあれば bump として一緒に貼る。
+    # DxLibはbumpを法線マップとして読み込むので、平らな面に凹凸を持たせられる。
+    # 「ファイルを置いて作り直すだけで有効になる」形にして、対応表を二重に持たない
+    normal_filename = os.path.splitext(tex_filename)[0] + "_normal.png"
+    has_normal = os.path.exists(os.path.join(OUT_DIR, normal_filename))
+    bump = ' bump("%s")' % normal_filename if has_normal else ""
+
+    # 光沢は法線マップがある面にだけ持たせる。
+    # 平らなままで光沢を上げても、面全体が一様に光るだけで「ただ明るい板」になる。
+    # 法線マップと組み合わせて初めて、凹凸の峰にだけハイライトが乗り、
+    # カメラの動きにつれてそれが流れる（動かして初めて効く種類の表現）
+    spc, power = (SPECULAR_LEVEL, SPECULAR_POWER) if has_normal else (0.0, 5.0)
+
     lines = [
         "Metasequoia Document",
         "Format Text Ver 1.0",
         "",
         "Material 1 {",
         '\t"tex" shader(3) col(1.000 1.000 1.000 1.000) dif(1.000) '
-        'amb(1.000) emi(0.000) spc(0.000) power(5.00) tex("%s")' % tex_filename,
+        'amb(1.000) emi(0.000) spc(%.3f) power(%.2f) tex("%s")%s'
+        % (spc, power, tex_filename, bump),
         "}",
         'Object "cube" {',
         "\tvisible 15",
