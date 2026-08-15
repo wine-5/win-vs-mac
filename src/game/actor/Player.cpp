@@ -4,6 +4,7 @@
 #include "game/component/movement/InputComponent.h"
 #include "game/component/movement/FallRecoveryComponent.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/component/visual/ShadowCasterComponent.h"
 #include "game/component/visual/AnimationComponent.h"
 #include "game/component/visual/WeaponAttachComponent.h"
 #include "game/component/combat/ColliderComponent.h"
@@ -51,6 +52,7 @@ namespace game::actor
 		componentManager.add<component::visual::AnimationComponent>(
 		    m_entity.getId(), buildAnimationComponent(playerData.getAnimations(), resourceManager));
 		componentManager.add<component::visual::RenderComponent>(m_entity.getId(), { modelHandle });
+		componentManager.add<component::visual::ShadowCasterComponent>(m_entity.getId(), {});
 		attachWeapon(componentManager, resourceManager, playerData);
 		componentManager.add<component::visual::HitEffectComponent>(m_entity.getId(), {});
 		componentManager.add<component::visual::EffectComponent>(m_entity.getId(), {});
