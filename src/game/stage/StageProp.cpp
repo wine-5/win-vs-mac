@@ -2,6 +2,7 @@
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/movement/GroundSurfaceComponent.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/component/visual/ShadowCasterComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
 #include "game/component/stage/DestructibleComponent.h"
@@ -32,6 +33,11 @@ namespace game::stage
 		// 床・坂にAABBを付けると「傾いた面」を表現できず、上に乗れず浮くため分けている
 		if (params.m_collision == constant::PropCollision::Box)
 		{
+			// 壁・柱・ブロックは影を落とす。床・坂（Ground）は影を受ける側なので付けない。
+			// 受ける面が自分自身へ影を落としても絵は変わらず、二度描きのぶん重くなるうえ、
+			// 自分の面が自分の影に入って縞状のノイズが出やすくなる
+			componentManager.add<component::visual::ShadowCasterComponent>(m_entity.getId(), {});
+
 			component::combat::ColliderComponent collider;
 			collider.m_size = params.m_collisionSize;
 			// 配置物の中心座標がそのまま箱の中心になる

@@ -6,6 +6,7 @@
 #include "game/component/stage/DestructibleComponent.h"
 #include "game/component/stage/BlockDebrisComponent.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/component/visual/ShadowCasterComponent.h"
 #include "game/component/stage/ExtensionPickupComponent.h"
 #include "game/constant/ExtensionIconId.h"
 #include "game/event/InGameEvents.h"
@@ -330,6 +331,9 @@ namespace game::system::stage
 			render.m_billboardImage = m_resourceManager.loadImageById(constant::toExtensionIconId(type));
 			render.m_billboardSize = DROP_BILLBOARD_SIZE;
 			m_componentManager.add<component::visual::RenderComponent>(dropId, render);
+
+			// 落ちた欠片も影を落とす。どこへ転がったかが影で分かると拾いに行きやすい
+			m_componentManager.add<component::visual::ShadowCasterComponent>(dropId, {});
 
 			component::stage::ExtensionPickupComponent pickup{};
 			pickup.m_type = type;
