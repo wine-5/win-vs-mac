@@ -42,6 +42,8 @@ SPECIAL = (0.55, 40.0)       # 端末・扉・ギャンブル箱。特別な設�
 
 MANIFEST = [
     # (id,               texture png,          材質)
+    # ⓪ 全エリア共通。エリア同士をつなぐ通路（動く歩道としても使う）
+    ("PathCorridor",     "PathCorridor.png",     BACKGROUND),
     # ① Desktop（入口・ユーザー領域）
     ("FloorDesktop",     "FloorDesktop.png",     BACKGROUND),
     ("BlockFolder",      "BlockFolder.png",      DESTRUCTIBLE),
