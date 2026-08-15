@@ -2,7 +2,7 @@ Metasequoia Document
 Format Text Ver 1.0
 
 Material 1 {
-	"tex" shader(3) col(1.000 1.000 1.000 1.000) dif(1.000) amb(1.000) emi(0.000) spc(0.000) power(5.00) tex("BlockRecycleBin.png")
+	"tex" shader(3) col(1.000 1.000 1.000 1.000) dif(1.000) amb(1.000) emi(0.000) spc(0.350) power(25.00) tex("BlockRecycleBin.png")
 }
 Object "cube" {
 	visible 15
