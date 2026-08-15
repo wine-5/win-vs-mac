@@ -293,7 +293,7 @@ namespace game::scene
 		// 「プレイヤー周辺だけを写す」前提の 2048 に留めている
 		if (auto* shadowMap{ core::base::ServiceLocator::get<core::iface::IShadowMap>() })
 		{
-			constexpr int SHADOW_RESOLUTION{ 2048 };
+			constexpr int SHADOW_RESOLUTION{ 1024 };
 
 			// 小さすぎると自分の面が自分の影に入り縞状のノイズが出る。
 			// 大きくすると足元の影が本体から離れて浮いて見える
