@@ -7,6 +7,7 @@
 #include "game/component/stage/ExtensionPickupComponent.h"
 #include "game/component/visual/WeaponAttachComponent.h"
 #include "game/component/combat/AimComponent.h"
+#include "game/component/combat/ColliderComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
 #include "game/component/combat/DeathComponent.h"
 #include "game/component/ai/AIComponent.h"
@@ -386,6 +387,20 @@ namespace game::scene
 		}
 	}
 
+	float InGameView::castingHalfExtent(core::ecs::EntityId entityId,
+	    const component::visual::RenderComponent& render) const
+	{
+		// 押し返しの箱を持つ物（壁・柱・ブロック）は、その実寸が見た目の大きさそのもの
+		if (const auto* collider{ m_componentManager.tryGet<component::combat::ColliderComponent>(entityId) })
+			return std::max(collider->m_size.x, collider->m_size.z) * 0.5f;
+
+		// ビルボードは板の大きさがそのまま広がりになる
+		if (render.m_billboardImage != -1)
+			return render.m_billboardSize * 0.5f;
+
+		return 0.0f;
+	}
+
 	void InGameView::drawShadowCasters(core::ecs::EntityId playerId)
 	{
 		if (!m_shadowMap.isValid())
@@ -401,8 +416,8 @@ namespace game::scene
 		// ステージ全体ではなくプレイヤーの周囲だけを覆い、毎フレーム追従させる。
 		// プレイヤーのコライダーが 50x150 なので、この範囲なら本体が2048px中の
 		// 100px以上を占め、足元の輪郭が潰れずに残る
-		constexpr float AREA_HALF_SIZE{ 400.0f };
-		constexpr float AREA_HALF_HEIGHT{ 400.0f };
+		constexpr float AREA_HALF_SIZE{ 900.0f };
+		constexpr float AREA_HALF_HEIGHT{ 900.0f };
 
 		const core::Vector3 center{ playerTransform->m_position };
 		m_shadowMap.setDrawArea(center, AREA_HALF_SIZE, AREA_HALF_HEIGHT);
@@ -412,7 +427,7 @@ namespace game::scene
 		    m_componentManager.getAllEntities<component::visual::ShadowCasterComponent>())
 		{
 			const auto* render{ m_componentManager.tryGet<component::visual::RenderComponent>(entityId) };
-			if (render == nullptr || !render->m_isVisible || render->m_modelHandle == -1)
+			if (render == nullptr || !render->m_isVisible)
 				continue;
 
 			const auto* transform{
@@ -421,11 +436,21 @@ namespace game::scene
 			if (transform == nullptr)
 				continue;
 
-			// 範囲の外にいるものはシャドウマップに写らない。ブロックのように数の多い種類へ
-			// 付けたときに、写らないものまで描いて二度手間にならないよう先に弾く
-			if (std::abs(transform->m_position.x - center.x) > AREA_HALF_SIZE ||
-			    std::abs(transform->m_position.z - center.z) > AREA_HALF_SIZE)
+			// 範囲へ「完全に収まる」物だけを描く。
+			const float halfExtent{ castingHalfExtent(entityId, *render) };
+			if (std::abs(transform->m_position.x - center.x) + halfExtent > AREA_HALF_SIZE ||
+			    std::abs(transform->m_position.z - center.z) + halfExtent > AREA_HALF_SIZE)
 				continue;
+
+			// 拡張子の欠片のようにビルボードで描く物は板のまま焼く。
+			// 焼くときのカメラは光源なので、板は光に正対して実寸ぶんの影を落とす
+			if (render->m_modelHandle == -1)
+			{
+				if (render->m_billboardImage != -1)
+					m_renderer.drawBillboard(render->m_billboardImage, transform->m_position,
+					    render->m_billboardSize, 0.0f);
+				continue;
+			}
 
 			m_renderer.drawModel(render->m_modelHandle, transform->m_position,
 			    transform->m_rotation, transform->m_scale);

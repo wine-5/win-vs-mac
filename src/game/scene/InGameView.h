@@ -7,6 +7,7 @@
 #include "core/interface/IScreen.h"
 #include "core/interface/IEffectFactory.h"
 #include "core/interface/IShadowMap.h"
+#include "game/component/visual/RenderComponent.h"
 
 namespace game::system::combat
 {
@@ -278,6 +279,19 @@ namespace game::scene
 		 * @param playerId 影の範囲の中心にするプレイヤーのEntityId
 		 */
 		void drawShadowCasters(core::ecs::EntityId playerId);
+
+		/**
+		 * @brief 影を落とすEntityの水平方向の広がり（半分）を返す
+		 *
+		 * 影の範囲へ完全に収まっているかの判定に使う。中心座標だけで見ると、
+		 * 端が範囲からはみ出した物を描いてしまい、シャドウマップの縁が
+		 * 範囲外へ引き伸ばされて巨大な偽の影が出る。
+		 * @param entityId 対象のEntityId
+		 * @param render 対象のRenderComponent
+		 * @return 中心からの水平方向の広がり。分からない場合は0
+		 */
+		[[nodiscard]] float castingHalfExtent(core::ecs::EntityId entityId,
+		    const component::visual::RenderComponent& render) const;
 
 		/**
 		 * @brief Entityが装着している武器を、装着先ボーンへ追従させて描画する
