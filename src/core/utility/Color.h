@@ -78,12 +78,6 @@ namespace core::utility
 		static constexpr unsigned int TELEGRAPH_FILL = 0x78FF6030; // 満ちていく内側（オレンジ）
 		static constexpr unsigned int TELEGRAPH_RING = 0xC8FF3820; // 外周リング（濃い赤オレンジ）
 
-		// ========== 接地影の色 ==========
-
-		// 明るい青の床に落とすため、真っ黒ではなく床の色を残す濃紺にする。
-		// 純黒だと穴が空いたように見え、キャラクターより影のほうが目立ってしまう
-		static constexpr unsigned int GROUND_SHADOW = 0x96081428; // 足元の接地影（濃紺・半透明）
-
 		// ========== InGame HUD（Windows 11 / Fluent）用の色 ==========
 
 		static constexpr unsigned int HUD_INK = 0xFFEAF1FB;         // 文字・レティクルの基本色（わずかに青みのある白）
