@@ -23,6 +23,19 @@ namespace infrastructure::graphics
 		void drawModel(int modelHandle, const core::Vector3& position, const core::Vector3& rotation, const core::Vector3& scale) override;
 
 		/**
+		 * @brief モデルの輪郭光（リムライト）を描く
+		 * @param modelHandle モデルハンドル（本体と同じもの）
+		 * @param position 位置
+		 * @param rotation 回転（ラジアン）
+		 * @param scale 本体のスケール
+		 * @param thickness 膨らませる割合（0.02なら2%）
+		 * @param color 輪郭の色（ARGB）
+		 */
+		void drawModelOutline(int modelHandle, const core::Vector3& position,
+		    const core::Vector3& rotation, const core::Vector3& scale,
+		    float thickness, unsigned int color) override;
+
+		/**
 		 * @brief モデルのフレーム（ボーン）を名前から検索する
 		 * @param modelHandle モデルハンドル
 		 * @param frameName フレーム（ボーン）名

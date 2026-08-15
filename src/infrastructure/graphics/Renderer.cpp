@@ -39,6 +39,79 @@ namespace infrastructure::graphics
 		MV1DrawModel(modelHandle);
 	}
 
+	void Renderer::drawModelOutline(int modelHandle, const core::Vector3& position,
+	    const core::Vector3& rotation, const core::Vector3& scale,
+	    float thickness, unsigned int color)
+	{
+		if (modelHandle == -1 || thickness <= 0.0f)
+			return;
+
+		const int materialNum{ MV1GetMaterialNum(modelHandle) };
+		const int meshNum{ MV1GetMeshNum(modelHandle) };
+		if (materialNum <= 0 || meshNum <= 0)
+			return;
+
+		// 本体と同じハンドルを一時的に作り替えて描くため、元の状態を控えて必ず戻す。
+		// 複製したハンドルを使う手もあるが、アニメーションの姿勢を本体と同期させる
+		// 手間が増えるうえメモリも食うので、同じハンドルを2度描く方式にしている
+		std::vector<COLOR_F> savedDif(materialNum);
+		std::vector<COLOR_F> savedEmi(materialNum);
+		for (int i{ 0 }; i < materialNum; ++i)
+		{
+			savedDif[i] = MV1GetMaterialDifColor(modelHandle, i);
+			savedEmi[i] = MV1GetMaterialEmiColor(modelHandle, i);
+		}
+
+		std::vector<int> savedCulling(meshNum);
+		for (int i{ 0 }; i < meshNum; ++i)
+			savedCulling[i] = MV1GetMeshBackCulling(modelHandle, i);
+
+		constexpr float MAX_COMPONENT{ 255.0f };
+		const COLOR_F rim{ GetColorF(
+			((color >> 16) & 0xFF) / MAX_COMPONENT,
+			((color >> 8) & 0xFF) / MAX_COMPONENT,
+			(color & 0xFF) / MAX_COMPONENT, 1.0f) };
+		const COLOR_F black{ GetColorF(0.0f, 0.0f, 0.0f, 1.0f) };
+
+		// 拡散色を消して自己発光だけにする。ライトの当たり方に関わらず
+		// 輪郭が一定の明るさで出るようにするため
+		for (int i{ 0 }; i < materialNum; ++i)
+		{
+			MV1SetMaterialDifColor(modelHandle, i, black);
+			MV1SetMaterialEmiColor(modelHandle, i, rim);
+		}
+
+		// 裏面だけを描く。膨らませた表面まで描くと本体が丸ごと塗り潰される
+		for (int i{ 0 }; i < meshNum; ++i)
+			MV1SetMeshBackCulling(modelHandle, i, DX_CULLING_RIGHT);
+
+		// テクスチャを外す。付けたままだと自己発光色にテクスチャの明暗が掛かり、
+		// 暗いキャラクターでは輪郭がほとんど光らない
+		const int textureNum{ MV1GetTextureNum(modelHandle) };
+		std::vector<int> savedTexture(textureNum);
+		for (int i{ 0 }; i < textureNum; ++i)
+		{
+			savedTexture[i] = MV1GetTextureGraphHandle(modelHandle, i);
+			MV1SetTextureGraphHandle(modelHandle, i, -1, FALSE);
+		}
+
+		const float expand{ 1.0f + thickness };
+		MV1SetScale(modelHandle, VGet(scale.x * expand, scale.y * expand, scale.z * expand));
+		MV1SetPosition(modelHandle, VGet(position.x, position.y, position.z));
+		MV1SetRotationXYZ(modelHandle, VGet(rotation.x, rotation.y, rotation.z));
+		MV1DrawModel(modelHandle);
+
+		for (int i{ 0 }; i < materialNum; ++i)
+		{
+			MV1SetMaterialDifColor(modelHandle, i, savedDif[i]);
+			MV1SetMaterialEmiColor(modelHandle, i, savedEmi[i]);
+		}
+		for (int i{ 0 }; i < meshNum; ++i)
+			MV1SetMeshBackCulling(modelHandle, i, savedCulling[i]);
+		for (int i{ 0 }; i < textureNum; ++i)
+			MV1SetTextureGraphHandle(modelHandle, i, savedTexture[i], FALSE);
+	}
+
 	int Renderer::findModelFrame(int modelHandle, std::string_view frameName)
 	{
 		if (modelHandle == -1)
