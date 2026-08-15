@@ -38,17 +38,25 @@ namespace
 		return t * t * (3.0f - 2.0f * t);
 	}
 
-	// 演出の強度プリセット。トリガーごとにシェイク振幅・赤ビネット濃さを個別に決める。
+	// 演出の強度プリセット。トリガーごとにシェイク振幅・ビネットの濃さと色を個別に決める。
 	struct CinematicIntensity
 	{
-		float m_shakeStrength; // ホールド中のシェイクの最大振幅（ワールド単位）
-		float m_vignetteAlpha; // 赤ビネットの最大濃さ（0〜1）
+		float m_shakeStrength;        // ホールド中のシェイクの最大振幅（ワールド単位）
+		float m_vignetteAlpha;        // ビネットの最大濃さ（0〜1）
+		unsigned int m_vignetteColor; // ビネットの色（0xRRGGBB）
 	};
 
-	// 出現：初登場なので控えめ（軽い揺れ・淡い赤縁）
-	constexpr CinematicIntensity APPEARANCE_INTENSITY{ 12.0f, 0.45f };
-	// 覚醒：本気モードなので強め（従来値を維持）
-	constexpr CinematicIntensity AWAKEN_INTENSITY{ 22.0f, 0.85f };
+	// 出現：初登場なので控えめ（軽い揺れ・オレンジの縁）。
+	// 覚醒との差を色で付ける。オレンジ→赤と段階を踏ませることで、
+	// 同じ演出でも「まだ本気ではない」「本気になった」が一目で伝わる
+	constexpr CinematicIntensity APPEARANCE_INTENSITY{
+		12.0f, 0.45f, core::utility::Color::rgb(230, 110, 20)
+	};
+
+	// 覚醒：本気モードなので強め。色は最も危険を示す赤で振り切る
+	constexpr CinematicIntensity AWAKEN_INTENSITY{
+		22.0f, 0.85f, core::utility::Color::rgb(200, 0, 0)
+	};
 } // namespace
 
 namespace game::system::visual
@@ -72,6 +80,7 @@ namespace game::system::visual
 			    m_isPlaying = true;
 			    m_shakeStrength = intensity.m_shakeStrength;
 			    m_vignetteStrength = intensity.m_vignetteAlpha;
+			    m_vignetteColor = intensity.m_vignetteColor;
 			    setMacInvincible(true);
 			} };
 
@@ -196,8 +205,6 @@ namespace game::system::visual
 		const int screenW{ m_screen.getWidth() };
 		const int screenH{ m_screen.getHeight() };
 
-		const unsigned int red{ core::utility::Color::rgb(200, 0, 0) };
-
 		// 帯の幅をフレームごとにランダムに伸縮させ、縁の「もやもや」感を出す
 		std::uniform_int_distribution<int> bandDist{ VIGNETTE_BAND - VIGNETTE_BAND_JITTER, VIGNETTE_BAND + VIGNETTE_BAND_JITTER };
 		const int band{ bandDist(m_rng) };
@@ -214,7 +221,8 @@ namespace game::system::visual
 
 			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
 			// 塗りつぶさない矩形（枠）を1段ずつ内側へ描く（幅・高さは両端ぶん詰める）
-			m_uiRenderer.drawBox(inset, inset, screenW - 2 * inset, screenH - 2 * inset, red, false);
+			m_uiRenderer.drawBox(inset, inset, screenW - 2 * inset, screenH - 2 * inset,
+			    m_vignetteColor, false);
 		}
 
 		m_uiRenderer.resetBlendMode();

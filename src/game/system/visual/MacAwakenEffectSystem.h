@@ -73,7 +73,10 @@ namespace game::system::visual
 		// 今回の演出の強度。トリガー（出現／覚醒）ごとに別プリセットを起動時に取り込む。
 		// 出現は控えめ、覚醒は強め、というように個別調整できる
 		float m_shakeStrength{ 0.0f };    // ホールド中のシェイクの最大振幅（ワールド単位）
-		float m_vignetteStrength{ 0.0f }; // 赤ビネットの最大濃さ（0〜1）
+		float m_vignetteStrength{ 0.0f }; // ビネットの最大濃さ（0〜1）
+
+		// ビネットの色。出現はオレンジ、覚醒は赤、と段階を付けて強さの違いを色で示す
+		unsigned int m_vignetteColor{ 0u };
 
 		std::mt19937 m_rng{ std::random_device{}() }; // ビネットのちらつき用乱数
 
