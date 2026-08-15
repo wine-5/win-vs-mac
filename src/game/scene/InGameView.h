@@ -23,6 +23,7 @@ namespace game::system::visual
 	class TelegraphVisualsSystem;
 	class BackgroundParticleSystem;
 	class HardAuraVisualsSystem;
+	class ShadowVisualsSystem;
 	class DamagePopupSystem;
 	class BattleStartSystem;
 } // namespace game::system::visual
@@ -140,6 +141,12 @@ namespace game::scene
 		 * @param system HardAuraVisualsSystemのポインタ（所有はSystemManager）
 		 */
 		void setHardAuraVisualsSystem(system::visual::HardAuraVisualsSystem* system);
+
+		/**
+		 * @brief 足元の接地影のSystemを設定する
+		 * @param system ShadowVisualsSystemのポインタ（所有はSystemManager）
+		 */
+		void setShadowVisualsSystem(system::visual::ShadowVisualsSystem* system);
 
 		/**
 		 * @brief 開始演出System（READY / FIGHT! の描画元）を設定する
@@ -344,6 +351,7 @@ namespace game::scene
 
 		// Hardの敵を包む赤いオーラの描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::visual::HardAuraVisualsSystem* m_hardAuraVisualsSystem{ nullptr };
+		system::visual::ShadowVisualsSystem* m_shadowVisualsSystem{ nullptr };
 
 		// プレイヤーステータス（左下のHUD）の描画元（所有はInGame）
 		ui::ingame::PlayerHUDView* m_playerHUDView{ nullptr };

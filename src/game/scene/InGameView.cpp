@@ -3,6 +3,7 @@
 #include "core/constant/UI.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/component/visual/ShadowCasterComponent.h"
 #include "game/component/stage/ExtensionPickupComponent.h"
 #include "game/component/visual/WeaponAttachComponent.h"
 #include "game/component/combat/AimComponent.h"
@@ -20,6 +21,7 @@
 #include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/system/visual/HardAuraVisualsSystem.h"
+#include "game/system/visual/ShadowVisualsSystem.h"
 #include "game/system/visual/BattleStartSystem.h"
 #include "game/system/combat/PlayerDeathSystem.h"
 #include "game/system/combat/PlayerRangedAttackSystem.h"
@@ -64,6 +66,11 @@ namespace game::scene
 			m_backgroundParticleSystem->draw();
 
 		drawModels();
+
+		// 足元の接地影。地面より後に描かないと床に塗り潰される（影はZバッファへ書かないため）。
+		// Zテストは効いているので、キャラクターの手前に被ることはない
+		if (m_shadowVisualsSystem)
+			m_shadowVisualsSystem->draw();
 
 		// Hardの敵を包む赤いオーラ。敵モデルの直後に重ねて「体から漏れる光」に見せる
 		if (m_hardAuraVisualsSystem)
@@ -229,6 +236,11 @@ namespace game::scene
 	void InGameView::setHardAuraVisualsSystem(system::visual::HardAuraVisualsSystem* system)
 	{
 		m_hardAuraVisualsSystem = system;
+	}
+
+	void InGameView::setShadowVisualsSystem(system::visual::ShadowVisualsSystem* system)
+	{
+		m_shadowVisualsSystem = system;
 	}
 
 	void InGameView::setBattleStartSystem(system::visual::BattleStartSystem* system)

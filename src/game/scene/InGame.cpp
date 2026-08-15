@@ -89,6 +89,7 @@
 #include "game/system/visual/MacAwakenEffectSystem.h"
 #include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/system/visual/HardAuraVisualsSystem.h"
+#include "game/system/visual/ShadowVisualsSystem.h"
 #include "game/system/visual/BattleStartSystem.h"
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
@@ -268,6 +269,10 @@ namespace game::scene
 		// 【重要】環境光と平行光の和は255を超えないこと。配置物のマテリアルは
 		// amb(1.0) dif(1.0) なので、和が255を超えると最も光の当たる面が白へ飽和する。
 		// 暗いテクスチャでは気付けないが、明るい面（リネーム端末）を置くと絵が消える
+		// 平行光の向きは明暗と影の両方が使う。別々に書くと片方だけ直したときに
+		// 「面の明るさ」と「影の伸びる向き」が食い違うため、ここで一度だけ決める
+		const core::Vector3 DIRECTIONAL_LIGHT_DIRECTION{ -0.3f, -1.0f, 0.4f };
+
 		auto* lighting{ core::base::ServiceLocator::get<core::iface::ILighting>() };
 		if (lighting)
 		{
@@ -277,7 +282,7 @@ namespace game::scene
 			constexpr int DIRECTIONAL_LEVEL{ 150 };
 			lighting->setEnabled(true);
 			lighting->setAmbient(AMBIENT_R, AMBIENT_G, AMBIENT_B);
-			lighting->setDirectionalLight(core::Vector3{ -0.3f, -1.0f, 0.4f },
+			lighting->setDirectionalLight(DIRECTIONAL_LIGHT_DIRECTION,
 			    DIRECTIONAL_LEVEL, DIRECTIONAL_LEVEL, DIRECTIONAL_LEVEL);
 		}
 
@@ -723,6 +728,12 @@ namespace game::scene
 			m_gameManager.getDifficulty() == core::data::Difficulty::Hard) };
 		core::probe::mark("      sys: HardAuraVisualsSystem");
 		m_view.setHardAuraVisualsSystem(hardAura);
+
+		// 足元の接地影。ShadowCasterComponentを付けたEntityだけが影を落とす
+		auto* shadowVisuals{ m_systemManager.registerSystem<game::system::visual::ShadowVisualsSystem>(
+			m_componentManager, m_renderer) };
+		core::probe::mark("      sys: ShadowVisualsSystem");
+		m_view.setShadowVisualsSystem(shadowVisuals);
 
 		// 敵の発見演出（頭上の通知バッジ）。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
 		auto* detectionAlert{ m_systemManager.registerSystem<game::system::visual::DetectionAlertVisualsSystem>(
