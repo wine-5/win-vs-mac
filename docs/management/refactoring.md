@@ -183,3 +183,248 @@ m_view.attach(context);  // setterの26呼び出しが1回に
 
 - **EventBus の破棄順**: InGame.h 先頭のコメント（購読者より前に EventBus を宣言）の制約は、MissionProgress 切り出し後も同じく残る。MissionProgress のメンバ宣言は EventBus より後（＝破棄が先）に置くこと
 - System 登録の順序コメントは仕様ドキュメントとして Setup 側へ必ず引き継ぐこと
+
+
+# コードレビュー：検出された問題点
+
+対象：`src/`（約 40,000 行 / 403 ファイル）
+観点：ポインタ・所有権・パフォーマンス
+
+---
+
+## 総評
+
+`new` / `delete` の直接使用はゼロ。所有権は `unique_ptr`、非所有は生ポインタ・参照で一貫して表現されており、設計は良好。以下は「さらに良くする」ための指摘。
+
+| # | 問題 | 深刻度 | 修正コスト |
+|---|---|---|---|
+| 1 | `ServiceLocator::provide` のポインタ調整漏れ | **高**（潜在） | 1 行 |
+| 2 | `getAllEntities()` の毎フレームアロケーション | 中 | 中 |
+| 3 | `has()` → `get()` の二重ハッシュ検索 | 低〜中 | 小（機械的） |
+| 4 | `ComponentArray::add()` の余分なコピー | 低 | 小 |
+
+---
+
+## 1. `ServiceLocator::provide` のポインタ調整漏れ
+
+**場所**：`core/base/ServiceLocator.h`
+**深刻度**：高（現状は未発症。多重継承を導入した瞬間に未定義動作）
+
+### 現状
+
+```cpp
+template<typename TInterface, typename TImpl>
+static void provide(std::unique_ptr<TImpl> service)
+{
+    registerService(std::type_index(typeid(TInterface)),
+                    std::shared_ptr<void>(std::move(service)));  // TImpl* のまま消える
+}
+```
+
+呼び出し側は `provide<IStringConverter>(std::make_unique<StringConverter>())` の形。
+オーバーロード解決の結果、**全 17 箇所がこの 2 引数版を通る**（`TImpl` 側が完全一致で勝つ）。
+
+このため `shared_ptr<void>` に入るのは `TImpl*`。一方 `get<T>()` は：
+
+```cpp
+return static_cast<T*>(it->second.get());   // void* を TInterface* とみなす
+```
+
+`TImpl*` → `TInterface*` の変換に必要な**ポインタ調整が行われない**。
+
+### 実測（多重継承の場合）
+
+```
+AudioManager* のアドレス   : 0x558bdbda62b0
+IAudioManager* へ正しく変換: 0x558bdbda62b8  <- 8 バイトずれる
+void* 経由で復元           : 0x558bdbda62b0  <- ずれない = 誤り
+一致するか: いいえ（未定義動作）
+```
+
+ずれたアドレスで仮想関数を呼ぶと、別インターフェースの vtable を引く。
+単一継承では基底がオフセット 0 に来るため、**現状は偶然動いている**。
+
+### 修正
+
+```cpp
+template<typename TInterface, typename TImpl>
+static void provide(std::unique_ptr<TImpl> service)
+{
+    // TInterface へ変換してから型を消す（ここで調整が入る）
+    std::unique_ptr<TInterface> asInterface{ std::move(service) };
+    registerService(std::type_index(typeid(TInterface)),
+                    std::shared_ptr<void>(std::move(asInterface)));
+}
+```
+
+---
+
+## 2. `getAllEntities()` の毎フレームアロケーション
+
+**場所**：`core/ecs/ComponentArray.h` / `ComponentManager.h`、呼び出し **56 箇所**
+**深刻度**：中
+
+### 現状
+
+```cpp
+std::vector<EntityId> getAllEntities() const   // 値返し = 毎回ヒープ確保
+{
+    std::vector<EntityId> entities;
+    entities.reserve(m_component.size());
+    for (const auto& [id, _] : m_component) entities.push_back(id);
+    return entities;
+}
+```
+
+呼び出し側の典型：
+
+```cpp
+const auto entities{ m_componentManager.getAllEntities<ColliderComponent>() };
+for (const auto id : entities)
+{
+    const auto& collider{ m_componentManager.get<ColliderComponent>(id) };  // 再検索
+}
+```
+
+**確保 → 詰める → ID で引き直す**の 3 段階。ID からの再検索はハッシュ検索。
+
+呼び出しが集中しているファイル：
+
+| ファイル | 箇所数 |
+|---|---|
+| `DebugGizmoView.cpp` | 4 |
+| `InGameView.cpp` | 4 |
+| `MiniMapView.cpp` | 3 |
+| `DetectionAlertVisualsSystem.cpp` | 3 |
+| （他 20 ファイル） | 42 |
+
+### 修正案：`forEach` を追加する
+
+```cpp
+// ComponentArray
+template <typename Fn>
+void forEach(Fn&& fn)
+{
+    for (auto& [id, comp] : m_component) fn(id, comp);
+}
+
+// ComponentManager
+template <typename T, typename Fn>
+void forEach(Fn&& fn) { getComponentArray<T>()->forEach(std::forward<Fn>(fn)); }
+```
+
+```cpp
+m_componentManager.forEach<ColliderComponent>(
+    [&](EntityId id, ColliderComponent& collider) { ... });
+```
+
+**アロケーションとハッシュ再検索の両方が消える。**
+
+### 補足
+
+`ComponentArray` のコメントに「利用側を変えずに packed array へ差し替えられる」とあるが、
+`getAllEntities` が残っていると「ID を受け取って引き直す」形が固定されてしまう。
+`forEach` を経由させておくと、その差し替えが本当に無痛になる。
+
+---
+
+## 3. `has()` → `get()` の二重ハッシュ検索
+
+**場所**：`has<` の呼び出しが **133 箇所**。うち直後に `get<` が続くものが対象
+**深刻度**：低〜中（AI 系は毎フレーム全敵を走査するため効く）
+
+### 現状
+
+```cpp
+if (!m_componentManager.has<AIComponent>(entityId))    // find #1
+    continue;
+auto& ai{ m_componentManager.get<AIComponent>(entityId) };  // find #2
+```
+
+`has()` も `get()` も内部は `m_component.find(id)`。**同じキーを 2 回引いている。**
+
+### 修正
+
+```cpp
+auto* ai{ m_componentManager.tryGet<AIComponent>(entityId) };
+if (!ai) continue;
+```
+
+または C++17 の初期化付き `if`：
+
+```cpp
+if (auto* ai{ m_componentManager.tryGet<AIComponent>(entityId) })
+{
+    // このブロック内で ai は非 nullptr が保証される
+}
+```
+
+### 優先して直す箇所
+
+| ファイル:行 | 備考 |
+|---|---|
+| `system/ai/MeleeChaseAISystem.cpp:45, 101, 115` | 毎フレーム全敵 |
+| `system/ai/EnemyRangedAttackSystem.cpp:46` | 同上 |
+| `system/ai/DetectionSystem.cpp:30-34` | **2 組あり 4 回 → 2 回** |
+
+`tryGet` は既に 93 箇所で使われているため、方針は統一済み。取りこぼしの回収にあたる。
+
+---
+
+## 4. `ComponentArray::add()` の余分なコピー
+
+**場所**：`core/ecs/ComponentArray.h` / `ComponentManager.h`
+**深刻度**：低
+
+### 現状
+
+```cpp
+void add(EntityId id, T component)   // コピー #1（値渡し）
+{
+    m_component[id] = component;     // コピー #2（代入）
+}
+```
+
+`ComponentManager::add()` も同様に値で受けて値で渡している。
+Component が小さいうちは誤差だが、`std::string` や `std::vector` を含む型では効く。
+
+### 修正
+
+```cpp
+// ComponentArray
+template <typename U = T>
+void add(EntityId id, U&& component)
+{
+    m_component.insert_or_assign(id, std::forward<U>(component));
+}
+
+// ComponentManager
+template <typename T, typename U = T>
+void add(EntityId id, U&& component)
+{
+    getComponentArray<T>()->add(id, std::forward<U>(component));
+}
+```
+
+---
+
+## 良い点（維持すべき設計）
+
+- `new` / `delete` の直接使用なし（`unique_ptr` 88 / `shared_ptr` 8）
+- 所有＝`unique_ptr`・値、非所有＝`T*`・`T&` の使い分けが全体で一貫
+- `ObjectPool` の `m_all`（`unique_ptr`）と `m_available`（`T*`）の分離
+- `vector<unique_ptr<T>>` によるポインタ安定性の確保（`expand()` で借用ポインタが無効化しない）
+- `EventBus::Subscription` による RAII での購読解除
+- `InGame` のメンバ宣言順コメント（破棄順の明示）
+- `ServiceLocator::clear()` の `m_order` による逆順破棄
+- `get()` は assert、`tryGet()` は `nullptr` という意図の撃ち分け
+- `[[nodiscard]]` の付与
+
+---
+
+## 推奨する着手順
+
+1. **問題 1**（1 行。将来の地雷除去）
+2. **問題 3**（機械的。AI 系のみ先行でも可）
+3. **問題 4**（`add` 周りのみ）
+4. **問題 2**（`forEach` 追加 → 呼び出し 56 箇所を段階的に移行）
