@@ -22,7 +22,9 @@
 #include "infrastructure/graphics/Camera.h"
 #include "infrastructure/graphics/Renderer.h"
 #include "core/interface/ILighting.h"
+#include "core/interface/IShadowMap.h"
 #include "infrastructure/graphics/Lighting.h"
+#include "infrastructure/graphics/ShadowMap.h"
 #include "infrastructure/graphics/Animator.h"
 #include "game/scene/SceneManager.h"
 #include "game/GameManager.h"
@@ -109,6 +111,12 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 	    std::make_unique<infrastructure::graphics::Lighting>());
 
 	core::probe::mark("  service: Lighting");
+
+	// ShadowMap登録。ハンドルの生成はシーン側（使う所）で行うため、ここでは器だけ用意する
+	core::base::ServiceLocator::provide<core::iface::IShadowMap>(
+	    std::make_unique<infrastructure::graphics::ShadowMap>());
+
+	core::probe::mark("  service: ShadowMap");
 
 	// WindowFactory登録
 	core::base::ServiceLocator::provide<core::iface::IWindowFactory>(
