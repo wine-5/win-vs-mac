@@ -39,14 +39,24 @@ NORMAL_SUFFIX = "_normal"
 DEFAULT_STRENGTH = 20.0
 DEFAULT_BLUR = 0.6
 
+# 出力する法線マップの一辺。DxLibはテクスチャ1枚につき生データの約3倍を確保するため、
+# 元テクスチャ（256px）と同じにせず半分に落として確保量を1/4に抑える。
+# 凹凸のうねりは低周波なので、この解像度でも見た目はほとんど変わらない
+DEFAULT_SIZE = 128
+
 
 def _wrap_shift(a, dy, dx):
     """周期境界でずらす。タイリングする絵なので継ぎ目を作らないために使う。"""
     return np.roll(np.roll(a, dy, axis=0), dx, axis=1)
 
 
-def make_normal(src_path, dst_path, strength, blur):
-    """1枚のテクスチャから法線マップを作って保存する。"""
+def make_normal(src_path, dst_path, strength, blur, size):
+    """1枚のテクスチャから法線マップを作って保存する。
+
+    size を指定すると、法線を求めてからその解像度へ縮小する。
+    法線マップは元テクスチャほど細かい情報を持たない（凹凸のうねりは低周波）ため、
+    半分の解像度でも見た目はほとんど変わらず、確保するメモリは1/4で済む。
+    """
     with Image.open(src_path) as img:
         gray = img.convert("L")
         if blur > 0:
@@ -65,11 +75,14 @@ def make_normal(src_path, dst_path, strength, blur):
 
     # -1〜1 を 0〜255 へ詰める（法線マップが青紫に見えるのはZ成分が常に正のため）
     rgb = np.clip(np.stack([nx, ny, nz], axis=-1) * 0.5 + 0.5, 0.0, 1.0)
-    Image.fromarray((rgb * 255.0 + 0.5).astype(np.uint8), "RGB").save(dst_path, "PNG", optimize=True)
+    out = Image.fromarray((rgb * 255.0 + 0.5).astype(np.uint8), "RGB")
+    if size > 0 and out.size != (size, size):
+        out = out.resize((size, size), Image.LANCZOS)
+    out.save(dst_path, "PNG", optimize=True)
 
     size_kb = os.path.getsize(dst_path) // 1024
-    print("generated %s (strength=%.1f blur=%.1f, %dKB)"
-          % (dst_path, strength, blur, size_kb))
+    print("generated %s %s (strength=%.1f blur=%.1f, %dKB)"
+          % (dst_path, out.size, strength, blur, size_kb))
 
 
 def main():
@@ -78,6 +91,8 @@ def main():
                         help="assets/model/stage/<name>.png を元にする（拡張子なしの名前）")
     parser.add_argument("--strength", type=float, default=DEFAULT_STRENGTH, help="凹凸の急峻さ")
     parser.add_argument("--blur", type=float, default=DEFAULT_BLUR, help="ハイトマップのぼかし半径")
+    parser.add_argument("--size", type=int, default=DEFAULT_SIZE,
+                        help="出力する一辺のピクセル数（0で元テクスチャと同じ）")
     args = parser.parse_args()
 
     src = os.path.join(OUT_DIR, args.name + ".png")
@@ -86,7 +101,7 @@ def main():
         return
 
     dst = os.path.join(OUT_DIR, args.name + NORMAL_SUFFIX + ".png")
-    make_normal(src, dst, args.strength, args.blur)
+    make_normal(src, dst, args.strength, args.blur, args.size)
 
 
 if __name__ == "__main__":
