@@ -229,7 +229,7 @@ void Application::updatePauseMenu(float deltaTime)
 		return;
 
 	// メニューの選択・決定を処理する
-	switch (m_pauseMenuController->update())
+	switch (m_pauseMenuController->update(deltaTime))
 	{
 	case game::ui::pause::PauseMenuAction::Resume:
 		m_pauseManager.resume();

@@ -1,5 +1,4 @@
 #include "PauseMenuController.h"
-#include "core/input/KeyCode.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IAudioManager.h"
 #include "core/constant/SeType.h"
@@ -11,6 +10,7 @@ namespace game::ui::pause
 	    core::iface::IScreen& screen)
 	    : m_inputProvider{ inputProvider }
 	    , m_screen{ screen }
+	    , m_inputMapper{ inputProvider }
 	    , m_view{ uiRenderer, screen }
 	{
 	}
@@ -25,22 +25,25 @@ namespace game::ui::pause
 		m_items.push_back(PauseMenuAction::Quit);
 
 		m_selectedIndex = 0;
-		// 開いた瞬間のクリックで誤決定しないよう、現在の押下状態を引き継ぐ
+		// 開いた瞬間のキー・クリックで誤決定しないよう、現在の押下状態を引き継ぐ
+		m_inputMapper.reset();
 		m_prevMouseLeft = m_inputProvider.isMouseLeftPressed();
 	}
 
-	PauseMenuAction PauseMenuController::update()
+	PauseMenuAction PauseMenuController::update(float deltaTime)
 	{
 		if (m_items.empty())
 			return PauseMenuAction::None;
+
+		m_inputMapper.update(deltaTime);
 
 		const int itemCount{ static_cast<int>(m_items.size()) };
 		const int previousIndex{ m_selectedIndex };
 
 		// キーボード：↑↓で選択を移動する（端で止める）
-		if (m_inputProvider.isKeyPressed(core::input::KeyCode::Up) && m_selectedIndex > 0)
+		if (m_inputMapper.isTriggered(UiAction::NavigateUp) && m_selectedIndex > 0)
 			m_selectedIndex--;
-		if (m_inputProvider.isKeyPressed(core::input::KeyCode::Down) && m_selectedIndex < itemCount - 1)
+		if (m_inputMapper.isTriggered(UiAction::NavigateDown) && m_selectedIndex < itemCount - 1)
 			m_selectedIndex++;
 
 		// マウス：ホバーで選択を移動する
@@ -63,7 +66,7 @@ namespace game::ui::pause
 		m_prevMouseLeft = mouseLeft;
 
 		// 決定：Enter、またはホバー中の項目をクリック
-		const bool decided{ m_inputProvider.isKeyPressed(core::input::KeyCode::Enter) ||
+		const bool decided{ m_inputMapper.isTriggered(UiAction::Confirm) ||
 			                (mouseClicked && hoveredIndex >= 0) };
 		if (decided)
 		{

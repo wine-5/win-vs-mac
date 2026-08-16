@@ -2,6 +2,7 @@
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "game/ui/UiInputMapper.h"
 #include "game/ui/pause/PauseMenuView.h"
 #include <vector>
 
@@ -47,9 +48,10 @@ namespace game::ui::pause
 
 		/**
 		 * @brief 入力を処理し、決定された操作を返す
+		 * @param deltaTime フレーム間の時間差（秒）
 		 * @return 決定された操作（未決定なら PauseMenuAction::None）
 		 */
-		[[nodiscard]] PauseMenuAction update();
+		[[nodiscard]] PauseMenuAction update(float deltaTime);
 
 		/**
 		 * @brief メニューを描画する
@@ -59,6 +61,11 @@ namespace game::ui::pause
 	  private:
 		core::iface::IInputProvider& m_inputProvider;
 		core::iface::IScreen& m_screen;
+
+		// キーの割り当てと長押しの繰り返しは設定画面と共有する。
+		// 画面ごとに書くと反応の速さが揃わず、ゲームパッド対応も画面の数だけ必要になる
+		UiInputMapper m_inputMapper;
+
 		PauseMenuView m_view;
 
 		std::vector<PauseMenuAction> m_items{}; // 表示中の項目（上から順）
