@@ -11,7 +11,8 @@ namespace game::ui::pause
 	/**
 	 * @brief ポーズメニューの描画を担当するView
 	 *
-	 * 画面全体を半透明の黒で覆い、タイトルと項目リストを中央に描画する。
+	 * Ctrl+Alt+Del を押したときのセキュリティオプション画面に見立てて描く。
+	 *
 	 * 状態は持たず、項目と選択位置を都度受け取って描画する。
 	 * マウスのヒット判定用に項目の矩形計算も担う（レイアウトの一元管理）。
 	 */
@@ -30,8 +31,17 @@ namespace game::ui::pause
 		 * @brief ポーズメニューを描画する
 		 * @param items 表示する項目（上から順）
 		 * @param selectedIndex 選択中の項目のインデックス
+		 * @param isPowerHovered 右下の電源ボタンにカーソルが乗っているか
 		 */
-		void draw(const std::vector<PauseMenuAction>& items, int selectedIndex);
+		void draw(const std::vector<PauseMenuAction>& items, int selectedIndex, bool isPowerHovered);
+
+		/**
+		 * @brief 指定座標が右下の電源ボタンの上かを返す
+		 * @param x 判定するX座標
+		 * @param y 判定するY座標
+		 * @return 電源ボタンの上なら true
+		 */
+		[[nodiscard]] bool isOnPowerButton(int x, int y) const;
 
 		/**
 		 * @brief 指定座標の上にある項目のインデックスを返す（マウスホバー用）
@@ -44,14 +54,54 @@ namespace game::ui::pause
 
 	  private:
 		/**
+		 * @brief 項目リストを描く
+		 * @param items 表示する項目（上から順）
+		 * @param selectedIndex 選択中の項目のインデックス
+		 */
+		void drawItems(const std::vector<PauseMenuAction>& items, int selectedIndex) const;
+
+		/**
+		 * @brief 右下に電源の記号を描く
+		 * @param isHovered カーソルが乗っているか（乗っていれば明るくする）
+		 */
+		void drawPowerButton(bool isHovered) const;
+
+		/**
+		 * @brief 電源ボタンの円の位置と半径を返す（描画とヒット判定で共有する）
+		 * @param outCenterX 中心X座標の出力先
+		 * @param outCenterY 中心Y座標の出力先
+		 * @param outRadius 半径の出力先
+		 */
+		void getPowerCircle(int& outCenterX, int& outCenterY, int& outRadius) const;
+
+		/**
+		 * @brief その位置が「キャンセル」かを返す
+		 *
+		 * 実物と同じく最後に置くので、末尾かどうかで判定する
+		 * @param index 項目のインデックス
+		 * @param itemCount 表示中の項目数
+		 * @return キャンセルなら true
+		 */
+		[[nodiscard]] bool isCancelIndex(int index, int itemCount) const noexcept;
+
+		/**
+		 * @brief UTF-8の文字列を描画用（Shift-JIS）へ変換する
+		 * @param utf8 変換する文字列
+		 * @return 変換後の文字列
+		 */
+		[[nodiscard]] std::string getDrawableText(const char* utf8) const;
+
+		/**
 		 * @brief 項目の矩形を計算する（描画とヒット判定で共有する）
 		 * @param index 項目のインデックス
+		 * @param itemCount 表示中の項目数（キャンセルの前の間隔を空けるために使う）
 		 * @param outX 矩形左上X座標の出力先
 		 * @param outY 矩形左上Y座標の出力先
 		 * @param outWidth 矩形幅の出力先
 		 * @param outHeight 矩形高さの出力先
 		 */
-		void getItemRect(int index, int& outX, int& outY, int& outWidth, int& outHeight) const;
+		void getItemRect(int index, int itemCount,
+		    int& outX, int& outY, int& outWidth, int& outHeight) const;
 
 		/**
 		 * @brief 項目の表示ラベルを返す（Shift-JIS変換済み）

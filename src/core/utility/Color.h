@@ -137,6 +137,12 @@ namespace core::utility
 		static constexpr unsigned int SETTINGS_TEXT_TERTIARY = 0xFF8B8B8B;  // 説明文・未選択
 		static constexpr unsigned int SETTINGS_TRACK = 0xFF8B8B8B;          // スライダーの未到達部分
 
+		// ========== ポーズ画面（Ctrl+Alt+Del のセキュリティオプション画面）用の色 ==========
+
+		// 画面全体を沈める濃紺。真っ黒で覆うと単なる暗転に見えるが、青をわずかに残すと
+		static constexpr unsigned int PAUSE_BACKGROUND_NAVY = 0xFF060C15;
+		static constexpr unsigned int PAUSE_CANCEL_BUTTON = 0xFF3A3A3A;
+
 		// ========== メニュー（ポーズなどの項目リスト）用の色 ==========
 
 		// 選択中の項目。非選択の薄いグレーと色相・明度の両方で離し、

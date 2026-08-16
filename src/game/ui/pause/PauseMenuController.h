@@ -70,6 +70,7 @@ namespace game::ui::pause
 
 		std::vector<PauseMenuAction> m_items{}; // 表示中の項目（上から順）
 		int m_selectedIndex{ 0 };
-		bool m_prevMouseLeft{ false }; // マウス左クリックのエッジ検出用
+		bool m_prevMouseLeft{ false };  // マウス左クリックのエッジ検出用
+		bool m_isPowerHovered{ false }; // 右下の電源ボタンにカーソルが乗っているか
 	};
 } // namespace game::ui::pause
