@@ -109,14 +109,6 @@ namespace game::ui::settings
 		[[nodiscard]] int getFocusIndexAt(SettingsPage page, int x, int y);
 
 		/**
-		 * @brief 指定座標がウィンドウの外かを返す
-		 * @param x マウスのX座標
-		 * @param y マウスのY座標
-		 * @return ウィンドウの外なら true
-		 */
-		[[nodiscard]] bool isOutsideWindow(SettingsPage page, int x, int y);
-
-		/**
 		 * @brief 指定座標が閉じるボタン（×）の上かを返す
 		 * @param page 表示中のページ
 		 * @param x マウスのX座標

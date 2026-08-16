@@ -3,6 +3,7 @@
 #include "core/interface/IAudioManager.h"
 #include "game/SettingsManager.h"
 #include <algorithm>
+#include <cmath>
 
 namespace game::ui::settings
 {
@@ -13,7 +14,8 @@ namespace game::ui::settings
 	    core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
 	    game::SettingsManager& settingsManager)
-	    : m_settingsManager{ settingsManager }
+	    : m_inputProvider{ inputProvider }
+	    , m_settingsManager{ settingsManager }
 	    , m_inputMapper{ inputProvider }
 	    , m_view{ uiRenderer, screen }
 	{
@@ -23,14 +25,22 @@ namespace game::ui::settings
 	{
 		m_page = SettingsPage::Sound;
 		m_focusIndex = PAGE_COUNT; // 開いた直後は最初の行を選んでおく
+		m_draggingRow = -1;
 
-		// 開くのに使ったキーが押しっぱなしのまま流れ込まないようにする
+		// 開くのに使ったキー・クリックが押しっぱなしのまま流れ込まないようにする
 		m_inputMapper.reset();
+		m_prevMouseLeft = m_inputProvider.isMouseLeftPressed();
 	}
 
 	SettingsPanelAction SettingsPanelController::update(float deltaTime)
 	{
 		m_inputMapper.update(deltaTime);
+
+		if (handleMouse())
+		{
+			m_settingsManager.save();
+			return SettingsPanelAction::Close;
+		}
 
 		if (m_inputMapper.isTriggered(UiAction::Cancel))
 		{
@@ -52,8 +62,8 @@ namespace game::ui::settings
 		if (m_inputMapper.isTriggered(UiAction::NavigateRight))
 			adjustValue(1);
 
-		if (m_inputMapper.isTriggered(UiAction::Confirm))
-			confirm();
+		if (m_inputMapper.isTriggered(UiAction::Confirm) && !isNavFocused())
+			activateRow(getFocusedRow());
 
 		return SettingsPanelAction::None;
 	}
@@ -62,6 +72,72 @@ namespace game::ui::settings
 	{
 		m_view.draw(core::data::GameSettings{ m_settingsManager.getAudio(), m_settingsManager.getControl() },
 		    m_page, m_focusIndex, m_inputMapper.isFocusVisible());
+	}
+
+	bool SettingsPanelController::handleMouse()
+	{
+		int mouseX{}, mouseY{};
+		m_inputProvider.getMousePosition(mouseX, mouseY);
+
+		const bool isDown{ m_inputProvider.isMouseLeftPressed() };
+		const bool isPressed{ isDown && !m_prevMouseLeft };
+		m_prevMouseLeft = isDown;
+
+		// つまみを掴んでいる間は、カーソルが行の外へ出ても離すまで追従させる。
+		// 掴み直しを強いると、細かく合わせたいときほど扱いにくくなる
+		if (m_draggingRow >= 0)
+		{
+			if (!isDown)
+			{
+				m_draggingRow = -1;
+				return false;
+			}
+
+			applySliderRatio(m_draggingRow, m_view.getSliderRatioAt(m_page, mouseX));
+			return false;
+		}
+
+		const int hovered{ m_view.getFocusIndexAt(m_page, mouseX, mouseY) };
+
+		// 行の上に乗せたら選択位置を移す。左ナビは押して初めて切り替える
+		// （乗せただけでページが変わると、通り道の項目に反応して内容が飛ぶ）
+		if (hovered >= PAGE_COUNT)
+			m_focusIndex = hovered;
+
+		if (!isPressed)
+			return false;
+
+		if (m_view.isOnCloseButton(m_page, mouseX, mouseY))
+			return true;
+
+		if (hovered >= 0 && hovered < PAGE_COUNT)
+		{
+			if (static_cast<int>(m_page) != hovered)
+			{
+				m_page = static_cast<SettingsPage>(hovered);
+				m_focusIndex = PAGE_COUNT;
+				playUiSe(core::constant::SeType::UiClick);
+			}
+			return false;
+		}
+
+		if (hovered < PAGE_COUNT)
+			return false;
+
+		const int row{ hovered - PAGE_COUNT };
+		if (getControlKind(m_page, row) == ControlKind::Slider)
+		{
+			// つまみの上でなくても、線の上を押した位置へ飛ばす（Windowsのスライダーと同じ）
+			if (!m_view.isOnSlider(m_page, row, mouseX, mouseY))
+				return false;
+
+			m_draggingRow = row;
+			applySliderRatio(row, m_view.getSliderRatioAt(m_page, mouseX));
+			return false;
+		}
+
+		activateRow(row);
+		return false;
 	}
 
 	void SettingsPanelController::moveFocus(int delta)
@@ -87,100 +163,39 @@ namespace game::ui::settings
 			return;
 
 		const int row{ getFocusedRow() };
-
-		if (m_page == SettingsPage::Sound)
-		{
-			AudioSettings audio{ m_settingsManager.getAudio() };
-			const int step{ AudioSettings::LEVEL_STEP * direction };
-
-			int* target{ nullptr };
-			switch (static_cast<SoundRow>(row))
-			{
-			case SoundRow::Master: target = &audio.m_master; break;
-			case SoundRow::Bgm: target = &audio.m_bgm; break;
-			case SoundRow::Se: target = &audio.m_se; break;
-			default: return; // リセット行は左右では動かさない
-			}
-
-			const int next{ std::clamp(*target + step, 0, AudioSettings::MAX_LEVEL) };
-			if (next == *target)
-				return;
-
-			*target = next;
-			m_settingsManager.setAudio(audio);
-			playUiSe(core::constant::SeType::UiKeyPress);
+		if (getControlKind(m_page, row) == ControlKind::Button)
 			return;
-		}
 
-		ControlSettings control{ m_settingsManager.getControl() };
-		switch (static_cast<ControlRow>(row))
-		{
-		case ControlRow::Sensitivity:
-		{
-			const int next{ std::clamp(control.m_sensitivity + direction,
-				ControlSettings::MIN_SENSITIVITY, ControlSettings::MAX_SENSITIVITY) };
-			if (next == control.m_sensitivity)
-				return;
-			control.m_sensitivity = next;
-			break;
-		}
-		case ControlRow::InvertY:
-		{
-			// トグルは左でオフ・右でオン。スライダーと同じ指の動きで扱えるようにする
-			const bool next{ direction > 0 };
-			if (next == control.m_invertY)
-				return;
-			control.m_invertY = next;
-			break;
-		}
-		case ControlRow::Shake:
-		{
-			const int next{ std::clamp(control.m_screenShake + ControlSettings::SHAKE_STEP * direction,
-				0, ControlSettings::MAX_SHAKE) };
-			if (next == control.m_screenShake)
-				return;
-			control.m_screenShake = next;
-			break;
-		}
-		default: return;
-		}
-
-		m_settingsManager.setControl(control);
-		playUiSe(core::constant::SeType::UiKeyPress);
+		const ValueRange range{ getValueRange(row) };
+		setRowValue(row, std::clamp(getRowValue(row) + range.m_step * direction, range.m_min, range.m_max));
 	}
 
-	void SettingsPanelController::confirm()
+	void SettingsPanelController::activateRow(int row)
 	{
-		if (isNavFocused())
-			return; // ページは選んだ時点で切り替わっているので何もしない
-
-		const int row{ getFocusedRow() };
-
-		if (m_page == SettingsPage::Sound)
+		switch (getControlKind(m_page, row))
 		{
-			if (static_cast<SoundRow>(row) != SoundRow::Reset)
-				return;
-
-			resetCurrentPage();
-			return;
-		}
-
-		switch (static_cast<ControlRow>(row))
-		{
-		case ControlRow::InvertY:
-		{
-			ControlSettings control{ m_settingsManager.getControl() };
-			control.m_invertY = !control.m_invertY;
-			m_settingsManager.setControl(control);
-			playUiSe(core::constant::SeType::UiClick);
+		case ControlKind::Toggle:
+			setRowValue(row, getRowValue(row) != 0 ? 0 : 1);
 			break;
-		}
-		case ControlRow::Reset:
+
+		case ControlKind::Button:
 			resetCurrentPage();
 			break;
+
 		default:
 			break;
 		}
+	}
+
+	void SettingsPanelController::applySliderRatio(int row, float ratio)
+	{
+		const ValueRange range{ getValueRange(row) };
+		const float raw{ range.m_min + ratio * (range.m_max - range.m_min) };
+
+		// 刻みに合わせて丸める。キーボードで動かしたときと同じ値しか取らないようにして、
+		// マウスで触ったときだけ半端な数字になるのを防ぐ
+		const int steps{ static_cast<int>(std::lround((raw - range.m_min) / range.m_step)) };
+		setRowValue(row, std::clamp(range.m_min + steps * range.m_step, range.m_min, range.m_max));
 	}
 
 	void SettingsPanelController::resetCurrentPage()
@@ -192,6 +207,81 @@ namespace game::ui::settings
 			m_settingsManager.setControl(ControlSettings{});
 
 		playUiSe(core::constant::SeType::UiClick);
+	}
+
+	SettingsPanelController::ValueRange SettingsPanelController::getValueRange(int row) const noexcept
+	{
+		if (m_page == SettingsPage::Sound)
+			return { 0, AudioSettings::MAX_LEVEL, AudioSettings::LEVEL_STEP };
+
+		switch (static_cast<ControlRow>(row))
+		{
+		case ControlRow::Sensitivity:
+			return { ControlSettings::MIN_SENSITIVITY, ControlSettings::MAX_SENSITIVITY, 1 };
+		case ControlRow::InvertY:
+			return { 0, 1, 1 };
+		case ControlRow::Shake:
+			return { 0, ControlSettings::MAX_SHAKE, ControlSettings::SHAKE_STEP };
+		default:
+			return { 0, 1, 1 };
+		}
+	}
+
+	int SettingsPanelController::getRowValue(int row) const noexcept
+	{
+		if (m_page == SettingsPage::Sound)
+		{
+			const AudioSettings& audio{ m_settingsManager.getAudio() };
+			switch (static_cast<SoundRow>(row))
+			{
+			case SoundRow::Master: return audio.m_master;
+			case SoundRow::Bgm: return audio.m_bgm;
+			case SoundRow::Se: return audio.m_se;
+			default: return 0;
+			}
+		}
+
+		const ControlSettings& control{ m_settingsManager.getControl() };
+		switch (static_cast<ControlRow>(row))
+		{
+		case ControlRow::Sensitivity: return control.m_sensitivity;
+		case ControlRow::InvertY: return control.m_invertY ? 1 : 0;
+		case ControlRow::Shake: return control.m_screenShake;
+		default: return 0;
+		}
+	}
+
+	void SettingsPanelController::setRowValue(int row, int value)
+	{
+		if (value == getRowValue(row))
+			return;
+
+		if (m_page == SettingsPage::Sound)
+		{
+			AudioSettings audio{ m_settingsManager.getAudio() };
+			switch (static_cast<SoundRow>(row))
+			{
+			case SoundRow::Master: audio.m_master = value; break;
+			case SoundRow::Bgm: audio.m_bgm = value; break;
+			case SoundRow::Se: audio.m_se = value; break;
+			default: return;
+			}
+			m_settingsManager.setAudio(audio);
+		}
+		else
+		{
+			ControlSettings control{ m_settingsManager.getControl() };
+			switch (static_cast<ControlRow>(row))
+			{
+			case ControlRow::Sensitivity: control.m_sensitivity = value; break;
+			case ControlRow::InvertY: control.m_invertY = value != 0; break;
+			case ControlRow::Shake: control.m_screenShake = value; break;
+			default: return;
+			}
+			m_settingsManager.setControl(control);
+		}
+
+		playUiSe(core::constant::SeType::UiKeyPress);
 	}
 
 	void SettingsPanelController::playUiSe(core::constant::SeType seType) const

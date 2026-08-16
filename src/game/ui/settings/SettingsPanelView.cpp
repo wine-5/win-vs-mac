@@ -593,14 +593,6 @@ namespace game::ui::settings
 		return -1;
 	}
 
-	bool SettingsPanelView::isOutsideWindow(SettingsPage page, int x, int y)
-	{
-		updateLayout(page);
-
-		return x < m_panelX || x >= m_panelX + m_panelWidth ||
-		       y < m_panelY || y >= m_panelY + m_panelHeight;
-	}
-
 	bool SettingsPanelView::isOnCloseButton(SettingsPage page, int x, int y)
 	{
 		updateLayout(page);
