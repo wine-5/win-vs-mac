@@ -275,7 +275,7 @@ namespace game::scene
 		// 暗いテクスチャでは気付けないが、明るい面（リネーム端末）を置くと絵が消える
 		// 平行光の向きは明暗と影の両方が使う。別々に書くと片方だけ直したときに
 		// 「面の明るさ」と「影の伸びる向き」が食い違うため、ここで一度だけ決める
-		const core::Vector3 DIRECTIONAL_LIGHT_DIRECTION{ -0.3f, -1.0f, 0.4f };
+		const core::Vector3 directionalLightDirection{ -0.3f, -1.0f, 0.4f };
 
 		auto* lighting{ core::base::ServiceLocator::get<core::iface::ILighting>() };
 		if (lighting)
@@ -286,7 +286,7 @@ namespace game::scene
 			constexpr int DIRECTIONAL_LEVEL{ 150 };
 			lighting->setEnabled(true);
 			lighting->setAmbient(AMBIENT_R, AMBIENT_G, AMBIENT_B);
-			lighting->setDirectionalLight(DIRECTIONAL_LIGHT_DIRECTION,
+			lighting->setDirectionalLight(directionalLightDirection,
 			    DIRECTIONAL_LEVEL, DIRECTIONAL_LEVEL, DIRECTIONAL_LEVEL);
 		}
 
@@ -303,7 +303,7 @@ namespace game::scene
 
 			if (shadowMap->create(SHADOW_RESOLUTION))
 			{
-				shadowMap->setLightDirection(DIRECTIONAL_LIGHT_DIRECTION);
+				shadowMap->setLightDirection(directionalLightDirection);
 				shadowMap->setAdjustDepth(SHADOW_ADJUST_DEPTH);
 			}
 		}
