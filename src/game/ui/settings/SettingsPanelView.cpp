@@ -4,6 +4,7 @@
 #include "core/interface/IStringConverter.h"
 #include "core/utility/Color.h"
 #include <algorithm>
+#include <cmath>
 #include <string>
 
 namespace
@@ -34,6 +35,8 @@ namespace
 	constexpr float PANEL_RADIUS{ 8.0f };
 	constexpr float CARD_RADIUS{ 4.0f };
 	constexpr float ICON_COLUMN_WIDTH{ 36.0f }; // 行の左端に空けておくアイコン用の幅
+	constexpr float ICON_SIZE{ 20.0f };         // アイコンを描く正方形の一辺
+	constexpr float ICON_LINE{ 1.4f };          // アイコンの線の太さ
 	constexpr float SLIDER_WIDTH{ 200.0f };
 	constexpr float SLIDER_TRACK_HEIGHT{ 4.0f };
 	constexpr float SLIDER_THUMB_RADIUS{ 10.0f };
@@ -401,7 +404,7 @@ namespace game::ui::settings
 			for (int j{ 0 }; j < sections[i].m_rowCount; ++j)
 			{
 				const RowValue value{ getRowValue(settings, page, row) };
-				drawRow(m_rowY[row], rows[row].m_title, rows[row].m_sub, rows[row].m_kind,
+				drawRow(page, row, m_rowY[row], rows[row].m_kind,
 				    value.m_value, value.m_min, value.m_max, row == selectedRow, showFocus);
 				++row;
 			}
@@ -441,15 +444,20 @@ namespace game::ui::settings
 		}
 	}
 
-	void SettingsPanelView::drawRow(int y, const char* title, const char* sub, ControlKind kind,
+	void SettingsPanelView::drawRow(SettingsPage page, int row, int y, ControlKind kind,
 	    int value, int minValue, int maxValue, bool isSelected, bool showFocus) const
 	{
 		const int centerY{ y + m_rowHeight / 2 };
+		const RowSpec& spec{ getRows(page)[row] };
+		const char* title{ spec.m_title };
+		const char* sub{ spec.m_sub };
 
 		if (isSelected)
 			drawSelection(m_contentX + 1, y + 1, m_contentWidth - 2, m_rowHeight - 2, showFocus);
 
-		// 見出しと説明。アイコン用の幅を左に空けてある（アイコンは別途描き足す）
+		drawRowIcon(page, row, centerY, value, maxValue);
+
+		// 見出しと説明。左はアイコンの幅ぶん空ける
 		const int textX{ m_contentX + scaled(ROW_PADDING_X) + scaled(ICON_COLUMN_WIDTH) };
 		const int titleFontSize{ scaled(FONT_ROW_TITLE) };
 		const int subFontSize{ scaled(FONT_ROW_SUB) };
@@ -565,6 +573,186 @@ namespace game::ui::settings
 		const int labelWidth{ m_uiRenderer.getTextWidth(label.c_str(), fontSize) };
 		m_uiRenderer.drawText(left + (width - labelWidth) / 2, centerY - fontSize / 2,
 		    label.c_str(), Color::SETTINGS_TEXT, fontSize);
+	}
+
+	void SettingsPanelView::drawArc(int centerX, int centerY, int radius, float startDegrees, float endDegrees,
+	    unsigned int color, int thickness) const
+	{
+		// 半径が小さいうちは分割を増やしても見えないので、円周の長さに合わせて刻む
+		const int segments{ std::clamp(radius, 6, 24) };
+		constexpr float DEG_TO_RAD{ 3.14159265f / 180.0f };
+
+		int previousX{}, previousY{};
+		for (int i{ 0 }; i <= segments; ++i)
+		{
+			const float t{ static_cast<float>(i) / segments };
+			const float angle{ (startDegrees + (endDegrees - startDegrees) * t) * DEG_TO_RAD };
+			const int x{ centerX + static_cast<int>(std::cos(angle) * radius) };
+			const int y{ centerY + static_cast<int>(std::sin(angle) * radius) };
+
+			if (i > 0)
+				m_uiRenderer.drawLine(previousX, previousY, x, y, color, thickness);
+
+			previousX = x;
+			previousY = y;
+		}
+	}
+
+	void SettingsPanelView::drawRowIcon(SettingsPage page, int row, int centerY, int value, int maxValue) const
+	{
+		const int left{ m_contentX + scaled(ROW_PADDING_X) };
+		const int top{ centerY - scaled(ICON_SIZE) / 2 };
+
+		if (page == SettingsPage::Sound)
+		{
+			switch (static_cast<SoundRow>(row))
+			{
+			case SoundRow::Master: drawSpeakerIcon(left, top, value, maxValue); break;
+			case SoundRow::Bgm: drawMusicIcon(left, top); break;
+			case SoundRow::Se: drawWaveIcon(left, top); break;
+			default: drawResetIcon(left, top); break;
+			}
+			return;
+		}
+
+		switch (static_cast<ControlRow>(row))
+		{
+		case ControlRow::Sensitivity: drawMouseIcon(left, top); break;
+		case ControlRow::InvertY: drawInvertYIcon(left, top); break;
+		case ControlRow::Shake: drawCameraIcon(left, top); break;
+		default: drawResetIcon(left, top); break;
+		}
+	}
+
+	void SettingsPanelView::drawSpeakerIcon(int left, int top, int value, int maxValue) const
+	{
+		const unsigned int color{ Color::SETTINGS_TEXT };
+		const int thickness{ scaled(ICON_LINE) };
+
+		// 本体（細い箱）と、そこから開くコーン（台形を三角形2枚で作る）
+		m_uiRenderer.drawBox(left + scaled(2.0f), top + scaled(7.0f),
+		    scaled(3.5f), scaled(6.0f), color, true);
+		m_uiRenderer.drawTriangle(left + scaled(5.0f), top + scaled(7.0f),
+		    left + scaled(10.0f), top + scaled(3.5f),
+		    left + scaled(10.0f), top + scaled(16.5f), color, true);
+		m_uiRenderer.drawTriangle(left + scaled(5.0f), top + scaled(7.0f),
+		    left + scaled(10.0f), top + scaled(16.5f),
+		    left + scaled(5.0f), top + scaled(13.0f), color, true);
+
+		const int waveCenterX{ left + scaled(10.0f) };
+		const int waveCenterY{ top + scaled(10.0f) };
+
+		// 音量が0のときは波の代わりに×を出す。ミュート専用のボタンを置かない代わりに、
+		// 音が出ない状態であることをアイコンだけで伝える
+		if (value <= 0)
+		{
+			m_uiRenderer.drawLine(left + scaled(13.0f), top + scaled(7.0f),
+			    left + scaled(18.0f), top + scaled(13.0f), color, thickness);
+			m_uiRenderer.drawLine(left + scaled(18.0f), top + scaled(7.0f),
+			    left + scaled(13.0f), top + scaled(13.0f), color, thickness);
+			return;
+		}
+
+		drawArc(waveCenterX, waveCenterY, scaled(5.0f), -50.0f, 50.0f, color, thickness);
+
+		// 半分より上のときだけ外側の波も出す（Windows のスピーカーアイコンと同じ振る舞い）
+		if (value * 2 >= maxValue)
+			drawArc(waveCenterX, waveCenterY, scaled(8.0f), -50.0f, 50.0f, color, thickness);
+	}
+
+	void SettingsPanelView::drawMusicIcon(int left, int top) const
+	{
+		const unsigned int color{ Color::SETTINGS_TEXT };
+		const int stemThickness{ scaled(ICON_LINE) };
+
+		m_uiRenderer.drawCircle(left + scaled(5.5f), top + scaled(15.0f), scaled(2.4f), color, true, 1);
+		m_uiRenderer.drawCircle(left + scaled(13.5f), top + scaled(13.2f), scaled(2.4f), color, true, 1);
+
+		m_uiRenderer.drawLine(left + scaled(7.6f), top + scaled(15.0f),
+		    left + scaled(7.6f), top + scaled(5.0f), color, stemThickness);
+		m_uiRenderer.drawLine(left + scaled(15.6f), top + scaled(13.2f),
+		    left + scaled(15.6f), top + scaled(3.2f), color, stemThickness);
+
+		// 2本の旗をつなぐ横棒
+		m_uiRenderer.drawLine(left + scaled(7.6f), top + scaled(5.0f),
+		    left + scaled(15.6f), top + scaled(3.2f), color, scaled(2.4f));
+	}
+
+	void SettingsPanelView::drawWaveIcon(int left, int top) const
+	{
+		const unsigned int color{ Color::SETTINGS_TEXT };
+		const int thickness{ scaled(ICON_LINE) };
+		const int centerY{ top + scaled(10.0f) };
+
+		// 波形。中央ほど高くして音の塊に見せる
+		constexpr float BAR_X[]{ 3.0f, 6.5f, 10.0f, 13.5f, 17.0f };
+		constexpr float BAR_HALF_HEIGHT[]{ 2.5f, 6.0f, 8.0f, 4.5f, 2.0f };
+
+		for (int i{ 0 }; i < static_cast<int>(std::size(BAR_X)); ++i)
+		{
+			const int x{ left + scaled(BAR_X[i]) };
+			const int half{ scaled(BAR_HALF_HEIGHT[i]) };
+			m_uiRenderer.drawLine(x, centerY - half, x, centerY + half, color, thickness);
+		}
+	}
+
+	void SettingsPanelView::drawMouseIcon(int left, int top) const
+	{
+		const unsigned int color{ Color::SETTINGS_TEXT };
+		const int thickness{ scaled(ICON_LINE) };
+
+		m_uiRenderer.drawRoundedBox(left + scaled(5.5f), top + scaled(2.0f),
+		    scaled(9.0f), scaled(16.0f), scaled(4.5f), color, false, thickness);
+		m_uiRenderer.drawLine(left + scaled(10.0f), top + scaled(5.0f),
+		    left + scaled(10.0f), top + scaled(8.5f), color, thickness);
+	}
+
+	void SettingsPanelView::drawInvertYIcon(int left, int top) const
+	{
+		const unsigned int color{ Color::SETTINGS_TEXT };
+		const int thickness{ scaled(ICON_LINE) };
+		const int centerX{ left + scaled(10.0f) };
+
+		m_uiRenderer.drawLine(centerX, top + scaled(4.0f), centerX, top + scaled(16.0f), color, thickness);
+
+		// 上下の矢じり。縦だけを反転させる設定なので、矢印も縦だけにする
+		m_uiRenderer.drawTriangle(centerX, top + scaled(2.0f),
+		    left + scaled(6.5f), top + scaled(6.5f),
+		    left + scaled(13.5f), top + scaled(6.5f), color, true);
+		m_uiRenderer.drawTriangle(centerX, top + scaled(18.0f),
+		    left + scaled(6.5f), top + scaled(13.5f),
+		    left + scaled(13.5f), top + scaled(13.5f), color, true);
+	}
+
+	void SettingsPanelView::drawCameraIcon(int left, int top) const
+	{
+		const unsigned int color{ Color::SETTINGS_TEXT };
+		const int thickness{ scaled(ICON_LINE) };
+
+		m_uiRenderer.drawRoundedBox(left + scaled(2.5f), top + scaled(6.0f),
+		    scaled(10.0f), scaled(8.0f), scaled(2.0f), color, false, thickness);
+
+		// レンズ側の出っ張り（ビデオカメラの形）
+		m_uiRenderer.drawTriangle(left + scaled(13.5f), top + scaled(10.0f),
+		    left + scaled(17.5f), top + scaled(6.5f),
+		    left + scaled(17.5f), top + scaled(13.5f), color, true);
+
+		// 揺れていることを示す線を左右に添える
+		m_uiRenderer.drawLine(left, top + scaled(8.0f), left, top + scaled(12.0f), color, thickness);
+		m_uiRenderer.drawLine(left + scaled(19.5f), top + scaled(8.0f),
+		    left + scaled(19.5f), top + scaled(12.0f), color, thickness);
+	}
+
+	void SettingsPanelView::drawResetIcon(int left, int top) const
+	{
+		const unsigned int color{ Color::SETTINGS_TEXT };
+		const int thickness{ scaled(ICON_LINE) };
+
+		// 一周させず右上を空け、そこへ矢じりを置いて「戻す」の向きを出す
+		drawArc(left + scaled(10.0f), top + scaled(10.0f), scaled(6.5f), 30.0f, 320.0f, color, thickness);
+		m_uiRenderer.drawTriangle(left + scaled(13.0f), top + scaled(2.5f),
+		    left + scaled(18.5f), top + scaled(5.5f),
+		    left + scaled(12.5f), top + scaled(8.5f), color, true);
 	}
 
 	int SettingsPanelView::getFocusIndexAt(SettingsPage page, int x, int y)

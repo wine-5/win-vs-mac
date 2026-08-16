@@ -166,9 +166,9 @@ namespace game::ui::settings
 
 		/**
 		 * @brief カード内の1行を描く
+		 * @param page 表示中のページ
+		 * @param row ページ内の行番号
 		 * @param y 行の上端Y
-		 * @param title 行の見出し（UTF-8）
-		 * @param sub 行の説明（UTF-8。空文字なら描かない）
 		 * @param kind 右側に置くコントロールの種類
 		 * @param value 値（スライダーは現在値、トグルは0/1、ボタンは未使用）
 		 * @param minValue スライダーの下限
@@ -176,12 +176,46 @@ namespace game::ui::settings
 		 * @param isSelected 選択中の行か
 		 * @param showFocus フォーカス枠を出すか
 		 */
-		void drawRow(int y, const char* title, const char* sub, ControlKind kind,
+		void drawRow(SettingsPage page, int row, int y, ControlKind kind,
 		    int value, int minValue, int maxValue, bool isSelected, bool showFocus) const;
 
 		void drawSlider(int centerY, int value, int minValue, int maxValue) const;
 		void drawToggle(int centerY, bool isOn) const;
 		void drawResetButton(int centerY) const;
+
+		/**
+		 * @brief 行の左端にその行を表すアイコンを描く
+		 * @param page 表示中のページ
+		 * @param row ページ内の行番号
+		 * @param centerY 行の中心Y
+		 * @param value 行がいま示している値（音量アイコンの波の数に使う）
+		 * @param maxValue 値の上限
+		 */
+		void drawRowIcon(SettingsPage page, int row, int centerY, int value, int maxValue) const;
+
+		void drawSpeakerIcon(int left, int top, int value, int maxValue) const;
+		void drawMusicIcon(int left, int top) const;
+		void drawWaveIcon(int left, int top) const;
+		void drawMouseIcon(int left, int top) const;
+		void drawInvertYIcon(int left, int top) const;
+		void drawCameraIcon(int left, int top) const;
+		void drawResetIcon(int left, int top) const;
+
+		/**
+		 * @brief 円弧を短い直線の連なりで描く
+		 *
+		 * IUIRenderer に円弧が無いため、角度を刻んで drawLine でつなぐ。
+		 * スピーカーの音波や、やり直しの回転矢印に使う
+		 * @param centerX 中心X座標
+		 * @param centerY 中心Y座標
+		 * @param radius 半径
+		 * @param startDegrees 開始角（度。0が右、時計回りが正）
+		 * @param endDegrees 終了角（度）
+		 * @param color 色
+		 * @param thickness 線の太さ
+		 */
+		void drawArc(int centerX, int centerY, int radius, float startDegrees, float endDegrees,
+		    unsigned int color, int thickness) const;
 
 		/**
 		 * @brief 左ナビの項目の矩形を返す
