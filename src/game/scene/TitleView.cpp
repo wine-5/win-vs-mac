@@ -10,14 +10,15 @@
 namespace game::scene
 {
 	TitleView::TitleView(core::iface::IInputProvider& inputProvider,
-		core::iface::IUIRenderer& uiRenderer,
-		core::iface::IScreen& screen,
-		std::string mainFontName,
-		std::function<void()> onGoToSelect,
-		std::function<void()> onExit)
-		: m_uiRenderer{ uiRenderer }
-		, m_screen{ screen }
-		, m_mainFontName{ std::move(mainFontName) }
+	    core::iface::IUIRenderer& uiRenderer,
+	    core::iface::IScreen& screen,
+	    std::string mainFontName,
+	    std::function<void()> onGoToSelect,
+	    std::function<void()> onOpenSettings,
+	    std::function<void()> onExit)
+	    : m_uiRenderer{ uiRenderer }
+	    , m_screen{ screen }
+	    , m_mainFontName{ std::move(mainFontName) }
 	{
 		const int screenWidth    { screen.getWidth() };
 		const int screenHeight   { screen.getHeight() };
@@ -25,6 +26,7 @@ namespace game::scene
 		const int buttonHeight   { static_cast<int>(screenHeight * BUTTON_HEIGHT_RATIO) };
 		const int buttonX        { (screenWidth - buttonWidth) / 2 };
 		const int startButtonY   { static_cast<int>(screenHeight * START_BUTTON_Y_RATIO) };
+		const int settingsButtonY{ static_cast<int>(screenHeight * SETTINGS_BUTTON_Y_RATIO) };
 		const int exitButtonY    { static_cast<int>(screenHeight * EXIT_BUTTON_Y_RATIO) };
 		const int buttonFontSize { static_cast<int>(screenHeight * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
 
@@ -34,6 +36,15 @@ namespace game::scene
 		startBtn->setVisible(false);
 		m_startButton = startBtn.get();
 		m_uiManager.addElement(std::move(startBtn));
+
+		// Escのメニューからも開けるが、押せる場所が見えていないと気づかれない。
+		// 初見の人がいちばん最初に見る画面なので、ボタンとして出しておく
+		auto settingsBtn{ std::make_unique<ui::Button>(
+			"設定", buttonX, settingsButtonY, buttonWidth, buttonHeight, inputProvider, buttonFontSize) };
+		settingsBtn->setOnClick(std::move(onOpenSettings));
+		settingsBtn->setVisible(false);
+		m_settingsButton = settingsBtn.get();
+		m_uiManager.addElement(std::move(settingsBtn));
 
 		auto exitBtn{ std::make_unique<ui::Button>(
 			"EXEを終了する", buttonX, exitButtonY, buttonWidth, buttonHeight, inputProvider, buttonFontSize) };
@@ -76,6 +87,7 @@ namespace game::scene
 	void TitleView::setButtonsVisible(bool visible)
 	{
 		m_startButton->setVisible(visible);
+		m_settingsButton->setVisible(visible);
 		m_exitButton->setVisible(visible);
 	}
 

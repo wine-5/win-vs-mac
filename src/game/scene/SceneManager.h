@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "IScene.h"
 #include "SceneType.h"
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -27,8 +28,10 @@ namespace game::scene
 	   * @param gameManager シーン間共有データ（各シーンへ注入する）
 	   * @param pauseManager ポーズ状態（各シーンへ注入する）
 	   * @param settingsManager プレイヤーの設定（各シーンへ注入する）
+	   * @param onOpenSettings 設定画面を開く操作（Applicationが所有する画面を開くために渡す）
 	   */
-	  SceneManager(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager);
+	  SceneManager(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager,
+		  std::function<void()> onOpenSettings);
 
 	  /**
 	   * @brief デストラクタ

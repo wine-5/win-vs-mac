@@ -29,10 +29,12 @@ namespace
 
 namespace game::scene
 {
-	SceneFactory::SceneFactory(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager)
+	SceneFactory::SceneFactory(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager,
+	    std::function<void()> onOpenSettings)
 	    : m_gameManager{ gameManager }
 	    , m_pauseManager{ pauseManager }
 	    , m_settingsManager{ settingsManager }
+	    , m_onOpenSettings{ std::move(onOpenSettings) }
 	{
 	}
 
@@ -67,7 +69,8 @@ namespace game::scene
 			    *inputProvider,
 			    *uiRenderer,
 			    *screen,
-			    m_gameManager);
+			    m_gameManager,
+			    m_onOpenSettings);
 			return m_titleScene.get();
 		}
 

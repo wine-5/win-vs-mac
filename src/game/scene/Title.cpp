@@ -14,20 +14,26 @@ namespace game::scene
 	Title::Title(core::iface::IInputProvider& inputProvider,
 	    core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
-	    GameManager& gameManager)
+	    GameManager& gameManager,
+	    std::function<void()> onOpenSettings)
 	    : m_inputProvider{ inputProvider }
 	    , m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_gameManager{ gameManager }
+	    , m_onOpenSettings{ std::move(onOpenSettings) }
 	{
 		auto* res{ core::base::ServiceLocator::get<core::iface::IResourceManager>() };
 		std::string mainFontName{ res->getFontName("main").value_or("") };
 
 		m_view = std::make_unique<TitleView>(
-			inputProvider, uiRenderer, screen,
-			std::move(mainFontName),
-			[this]() { goToSelect(); },
-			[this]() { exitApp(); });
+		    inputProvider, uiRenderer, screen,
+		    std::move(mainFontName),
+		    [this]()
+		    { goToSelect(); },
+		    [this]()
+		    { openSettings(); },
+		    [this]()
+		    { exitApp(); });
 
 		// Loading 画面で起動演出済みのため、タイトルはフェードインから開始する
 		m_view->setButtonsVisible(true);
@@ -102,6 +108,15 @@ namespace game::scene
 		m_fade = std::make_unique<ui::FadeTransition>(
 			m_uiRenderer, m_screen, FADE_DURATION, false);
 		m_state = State::FadingOut;
+	}
+
+	void Title::openSettings()
+	{
+		if (m_state != State::Idle)
+			return;
+
+		if (m_onOpenSettings)
+			m_onOpenSettings();
 	}
 
 	void Title::exitApp()

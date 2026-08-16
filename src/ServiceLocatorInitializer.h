@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <functional>
 
 namespace game
 {
@@ -21,8 +22,9 @@ public:
    * @param gameManager シーン間共有データ（SceneManager経由で各シーンへ注入する）
    * @param pauseManager ポーズ状態（SceneManager経由で各シーンへ注入する）
    * @param settingsManager プレイヤーの設定（SceneManager経由で各シーンへ注入する）
+   * @param onOpenSettings 設定画面を開く操作（Applicationが所有する画面をシーンから開くために渡す）
    */
   static void init(int screenWidth, int screenHeight,
 	  game::GameManager& gameManager, game::PauseManager& pauseManager,
-	  game::SettingsManager& settingsManager);
+	  game::SettingsManager& settingsManager, std::function<void()> onOpenSettings);
 };

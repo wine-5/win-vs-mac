@@ -40,7 +40,7 @@
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
     game::GameManager& gameManager, game::PauseManager& pauseManager,
-    game::SettingsManager& settingsManager)
+    game::SettingsManager& settingsManager, std::function<void()> onOpenSettings)
 {
 	// 文字列変換プロバイダを登録
 	core::base::ServiceLocator::provide<core::iface::IStringConverter>(
@@ -129,7 +129,8 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 
 	// SceneManager登録（内部でSceneFactoryを所有。横断データを各シーンへ注入する）
 	core::base::ServiceLocator::provide(
-	    std::make_unique<game::scene::SceneManager>(gameManager, pauseManager, settingsManager));
+	    std::make_unique<game::scene::SceneManager>(gameManager, pauseManager, settingsManager,
+	        std::move(onOpenSettings)));
 
 	core::probe::mark("  service: SceneManager");
 

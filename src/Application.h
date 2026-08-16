@@ -57,6 +57,15 @@ class Application
 	void updatePauseMenu(float deltaTime);
 
 	/**
+	 * @brief 設定画面を開く
+	 *
+	 * タイトルの「設定」ボタンからも呼ばれる。設定画面はシーンの外側にあるため、
+	 * 開いている間はシーンを止める（ポーズメニュー経由と同じ状態にする）
+	 * @param returnToPauseMenu 閉じたあとポーズメニューへ戻るか（falseならポーズも解除する）
+	 */
+	void openSettings(bool returnToPauseMenu);
+
+	/**
 	 * @brief UI操作の効果音を鳴らす
 	 *
 	 * ポーズの開閉はシーンをまたいで同じ操作なので、シーン側ではなくここが鳴らす
@@ -101,8 +110,11 @@ class Application
 	// 設定画面もシーンをまたいで同じものを使う（どこから開いても同じ見た目・同じ値になる）
 	std::unique_ptr<game::ui::settings::SettingsPanelController> m_settingsPanelController;
 
-	/** @brief ポーズメニューの上に設定画面を開いているか */
+	/** @brief 設定画面を開いているか */
 	bool m_isSettingsOpen{ false };
+
+	/** @brief 設定画面を閉じたときポーズメニューへ戻るか（タイトルのボタンから開いた場合は戻らない） */
+	bool m_returnToPauseMenu{ false };
 
 	// ServiceLocatorが所有するサービスへの参照（初期化後に取得する）
 	game::scene::SceneManager* m_sceneManager{ nullptr };

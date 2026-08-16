@@ -3,8 +3,10 @@
 
 namespace game::scene
 {
-	SceneManager::SceneManager(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager)
-	    : m_sceneFactory(std::make_unique<SceneFactory>(gameManager, pauseManager, settingsManager))
+	SceneManager::SceneManager(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager,
+	    std::function<void()> onOpenSettings)
+	    : m_sceneFactory(std::make_unique<SceneFactory>(gameManager, pauseManager, settingsManager,
+	          std::move(onOpenSettings)))
 	    , m_currentScene{}
 	{
 	}
