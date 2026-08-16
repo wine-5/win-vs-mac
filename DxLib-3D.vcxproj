@@ -207,6 +207,7 @@
     <ClCompile Include="src\infrastructure\AudioManager.cpp" />
     <ClCompile Include="src\infrastructure\settings\SettingsRepository.cpp" />
     <ClCompile Include="src\game\SettingsManager.cpp" />
+    <ClCompile Include="src\game\ui\settings\SettingsPanelView.cpp" />
     <ClCompile Include="src\infrastructure\effect\EffectFactory.cpp" />
     <ClCompile Include="src\infrastructure\effect\EffectPool.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\AudioRepository.cpp" />
@@ -471,6 +472,7 @@
     <ClInclude Include="src\infrastructure\AudioManager.h" />
     <ClInclude Include="src\infrastructure\settings\SettingsRepository.h" />
     <ClInclude Include="src\game\SettingsManager.h" />
+    <ClInclude Include="src\game\ui\settings\SettingsPanelView.h" />
     <ClInclude Include="src\infrastructure\effect\EffectFactory.h" />
     <ClInclude Include="src\infrastructure\effect\EffectPool.h" />
     <ClInclude Include="src\infrastructure\resource\repository\AudioRepository.h" />

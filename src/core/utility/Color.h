@@ -121,6 +121,23 @@ namespace core::utility
 		static constexpr unsigned int MAP_SLOPE_GREEN = 0xFF3FB950;   // 滑る坂
 		static constexpr unsigned int MAP_CONVEYOR_CYAN = 0xFF00B7C3; // 動く歩道
 
+		// ========== 設定画面（Windows 11「設定」アプリのダークモード）用の色 ==========
+
+		// 既存のWeb側UI（web/common/common.css）が暗い配色で統一されているため、
+		// 設定画面も実在するダークモードの設定アプリに寄せる。ライトのまま持ち込むと
+		// ここだけ真っ白な面になり、ゲーム画面に重ねたときに目を焼く
+		static constexpr unsigned int SETTINGS_WINDOW_BG = 0xFF202020;      // ウィンドウ（左ナビ側）の地
+		static constexpr unsigned int SETTINGS_CONTENT_BG = 0xFF272727;     // 右のコンテンツ領域
+		static constexpr unsigned int SETTINGS_CARD = 0xFF2B2B2B;           // 項目をまとめるカードの面
+		static constexpr unsigned int SETTINGS_CARD_HOVER = 0xFF323232;     // カード上のボタンの面
+		static constexpr unsigned int SETTINGS_STROKE = 0xFF383838;         // カード・コントロールの枠
+		static constexpr unsigned int SETTINGS_NAV_SELECTED = 0xFF2E2E2E;   // 左ナビの選択中の背景
+		static constexpr unsigned int SETTINGS_ACCENT = 0xFF4CC2FF;         // ダークモードのアクセント（水色）
+		static constexpr unsigned int SETTINGS_TEXT = 0xFFFFFFFF;           // 本文
+		static constexpr unsigned int SETTINGS_TEXT_SECONDARY = 0xFFC8C8C8; // 補助的な文字
+		static constexpr unsigned int SETTINGS_TEXT_TERTIARY = 0xFF8B8B8B;  // 説明文・未選択
+		static constexpr unsigned int SETTINGS_TRACK = 0xFF8B8B8B;          // スライダーの未到達部分
+
 		// ========== メニュー（ポーズなどの項目リスト）用の色 ==========
 
 		// 選択中の項目。非選択の薄いグレーと色相・明度の両方で離し、
