@@ -1,4 +1,4 @@
-﻿#include "AudioManager.h"
+#include "AudioManager.h"
 #include "DxLib.h"
 
 namespace infrastructure
@@ -31,7 +31,7 @@ namespace infrastructure
 		{
 			// 別の BGM が再生中: フェードアウトしてから切り替える
 			m_pendingBgmHandle = config.m_handle;
-			m_pendingBgmVolume = config.m_volume;
+			m_pendingBgmSourceVolume = config.m_volume;
 
 			if (useFade)
 			{
@@ -39,25 +39,19 @@ namespace infrastructure
 				return;
 			}
 
+			// フェード無しでの切り替えはこの場で鳴らし切るので、予約は残さない
 			StopSoundMem(m_currentBgmHandle);
+			m_pendingBgmHandle = -1;
+			m_pendingBgmSourceVolume = 0.0f;
 		}
 
 		// 即時再生
 		m_currentBgmHandle = config.m_handle;
-		m_targetBgmVolume  = config.m_volume;
+		m_currentBgmSourceVolume = config.m_volume;
+		m_fadeLevel = useFade ? 0.0f : 1.0f;
+		m_fadeState = useFade ? FadeState::FadeIn : FadeState::None;
 
-		if (useFade)
-		{
-			m_currentBgmVolume = 0.0f;
-			m_fadeState        = FadeState::FadeIn;
-		}
-		else
-		{
-			m_currentBgmVolume = config.m_volume;
-			m_fadeState        = FadeState::None;
-		}
-
-		applyBgmVolume(m_currentBgmHandle, m_currentBgmVolume);
+		applyBgmVolume();
 		PlaySoundMem(m_currentBgmHandle, DX_PLAYTYPE_LOOP);
 	}
 
@@ -69,15 +63,15 @@ namespace infrastructure
 
 		if (fade)
 		{
-			m_fadeState       = FadeState::FadeOut;
-			m_targetBgmVolume = 0.0f;
+			m_fadeState = FadeState::FadeOut;
 		}
 		else
 		{
 			StopSoundMem(m_currentBgmHandle);
 			m_currentBgmHandle = -1;
-			m_currentBgmVolume = 0.0f;
-			m_fadeState        = FadeState::None;
+			m_fadeLevel = 0.0f;
+			m_currentBgmSourceVolume = 0.0f;
+			m_fadeState = FadeState::None;
 		}
 	}
 
@@ -87,8 +81,10 @@ namespace infrastructure
 		auto it{ configs.find(type) };
 		if (it == configs.end()) return;
 
+		// SE は鳴らす瞬間に音量を決めるため、設定を変えても次の一発から自然に追従する
 		const resource::repository::SeConfig& config{ it->second };
-		ChangeVolumeSoundMem(static_cast<int>(config.m_volume * 255), config.m_handle);
+		const float volume{ config.m_volume * m_volumeSettings.seGain() };
+		ChangeVolumeSoundMem(static_cast<int>(volume * DX_VOLUME_MAX), config.m_handle);
 		PlaySoundMem(config.m_handle, DX_PLAYTYPE_BACK);
 	}
 
@@ -96,54 +92,65 @@ namespace infrastructure
 	{
 		if (m_fadeState == FadeState::None) return;
 
-		// 1フレームあたりではなく秒あたりの変化量にして、フレームレートに依存させない
+		// 1フレームあたりではなく秒あたりの変化量にして、フレームレートに依存させない。
+		// 進み具合（0〜1）を動かすので、音源ごとの音量が小さい曲でもフェードにかかる時間は同じになる
 		const float step{ deltaTime / FADE_DURATION };
 
 		if (m_fadeState == FadeState::FadeIn)
 		{
-			m_currentBgmVolume += step;
-			if (m_currentBgmVolume >= m_targetBgmVolume)
+			m_fadeLevel += step;
+			if (m_fadeLevel >= 1.0f)
 			{
-				m_currentBgmVolume = m_targetBgmVolume;
-				m_fadeState        = FadeState::None;
+				m_fadeLevel = 1.0f;
+				m_fadeState = FadeState::None;
 			}
-			applyBgmVolume(m_currentBgmHandle, m_currentBgmVolume);
+			applyBgmVolume();
+			return;
 		}
-		else if (m_fadeState == FadeState::FadeOut)
-		{
-			m_currentBgmVolume -= step;
-			if (m_currentBgmVolume <= 0.0f)
-			{
-				m_currentBgmVolume = 0.0f;
-				applyBgmVolume(m_currentBgmHandle, 0.0f);
-				StopSoundMem(m_currentBgmHandle);
-				m_currentBgmHandle = -1;
-				m_fadeState        = FadeState::None;
 
-				// 予約 BGM があればフェードインで再生
-				if (m_pendingBgmHandle != -1)
-				{
-					m_currentBgmHandle = m_pendingBgmHandle;
-					m_targetBgmVolume  = m_pendingBgmVolume;
-					m_currentBgmVolume = 0.0f;
-					m_pendingBgmHandle = -1;
-					m_pendingBgmVolume = 0.0f;
-					m_fadeState        = FadeState::FadeIn;
-					applyBgmVolume(m_currentBgmHandle, 0.0f);
-					PlaySoundMem(m_currentBgmHandle, DX_PLAYTYPE_LOOP);
-				}
-			}
-			else
-			{
-				applyBgmVolume(m_currentBgmHandle, m_currentBgmVolume);
-			}
+		m_fadeLevel -= step;
+		if (m_fadeLevel > 0.0f)
+		{
+			applyBgmVolume();
+			return;
 		}
+
+		m_fadeLevel = 0.0f;
+		applyBgmVolume();
+		StopSoundMem(m_currentBgmHandle);
+		m_currentBgmHandle = -1;
+		m_currentBgmSourceVolume = 0.0f;
+		m_fadeState = FadeState::None;
+
+		// 予約 BGM があればフェードインで再生
+		if (m_pendingBgmHandle == -1)
+			return;
+
+		m_currentBgmHandle = m_pendingBgmHandle;
+		m_currentBgmSourceVolume = m_pendingBgmSourceVolume;
+		m_pendingBgmHandle = -1;
+		m_pendingBgmSourceVolume = 0.0f;
+		m_fadeState = FadeState::FadeIn;
+
+		applyBgmVolume();
+		PlaySoundMem(m_currentBgmHandle, DX_PLAYTYPE_LOOP);
 	}
 
-	void AudioManager::applyBgmVolume(int handle, float normalizedVolume) const
+	void AudioManager::applyVolumeSettings(const core::data::AudioSettings& settings)
 	{
-		// DxLib の音量は 0〜255 の整数
-		const int dxVolume{ static_cast<int>(normalizedVolume * 255) };
-		ChangeVolumeSoundMem(dxVolume, handle);
+		m_volumeSettings = settings;
+
+		// 鳴っている曲へその場で反映する。スライダーを動かしている最中に
+		// 音が追従しないと、どこで止めればいいのか判断できない
+		applyBgmVolume();
+	}
+
+	void AudioManager::applyBgmVolume() const
+	{
+		if (m_currentBgmHandle == -1)
+			return;
+
+		const float volume{ m_fadeLevel * m_currentBgmSourceVolume * m_volumeSettings.bgmGain() };
+		ChangeVolumeSoundMem(static_cast<int>(volume * DX_VOLUME_MAX), m_currentBgmHandle);
 	}
 } // namespace infrastructure
