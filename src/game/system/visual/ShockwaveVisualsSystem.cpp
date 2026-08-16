@@ -14,6 +14,9 @@ namespace
 
 	constexpr int MAX_ALPHA{ 255 };
 
+	// 最後の波をどれだけ弱めるか（0で減衰なし、1で消える）
+	constexpr float RING_DECAY{ 0.35f };
+
 	float easeOut(float t)
 	{
 		t = std::clamp(t, 0.0f, 1.0f);
@@ -71,7 +74,12 @@ namespace game::system::visual
 
 				const float progress{ ringTime / shockwave.m_duration };
 				const float radius{ shockwave.m_startRadius + (shockwave.m_maxRadius - shockwave.m_startRadius) * easeOut(progress) };
-				const float ringFade{ 1.0f - static_cast<float>(ring) / static_cast<float>(shockwave.m_ringCount) };
+				// 後の波ほど弱めるが、消えるほどは落とさない。
+				// 本数で割ると3本目が1/3の濃さになり、独立した波として見えなくなる
+				const float ringRatio{ shockwave.m_ringCount > 1
+					                       ? static_cast<float>(ring) / static_cast<float>(shockwave.m_ringCount - 1)
+					                       : 0.0f };
+				const float ringFade{ 1.0f - RING_DECAY * ringRatio };
 				const int alpha{ static_cast<int>(MAX_ALPHA * (1.0f - progress) * ringFade) };
 				if (alpha <= 0)
 					continue;
