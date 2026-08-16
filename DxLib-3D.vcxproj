@@ -278,6 +278,7 @@
     <ClCompile Include="src\platform\window\select\DesktopWindow.cpp" />
     <ClCompile Include="src\platform\window\select\DifficultyWindow.cpp" />
     <ClCompile Include="src\platform\window\select\RulesWindow.cpp" />
+    <ClCompile Include="src\platform\window\select\SettingsWindow.cpp" />
     <ClCompile Include="src\platform\window\select\ParameterWindow.cpp" />
     <ClCompile Include="src\platform\window\UiSound.cpp" />
     <ClCompile Include="src\platform\window\WindowBase.cpp" />
@@ -567,6 +568,7 @@
     <ClInclude Include="src\platform\utility\StringConverter.h" />
     <ClInclude Include="src\platform\window\select\FileSelectWindow.h" />
     <ClInclude Include="src\platform\window\select\RulesWindow.h" />
+    <ClInclude Include="src\platform\window\select\SettingsWindow.h" />
     <ClInclude Include="src\platform\window\select\Win32SelectWindowManager.h" />
     <ClInclude Include="src\platform\window\WindowBase.h" />
     <ClInclude Include="src\platform\window\WebViewWindowBase.h" />
@@ -605,4 +607,5 @@
     <Error Condition="!Exists('packages\Microsoft.Web.WebView2.1.0.3967.48\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Web.WebView2.1.0.3967.48\build\native\Microsoft.Web.WebView2.targets'))" />
   </Target>
 </Project>
+
 
