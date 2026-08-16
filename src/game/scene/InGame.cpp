@@ -91,6 +91,7 @@
 #include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/system/visual/HardAuraVisualsSystem.h"
 #include "game/system/visual/RimLightVisualsSystem.h"
+#include "game/system/visual/ShockwaveVisualsSystem.h"
 #include "game/system/visual/BattleStartSystem.h"
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
@@ -759,6 +760,12 @@ namespace game::scene
 			m_componentManager, m_renderer) };
 		core::probe::mark("      sys: RimLightVisualsSystem");
 		m_view.setRimLightVisualsSystem(rimLight);
+
+		// 地面を走る衝撃波。ShockwaveComponentを付けたEntityが対象
+		auto* shockwave{ m_systemManager.registerSystem<game::system::visual::ShockwaveVisualsSystem>(
+			m_componentManager, m_renderer) };
+		core::probe::mark("      sys: ShockwaveVisualsSystem");
+		m_view.setShockwaveVisualsSystem(shockwave);
 
 		// 敵の発見演出（頭上の通知バッジ）。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
 		auto* detectionAlert{ m_systemManager.registerSystem<game::system::visual::DetectionAlertVisualsSystem>(

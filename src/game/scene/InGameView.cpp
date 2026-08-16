@@ -23,6 +23,7 @@
 #include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/system/visual/HardAuraVisualsSystem.h"
 #include "game/system/visual/RimLightVisualsSystem.h"
+#include "game/system/visual/ShockwaveVisualsSystem.h"
 #include "game/system/visual/BattleStartSystem.h"
 #include "game/system/combat/PlayerDeathSystem.h"
 #include "game/system/combat/PlayerRangedAttackSystem.h"
@@ -85,6 +86,10 @@ namespace game::scene
 		// Hardの敵を包む赤いオーラ。敵モデルの直後に重ねて「体から漏れる光」に見せる
 		if (m_hardAuraVisualsSystem)
 			m_hardAuraVisualsSystem->draw();
+
+		// 地面を走る衝撃波。予兆より先に描き、予兆の輪が衝撃波に埋もれないようにする
+		if (m_shockwaveVisualsSystem)
+			m_shockwaveVisualsSystem->draw();
 
 		// 攻撃予兆（地面の攻撃範囲サークル）。地面の上・敵の足元に3Dで描く（3D描画フェーズ）
 		if (m_attackTelegraphSystem)
@@ -251,6 +256,11 @@ namespace game::scene
 	void InGameView::setRimLightVisualsSystem(system::visual::RimLightVisualsSystem* system)
 	{
 		m_rimLightVisualsSystem = system;
+	}
+
+	void InGameView::setShockwaveVisualsSystem(system::visual::ShockwaveVisualsSystem* system)
+	{
+		m_shockwaveVisualsSystem = system;
 	}
 
 	void InGameView::setBattleStartSystem(system::visual::BattleStartSystem* system)

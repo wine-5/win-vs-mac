@@ -26,6 +26,7 @@ namespace game::system::visual
 	class BackgroundParticleSystem;
 	class HardAuraVisualsSystem;
 	class RimLightVisualsSystem;
+	class ShockwaveVisualsSystem;
 	class DamagePopupSystem;
 	class BattleStartSystem;
 } // namespace game::system::visual
@@ -151,6 +152,12 @@ namespace game::scene
 		 * @param system RimLightVisualsSystemのポインタ（所有はSystemManager）
 		 */
 		void setRimLightVisualsSystem(system::visual::RimLightVisualsSystem* system);
+
+		/**
+		 * @brief 地面を走る衝撃波のSystemを設定する
+		 * @param system ShockwaveVisualsSystemのポインタ（所有はSystemManager）
+		 */
+		void setShockwaveVisualsSystem(system::visual::ShockwaveVisualsSystem* system);
 
 		/**
 		 * @brief 開始演出System（READY / FIGHT! の描画元）を設定する
@@ -379,6 +386,7 @@ namespace game::scene
 		// Hardの敵を包む赤いオーラの描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::visual::HardAuraVisualsSystem* m_hardAuraVisualsSystem{ nullptr };
 		system::visual::RimLightVisualsSystem* m_rimLightVisualsSystem{ nullptr };
+		system::visual::ShockwaveVisualsSystem* m_shockwaveVisualsSystem{ nullptr };
 
 		// プレイヤーステータス（左下のHUD）の描画元（所有はInGame）
 		ui::ingame::PlayerHUDView* m_playerHUDView{ nullptr };
