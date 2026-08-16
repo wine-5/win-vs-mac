@@ -36,7 +36,7 @@ namespace
 Application::Application(int screenWidth, int screenHeight)
 {
 	// サービスを登録する（GameManager/PauseManagerはApplicationが所有し、参照を注入する）
-	ServiceLocatorInitializer::init(screenWidth, screenHeight, m_gameManager, m_pauseManager);
+	ServiceLocatorInitializer::init(screenWidth, screenHeight, m_gameManager, m_pauseManager, m_settingsManager);
 
 	m_sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
 	m_inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();

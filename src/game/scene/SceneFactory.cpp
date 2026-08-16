@@ -16,6 +16,7 @@
 #include "core/utility/Log.h"
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
+#include "game/SettingsManager.h"
 
 namespace
 {
@@ -28,9 +29,10 @@ namespace
 
 namespace game::scene
 {
-	SceneFactory::SceneFactory(GameManager& gameManager, PauseManager& pauseManager)
+	SceneFactory::SceneFactory(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager)
 	    : m_gameManager{ gameManager }
 	    , m_pauseManager{ pauseManager }
+	    , m_settingsManager{ settingsManager }
 	{
 	}
 
@@ -159,7 +161,8 @@ namespace game::scene
 			    *resourceManager,
 			    *inputProvider,
 			    m_gameManager,
-			    m_pauseManager);
+			    m_pauseManager,
+			    m_settingsManager);
 			return m_inGameScene.get();
 		}
 

@@ -6,8 +6,9 @@
 
 namespace game
 {
-	class GameManager;  // 前方宣言
-	class PauseManager; // 前方宣言
+	class GameManager;     // 前方宣言
+	class PauseManager;    // 前方宣言
+	class SettingsManager; // 前方宣言
 } // namespace game
 
 namespace game::scene
@@ -25,8 +26,9 @@ namespace game::scene
 	   * SceneFactoryを内部で生成して所有する
 	   * @param gameManager シーン間共有データ（各シーンへ注入する）
 	   * @param pauseManager ポーズ状態（各シーンへ注入する）
+	   * @param settingsManager プレイヤーの設定（各シーンへ注入する）
 	   */
-	  SceneManager(GameManager& gameManager, PauseManager& pauseManager);
+	  SceneManager(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager);
 
 	  /**
 	   * @brief デストラクタ

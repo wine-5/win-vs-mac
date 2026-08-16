@@ -20,8 +20,9 @@
 
 namespace game
 {
-	class GameManager;  // 前方宣言
-	class PauseManager; // 前方宣言
+	class GameManager;     // 前方宣言
+	class PauseManager;    // 前方宣言
+	class SettingsManager; // 前方宣言
 } // namespace game
 
 namespace game::scene
@@ -37,8 +38,9 @@ namespace game::scene
 	   * @brief SceneFactoryのコンストラクタ
 	   * @param gameManager シーン間共有データ（各シーンへ注入する）
 	   * @param pauseManager ポーズ状態（各シーンへ注入する）
+	   * @param settingsManager プレイヤーの設定（各シーンへ注入する）
 	   */
-	  SceneFactory(GameManager& gameManager, PauseManager& pauseManager);
+	  SceneFactory(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager);
 
 	  /**
 	   * @brief デストラクタ
@@ -62,6 +64,7 @@ namespace game::scene
     private:
 	  GameManager& m_gameManager;
 	  PauseManager& m_pauseManager;
+	  SettingsManager& m_settingsManager;
 
 	  // シーンインスタンスの管理
 	  std::unique_ptr<InGame> m_inGameScene{};

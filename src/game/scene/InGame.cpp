@@ -32,6 +32,7 @@
 #include "game/actor/Player.h"
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
+#include "game/SettingsManager.h"
 #include "game/component/visual/RenderComponent.h"
 #include "game/component/combat/HealthComponent.h"
 #include "game/component/visual/HitEffectComponent.h"
@@ -214,7 +215,8 @@ namespace game::scene
 	    core::iface::IResourceManager& resourceManager,
 	    core::iface::IInputProvider& inputProvider,
 	    GameManager& gameManager,
-	    PauseManager& pauseManager)
+	    PauseManager& pauseManager,
+	    SettingsManager& settingsManager)
 	    : m_camera{ camera }
 	    , m_renderer{ renderer }
 	    , m_animator{ animator }
@@ -222,6 +224,7 @@ namespace game::scene
 	    , m_inputProvider{ inputProvider }
 	    , m_gameManager{ gameManager }
 	    , m_pauseManager{ pauseManager }
+	    , m_settingsManager{ settingsManager }
 	    , m_fileEquipmentData{ gameManager.getFileEquipmentData() }
 	    , m_effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() }
 	    , m_factoryManager{ m_entityManager, m_componentManager, m_resourceManager }

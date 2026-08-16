@@ -29,6 +29,7 @@
 #include "game/scene/SceneManager.h"
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
+#include "game/SettingsManager.h"
 #include "core/interface/IPerformanceDataProvider.h"
 #include "platform/system/WindowsPerformanceProvider.h"
 #include "core/interface/IAudioManager.h"
@@ -38,7 +39,8 @@
 #include "core/utility/Probe.h" // 一時: メモリ調査用（原因特定後に削除）
 
 void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
-    game::GameManager& gameManager, game::PauseManager& pauseManager)
+    game::GameManager& gameManager, game::PauseManager& pauseManager,
+    game::SettingsManager& settingsManager)
 {
 	// 文字列変換プロバイダを登録
 	core::base::ServiceLocator::provide<core::iface::IStringConverter>(
@@ -125,9 +127,9 @@ void ServiceLocatorInitializer::init(int screenWidth, int screenHeight,
 
 	core::probe::mark("  service: WindowFactory");
 
-	// SceneManager登録（内部でSceneFactoryを所有。GameManager/PauseManagerを各シーンへ注入する）
+	// SceneManager登録（内部でSceneFactoryを所有。横断データを各シーンへ注入する）
 	core::base::ServiceLocator::provide(
-	    std::make_unique<game::scene::SceneManager>(gameManager, pauseManager));
+	    std::make_unique<game::scene::SceneManager>(gameManager, pauseManager, settingsManager));
 
 	core::probe::mark("  service: SceneManager");
 
