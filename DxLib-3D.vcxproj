@@ -279,6 +279,7 @@
     <ClCompile Include="src\platform\window\select\DifficultyWindow.cpp" />
     <ClCompile Include="src\platform\window\select\RulesWindow.cpp" />
     <ClCompile Include="src\platform\window\select\SettingsWindow.cpp" />
+    <ClCompile Include="src\platform\window\select\QuickSettingsWindow.cpp" />
     <ClCompile Include="src\platform\window\select\ParameterWindow.cpp" />
     <ClCompile Include="src\platform\window\UiSound.cpp" />
     <ClCompile Include="src\platform\window\WindowBase.cpp" />
@@ -569,6 +570,7 @@
     <ClInclude Include="src\platform\window\select\FileSelectWindow.h" />
     <ClInclude Include="src\platform\window\select\RulesWindow.h" />
     <ClInclude Include="src\platform\window\select\SettingsWindow.h" />
+    <ClInclude Include="src\platform\window\select\QuickSettingsWindow.h" />
     <ClInclude Include="src\platform\window\select\Win32SelectWindowManager.h" />
     <ClInclude Include="src\platform\window\WindowBase.h" />
     <ClInclude Include="src\platform\window\WebViewWindowBase.h" />
