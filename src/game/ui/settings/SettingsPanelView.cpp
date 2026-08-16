@@ -16,9 +16,10 @@ namespace
 	// 背景オーバーレイの暗さ（ポーズメニューと同じ値にして、開き方で明るさが変わらないようにする）
 	constexpr int OVERLAY_ALPHA{ 160 };
 
-	// ウィンドウの大きさ（画面に対する比率）
-	constexpr float PANEL_WIDTH_RATIO{ 0.58f };
-	constexpr float PANEL_HEIGHT_RATIO{ 0.70f };
+	// ウィンドウの大きさ（画面に対する比率）。
+	// 中の寸法はすべて高さから換算するので、ここを変えれば文字もコントロールも一緒に拡大する
+	constexpr float PANEL_WIDTH_RATIO{ 0.66f };
+	constexpr float PANEL_HEIGHT_RATIO{ 0.82f };
 
 	// 左ナビの幅（ウィンドウ幅に対する比率）
 	constexpr float NAV_WIDTH_RATIO{ 0.27f };
@@ -113,7 +114,8 @@ namespace
 	constexpr RowSpec CONTROL_ROWS[]{
 		{ "カメラ感度", "マウスを動かしたときにカメラが回る速さ", ControlKind::Slider },
 		{ "Y軸を反転する", "マウスを下に動かすとカメラが上を向きます", ControlKind::Toggle },
-		{ "画面の揺れ", "被弾やボス演出での揺れの強さ。酔いやすい場合は下げてください", ControlKind::Slider },
+		// 説明文はスライダーの手前で収まる長さにする。長いと右のコントロールの下へ潜り込む
+		{ "画面の揺れ", "酔いやすい場合は下げてください", ControlKind::Slider },
 		{ "操作を既定値に戻す", "カメラ感度 5 / Y軸反転 オフ / 画面の揺れ 100", ControlKind::Button },
 	};
 
