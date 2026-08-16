@@ -2,6 +2,7 @@
 
 #include "core/interface/ISelectWindowManager.h"
 #include "core/data/FileExtensionType.h"
+#include "core/data/GameSettings.h"
 #include "game/utility/FileExtensionTypeResolver.h"
 #include "platform/window/WindowConstants.h"
 #include "DesktopWindow.h"
@@ -9,6 +10,7 @@
 #include "ParameterWindow.h"
 #include "DifficultyWindow.h"
 #include "RulesWindow.h"
+#include "SettingsWindow.h"
 #include <memory>
 #include <functional>
 #include <string>
@@ -32,6 +34,8 @@ namespace platform::window::select
 		  std::function<void()> onQuitGame,
 		  std::function<void(int, const std::string&)> onFileSlotChanged,
 		  std::function<void(const std::string&)> onDifficultyChanged,
+		  std::function<core::data::GameSettings()> getSettings,
+		  std::function<void(const core::data::GameSettings&)> onSettingsChanged,
 		  core::iface::IResourceManager& resourceManager,
 		  core::iface::IScreen& screen,
 		  bool showTutorial) noexcept;
@@ -62,6 +66,11 @@ namespace platform::window::select
 		static constexpr int RULES_WINDOW_WIDTH_PERCENT{ 76 };
 		static constexpr int RULES_WINDOW_HEIGHT_PERCENT{ 84 };
 
+		// 設定ウィンドウのサイズ。タイトル・ポーズで出るDxLib側の設定画面と同じ割合にして、
+		// どこから開いても同じ大きさのものが出るようにする
+		static constexpr int SETTINGS_WINDOW_WIDTH_PERCENT{ 66 };
+		static constexpr int SETTINGS_WINDOW_HEIGHT_PERCENT{ 82 };
+
 		// ウィンドウのアルファ値
         static constexpr BYTE WINDOW_ALPHA{ 250 };
 
@@ -76,8 +85,9 @@ namespace platform::window::select
         static constexpr const char* WINDOW_NAME_PARAM{ "param" };
         static constexpr const char* WINDOW_NAME_DIFF{ "diff" };
         static constexpr const char* WINDOW_NAME_RULES{ "rules" };
+		static constexpr const char* WINDOW_NAME_SETTINGS{ "settings" };
 
-        // アプリケーション名とパス
+		// アプリケーション名とパス
         // アプリパス（複雑で再利用可能）
         static constexpr const wchar_t* APP_CMD_PATH{ L"cmd.exe" };
         static constexpr const wchar_t* APP_TASKMGR_PATH{ L"taskmgr.exe" };
@@ -168,6 +178,23 @@ namespace platform::window::select
 		 */
 		void notifyEquipReady() noexcept;
 
+		/**
+		 * @brief 設定の変更を受け取ってゲームへ反映する
+		 *
+		 * デスクトップのクイック設定と設定ウィンドウの両方から届く。
+		 * どちらも「変えた項目だけ」を送ってくるので、いまの設定へ混ぜ込む
+		 * @param json 届いたJSON文字列（UTF-8）
+		 * @return 設定の変更として処理した場合true
+		 */
+		[[nodiscard]] bool handleSettingsMessage(const std::string& json) noexcept;
+
+		/**
+		 * @brief いまの設定をデスクトップと設定ウィンドウへ配る
+		 *
+		 * 片方で音量を変えたとき、もう片方の表示が置いていかれないようにする
+		 */
+		void broadcastSettings() noexcept;
+
 		void handleDesktopMessage(const std::string& json) noexcept;
         void notifyWindowState(const std::string& name, bool visible) noexcept;
 
@@ -176,11 +203,13 @@ namespace platform::window::select
         std::unique_ptr<ParameterWindow>  m_parameterWindow{};
         std::unique_ptr<DifficultyWindow> m_difficultyWindow{};
         std::unique_ptr<RulesWindow>      m_rulesWindow{};
+		std::unique_ptr<SettingsWindow> m_settingsWindow{};
 
-        bool m_fileVisible{true};
+		bool m_fileVisible{true};
         bool m_paramVisible{true};
         bool m_diffVisible{true};
         bool m_rulesVisible{false};
+		bool m_settingsVisible{ false };
 
 		// DEBUG: F4での一時退避の状態（リリース時に削除）
 		bool m_debugOverlayHidden{ false };
@@ -202,6 +231,10 @@ namespace platform::window::select
 		std::function<void()> m_onQuitGame{};
 		std::function<void(int, const std::string&)> m_onFileSlotChanged{};
 		std::function<void(const std::string&)> m_onDifficultyChanged{};
+
+		// 設定の正はGame層（SettingsManager）が持つ。ここは読み書きの口だけを預かる
+		std::function<core::data::GameSettings()> m_getSettings{};
+		std::function<void(const core::data::GameSettings&)> m_onSettingsChanged{};
 
 		core::iface::IResourceManager& m_resourceManager;
         core::iface::IScreen& m_screen;

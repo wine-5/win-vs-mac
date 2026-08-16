@@ -25,6 +25,8 @@ namespace platform::window::select
 	    std::function<void()> onQuitGame,
 	    std::function<void(int, const std::string&)> onFileSlotChanged,
 	    std::function<void(const std::string&)> onDifficultyChanged,
+	    std::function<core::data::GameSettings()> getSettings,
+	    std::function<void(const core::data::GameSettings&)> onSettingsChanged,
 	    core::iface::IResourceManager& resourceManager,
 	    core::iface::IScreen& screen,
 	    bool showTutorial) noexcept
@@ -33,6 +35,8 @@ namespace platform::window::select
 	    , m_onQuitGame{ std::move(onQuitGame) }
 	    , m_onFileSlotChanged{ std::move(onFileSlotChanged) }
 	    , m_onDifficultyChanged{ std::move(onDifficultyChanged) }
+	    , m_getSettings{ std::move(getSettings) }
+	    , m_onSettingsChanged{ std::move(onSettingsChanged) }
 	    , m_resourceManager{ resourceManager }
 	    , m_screen{ screen }
 	    , m_showTutorial{ showTutorial }
@@ -173,18 +177,45 @@ namespace platform::window::select
             notifyWindowState(WINDOW_NAME_RULES, false);
         });
 
-        m_fileSelectWindow->setAlpha(WINDOW_ALPHA);
+		// SettingsWindow（センタリング・初期非表示）。
+		// タイトル・ポーズで出る設定画面と同じ割合の大きさで開く
+		const int settingsWidth{ screenWidth * SETTINGS_WINDOW_WIDTH_PERCENT / 100 };
+		const int settingsHeight{ screenHeight * SETTINGS_WINDOW_HEIGHT_PERCENT / 100 };
+		m_settingsWindow = std::make_unique<SettingsWindow>(
+		    originX + (screenWidth - settingsWidth) / 2,
+		    originY + (screenHeight - settingsHeight) / 2,
+		    settingsWidth,
+		    settingsHeight);
+		if (!m_settingsWindow->create(m_desktopWindow->getHwnd()))
+			return;
+		m_settingsWindow->setOnMessage([this](const std::string& json) noexcept
+		    { (void)handleSettingsMessage(json); });
+		m_settingsWindow->setOnMinimize([this]() noexcept
+		    {
+			m_settingsWindow->hide();
+			m_settingsVisible = false;
+			notifyWindowState(WINDOW_NAME_SETTINGS, false); });
+		m_settingsWindow->setOnClose([this]() noexcept
+		    {
+			m_settingsVisible = false;
+			notifyWindowState(WINDOW_NAME_SETTINGS, false); });
+
+		m_fileSelectWindow->setAlpha(WINDOW_ALPHA);
         m_parameterWindow->setAlpha(WINDOW_ALPHA);
         m_difficultyWindow->setAlpha(WINDOW_ALPHA);
         m_rulesWindow->setAlpha(WINDOW_ALPHA);
+		m_settingsWindow->setAlpha(WINDOW_ALPHA);
 
-        m_fileSelectWindow->show();
+		m_fileSelectWindow->show();
         m_parameterWindow->show();
         m_difficultyWindow->show();
 
 		// 何も装備していない状態の基礎値を最初から見せる。
 		// ファイルを1つ選ぶまで全項目が「—」のままだと、何が伸びるのか比較できない
 		updateParameterWindow();
+
+		// 保存されている音量をタスクバーのトレイへ反映させる
+		broadcastSettings();
 	}
 
     void Win32SelectWindowManager::destroyAllWindows()
@@ -193,13 +224,16 @@ namespace platform::window::select
         if (m_parameterWindow)  m_parameterWindow->destroy();
         if (m_difficultyWindow) m_difficultyWindow->destroy();
         if (m_rulesWindow)      m_rulesWindow->destroy();
-        if (m_desktopWindow)    m_desktopWindow->destroy();
+		if (m_settingsWindow)
+			m_settingsWindow->destroy();
+		if (m_desktopWindow)    m_desktopWindow->destroy();
 
         m_fileSelectWindow.reset();
         m_parameterWindow.reset();
         m_difficultyWindow.reset();
         m_rulesWindow.reset();
-        m_desktopWindow.reset();
+		m_settingsWindow.reset();
+		m_desktopWindow.reset();
     }
 
 	void Win32SelectWindowManager::setWindowsVisible(bool visible) noexcept
@@ -339,6 +373,8 @@ namespace platform::window::select
 			m_difficultyWindow->hide();
 		if (m_rulesWindow)
 			m_rulesWindow->hide();
+		if (m_settingsWindow)
+			m_settingsWindow->hide();
 
 		if (HWND gameHwnd{ static_cast<HWND>(m_screen.getNativeWindowHandle()) })
 		{
@@ -347,10 +383,112 @@ namespace platform::window::select
 		}
 	}
 
+	bool Win32SelectWindowManager::handleSettingsMessage(const std::string& json) noexcept
+	{
+		if (!m_getSettings)
+			return false;
+
+		try
+		{
+			const auto j{ nlohmann::json::parse(json) };
+			const std::string type{ j.value(platform::window::WindowConstants::JSON_KEY_TYPE, std::string{}) };
+
+			// 開いた直後の要求。いまの値を送り返すだけ
+			if (type == "requestSettings")
+			{
+				broadcastSettings();
+				return true;
+			}
+
+			if (type != "settingsChanged")
+				return false;
+
+			// 送られてくるのは変えた項目だけ。いまの設定を土台にして上書きする
+			core::data::GameSettings settings{ m_getSettings() };
+
+			if (j.contains("audio"))
+			{
+				const auto& audio{ j["audio"] };
+				settings.m_audio.m_master = audio.value("master", settings.m_audio.m_master);
+				settings.m_audio.m_bgm = audio.value("bgm", settings.m_audio.m_bgm);
+				settings.m_audio.m_se = audio.value("se", settings.m_audio.m_se);
+			}
+
+			if (j.contains("control"))
+			{
+				const auto& control{ j["control"] };
+				settings.m_control.m_sensitivity = control.value("sensitivity", settings.m_control.m_sensitivity);
+				settings.m_control.m_invertY = control.value("invertY", settings.m_control.m_invertY);
+				settings.m_control.m_screenShake = control.value("screenShake", settings.m_control.m_screenShake);
+			}
+
+			if (m_onSettingsChanged)
+				m_onSettingsChanged(settings);
+
+			broadcastSettings();
+			return true;
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("Win32SelectWindowManager::handleSettingsMessage: 処理に失敗しました: {}", e.what());
+			return false;
+		}
+		catch (...)
+		{
+			return false;
+		}
+	}
+
+	void Win32SelectWindowManager::broadcastSettings() noexcept
+	{
+		if (!m_getSettings)
+			return;
+
+		try
+		{
+			const core::data::GameSettings settings{ m_getSettings() };
+			const nlohmann::json payload{
+				{ "type", "settings" },
+				{ "audio",
+				    {
+				        { "master", settings.m_audio.m_master },
+				        { "bgm", settings.m_audio.m_bgm },
+				        { "se", settings.m_audio.m_se },
+				    } },
+				{ "control",
+				    {
+				        { "sensitivity", settings.m_control.m_sensitivity },
+				        { "invertY", settings.m_control.m_invertY },
+				        { "screenShake", settings.m_control.m_screenShake },
+				    } },
+			};
+
+			const std::string text{ payload.dump() };
+
+			// デスクトップ（トレイの音量）と設定ウィンドウの両方へ配る。
+			// 片方で変えたときにもう片方の表示が置いていかれないようにする
+			if (m_desktopWindow)
+				m_desktopWindow->postMessage(text);
+			if (m_settingsWindow)
+				m_settingsWindow->postMessage(text);
+		}
+		catch (const std::exception& e)
+		{
+			core::log::error("Win32SelectWindowManager::broadcastSettings: 処理に失敗しました: {}", e.what());
+		}
+		catch (...)
+		{
+		}
+	}
+
 	void Win32SelectWindowManager::handleDesktopMessage(const std::string& json) noexcept
     {
 		// 操作音はJS側が要求する（押した要素ごとに鳴らし分けるため）
 		if (platform::window::tryPlayUiSound(json))
+			return;
+
+		// クイック設定の音量もここへ届く。設定ウィンドウと同じ経路で処理する
+		if (handleSettingsMessage(json))
 			return;
 
 		try
@@ -416,7 +554,17 @@ namespace platform::window::select
                     m_rulesVisible ? m_rulesWindow->show() : m_rulesWindow->hide();
                     notifyWindowState(WINDOW_NAME_RULES, m_rulesVisible);
                 }
-            }
+				else if (name == WINDOW_NAME_SETTINGS && m_settingsWindow)
+				{
+					m_settingsVisible = !m_settingsVisible;
+					m_settingsVisible ? m_settingsWindow->show() : m_settingsWindow->hide();
+					notifyWindowState(WINDOW_NAME_SETTINGS, m_settingsVisible);
+
+					// 開いた側は空の表示から始まるので、いまの値を送って合わせる
+					if (m_settingsVisible)
+						broadcastSettings();
+				}
+			}
             else if (type == platform::window::WindowConstants::MESSAGE_TYPE_LAUNCH_APP)
             {
                 const std::string app{ j.value(platform::window::WindowConstants::JSON_KEY_APP, "") };
