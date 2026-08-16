@@ -200,6 +200,25 @@ namespace platform::window::select
 			m_settingsVisible = false;
 			notifyWindowState(WINDOW_NAME_SETTINGS, false); });
 
+		// QuickSettingsWindow（タスクバー右上・初期非表示）。
+		// デスクトップのHTMLの中に描くと、別HWNDである他のウィンドウの背面へ回ってしまう。
+		// z-index はHWNDをまたげないため、独立したウィンドウにして開くたび最前面へ出す
+		const int quickWidth{ (std::max)(QUICK_WINDOW_MIN_WIDTH,
+			screenWidth * QUICK_WINDOW_WIDTH_PERCENT / 100) };
+		m_quickSettingsWindow = std::make_unique<QuickSettingsWindow>(
+		    originX + screenWidth - quickWidth - QUICK_WINDOW_MARGIN,
+		    originY + screenHeight - TASKBAR_HEIGHT - QUICK_WINDOW_HEIGHT - QUICK_WINDOW_MARGIN,
+		    quickWidth,
+		    QUICK_WINDOW_HEIGHT);
+		if (!m_quickSettingsWindow->create(m_desktopWindow->getHwnd()))
+			return;
+		m_quickSettingsWindow->setOnMessage([this](const std::string& json) noexcept
+		    {
+			if (handleSettingsMessage(json)) return;
+
+			// 「設定」を開く要求はデスクトップと同じ経路で処理する
+			handleDesktopMessage(json); });
+
 		m_fileSelectWindow->setAlpha(WINDOW_ALPHA);
         m_parameterWindow->setAlpha(WINDOW_ALPHA);
         m_difficultyWindow->setAlpha(WINDOW_ALPHA);
@@ -226,6 +245,8 @@ namespace platform::window::select
         if (m_rulesWindow)      m_rulesWindow->destroy();
 		if (m_settingsWindow)
 			m_settingsWindow->destroy();
+		if (m_quickSettingsWindow)
+			m_quickSettingsWindow->destroy();
 		if (m_desktopWindow)    m_desktopWindow->destroy();
 
         m_fileSelectWindow.reset();
@@ -375,6 +396,8 @@ namespace platform::window::select
 			m_rulesWindow->hide();
 		if (m_settingsWindow)
 			m_settingsWindow->hide();
+		if (m_quickSettingsWindow)
+			m_quickSettingsWindow->hide();
 
 		if (HWND gameHwnd{ static_cast<HWND>(m_screen.getNativeWindowHandle()) })
 		{
@@ -471,6 +494,8 @@ namespace platform::window::select
 				m_desktopWindow->postMessage(text);
 			if (m_settingsWindow)
 				m_settingsWindow->postMessage(text);
+			if (m_quickSettingsWindow)
+				m_quickSettingsWindow->postMessage(text);
 		}
 		catch (const std::exception& e)
 		{
@@ -563,6 +588,28 @@ namespace platform::window::select
 					// 開いた側は空の表示から始まるので、いまの値を送って合わせる
 					if (m_settingsVisible)
 						broadcastSettings();
+
+					// 設定を開いたらクイック設定は役目を終える。
+					// 同じ音量のスライダーが2か所に出たままだと、どちらを触ればよいのか迷う
+					if (m_settingsVisible && m_quickSettingsVisible && m_quickSettingsWindow)
+					{
+						m_quickSettingsWindow->hide();
+						m_quickSettingsVisible = false;
+					}
+				}
+				else if (name == WINDOW_NAME_QUICK && m_quickSettingsWindow)
+				{
+					m_quickSettingsVisible = !m_quickSettingsVisible;
+					if (m_quickSettingsVisible)
+					{
+						// 出す前に値を配っておく。開いた瞬間に古い音量が見えるのを防ぐ
+						broadcastSettings();
+						m_quickSettingsWindow->showOnTop();
+					}
+					else
+					{
+						m_quickSettingsWindow->hide();
+					}
 				}
 			}
             else if (type == platform::window::WindowConstants::MESSAGE_TYPE_LAUNCH_APP)

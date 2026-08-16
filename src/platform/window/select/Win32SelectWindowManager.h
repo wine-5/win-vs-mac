@@ -9,6 +9,7 @@
 #include "FileSelectWindow.h"
 #include "ParameterWindow.h"
 #include "DifficultyWindow.h"
+#include "QuickSettingsWindow.h"
 #include "RulesWindow.h"
 #include "SettingsWindow.h"
 #include <memory>
@@ -71,6 +72,13 @@ namespace platform::window::select
 		static constexpr int SETTINGS_WINDOW_WIDTH_PERCENT{ 66 };
 		static constexpr int SETTINGS_WINDOW_HEIGHT_PERCENT{ 82 };
 
+		// クイック設定の大きさ（画面幅に対する割合と、内容が収まる高さ）。
+		// Windowsのものと同じく、タスクバーの右上へ小さく出す
+		static constexpr int QUICK_WINDOW_WIDTH_PERCENT{ 22 };
+		static constexpr int QUICK_WINDOW_MIN_WIDTH{ 280 };
+		static constexpr int QUICK_WINDOW_HEIGHT{ 104 };
+		static constexpr int QUICK_WINDOW_MARGIN{ 12 };
+
 		// ウィンドウのアルファ値
         static constexpr BYTE WINDOW_ALPHA{ 250 };
 
@@ -86,6 +94,7 @@ namespace platform::window::select
         static constexpr const char* WINDOW_NAME_DIFF{ "diff" };
         static constexpr const char* WINDOW_NAME_RULES{ "rules" };
 		static constexpr const char* WINDOW_NAME_SETTINGS{ "settings" };
+		static constexpr const char* WINDOW_NAME_QUICK{ "quick" };
 
 		// アプリケーション名とパス
         // アプリパス（複雑で再利用可能）
@@ -204,12 +213,14 @@ namespace platform::window::select
         std::unique_ptr<DifficultyWindow> m_difficultyWindow{};
         std::unique_ptr<RulesWindow>      m_rulesWindow{};
 		std::unique_ptr<SettingsWindow> m_settingsWindow{};
+		std::unique_ptr<QuickSettingsWindow> m_quickSettingsWindow{};
 
 		bool m_fileVisible{true};
         bool m_paramVisible{true};
         bool m_diffVisible{true};
         bool m_rulesVisible{false};
 		bool m_settingsVisible{ false };
+		bool m_quickSettingsVisible{ false };
 
 		// DEBUG: F4での一時退避の状態（リリース時に削除）
 		bool m_debugOverlayHidden{ false };
