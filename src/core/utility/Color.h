@@ -133,7 +133,6 @@ namespace core::utility
 		static constexpr unsigned int SETTINGS_STROKE = 0xFF383838;         // カード・コントロールの枠
 		static constexpr unsigned int SETTINGS_NAV_SELECTED = 0xFF2E2E2E;   // 左ナビの選択中の背景
 		static constexpr unsigned int SETTINGS_ACCENT = 0xFF4CC2FF;         // ダークモードのアクセント（水色）
-		static constexpr unsigned int SETTINGS_TEXT = 0xFFFFFFFF;           // 本文
 		static constexpr unsigned int SETTINGS_TEXT_SECONDARY = 0xFFC8C8C8; // 補助的な文字
 		static constexpr unsigned int SETTINGS_TEXT_TERTIARY = 0xFF8B8B8B;  // 説明文・未選択
 		static constexpr unsigned int SETTINGS_TRACK = 0xFF8B8B8B;          // スライダーの未到達部分

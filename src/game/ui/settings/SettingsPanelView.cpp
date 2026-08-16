@@ -295,16 +295,16 @@ namespace game::ui::settings
 
 		m_uiRenderer.drawText(m_panelX + scaled(CONTENT_PADDING_LEFT),
 		    m_panelY + (m_titleBarHeight - fontSize) / 2,
-		    title.c_str(), Color::SETTINGS_TEXT, fontSize);
+		    title.c_str(), Color::WHITE, fontSize);
 
 		// 閉じるボタン（×）。線2本で描く
 		const int centerX{ m_panelX + m_panelWidth - scaled(CLOSE_BUTTON_RIGHT_MARGIN) };
 		const int centerY{ m_panelY + m_titleBarHeight / 2 };
 		const int arm{ scaled(CLOSE_MARK_ARM) };
 		m_uiRenderer.drawLine(centerX - arm, centerY - arm, centerX + arm, centerY + arm,
-		    Color::SETTINGS_TEXT, 1);
+		    Color::WHITE, 1);
 		m_uiRenderer.drawLine(centerX + arm, centerY - arm, centerX - arm, centerY + arm,
-		    Color::SETTINGS_TEXT, 1);
+		    Color::WHITE, 1);
 	}
 
 	void SettingsPanelView::getNavItemRect(int index, int& outX, int& outY, int& outWidth, int& outHeight) const
@@ -350,7 +350,7 @@ namespace game::ui::settings
 		const std::string accountName{ toDrawable("セキュリティ エージェント") };
 
 		m_uiRenderer.drawText(textX, avatarCenterY - nameFontSize - scaled(1.0f),
-		    accountName.c_str(), Color::SETTINGS_TEXT, nameFontSize);
+		    accountName.c_str(), Color::WHITE, nameFontSize);
 		m_uiRenderer.drawText(textX, avatarCenterY + scaled(2.0f),
 		    "WIN-VS-MAC\\agent", Color::SETTINGS_TEXT_TERTIARY, subFontSize);
 
@@ -379,7 +379,7 @@ namespace game::ui::settings
 
 			const std::string label{ toDrawable(PAGE_TITLES[i]) };
 			m_uiRenderer.drawText(itemX + scaled(NAV_TEXT_INDENT), itemY + (itemHeight - itemFontSize) / 2,
-			    label.c_str(), Color::SETTINGS_TEXT, itemFontSize);
+			    label.c_str(), Color::WHITE, itemFontSize);
 		}
 	}
 
@@ -388,7 +388,7 @@ namespace game::ui::settings
 	{
 		const int titleFontSize{ scaled(FONT_PAGE_TITLE) };
 		const std::string pageTitle{ toDrawable(PAGE_TITLES[static_cast<int>(page)]) };
-		m_uiRenderer.drawText(m_contentX, m_contentTop, pageTitle.c_str(), Color::SETTINGS_TEXT, titleFontSize);
+		m_uiRenderer.drawText(m_contentX, m_contentTop, pageTitle.c_str(), Color::WHITE, titleFontSize);
 
 		const auto [sections, sectionCount]{ getSections(page) };
 		const RowSpec* rows{ getRows(page) };
@@ -399,7 +399,7 @@ namespace game::ui::settings
 		{
 			const std::string label{ toDrawable(sections[i].m_label) };
 			m_uiRenderer.drawText(m_contentX, m_sectionLabelY[i], label.c_str(),
-			    Color::SETTINGS_TEXT, sectionFontSize);
+			    Color::WHITE, sectionFontSize);
 
 			drawCard(m_cardY[i], sections[i].m_rowCount);
 
@@ -424,7 +424,7 @@ namespace game::ui::settings
 			return;
 
 		const int thickness{ scaled(FOCUS_RING_THICKNESS) };
-		m_uiRenderer.drawRoundedBox(x, y, width, height, radius, Color::SETTINGS_TEXT, false, thickness);
+		m_uiRenderer.drawRoundedBox(x, y, width, height, radius, Color::WHITE, false, thickness);
 		m_uiRenderer.drawRoundedBox(x + thickness, y + thickness,
 		    width - thickness * 2, height - thickness * 2,
 		    radius, Color::SETTINGS_WINDOW_BG, false, 1);
@@ -470,14 +470,14 @@ namespace game::ui::settings
 		{
 			const std::string subText{ toDrawable(sub) };
 			m_uiRenderer.drawText(textX, centerY - titleFontSize - scaled(1.0f),
-			    titleText.c_str(), Color::SETTINGS_TEXT, titleFontSize);
+			    titleText.c_str(), Color::WHITE, titleFontSize);
 			m_uiRenderer.drawText(textX, centerY + scaled(2.0f),
 			    subText.c_str(), Color::SETTINGS_TEXT_TERTIARY, subFontSize);
 		}
 		else
 		{
 			m_uiRenderer.drawText(textX, centerY - titleFontSize / 2,
-			    titleText.c_str(), Color::SETTINGS_TEXT, titleFontSize);
+			    titleText.c_str(), Color::WHITE, titleFontSize);
 		}
 
 		switch (kind)
@@ -548,7 +548,7 @@ namespace game::ui::settings
 		const int knobOffset{ scaled(10.0f) };
 		const int knobX{ isOn ? right - knobOffset : left + knobOffset };
 		m_uiRenderer.drawCircle(knobX, centerY, knobRadius,
-		    isOn ? Color::BLACK : Color::SETTINGS_TEXT, true, 1);
+		    isOn ? Color::BLACK : Color::WHITE, true, 1);
 
 		// オン／オフの文字はトグルの左に置く（Windows と同じ並び）
 		const int fontSize{ scaled(FONT_ROW_TITLE) };
@@ -574,7 +574,7 @@ namespace game::ui::settings
 		const std::string label{ toDrawable("リセット") };
 		const int labelWidth{ m_uiRenderer.getTextWidth(label.c_str(), fontSize) };
 		m_uiRenderer.drawText(left + (width - labelWidth) / 2, centerY - fontSize / 2,
-		    label.c_str(), Color::SETTINGS_TEXT, fontSize);
+		    label.c_str(), Color::WHITE, fontSize);
 	}
 
 	void SettingsPanelView::drawArc(int centerX, int centerY, int radius, float startDegrees, float endDegrees,
@@ -628,7 +628,7 @@ namespace game::ui::settings
 
 	void SettingsPanelView::drawSpeakerIcon(int left, int top, int value, int maxValue) const
 	{
-		const unsigned int color{ Color::SETTINGS_TEXT };
+		const unsigned int color{ Color::WHITE };
 		const int thickness{ scaled(ICON_LINE) };
 
 		// 本体（細い箱）と、そこから開くコーン（台形を三角形2枚で作る）
@@ -664,7 +664,7 @@ namespace game::ui::settings
 
 	void SettingsPanelView::drawMusicIcon(int left, int top) const
 	{
-		const unsigned int color{ Color::SETTINGS_TEXT };
+		const unsigned int color{ Color::WHITE };
 		const int stemThickness{ scaled(ICON_LINE) };
 
 		m_uiRenderer.drawCircle(left + scaled(5.5f), top + scaled(15.0f), scaled(2.4f), color, true, 1);
@@ -682,7 +682,7 @@ namespace game::ui::settings
 
 	void SettingsPanelView::drawWaveIcon(int left, int top) const
 	{
-		const unsigned int color{ Color::SETTINGS_TEXT };
+		const unsigned int color{ Color::WHITE };
 		const int thickness{ scaled(ICON_LINE) };
 		const int centerY{ top + scaled(10.0f) };
 
@@ -700,7 +700,7 @@ namespace game::ui::settings
 
 	void SettingsPanelView::drawMouseIcon(int left, int top) const
 	{
-		const unsigned int color{ Color::SETTINGS_TEXT };
+		const unsigned int color{ Color::WHITE };
 		const int thickness{ scaled(ICON_LINE) };
 
 		m_uiRenderer.drawRoundedBox(left + scaled(5.5f), top + scaled(2.0f),
@@ -711,7 +711,7 @@ namespace game::ui::settings
 
 	void SettingsPanelView::drawInvertYIcon(int left, int top) const
 	{
-		const unsigned int color{ Color::SETTINGS_TEXT };
+		const unsigned int color{ Color::WHITE };
 		const int thickness{ scaled(ICON_LINE) };
 		const int centerX{ left + scaled(10.0f) };
 
@@ -728,7 +728,7 @@ namespace game::ui::settings
 
 	void SettingsPanelView::drawCameraIcon(int left, int top) const
 	{
-		const unsigned int color{ Color::SETTINGS_TEXT };
+		const unsigned int color{ Color::WHITE };
 		const int thickness{ scaled(ICON_LINE) };
 
 		m_uiRenderer.drawRoundedBox(left + scaled(2.5f), top + scaled(6.0f),
@@ -747,7 +747,7 @@ namespace game::ui::settings
 
 	void SettingsPanelView::drawResetIcon(int left, int top) const
 	{
-		const unsigned int color{ Color::SETTINGS_TEXT };
+		const unsigned int color{ Color::WHITE };
 		const int thickness{ scaled(ICON_LINE) };
 
 		// 一周させず右上を空け、そこへ矢じりを置いて「戻す」の向きを出す
