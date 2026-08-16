@@ -4,14 +4,8 @@
  * 設定ウィンドウの表示とDOM操作。値の保持は SettingsLogic が持つ
  */
 (function () {
-    // 効果音のスライダーを動かしたときに鳴らす試聴音の最短間隔（ミリ秒）。
-    // 1目盛りごとに鳴らすとドラッグ中に音が重なって潰れ、かえって音量が分からなくなる
-    const PREVIEW_INTERVAL_MS = 90;
-
     const sliders = Array.prototype.slice.call(document.querySelectorAll('input[type=range]'));
     const toggles = Array.prototype.slice.call(document.querySelectorAll('.toggle'));
-
-    let lastPreviewTime = 0;
 
     /**
      * 画面全体を現在の設定で描き直す
@@ -62,25 +56,13 @@
             '<path d="M4 8v4h2.5L10 15V5L6.5 8H4z" stroke-linejoin="round"/>' + waves + '</svg>';
     }
 
-    /**
-     * 効果音の音量を変えたときだけ、その音量で試聴音を鳴らす
-     *
-     * 音量は鳴らさないと分からないので、変更操作そのものを試聴にしてしまう
-     */
-    function playSePreview() {
-        const now = Date.now();
-        if (now - lastPreviewTime < PREVIEW_INTERVAL_MS) return;
-
-        lastPreviewTime = now;
-        sendToGame({ type: 'uiSound', se: 'UiKeyPress' });
-    }
-
     sliders.forEach(function (slider) {
         slider.addEventListener('input', function () {
             SettingsLogic.setValue(slider.dataset.key, Number(slider.value));
 
-            if (slider.dataset.key === 'se' || slider.dataset.key === 'master')
-                playSePreview();
+            // 1目盛りごとに鳴らす。短く連続して鳴らす前提の音なので間引かない。
+            // 音量の行では、この音そのものが変更後の音量の試聴になる
+            sendToGame({ type: 'uiSound', se: 'UiSliderTick' });
         });
     });
 

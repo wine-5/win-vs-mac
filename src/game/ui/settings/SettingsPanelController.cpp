@@ -281,7 +281,9 @@ namespace game::ui::settings
 			m_settingsManager.setControl(control);
 		}
 
-		playUiSe(core::constant::SeType::UiKeyPress);
+		// 1目盛りごとに鳴らす。短く連続して鳴らす前提の音なので間引かない。
+		// 効果音の行では、この音そのものが変更後の音量の試聴になる
+		playUiSe(core::constant::SeType::UiSliderTick);
 	}
 
 	void SettingsPanelController::playUiSe(core::constant::SeType seType) const

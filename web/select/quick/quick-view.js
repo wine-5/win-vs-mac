@@ -7,12 +7,7 @@
  * 触られたぶんを送り返すだけで、自前では保持しない
  */
 (function () {
-    // 音量を変えたときに鳴らす試聴音の最短間隔（ミリ秒）。
-    // 1目盛りごとに鳴らすとドラッグ中に音が重なって潰れ、かえって音量が分からなくなる
-    const PREVIEW_INTERVAL_MS = 90;
-
     const slider = document.getElementById('master');
-    let lastPreviewTime = 0;
 
     /**
      * 音量の表示（スライダー・数値・スピーカーの波）を更新する
@@ -44,24 +39,14 @@
             '<path d="M4 8v4h2.5L10 15V5L6.5 8H4z" stroke-linejoin="round"/>' + waves + '</svg>';
     }
 
-    /**
-     * 変更後の音量で試聴音を鳴らす
-     *
-     * 音量は鳴らさないと分からないので、変更操作そのものを試聴にしてしまう
-     */
-    function playPreview() {
-        const now = Date.now();
-        if (now - lastPreviewTime < PREVIEW_INTERVAL_MS) return;
-
-        lastPreviewTime = now;
-        sendToGame({ type: 'uiSound', se: 'UiKeyPress' });
-    }
-
     slider.addEventListener('input', function () {
         // 送るのは変えた項目だけ。C++側が現在の設定へ混ぜ込む
         sendToGame({ type: 'settingsChanged', audio: { master: Number(slider.value) } });
         render(Number(slider.value));
-        playPreview();
+
+        // 1目盛りごとに鳴らす。短く連続して鳴らす前提の音なので間引かない。
+        // この音そのものが変更後の音量の試聴になる
+        sendToGame({ type: 'uiSound', se: 'UiSliderTick' });
     });
 
     window.onMessageFromGame = function (data) {
