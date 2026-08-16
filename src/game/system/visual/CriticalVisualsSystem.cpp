@@ -1,4 +1,5 @@
 #include "CriticalVisualsSystem.h"
+#include "core/utility/Easing.h"
 #include "core/constant/UI.h"
 #include "core/utility/Color.h"
 #include "core/utility/MathConstants.h"
@@ -105,7 +106,7 @@ namespace game::system::visual
 		const float outerRadius{ std::sqrt(screenW * screenW + screenH * screenH) * 0.5f * OUTER_RADIUS_MARGIN };
 
 		// 先端が外へ逃げていく（減速しながら抜けると、弾けて散ったように見える）
-		const float eased{ 1.0f - (1.0f - progress) * (1.0f - progress) };
+		const float eased{ core::utility::easeOut(progress) };
 		const float innerRadius{ screenH * (INNER_RADIUS_START + (INNER_RADIUS_END - INNER_RADIUS_START) * eased) };
 
 		// 出た瞬間が最も濃く、あとは一直線に薄れる

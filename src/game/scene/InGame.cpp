@@ -8,6 +8,7 @@
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/ILighting.h"
+#include "core/interface/IShadowMap.h"
 #include "core/utility/Color.h"
 #include "core/base/ServiceLocator.h"
 #include "core/constant/SeType.h"
@@ -89,6 +90,9 @@
 #include "game/system/visual/MacAwakenEffectSystem.h"
 #include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/system/visual/HardAuraVisualsSystem.h"
+#include "game/system/visual/RimLightVisualsSystem.h"
+#include "game/system/visual/ShockwaveVisualsSystem.h"
+#include "game/system/visual/HudDropSystem.h"
 #include "game/system/visual/BattleStartSystem.h"
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
@@ -229,7 +233,8 @@ namespace game::scene
 	    , m_view{ m_componentManager, m_renderer,
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
-		    m_effectFactory }
+		    m_effectFactory,
+		    *core::base::ServiceLocator::get<core::iface::IShadowMap>() }
 	{
 		loadResources();
 		core::probe::mark("  InGame: loadResources");
@@ -268,6 +273,10 @@ namespace game::scene
 		// 【重要】環境光と平行光の和は255を超えないこと。配置物のマテリアルは
 		// amb(1.0) dif(1.0) なので、和が255を超えると最も光の当たる面が白へ飽和する。
 		// 暗いテクスチャでは気付けないが、明るい面（リネーム端末）を置くと絵が消える
+		// 平行光の向きは明暗と影の両方が使う。別々に書くと片方だけ直したときに
+		// 「面の明るさ」と「影の伸びる向き」が食い違うため、ここで一度だけ決める
+		const core::Vector3 directionalLightDirection{ -0.3f, -1.0f, 0.4f };
+
 		auto* lighting{ core::base::ServiceLocator::get<core::iface::ILighting>() };
 		if (lighting)
 		{
@@ -277,8 +286,26 @@ namespace game::scene
 			constexpr int DIRECTIONAL_LEVEL{ 150 };
 			lighting->setEnabled(true);
 			lighting->setAmbient(AMBIENT_R, AMBIENT_G, AMBIENT_B);
-			lighting->setDirectionalLight(core::Vector3{ -0.3f, -1.0f, 0.4f },
+			lighting->setDirectionalLight(directionalLightDirection,
 			    DIRECTIONAL_LEVEL, DIRECTIONAL_LEVEL, DIRECTIONAL_LEVEL);
+		}
+
+		// 影を落とすシャドウマップ。範囲はプレイヤーに追従させるので、ここでは向きと精度だけ決める。
+		// 解像度を上げるほど輪郭は締まるがVRAMと描画時間が増えるため、
+		// 「プレイヤー周辺だけを写す」前提の 2048 に留めている
+		if (auto* shadowMap{ core::base::ServiceLocator::get<core::iface::IShadowMap>() })
+		{
+			constexpr int SHADOW_RESOLUTION{ 1024 };
+
+			// 小さすぎると自分の面が自分の影に入り縞状のノイズが出る。
+			// 大きくすると足元の影が本体から離れて浮いて見える
+			constexpr float SHADOW_ADJUST_DEPTH{ 0.001f };
+
+			if (shadowMap->create(SHADOW_RESOLUTION))
+			{
+				shadowMap->setLightDirection(directionalLightDirection);
+				shadowMap->setAdjustDepth(SHADOW_ADJUST_DEPTH);
+			}
 		}
 
 		// 3人称マウス視点のためカーソルを非表示にする（表示の切り替えは DebugFlags.h で行う）
@@ -383,6 +410,11 @@ namespace game::scene
 		// ポーズからタイトルへ戻る経路では resume() が先に走って再び隠れてしまう。
 		// 抜け方（死亡・勝利・タイトルへ）ごとに書くと漏れるため、終了地点に一本化する
 		m_inputProvider.setMouseCursorVisible(true);
+
+		// シャドウマップはServiceLocator側がインゲームより長生きするため、
+		// シーンを抜けるときにこちらで確保を解く
+		if (auto* shadowMap{ core::base::ServiceLocator::get<core::iface::IShadowMap>() })
+			shadowMap->destroy();
 	}
 
 	void InGame::onPauseChanged(bool isPaused)
@@ -723,6 +755,24 @@ namespace game::scene
 			m_gameManager.getDifficulty() == core::data::Difficulty::Hard) };
 		core::probe::mark("      sys: HardAuraVisualsSystem");
 		m_view.setHardAuraVisualsSystem(hardAura);
+
+		// 輪郭光。RimLightComponentを付けたEntityだけが対象
+		auto* rimLight{ m_systemManager.registerSystem<game::system::visual::RimLightVisualsSystem>(
+			m_componentManager, m_renderer) };
+		core::probe::mark("      sys: RimLightVisualsSystem");
+		m_view.setRimLightVisualsSystem(rimLight);
+
+		// 地面を走る衝撃波。ShockwaveComponentを付けたEntityが対象
+		auto* shockwave{ m_systemManager.registerSystem<game::system::visual::ShockwaveVisualsSystem>(
+			m_componentManager, m_renderer) };
+		core::probe::mark("      sys: ShockwaveVisualsSystem");
+		m_view.setShockwaveVisualsSystem(shockwave);
+
+		// ボス覚醒でHUDを震わせて落とす
+		auto* hudDrop{ m_systemManager.registerSystem<game::system::visual::HudDropSystem>(
+			m_eventBus, *core::base::ServiceLocator::get<core::iface::IScreen>()) };
+		core::probe::mark("      sys: HudDropSystem");
+		m_view.setHudDropSystem(hudDrop);
 
 		// 敵の発見演出（頭上の通知バッジ）。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
 		auto* detectionAlert{ m_systemManager.registerSystem<game::system::visual::DetectionAlertVisualsSystem>(

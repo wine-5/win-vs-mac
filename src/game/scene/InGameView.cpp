@@ -3,9 +3,11 @@
 #include "core/constant/UI.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/component/visual/ShadowCasterComponent.h"
 #include "game/component/stage/ExtensionPickupComponent.h"
 #include "game/component/visual/WeaponAttachComponent.h"
 #include "game/component/combat/AimComponent.h"
+#include "game/component/combat/ColliderComponent.h"
 #include "game/component/combat/ProjectileComponent.h"
 #include "game/component/combat/DeathComponent.h"
 #include "game/component/ai/AIComponent.h"
@@ -20,6 +22,8 @@
 #include "game/system/visual/TelegraphVisualsSystem.h"
 #include "game/system/visual/BackgroundParticleSystem.h"
 #include "game/system/visual/HardAuraVisualsSystem.h"
+#include "game/system/visual/RimLightVisualsSystem.h"
+#include "game/system/visual/ShockwaveVisualsSystem.h"
 #include "game/system/visual/BattleStartSystem.h"
 #include "game/system/combat/PlayerDeathSystem.h"
 #include "game/system/combat/PlayerRangedAttackSystem.h"
@@ -46,28 +50,46 @@ namespace game::scene
 	    core::iface::IRenderer& renderer,
 	    core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
-	    core::iface::IEffectFactory& effectFactory)
+	    core::iface::IEffectFactory& effectFactory,
+	    core::iface::IShadowMap& shadowMap)
 	    : m_componentManager{ componentManager }
 	    , m_renderer{ renderer }
 	    , m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_effectFactory{ effectFactory }
+	    , m_shadowMap{ shadowMap }
 	{
 	}
 
 	void InGameView::draw(core::ecs::EntityId playerId, int remainingEnemyCount, core::ecs::EntityId bossId,
 	    float elapsedTime)
 	{
+		// 影を落とす物だけを先にシャドウマップへ焼く。ここでの描画は画面には出ない
+		drawShadowCasters(playerId);
+
 		// 虚空を流れるデータの光跡。壁や床に隠れてほしいのでモデルと同じ3D描画フェーズで、
 		// かつ最初に描いて他の要素の背景に回す
 		if (m_backgroundParticleSystem)
 			m_backgroundParticleSystem->draw();
 
+		// 輪郭光。膨らませた裏面を先に描き、この直後の本体描画で内側を塗り潰させる。
+		// 影の判定を掛けたくないので受け側のパスの外で描く（発光色が暗くなるため）
+		if (m_rimLightVisualsSystem)
+			m_rimLightVisualsSystem->draw();
+
+		// 影が落ちるのは地面・壁・ブロックとキャラクター本体。モデルを描く間だけ影を効かせ、
+		// 演出やHUDには掛けない（半透明の演出に影が乗ると濁るため）
+		m_shadowMap.beginReceivePass();
 		drawModels();
+		m_shadowMap.endReceivePass();
 
 		// Hardの敵を包む赤いオーラ。敵モデルの直後に重ねて「体から漏れる光」に見せる
 		if (m_hardAuraVisualsSystem)
 			m_hardAuraVisualsSystem->draw();
+
+		// 地面を走る衝撃波。予兆より先に描き、予兆の輪が衝撃波に埋もれないようにする
+		if (m_shockwaveVisualsSystem)
+			m_shockwaveVisualsSystem->draw();
 
 		// 攻撃予兆（地面の攻撃範囲サークル）。地面の上・敵の足元に3Dで描く（3D描画フェーズ）
 		if (m_attackTelegraphSystem)
@@ -128,11 +150,15 @@ namespace game::scene
 			// （同じ内容が中央と左上に同時に出ていると、どちらを見ればよいのか分からない）
 			if (m_objectiveView &&
 			    (m_battleStartSystem == nullptr || m_battleStartSystem->isObjectiveRevealed()))
-				m_objectiveView->draw(remainingEnemyCount, bossId != core::ecs::INVALID_ENTITY_ID);
+				drawDroppableHud(system::visual::HudSlot::Objective,
+				    [&]
+				    { m_objectiveView->draw(remainingEnemyCount, bossId != core::ecs::INVALID_ENTITY_ID); });
 
 			// 難易度と経過時間（右上）
 			if (m_statusView)
-				m_statusView->draw(elapsedTime);
+				drawDroppableHud(system::visual::HudSlot::Status,
+				    [&]
+				    { m_statusView->draw(elapsedTime); });
 
 			// ボスHP（上中央）。出現していなければ描かれない
 			if (m_bossHUDView)
@@ -140,7 +166,9 @@ namespace game::scene
 
 			// ミニマップ（右上・難易度パネルの下）
 			if (m_miniMapView)
-				m_miniMapView->draw(playerId);
+				drawDroppableHud(system::visual::HudSlot::MiniMap,
+				    [&]
+				    { m_miniMapView->draw(playerId); });
 
 			// 低HP警告のビネット。四隅を赤く染めるが、下の隅はHUDのパネルが占めているため、
 			// パネルより手前に描かないと下2つの隅が隠れてしまう。
@@ -229,6 +257,41 @@ namespace game::scene
 	void InGameView::setHardAuraVisualsSystem(system::visual::HardAuraVisualsSystem* system)
 	{
 		m_hardAuraVisualsSystem = system;
+	}
+
+	void InGameView::setRimLightVisualsSystem(system::visual::RimLightVisualsSystem* system)
+	{
+		m_rimLightVisualsSystem = system;
+	}
+
+	void InGameView::setShockwaveVisualsSystem(system::visual::ShockwaveVisualsSystem* system)
+	{
+		m_shockwaveVisualsSystem = system;
+	}
+
+	void InGameView::setHudDropSystem(system::visual::HudDropSystem* system)
+	{
+		m_hudDropSystem = system;
+	}
+
+	void InGameView::drawDroppableHud(system::visual::HudSlot slot, const std::function<void()>& drawBody)
+	{
+		// 演出が無いときは素通しする。落下していない間も同じ経路を通すことで、
+		// 「演出中だけ別の描き方をする」分岐をView側に持たずに済む
+		if (m_hudDropSystem == nullptr)
+		{
+			drawBody();
+			return;
+		}
+
+		// 画面外まで落ちきったものは描かない
+		if (m_hudDropSystem->isDropped(slot))
+			return;
+
+		const auto offset{ m_hudDropSystem->getOffset(slot) };
+		m_uiRenderer.setDrawOffset(offset.m_x, offset.m_y);
+		drawBody();
+		m_uiRenderer.resetDrawOffset();
 	}
 
 	void InGameView::setBattleStartSystem(system::visual::BattleStartSystem* system)
@@ -363,6 +426,80 @@ namespace game::scene
 				drawAttachedWeapon(entityId);
 			}
 		}
+	}
+
+	float InGameView::castingHalfExtent(core::ecs::EntityId entityId,
+	    const component::visual::RenderComponent& render) const
+	{
+		// 押し返しの箱を持つ物（壁・柱・ブロック）は、その実寸が見た目の大きさそのもの
+		if (const auto* collider{ m_componentManager.tryGet<component::combat::ColliderComponent>(entityId) })
+			return std::max(collider->m_size.x, collider->m_size.z) * 0.5f;
+
+		// ビルボードは板の大きさがそのまま広がりになる
+		if (render.m_billboardImage != -1)
+			return render.m_billboardSize * 0.5f;
+
+		return 0.0f;
+	}
+
+	void InGameView::drawShadowCasters(core::ecs::EntityId playerId)
+	{
+		if (!m_shadowMap.isValid())
+			return;
+
+		const auto* playerTransform{
+			m_componentManager.tryGet<component::movement::TransformComponent>(playerId)
+		};
+		if (playerTransform == nullptr)
+			return;
+
+		// 影の写る範囲。広げるほど1ピクセルあたりの実寸が粗くなって輪郭がぼやけるので、
+		// ステージ全体ではなくプレイヤーの周囲だけを覆い、毎フレーム追従させる。
+		// プレイヤーのコライダーが 50x150 なので、この範囲なら本体が2048px中の
+		// 100px以上を占め、足元の輪郭が潰れずに残る
+		constexpr float AREA_HALF_SIZE{ 900.0f };
+		constexpr float AREA_HALF_HEIGHT{ 900.0f };
+
+		const core::Vector3 center{ playerTransform->m_position };
+		m_shadowMap.setDrawArea(center, AREA_HALF_SIZE, AREA_HALF_HEIGHT);
+
+		m_shadowMap.beginCasterPass();
+		for (const auto entityId :
+		    m_componentManager.getAllEntities<component::visual::ShadowCasterComponent>())
+		{
+			const auto* render{ m_componentManager.tryGet<component::visual::RenderComponent>(entityId) };
+			if (render == nullptr || !render->m_isVisible)
+				continue;
+
+			const auto* transform{
+				m_componentManager.tryGet<component::movement::TransformComponent>(entityId)
+			};
+			if (transform == nullptr)
+				continue;
+
+			// 範囲へ「完全に収まる」物だけを描く。
+			const float halfExtent{ castingHalfExtent(entityId, *render) };
+			if (std::abs(transform->m_position.x - center.x) + halfExtent > AREA_HALF_SIZE ||
+			    std::abs(transform->m_position.z - center.z) + halfExtent > AREA_HALF_SIZE)
+				continue;
+
+			// 拡張子の欠片のようにビルボードで描く物は板のまま焼く。
+			// 焼くときのカメラは光源なので、板は光に正対して実寸ぶんの影を落とす
+			if (render->m_modelHandle == -1)
+			{
+				if (render->m_billboardImage != -1)
+					m_renderer.drawBillboard(render->m_billboardImage, transform->m_position,
+					    render->m_billboardSize, 0.0f);
+				continue;
+			}
+
+			m_renderer.drawModel(render->m_modelHandle, transform->m_position,
+			    transform->m_rotation, transform->m_scale);
+
+			// 武器も影を落とす。本体を描いた直後でないとボーンのワールド行列が確定しない
+			drawAttachedWeapon(entityId);
+		}
+		m_shadowMap.endCasterPass();
 	}
 
 	void InGameView::drawAttachedWeapon(core::ecs::EntityId entityId)

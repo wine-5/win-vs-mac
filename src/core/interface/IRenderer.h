@@ -25,6 +25,26 @@ namespace core::iface
 		virtual void drawModel(int modelHandle, const core::Vector3& position, const::core::Vector3& rotation, const core::Vector3& scale) = 0;
 
 		/**
+		 * @brief モデルの輪郭光（リムライト）を描く
+		 *
+		 * 少し膨らませたモデルの裏面だけを発光色で描き、本体の外へはみ出した分を
+		 * 輪郭として見せる。本体は呼び出し側が直後に通常描画すること。
+		 *
+		 * 明るい床の上では暗いキャラクターが背景へ溶けるため、輪郭を光らせて
+		 * 見失わないようにするのが狙い。本体と同じハンドルを使うので、
+		 * アニメーションの姿勢は自動的に一致する。
+		 * @param modelHandle モデルハンドル（本体と同じもの）
+		 * @param position ワールド座標
+		 * @param rotation 回転（ラジアン）
+		 * @param scale 本体のスケール（これを thickness ぶん膨らませて描く）
+		 * @param thickness 膨らませる割合（0.02なら2%）
+		 * @param color 輪郭の色（ARGB。アルファは見ない）
+		 */
+		virtual void drawModelOutline(int modelHandle, const core::Vector3& position,
+		    const core::Vector3& rotation, const core::Vector3& scale,
+		    float thickness, unsigned int color) = 0;
+
+		/**
 		 * @brief モデルのフレーム（ボーン）を名前から検索する
 		 *
 		 * 武器をキャラクターの手へ装着する際、装着先のボーン番号を得るのに使う。

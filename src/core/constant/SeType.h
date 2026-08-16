@@ -47,6 +47,8 @@ namespace core::constant
 		// ---- 進行・演出 ----
 		BattleReady, // 開始演出のREADY
 		BattleFight, // 開始演出のFIGHT!
+		HudRattle,   // ボス覚醒でHUDが震え出した
+		HudDrop,     // 震えたHUDが落ちて画面下端に当たった
 
 		// ---- 拡張子の付け替え ----
 		ExtensionGrab, // インベントリでマスを掴んだ
@@ -98,6 +100,8 @@ namespace core::constant
 		{ "ItemPickup", SeType::ItemPickup },
 		{ "BattleReady", SeType::BattleReady },
 		{ "BattleFight", SeType::BattleFight },
+		{ "HudRattle", SeType::HudRattle },
+		{ "HudDrop", SeType::HudDrop },
 		{ "UiClick", SeType::UiClick },
 		{ "UiKeyPress", SeType::UiKeyPress },
 		{ "UiFileSelect", SeType::UiFileSelect },

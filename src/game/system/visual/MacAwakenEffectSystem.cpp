@@ -6,6 +6,8 @@
 #include "game/event/InGameEvents.h"
 #include "game/constant/MacAwakenTiming.h"
 #include "core/utility/Color.h"
+#include "core/utility/Easing.h"
+#include "game/component/visual/ShockwaveComponent.h"
 #include "core/constant/UI.h"
 #include <cmath>
 #include <algorithm>
@@ -27,28 +29,32 @@ namespace
 	constexpr int VIGNETTE_BAND_JITTER{ 60 };        // 帯の幅をランダムに伸縮させる量（もやもや感）
 	constexpr int VIGNETTE_STEP{ 4 };                // ビネットの帯を描く刻み幅（px）
 
-	/**
-	 * @brief 滑らかな0→1補間（smoothstep）。等速より緩急がついてカメラの寄りが上品になる
-	 * @param t 進行度（0〜1）
-	 * @return 補間値（0〜1）
-	 */
-	float smoothstep(float t)
-	{
-		t = std::clamp(t, 0.0f, 1.0f);
-		return t * t * (3.0f - 2.0f * t);
-	}
+	// 衝撃波の到達半径をシェイク振幅から導く係数。
+	// 別々に持つと「揺れは大きいのに波は小さい」と食い違うため比例させる
+	constexpr float SHOCKWAVE_RADIUS_PER_SHAKE{ 40.0f };
 
-	// 演出の強度プリセット。トリガーごとにシェイク振幅・赤ビネット濃さを個別に決める。
+	// 演出の強度プリセット。トリガーごとにシェイク振幅・ビネットの濃さと色を個別に決める。
 	struct CinematicIntensity
 	{
-		float m_shakeStrength; // ホールド中のシェイクの最大振幅（ワールド単位）
-		float m_vignetteAlpha; // 赤ビネットの最大濃さ（0〜1）
+		float m_shakeStrength;        // ホールド中のシェイクの最大振幅（ワールド単位）
+		float m_vignetteAlpha;        // ビネットの最大濃さ（0〜1）
+		unsigned int m_vignetteColor; // ビネットの色（0xRRGGBB）
+		int m_shockwaveCount;         // 飛ばす衝撃波の本数
+		float m_shockwaveInterval;    // 衝撃波どうしの間隔（秒）
 	};
 
-	// 出現：初登場なので控えめ（軽い揺れ・淡い赤縁）
-	constexpr CinematicIntensity APPEARANCE_INTENSITY{ 12.0f, 0.45f };
-	// 覚醒：本気モードなので強め（従来値を維持）
-	constexpr CinematicIntensity AWAKEN_INTENSITY{ 22.0f, 0.85f };
+	// 出現：初登場なので控えめ（軽い揺れ・オレンジの縁・衝撃波は1発）。
+	// 覚醒との差を色で付ける。オレンジ→赤と段階を踏ませることで、
+	// 同じ演出でも「まだ本気ではない」「本気になった」が一目で伝わる
+	constexpr CinematicIntensity APPEARANCE_INTENSITY{
+		12.0f, 0.45f, core::utility::Color::rgb(230, 110, 20), 1, 0.0f
+	};
+
+	// 覚醒：本気モードなので強め。色は最も危険を示す赤で振り切り、
+	// 衝撃波も3発続けて飛ばして「ドン、ドン、ドン」と踏み鳴らす
+	constexpr CinematicIntensity AWAKEN_INTENSITY{
+		22.0f, 0.85f, core::utility::Color::rgb(200, 0, 0), 3, 0.35f
+	};
 } // namespace
 
 namespace game::system::visual
@@ -72,6 +78,10 @@ namespace game::system::visual
 			    m_isPlaying = true;
 			    m_shakeStrength = intensity.m_shakeStrength;
 			    m_vignetteStrength = intensity.m_vignetteAlpha;
+			    m_vignetteColor = intensity.m_vignetteColor;
+			    m_shockwaveCount = intensity.m_shockwaveCount;
+			    m_shockwaveInterval = intensity.m_shockwaveInterval;
+			    m_hasFiredShockwave = false;
 			    setMacInvincible(true);
 			} };
 
@@ -129,13 +139,21 @@ namespace game::system::visual
 			macTransform.m_position.z
 		};
 
+		// カメラが寄りきった瞬間＝ボスが踏み鳴らす瞬間として、地面へ衝撃波を走らせる。
+		// 画面のシェイクだけでは「なぜ揺れたか」が伝わらないため、揺れの原因を見せる
+		if (!m_hasFiredShockwave && m_elapsedTime >= timing::ZOOM_IN_TIME)
+		{
+			m_hasFiredShockwave = true;
+			fireShockwave(macTransform.m_position);
+		}
+
 		// --- タイムラインからブレンド量（カメラの寄り具合）を決める ---
 		float blend{ 0.0f };
 		float holdIntensity{ 0.0f }; // ホールド演出（シェイク・ビネット）の強さ（0〜1）
 		if (m_elapsedTime < timing::ZOOM_IN_TIME)
 		{
 			// ①ズームイン：0→1へ滑らかに寄る
-			blend = smoothstep(m_elapsedTime / timing::ZOOM_IN_TIME);
+			blend = core::utility::smoothstep(m_elapsedTime / timing::ZOOM_IN_TIME);
 		}
 		else if (m_elapsedTime < timing::ZOOM_IN_TIME + timing::HOLD_TIME)
 		{
@@ -147,7 +165,7 @@ namespace game::system::visual
 		{
 			// ③ズームアウト：1→0へ滑らかに引く
 			const float t{ (m_elapsedTime - timing::ZOOM_IN_TIME - timing::HOLD_TIME) / timing::ZOOM_OUT_TIME };
-			blend = 1.0f - smoothstep(t);
+			blend = 1.0f - core::utility::smoothstep(t);
 		}
 		effect.m_cinematicBlend = blend;
 
@@ -188,6 +206,28 @@ namespace game::system::visual
 		m_componentManager.get<component::combat::HealthComponent>(m_macId).m_isInvincible = isInvincible;
 	}
 
+	void MacAwakenEffectSystem::fireShockwave(const core::Vector3& origin)
+	{
+		if (m_macId == core::ecs::INVALID_ENTITY_ID)
+			return;
+
+		// 覚醒のたびに付け直さず、初回だけ付けて以後は使い回す
+		if (!m_componentManager.has<component::visual::ShockwaveComponent>(m_macId))
+			m_componentManager.add<component::visual::ShockwaveComponent>(m_macId, {});
+
+		auto& shockwave{ m_componentManager.get<component::visual::ShockwaveComponent>(m_macId) };
+
+		// 画面の縁と地面の輪を同じ色に揃えると「同じ出来事」に見える
+		shockwave.m_color = m_vignetteColor;
+		shockwave.m_maxRadius = SHOCKWAVE_RADIUS_PER_SHAKE * m_shakeStrength;
+
+		// 間隔を広げると、重なった輪ではなく独立した波として読める
+		shockwave.m_ringCount = m_shockwaveCount;
+		shockwave.m_ringInterval = m_shockwaveInterval;
+
+		component::visual::startShockwave(shockwave, origin);
+	}
+
 	void MacAwakenEffectSystem::draw()
 	{
 		if (m_vignetteAlpha <= 0.0f)
@@ -195,8 +235,6 @@ namespace game::system::visual
 
 		const int screenW{ m_screen.getWidth() };
 		const int screenH{ m_screen.getHeight() };
-
-		const unsigned int red{ core::utility::Color::rgb(200, 0, 0) };
 
 		// 帯の幅をフレームごとにランダムに伸縮させ、縁の「もやもや」感を出す
 		std::uniform_int_distribution<int> bandDist{ VIGNETTE_BAND - VIGNETTE_BAND_JITTER, VIGNETTE_BAND + VIGNETTE_BAND_JITTER };
@@ -214,7 +252,8 @@ namespace game::system::visual
 
 			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
 			// 塗りつぶさない矩形（枠）を1段ずつ内側へ描く（幅・高さは両端ぶん詰める）
-			m_uiRenderer.drawBox(inset, inset, screenW - 2 * inset, screenH - 2 * inset, red, false);
+			m_uiRenderer.drawBox(inset, inset, screenW - 2 * inset, screenH - 2 * inset,
+			    m_vignetteColor, false);
 		}
 
 		m_uiRenderer.resetBlendMode();

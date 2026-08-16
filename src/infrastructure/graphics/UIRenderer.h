@@ -143,6 +143,18 @@ namespace infrastructure::graphics
 		 */
 		void resetClipArea() override;
 
+		/**
+		 * @brief 以降の描画位置をまとめてずらす
+		 * @param x 横方向のずらし量（px）
+		 * @param y 縦方向のずらし量（px）
+		 */
+		void setDrawOffset(int x, int y) override;
+
+		/**
+		 * @brief 描画位置のずらしを解除する
+		 */
+		void resetDrawOffset() override;
+
 	  private:
 		/**
 		 * @brief 現在のフォント名と指定サイズに対応するフォントハンドルを返す
@@ -156,5 +168,9 @@ namespace infrastructure::graphics
         // mutable: getTextWidth はフォントハンドルを遅延生成してキャッシュする
         // キャッシュは内部実装の詳細であり論理的な const 性を損なわないため mutable としている
         mutable std::map<std::pair<std::string, int>, int> m_fontHandles{};
-    };
+
+		// 全描画に加算するずらし量。HUDを揺らす・落とす演出で使う
+		int m_offsetX{ 0 };
+		int m_offsetY{ 0 };
+	};
 } // namespace infrastructure::graphics

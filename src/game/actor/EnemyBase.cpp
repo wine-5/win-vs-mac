@@ -4,6 +4,7 @@
 #include "game/component/movement/VelocityComponent.h"
 #include "game/component/movement/FallRecoveryComponent.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/component/visual/ShadowCasterComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/ai/AIComponent.h"
 #include "game/component/combat/HealthComponent.h"
@@ -67,6 +68,7 @@ namespace game::actor
 		}
 
 		m_componentManager.add<component::visual::RenderComponent>(m_entity.getId(), component::visual::RenderComponent{ .m_modelHandle = m_modelHandle });
+		m_componentManager.add<component::visual::ShadowCasterComponent>(m_entity.getId(), {});
 		m_componentManager.add<component::visual::HitEffectComponent>(m_entity.getId(), {});
 		m_componentManager.add<component::visual::EffectComponent>(m_entity.getId(), {});
 

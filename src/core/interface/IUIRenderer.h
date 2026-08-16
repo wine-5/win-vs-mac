@@ -145,5 +145,21 @@ namespace core::iface
 		 * @brief 描画範囲の制限を解除して全画面へ戻す
 		 */
 		virtual void resetClipArea() = 0;
+
+		/**
+		 * @brief 以降の描画位置をまとめてずらす
+		 *
+		 * HUDを丸ごと揺らす・落とすといった演出に使う。各Viewの座標計算に
+		 * 手を入れず、描画を挟むだけで全体を動かせるようにするためのもの。
+		 * 使い終わったら必ず resetDrawOffset() で戻すこと。
+		 * @param x 横方向のずらし量（px）
+		 * @param y 縦方向のずらし量（px）
+		 */
+		virtual void setDrawOffset(int x, int y) = 0;
+
+		/**
+		 * @brief 描画位置のずらしを解除する
+		 */
+		virtual void resetDrawOffset() = 0;
 	};
 } // namespace core::iface

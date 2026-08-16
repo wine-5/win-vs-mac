@@ -6,6 +6,10 @@
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IEffectFactory.h"
+#include "core/interface/IShadowMap.h"
+#include "game/component/visual/RenderComponent.h"
+#include "game/system/visual/HudDropSystem.h"
+#include <functional>
 
 namespace game::system::combat
 {
@@ -23,6 +27,8 @@ namespace game::system::visual
 	class TelegraphVisualsSystem;
 	class BackgroundParticleSystem;
 	class HardAuraVisualsSystem;
+	class RimLightVisualsSystem;
+	class ShockwaveVisualsSystem;
 	class DamagePopupSystem;
 	class BattleStartSystem;
 } // namespace game::system::visual
@@ -67,12 +73,14 @@ namespace game::scene
 		 * @param uiRenderer UI描画のインターフェース
 		 * @param screen 画面サイズ取得のインターフェース
 		 * @param effectFactory エフェクト（Effekseer）描画のインターフェース
+		 * @param shadowMap 影の描き分けのインターフェース
 		 */
 		InGameView(core::ecs::ComponentManager& componentManager,
 		    core::iface::IRenderer& renderer,
 		    core::iface::IUIRenderer& uiRenderer,
 		    core::iface::IScreen& screen,
-		    core::iface::IEffectFactory& effectFactory);
+		    core::iface::IEffectFactory& effectFactory,
+		    core::iface::IShadowMap& shadowMap);
 
 		/**
 		 * @brief インゲームを描画する
@@ -140,6 +148,24 @@ namespace game::scene
 		 * @param system HardAuraVisualsSystemのポインタ（所有はSystemManager）
 		 */
 		void setHardAuraVisualsSystem(system::visual::HardAuraVisualsSystem* system);
+
+		/**
+		 * @brief 輪郭光のSystemを設定する
+		 * @param system RimLightVisualsSystemのポインタ（所有はSystemManager）
+		 */
+		void setRimLightVisualsSystem(system::visual::RimLightVisualsSystem* system);
+
+		/**
+		 * @brief 地面を走る衝撃波のSystemを設定する
+		 * @param system ShockwaveVisualsSystemのポインタ（所有はSystemManager）
+		 */
+		void setShockwaveVisualsSystem(system::visual::ShockwaveVisualsSystem* system);
+
+		/**
+		 * @brief HUD落下のSystemを設定する
+		 * @param system HudDropSystemのポインタ（所有はSystemManager）
+		 */
+		void setHudDropSystem(system::visual::HudDropSystem* system);
 
 		/**
 		 * @brief 開始演出System（READY / FIGHT! の描画元）を設定する
@@ -261,6 +287,38 @@ namespace game::scene
 		void drawModels();
 
 		/**
+		 * @brief 影を落とすEntityをシャドウマップへ描画する
+		 *
+		 * ShadowCasterComponent を持つEntityだけが対象。影の写る範囲は
+		 * プレイヤーの周囲に限っているため、そこから外れたものは描かずに飛ばす。
+		 * @param playerId 影の範囲の中心にするプレイヤーのEntityId
+		 */
+		void drawShadowCasters(core::ecs::EntityId playerId);
+
+		/**
+		 * @brief 落下対象のHUDを、落下ぶんずらして描く
+		 *
+		 * 落下していない間もこの経路を通すことで、演出の有無による分岐を
+		 * 各HUDの描画箇所へ書かずに済ませる。
+		 * @param slot 対象のHUD
+		 * @param drawBody 実際の描画処理
+		 */
+		void drawDroppableHud(system::visual::HudSlot slot, const std::function<void()>& drawBody);
+
+		/**
+		 * @brief 影を落とすEntityの水平方向の広がり（半分）を返す
+		 *
+		 * 影の範囲へ完全に収まっているかの判定に使う。中心座標だけで見ると、
+		 * 端が範囲からはみ出した物を描いてしまい、シャドウマップの縁が
+		 * 範囲外へ引き伸ばされて巨大な偽の影が出る。
+		 * @param entityId 対象のEntityId
+		 * @param render 対象のRenderComponent
+		 * @return 中心からの水平方向の広がり。分からない場合は0
+		 */
+		[[nodiscard]] float castingHalfExtent(core::ecs::EntityId entityId,
+		    const component::visual::RenderComponent& render) const;
+
+		/**
 		 * @brief Entityが装着している武器を、装着先ボーンへ追従させて描画する
 		 *
 		 * 本体モデルを描いた直後に呼ぶこと（ボーンのワールド行列が確定するため）。
@@ -318,6 +376,7 @@ namespace game::scene
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
 		core::iface::IEffectFactory& m_effectFactory;
+		core::iface::IShadowMap& m_shadowMap;
 
 		// 溜め攻撃の集中線の描画元（描画内容はSystemが持ち、Viewは描画順だけを管理する）
 		// 所有はSystemManagerにあり、InGameがsetupSystemsで設定する
@@ -344,6 +403,9 @@ namespace game::scene
 
 		// Hardの敵を包む赤いオーラの描画元（所有はSystemManager、InGameがsetupSystemsで設定する）
 		system::visual::HardAuraVisualsSystem* m_hardAuraVisualsSystem{ nullptr };
+		system::visual::RimLightVisualsSystem* m_rimLightVisualsSystem{ nullptr };
+		system::visual::ShockwaveVisualsSystem* m_shockwaveVisualsSystem{ nullptr };
+		system::visual::HudDropSystem* m_hudDropSystem{ nullptr };
 
 		// プレイヤーステータス（左下のHUD）の描画元（所有はInGame）
 		ui::ingame::PlayerHUDView* m_playerHUDView{ nullptr };

@@ -4,6 +4,8 @@
 #include "game/component/movement/InputComponent.h"
 #include "game/component/movement/FallRecoveryComponent.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/component/visual/RimLightComponent.h"
+#include "game/component/visual/ShadowCasterComponent.h"
 #include "game/component/visual/AnimationComponent.h"
 #include "game/component/visual/WeaponAttachComponent.h"
 #include "game/component/combat/ColliderComponent.h"
@@ -51,6 +53,9 @@ namespace game::actor
 		componentManager.add<component::visual::AnimationComponent>(
 		    m_entity.getId(), buildAnimationComponent(playerData.getAnimations(), resourceManager));
 		componentManager.add<component::visual::RenderComponent>(m_entity.getId(), { modelHandle });
+		componentManager.add<component::visual::ShadowCasterComponent>(m_entity.getId(), {});
+		// 明るい床の上で自機を見失わないよう、輪郭を光らせる
+		componentManager.add<component::visual::RimLightComponent>(m_entity.getId(), {});
 		attachWeapon(componentManager, resourceManager, playerData);
 		componentManager.add<component::visual::HitEffectComponent>(m_entity.getId(), {});
 		componentManager.add<component::visual::EffectComponent>(m_entity.getId(), {});
@@ -103,9 +108,9 @@ namespace game::actor
 		component::visual::LightComponent light{};
 		light.m_offset = core::Vector3{ 0.0f, 250.0f, 0.0f };
 		light.m_range = 1200.0f;
-		light.m_r = 220;
-		light.m_g = 235;
-		light.m_b = 255;
+		light.m_r = 150;
+		light.m_g = 165;
+		light.m_b = 185;
 		componentManager.add<component::visual::LightComponent>(m_entity.getId(), light);
 
 		componentManager.add<component::camera::CameraComponent>(m_entity.getId(), {});

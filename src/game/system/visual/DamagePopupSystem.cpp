@@ -1,4 +1,5 @@
 #include "DamagePopupSystem.h"
+#include "core/utility/Easing.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/combat/ColliderComponent.h"
 #include "game/component/TagComponent.h"
@@ -120,7 +121,7 @@ namespace game::system::visual
 
 			// 時間とともに浮き上がる（減速しながら上がると軽く見える）
 			core::Vector3 world{ popup.m_worldPosition };
-			world.y += RISE_HEIGHT * (1.0f - (1.0f - progress) * (1.0f - progress));
+			world.y += RISE_HEIGHT * core::utility::easeOut(progress);
 
 			const core::Vector3 screen{ m_renderer.worldToScreen(world) };
 			// カメラの背後や描画範囲外は出さない
@@ -152,7 +153,7 @@ namespace game::system::visual
 			{
 				const float burst{ popup.m_elapsedTime / CRITICAL_BURST_DURATION };
 				// 一気に広がって減速する（勢いよく弾けたように見せる）
-				const float eased{ 1.0f - (1.0f - burst) * (1.0f - burst) };
+				const float eased{ core::utility::easeOut(burst) };
 				const float radiusRatio{ CRITICAL_BURST_START_RATIO + (CRITICAL_BURST_END_RATIO - CRITICAL_BURST_START_RATIO) * eased };
 				const int burstAlpha{ static_cast<int>(ALPHA_MAX * (1.0f - burst)) };
 
