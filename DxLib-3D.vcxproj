@@ -205,6 +205,7 @@
     <ClCompile Include="src\game\system\visual\TelegraphVisualsSystem.cpp" />
     <ClCompile Include="src\game\ui\FadeTransition.cpp" />
     <ClCompile Include="src\infrastructure\AudioManager.cpp" />
+    <ClCompile Include="src\infrastructure\settings\SettingsRepository.cpp" />
     <ClCompile Include="src\infrastructure\effect\EffectFactory.cpp" />
     <ClCompile Include="src\infrastructure\effect\EffectPool.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\AudioRepository.cpp" />
@@ -467,6 +468,7 @@
     <ClInclude Include="src\game\utility\GroundQuery.h" />
     <ClInclude Include="src\game\utility\MiniMapProjection.h" />
     <ClInclude Include="src\infrastructure\AudioManager.h" />
+    <ClInclude Include="src\infrastructure\settings\SettingsRepository.h" />
     <ClInclude Include="src\infrastructure\effect\EffectFactory.h" />
     <ClInclude Include="src\infrastructure\effect\EffectPool.h" />
     <ClInclude Include="src\infrastructure\resource\repository\AudioRepository.h" />

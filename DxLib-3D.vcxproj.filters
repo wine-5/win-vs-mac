@@ -509,6 +509,9 @@
     <ClInclude Include="src\core\data\GameSettings.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="src\infrastructure\settings\SettingsRepository.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
     <ClInclude Include="src\core\interface\ISettingsRepository.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
