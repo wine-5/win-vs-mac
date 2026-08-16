@@ -17,6 +17,8 @@ namespace infrastructure::graphics
 
 	void UIRenderer::drawBox(int x, int y, int width, int height, unsigned int color, bool isFilled)
 	{
+		x += m_offsetX;
+		y += m_offsetY;
 		if (isFilled)
 			DrawBox(x, y, x + width, y + height, color, TRUE);
 		else
@@ -25,18 +27,19 @@ namespace infrastructure::graphics
 
 	void UIRenderer::drawCircle(int centerX, int centerY, int radius, unsigned int color, bool isFilled, int thickness)
 	{
-		DrawCircle(centerX, centerY, radius, color, isFilled ? TRUE : FALSE, thickness);
+		DrawCircle(centerX + m_offsetX, centerY + m_offsetY, radius, color, isFilled ? TRUE : FALSE, thickness);
 	}
 
 	void UIRenderer::drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, unsigned int color, bool isFilled)
 	{
-		DrawTriangle(x1, y1, x2, y2, x3, y3, color, isFilled ? TRUE : FALSE);
+		DrawTriangle(x1 + m_offsetX, y1 + m_offsetY, x2 + m_offsetX, y2 + m_offsetY,
+		    x3 + m_offsetX, y3 + m_offsetY, color, isFilled ? TRUE : FALSE);
 	}
 
 	void UIRenderer::drawLine(int x1, int y1, int x2, int y2, unsigned int color, int thickness)
 	{
-		DrawLineAA(static_cast<float>(x1), static_cast<float>(y1),
-		    static_cast<float>(x2), static_cast<float>(y2),
+		DrawLineAA(static_cast<float>(x1 + m_offsetX), static_cast<float>(y1 + m_offsetY),
+		    static_cast<float>(x2 + m_offsetX), static_cast<float>(y2 + m_offsetY),
 		    color, static_cast<float>(thickness));
 	}
 
@@ -45,6 +48,8 @@ namespace infrastructure::graphics
 		// 角の円弧を何分割して描くか。Windows 11の角丸（4〜8px）ならこの程度で十分滑らかになる
 		constexpr int CORNER_SEGMENTS{ 12 };
 
+		x += m_offsetX;
+		y += m_offsetY;
 		DrawRoundRectAA(static_cast<float>(x), static_cast<float>(y),
 		    static_cast<float>(x + width), static_cast<float>(y + height),
 		    static_cast<float>(radius), static_cast<float>(radius),
@@ -68,7 +73,7 @@ namespace infrastructure::graphics
 
 	void UIRenderer::drawText(int x, int y, const char *text, unsigned int color, int fontSize)
 	{
-		DrawStringToHandle(x, y, text, color, resolveFontHandle(fontSize));
+		DrawStringToHandle(x + m_offsetX, y + m_offsetY, text, color, resolveFontHandle(fontSize));
 	}
 
 	int UIRenderer::getTextWidth(const char *text, int fontSize) const
@@ -100,6 +105,8 @@ namespace infrastructure::graphics
 	void UIRenderer::drawImage(int handle, int x, int y, int width, int height)
 	{
 		if (handle == -1) return;
+		x += m_offsetX;
+		y += m_offsetY;
 		// 第6引数は透過フラグ。PNGのアルファチャンネルを反映するためTRUEにする
 		// （アルファを持たないJPG等は不透明のままなので影響なし）
 		DrawExtendGraph(x, y, x + width, y + height, handle, TRUE);
@@ -107,6 +114,9 @@ namespace infrastructure::graphics
 
 	void UIRenderer::setClipArea(int x, int y, int width, int height)
 	{
+		// 切り抜き範囲もずらす。ずらさないとミニマップだけ中身が動いて枠が残る
+		x += m_offsetX;
+		y += m_offsetY;
 		// DxLibの描画可能範囲は右下端を含むため、幅・高さから1引いた座標を渡す
 		SetDrawArea(x, y, x + width - 1, y + height - 1);
 	}
@@ -118,5 +128,17 @@ namespace infrastructure::graphics
 		int colorBitDepth{ 0 };
 		GetScreenState(&screenWidth, &screenHeight, &colorBitDepth);
 		SetDrawArea(0, 0, screenWidth, screenHeight);
+	}
+
+	void UIRenderer::setDrawOffset(int x, int y)
+	{
+		m_offsetX = x;
+		m_offsetY = y;
+	}
+
+	void UIRenderer::resetDrawOffset()
+	{
+		m_offsetX = 0;
+		m_offsetY = 0;
 	}
 } // namespace infrastructure::graphics
