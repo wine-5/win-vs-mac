@@ -5,7 +5,7 @@
  * ウィンドウ状態の管理と C++ ↔ JS メッセージングを担う
  */
 const DesktopLogic = (function () {
-    const winStates = { file: true, param: true, diff: true, rules: false, settings: false };
+    const winStates = { file: true, param: true, diff: true, rules: false, settings: false, quick: false };
 
     let onWindowChangeCallback = null;
     let onVolumeChangeCallback = null;
@@ -77,21 +77,6 @@ const DesktopLogic = (function () {
     }
 
     /**
-     * @brief マスター音量を変更してゲームへ通知する
-     *
-     * 送るのは変えた項目だけで、C++側が現在の設定へ混ぜ込む。
-     * ここが設定の全項目を知る必要はない
-     * @param {number} value 0〜100
-     */
-    function setMasterVolume(value) {
-        if (masterVolume === value) return;
-
-        masterVolume = value;
-        sendToGame({ type: 'settingsChanged', audio: { master: value } });
-        if (onVolumeChangeCallback) onVolumeChangeCallback(masterVolume);
-    }
-
-    /**
      * @brief C++ からのメッセージを処理する
      * @param {object} data 受信したメッセージオブジェクト
      */
@@ -124,13 +109,12 @@ const DesktopLogic = (function () {
 
     return {
         onWindowChange, toggleWindow, startGame, backToTitle, quitGame, launchApp, handleMessage,
-        onVolumeChange, getMasterVolume, setMasterVolume
+        onVolumeChange, getMasterVolume
     };
 }());
 
 // HTML の onclick から呼ばれるグローバル関数
 function toggleWindow(name) { DesktopLogic.toggleWindow(name); }
-function openSettingsWindow() { DesktopLogic.toggleWindow('settings'); }
 function startGame()        { DesktopLogic.startGame(); }
 function backToTitle()      { DesktopLogic.backToTitle(); }
 function quitGame()         { DesktopLogic.quitGame(); }

@@ -84,28 +84,22 @@ const DesktopView = (function () {
     // ── クイック設定 ──────────────────────────────────────────────
 
     /**
-     * @brief クイック設定の開閉を切り替える
+     * @brief クイック設定の開閉をゲームへ要求する
+     *
+     * パネル自体は別ウィンドウ（QuickSettingsWindow）にしてある。
+     * ここのHTMLの中に描くと、別HWNDである他のウィンドウの背面に回ってしまうため
      */
     function toggleQuickSettings() {
-        const panel = document.getElementById('quick-settings');
-        panel.hidden = !panel.hidden;
+        DesktopLogic.toggleWindow('quick');
     }
 
     /**
-     * @brief 音量の表示（スライダー・数値・スピーカーの波）を更新する
+     * @brief トレイのスピーカーアイコンを音量に合わせて描き替える
      * @param {number} master マスター音量（0〜100）
      */
     function renderVolume(master) {
-        const slider = document.getElementById('qs-master');
-        slider.value = master;
-        slider.style.setProperty('--fill', master + '%');
-
-        document.getElementById('qs-value').textContent = master + '%';
-
-        // トレイとパネルで同じスピーカーを使う。0のときは×にして消音が一目で分かるようにする
-        const icon = speakerSvg(master);
-        document.getElementById('qs-volume-icon').innerHTML = icon;
-        document.getElementById('tray-volume').innerHTML = icon;
+        // パネルを閉じていても消音状態が分かるよう、トレイのアイコンも音量に追従させる
+        document.getElementById('tray-volume').innerHTML = speakerSvg(master);
     }
 
     /**
@@ -128,27 +122,11 @@ const DesktopView = (function () {
     }
 
     /**
-     * @brief クイック設定の操作を結びつける
+     * @brief トレイの音量表示を結びつける
      */
     function initQuickSettings() {
-        const slider = document.getElementById('qs-master');
-
-        slider.addEventListener('input', function () {
-            DesktopLogic.setMasterVolume(Number(slider.value));
-        });
-
         DesktopLogic.onVolumeChange(renderVolume);
         renderVolume(DesktopLogic.getMasterVolume());
-
-        // パネルの外を押したら閉じる。タスクバーのトレイを押した場合は
-        // toggleQuickSettings 側で開閉するので、ここでは触らない
-        document.addEventListener('click', function (event) {
-            const panel = document.getElementById('quick-settings');
-            if (panel.hidden) return;
-            if (event.target.closest('#quick-settings') || event.target.closest('.tray')) return;
-
-            panel.hidden = true;
-        });
     }
 
     // ── Matrix Rain ───────────────────────────────────────────────

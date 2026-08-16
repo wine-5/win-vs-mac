@@ -123,21 +123,6 @@
         </div>
     </div>
 
-    <!-- クイック設定。Windows の Win+A と同じく、タスクバーの右上へせり出す。
-         ここに置くのは音量だけで、それ以外は「設定」を開かせる。
-         同じ設定を2か所で細かく触れるようにすると、どちらが正なのか分からなくなる -->
-    <div class="quick-settings" id="quick-settings" hidden>
-        <div class="qs-row">
-            <span class="qs-icon" id="qs-volume-icon"></span>
-            <input type="range" min="0" max="100" step="5" id="qs-master" aria-label="音量">
-            <button class="qs-more" data-tooltip="音量ミキサー" onclick="openSettingsWindow()">›</button>
-        </div>
-        <div class="qs-footer">
-            <span class="qs-value" id="qs-value">100%</span>
-            <button class="qs-gear" data-tooltip="設定" onclick="openSettingsWindow()">⚙</button>
-        </div>
-    </div>
-
     <script src="common/messaging.js"></script>
     <script src="common/ui-sound.js"></script>
     <script src="select/desktop/desktop-logic.js"></script>
