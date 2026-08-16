@@ -208,6 +208,8 @@
     <ClCompile Include="src\infrastructure\settings\SettingsRepository.cpp" />
     <ClCompile Include="src\game\SettingsManager.cpp" />
     <ClCompile Include="src\game\ui\settings\SettingsPanelView.cpp" />
+    <ClCompile Include="src\game\ui\UiInputMapper.cpp" />
+    <ClCompile Include="src\game\ui\settings\SettingsPanelController.cpp" />
     <ClCompile Include="src\infrastructure\effect\EffectFactory.cpp" />
     <ClCompile Include="src\infrastructure\effect\EffectPool.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\AudioRepository.cpp" />
@@ -473,6 +475,8 @@
     <ClInclude Include="src\infrastructure\settings\SettingsRepository.h" />
     <ClInclude Include="src\game\SettingsManager.h" />
     <ClInclude Include="src\game\ui\settings\SettingsPanelView.h" />
+    <ClInclude Include="src\game\ui\UiInputMapper.h" />
+    <ClInclude Include="src\game\ui\settings\SettingsPanelController.h" />
     <ClInclude Include="src\infrastructure\effect\EffectFactory.h" />
     <ClInclude Include="src\infrastructure\effect\EffectPool.h" />
     <ClInclude Include="src\infrastructure\resource\repository\AudioRepository.h" />
@@ -601,3 +605,4 @@
     <Error Condition="!Exists('packages\Microsoft.Web.WebView2.1.0.3967.48\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Web.WebView2.1.0.3967.48\build\native\Microsoft.Web.WebView2.targets'))" />
   </Target>
 </Project>
+
