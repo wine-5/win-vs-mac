@@ -113,6 +113,18 @@ namespace game::scene
 				    m_gameManager.setDifficulty(core::data::toDifficulty(difficulty));
 				    core::log::info("難易度を選択しました: {}", difficulty.c_str());
 			    },
+			    // 設定の正は SettingsManager が持つ。ウィンドウ側へは読み書きの口だけ渡す
+			    [this]() -> core::data::GameSettings
+			    {
+				    return core::data::GameSettings{ m_settingsManager.getAudio(),
+					    m_settingsManager.getControl() };
+			    },
+			    [this](const core::data::GameSettings& settings)
+			    {
+				    m_settingsManager.setAudio(settings.m_audio);
+				    m_settingsManager.setControl(settings.m_control);
+				    m_settingsManager.save();
+			    },
 			    *resourceManager,
 			    // 初見の「何をすればいいのか分からない」を解くための案内。起動後の1回だけ出す
 			    m_gameManager.consumeSelectTutorial());

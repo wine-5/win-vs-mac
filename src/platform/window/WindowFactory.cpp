@@ -66,6 +66,8 @@ namespace platform::window
 	    std::function<void()> onQuitGame,
 	    std::function<void(int, const std::string&)> onFileSlotChanged,
 	    std::function<void(const std::string&)> onDifficultyChanged,
+	    std::function<core::data::GameSettings()> getSettings,
+	    std::function<void(const core::data::GameSettings&)> onSettingsChanged,
 	    core::iface::IResourceManager& resourceManager,
 	    bool showTutorial)
 	{
@@ -75,6 +77,8 @@ namespace platform::window
 		    std::move(onQuitGame),
 		    std::move(onFileSlotChanged),
 		    std::move(onDifficultyChanged),
+		    std::move(getSettings),
+		    std::move(onSettingsChanged),
 		    resourceManager,
 		    m_screen,
 		    showTutorial);

@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "core/data/GameSettings.h"
 #include <memory>
 #include <functional>
 #include <string>
@@ -45,6 +46,8 @@ namespace core::iface
 		 * @param onQuitGame アプリを終了するときのコールバック
 		 * @param onFileSlotChanged ファイルスロット変更時のコールバック
 		 * @param onDifficultyChanged 難易度変更時のコールバック（"NORMAL" | "HARD"）
+		 * @param getSettings 現在の設定を取り出すコールバック（設定ウィンドウの初期表示に使う）
+		 * @param onSettingsChanged 設定変更時のコールバック
 		 * @param resourceManager リソースマネージャ
 		 * @param showTutorial 初回の操作ガイドを表示するか
 		 * @return 生成されたセレクトウィンドウマネージャ
@@ -55,6 +58,8 @@ namespace core::iface
 		    std::function<void()> onQuitGame,
 		    std::function<void(int, const std::string&)> onFileSlotChanged,
 		    std::function<void(const std::string&)> onDifficultyChanged,
+		    std::function<core::data::GameSettings()> getSettings,
+		    std::function<void(const core::data::GameSettings&)> onSettingsChanged,
 		    IResourceManager& resourceManager,
 		    bool showTutorial) = 0;
 	};
