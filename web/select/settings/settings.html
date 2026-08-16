@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <base href="https://game.web/">
+    <link rel="stylesheet" href="common/common.css">
+    <link rel="stylesheet" href="select/settings/settings.css">
+</head>
+<body>
+<!-- 行の並び・文言・刻みは、タイトルとポーズで出るDxLib側の設定画面
+     （src/game/ui/settings/SettingsPanelView.cpp）と一致させること。
+     開いた場所で内容が違うと、同じ「設定」が2つあるように見えてしまう -->
+<div class="app">
+    <nav class="nav">
+        <div class="account">
+            <div class="avatar">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3">
+                    <circle cx="10" cy="7" r="3.2"/><path d="M4 16.5c0-3 2.7-4.6 6-4.6s6 1.6 6 4.6"/>
+                </svg>
+            </div>
+            <div>
+                <div class="account-name">セキュリティ エージェント</div>
+                <div class="account-sub">WIN-VS-MAC\agent</div>
+            </div>
+        </div>
+
+        <button class="nav-item is-active" data-page="sound" data-se="UiKeyPress">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4">
+                <path d="M4 8v4h2.5L10 15V5L6.5 8H4z" stroke-linejoin="round"/>
+                <path d="M13 7.5a3.5 3.5 0 0 1 0 5M15 5.5a6.5 6.5 0 0 1 0 9" stroke-linecap="round"/>
+            </svg>
+            サウンド
+        </button>
+        <button class="nav-item" data-page="control" data-se="UiKeyPress">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4">
+                <rect x="2.5" y="5.5" width="15" height="9" rx="4"/>
+                <path d="M6 8v4M4 10h4M13 9.5h.01M15 11.5h.01" stroke-linecap="round"/>
+            </svg>
+            操作
+        </button>
+    </nav>
+
+    <main class="content">
+        <!-- ================= サウンド ================= -->
+        <section class="page is-active" id="page-sound">
+            <h1 class="page-title">サウンド</h1>
+
+            <!-- 出力＝Windowsの「音量」。ここがマスター -->
+            <div class="section-label">出力</div>
+            <div class="card">
+                <div class="row">
+                    <div class="row-icon" id="icon-master"></div>
+                    <div class="row-text">
+                        <div class="row-title">音量</div>
+                        <div class="row-sub">ゲーム全体の音量</div>
+                    </div>
+                    <div class="row-ctrl">
+                        <input type="range" min="0" max="100" step="5" data-key="master" aria-label="音量">
+                        <span class="row-value" data-for="master">100</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 音量ミキサー＝Windowsのアプリ別音量 -->
+            <div class="section-label">音量ミキサー</div>
+            <div class="card">
+                <div class="row">
+                    <div class="row-icon">
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4">
+                            <path d="M7.5 14.5V4.8l8-1.6v9.6" stroke-linejoin="round"/>
+                            <circle cx="5.6" cy="14.6" r="1.9"/><circle cx="13.6" cy="12.8" r="1.9"/>
+                        </svg>
+                    </div>
+                    <div class="row-text">
+                        <div class="row-title">BGM</div>
+                        <div class="row-sub">WinVsMac.exe - Music</div>
+                    </div>
+                    <div class="row-ctrl">
+                        <input type="range" min="0" max="100" step="5" data-key="bgm" aria-label="BGM">
+                        <span class="row-value" data-for="bgm">100</span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="row-icon">
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                            <path d="M3 10h1.6M6.6 6.5v7M9.6 3.5v13M12.6 7.5v5M15.6 9v2M18 10h-1"/>
+                        </svg>
+                    </div>
+                    <div class="row-text">
+                        <div class="row-title">効果音</div>
+                        <div class="row-sub">WinVsMac.exe - Sound Effects</div>
+                    </div>
+                    <div class="row-ctrl">
+                        <input type="range" min="0" max="100" step="5" data-key="se" aria-label="効果音">
+                        <span class="row-value" data-for="se">100</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-label">詳細設定</div>
+            <div class="card">
+                <div class="row">
+                    <div class="row-icon">
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 10a6 6 0 1 1-1.8-4.3"/><path d="M16.2 2.6v3.4h-3.4"/>
+                        </svg>
+                    </div>
+                    <div class="row-text">
+                        <div class="row-title">音量を既定値に戻す</div>
+                        <div class="row-sub">音量 100 / BGM 100 / 効果音 100</div>
+                    </div>
+                    <div class="row-ctrl">
+                        <button class="btn" data-reset="sound">リセット</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= 操作 ================= -->
+        <section class="page" id="page-control">
+            <h1 class="page-title">操作</h1>
+
+            <div class="section-label">マウス</div>
+            <div class="card">
+                <div class="row">
+                    <div class="row-icon">
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4">
+                            <rect x="5.5" y="2.5" width="9" height="15" rx="4.5"/>
+                            <path d="M10 5.5v3" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div class="row-text">
+                        <div class="row-title">カメラ感度</div>
+                        <div class="row-sub">マウスを動かしたときにカメラが回る速さ</div>
+                    </div>
+                    <div class="row-ctrl">
+                        <input type="range" min="1" max="10" step="1" data-key="sensitivity" aria-label="カメラ感度">
+                        <span class="row-value" data-for="sensitivity">5</span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="row-icon">
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10 3v14M10 3 7 6.2M10 3l3 3.2M10 17l-3-3.2M10 17l3-3.2"/>
+                        </svg>
+                    </div>
+                    <div class="row-text">
+                        <div class="row-title">Y軸を反転する</div>
+                        <div class="row-sub">マウスを下に動かすとカメラが上を向きます</div>
+                    </div>
+                    <div class="row-ctrl">
+                        <span class="toggle-label" data-for="invertY">オフ</span>
+                        <button class="toggle" data-key="invertY" aria-label="Y軸を反転する">
+                            <span class="toggle-track"></span><span class="toggle-knob"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-label">カメラ</div>
+            <div class="card">
+                <div class="row">
+                    <div class="row-icon">
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4.5" y="6" width="9" height="8" rx="1.5"/><path d="M13.5 9.5 17 7.5v5l-3.5-2z"/>
+                            <path d="M2.2 8v4M18.4 15.5l-1.2-1.2"/>
+                        </svg>
+                    </div>
+                    <div class="row-text">
+                        <div class="row-title">画面の揺れ</div>
+                        <div class="row-sub">酔いやすい場合は下げてください</div>
+                    </div>
+                    <div class="row-ctrl">
+                        <input type="range" min="0" max="100" step="10" data-key="screenShake" aria-label="画面の揺れ">
+                        <span class="row-value" data-for="screenShake">100</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-label">詳細設定</div>
+            <div class="card">
+                <div class="row">
+                    <div class="row-icon">
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 10a6 6 0 1 1-1.8-4.3"/><path d="M16.2 2.6v3.4h-3.4"/>
+                        </svg>
+                    </div>
+                    <div class="row-text">
+                        <div class="row-title">操作を既定値に戻す</div>
+                        <div class="row-sub">カメラ感度 5 / Y軸反転 オフ / 画面の揺れ 100</div>
+                    </div>
+                    <div class="row-ctrl">
+                        <button class="btn" data-reset="control">リセット</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="common/messaging.js"></script>
+<script src="common/ui-sound.js"></script>
+<script src="select/settings/settings-logic.js"></script>
+<script src="select/settings/settings-view.js"></script>
+</body>
+</html>
