@@ -59,6 +59,7 @@ namespace core::constant
 		// ---- UI ----
 		UiClick,      // ボタンなどを押した
 		UiKeyPress,   // 選択の移動・キー入力
+		UiSliderTick, // スライダーを1目盛り動かした（短い音を連続で鳴らす前提）
 		UiFileSelect, // 装備するファイルを決定した
 		InventoryOpen, // インベントリを開いた
 		PauseOpen,     // ポーズメニューを開いた
@@ -104,6 +105,7 @@ namespace core::constant
 		{ "HudDrop", SeType::HudDrop },
 		{ "UiClick", SeType::UiClick },
 		{ "UiKeyPress", SeType::UiKeyPress },
+		{ "UiSliderTick", SeType::UiSliderTick },
 		{ "UiFileSelect", SeType::UiFileSelect },
 		{ "ExtensionGrab", SeType::ExtensionGrab },
 		{ "ExtensionDrop", SeType::ExtensionDrop },
