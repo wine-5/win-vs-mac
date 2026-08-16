@@ -6,6 +6,7 @@
 #include "game/event/InGameEvents.h"
 #include "game/constant/MacAwakenTiming.h"
 #include "core/utility/Color.h"
+#include "game/component/visual/ShockwaveComponent.h"
 #include "core/constant/UI.h"
 #include <cmath>
 #include <algorithm>
@@ -26,6 +27,10 @@ namespace
 	constexpr int VIGNETTE_BAND{ 200 };              // 画面端から内側へ何pxまで赤くするか（基準値）
 	constexpr int VIGNETTE_BAND_JITTER{ 60 };        // 帯の幅をランダムに伸縮させる量（もやもや感）
 	constexpr int VIGNETTE_STEP{ 4 };                // ビネットの帯を描く刻み幅（px）
+
+	// 衝撃波の到達半径をシェイク振幅から導く係数。
+	// 別々に持つと「揺れは大きいのに波は小さい」と食い違うため比例させる
+	constexpr float SHOCKWAVE_RADIUS_PER_SHAKE{ 40.0f };
 
 	/**
 	 * @brief 滑らかな0→1補間（smoothstep）。等速より緩急がついてカメラの寄りが上品になる
@@ -81,6 +86,7 @@ namespace game::system::visual
 			    m_shakeStrength = intensity.m_shakeStrength;
 			    m_vignetteStrength = intensity.m_vignetteAlpha;
 			    m_vignetteColor = intensity.m_vignetteColor;
+			    m_hasFiredShockwave = false;
 			    setMacInvincible(true);
 			} };
 
@@ -137,6 +143,14 @@ namespace game::system::visual
 			macTransform.m_position.y + MAC_LOOK_HEIGHT,
 			macTransform.m_position.z
 		};
+
+		// カメラが寄りきった瞬間＝ボスが踏み鳴らす瞬間として、地面へ衝撃波を走らせる。
+		// 画面のシェイクだけでは「なぜ揺れたか」が伝わらないため、揺れの原因を見せる
+		if (!m_hasFiredShockwave && m_elapsedTime >= timing::ZOOM_IN_TIME)
+		{
+			m_hasFiredShockwave = true;
+			fireShockwave(macTransform.m_position);
+		}
 
 		// --- タイムラインからブレンド量（カメラの寄り具合）を決める ---
 		float blend{ 0.0f };
@@ -195,6 +209,24 @@ namespace game::system::visual
 		if (!m_componentManager.has<component::combat::HealthComponent>(m_macId))
 			return;
 		m_componentManager.get<component::combat::HealthComponent>(m_macId).m_isInvincible = isInvincible;
+	}
+
+	void MacAwakenEffectSystem::fireShockwave(const core::Vector3& origin)
+	{
+		if (m_macId == core::ecs::INVALID_ENTITY_ID)
+			return;
+
+		// 覚醒のたびに付け直さず、初回だけ付けて以後は使い回す
+		if (!m_componentManager.has<component::visual::ShockwaveComponent>(m_macId))
+			m_componentManager.add<component::visual::ShockwaveComponent>(m_macId, {});
+
+		auto& shockwave{ m_componentManager.get<component::visual::ShockwaveComponent>(m_macId) };
+
+		// 画面の縁と地面の輪を同じ色に揃えると「同じ出来事」に見える
+		shockwave.m_color = m_vignetteColor;
+		shockwave.m_maxRadius = SHOCKWAVE_RADIUS_PER_SHAKE * m_shakeStrength;
+
+		component::visual::startShockwave(shockwave, origin);
 	}
 
 	void MacAwakenEffectSystem::draw()

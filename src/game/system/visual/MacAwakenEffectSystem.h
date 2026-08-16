@@ -5,6 +5,7 @@
 #include "core/base/EventBus.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include "core/utility/Vector3.h"
 #include <random>
 #include <vector>
 
@@ -59,6 +60,12 @@ namespace game::system::visual
 		 */
 		void setMacInvincible(bool isInvincible) noexcept;
 
+		/**
+		 * @brief ボスの足元から地面へ衝撃波を走らせる（揺れた原因を見せる）
+		 * @param origin 衝撃波の中心にするワールド座標（ボスの足元）
+		 */
+		void fireShockwave(const core::Vector3& origin);
+
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
@@ -77,6 +84,9 @@ namespace game::system::visual
 
 		// ビネットの色。出現はオレンジ、覚醒は赤、と段階を付けて強さの違いを色で示す
 		unsigned int m_vignetteColor{ 0u };
+
+		// この演出で衝撃波を出したか。カメラが寄りきった瞬間に一度だけ出す
+		bool m_hasFiredShockwave{ false };
 
 		std::mt19937 m_rng{ std::random_device{}() }; // ビネットのちらつき用乱数
 
