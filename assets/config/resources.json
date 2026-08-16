@@ -100,6 +100,8 @@
     { "type": "ItemPickup",       "path": "assets/audio/se/se_item_pickup.mp3",        "volume":0.9 },
     { "type": "BattleReady",      "path": "assets/audio/se/se_battle_ready.mp3",      "volume":0.9 },
     { "type": "BattleFight",      "path": "assets/audio/se/se_battle_fight.mp3",      "volume":1.0 },
+    { "type": "HudRattle",        "path": "assets/audio/se/se_hud_rattle.mp3",        "volume":1.0 },
+    { "type": "HudDrop",          "path": "assets/audio/se/se_hud_drop.mp3",          "volume":1.0 },
     { "type": "UiClick",          "path": "assets/audio/se/se_ui_clicked.mp3",        "volume":1.0 },
     { "type": "UiKeyPress",       "path": "assets/audio/se/se_ui_key_press.mp3",      "volume":0.5 },
     { "type": "ExtensionGrab",    "path": "assets/audio/se/se_extension_grab.mp3",    "volume":0.5 },
