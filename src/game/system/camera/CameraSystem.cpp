@@ -28,11 +28,13 @@ namespace game::system::camera
 	CameraSystem::CameraSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId targetEntityId,
 	    core::iface::IInputProvider& inputProvider,
-	    core::iface::ICamera& camera)
+	    core::iface::ICamera& camera,
+	    const core::data::ControlSettings& controlSettings)
 	    : m_componentManager{ componentManager }
 	    , m_targetEntityId{ targetEntityId }
 	    , m_inputProvider{ inputProvider }
 	    , m_camera{ camera }
+	    , m_controlSettings{ controlSettings }
 	{
 	}
 
@@ -116,9 +118,11 @@ namespace game::system::camera
 			                      m_componentManager.get<component::movement::InputComponent>(m_targetEntityId).m_locked };
 		if (!isInputLocked)
 		{
-			// マウス移動量で yaw/pitch を更新する
-			camera.m_yaw += deltaX * camera.m_sensitivity;
-			camera.m_pitch += deltaY * camera.m_sensitivity;
+			// マウス移動量で yaw/pitch を更新する。感度と縦の向きは設定から毎フレーム引くので、
+			// 設定画面のスライダーを動かした瞬間から次のフレームで効く
+			const float sensitivity{ m_controlSettings.sensitivityPerPixel() };
+			camera.m_yaw += deltaX * sensitivity;
+			camera.m_pitch += deltaY * sensitivity * m_controlSettings.pitchDirection();
 		}
 
 		// ピッチを可動範囲に制限する

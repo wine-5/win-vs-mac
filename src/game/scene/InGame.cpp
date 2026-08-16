@@ -565,7 +565,7 @@ namespace game::scene
 		core::probe::mark("      sys: MacAwakenEffectSystem");
 		m_view.setMacAwakenEffectSystem(macAwakenEffect);
 		// カメラはMoveSystemより前に更新し、最新のyawで移動方向を計算させる
-		m_systemManager.registerSystem<game::system::camera::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera);
+		m_systemManager.registerSystem<game::system::camera::CameraSystem>(m_componentManager, m_playerId, m_inputProvider, m_camera, m_settingsManager.getControl());
 		core::probe::mark("      sys: CameraSystem");
 		m_systemManager.registerSystem<game::system::movement::MoveSystem>(m_componentManager, m_playerId, m_playerData.getDashMultiplier());
 		core::probe::mark("      sys: MoveSystem");
