@@ -81,6 +81,76 @@ const DesktopView = (function () {
         document.getElementById('clock').innerHTML = h + ':' + m + '<br>' + y + '/' + mo + '/' + d;
     }
 
+    // ── クイック設定 ──────────────────────────────────────────────
+
+    /**
+     * @brief クイック設定の開閉を切り替える
+     */
+    function toggleQuickSettings() {
+        const panel = document.getElementById('quick-settings');
+        panel.hidden = !panel.hidden;
+    }
+
+    /**
+     * @brief 音量の表示（スライダー・数値・スピーカーの波）を更新する
+     * @param {number} master マスター音量（0〜100）
+     */
+    function renderVolume(master) {
+        const slider = document.getElementById('qs-master');
+        slider.value = master;
+        slider.style.setProperty('--fill', master + '%');
+
+        document.getElementById('qs-value').textContent = master + '%';
+
+        // トレイとパネルで同じスピーカーを使う。0のときは×にして消音が一目で分かるようにする
+        const icon = speakerSvg(master);
+        document.getElementById('qs-volume-icon').innerHTML = icon;
+        document.getElementById('tray-volume').innerHTML = icon;
+    }
+
+    /**
+     * @brief 音量に応じた波の数のスピーカーSVGを返す
+     * @param {number} master マスター音量（0〜100）
+     * @returns {string} SVG文字列
+     */
+    function speakerSvg(master) {
+        let waves;
+        if (master <= 0) {
+            waves = '<path d="M13 7.5 17 12.5M17 7.5 13 12.5" stroke-linecap="round"/>';
+        } else if (master < 50) {
+            waves = '<path d="M13 7.5a3.5 3.5 0 0 1 0 5" stroke-linecap="round"/>';
+        } else {
+            waves = '<path d="M13 7.5a3.5 3.5 0 0 1 0 5M15 5.5a6.5 6.5 0 0 1 0 9" stroke-linecap="round"/>';
+        }
+
+        return '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4">' +
+            '<path d="M4 8v4h2.5L10 15V5L6.5 8H4z" stroke-linejoin="round"/>' + waves + '</svg>';
+    }
+
+    /**
+     * @brief クイック設定の操作を結びつける
+     */
+    function initQuickSettings() {
+        const slider = document.getElementById('qs-master');
+
+        slider.addEventListener('input', function () {
+            DesktopLogic.setMasterVolume(Number(slider.value));
+        });
+
+        DesktopLogic.onVolumeChange(renderVolume);
+        renderVolume(DesktopLogic.getMasterVolume());
+
+        // パネルの外を押したら閉じる。タスクバーのトレイを押した場合は
+        // toggleQuickSettings 側で開閉するので、ここでは触らない
+        document.addEventListener('click', function (event) {
+            const panel = document.getElementById('quick-settings');
+            if (panel.hidden) return;
+            if (event.target.closest('#quick-settings') || event.target.closest('.tray')) return;
+
+            panel.hidden = true;
+        });
+    }
+
     // ── Matrix Rain ───────────────────────────────────────────────
 
     /**
@@ -240,13 +310,17 @@ const DesktopView = (function () {
         setInterval(updateClock, 10000);
 
         initMatrixRain();
+        initQuickSettings();
 
         DesktopLogic.onWindowChange(function (name, visible) {
             setWindowVisible(name, visible);
         });
     }
 
-    return { initialize };
+    return { initialize, toggleQuickSettings };
 }());
+
+// HTML の onclick から呼ばれるグローバル関数
+function toggleQuickSettings() { DesktopView.toggleQuickSettings(); }
 
 DesktopView.initialize();
