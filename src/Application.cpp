@@ -42,6 +42,9 @@ Application::Application(int screenWidth, int screenHeight)
 	m_inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
 	m_preloader = core::base::ServiceLocator::get<core::iface::IResourcePreloader>();
 
+	// 保存されていた音量を、AudioManager が登録された後に行き渡らせる
+	m_settingsManager.applyAudio();
+
 	// 起動直後から全リソースの先読みを始める。BIOS〜Selectの間にほぼ読み終わるため、
 	// InGame生成時の loadXxxById() はキャッシュヒットになりロード待ちが消える
 	m_preloader->enqueueAll();

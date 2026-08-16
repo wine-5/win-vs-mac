@@ -1,9 +1,11 @@
 #pragma once
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
+#include "game/SettingsManager.h"
 #include "game/ui/pause/PauseMenuController.h"
 #include "game/scene/SceneType.h"
 #include "core/constant/SeType.h"
+#include "infrastructure/settings/SettingsRepository.h"
 #include <memory>
 
 namespace game::scene
@@ -86,6 +88,10 @@ class Application
 
 	game::GameManager m_gameManager{};
 	game::PauseManager m_pauseManager{};
+
+	// 設定は保存先（リポジトリ）より後に生まれる必要があるため、この順で宣言する
+	infrastructure::settings::SettingsRepository m_settingsRepository{};
+	game::SettingsManager m_settingsManager{ m_settingsRepository };
 
 	// サービス初期化後に生成するためポインタで持つ（所有はApplication）
 	std::unique_ptr<game::ui::pause::PauseMenuController> m_pauseMenuController;
