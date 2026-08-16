@@ -139,8 +139,10 @@ namespace game::system::camera
 			const auto& effect{ m_componentManager.get<component::camera::CameraEffectComponent>(m_targetEntityId) };
 			fovScale = effect.m_fovScale;
 			distanceScale = effect.m_distanceScale;
-			// 揺れは通常演出（被弾）とボス覚醒演出を加算する
-			shakeOffset = effect.m_shakeOffset + effect.m_awakenShakeOffset;
+			// 揺れは通常演出（被弾）とボス覚醒演出を加算する。
+			// 揺れの発生源はいくつもあるが合成はここ1か所なので、設定の倍率もここで掛ける。
+			// 酔いやすい人が0にすれば、どの演出由来の揺れもまとめて止まる
+			shakeOffset = (effect.m_shakeOffset + effect.m_awakenShakeOffset) * m_controlSettings.shakeScale();
 			cinematicBlend = effect.m_cinematicBlend;
 			cinematicTarget = effect.m_cinematicTarget;
 		}
