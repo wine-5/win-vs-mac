@@ -22,10 +22,14 @@ namespace platform::window::select
 		if (!getHwnd())
 			return;
 
+		// 表示は必ず ShowWindow で行う。SetWindowPos の SWP_SHOWWINDOW では
+		// WM_SHOWWINDOW が飛ばず、WebView 側が非表示のままになって白紙で出てしまう
+		show();
+
 		// 兄弟の中で最前面へ移す。SWP_NOACTIVATE を付けるのは、
 		// ここへフォーカスを奪うとデスクトップ側のクリック判定が途切れるため
 		::SetWindowPos(getHwnd(), HWND_TOP, 0, 0, 0, 0,
-		    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+		    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 	}
 
 	void QuickSettingsWindow::onCreateControls(HWND hwnd)
