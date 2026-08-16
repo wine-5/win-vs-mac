@@ -1,6 +1,7 @@
 #include "ShockwaveVisualsSystem.h"
 #include <algorithm>
 #include "core/utility/Color.h"
+#include "core/utility/Easing.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/component/visual/ShockwaveComponent.h"
 
@@ -17,11 +18,6 @@ namespace
 	// 最後の波をどれだけ弱めるか（0で減衰なし、1で消える）
 	constexpr float RING_DECAY{ 0.35f };
 
-	float easeOut(float t)
-	{
-		t = std::clamp(t, 0.0f, 1.0f);
-		return 1.0f - (1.0f - t) * (1.0f - t);
-	}
 } // namespace
 
 namespace game::system::visual
@@ -73,7 +69,7 @@ namespace game::system::visual
 					continue;
 
 				const float progress{ ringTime / shockwave.m_duration };
-				const float radius{ shockwave.m_startRadius + (shockwave.m_maxRadius - shockwave.m_startRadius) * easeOut(progress) };
+				const float radius{ shockwave.m_startRadius + (shockwave.m_maxRadius - shockwave.m_startRadius) * core::utility::easeOut(progress) };
 				// 後の波ほど弱めるが、消えるほどは落とさない。
 				// 本数で割ると3本目が1/3の濃さになり、独立した波として見えなくなる
 				const float ringRatio{ shockwave.m_ringCount > 1

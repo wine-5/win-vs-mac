@@ -1,4 +1,5 @@
 #include "BossGateSystem.h"
+#include "core/utility/Easing.h"
 #include "game/component/stage/BossGateComponent.h"
 #include "game/component/movement/TransformComponent.h"
 #include "game/event/InGameEvents.h"
@@ -41,7 +42,7 @@ namespace game::system::stage
 			anyMoving = true;
 
 			// 加速しながら上がって閉じきる瞬間が最も速い（シャッターが叩きつけられる感じ）
-			const float eased{ gate.m_progress * gate.m_progress };
+			const float eased{ core::utility::easeIn(gate.m_progress) };
 
 			auto& transform{ m_componentManager.get<component::movement::TransformComponent>(gateId) };
 			transform.m_position.y = gate.m_openY + (gate.m_closedY - gate.m_openY) * eased;

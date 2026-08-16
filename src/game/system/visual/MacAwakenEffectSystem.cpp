@@ -6,6 +6,7 @@
 #include "game/event/InGameEvents.h"
 #include "game/constant/MacAwakenTiming.h"
 #include "core/utility/Color.h"
+#include "core/utility/Easing.h"
 #include "game/component/visual/ShockwaveComponent.h"
 #include "core/constant/UI.h"
 #include <cmath>
@@ -31,17 +32,6 @@ namespace
 	// 衝撃波の到達半径をシェイク振幅から導く係数。
 	// 別々に持つと「揺れは大きいのに波は小さい」と食い違うため比例させる
 	constexpr float SHOCKWAVE_RADIUS_PER_SHAKE{ 40.0f };
-
-	/**
-	 * @brief 滑らかな0→1補間（smoothstep）。等速より緩急がついてカメラの寄りが上品になる
-	 * @param t 進行度（0〜1）
-	 * @return 補間値（0〜1）
-	 */
-	float smoothstep(float t)
-	{
-		t = std::clamp(t, 0.0f, 1.0f);
-		return t * t * (3.0f - 2.0f * t);
-	}
 
 	// 演出の強度プリセット。トリガーごとにシェイク振幅・ビネットの濃さと色を個別に決める。
 	struct CinematicIntensity
@@ -163,7 +153,7 @@ namespace game::system::visual
 		if (m_elapsedTime < timing::ZOOM_IN_TIME)
 		{
 			// ①ズームイン：0→1へ滑らかに寄る
-			blend = smoothstep(m_elapsedTime / timing::ZOOM_IN_TIME);
+			blend = core::utility::smoothstep(m_elapsedTime / timing::ZOOM_IN_TIME);
 		}
 		else if (m_elapsedTime < timing::ZOOM_IN_TIME + timing::HOLD_TIME)
 		{
@@ -175,7 +165,7 @@ namespace game::system::visual
 		{
 			// ③ズームアウト：1→0へ滑らかに引く
 			const float t{ (m_elapsedTime - timing::ZOOM_IN_TIME - timing::HOLD_TIME) / timing::ZOOM_OUT_TIME };
-			blend = 1.0f - smoothstep(t);
+			blend = 1.0f - core::utility::smoothstep(t);
 		}
 		effect.m_cinematicBlend = blend;
 

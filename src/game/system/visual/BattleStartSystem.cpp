@@ -7,6 +7,7 @@
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IAudioManager.h"
 #include "core/interface/IStringConverter.h"
+#include "core/utility/Easing.h"
 #include "core/utility/MathConstants.h"
 #include "core/utility/Probe.h" // 一時: メモリ調査用（原因特定後に削除）
 #include <algorithm>
@@ -97,16 +98,6 @@ namespace
 	constexpr float FLASH_TIME{ 0.14f };
 	constexpr int FLASH_ALPHA{ 150 };
 
-	/**
-	 * @brief 滑らかな0→1補間（smoothstep）。等速より緩急がついて文字の出入りが上品になる
-	 * @param t 進行度（0〜1）
-	 * @return 補間値（0〜1）
-	 */
-	float smoothstep(float t)
-	{
-		t = std::clamp(t, 0.0f, 1.0f);
-		return t * t * (3.0f - 2.0f * t);
-	}
 } // namespace
 
 namespace game::system::visual
@@ -334,7 +325,7 @@ namespace game::system::visual
 
 	void BattleStartSystem::drawMission()
 	{
-		const float alphaRate{ smoothstep(m_phaseTime / MISSION_FADE_IN) };
+		const float alphaRate{ core::utility::smoothstep(m_phaseTime / MISSION_FADE_IN) };
 		const int centerX{ m_screen.getWidth() / 2 };
 		const int centerY{ m_screen.getHeight() * TEXT_CENTER_Y_RATIO_PERCENT / 100 };
 
@@ -346,7 +337,7 @@ namespace game::system::visual
 			return;
 
 		const float promptTime{ m_phaseTime - MISSION_PROMPT_DELAY };
-		const float promptFade{ smoothstep(promptTime / MISSION_PROMPT_FADE_IN) };
+		const float promptFade{ core::utility::smoothstep(promptTime / MISSION_PROMPT_FADE_IN) };
 
 		// ゆっくりフェードイン・フェードアウトを繰り返して「入力を待っている」ことを示す。
 		// 帯も文字と一緒に濃さを変える（帯だけ残ると黒い箱が貼り付いて見える）
@@ -383,7 +374,7 @@ namespace game::system::visual
 
 	void BattleStartSystem::drawMissionFly()
 	{
-		const float progress{ smoothstep(m_phaseTime / MISSION_FLY_TIME) };
+		const float progress{ core::utility::smoothstep(m_phaseTime / MISSION_FLY_TIME) };
 
 		const int startX{ m_screen.getWidth() / 2 };
 		const int startY{ m_screen.getHeight() * TEXT_CENTER_Y_RATIO_PERCENT / 100 };
@@ -405,9 +396,9 @@ namespace game::system::visual
 		// フェードイン→ホールド→フェードアウトの濃さ（0〜1）を求める
 		float alphaRate{ 1.0f };
 		if (m_elapsedTime < READY_FADE_IN)
-			alphaRate = smoothstep(m_elapsedTime / READY_FADE_IN);
+			alphaRate = core::utility::smoothstep(m_elapsedTime / READY_FADE_IN);
 		else if (m_elapsedTime >= READY_FADE_IN + READY_HOLD)
-			alphaRate = 1.0f - smoothstep((m_elapsedTime - READY_FADE_IN - READY_HOLD) / READY_FADE_OUT);
+			alphaRate = 1.0f - core::utility::smoothstep((m_elapsedTime - READY_FADE_IN - READY_HOLD) / READY_FADE_OUT);
 
 		if (alphaRate <= 0.0f)
 			return;
@@ -423,7 +414,7 @@ namespace game::system::visual
 		    core::utility::Color::BLACK, true);
 
 		// フェードインの間だけ下からせり上がらせる（消えるときは動かさない）
-		const float riseRate{ 1.0f - smoothstep(m_elapsedTime / READY_FADE_IN) };
+		const float riseRate{ 1.0f - core::utility::smoothstep(m_elapsedTime / READY_FADE_IN) };
 		const int fontSize{ scaled(READY_FONT_SIZE) };
 		const int textWidth{ m_uiRenderer.getTextWidth(READY_TEXT, fontSize) };
 		const int textY{ centerY - fontSize / 2 + static_cast<int>(scaled(READY_RISE) * riseRate) };
@@ -444,7 +435,7 @@ namespace game::system::visual
 		// ホールドの間は振り切ったまま、そのあとフェードアウトする
 		const float alphaRate{ fightTime < FIGHT_HOLD
 			                       ? 1.0f
-			                       : 1.0f - smoothstep((fightTime - FIGHT_HOLD) / FIGHT_FADE_OUT) };
+			                       : 1.0f - core::utility::smoothstep((fightTime - FIGHT_HOLD) / FIGHT_FADE_OUT) };
 		if (alphaRate <= 0.0f)
 			return;
 
@@ -478,7 +469,7 @@ namespace game::system::visual
 		m_uiRenderer.resetFont();
 
 		// 文字の下を左右へ走る発光ライン。文字だけより「始まった」という勢いが出る
-		const float expandRate{ smoothstep(fightTime / LINE_EXPAND_TIME) };
+		const float expandRate{ core::utility::smoothstep(fightTime / LINE_EXPAND_TIME) };
 		const int halfWidth{ static_cast<int>(scaled(LINE_HALF_WIDTH) * expandRate) };
 		if (halfWidth <= 0)
 			return;
