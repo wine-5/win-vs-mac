@@ -88,6 +88,10 @@ namespace game::system::visual
 		// この演出で衝撃波を出したか。カメラが寄りきった瞬間に一度だけ出す
 		bool m_hasFiredShockwave{ false };
 
+		// 飛ばす衝撃波の本数と間隔（秒）。出現は1発、覚醒は続けて複数飛ばす
+		int m_shockwaveCount{ 1 };
+		float m_shockwaveInterval{ 0.0f };
+
 		std::mt19937 m_rng{ std::random_device{}() }; // ビネットのちらつき用乱数
 
 		// EventBusの購読ハンドル。このクラスが破棄されると自動で解除される

@@ -49,18 +49,21 @@ namespace
 		float m_shakeStrength;        // ホールド中のシェイクの最大振幅（ワールド単位）
 		float m_vignetteAlpha;        // ビネットの最大濃さ（0〜1）
 		unsigned int m_vignetteColor; // ビネットの色（0xRRGGBB）
+		int m_shockwaveCount;         // 飛ばす衝撃波の本数
+		float m_shockwaveInterval;    // 衝撃波どうしの間隔（秒）
 	};
 
-	// 出現：初登場なので控えめ（軽い揺れ・オレンジの縁）。
+	// 出現：初登場なので控えめ（軽い揺れ・オレンジの縁・衝撃波は1発）。
 	// 覚醒との差を色で付ける。オレンジ→赤と段階を踏ませることで、
 	// 同じ演出でも「まだ本気ではない」「本気になった」が一目で伝わる
 	constexpr CinematicIntensity APPEARANCE_INTENSITY{
-		12.0f, 0.45f, core::utility::Color::rgb(230, 110, 20)
+		12.0f, 0.45f, core::utility::Color::rgb(230, 110, 20), 1, 0.0f
 	};
 
-	// 覚醒：本気モードなので強め。色は最も危険を示す赤で振り切る
+	// 覚醒：本気モードなので強め。色は最も危険を示す赤で振り切り、
+	// 衝撃波も3発続けて飛ばして「ドン、ドン、ドン」と踏み鳴らす
 	constexpr CinematicIntensity AWAKEN_INTENSITY{
-		22.0f, 0.85f, core::utility::Color::rgb(200, 0, 0)
+		22.0f, 0.85f, core::utility::Color::rgb(200, 0, 0), 3, 0.35f
 	};
 } // namespace
 
@@ -86,6 +89,8 @@ namespace game::system::visual
 			    m_shakeStrength = intensity.m_shakeStrength;
 			    m_vignetteStrength = intensity.m_vignetteAlpha;
 			    m_vignetteColor = intensity.m_vignetteColor;
+			    m_shockwaveCount = intensity.m_shockwaveCount;
+			    m_shockwaveInterval = intensity.m_shockwaveInterval;
 			    m_hasFiredShockwave = false;
 			    setMacInvincible(true);
 			} };
@@ -225,6 +230,10 @@ namespace game::system::visual
 		// 画面の縁と地面の輪を同じ色に揃えると「同じ出来事」に見える
 		shockwave.m_color = m_vignetteColor;
 		shockwave.m_maxRadius = SHOCKWAVE_RADIUS_PER_SHAKE * m_shakeStrength;
+
+		// 間隔を広げると、重なった輪ではなく独立した波として読める
+		shockwave.m_ringCount = m_shockwaveCount;
+		shockwave.m_ringInterval = m_shockwaveInterval;
 
 		component::visual::startShockwave(shockwave, origin);
 	}
