@@ -375,6 +375,8 @@
     <ClInclude Include="src\core\interface\IRenderer.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
     <ClInclude Include="src\core\interface\IResourcePreloader.h" />
+    <ClInclude Include="src\core\interface\ISettingsRepository.h" />
+    <ClInclude Include="src\core\data\GameSettings.h" />
     <ClInclude Include="src\core\interface\IStringConverter.h" />
     <ClInclude Include="src\core\input\KeyCode.h" />
     <ClInclude Include="src\core\interface\IScreen.h" />
