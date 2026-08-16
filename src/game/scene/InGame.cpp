@@ -92,6 +92,7 @@
 #include "game/system/visual/HardAuraVisualsSystem.h"
 #include "game/system/visual/RimLightVisualsSystem.h"
 #include "game/system/visual/ShockwaveVisualsSystem.h"
+#include "game/system/visual/HudDropSystem.h"
 #include "game/system/visual/BattleStartSystem.h"
 #include "game/ui/debug/DebugGizmoView.h"            // DEBUG: リリース時に削除
 #include "game/ui/debug/DebugHUDView.h"              // DEBUG: リリース時に削除
@@ -766,6 +767,12 @@ namespace game::scene
 			m_componentManager, m_renderer) };
 		core::probe::mark("      sys: ShockwaveVisualsSystem");
 		m_view.setShockwaveVisualsSystem(shockwave);
+
+		// ボス覚醒でHUDを震わせて落とす
+		auto* hudDrop{ m_systemManager.registerSystem<game::system::visual::HudDropSystem>(
+			m_eventBus, *core::base::ServiceLocator::get<core::iface::IScreen>()) };
+		core::probe::mark("      sys: HudDropSystem");
+		m_view.setHudDropSystem(hudDrop);
 
 		// 敵の発見演出（頭上の通知バッジ）。描画内容はSystemが持ち、Viewが描画フェーズで呼ぶ
 		auto* detectionAlert{ m_systemManager.registerSystem<game::system::visual::DetectionAlertVisualsSystem>(

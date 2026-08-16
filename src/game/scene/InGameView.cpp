@@ -150,11 +150,15 @@ namespace game::scene
 			// （同じ内容が中央と左上に同時に出ていると、どちらを見ればよいのか分からない）
 			if (m_objectiveView &&
 			    (m_battleStartSystem == nullptr || m_battleStartSystem->isObjectiveRevealed()))
-				m_objectiveView->draw(remainingEnemyCount, bossId != core::ecs::INVALID_ENTITY_ID);
+				drawDroppableHud(system::visual::HudSlot::Objective,
+				    [&]
+				    { m_objectiveView->draw(remainingEnemyCount, bossId != core::ecs::INVALID_ENTITY_ID); });
 
 			// 難易度と経過時間（右上）
 			if (m_statusView)
-				m_statusView->draw(elapsedTime);
+				drawDroppableHud(system::visual::HudSlot::Status,
+				    [&]
+				    { m_statusView->draw(elapsedTime); });
 
 			// ボスHP（上中央）。出現していなければ描かれない
 			if (m_bossHUDView)
@@ -162,7 +166,9 @@ namespace game::scene
 
 			// ミニマップ（右上・難易度パネルの下）
 			if (m_miniMapView)
-				m_miniMapView->draw(playerId);
+				drawDroppableHud(system::visual::HudSlot::MiniMap,
+				    [&]
+				    { m_miniMapView->draw(playerId); });
 
 			// 低HP警告のビネット。四隅を赤く染めるが、下の隅はHUDのパネルが占めているため、
 			// パネルより手前に描かないと下2つの隅が隠れてしまう。
@@ -261,6 +267,31 @@ namespace game::scene
 	void InGameView::setShockwaveVisualsSystem(system::visual::ShockwaveVisualsSystem* system)
 	{
 		m_shockwaveVisualsSystem = system;
+	}
+
+	void InGameView::setHudDropSystem(system::visual::HudDropSystem* system)
+	{
+		m_hudDropSystem = system;
+	}
+
+	void InGameView::drawDroppableHud(system::visual::HudSlot slot, const std::function<void()>& drawBody)
+	{
+		// 演出が無いときは素通しする。落下していない間も同じ経路を通すことで、
+		// 「演出中だけ別の描き方をする」分岐をView側に持たずに済む
+		if (m_hudDropSystem == nullptr)
+		{
+			drawBody();
+			return;
+		}
+
+		// 画面外まで落ちきったものは描かない
+		if (m_hudDropSystem->isDropped(slot))
+			return;
+
+		const auto offset{ m_hudDropSystem->getOffset(slot) };
+		m_uiRenderer.setDrawOffset(offset.m_x, offset.m_y);
+		drawBody();
+		m_uiRenderer.resetDrawOffset();
 	}
 
 	void InGameView::setBattleStartSystem(system::visual::BattleStartSystem* system)

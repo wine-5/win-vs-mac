@@ -8,6 +8,8 @@
 #include "core/interface/IEffectFactory.h"
 #include "core/interface/IShadowMap.h"
 #include "game/component/visual/RenderComponent.h"
+#include "game/system/visual/HudDropSystem.h"
+#include <functional>
 
 namespace game::system::combat
 {
@@ -160,6 +162,12 @@ namespace game::scene
 		void setShockwaveVisualsSystem(system::visual::ShockwaveVisualsSystem* system);
 
 		/**
+		 * @brief HUD落下のSystemを設定する
+		 * @param system HudDropSystemのポインタ（所有はSystemManager）
+		 */
+		void setHudDropSystem(system::visual::HudDropSystem* system);
+
+		/**
 		 * @brief 開始演出System（READY / FIGHT! の描画元）を設定する
 		 * @param system BattleStartSystemのポインタ（所有はSystemManager）
 		 */
@@ -288,6 +296,16 @@ namespace game::scene
 		void drawShadowCasters(core::ecs::EntityId playerId);
 
 		/**
+		 * @brief 落下対象のHUDを、落下ぶんずらして描く
+		 *
+		 * 落下していない間もこの経路を通すことで、演出の有無による分岐を
+		 * 各HUDの描画箇所へ書かずに済ませる。
+		 * @param slot 対象のHUD
+		 * @param drawBody 実際の描画処理
+		 */
+		void drawDroppableHud(system::visual::HudSlot slot, const std::function<void()>& drawBody);
+
+		/**
 		 * @brief 影を落とすEntityの水平方向の広がり（半分）を返す
 		 *
 		 * 影の範囲へ完全に収まっているかの判定に使う。中心座標だけで見ると、
@@ -387,6 +405,7 @@ namespace game::scene
 		system::visual::HardAuraVisualsSystem* m_hardAuraVisualsSystem{ nullptr };
 		system::visual::RimLightVisualsSystem* m_rimLightVisualsSystem{ nullptr };
 		system::visual::ShockwaveVisualsSystem* m_shockwaveVisualsSystem{ nullptr };
+		system::visual::HudDropSystem* m_hudDropSystem{ nullptr };
 
 		// プレイヤーステータス（左下のHUD）の描画元（所有はInGame）
 		ui::ingame::PlayerHUDView* m_playerHUDView{ nullptr };
