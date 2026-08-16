@@ -151,10 +151,13 @@ namespace game::ui::settings
 
 		// 左ナビへ入ったらページも切り替える。Windows の設定と同じで、
 		// 選んでいる項目と右に出ている内容が食い違わないようにする
+		const bool didChangePage{ isNavFocused() && m_page != static_cast<SettingsPage>(m_focusIndex) };
 		if (isNavFocused())
 			m_page = static_cast<SettingsPage>(m_focusIndex);
 
-		playUiSe(core::constant::SeType::UiKeyPress);
+		// ページが変わったときは、行を1つ移るのとは重さが違うので押した音を鳴らす。
+		// マウスで左ナビを押したときと同じ音になり、操作の意味と音が一致する
+		playUiSe(didChangePage ? core::constant::SeType::UiClick : core::constant::SeType::UiKeyPress);
 	}
 
 	void SettingsPanelController::adjustValue(int direction)
