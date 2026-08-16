@@ -55,6 +55,12 @@ Application::Application(int screenWidth, int screenHeight)
 	    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 	    *core::base::ServiceLocator::get<core::iface::IScreen>());
 
+	m_settingsPanelController = std::make_unique<game::ui::settings::SettingsPanelController>(
+	    *m_inputProvider,
+	    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+	    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+	    m_settingsManager);
+
 	// 初期シーンを設定する（インゲームから始めるかは DebugFlags.h で切り替える）
 	m_sceneManager->changeScene(core::constant::START_FROM_IN_GAME
 	                                ? game::scene::SceneType::InGame
@@ -80,7 +86,7 @@ void Application::run()
 		m_inputProvider->captureFrameInput();
 
 		// シーンをまたぐポーズメニュー（Esc）の開閉・操作を処理する
-		updatePauseMenu();
+		updatePauseMenu(elapsedTime);
 
 		if (m_pauseManager.isPausedBy(game::PauseReason::Menu))
 		{
@@ -88,7 +94,13 @@ void Application::run()
 			// 貯めた時間も捨てる（捨てないと再開した瞬間にメニューを開いていた時間ぶん早送りされる）
 			accumulator = 0.0f;
 			m_sceneManager->draw();
-			m_pauseMenuController->draw();
+
+			// 設定を開いている間はポーズメニューを隠す。重ねて出すと、
+			// どちらを操作しているのか分からなくなる
+			if (m_isSettingsOpen)
+				m_settingsPanelController->draw();
+			else
+				m_pauseMenuController->draw();
 		}
 		else
 		{
@@ -149,8 +161,20 @@ void Application::playUiSe(core::constant::SeType seType) const
 		audio->playSe(seType);
 }
 
-void Application::updatePauseMenu()
+void Application::updatePauseMenu(float deltaTime)
 {
+	// 設定を開いている間は、ポーズメニューもEscの開閉も止める。
+	// Escは「設定を閉じてポーズメニューへ戻る」に割り当てる
+	if (m_isSettingsOpen)
+	{
+		if (m_settingsPanelController->update(deltaTime) == game::ui::settings::SettingsPanelAction::Close)
+		{
+			m_isSettingsOpen = false;
+			playUiSe(core::constant::SeType::UiClose);
+		}
+		return;
+	}
+
 	const auto sceneType{ m_sceneManager->getCurrentSceneType() };
 
 	// Escで開閉する（別の理由でポーズ中は何もしない）
@@ -181,6 +205,12 @@ void Application::updatePauseMenu()
 		m_pauseManager.resume();
 		m_sceneManager->notifyPauseChanged(false);
 		playUiSe(core::constant::SeType::UiClose);
+		break;
+
+	case game::ui::pause::PauseMenuAction::Settings:
+		m_isSettingsOpen = true;
+		m_settingsPanelController->open();
+		playUiSe(core::constant::SeType::UiClick);
 		break;
 
 	case game::ui::pause::PauseMenuAction::BackToTitle:

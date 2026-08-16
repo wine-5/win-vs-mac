@@ -104,6 +104,7 @@ namespace game::ui::pause
 		switch (action)
 		{
 		case PauseMenuAction::Resume: label = "ゲームに戻る"; break;
+		case PauseMenuAction::Settings: label = "設定"; break;
 		case PauseMenuAction::BackToTitle: label = "タイトルへ戻る"; break;
 		case PauseMenuAction::Quit: label = "ゲームを終了"; break;
 		default: label = ""; break;

@@ -3,6 +3,7 @@
 #include "game/PauseManager.h"
 #include "game/SettingsManager.h"
 #include "game/ui/pause/PauseMenuController.h"
+#include "game/ui/settings/SettingsPanelController.h"
 #include "game/scene/SceneType.h"
 #include "core/constant/SeType.h"
 #include "infrastructure/settings/SettingsRepository.h"
@@ -51,8 +52,9 @@ class Application
   private:
 	/**
 	 * @brief Escキーによるポーズメニューの開閉と、メニュー操作の結果を処理する
+	 * @param deltaTime フレーム間の時間差（秒）
 	 */
-	void updatePauseMenu();
+	void updatePauseMenu(float deltaTime);
 
 	/**
 	 * @brief UI操作の効果音を鳴らす
@@ -95,6 +97,12 @@ class Application
 
 	// サービス初期化後に生成するためポインタで持つ（所有はApplication）
 	std::unique_ptr<game::ui::pause::PauseMenuController> m_pauseMenuController;
+
+	// 設定画面もシーンをまたいで同じものを使う（どこから開いても同じ見た目・同じ値になる）
+	std::unique_ptr<game::ui::settings::SettingsPanelController> m_settingsPanelController;
+
+	/** @brief ポーズメニューの上に設定画面を開いているか */
+	bool m_isSettingsOpen{ false };
 
 	// ServiceLocatorが所有するサービスへの参照（初期化後に取得する）
 	game::scene::SceneManager* m_sceneManager{ nullptr };

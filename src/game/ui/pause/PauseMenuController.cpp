@@ -19,6 +19,7 @@ namespace game::ui::pause
 	{
 		m_items.clear();
 		m_items.push_back(PauseMenuAction::Resume);
+		m_items.push_back(PauseMenuAction::Settings);
 		if (allowBackToTitle)
 			m_items.push_back(PauseMenuAction::BackToTitle);
 		m_items.push_back(PauseMenuAction::Quit);

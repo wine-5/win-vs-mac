@@ -71,9 +71,12 @@ namespace game::ui::settings
 	}
 
 	void SettingsPanelView::draw(const core::data::GameSettings& settings, SettingsPage page,
-	    int selectedRow, bool showFocus)
+	    int focusIndex, bool showFocus)
 	{
 		updateLayout();
+
+		// 左ナビの番号ぶんを引いて、ページ内での行番号にする（負なら行は選択されていない）
+		const int selectedRow{ focusIndex - PAGE_COUNT };
 
 		// 背後のシーンを半透明の黒で沈めてから、その上にウィンドウを置く
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, OVERLAY_ALPHA);
@@ -84,7 +87,7 @@ namespace game::ui::settings
 
 		drawWindow();
 		drawTitleBar();
-		drawNav(page);
+		drawNav(page, focusIndex, showFocus);
 
 		if (page == SettingsPage::Sound)
 			drawSoundPage(settings.m_audio, selectedRow, showFocus);
@@ -158,7 +161,7 @@ namespace game::ui::settings
 		    closeCenterX - arm, closeCenterY + arm, Color::SETTINGS_TEXT, 1);
 	}
 
-	void SettingsPanelView::drawNav(SettingsPage page) const
+	void SettingsPanelView::drawNav(SettingsPage page, int focusIndex, bool showFocus) const
 	{
 		const int navLeft{ m_panelX + scaled(12.0f) };
 		const int navWidth{ m_navWidth - scaled(16.0f) };
@@ -215,6 +218,10 @@ namespace game::ui::settings
 				m_uiRenderer.drawRoundedBox(navLeft, itemY + (itemHeight - pillHeight) / 2,
 				    scaled(NAV_PILL_WIDTH), pillHeight, scaled(2.0f), Color::SETTINGS_ACCENT, true, 1);
 			}
+
+			// 操作の対象が左ナビにあるときだけ枠を出す（行を触っている間は出さない）
+			if (i == focusIndex && showFocus)
+				drawSelection(navLeft, itemY, navWidth, itemHeight, true);
 
 			const std::string label{ toDrawable(labels[i]) };
 			m_uiRenderer.drawText(navLeft + scaled(36.0f), itemY + (itemHeight - itemFontSize) / 2,
@@ -297,6 +304,23 @@ namespace game::ui::settings
 		    selectedRow == static_cast<int>(ControlRow::Reset), showFocus);
 	}
 
+	void SettingsPanelView::drawSelection(int x, int y, int width, int height, bool showFocus) const
+	{
+		const int radius{ scaled(CARD_RADIUS) };
+		m_uiRenderer.drawRoundedBox(x, y, width, height, radius, Color::SETTINGS_CARD_HOVER, true, 1);
+
+		// Fluent のフォーカスは「外に白い線、内に暗い線」の二重リング。
+		// マウスで触っている間は出さないので、キーボード・パッド操作中だけ描く
+		if (!showFocus)
+			return;
+
+		const int thickness{ scaled(FOCUS_RING_THICKNESS) };
+		m_uiRenderer.drawRoundedBox(x, y, width, height, radius, Color::SETTINGS_TEXT, false, thickness);
+		m_uiRenderer.drawRoundedBox(x + thickness, y + thickness,
+		    width - thickness * 2, height - thickness * 2,
+		    radius, Color::SETTINGS_WINDOW_BG, false, 1);
+	}
+
 	int SettingsPanelView::drawSectionLabel(int y, const char* label) const
 	{
 		const int fontSize{ scaled(FONT_SECTION) };
@@ -331,23 +355,7 @@ namespace game::ui::settings
 		const int radius{ scaled(CARD_RADIUS) };
 
 		if (isSelected)
-		{
-			m_uiRenderer.drawRoundedBox(m_contentX + 1, y + 1, m_contentWidth - 2, m_rowHeight - 2,
-			    radius, Color::SETTINGS_CARD_HOVER, true, 1);
-
-			// Fluent のフォーカスは「外に白い線、内に暗い線」の二重リング。
-			// マウスで触っている間は出さないので、キーボード・パッド操作中だけ描く
-			if (showFocus)
-			{
-				m_uiRenderer.drawRoundedBox(m_contentX + 1, y + 1, m_contentWidth - 2, m_rowHeight - 2,
-				    radius, Color::SETTINGS_TEXT, false, scaled(FOCUS_RING_THICKNESS));
-				m_uiRenderer.drawRoundedBox(m_contentX + 1 + scaled(FOCUS_RING_THICKNESS),
-				    y + 1 + scaled(FOCUS_RING_THICKNESS),
-				    m_contentWidth - 2 - scaled(FOCUS_RING_THICKNESS) * 2,
-				    m_rowHeight - 2 - scaled(FOCUS_RING_THICKNESS) * 2,
-				    radius, Color::SETTINGS_WINDOW_BG, false, 1);
-			}
-		}
+			drawSelection(m_contentX + 1, y + 1, m_contentWidth - 2, m_rowHeight - 2, showFocus);
 
 		// 見出しと説明。アイコン用の幅を左に空けてある（アイコンは別途描き足す）
 		const int textX{ m_contentX + scaled(ROW_PADDING_X) + scaled(ICON_COLUMN_WIDTH) };
@@ -428,9 +436,7 @@ namespace game::ui::settings
 		const int radius{ height / 2 };
 
 		if (isOn)
-		{
 			m_uiRenderer.drawRoundedBox(left, top, width, height, radius, Color::SETTINGS_ACCENT, true, 1);
-		}
 		else
 		{
 			m_uiRenderer.drawRoundedBox(left, top, width, height, radius, Color::SETTINGS_CARD, true, 1);

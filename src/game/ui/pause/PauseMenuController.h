@@ -14,6 +14,7 @@ namespace game::ui::pause
 	{
 		None,        // 何も選択されていない
 		Resume,      // ゲームに戻る
+		Settings,    // 設定を開く
 		BackToTitle, // タイトルへ戻る
 		Quit,        // ゲームを終了する
 	};

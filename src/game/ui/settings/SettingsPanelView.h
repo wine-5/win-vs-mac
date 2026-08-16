@@ -74,11 +74,11 @@ namespace game::ui::settings
 		 * @brief 設定画面を描画する
 		 * @param settings 表示する設定値
 		 * @param page 表示中のページ
-		 * @param selectedRow 選択中の行（0起点。範囲外なら選択なし）
+		 * @param focusIndex 選択位置（0〜PAGE_COUNT-1 は左ナビ、それ以降がページ内の行）
 		 * @param showFocus フォーカス枠を出すか（キーボード・パッド操作中だけ true）
 		 */
 		void draw(const core::data::GameSettings& settings, SettingsPage page,
-		    int selectedRow, bool showFocus);
+		    int focusIndex, bool showFocus);
 
 	  private:
 		/** @brief 行の右側に置くコントロールの種類 */
@@ -91,7 +91,17 @@ namespace game::ui::settings
 
 		void drawWindow() const;
 		void drawTitleBar() const;
-		void drawNav(SettingsPage page) const;
+		void drawNav(SettingsPage page, int focusIndex, bool showFocus) const;
+
+		/**
+		 * @brief 選択中を示す下地と、キーボード操作中だけ出す二重のフォーカス枠を描く
+		 * @param x 左上X座標
+		 * @param y 左上Y座標
+		 * @param width 幅
+		 * @param height 高さ
+		 * @param showFocus フォーカス枠を出すか
+		 */
+		void drawSelection(int x, int y, int width, int height, bool showFocus) const;
 		void drawSoundPage(const core::data::AudioSettings& audio, int selectedRow, bool showFocus) const;
 		void drawControlPage(const core::data::ControlSettings& control, int selectedRow, bool showFocus) const;
 
