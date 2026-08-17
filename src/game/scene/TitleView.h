@@ -109,6 +109,18 @@ namespace game::scene
 		void drawStartButton() const;
 
 		/**
+		 * @brief 歯車（設定）のアイコンを描く
+		 *
+		 * 実物のタスクマネージャーは左ナビの項目に必ずアイコンが付く。
+		 * 画像を持たずに済むよう、輪と歯を線で組み立てる
+		 * @param centerX 中心X座標
+		 * @param centerY 中心Y座標
+		 * @param size アイコンの一辺（px）
+		 * @param color 線の色
+		 */
+		void drawGearIcon(int centerX, int centerY, int size, unsigned int color) const;
+
+		/**
 		 * @brief Fluent のボタンを描く
 		 * @param x 左上X座標
 		 * @param y 左上Y座標

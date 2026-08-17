@@ -3,9 +3,11 @@
 #include "core/constant/UI.h"
 #include "core/interface/IStringConverter.h"
 #include "core/utility/Color.h"
+#include "core/utility/MathConstants.h"
 #include "core/constant/SeType.h"
 #include "core/interface/IAudioManager.h"
 #include <algorithm>
+#include <cmath>
 #include <string>
 
 namespace
@@ -31,6 +33,14 @@ namespace
 	constexpr float NAV_PILL_HEIGHT{ 16.0f };
 	constexpr float NAV_TOP_GAP{ 48.0f };    // ハンバーガーの下から最初の項目まで
 	constexpr float NAV_BOTTOM_GAP{ 12.0f }; // 左下の「設定」の下余白
+	constexpr float NAV_ICON_SIZE{ 18.0f };  // 項目のアイコンの一辺
+	constexpr float NAV_ICON_LEFT{ 12.0f };  // 項目の左端からアイコンの左端まで
+
+	// 歯車の各部を「アイコンの一辺」に対する比率で持つ。拡大しても形が崩れないようにする
+	constexpr float GEAR_RING_RADIUS_RATIO{ 0.29f };    // 輪の中心線の半径
+	constexpr float GEAR_RING_THICKNESS_RATIO{ 0.13f }; // 輪の太さ
+	constexpr float GEAR_TOOTH_LENGTH_RATIO{ 0.47f };   // 中心から歯の先端まで
+	constexpr int GEAR_TOOTH_COUNT{ 8 };
 
 	constexpr float CONTENT_PADDING_X{ 28.0f };
 	constexpr float CONTENT_PADDING_TOP{ 22.0f };
@@ -367,6 +377,10 @@ namespace game::scene
 			    scaled(5.0f), Color::TITLE_CARD_HOVER, true, 1);
 		}
 
+		const int iconSize{ scaled(NAV_ICON_SIZE) };
+		drawGearIcon(settingsX + scaled(NAV_ICON_LEFT) + iconSize / 2,
+		    settingsY + settingsHeight / 2, iconSize, Color::TITLE_TEXT);
+
 		const std::string settings{ toDrawable("設定") };
 		m_uiRenderer.drawText(settingsX + scaled(NAV_TEXT_INDENT),
 		    settingsY + (settingsHeight - fontSize) / 2,
@@ -561,6 +575,32 @@ namespace game::scene
 		int rectX{}, rectY{}, rectWidth{}, rectHeight{};
 		getStartButtonRect(rectX, rectY, rectWidth, rectHeight);
 		drawButton(rectX, rectY, rectWidth, rectHeight, "選択画面へ", true, m_hovered == Hit::Start);
+	}
+
+	void TitleView::drawGearIcon(int centerX, int centerY, int size, unsigned int color) const
+	{
+		const float ringRadius{ size * GEAR_RING_RADIUS_RATIO };
+		const int thickness{ std::max(1, static_cast<int>(size * GEAR_RING_THICKNESS_RATIO)) };
+		const float toothLength{ size * GEAR_TOOTH_LENGTH_RATIO };
+
+		// 歯は輪の内側から生やす。輪の中心線から出すと、根元に隙間ができて割れて見える
+		const float toothStart{ ringRadius - thickness * 0.5f };
+
+		for (int i{ 0 }; i < GEAR_TOOTH_COUNT; ++i)
+		{
+			const float angle{ core::utility::TWO_PI * i / GEAR_TOOTH_COUNT };
+			const float dirX{ std::cos(angle) };
+			const float dirY{ std::sin(angle) };
+
+			m_uiRenderer.drawLine(centerX + static_cast<int>(dirX * toothStart),
+			    centerY + static_cast<int>(dirY * toothStart),
+			    centerX + static_cast<int>(dirX * toothLength),
+			    centerY + static_cast<int>(dirY * toothLength),
+			    color, thickness);
+		}
+
+		// 塗らずに描くことで、中央が抜けて歯車の穴になる
+		m_uiRenderer.drawCircle(centerX, centerY, static_cast<int>(ringRadius), color, false, thickness);
 	}
 
 	void TitleView::drawButton(int x, int y, int width, int height, const char* label,
