@@ -58,13 +58,6 @@ namespace core::utility
         static constexpr unsigned int BUTTON_PRESSED   = 0xFF383880;
         static constexpr unsigned int BUTTON_DISABLED  = GRAY;
 
-        // ========== パフォーマンスグラフ用の色 ==========
-
-        static constexpr unsigned int GRAPH_CPU    = 0xFF4080FF; // 青：CPU使用率
-        static constexpr unsigned int GRAPH_MEMORY = 0xFF40FF80; // 緑：メモリ使用率
-        static constexpr unsigned int GRAPH_DISK   = 0xFF80FFFF; // シアン：ディスク活動率
-        static constexpr unsigned int CARD_BG      = 0xFF081024; // タスクマネージャー風カード背景（濃い紺）
-
 		// ========== 発見演出（通知バナー）用の色 ==========
 
 		static constexpr unsigned int ALERT_BANNER_BG = 0xFFF8F8FA;    // 通知バー背景の代替色（画像未ロード時）
@@ -138,10 +131,6 @@ namespace core::utility
 		static constexpr unsigned int SETTINGS_TRACK = 0xFF8B8B8B;          // スライダーの未到達部分
 
 		// ========== タイトル画面（タスクマネージャー風ウィンドウ）用の色 ==========
-
-		// ウィンドウの外に敷く地。真っ黒だとウィンドウの影が消えて板が浮かないため、
-		// わずかに青を残した暗色にする
-		static constexpr unsigned int TITLE_BACKDROP = 0xFF080C14;
 
 		// 実物のタスクマネージャーはライトテーマが既定で、白い面に濃い文字が載る。
 		// 「自分のPCのタスクマネージャーがそのまま立ち上がった」ように見せたい画面なので、
