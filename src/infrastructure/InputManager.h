@@ -92,6 +92,7 @@ namespace infrastructure
 
 		/**
 		 * @brief 前回取得時からのマウス移動量を取得する（取得後カーソルを画面中央へ戻す）
+		 * @details 他アプリが前面の間は 0 を返し、カーソルの位置にも触れない
 		 * @param outDx X方向の移動量の出力先
 		 * @param outDy Y方向の移動量の出力先
 		 */
@@ -109,9 +110,17 @@ namespace infrastructure
 
 		// このフレームで既に消費した「押された瞬間」。updatePreviousState で空にする
 		std::unordered_set<core::input::KeyCode> m_consumedKeys;
+		// 自分のアプリが前面か。captureFrameInput() で毎フレーム更新し、
+		// キー入力だけでなくマウス視点操作の可否にも使う
+		bool m_isWindowFocused{ true };
+
 		bool m_cursorVisible{ true }; // 表示中は前回座標との差分、非表示中は中央固定差分を使う
 		int m_previousMouseX{ 0 };
 		int m_previousMouseY{ 0 };
 		bool m_hasPreviousMousePosition{ false };
+
+		// 前面へ戻った直後にカーソルを中央へ置き直すか。離れた位置のカーソルを
+		// そのまま差分にすると視点が飛ぶため、1フレームぶん捨てるのに使う
+		bool m_needsMouseRecenter{ false };
 	};
 } // namespace infrastructure
