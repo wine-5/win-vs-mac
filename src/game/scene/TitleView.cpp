@@ -68,6 +68,9 @@ namespace
 	constexpr float WINDOW_RADIUS{ 8.0f };
 	constexpr float GRID_LINE_COUNT{ 10.0f };
 
+	/** @brief グラフの塗りの濃さ。白地なので、線が読める程度まで薄くする */
+	constexpr int GRAPH_FILL_ALPHA{ 64 };
+
 	// フォントサイズ（基準サイズでのピクセル数）
 	constexpr float FONT_TITLE_BAR{ 13.0f };
 	constexpr float FONT_GAME_TITLE{ 42.0f };
@@ -94,9 +97,9 @@ namespace
 
 	// 並びは TitleChannel と対にする
 	constexpr ChannelSpec CHANNEL_SPECS[]{
-		{ "CPU", "CPU 使用率", "使用率", Color::GRAPH_CPU, 0.15f },
-		{ "メモリ", "メモリ使用率", "使用率", Color::GRAPH_MEMORY, 0.40f },
-		{ "ディスク", "ディスクのアクティブな時間", "アクティブな時間", Color::GRAPH_DISK, 0.15f },
+		{ "CPU", "CPU 使用率", "使用率", Color::TITLE_GRAPH_CPU, 0.15f },
+		{ "メモリ", "メモリ使用率", "使用率", Color::TITLE_GRAPH_MEMORY, 0.40f },
+		{ "ディスク", "ディスクのアクティブな時間", "アクティブな時間", Color::TITLE_GRAPH_DISK, 0.15f },
 	};
 } // namespace
 
@@ -318,15 +321,15 @@ namespace game::scene
 		const int radius{ scaled(WINDOW_RADIUS) };
 
 		m_uiRenderer.drawRoundedBox(m_windowX, m_windowY, m_windowWidth, m_windowHeight,
-		    radius, Color::SETTINGS_WINDOW_BG, true, 1);
+		    radius, Color::TITLE_WINDOW_BG, true, 1);
 
 		// 右のコンテンツ面。ウィンドウの右下までを覆い、角丸をウィンドウと共有する
 		m_uiRenderer.drawRoundedBox(m_windowX + m_navWidth, m_windowY + m_titleBarHeight,
 		    m_windowWidth - m_navWidth, m_windowHeight - m_titleBarHeight,
-		    radius, Color::SETTINGS_CONTENT_BG, true, 1);
+		    radius, Color::TITLE_CONTENT_BG, true, 1);
 
 		m_uiRenderer.drawRoundedBox(m_windowX, m_windowY, m_windowWidth, m_windowHeight,
-		    radius, Color::SETTINGS_STROKE, false, 1);
+		    radius, Color::TITLE_STROKE, false, 1);
 	}
 
 	void TitleView::drawTitleBar() const
@@ -336,7 +339,7 @@ namespace game::scene
 
 		m_uiRenderer.drawText(m_windowX + scaled(CONTENT_PADDING_X),
 		    m_windowY + (m_titleBarHeight - fontSize) / 2,
-		    title.c_str(), Color::WHITE, fontSize);
+		    title.c_str(), Color::TITLE_TEXT, fontSize);
 	}
 
 	void TitleView::drawNav() const
@@ -350,16 +353,16 @@ namespace game::scene
 		// 押しても行き先が変わらないため、押せる場所にはしない
 		const int performanceY{ m_windowY + m_titleBarHeight + scaled(NAV_TOP_GAP) };
 		m_uiRenderer.drawRoundedBox(itemX, performanceY, itemWidth, itemHeight,
-		    scaled(5.0f), Color::SETTINGS_NAV_SELECTED, true, 1);
+		    scaled(5.0f), Color::TITLE_NAV_SELECTED, true, 1);
 
 		const int pillHeight{ scaled(NAV_PILL_HEIGHT) };
 		m_uiRenderer.drawRoundedBox(itemX, performanceY + (itemHeight - pillHeight) / 2,
-		    scaled(NAV_PILL_WIDTH), pillHeight, scaled(2.0f), Color::SETTINGS_ACCENT, true, 1);
+		    scaled(NAV_PILL_WIDTH), pillHeight, scaled(2.0f), Color::TITLE_ACCENT, true, 1);
 
 		const std::string performance{ toDrawable("パフォーマンス") };
 		m_uiRenderer.drawText(itemX + scaled(NAV_TEXT_INDENT),
 		    performanceY + (itemHeight - fontSize) / 2,
-		    performance.c_str(), Color::WHITE, fontSize);
+		    performance.c_str(), Color::TITLE_TEXT, fontSize);
 
 		// 左下の「設定」。実物もアプリの設定をここへ置く
 		int settingsX{}, settingsY{}, settingsWidth{}, settingsHeight{};
@@ -368,13 +371,13 @@ namespace game::scene
 		if (m_hovered == Hit::Settings)
 		{
 			m_uiRenderer.drawRoundedBox(settingsX, settingsY, settingsWidth, settingsHeight,
-			    scaled(5.0f), Color::SETTINGS_CARD_HOVER, true, 1);
+			    scaled(5.0f), Color::TITLE_CARD_HOVER, true, 1);
 		}
 
 		const std::string settings{ toDrawable("設定") };
 		m_uiRenderer.drawText(settingsX + scaled(NAV_TEXT_INDENT),
 		    settingsY + (settingsHeight - fontSize) / 2,
-		    settings.c_str(), Color::WHITE, fontSize);
+		    settings.c_str(), Color::TITLE_TEXT, fontSize);
 	}
 
 	void TitleView::drawAppHeader() const
@@ -389,11 +392,11 @@ namespace game::scene
 		const int subFontSize{ scaled(FONT_APP_SUB) };
 
 		// 実物は「パフォーマンス」と出す位置。画面で最初に目が行く場所なのでゲーム名を置く
-		m_uiRenderer.drawText(textX, m_contentY, "Win vs Mac", Color::WHITE, titleFontSize);
+		m_uiRenderer.drawText(textX, m_contentY, "Win vs Mac", Color::TITLE_TEXT, titleFontSize);
 
 		const std::string sub{ toDrawable("WinVsMac.exe ・ 実行中") };
 		m_uiRenderer.drawText(textX, m_contentY + titleFontSize + scaled(4.0f),
-		    sub.c_str(), Color::SETTINGS_TEXT_TERTIARY, subFontSize);
+		    sub.c_str(), Color::TITLE_TEXT_TERTIARY, subFontSize);
 
 		int exitX{}, exitY{}, exitWidth{}, exitHeight{};
 		getExitButtonRect(exitX, exitY, exitWidth, exitHeight);
@@ -421,24 +424,24 @@ namespace game::scene
 			if (isSelected || m_hovered == THUMB_HITS[i])
 			{
 				m_uiRenderer.drawRoundedBox(rectX, rectY, rectWidth, rectHeight, scaled(4.0f),
-				    isSelected ? Color::SETTINGS_NAV_SELECTED : Color::SETTINGS_CARD_HOVER, true, 1);
+				    isSelected ? Color::TITLE_NAV_SELECTED : Color::TITLE_CARD_HOVER, true, 1);
 			}
 
 			const int graphX{ rectX + padding };
 			const int graphY{ rectY + (rectHeight - graphHeight) / 2 };
-			m_uiRenderer.drawBox(graphX, graphY, graphWidth, graphHeight, Color::SETTINGS_CARD, true);
+			m_uiRenderer.drawBox(graphX, graphY, graphWidth, graphHeight, Color::TITLE_CARD, true);
 			drawGraph(graphX, graphY, graphWidth, graphHeight, i, false);
-			m_uiRenderer.drawBox(graphX, graphY, graphWidth, graphHeight, Color::SETTINGS_STROKE, false);
+			m_uiRenderer.drawBox(graphX, graphY, graphWidth, graphHeight, Color::TITLE_STROKE, false);
 
 			const int textX{ graphX + graphWidth + scaled(THUMB_TEXT_GAP) };
 			const std::string name{ toDrawable(CHANNEL_SPECS[i].m_name) };
-			m_uiRenderer.drawText(textX, graphY + scaled(8.0f), name.c_str(), Color::WHITE, nameFontSize);
+			m_uiRenderer.drawText(textX, graphY + scaled(8.0f), name.c_str(), Color::TITLE_TEXT, nameFontSize);
 
 			const std::string value{ std::to_string(
 				                         static_cast<int>(m_channels[i].m_history.back() * 100.0f)) +
 				                     "%" };
 			m_uiRenderer.drawText(textX, graphY + scaled(8.0f) + nameFontSize + scaled(4.0f),
-			    value.c_str(), Color::SETTINGS_TEXT_TERTIARY, valueFontSize);
+			    value.c_str(), Color::TITLE_TEXT_TERTIARY, valueFontSize);
 		}
 	}
 
@@ -449,39 +452,39 @@ namespace game::scene
 		// 実物が「ディスク 0 (C:) ／ 型番」を出す位置。こちらはチャンネル名と取得元を出す
 		const int nameFontSize{ scaled(FONT_CHANNEL_NAME) };
 		const std::string channelName{ toDrawable(spec.m_name) };
-		m_uiRenderer.drawText(m_detailX, m_panesTop, channelName.c_str(), Color::WHITE, nameFontSize);
+		m_uiRenderer.drawText(m_detailX, m_panesTop, channelName.c_str(), Color::TITLE_TEXT, nameFontSize);
 
 		const int smallFontSize{ scaled(FONT_SMALL) };
 		const std::string source{ toDrawable("このPCの実測値") };
 		const int sourceWidth{ m_uiRenderer.getTextWidth(source.c_str(), smallFontSize) };
 		m_uiRenderer.drawText(m_detailX + m_detailWidth - sourceWidth,
 		    m_panesTop + (nameFontSize - smallFontSize) / 2,
-		    source.c_str(), Color::SETTINGS_TEXT_TERTIARY, smallFontSize);
+		    source.c_str(), Color::TITLE_TEXT_TERTIARY, smallFontSize);
 
 		// グラフの上下に付く小さな説明（実物と同じ位置・同じ内容）
 		const int captionY{ m_panesTop + scaled(DETAIL_HEAD_HEIGHT) };
 		const std::string caption{ toDrawable(spec.m_caption) };
-		m_uiRenderer.drawText(m_detailX, captionY, caption.c_str(), Color::SETTINGS_TEXT_TERTIARY, smallFontSize);
+		m_uiRenderer.drawText(m_detailX, captionY, caption.c_str(), Color::TITLE_TEXT_TERTIARY, smallFontSize);
 
 		const int maxWidth{ m_uiRenderer.getTextWidth("100%", smallFontSize) };
 		m_uiRenderer.drawText(m_detailX + m_detailWidth - maxWidth, captionY,
-		    "100%", Color::SETTINGS_TEXT_TERTIARY, smallFontSize);
+		    "100%", Color::TITLE_TEXT_TERTIARY, smallFontSize);
 
 		// グラフ本体。残りの高さをすべて使う
 		const int graphY{ captionY + scaled(GRAPH_CAPTION_HEIGHT) };
 		const int statsY{ m_contentY + m_contentHeight - scaled(START_BUTTON_HEIGHT) - scaled(START_BUTTON_TOP_GAP) - scaled(STATS_HEIGHT) };
 		const int graphHeight{ statsY - scaled(STATS_TOP_GAP) - scaled(GRAPH_AXIS_HEIGHT) - graphY };
 
-		m_uiRenderer.drawBox(m_detailX, graphY, m_detailWidth, graphHeight, Color::SETTINGS_CARD, true);
+		m_uiRenderer.drawBox(m_detailX, graphY, m_detailWidth, graphHeight, Color::TITLE_CARD, true);
 		drawGraph(m_detailX, graphY, m_detailWidth, graphHeight, m_selectedChannel, true);
-		m_uiRenderer.drawBox(m_detailX, graphY, m_detailWidth, graphHeight, Color::SETTINGS_STROKE, false);
+		m_uiRenderer.drawBox(m_detailX, graphY, m_detailWidth, graphHeight, Color::TITLE_STROKE, false);
 
 		const int axisY{ graphY + graphHeight + scaled(4.0f) };
 		const std::string span{ toDrawable("60 秒") };
-		m_uiRenderer.drawText(m_detailX, axisY, span.c_str(), Color::SETTINGS_TEXT_TERTIARY, smallFontSize);
+		m_uiRenderer.drawText(m_detailX, axisY, span.c_str(), Color::TITLE_TEXT_TERTIARY, smallFontSize);
 		const int zeroWidth{ m_uiRenderer.getTextWidth("0", smallFontSize) };
 		m_uiRenderer.drawText(m_detailX + m_detailWidth - zeroWidth, axisY,
-		    "0", Color::SETTINGS_TEXT_TERTIARY, smallFontSize);
+		    "0", Color::TITLE_TEXT_TERTIARY, smallFontSize);
 
 		drawStats(statsY);
 	}
@@ -493,17 +496,15 @@ namespace game::scene
 
 		if (withGrid)
 		{
-			// 実物と同じ細かい方眼。線が薄いので加算ではなく通常合成で薄い色を置く
-			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, 26);
+			// 実物と同じ細かい方眼。白地に薄いグレーを置くだけなので合成は要らない
 			for (int i{ 1 }; i < static_cast<int>(GRID_LINE_COUNT); ++i)
 			{
 				const int lineY{ y + static_cast<int>(height * i / GRID_LINE_COUNT) };
-				m_uiRenderer.drawBox(x, lineY, width, 1, Color::WHITE, true);
+				m_uiRenderer.drawBox(x, lineY, width, 1, Color::TITLE_GRID, true);
 
 				const int lineX{ x + static_cast<int>(width * i / GRID_LINE_COUNT) };
-				m_uiRenderer.drawBox(lineX, y, 1, height, Color::WHITE, true);
+				m_uiRenderer.drawBox(lineX, y, 1, height, Color::TITLE_GRID, true);
 			}
-			m_uiRenderer.resetBlendMode();
 		}
 
 		const int barWidth{ std::max(1, width / HISTORY_SIZE) };
@@ -517,13 +518,13 @@ namespace game::scene
 			const int barX{ x + i * width / HISTORY_SIZE };
 			const int barY{ y + height - barHeight };
 
-			// 塗り（薄く）と上端の輝線。実物の面グラフに近い見え方になる
-			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, 56);
+			// 塗り（薄く）と上端の線。実物の面グラフに近い見え方になる
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, GRAPH_FILL_ALPHA);
 			m_uiRenderer.drawBox(barX, barY, barWidth, barHeight, color, true);
-
-			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, 235);
-			m_uiRenderer.drawBox(barX, barY, barWidth, std::max(1, scaled(1.6f)), color, true);
 			m_uiRenderer.resetBlendMode();
+
+			// 上端は白地に対してそのまま置く。薄めると塗りとの差が出ず輪郭が消える
+			m_uiRenderer.drawBox(barX, barY, barWidth, std::max(1, scaled(1.6f)), color, true);
 		}
 	}
 
@@ -554,11 +555,11 @@ namespace game::scene
 		for (int i{ 0 }; i < 3; ++i)
 		{
 			const int columnX{ m_detailX + i * columnWidth };
-			m_uiRenderer.drawText(columnX, y, labels[i].c_str(), Color::SETTINGS_TEXT_TERTIARY, labelFontSize);
+			m_uiRenderer.drawText(columnX, y, labels[i].c_str(), Color::TITLE_TEXT_TERTIARY, labelFontSize);
 
 			const std::string text{ std::to_string(values[i]) + "%" };
 			m_uiRenderer.drawText(columnX, y + labelFontSize + scaled(4.0f),
-			    text.c_str(), Color::WHITE, valueFontSize);
+			    text.c_str(), Color::TITLE_TEXT, valueFontSize);
 		}
 	}
 
@@ -576,12 +577,15 @@ namespace game::scene
 
 		if (isAccent)
 		{
-			m_uiRenderer.drawRoundedBox(x, y, width, height, radius, Color::SETTINGS_ACCENT, true, 1);
+			m_uiRenderer.drawRoundedBox(x, y, width, height, radius, Color::TITLE_ACCENT, true, 1);
 		}
-		else if (isHovered)
+		else
 		{
-			m_uiRenderer.drawRoundedBox(x, y, width, height, radius, Color::SETTINGS_CARD_HOVER, true, 1);
-			m_uiRenderer.drawRoundedBox(x, y, width, height, radius, Color::SETTINGS_STROKE, false, 1);
+			// 白い面の上に白いボタンを置くので、枠は常に描く。
+			// 乗せたときだけ枠を出す作りだと、押せる場所があること自体が伝わらない
+			m_uiRenderer.drawRoundedBox(x, y, width, height, radius,
+			    isHovered ? Color::TITLE_CARD_HOVER : Color::TITLE_CARD, true, 1);
+			m_uiRenderer.drawRoundedBox(x, y, width, height, radius, Color::TITLE_STROKE, false, 1);
 		}
 
 		// アクセントのボタンは押した先が分かるよう、乗せたときだけ少し暗くする
@@ -597,7 +601,7 @@ namespace game::scene
 		const int textWidth{ m_uiRenderer.getTextWidth(text.c_str(), fontSize) };
 
 		m_uiRenderer.drawText(x + (width - textWidth) / 2, y + (height - fontSize) / 2,
-		    text.c_str(), isAccent ? Color::BLACK : Color::WHITE, fontSize);
+		    text.c_str(), isAccent ? Color::WHITE : Color::TITLE_TEXT, fontSize);
 	}
 
 	std::string TitleView::toDrawable(const char* utf8) const
