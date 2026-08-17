@@ -61,7 +61,7 @@ namespace game::scene
 		{
 			const auto snap{ m_perfProvider->getSnapshot() };
 			m_fade->update(deltaTime);
-			m_view->update(snap);
+			m_view->update(snap, deltaTime);
 			if (m_fade->isFinished())
 			{
 				m_fade = nullptr;
@@ -73,7 +73,7 @@ namespace game::scene
 		case State::Idle:
 		{
 			const auto snap{ m_perfProvider->getSnapshot() };
-			m_view->update(snap);
+			m_view->update(snap, deltaTime);
 			break;
 		}
 

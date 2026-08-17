@@ -3,6 +3,7 @@
 #include "core/constant/UI.h"
 #include "core/interface/IStringConverter.h"
 #include "core/utility/Color.h"
+#include "core/utility/Easing.h"
 #include "core/utility/MathConstants.h"
 #include "core/constant/SeType.h"
 #include "core/interface/IAudioManager.h"
@@ -72,6 +73,14 @@ namespace
 	constexpr float START_BUTTON_HEIGHT{ 48.0f };
 	constexpr float START_BUTTON_TOP_GAP{ 14.0f };
 	constexpr float BUTTON_RADIUS{ 4.0f };
+
+	// 「選択画面へ」から広がる輪。押さないとゲームが始まらないボタンなので、
+	// 間を空けて一度だけ広げる。出しっぱなしにすると画面が落ち着かない
+	constexpr float PULSE_INTERVAL{ 2.4f };    // 次の輪が出るまでの周期（秒）
+	constexpr float PULSE_DURATION{ 0.9f };    // 輪が広がりきるまで（秒）
+	constexpr float PULSE_MAX_SPREAD{ 14.0f }; // ボタンの外へ広がる幅
+	constexpr float PULSE_THICKNESS{ 2.0f };   // 輪の太さ
+	constexpr float PULSE_MAX_ALPHA{ 170.0f }; // 出はじめの濃さ
 
 	/** @brief コンテンツ面の角丸。最大化したウィンドウで丸くなるのは左上だけ */
 	constexpr float CONTENT_RADIUS{ 8.0f };
@@ -148,8 +157,12 @@ namespace game::scene
 		buffer.back() = value;
 	}
 
-	void TitleView::update(const core::iface::PerformanceSnapshot& snap)
+	void TitleView::update(const core::iface::PerformanceSnapshot& snap, float deltaTime)
 	{
+		m_pulseTimer += deltaTime;
+		if (m_pulseTimer >= PULSE_INTERVAL)
+			m_pulseTimer -= PULSE_INTERVAL;
+
 		const float rawValues[CHANNEL_COUNT]{ snap.cpuUsage, snap.memoryUsage, snap.diskActivity };
 
 		for (int i{ 0 }; i < CHANNEL_COUNT; ++i)
@@ -575,7 +588,31 @@ namespace game::scene
 	{
 		int rectX{}, rectY{}, rectWidth{}, rectHeight{};
 		getStartButtonRect(rectX, rectY, rectWidth, rectHeight);
+
+		// カーソルが乗っているなら気づけているので、呼び込みは出さない
+		if (m_hovered != Hit::Start)
+			drawStartPulse(rectX, rectY, rectWidth, rectHeight);
+
 		drawButton(rectX, rectY, rectWidth, rectHeight, "選択画面へ", true, m_hovered == Hit::Start);
+	}
+
+	void TitleView::drawStartPulse(int x, int y, int width, int height) const
+	{
+		if (m_pulseTimer >= PULSE_DURATION)
+			return;
+
+		const float progress{ m_pulseTimer / PULSE_DURATION };
+
+		// 勢いよく広がってから緩める。等速だと輪が伸びていくようにしか見えない
+		const int spread{ static_cast<int>(scaled(PULSE_MAX_SPREAD) * core::utility::easeOut(progress)) };
+		const int alpha{ static_cast<int>(PULSE_MAX_ALPHA * (1.0f - progress)) };
+		if (alpha <= 0)
+			return;
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+		m_uiRenderer.drawRoundedBox(x - spread, y - spread, width + spread * 2, height + spread * 2,
+		    scaled(BUTTON_RADIUS) + spread, Color::TITLE_ACCENT, false, scaled(PULSE_THICKNESS));
+		m_uiRenderer.resetBlendMode();
 	}
 
 	void TitleView::drawGearIcon(int centerX, int centerY, int size, unsigned int color) const

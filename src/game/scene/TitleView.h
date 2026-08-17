@@ -54,8 +54,9 @@ namespace game::scene
 		/**
 		 * @brief 入力とパフォーマンス履歴を更新する
 		 * @param snap 最新のパフォーマンススナップショット
+		 * @param deltaTime 前フレームからの経過時間（秒）
 		 */
-		void update(const core::iface::PerformanceSnapshot& snap);
+		void update(const core::iface::PerformanceSnapshot& snap, float deltaTime);
 
 		/**
 		 * @brief タイトル画面を描画する
@@ -107,6 +108,18 @@ namespace game::scene
 		void drawGraph(int x, int y, int width, int height, int channelIndex, bool withGrid) const;
 		void drawStats(int y) const;
 		void drawStartButton() const;
+
+		/**
+		 * @brief 「選択画面へ」から広がる輪を描く
+		 *
+		 * ここを押さないとゲームが始まらないのに、白い画面では静かなボタンが埋もれる。
+		 * 一定の間隔で輪を広げて、次に押す場所だと分かるようにする
+		 * @param x ボタンの左上X座標
+		 * @param y ボタンの左上Y座標
+		 * @param width ボタンの幅
+		 * @param height ボタンの高さ
+		 */
+		void drawStartPulse(int x, int y, int width, int height) const;
 
 		/**
 		 * @brief 歯車（設定）のアイコンを描く
@@ -192,6 +205,9 @@ namespace game::scene
 
 		/** @brief 右の大きなグラフに出しているチャンネル */
 		int m_selectedChannel{ static_cast<int>(TitleChannel::Cpu) };
+
+		/** @brief 「選択画面へ」の呼び込みの経過時間（秒）。一定の周期で0へ戻す */
+		float m_pulseTimer{};
 
 		Hit m_hovered{ Hit::None };
 		bool m_isInteractive{ false };
