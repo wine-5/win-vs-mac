@@ -1,206 +1,612 @@
-﻿#include "TitleView.h"
-#include "game/ui/Button.h"
-#include "core/utility/Color.h"
-#include "core/constant/UI.h"
+#include "TitleView.h"
 #include "core/base/ServiceLocator.h"
+#include "core/constant/UI.h"
 #include "core/interface/IStringConverter.h"
-#include <string>
+#include "core/utility/Color.h"
+#include "core/constant/SeType.h"
+#include "core/interface/IAudioManager.h"
 #include <algorithm>
+#include <string>
+
+namespace
+{
+	using Color = core::utility::Color;
+
+	/** @brief アプリアイコンのリソースID */
+	constexpr const char* APP_ICON_IMAGE_ID{ "game-icon" };
+
+	// ウィンドウの大きさ（画面に対する比率）。
+	// 中の寸法はすべて高さから換算するので、ここを変えれば文字も一緒に拡大する
+	constexpr float WINDOW_WIDTH_RATIO{ 0.86f };
+	constexpr float WINDOW_HEIGHT_RATIO{ 0.88f };
+
+	// 以下は基準サイズ（ウィンドウ高さ740px）でのピクセル数
+	constexpr float BASE_WINDOW_HEIGHT{ 740.0f };
+
+	constexpr float TITLE_BAR_HEIGHT{ 48.0f };
+	constexpr float NAV_WIDTH{ 210.0f };
+	constexpr float NAV_LEFT_MARGIN{ 12.0f };
+	constexpr float NAV_RIGHT_MARGIN{ 16.0f };
+	constexpr float NAV_ITEM_HEIGHT{ 36.0f };
+	constexpr float NAV_TEXT_INDENT{ 40.0f };
+	constexpr float NAV_PILL_WIDTH{ 3.0f };
+	constexpr float NAV_PILL_HEIGHT{ 16.0f };
+	constexpr float NAV_TOP_GAP{ 48.0f };    // ハンバーガーの下から最初の項目まで
+	constexpr float NAV_BOTTOM_GAP{ 12.0f }; // 左下の「設定」の下余白
+
+	constexpr float CONTENT_PADDING_X{ 28.0f };
+	constexpr float CONTENT_PADDING_TOP{ 22.0f };
+	constexpr float CONTENT_PADDING_BOTTOM{ 20.0f };
+
+	constexpr float APP_ICON_SIZE{ 56.0f };
+	constexpr float APP_ICON_GAP{ 16.0f };
+	constexpr float APP_HEADER_HEIGHT{ 72.0f }; // アイコンの高さ＋下の余白
+
+	constexpr float THUMB_COLUMN_WIDTH{ 214.0f };
+	constexpr float THUMB_HEIGHT{ 70.0f };
+	constexpr float THUMB_GAP{ 10.0f };
+	constexpr float THUMB_GRAPH_WIDTH{ 92.0f };
+	constexpr float THUMB_GRAPH_HEIGHT{ 54.0f };
+	constexpr float THUMB_PADDING{ 8.0f };
+	constexpr float THUMB_TEXT_GAP{ 12.0f };
+	constexpr float PANES_GAP{ 22.0f };
+
+	constexpr float DETAIL_HEAD_HEIGHT{ 40.0f };
+	constexpr float GRAPH_CAPTION_HEIGHT{ 18.0f };
+	constexpr float GRAPH_AXIS_HEIGHT{ 18.0f };
+	constexpr float STATS_HEIGHT{ 52.0f };
+	constexpr float STATS_TOP_GAP{ 16.0f };
+	constexpr float STATS_COLUMN_WIDTH{ 130.0f };
+
+	constexpr float BUTTON_HEIGHT{ 34.0f };
+	constexpr float EXIT_BUTTON_WIDTH{ 158.0f };
+	constexpr float START_BUTTON_WIDTH{ 176.0f };
+	constexpr float START_BUTTON_HEIGHT{ 42.0f };
+	constexpr float START_BUTTON_TOP_GAP{ 14.0f };
+	constexpr float BUTTON_RADIUS{ 4.0f };
+
+	constexpr float WINDOW_RADIUS{ 8.0f };
+	constexpr float GRID_LINE_COUNT{ 10.0f };
+
+	// フォントサイズ（基準サイズでのピクセル数）
+	constexpr float FONT_TITLE_BAR{ 13.0f };
+	constexpr float FONT_GAME_TITLE{ 42.0f };
+	constexpr float FONT_APP_SUB{ 13.0f };
+	constexpr float FONT_NAV{ 13.0f };
+	constexpr float FONT_THUMB_NAME{ 14.0f };
+	constexpr float FONT_THUMB_VALUE{ 12.0f };
+	constexpr float FONT_CHANNEL_NAME{ 26.0f };
+	constexpr float FONT_SMALL{ 12.0f };
+	constexpr float FONT_STAT_LABEL{ 12.0f };
+	constexpr float FONT_STAT_VALUE{ 26.0f };
+	constexpr float FONT_BUTTON{ 13.0f };
+	constexpr float FONT_START_BUTTON{ 15.0f };
+
+	/** @brief チャンネルごとの見せ方。値そのものは TitleView が持つ */
+	struct ChannelSpec
+	{
+		const char* m_name;      // サムネイルと見出しに出す名前
+		const char* m_caption;   // グラフの上に出す説明
+		const char* m_statLabel; // 詳細値の1つ目のラベル
+		unsigned int m_color;
+		float m_smoothFactor; // EMAの係数（0に近いほど滑らか）
+	};
+
+	// 並びは TitleChannel と対にする
+	constexpr ChannelSpec CHANNEL_SPECS[]{
+		{ "CPU", "CPU 使用率", "使用率", Color::GRAPH_CPU, 0.15f },
+		{ "メモリ", "メモリ使用率", "使用率", Color::GRAPH_MEMORY, 0.40f },
+		{ "ディスク", "ディスクのアクティブな時間", "アクティブな時間", Color::GRAPH_DISK, 0.15f },
+	};
+} // namespace
 
 namespace game::scene
 {
 	TitleView::TitleView(core::iface::IInputProvider& inputProvider,
 	    core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
-	    std::string mainFontName,
+	    core::iface::IResourceManager& resourceManager,
 	    std::function<void()> onGoToSelect,
 	    std::function<void()> onOpenSettings,
 	    std::function<void()> onExit)
-	    : m_uiRenderer{ uiRenderer }
+	    : m_inputProvider{ inputProvider }
+	    , m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
-	    , m_mainFontName{ std::move(mainFontName) }
+	    , m_onGoToSelect{ std::move(onGoToSelect) }
+	    , m_onOpenSettings{ std::move(onOpenSettings) }
+	    , m_onExit{ std::move(onExit) }
 	{
-		const int screenWidth    { screen.getWidth() };
-		const int screenHeight   { screen.getHeight() };
-		const int buttonWidth    { static_cast<int>(screenWidth  * BUTTON_WIDTH_RATIO) };
-		const int buttonHeight   { static_cast<int>(screenHeight * BUTTON_HEIGHT_RATIO) };
-		const int buttonX        { (screenWidth - buttonWidth) / 2 };
-		const int startButtonY   { static_cast<int>(screenHeight * START_BUTTON_Y_RATIO) };
-		const int settingsButtonY{ static_cast<int>(screenHeight * SETTINGS_BUTTON_Y_RATIO) };
-		const int exitButtonY    { static_cast<int>(screenHeight * EXIT_BUTTON_Y_RATIO) };
-		const int buttonFontSize { static_cast<int>(screenHeight * core::constant::ui::DEFAULT_FONT_SIZE_RATIO) };
-
-		auto startBtn{ std::make_unique<ui::Button>(
-			"選択画面へ", buttonX, startButtonY, buttonWidth, buttonHeight, inputProvider, buttonFontSize) };
-		startBtn->setOnClick(std::move(onGoToSelect));
-		startBtn->setVisible(false);
-		m_startButton = startBtn.get();
-		m_uiManager.addElement(std::move(startBtn));
-
-		// Escのメニューからも開けるが、押せる場所が見えていないと気づかれない。
-		// 初見の人がいちばん最初に見る画面なので、ボタンとして出しておく
-		auto settingsBtn{ std::make_unique<ui::Button>(
-			"設定", buttonX, settingsButtonY, buttonWidth, buttonHeight, inputProvider, buttonFontSize) };
-		settingsBtn->setOnClick(std::move(onOpenSettings));
-		settingsBtn->setVisible(false);
-		m_settingsButton = settingsBtn.get();
-		m_uiManager.addElement(std::move(settingsBtn));
-
-		auto exitBtn{ std::make_unique<ui::Button>(
-			"EXEを終了する", buttonX, exitButtonY, buttonWidth, buttonHeight, inputProvider, buttonFontSize) };
-		exitBtn->setOnClick(std::move(onExit));
-		exitBtn->setVisible(false);
-		m_exitButton = exitBtn.get();
-		m_uiManager.addElement(std::move(exitBtn));
-	}
-
-	void TitleView::update(const core::iface::PerformanceSnapshot& snap)
-	{
-		// EMA スムージングを通して履歴に積み上げる
-		m_cpuSmoothed  += CPU_SMOOTH_FACTOR  * (snap.cpuUsage    - m_cpuSmoothed);
-		m_memSmoothed  += MEM_SMOOTH_FACTOR  * (snap.memoryUsage - m_memSmoothed);
-		m_diskSmoothed += DISK_SMOOTH_FACTOR * (snap.diskActivity - m_diskSmoothed);
-
-		pushHistory(m_cpuHistory,  m_cpuSmoothed);
-		pushHistory(m_memHistory,  m_memSmoothed);
-		pushHistory(m_diskHistory, m_diskSmoothed);
-
-		m_uiManager.update();
-	}
-
-	void TitleView::drawTitle() const
-	{
-		drawBackground();
-
-		m_uiRenderer.setFont(m_mainFontName.c_str());
-
-		const char* title{ "Win vs Mac" };
-		const int titleFontSize{ static_cast<int>(m_screen.getHeight() * core::constant::ui::FONT_SIZE_CLOCK_RATIO) };
-		const int titleWidth{ m_uiRenderer.getTextWidth(title, titleFontSize) };
-		const int titleX{ (m_screen.getWidth() - titleWidth) / 2 };
-		const int titleY{ static_cast<int>(m_screen.getHeight() * TITLE_Y_RATIO) };
-
-		m_uiRenderer.drawText(titleX, titleY, title, core::utility::Color::WHITE, titleFontSize);
-		m_uiManager.draw(m_uiRenderer);
+		// 読み込めなくてもアイコンを描かないだけで、画面は成立する
+		m_iconHandle = resourceManager.loadImageById(APP_ICON_IMAGE_ID);
 	}
 
 	void TitleView::setButtonsVisible(bool visible)
 	{
-		m_startButton->setVisible(visible);
-		m_settingsButton->setVisible(visible);
-		m_exitButton->setVisible(visible);
+		m_isInteractive = visible;
+
+		// 受け付け始めた瞬間のクリックで誤爆しないよう、現在の押下状態を引き継ぐ
+		if (visible)
+			m_prevMouseLeft = m_inputProvider.isMouseLeftPressed();
 	}
 
-	void TitleView::pushHistory(std::array<float, HISTORY_SIZE>& buf, float value)
+	void TitleView::pushHistory(std::array<float, HISTORY_SIZE>& buffer, float value)
 	{
-		std::ranges::rotate(buf, buf.begin() + 1);
-		buf.back() = value;
+		std::ranges::rotate(buffer, buffer.begin() + 1);
+		buffer.back() = value;
 	}
 
-	void TitleView::drawBackground() const
+	void TitleView::update(const core::iface::PerformanceSnapshot& snap)
 	{
-		const int screenW{ m_screen.getWidth()  };
-		const int screenH{ m_screen.getHeight() };
+		const float rawValues[CHANNEL_COUNT]{ snap.cpuUsage, snap.memoryUsage, snap.diskActivity };
 
-		struct Channel
+		for (int i{ 0 }; i < CHANNEL_COUNT; ++i)
 		{
-			const std::array<float, HISTORY_SIZE>& m_history;
-			const char*  m_label;
-			unsigned int m_color;
-			float        m_topRatio; // カード上端の Y 位置（0〜1）
-		};
+			// 生値のままだと折れ線が毎フレーム飛ぶので、EMAで均してから積む
+			ChannelState& channel{ m_channels[i] };
+			channel.m_smoothed += CHANNEL_SPECS[i].m_smoothFactor * (rawValues[i] - channel.m_smoothed);
+			pushHistory(channel.m_history, channel.m_smoothed);
+		}
 
-		const Channel channels[]
+		updateLayout();
+
+		int mouseX{}, mouseY{};
+		m_inputProvider.getMousePosition(mouseX, mouseY);
+		m_hovered = m_isInteractive ? getHitAt(mouseX, mouseY) : Hit::None;
+
+		const bool mouseLeft{ m_inputProvider.isMouseLeftPressed() };
+		const bool mouseClicked{ mouseLeft && !m_prevMouseLeft };
+		m_prevMouseLeft = mouseLeft;
+
+		if (!mouseClicked)
+			return;
+
+		switch (m_hovered)
 		{
-			{ m_cpuHistory,  "CPU",    core::utility::Color::GRAPH_CPU,    GRAPH_CPU_TOP_RATIO    },
-			{ m_memHistory,  "Memory", core::utility::Color::GRAPH_MEMORY, GRAPH_MEMORY_TOP_RATIO },
-			{ m_diskHistory, "Disk",   core::utility::Color::GRAPH_DISK,   GRAPH_DISK_TOP_RATIO   },
-		};
+		case Hit::ThumbCpu:
+			m_selectedChannel = static_cast<int>(TitleChannel::Cpu);
+			playUiClick();
+			break;
+		case Hit::ThumbMemory:
+			m_selectedChannel = static_cast<int>(TitleChannel::Memory);
+			playUiClick();
+			break;
+		case Hit::ThumbDisk:
+			m_selectedChannel = static_cast<int>(TitleChannel::Disk);
+			playUiClick();
+			break;
 
-		constexpr float CARD_WIDTH_RATIO{ 0.88f };       // 画面幅に対するカード幅の割合
-		constexpr float CARD_HEIGHT_RATIO{ 0.17f };      // 画面高さに対するカード高さの割合
-		constexpr float GRAPH_WIDTH_FRAC{ 0.68f };       // カード幅に対するグラフ領域の割合
-		constexpr float LABEL_FONT_SIZE_RATIO{ 0.028f }; // 画面高さに対するラベルフォントサイズの割合
-		constexpr float VALUE_FONT_SIZE_RATIO{ 0.038f }; // 画面高さに対する数値フォントサイズの割合
-		constexpr float GRID_LINE_INTERVAL{ 0.25f };     // グリッドライン間隔（0=下端、1=上端）
-		constexpr int GRID_LINE_COUNT{ 3 };              // グリッドライン本数（25 / 50 / 75 %）
-		constexpr int GRAPH_PADDING{ 2 };                // グラフ領域の上下パディング（px）
-		constexpr int INFO_PANEL_PADDING{ 14 };          // 情報パネルの左マージン（px）
-		constexpr int TEXT_VERTICAL_OFFSET{ 2 };         // ラベル・数値の縦位置微調整（px）
+		// 3つのボタンは押した先（Title::goToSelect など）が鳴らすので、ここでは鳴らさない
+		case Hit::Settings:
+			if (m_onOpenSettings)
+				m_onOpenSettings();
+			break;
+		case Hit::Exit:
+			if (m_onExit)
+				m_onExit();
+			break;
+		case Hit::Start:
+			if (m_onGoToSelect)
+				m_onGoToSelect();
+			break;
+		default: break;
+		}
+	}
 
-		const int cardW{ static_cast<int>(screenW * CARD_WIDTH_RATIO) };
-		const int cardX { (screenW - cardW) / 2 };
-		const int cardH{ static_cast<int>(screenH * CARD_HEIGHT_RATIO) };
-		const int graphW{ static_cast<int>(cardW * GRAPH_WIDTH_FRAC) };
-		const int infoX{ cardX + graphW + INFO_PANEL_PADDING };
-		const int barW  { std::max(1, graphW / HISTORY_SIZE) };
+	void TitleView::playUiClick() const
+	{
+		if (auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() })
+			audio->playSe(core::constant::SeType::UiClick);
+	}
 
-		const int labelSize{ static_cast<int>(screenH * LABEL_FONT_SIZE_RATIO) };
-		const int valueSize{ static_cast<int>(screenH * VALUE_FONT_SIZE_RATIO) };
+	int TitleView::scaled(float basePixels) const noexcept
+	{
+		return std::max(1, static_cast<int>(basePixels * m_scale));
+	}
 
-		for (const auto& ch : channels)
+	void TitleView::updateLayout()
+	{
+		const int screenWidth{ m_screen.getWidth() };
+		const int screenHeight{ m_screen.getHeight() };
+
+		m_windowWidth = static_cast<int>(screenWidth * WINDOW_WIDTH_RATIO);
+		m_windowHeight = static_cast<int>(screenHeight * WINDOW_HEIGHT_RATIO);
+		m_windowX = (screenWidth - m_windowWidth) / 2;
+		m_windowY = (screenHeight - m_windowHeight) / 2;
+
+		m_scale = m_windowHeight / BASE_WINDOW_HEIGHT;
+
+		m_titleBarHeight = scaled(TITLE_BAR_HEIGHT);
+		m_navWidth = scaled(NAV_WIDTH);
+
+		m_contentX = m_windowX + m_navWidth + scaled(CONTENT_PADDING_X);
+		m_contentY = m_windowY + m_titleBarHeight + scaled(CONTENT_PADDING_TOP);
+		m_contentWidth = m_windowWidth - m_navWidth - scaled(CONTENT_PADDING_X) * 2;
+		m_contentHeight = m_windowHeight - m_titleBarHeight - scaled(CONTENT_PADDING_TOP) - scaled(CONTENT_PADDING_BOTTOM);
+
+		m_panesTop = m_contentY + scaled(APP_HEADER_HEIGHT);
+
+		const int thumbColumn{ scaled(THUMB_COLUMN_WIDTH) };
+		m_detailX = m_contentX + thumbColumn + scaled(PANES_GAP);
+		m_detailWidth = m_contentWidth - thumbColumn - scaled(PANES_GAP);
+	}
+
+	void TitleView::getThumbRect(int index, int& outX, int& outY, int& outWidth, int& outHeight) const
+	{
+		outX = m_contentX;
+		outWidth = scaled(THUMB_COLUMN_WIDTH);
+		outHeight = scaled(THUMB_HEIGHT);
+		outY = m_panesTop + index * (outHeight + scaled(THUMB_GAP));
+	}
+
+	void TitleView::getNavSettingsRect(int& outX, int& outY, int& outWidth, int& outHeight) const
+	{
+		// 実物と同じく左下の隅に置く
+		outX = m_windowX + scaled(NAV_LEFT_MARGIN);
+		outWidth = m_navWidth - scaled(NAV_RIGHT_MARGIN);
+		outHeight = scaled(NAV_ITEM_HEIGHT);
+		outY = m_windowY + m_windowHeight - scaled(NAV_BOTTOM_GAP) - outHeight;
+	}
+
+	void TitleView::getExitButtonRect(int& outX, int& outY, int& outWidth, int& outHeight) const
+	{
+		// 実物が操作ボタンを置く、見出しと同じ高さの右端
+		outWidth = scaled(EXIT_BUTTON_WIDTH);
+		outHeight = scaled(BUTTON_HEIGHT);
+		outX = m_contentX + m_contentWidth - outWidth;
+		outY = m_contentY + (scaled(APP_ICON_SIZE) - outHeight) / 2;
+	}
+
+	void TitleView::getStartButtonRect(int& outX, int& outY, int& outWidth, int& outHeight) const
+	{
+		outWidth = scaled(START_BUTTON_WIDTH);
+		outHeight = scaled(START_BUTTON_HEIGHT);
+		outX = m_contentX + m_contentWidth - outWidth;
+		outY = m_contentY + m_contentHeight - outHeight;
+	}
+
+	TitleView::Hit TitleView::getHitAt(int x, int y) const
+	{
+		const auto contains{ [x, y](int rx, int ry, int rw, int rh)
+			{ return x >= rx && x < rx + rw && y >= ry && y < ry + rh; } };
+
+		int rectX{}, rectY{}, rectWidth{}, rectHeight{};
+
+		getStartButtonRect(rectX, rectY, rectWidth, rectHeight);
+		if (contains(rectX, rectY, rectWidth, rectHeight))
+			return Hit::Start;
+
+		getExitButtonRect(rectX, rectY, rectWidth, rectHeight);
+		if (contains(rectX, rectY, rectWidth, rectHeight))
+			return Hit::Exit;
+
+		getNavSettingsRect(rectX, rectY, rectWidth, rectHeight);
+		if (contains(rectX, rectY, rectWidth, rectHeight))
+			return Hit::Settings;
+
+		constexpr Hit THUMB_HITS[]{ Hit::ThumbCpu, Hit::ThumbMemory, Hit::ThumbDisk };
+		for (int i{ 0 }; i < CHANNEL_COUNT; ++i)
 		{
-			const int cardTop { static_cast<int>(screenH * ch.m_topRatio) };
-			const int graphTop{ cardTop + GRAPH_PADDING };
-			const int graphBot{ cardTop + cardH - GRAPH_PADDING };
-			const int graphH  { graphBot - graphTop };
-			const float latestVal{ ch.m_history.back() };
+			getThumbRect(i, rectX, rectY, rectWidth, rectHeight);
+			if (contains(rectX, rectY, rectWidth, rectHeight))
+				return THUMB_HITS[i];
+		}
 
-			// カード背景（濃い紺）
-			m_uiRenderer.setBlendMode(2, 40);
-			m_uiRenderer.drawBox(cardX, cardTop, cardW, cardH,
-				core::utility::Color::CARD_BG, true);
+		return Hit::None;
+	}
 
-			// グラフ背景（チャンネルカラーで極薄）
-			m_uiRenderer.setBlendMode(2, 18);
-			m_uiRenderer.drawBox(cardX, graphTop, graphW, graphH, ch.m_color, true);
+	void TitleView::drawTitle() const
+	{
+		// ウィンドウの外側。真っ黒だと影が出ず板が浮かないので、わずかに青を残す
+		m_uiRenderer.drawBox(0, 0, m_screen.getWidth(), m_screen.getHeight(),
+		    Color::TITLE_BACKDROP, true);
 
-			// 横グリッドライン（25 / 50 / 75 %）
-			m_uiRenderer.setBlendMode(2, 40);
-			for (int g{ 1 }; g <= GRID_LINE_COUNT; ++g)
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
+
+		drawWindow();
+		drawTitleBar();
+		drawNav();
+		drawAppHeader();
+		drawThumbnails();
+		drawDetail();
+		drawStartButton();
+
+		m_uiRenderer.resetFont();
+	}
+
+	void TitleView::drawWindow() const
+	{
+		const int radius{ scaled(WINDOW_RADIUS) };
+
+		m_uiRenderer.drawRoundedBox(m_windowX, m_windowY, m_windowWidth, m_windowHeight,
+		    radius, Color::SETTINGS_WINDOW_BG, true, 1);
+
+		// 右のコンテンツ面。ウィンドウの右下までを覆い、角丸をウィンドウと共有する
+		m_uiRenderer.drawRoundedBox(m_windowX + m_navWidth, m_windowY + m_titleBarHeight,
+		    m_windowWidth - m_navWidth, m_windowHeight - m_titleBarHeight,
+		    radius, Color::SETTINGS_CONTENT_BG, true, 1);
+
+		m_uiRenderer.drawRoundedBox(m_windowX, m_windowY, m_windowWidth, m_windowHeight,
+		    radius, Color::SETTINGS_STROKE, false, 1);
+	}
+
+	void TitleView::drawTitleBar() const
+	{
+		const int fontSize{ scaled(FONT_TITLE_BAR) };
+		const std::string title{ toDrawable("タスク マネージャー") };
+
+		m_uiRenderer.drawText(m_windowX + scaled(CONTENT_PADDING_X),
+		    m_windowY + (m_titleBarHeight - fontSize) / 2,
+		    title.c_str(), Color::WHITE, fontSize);
+	}
+
+	void TitleView::drawNav() const
+	{
+		const int fontSize{ scaled(FONT_NAV) };
+		const int itemX{ m_windowX + scaled(NAV_LEFT_MARGIN) };
+		const int itemWidth{ m_navWidth - scaled(NAV_RIGHT_MARGIN) };
+		const int itemHeight{ scaled(NAV_ITEM_HEIGHT) };
+
+		// 「パフォーマンス」はいま出している内容そのものなので、選択中として出す。
+		// 押しても行き先が変わらないため、押せる場所にはしない
+		const int performanceY{ m_windowY + m_titleBarHeight + scaled(NAV_TOP_GAP) };
+		m_uiRenderer.drawRoundedBox(itemX, performanceY, itemWidth, itemHeight,
+		    scaled(5.0f), Color::SETTINGS_NAV_SELECTED, true, 1);
+
+		const int pillHeight{ scaled(NAV_PILL_HEIGHT) };
+		m_uiRenderer.drawRoundedBox(itemX, performanceY + (itemHeight - pillHeight) / 2,
+		    scaled(NAV_PILL_WIDTH), pillHeight, scaled(2.0f), Color::SETTINGS_ACCENT, true, 1);
+
+		const std::string performance{ toDrawable("パフォーマンス") };
+		m_uiRenderer.drawText(itemX + scaled(NAV_TEXT_INDENT),
+		    performanceY + (itemHeight - fontSize) / 2,
+		    performance.c_str(), Color::WHITE, fontSize);
+
+		// 左下の「設定」。実物もアプリの設定をここへ置く
+		int settingsX{}, settingsY{}, settingsWidth{}, settingsHeight{};
+		getNavSettingsRect(settingsX, settingsY, settingsWidth, settingsHeight);
+
+		if (m_hovered == Hit::Settings)
+		{
+			m_uiRenderer.drawRoundedBox(settingsX, settingsY, settingsWidth, settingsHeight,
+			    scaled(5.0f), Color::SETTINGS_CARD_HOVER, true, 1);
+		}
+
+		const std::string settings{ toDrawable("設定") };
+		m_uiRenderer.drawText(settingsX + scaled(NAV_TEXT_INDENT),
+		    settingsY + (settingsHeight - fontSize) / 2,
+		    settings.c_str(), Color::WHITE, fontSize);
+	}
+
+	void TitleView::drawAppHeader() const
+	{
+		const int iconSize{ scaled(APP_ICON_SIZE) };
+
+		if (m_iconHandle != -1)
+			m_uiRenderer.drawImage(m_iconHandle, m_contentX, m_contentY, iconSize, iconSize);
+
+		const int textX{ m_contentX + iconSize + scaled(APP_ICON_GAP) };
+		const int titleFontSize{ scaled(FONT_GAME_TITLE) };
+		const int subFontSize{ scaled(FONT_APP_SUB) };
+
+		// 実物は「パフォーマンス」と出す位置。画面で最初に目が行く場所なのでゲーム名を置く
+		m_uiRenderer.drawText(textX, m_contentY, "Win vs Mac", Color::WHITE, titleFontSize);
+
+		const std::string sub{ toDrawable("WinVsMac.exe ・ 実行中") };
+		m_uiRenderer.drawText(textX, m_contentY + titleFontSize + scaled(4.0f),
+		    sub.c_str(), Color::SETTINGS_TEXT_TERTIARY, subFontSize);
+
+		int exitX{}, exitY{}, exitWidth{}, exitHeight{};
+		getExitButtonRect(exitX, exitY, exitWidth, exitHeight);
+		// 実物は「タスクを終了する」だが、それだと何が終わるのか伝わらない。
+		// ここは世界観より、押した先が分かることを優先する
+		drawButton(exitX, exitY, exitWidth, exitHeight, "ゲームを終了する", false, m_hovered == Hit::Exit);
+	}
+
+	void TitleView::drawThumbnails() const
+	{
+		const int nameFontSize{ scaled(FONT_THUMB_NAME) };
+		const int valueFontSize{ scaled(FONT_THUMB_VALUE) };
+		const int graphWidth{ scaled(THUMB_GRAPH_WIDTH) };
+		const int graphHeight{ scaled(THUMB_GRAPH_HEIGHT) };
+		const int padding{ scaled(THUMB_PADDING) };
+
+		constexpr Hit THUMB_HITS[]{ Hit::ThumbCpu, Hit::ThumbMemory, Hit::ThumbDisk };
+
+		for (int i{ 0 }; i < CHANNEL_COUNT; ++i)
+		{
+			int rectX{}, rectY{}, rectWidth{}, rectHeight{};
+			getThumbRect(i, rectX, rectY, rectWidth, rectHeight);
+
+			const bool isSelected{ i == m_selectedChannel };
+			if (isSelected || m_hovered == THUMB_HITS[i])
 			{
-				const int gy{ graphBot - static_cast<int>(graphH * g * GRID_LINE_INTERVAL) };
-				m_uiRenderer.drawBox(cardX, gy, graphW, 1, ch.m_color, true);
+				m_uiRenderer.drawRoundedBox(rectX, rectY, rectWidth, rectHeight, scaled(4.0f),
+				    isSelected ? Color::SETTINGS_NAV_SELECTED : Color::SETTINGS_CARD_HOVER, true, 1);
 			}
 
-			// 波形（塗り ＋ 上端ライン）
-			for (int i{ 0 }; i < HISTORY_SIZE; ++i)
+			const int graphX{ rectX + padding };
+			const int graphY{ rectY + (rectHeight - graphHeight) / 2 };
+			m_uiRenderer.drawBox(graphX, graphY, graphWidth, graphHeight, Color::SETTINGS_CARD, true);
+			drawGraph(graphX, graphY, graphWidth, graphHeight, i, false);
+			m_uiRenderer.drawBox(graphX, graphY, graphWidth, graphHeight, Color::SETTINGS_STROKE, false);
+
+			const int textX{ graphX + graphWidth + scaled(THUMB_TEXT_GAP) };
+			const std::string name{ toDrawable(CHANNEL_SPECS[i].m_name) };
+			m_uiRenderer.drawText(textX, graphY + scaled(8.0f), name.c_str(), Color::WHITE, nameFontSize);
+
+			const std::string value{ std::to_string(
+				                         static_cast<int>(m_channels[i].m_history.back() * 100.0f)) +
+				                     "%" };
+			m_uiRenderer.drawText(textX, graphY + scaled(8.0f) + nameFontSize + scaled(4.0f),
+			    value.c_str(), Color::SETTINGS_TEXT_TERTIARY, valueFontSize);
+		}
+	}
+
+	void TitleView::drawDetail() const
+	{
+		const ChannelSpec& spec{ CHANNEL_SPECS[m_selectedChannel] };
+
+		// 実物が「ディスク 0 (C:) ／ 型番」を出す位置。こちらはチャンネル名と取得元を出す
+		const int nameFontSize{ scaled(FONT_CHANNEL_NAME) };
+		const std::string channelName{ toDrawable(spec.m_name) };
+		m_uiRenderer.drawText(m_detailX, m_panesTop, channelName.c_str(), Color::WHITE, nameFontSize);
+
+		const int smallFontSize{ scaled(FONT_SMALL) };
+		const std::string source{ toDrawable("このPCの実測値") };
+		const int sourceWidth{ m_uiRenderer.getTextWidth(source.c_str(), smallFontSize) };
+		m_uiRenderer.drawText(m_detailX + m_detailWidth - sourceWidth,
+		    m_panesTop + (nameFontSize - smallFontSize) / 2,
+		    source.c_str(), Color::SETTINGS_TEXT_TERTIARY, smallFontSize);
+
+		// グラフの上下に付く小さな説明（実物と同じ位置・同じ内容）
+		const int captionY{ m_panesTop + scaled(DETAIL_HEAD_HEIGHT) };
+		const std::string caption{ toDrawable(spec.m_caption) };
+		m_uiRenderer.drawText(m_detailX, captionY, caption.c_str(), Color::SETTINGS_TEXT_TERTIARY, smallFontSize);
+
+		const int maxWidth{ m_uiRenderer.getTextWidth("100%", smallFontSize) };
+		m_uiRenderer.drawText(m_detailX + m_detailWidth - maxWidth, captionY,
+		    "100%", Color::SETTINGS_TEXT_TERTIARY, smallFontSize);
+
+		// グラフ本体。残りの高さをすべて使う
+		const int graphY{ captionY + scaled(GRAPH_CAPTION_HEIGHT) };
+		const int statsY{ m_contentY + m_contentHeight - scaled(START_BUTTON_HEIGHT) - scaled(START_BUTTON_TOP_GAP) - scaled(STATS_HEIGHT) };
+		const int graphHeight{ statsY - scaled(STATS_TOP_GAP) - scaled(GRAPH_AXIS_HEIGHT) - graphY };
+
+		m_uiRenderer.drawBox(m_detailX, graphY, m_detailWidth, graphHeight, Color::SETTINGS_CARD, true);
+		drawGraph(m_detailX, graphY, m_detailWidth, graphHeight, m_selectedChannel, true);
+		m_uiRenderer.drawBox(m_detailX, graphY, m_detailWidth, graphHeight, Color::SETTINGS_STROKE, false);
+
+		const int axisY{ graphY + graphHeight + scaled(4.0f) };
+		const std::string span{ toDrawable("60 秒") };
+		m_uiRenderer.drawText(m_detailX, axisY, span.c_str(), Color::SETTINGS_TEXT_TERTIARY, smallFontSize);
+		const int zeroWidth{ m_uiRenderer.getTextWidth("0", smallFontSize) };
+		m_uiRenderer.drawText(m_detailX + m_detailWidth - zeroWidth, axisY,
+		    "0", Color::SETTINGS_TEXT_TERTIARY, smallFontSize);
+
+		drawStats(statsY);
+	}
+
+	void TitleView::drawGraph(int x, int y, int width, int height, int channelIndex, bool withGrid) const
+	{
+		const unsigned int color{ CHANNEL_SPECS[channelIndex].m_color };
+		const std::array<float, HISTORY_SIZE>& history{ m_channels[channelIndex].m_history };
+
+		if (withGrid)
+		{
+			// 実物と同じ細かい方眼。線が薄いので加算ではなく通常合成で薄い色を置く
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, 26);
+			for (int i{ 1 }; i < static_cast<int>(GRID_LINE_COUNT); ++i)
 			{
-				const int barH{ static_cast<int>(ch.m_history[i] * graphH) };
-				if (barH <= 0) continue;
-				const int x{ cardX + i * barW };
-				const int y{ graphBot - barH };
+				const int lineY{ y + static_cast<int>(height * i / GRID_LINE_COUNT) };
+				m_uiRenderer.drawBox(x, lineY, width, 1, Color::WHITE, true);
 
-				// 塗り（半透明）
-				m_uiRenderer.setBlendMode(2, 90);
-				m_uiRenderer.drawBox(x, y, barW - 1, barH, ch.m_color, true);
-
-				// 上端ライン（輝線）
-				m_uiRenderer.setBlendMode(2, 230);
-				m_uiRenderer.drawBox(x, y, barW - 1, 1, ch.m_color, true);
+				const int lineX{ x + static_cast<int>(width * i / GRID_LINE_COUNT) };
+				m_uiRenderer.drawBox(lineX, y, 1, height, Color::WHITE, true);
 			}
-
-			// カード枠線
-			m_uiRenderer.setBlendMode(2, 130);
-			m_uiRenderer.drawBox(cardX, cardTop, cardW, cardH, ch.m_color, false);
-
-			// グラフ ／ 情報パネル 区切り線
-			m_uiRenderer.setBlendMode(2, 100);
-			m_uiRenderer.drawBox(cardX + graphW, cardTop, 1, cardH, ch.m_color, true);
-
-			// ラベル（情報パネル上段）
-			const int infoCenterY{ cardTop + cardH / 2 };
-			m_uiRenderer.setBlendMode(2, 210);
-			m_uiRenderer.drawText(infoX, infoCenterY - labelSize - valueSize / 2 - TEXT_VERTICAL_OFFSET,
-			                      ch.m_label, ch.m_color, labelSize);
-
-			// 数値（情報パネル下段、白 ＋ 大きめ）
-			const std::string valText{ std::to_string(static_cast<int>(latestVal * 100.f)) + "%" };
-			m_uiRenderer.setBlendMode(2, 255);
-			m_uiRenderer.drawText(infoX, infoCenterY + valueSize / 2 - labelSize,
-				valText.c_str(), core::utility::Color::WHITE, valueSize);
-
 			m_uiRenderer.resetBlendMode();
 		}
+
+		const int barWidth{ std::max(1, width / HISTORY_SIZE) };
+
+		for (int i{ 0 }; i < HISTORY_SIZE; ++i)
+		{
+			const int barHeight{ static_cast<int>(history[i] * height) };
+			if (barHeight <= 0)
+				continue;
+
+			const int barX{ x + i * width / HISTORY_SIZE };
+			const int barY{ y + height - barHeight };
+
+			// 塗り（薄く）と上端の輝線。実物の面グラフに近い見え方になる
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, 56);
+			m_uiRenderer.drawBox(barX, barY, barWidth, barHeight, color, true);
+
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, 235);
+			m_uiRenderer.drawBox(barX, barY, barWidth, std::max(1, scaled(1.6f)), color, true);
+			m_uiRenderer.resetBlendMode();
+		}
+	}
+
+	void TitleView::drawStats(int y) const
+	{
+		const ChannelSpec& spec{ CHANNEL_SPECS[m_selectedChannel] };
+		const std::array<float, HISTORY_SIZE>& history{ m_channels[m_selectedChannel].m_history };
+
+		float total{ 0.0f };
+		float peak{ 0.0f };
+		for (const float value : history)
+		{
+			total += value;
+			peak = std::max(peak, value);
+		}
+
+		const int labelFontSize{ scaled(FONT_STAT_LABEL) };
+		const int valueFontSize{ scaled(FONT_STAT_VALUE) };
+		const int columnWidth{ scaled(STATS_COLUMN_WIDTH) };
+
+		const std::string labels[]{ toDrawable(spec.m_statLabel), toDrawable("平均"), toDrawable("最大") };
+		const int values[]{
+			static_cast<int>(history.back() * 100.0f),
+			static_cast<int>(total / HISTORY_SIZE * 100.0f),
+			static_cast<int>(peak * 100.0f),
+		};
+
+		for (int i{ 0 }; i < 3; ++i)
+		{
+			const int columnX{ m_detailX + i * columnWidth };
+			m_uiRenderer.drawText(columnX, y, labels[i].c_str(), Color::SETTINGS_TEXT_TERTIARY, labelFontSize);
+
+			const std::string text{ std::to_string(values[i]) + "%" };
+			m_uiRenderer.drawText(columnX, y + labelFontSize + scaled(4.0f),
+			    text.c_str(), Color::WHITE, valueFontSize);
+		}
+	}
+
+	void TitleView::drawStartButton() const
+	{
+		int rectX{}, rectY{}, rectWidth{}, rectHeight{};
+		getStartButtonRect(rectX, rectY, rectWidth, rectHeight);
+		drawButton(rectX, rectY, rectWidth, rectHeight, "選択画面へ", true, m_hovered == Hit::Start);
+	}
+
+	void TitleView::drawButton(int x, int y, int width, int height, const char* label,
+	    bool isAccent, bool isHovered) const
+	{
+		const int radius{ scaled(BUTTON_RADIUS) };
+
+		if (isAccent)
+		{
+			m_uiRenderer.drawRoundedBox(x, y, width, height, radius, Color::SETTINGS_ACCENT, true, 1);
+		}
+		else if (isHovered)
+		{
+			m_uiRenderer.drawRoundedBox(x, y, width, height, radius, Color::SETTINGS_CARD_HOVER, true, 1);
+			m_uiRenderer.drawRoundedBox(x, y, width, height, radius, Color::SETTINGS_STROKE, false, 1);
+		}
+
+		// アクセントのボタンは押した先が分かるよう、乗せたときだけ少し暗くする
+		if (isAccent && isHovered)
+		{
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, 40);
+			m_uiRenderer.drawRoundedBox(x, y, width, height, radius, Color::BLACK, true, 1);
+			m_uiRenderer.resetBlendMode();
+		}
+
+		const int fontSize{ scaled(isAccent ? FONT_START_BUTTON : FONT_BUTTON) };
+		const std::string text{ toDrawable(label) };
+		const int textWidth{ m_uiRenderer.getTextWidth(text.c_str(), fontSize) };
+
+		m_uiRenderer.drawText(x + (width - textWidth) / 2, y + (height - fontSize) / 2,
+		    text.c_str(), isAccent ? Color::BLACK : Color::WHITE, fontSize);
+	}
+
+	std::string TitleView::toDrawable(const char* utf8) const
+	{
+		// DxLibのマルチバイト描画に合わせてUTF-8からShift-JISへ変換する
+		auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
+		if (!converter)
+			return std::string{ utf8 };
+
+		return converter->utf8ToShiftJis(utf8);
 	}
 } // namespace game::scene

@@ -1,101 +1,204 @@
 #pragma once
-#include "game/ui/UIManager.h"
 #include "core/interface/IInputProvider.h"
-#include "core/interface/IUIRenderer.h"
-#include "core/interface/IScreen.h"
 #include "core/interface/IPerformanceDataProvider.h"
-#include <functional>
+#include "core/interface/IResourceManager.h"
+#include "core/interface/IScreen.h"
+#include "core/interface/IUIRenderer.h"
 #include <array>
+#include <functional>
 #include <string>
-
-namespace game::ui
-{
-	class Button;
-}
 
 namespace game::scene
 {
 	/**
+	 * @brief タイトル画面のグラフに出す計測チャンネル
+	 */
+	enum class TitleChannel
+	{
+		Cpu,
+		Memory,
+		Disk,
+		Count,
+	};
+
+	/**
 	 * @brief タイトルシーンの描画クラス
+	 *
+	 * Windows 11 のタスクマネージャー（パフォーマンスタブ）を模したウィンドウとして描く。
+	 * 実物の骨格を借りたうえで、見出しの位置にはゲーム名を置く。
+	 *
+	 * ボタンは共通の ui::Button ではなく自前で描き、当たり判定もここが持つ。
+	 * 設定画面・ポーズメニューと同じ作りで、Fluent の見た目を1か所で管理するため
 	 */
 	class TitleView
 	{
-	public:
-	  /**
-	   * @brief TitleViewのコンストラクタ
-	   * @param inputProvider 入力インターフェース
-	   * @param uiRenderer UI描画インターフェース
-	   * @param screen 画面情報インターフェース
-	   * @param mainFontName 使用するフォント名
-	   * @param onGoToSelect 「選択画面へ」ボタン押下時コールバック
-	   * @param onOpenSettings 「設定」ボタン押下時コールバック
-	   * @param onExit 「終了」ボタン押下時コールバック
-	   */
-	  TitleView(core::iface::IInputProvider& inputProvider,
-		  core::iface::IUIRenderer& uiRenderer,
-		  core::iface::IScreen& screen,
-		  std::string mainFontName,
-		  std::function<void()> onGoToSelect,
-		  std::function<void()> onOpenSettings,
-		  std::function<void()> onExit);
+	  public:
+		/**
+		 * @brief TitleViewのコンストラクタ
+		 * @param inputProvider 入力インターフェース
+		 * @param uiRenderer UI描画インターフェース
+		 * @param screen 画面情報インターフェース
+		 * @param resourceManager リソース管理インターフェース（アプリアイコンの読み込みに使う）
+		 * @param onGoToSelect 「選択画面へ」押下時コールバック
+		 * @param onOpenSettings 「設定」押下時コールバック
+		 * @param onExit 「タスクを終了する」押下時コールバック
+		 */
+		TitleView(core::iface::IInputProvider& inputProvider,
+		    core::iface::IUIRenderer& uiRenderer,
+		    core::iface::IScreen& screen,
+		    core::iface::IResourceManager& resourceManager,
+		    std::function<void()> onGoToSelect,
+		    std::function<void()> onOpenSettings,
+		    std::function<void()> onExit);
 
-	  /**
-	   * @brief ボタン入力とパフォーマンス履歴を更新する
-	   * @param snap 最新のパフォーマンススナップショット
-	   */
-	  void update(const core::iface::PerformanceSnapshot& snap);
+		/**
+		 * @brief 入力とパフォーマンス履歴を更新する
+		 * @param snap 最新のパフォーマンススナップショット
+		 */
+		void update(const core::iface::PerformanceSnapshot& snap);
 
-	  /**
-	   * @brief タイトル画面を描画する
-	   */
-	  void drawTitle() const;
+		/**
+		 * @brief タイトル画面を描画する
+		 */
+		void drawTitle() const;
 
-	  /**
-	   * @brief ボタンの表示・非表示を設定する
-	   * @param visible trueで表示
-	   */
-	  void setButtonsVisible(bool visible);
+		/**
+		 * @brief 操作を受け付けるかを設定する
+		 *
+		 * フェード中は押せないようにする。描画自体は常に行う
+		 * @param visible 受け付けるなら true
+		 */
+		void setButtonsVisible(bool visible);
 
-	private:
+	  private:
+		/** @brief グラフに残す履歴の数（実物と同じく60秒ぶんの見た目にする） */
 		static constexpr int HISTORY_SIZE{ 120 };
 
-		void drawBackground() const;
-		void pushHistory(std::array<float, HISTORY_SIZE>& buf, float value);
+		/** @brief チャンネルの数 */
+		static constexpr int CHANNEL_COUNT{ static_cast<int>(TitleChannel::Count) };
 
+		/** @brief 押せる場所の種類 */
+		enum class Hit
+		{
+			None,
+			ThumbCpu,
+			ThumbMemory,
+			ThumbDisk,
+			Settings,
+			Exit,
+			Start,
+		};
+
+		/** @brief 1チャンネルぶんの計測状態 */
+		struct ChannelState
+		{
+			/// @brief 指数移動平均（EMA）で均した値。生値のままだと折れ線が暴れる
+			float m_smoothed{};
+			std::array<float, HISTORY_SIZE> m_history{};
+		};
+
+		// ---- 描画 ----
+		void drawWindow() const;
+		void drawTitleBar() const;
+		void drawNav() const;
+		void drawAppHeader() const;
+		void drawThumbnails() const;
+		void drawDetail() const;
+		void drawGraph(int x, int y, int width, int height, int channelIndex, bool withGrid) const;
+		void drawStats(int y) const;
+		void drawStartButton() const;
+
+		/**
+		 * @brief Fluent のボタンを描く
+		 * @param x 左上X座標
+		 * @param y 左上Y座標
+		 * @param width 幅
+		 * @param height 高さ
+		 * @param label ラベル（UTF-8）
+		 * @param isAccent アクセント色で塗るか
+		 * @param isHovered カーソルが乗っているか
+		 */
+		void drawButton(int x, int y, int width, int height, const char* label,
+		    bool isAccent, bool isHovered) const;
+
+		// ---- レイアウト（描画と当たり判定で共有する） ----
+		void updateLayout();
+		void getThumbRect(int index, int& outX, int& outY, int& outWidth, int& outHeight) const;
+		void getNavSettingsRect(int& outX, int& outY, int& outWidth, int& outHeight) const;
+		void getExitButtonRect(int& outX, int& outY, int& outWidth, int& outHeight) const;
+		void getStartButtonRect(int& outX, int& outY, int& outWidth, int& outHeight) const;
+
+		/**
+		 * @brief 指定座標にある押せる場所を返す
+		 * @param x 判定するX座標
+		 * @param y 判定するY座標
+		 * @return 押せる場所（どこでもなければ Hit::None）
+		 */
+		[[nodiscard]] Hit getHitAt(int x, int y) const;
+
+		/**
+		 * @brief 基準サイズ（ウィンドウ高さ740px）での値を、いまの画面サイズへ換算する
+		 * @param basePixels 基準サイズでのピクセル数
+		 * @return 換算後のピクセル数（最低1）
+		 */
+		[[nodiscard]] int scaled(float basePixels) const noexcept;
+
+		/**
+		 * @brief UTF-8の文字列を描画用（Shift-JIS）へ変換する
+		 * @param utf8 変換する文字列
+		 * @return 変換後の文字列
+		 */
+		[[nodiscard]] std::string toDrawable(const char* utf8) const;
+
+		/**
+		 * @brief UI操作の効果音を鳴らす
+		 *
+		 * 3つのボタンは押した先（Title::goToSelect など）が鳴らすので、
+		 * ここで鳴らすのはグラフの切り替えだけ
+		 */
+		void playUiClick() const;
+
+		/**
+		 * @brief 履歴を1つ進める
+		 * @param buffer 対象の履歴
+		 * @param value 新しく積む値
+		 */
+		static void pushHistory(std::array<float, HISTORY_SIZE>& buffer, float value);
+
+		core::iface::IInputProvider& m_inputProvider;
 		core::iface::IUIRenderer& m_uiRenderer;
-		core::iface::IScreen&     m_screen;
-		std::string               m_mainFontName;
+		core::iface::IScreen& m_screen;
 
-		ui::UIManager m_uiManager;
-		ui::Button*   m_startButton{};
-		ui::Button* m_settingsButton{};
-		ui::Button*   m_exitButton{};
+		std::function<void()> m_onGoToSelect;
+		std::function<void()> m_onOpenSettings;
+		std::function<void()> m_onExit;
 
+		/** @brief アプリアイコンの画像ハンドル（-1 なら描かない） */
+		int m_iconHandle{ -1 };
 
-		std::array<float, HISTORY_SIZE> m_cpuHistory{};
-		std::array<float, HISTORY_SIZE> m_memHistory{};
-		std::array<float, HISTORY_SIZE> m_diskHistory{};
+		std::array<ChannelState, CHANNEL_COUNT> m_channels{};
 
-		// 指数移動平均（EMA）スムージング後の中間値
-		float m_cpuSmoothed{};
-		float m_memSmoothed{};
-		float m_diskSmoothed{};
+		/** @brief 右の大きなグラフに出しているチャンネル */
+		int m_selectedChannel{ static_cast<int>(TitleChannel::Cpu) };
 
-		// EMA 平滑化係数（0=完全スムース　1=生値）
-		static constexpr float CPU_SMOOTH_FACTOR { 0.15f };
-		static constexpr float MEM_SMOOTH_FACTOR { 0.40f };
-		static constexpr float DISK_SMOOTH_FACTOR{ 0.15f };
+		Hit m_hovered{ Hit::None };
+		bool m_isInteractive{ false };
+		bool m_prevMouseLeft{ false };
 
-		static constexpr float TITLE_Y_RATIO = 0.35f;
-		static constexpr float START_BUTTON_Y_RATIO = 0.47f;
-		static constexpr float SETTINGS_BUTTON_Y_RATIO = 0.57f;
-		static constexpr float EXIT_BUTTON_Y_RATIO = 0.67f;
-		static constexpr float BUTTON_WIDTH_RATIO    = 0.15f;
-		static constexpr float BUTTON_HEIGHT_RATIO   = 0.06f;
-
-		// パフォーマンスグラフ カード上端 Y 位置（0〜1）
-		static constexpr float GRAPH_CPU_TOP_RATIO    = 0.04f;
-		static constexpr float GRAPH_MEMORY_TOP_RATIO = 0.37f;
-		static constexpr float GRAPH_DISK_TOP_RATIO   = 0.73f;
+		// updateLayout() が求めるレイアウト（すべてピクセル）
+		int m_windowX{};
+		int m_windowY{};
+		int m_windowWidth{};
+		int m_windowHeight{};
+		int m_titleBarHeight{};
+		int m_navWidth{};
+		int m_contentX{};
+		int m_contentY{};
+		int m_contentWidth{};
+		int m_contentHeight{};
+		int m_panesTop{};
+		int m_detailX{};
+		int m_detailWidth{};
+		float m_scale{ 1.0f };
 	};
 } // namespace game::scene

@@ -23,11 +23,9 @@ namespace game::scene
 	    , m_onOpenSettings{ std::move(onOpenSettings) }
 	{
 		auto* res{ core::base::ServiceLocator::get<core::iface::IResourceManager>() };
-		std::string mainFontName{ res->getFontName("main").value_or("") };
 
 		m_view = std::make_unique<TitleView>(
-		    inputProvider, uiRenderer, screen,
-		    std::move(mainFontName),
+		    inputProvider, uiRenderer, screen, *res,
 		    [this]()
 		    { goToSelect(); },
 		    [this]()
