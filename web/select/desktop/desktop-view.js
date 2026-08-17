@@ -81,6 +81,54 @@ const DesktopView = (function () {
         document.getElementById('clock').innerHTML = h + ':' + m + '<br>' + y + '/' + mo + '/' + d;
     }
 
+    // ── クイック設定 ──────────────────────────────────────────────
+
+    /**
+     * @brief クイック設定の開閉をゲームへ要求する
+     *
+     * パネル自体は別ウィンドウ（QuickSettingsWindow）にしてある。
+     * ここのHTMLの中に描くと、別HWNDである他のウィンドウの背面に回ってしまうため
+     */
+    function toggleQuickSettings() {
+        DesktopLogic.toggleWindow('quick');
+    }
+
+    /**
+     * @brief トレイのスピーカーアイコンを音量に合わせて描き替える
+     * @param {number} master マスター音量（0〜100）
+     */
+    function renderVolume(master) {
+        // パネルを閉じていても消音状態が分かるよう、トレイのアイコンも音量に追従させる
+        document.getElementById('tray-volume').innerHTML = speakerSvg(master);
+    }
+
+    /**
+     * @brief 音量に応じた波の数のスピーカーSVGを返す
+     * @param {number} master マスター音量（0〜100）
+     * @returns {string} SVG文字列
+     */
+    function speakerSvg(master) {
+        let waves;
+        if (master <= 0) {
+            waves = '<path d="M13 7.5 17 12.5M17 7.5 13 12.5" stroke-linecap="round"/>';
+        } else if (master < 50) {
+            waves = '<path d="M13 7.5a3.5 3.5 0 0 1 0 5" stroke-linecap="round"/>';
+        } else {
+            waves = '<path d="M13 7.5a3.5 3.5 0 0 1 0 5M15 5.5a6.5 6.5 0 0 1 0 9" stroke-linecap="round"/>';
+        }
+
+        return '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4">' +
+            '<path d="M4 8v4h2.5L10 15V5L6.5 8H4z" stroke-linejoin="round"/>' + waves + '</svg>';
+    }
+
+    /**
+     * @brief トレイの音量表示を結びつける
+     */
+    function initQuickSettings() {
+        DesktopLogic.onVolumeChange(renderVolume);
+        renderVolume(DesktopLogic.getMasterVolume());
+    }
+
     // ── Matrix Rain ───────────────────────────────────────────────
 
     /**
@@ -240,13 +288,17 @@ const DesktopView = (function () {
         setInterval(updateClock, 10000);
 
         initMatrixRain();
+        initQuickSettings();
 
         DesktopLogic.onWindowChange(function (name, visible) {
             setWindowVisible(name, visible);
         });
     }
 
-    return { initialize };
+    return { initialize, toggleQuickSettings };
 }());
+
+// HTML の onclick から呼ばれるグローバル関数
+function toggleQuickSettings() { DesktopView.toggleQuickSettings(); }
 
 DesktopView.initialize();

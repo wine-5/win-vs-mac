@@ -36,11 +36,18 @@ namespace
 Application::Application(int screenWidth, int screenHeight)
 {
 	// サービスを登録する（GameManager/PauseManagerはApplicationが所有し、参照を注入する）
-	ServiceLocatorInitializer::init(screenWidth, screenHeight, m_gameManager, m_pauseManager);
+	// タイトルの「設定」ボタンからも、Applicationが持つ同じ設定画面を開く。
+	// 閉じたあとはポーズメニューを出さずゲームへ戻す（そもそも開いていないため）
+	ServiceLocatorInitializer::init(screenWidth, screenHeight, m_gameManager, m_pauseManager, m_settingsManager,
+	    [this]()
+	    { openSettings(false); });
 
 	m_sceneManager = core::base::ServiceLocator::get<game::scene::SceneManager>();
 	m_inputProvider = core::base::ServiceLocator::get<core::iface::IInputProvider>();
 	m_preloader = core::base::ServiceLocator::get<core::iface::IResourcePreloader>();
+
+	// 保存されていた音量を、AudioManager が登録された後に行き渡らせる
+	m_settingsManager.applyAudio();
 
 	// 起動直後から全リソースの先読みを始める。BIOS〜Selectの間にほぼ読み終わるため、
 	// InGame生成時の loadXxxById() はキャッシュヒットになりロード待ちが消える
@@ -51,6 +58,12 @@ Application::Application(int screenWidth, int screenHeight)
 	    *m_inputProvider,
 	    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 	    *core::base::ServiceLocator::get<core::iface::IScreen>());
+
+	m_settingsPanelController = std::make_unique<game::ui::settings::SettingsPanelController>(
+	    *m_inputProvider,
+	    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
+	    *core::base::ServiceLocator::get<core::iface::IScreen>(),
+	    m_settingsManager);
 
 	// 初期シーンを設定する（インゲームから始めるかは DebugFlags.h で切り替える）
 	m_sceneManager->changeScene(core::constant::START_FROM_IN_GAME
@@ -77,7 +90,7 @@ void Application::run()
 		m_inputProvider->captureFrameInput();
 
 		// シーンをまたぐポーズメニュー（Esc）の開閉・操作を処理する
-		updatePauseMenu();
+		updatePauseMenu(elapsedTime);
 
 		if (m_pauseManager.isPausedBy(game::PauseReason::Menu))
 		{
@@ -85,7 +98,13 @@ void Application::run()
 			// 貯めた時間も捨てる（捨てないと再開した瞬間にメニューを開いていた時間ぶん早送りされる）
 			accumulator = 0.0f;
 			m_sceneManager->draw();
-			m_pauseMenuController->draw();
+
+			// 設定を開いている間はポーズメニューを隠す。重ねて出すと、
+			// どちらを操作しているのか分からなくなる
+			if (m_isSettingsOpen)
+				m_settingsPanelController->draw();
+			else
+				m_pauseMenuController->draw();
 		}
 		else
 		{
@@ -140,14 +159,52 @@ void Application::run()
 	}
 }
 
+void Application::openSettings(bool returnToPauseMenu)
+{
+	if (m_isSettingsOpen)
+		return;
+
+	// ポーズしていない状態（タイトルのボタン）から開いた場合も、
+	// 設定を触っている間はシーンを止める
+	if (!m_pauseManager.isPaused())
+	{
+		m_pauseManager.pause(game::PauseReason::Menu);
+		m_sceneManager->notifyPauseChanged(true);
+	}
+
+	m_isSettingsOpen = true;
+	m_returnToPauseMenu = returnToPauseMenu;
+	m_settingsPanelController->open();
+	playUiSe(core::constant::SeType::UiClick);
+}
+
 void Application::playUiSe(core::constant::SeType seType) const
 {
 	if (auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() })
 		audio->playSe(seType);
 }
 
-void Application::updatePauseMenu()
+void Application::updatePauseMenu(float deltaTime)
 {
+	// 設定を開いている間は、ポーズメニューもEscの開閉も止める。
+	// Escは「設定を閉じてポーズメニューへ戻る」に割り当てる
+	if (m_isSettingsOpen)
+	{
+		if (m_settingsPanelController->update(deltaTime) == game::ui::settings::SettingsPanelAction::Close)
+		{
+			m_isSettingsOpen = false;
+			playUiSe(core::constant::SeType::UiClose);
+
+			// ポーズメニューから開いたのでなければ、止めていたシーンも動かし直す
+			if (!m_returnToPauseMenu)
+			{
+				m_pauseManager.resume();
+				m_sceneManager->notifyPauseChanged(false);
+			}
+		}
+		return;
+	}
+
 	const auto sceneType{ m_sceneManager->getCurrentSceneType() };
 
 	// Escで開閉する（別の理由でポーズ中は何もしない）
@@ -172,12 +229,16 @@ void Application::updatePauseMenu()
 		return;
 
 	// メニューの選択・決定を処理する
-	switch (m_pauseMenuController->update())
+	switch (m_pauseMenuController->update(deltaTime))
 	{
 	case game::ui::pause::PauseMenuAction::Resume:
 		m_pauseManager.resume();
 		m_sceneManager->notifyPauseChanged(false);
 		playUiSe(core::constant::SeType::UiClose);
+		break;
+
+	case game::ui::pause::PauseMenuAction::Settings:
+		openSettings(true);
 		break;
 
 	case game::ui::pause::PauseMenuAction::BackToTitle:

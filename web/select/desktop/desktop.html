@@ -49,6 +49,11 @@
                     <img src="https://assets.game.web/images/ui/app/param.png" alt="">
                     <span>パラメータ</span>
                 </div>
+                <!-- 音量と操作の設定。1列目・3列目が4段なので、ここも4段目に置いて高さを揃える -->
+                <div class="desk-icon" ondblclick="toggleWindow('settings')">
+                    <img src="https://assets.game.web/images/ui/app/settings.png" alt="">
+                    <span>設定</span>
+                </div>
             </div>
             <!-- 3列目: 説明と、この画面の出口。ルール説明は初回ガイドの締めで指し示すので先頭へ置く。
                  セレクト画面ではEscのポーズメニューを開けないため、
@@ -101,6 +106,18 @@
             <div class="taskbar-app" data-tooltip="シャットダウン" onclick="quitGame()">
                 <span class="taskbar-glyph">⏻</span>
             </div>
+
+            <!-- Windows のトレイと同じく、アイコンをまとめて押すとクイック設定が開く。
+                 個々のアイコンは押せる場所ではなく、この1つのボタンの顔として並んでいる -->
+            <div class="taskbar-app tray" data-tooltip="クイック設定" onclick="toggleQuickSettings()">
+                <svg class="tray-glyph" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <path d="M2 7.5a11 11 0 0 1 16 0M4.8 10.6a7 7 0 0 1 10.4 0M7.6 13.7a3 3 0 0 1 4.8 0"
+                          stroke-linecap="round"/>
+                    <circle cx="10" cy="16.4" r="1" fill="currentColor" stroke="none"/>
+                </svg>
+                <span class="tray-glyph" id="tray-volume"></span>
+            </div>
+
             <div class="clock" id="clock">00:00<br>--/--</div>
             <button class="start-btn" onclick="startGame()">ゲームを開始 →</button>
         </div>

@@ -5,9 +5,13 @@
  * ウィンドウ状態の管理と C++ ↔ JS メッセージングを担う
  */
 const DesktopLogic = (function () {
-    const winStates = { file: true, param: true, diff: true, rules: false };
+    const winStates = { file: true, param: true, diff: true, rules: false, settings: false, quick: false };
 
     let onWindowChangeCallback = null;
+    let onVolumeChangeCallback = null;
+
+    // クイック設定で触れるのはマスター音量だけ。BGM・効果音は設定ウィンドウ側に任せる
+    let masterVolume = 100;
 
     /**
      * @brief ウィンドウ表示状態変化時のコールバックを登録する
@@ -57,10 +61,35 @@ const DesktopLogic = (function () {
     }
 
     /**
+     * @brief 音量が変わったときのコールバックを登録する
+     * @param {function(master: number): void} cb
+     */
+    function onVolumeChange(cb) {
+        onVolumeChangeCallback = cb;
+    }
+
+    /**
+     * @brief 現在のマスター音量を返す
+     * @returns {number} 0〜100
+     */
+    function getMasterVolume() {
+        return masterVolume;
+    }
+
+    /**
      * @brief C++ からのメッセージを処理する
      * @param {object} data 受信したメッセージオブジェクト
      */
     function handleMessage(data) {
+        if (data.type === 'settings') {
+            // 設定ウィンドウ側で変えられた場合もここへ届くので、トレイの表示が食い違わない
+            if (data.audio && typeof data.audio.master === 'number') {
+                masterVolume = data.audio.master;
+                if (onVolumeChangeCallback) onVolumeChangeCallback(masterVolume);
+            }
+            return;
+        }
+
         if (data.type === 'windowStateChanged') {
             winStates[data.window] = data.visible;
             if (onWindowChangeCallback) {
@@ -78,7 +107,10 @@ const DesktopLogic = (function () {
         }
     }
 
-    return { onWindowChange, toggleWindow, startGame, backToTitle, quitGame, launchApp, handleMessage };
+    return {
+        onWindowChange, toggleWindow, startGame, backToTitle, quitGame, launchApp, handleMessage,
+        onVolumeChange, getMasterVolume
+    };
 }());
 
 // HTML の onclick から呼ばれるグローバル関数

@@ -45,6 +45,8 @@ namespace platform::window
 		 * @param onQuitGame アプリを終了するときのコールバック
 		 * @param onFileSlotChanged ファイルスロット変更時のコールバック
 		 * @param onDifficultyChanged 難易度変更時のコールバック
+		 * @param getSettings 現在の設定を取り出すコールバック
+		 * @param onSettingsChanged 設定変更時のコールバック
 		 * @param resourceManager リソースマネージャ
 		 * @param showTutorial 初回の操作ガイドを表示するか
 		 * @return 生成されたセレクトウィンドウマネージャ
@@ -55,6 +57,8 @@ namespace platform::window
 		    std::function<void()> onQuitGame,
 		    std::function<void(int, const std::string&)> onFileSlotChanged,
 		    std::function<void(const std::string&)> onDifficultyChanged,
+		    std::function<core::data::GameSettings()> getSettings,
+		    std::function<void(const core::data::GameSettings&)> onSettingsChanged,
 		    core::iface::IResourceManager& resourceManager,
 		    bool showTutorial) override;
 

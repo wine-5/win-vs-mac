@@ -1,9 +1,12 @@
 #pragma once
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
+#include "game/SettingsManager.h"
 #include "game/ui/pause/PauseMenuController.h"
+#include "game/ui/settings/SettingsPanelController.h"
 #include "game/scene/SceneType.h"
 #include "core/constant/SeType.h"
+#include "infrastructure/settings/SettingsRepository.h"
 #include <memory>
 
 namespace game::scene
@@ -49,8 +52,18 @@ class Application
   private:
 	/**
 	 * @brief Escキーによるポーズメニューの開閉と、メニュー操作の結果を処理する
+	 * @param deltaTime フレーム間の時間差（秒）
 	 */
-	void updatePauseMenu();
+	void updatePauseMenu(float deltaTime);
+
+	/**
+	 * @brief 設定画面を開く
+	 *
+	 * タイトルの「設定」ボタンからも呼ばれる。設定画面はシーンの外側にあるため、
+	 * 開いている間はシーンを止める（ポーズメニュー経由と同じ状態にする）
+	 * @param returnToPauseMenu 閉じたあとポーズメニューへ戻るか（falseならポーズも解除する）
+	 */
+	void openSettings(bool returnToPauseMenu);
 
 	/**
 	 * @brief UI操作の効果音を鳴らす
@@ -87,8 +100,21 @@ class Application
 	game::GameManager m_gameManager{};
 	game::PauseManager m_pauseManager{};
 
+	// 設定は保存先（リポジトリ）より後に生まれる必要があるため、この順で宣言する
+	infrastructure::settings::SettingsRepository m_settingsRepository{};
+	game::SettingsManager m_settingsManager{ m_settingsRepository };
+
 	// サービス初期化後に生成するためポインタで持つ（所有はApplication）
 	std::unique_ptr<game::ui::pause::PauseMenuController> m_pauseMenuController;
+
+	// 設定画面もシーンをまたいで同じものを使う（どこから開いても同じ見た目・同じ値になる）
+	std::unique_ptr<game::ui::settings::SettingsPanelController> m_settingsPanelController;
+
+	/** @brief 設定画面を開いているか */
+	bool m_isSettingsOpen{ false };
+
+	/** @brief 設定画面を閉じたときポーズメニューへ戻るか（タイトルのボタンから開いた場合は戻らない） */
+	bool m_returnToPauseMenu{ false };
 
 	// ServiceLocatorが所有するサービスへの参照（初期化後に取得する）
 	game::scene::SceneManager* m_sceneManager{ nullptr };

@@ -28,11 +28,13 @@ namespace game::system::camera
 	CameraSystem::CameraSystem(core::ecs::ComponentManager& componentManager,
 	    core::ecs::EntityId targetEntityId,
 	    core::iface::IInputProvider& inputProvider,
-	    core::iface::ICamera& camera)
+	    core::iface::ICamera& camera,
+	    const core::data::ControlSettings& controlSettings)
 	    : m_componentManager{ componentManager }
 	    , m_targetEntityId{ targetEntityId }
 	    , m_inputProvider{ inputProvider }
 	    , m_camera{ camera }
+	    , m_controlSettings{ controlSettings }
 	{
 	}
 
@@ -116,9 +118,11 @@ namespace game::system::camera
 			                      m_componentManager.get<component::movement::InputComponent>(m_targetEntityId).m_locked };
 		if (!isInputLocked)
 		{
-			// マウス移動量で yaw/pitch を更新する
-			camera.m_yaw += deltaX * camera.m_sensitivity;
-			camera.m_pitch += deltaY * camera.m_sensitivity;
+			// マウス移動量で yaw/pitch を更新する。感度と縦の向きは設定から毎フレーム引くので、
+			// 設定画面のスライダーを動かした瞬間から次のフレームで効く
+			const float sensitivity{ m_controlSettings.sensitivityPerPixel() };
+			camera.m_yaw += deltaX * sensitivity;
+			camera.m_pitch += deltaY * sensitivity * m_controlSettings.pitchDirection();
 		}
 
 		// ピッチを可動範囲に制限する
@@ -135,8 +139,10 @@ namespace game::system::camera
 			const auto& effect{ m_componentManager.get<component::camera::CameraEffectComponent>(m_targetEntityId) };
 			fovScale = effect.m_fovScale;
 			distanceScale = effect.m_distanceScale;
-			// 揺れは通常演出（被弾）とボス覚醒演出を加算する
-			shakeOffset = effect.m_shakeOffset + effect.m_awakenShakeOffset;
+			// 揺れは通常演出（被弾）とボス覚醒演出を加算する。
+			// 揺れの発生源はいくつもあるが合成はここ1か所なので、設定の倍率もここで掛ける。
+			// 酔いやすい人が0にすれば、どの演出由来の揺れもまとめて止まる
+			shakeOffset = (effect.m_shakeOffset + effect.m_awakenShakeOffset) * m_controlSettings.shakeScale();
 			cinematicBlend = effect.m_cinematicBlend;
 			cinematicTarget = effect.m_cinematicTarget;
 		}

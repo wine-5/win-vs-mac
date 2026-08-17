@@ -4,6 +4,7 @@
 #include "core/ecs/Entity.h"
 #include "core/interface/ICamera.h"
 #include "core/interface/IInputProvider.h"
+#include "core/data/GameSettings.h"
 
 namespace game
 {
@@ -26,11 +27,13 @@ namespace game::system::camera
 		 * @param targetEntityId 追従対象（プレイヤー）のEntityID
 		 * @param inputProvider 入力のインターフェース
 		 * @param camera カメラ装置のインターフェース
+		 * @param controlSettings 操作設定（感度・Y軸反転を毎フレーム参照する）
 		 */
 		CameraSystem(core::ecs::ComponentManager& componentManager,
 		    core::ecs::EntityId targetEntityId,
 		    core::iface::IInputProvider& inputProvider,
-		    core::iface::ICamera& camera);
+		    core::iface::ICamera& camera,
+		    const core::data::ControlSettings& controlSettings);
 
 		/**
 		 * @brief マウス入力に応じてカメラを更新する
@@ -56,6 +59,9 @@ namespace game::system::camera
 		core::ecs::EntityId m_targetEntityId{};
 		core::iface::IInputProvider& m_inputProvider;
 		core::iface::ICamera& m_camera;
+
+		// 設定画面で変更された値をその場で反映したいので、値をコピーせず参照で持つ
+		const core::data::ControlSettings& m_controlSettings;
 
 		// 壁で寄せた距離。寄るのは即座、戻るのは緩やかにするため前フレームの値を持つ
 		float m_currentDistance{ 0.0f };

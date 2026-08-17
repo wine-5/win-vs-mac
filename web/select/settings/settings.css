@@ -1,0 +1,269 @@
+/* Windows 11「設定」アプリ（ダークモード）の見た目。
+   色も寸法も src/game/ui/settings/SettingsPanelView.cpp と揃えている。
+   タイトル・ポーズから開いたときとセレクトから開いたときで別物に見えてはいけない */
+
+@font-face {
+    font-family: 'NotoSansJP';
+    src: url('https://assets.game.web/fonts/NotoSansJP.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root {
+    --settings-window-bg: #202020;
+    --settings-content-bg: #272727;
+    --settings-card: #2b2b2b;
+    --settings-card-hover: #323232;
+    --settings-stroke: #383838;
+    --settings-nav-selected: #2e2e2e;
+    --settings-accent: #4cc2ff;
+    --settings-on-accent: #000;
+    --settings-text: #fff;
+    --settings-text-2: #c8c8c8;
+    --settings-text-3: #8b8b8b;
+}
+
+/* 難易度HARDでは他のウィンドウと同じく警告色へ寄せる。
+   ただし変えるのはアクセントだけで、地の色は設定アプリのまま保つ */
+body.hard {
+    --settings-accent: #e81123;
+    --settings-on-accent: #fff;
+}
+
+html, body {
+    background: var(--settings-window-bg);
+    color: var(--settings-text);
+    font-family: 'NotoSansJP', 'Segoe UI', 'Yu Gothic UI', 'Meiryo', sans-serif;
+    font-size: 14px;
+}
+
+.app {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+/* ---------------- 左ナビ ---------------- */
+.nav {
+    width: 27%;
+    min-width: 200px;
+    flex: none;
+    padding: 12px 4px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.account {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px 20px;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex: none;
+    display: grid;
+    place-items: center;
+    background: var(--settings-card);
+    border: 1px solid var(--settings-stroke);
+    color: var(--settings-text-3);
+}
+
+.avatar svg { width: 20px; height: 20px; }
+
+.account-name { font-size: 13px; font-weight: 600; line-height: 1.3; }
+.account-sub { font-size: 12px; color: var(--settings-text-3); line-height: 1.3; }
+
+.nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 36px;
+    padding: 0 12px;
+    border: none;
+    background: none;
+    border-radius: 5px;
+    color: var(--settings-text);
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.nav-item:hover { background: var(--settings-card-hover); }
+.nav-item.is-active { background: var(--settings-nav-selected); }
+
+/* 選択中を示す左端のアクセントピル */
+.nav-item.is-active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 3px;
+    height: 16px;
+    margin-top: -8px;
+    border-radius: 2px;
+    background: var(--settings-accent);
+}
+
+.nav-item svg { width: 18px; height: 18px; flex: none; color: var(--settings-accent); }
+
+/* ---------------- コンテンツ ---------------- */
+.content {
+    flex: 1;
+    min-width: 0;
+    background: var(--settings-content-bg);
+    border-top-left-radius: 8px;
+    border-left: 1px solid var(--settings-stroke);
+    border-top: 1px solid var(--settings-stroke);
+    padding: 24px 36px 40px 32px;
+    overflow-y: auto;
+}
+
+.content::-webkit-scrollbar { width: 12px; }
+.content::-webkit-scrollbar-thumb {
+    background: var(--settings-text-3);
+    border-radius: 6px;
+    border: 4px solid transparent;
+    background-clip: content-box;
+}
+
+.page { display: none; }
+.page.is-active { display: block; }
+
+.page-title { font-size: 28px; font-weight: 600; margin-bottom: 24px; }
+
+.section-label { font-size: 14px; font-weight: 600; margin: 24px 0 8px; }
+.section-label:first-of-type { margin-top: 0; }
+
+/* ---------------- カードと行 ---------------- */
+.card {
+    background: var(--settings-card);
+    border: 1px solid var(--settings-stroke);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    min-height: 62px;
+}
+
+.row + .row { border-top: 1px solid var(--settings-stroke); }
+
+.row-icon { width: 20px; flex: none; display: grid; place-items: center; color: var(--settings-text); }
+.row-icon svg { width: 20px; height: 20px; }
+
+.row-text { flex: 1; min-width: 0; }
+.row-title { font-size: 14px; line-height: 1.4; }
+.row-sub { font-size: 12px; color: var(--settings-text-3); line-height: 1.4; margin-top: 1px; }
+
+.row-ctrl { display: flex; align-items: center; gap: 14px; flex: none; }
+
+.row-value {
+    width: 28px;
+    text-align: right;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+    color: var(--settings-text-2);
+}
+
+/* ---------------- スライダー ---------------- */
+input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 200px;
+    height: 20px;
+    background: none;
+    cursor: pointer;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(to right,
+        var(--settings-accent) 0 var(--fill, 0%), var(--settings-text-3) var(--fill, 0%) 100%);
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    margin-top: -8px;
+    border-radius: 50%;
+    background: var(--settings-accent);
+    border: 5px solid var(--settings-card);
+    box-shadow: 0 0 0 1px var(--settings-stroke);
+    transition: border-width 0.08s ease;
+}
+
+input[type=range]:hover::-webkit-slider-thumb { border-width: 4px; }
+input[type=range]:active::-webkit-slider-thumb { border-width: 6px; }
+input[type=range]:focus { outline: none; }
+
+/* ---------------- トグル ---------------- */
+.toggle-label { font-size: 14px; color: var(--settings-text-2); width: 26px; }
+
+.toggle {
+    position: relative;
+    width: 40px;
+    height: 20px;
+    flex: none;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.toggle-track {
+    display: block;
+    width: 40px;
+    height: 20px;
+    border-radius: 10px;
+    border: 1px solid var(--settings-text-2);
+    background: transparent;
+    transition: background 0.1s, border-color 0.1s;
+}
+
+.toggle-knob {
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: var(--settings-text);
+    transition: left 0.12s cubic-bezier(0.2, 0, 0, 1), width 0.08s, height 0.08s, background 0.1s;
+}
+
+.toggle:hover .toggle-track { background: var(--settings-card-hover); }
+.toggle:hover .toggle-knob { width: 14px; height: 14px; margin-top: -7px; }
+.toggle.is-on .toggle-track { background: var(--settings-accent); border-color: var(--settings-accent); }
+.toggle.is-on .toggle-knob { left: 23px; background: var(--settings-on-accent); }
+.toggle.is-on:hover .toggle-knob { left: 22px; }
+
+/* ---------------- ボタン ---------------- */
+.btn {
+    height: 32px;
+    padding: 0 14px;
+    background: var(--settings-card-hover);
+    color: var(--settings-text);
+    border: 1px solid var(--settings-stroke);
+    border-radius: 4px;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn:hover { background: var(--settings-nav-selected); border-color: var(--settings-stroke); }
+.btn:active { color: var(--settings-text-3); }

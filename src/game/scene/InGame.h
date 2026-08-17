@@ -35,8 +35,9 @@ namespace core::iface
 
 namespace game
 {
-	class GameManager;  // 前方宣言
-	class PauseManager; // 前方宣言
+	class GameManager;     // 前方宣言
+	class PauseManager;    // 前方宣言
+	class SettingsManager; // 前方宣言
 
 	namespace system::visual
 	{
@@ -92,6 +93,7 @@ namespace game::scene
 	   * @param inputProvider 入力のインターフェース
 	   * @param gameManager シーン間共有データの参照
 	   * @param pauseManager ポーズ状態の参照
+	   * @param settingsManager プレイヤーの設定の参照
 	   */
 	  InGame(core::iface::ICamera& camera,
 		  core::iface::IRenderer& renderer,
@@ -99,7 +101,8 @@ namespace game::scene
 		  core::iface::IResourceManager& resourceManager,
 		  core::iface::IInputProvider& inputProvider,
 		  GameManager& gameManager,
-		  PauseManager& pauseManager);
+		  PauseManager& pauseManager,
+		  SettingsManager& settingsManager);
 
 	  /**
 	   * @brief InGameのデストラクタ
@@ -235,6 +238,7 @@ namespace game::scene
 		core::iface::IInputProvider   &m_inputProvider;
 		GameManager& m_gameManager;
 		PauseManager& m_pauseManager;
+		SettingsManager& m_settingsManager;
 		data::FileEquipmentData       &m_fileEquipmentData;
 		core::iface::IEffectFactory& m_effectFactory;
 

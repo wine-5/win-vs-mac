@@ -58,13 +58,6 @@ namespace core::utility
         static constexpr unsigned int BUTTON_PRESSED   = 0xFF383880;
         static constexpr unsigned int BUTTON_DISABLED  = GRAY;
 
-        // ========== パフォーマンスグラフ用の色 ==========
-
-        static constexpr unsigned int GRAPH_CPU    = 0xFF4080FF; // 青：CPU使用率
-        static constexpr unsigned int GRAPH_MEMORY = 0xFF40FF80; // 緑：メモリ使用率
-        static constexpr unsigned int GRAPH_DISK   = 0xFF80FFFF; // シアン：ディスク活動率
-        static constexpr unsigned int CARD_BG      = 0xFF081024; // タスクマネージャー風カード背景（濃い紺）
-
 		// ========== 発見演出（通知バナー）用の色 ==========
 
 		static constexpr unsigned int ALERT_BANNER_BG = 0xFFF8F8FA;    // 通知バー背景の代替色（画像未ロード時）
@@ -120,6 +113,49 @@ namespace core::utility
 		static constexpr unsigned int MAP_FLOOR_BLUE = 0xFF0067C0;    // 普通の足場
 		static constexpr unsigned int MAP_SLOPE_GREEN = 0xFF3FB950;   // 滑る坂
 		static constexpr unsigned int MAP_CONVEYOR_CYAN = 0xFF00B7C3; // 動く歩道
+
+		// ========== 設定画面（Windows 11「設定」アプリのダークモード）用の色 ==========
+
+		// 既存のWeb側UI（web/common/common.css）が暗い配色で統一されているため、
+		// 設定画面も実在するダークモードの設定アプリに寄せる。ライトのまま持ち込むと
+		// ここだけ真っ白な面になり、ゲーム画面に重ねたときに目を焼く
+		static constexpr unsigned int SETTINGS_WINDOW_BG = 0xFF202020;      // ウィンドウ（左ナビ側）の地
+		static constexpr unsigned int SETTINGS_CONTENT_BG = 0xFF272727;     // 右のコンテンツ領域
+		static constexpr unsigned int SETTINGS_CARD = 0xFF2B2B2B;           // 項目をまとめるカードの面
+		static constexpr unsigned int SETTINGS_CARD_HOVER = 0xFF323232;     // カード上のボタンの面
+		static constexpr unsigned int SETTINGS_STROKE = 0xFF383838;         // カード・コントロールの枠
+		static constexpr unsigned int SETTINGS_NAV_SELECTED = 0xFF2E2E2E;   // 左ナビの選択中の背景
+		static constexpr unsigned int SETTINGS_ACCENT = 0xFF4CC2FF;         // ダークモードのアクセント（水色）
+		static constexpr unsigned int SETTINGS_TEXT_SECONDARY = 0xFFC8C8C8; // 補助的な文字
+		static constexpr unsigned int SETTINGS_TEXT_TERTIARY = 0xFF8B8B8B;  // 説明文・未選択
+		static constexpr unsigned int SETTINGS_TRACK = 0xFF8B8B8B;          // スライダーの未到達部分
+
+		// ========== タイトル画面（タスクマネージャー風ウィンドウ）用の色 ==========
+
+		// 実物のタスクマネージャーはライトテーマが既定で、白い面に濃い文字が載る。
+		// 「自分のPCのタスクマネージャーがそのまま立ち上がった」ように見せたい画面なので、
+		// ダークで組んだ設定画面（SETTINGS_*）とは別に、白基調の一式をここに持つ
+		static constexpr unsigned int TITLE_WINDOW_BG = 0xFFF3F3F3;     // タイトルバー・左ナビの地
+		static constexpr unsigned int TITLE_CONTENT_BG = 0xFFFFFFFF;    // 右のコンテンツ領域
+		static constexpr unsigned int TITLE_CARD = 0xFFFFFFFF;          // グラフの面
+		static constexpr unsigned int TITLE_CARD_HOVER = 0xFFEAEAEA;    // カーソルを乗せた項目の面
+		static constexpr unsigned int TITLE_NAV_SELECTED = 0xFFE4E4E4;  // 左ナビ・サムネイルの選択中の背景
+		static constexpr unsigned int TITLE_STROKE = 0xFFDCDCDC;        // カード・ボタンの枠
+		static constexpr unsigned int TITLE_ACCENT = 0xFF0067C0;        // ライトテーマのアクセント（青）
+		static constexpr unsigned int TITLE_TEXT = 0xFF1B1B1B;          // 本文・数値
+		static constexpr unsigned int TITLE_TEXT_TERTIARY = 0xFF5D5D5D; // 説明文・軸ラベル
+		static constexpr unsigned int TITLE_GRID = 0xFFEAEAEA;          // グラフの方眼
+
+		// グラフの色。白地に載せるので、暗い画面用より明度を落として輪郭が出るようにする
+		static constexpr unsigned int TITLE_GRAPH_CPU = 0xFF0F6CBD;    // 青：CPU使用率
+		static constexpr unsigned int TITLE_GRAPH_MEMORY = 0xFF1A8F4C; // 緑：メモリ使用率
+		static constexpr unsigned int TITLE_GRAPH_DISK = 0xFF0E8A9B;   // 青緑：ディスク活動率
+
+		// ========== ポーズ画面（Ctrl+Alt+Del のセキュリティオプション画面）用の色 ==========
+
+		// 画面全体を沈める濃紺。真っ黒で覆うと単なる暗転に見えるが、青をわずかに残すと
+		static constexpr unsigned int PAUSE_BACKGROUND_NAVY = 0xFF060C15;
+		static constexpr unsigned int PAUSE_CANCEL_BUTTON = 0xFF3A3A3A;
 
 		// ========== メニュー（ポーズなどの項目リスト）用の色 ==========
 

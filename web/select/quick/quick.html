@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <base href="https://game.web/">
+    <link rel="stylesheet" href="common/common.css">
+    <link rel="stylesheet" href="select/quick/quick.css">
+</head>
+<body>
+<!-- Windows のクイック設定（Win+A）。タスクバーの右上へ出す小さなパネル。
+     ここに置くのは音量だけで、それ以外は「設定」を開かせる。
+     同じ設定を2か所で細かく触れるようにすると、どちらが正なのか分からなくなる -->
+<div class="panel">
+    <div class="row">
+        <span class="icon" id="volume-icon"></span>
+        <input type="range" min="0" max="100" step="5" id="master" aria-label="音量">
+        <button class="more" data-tooltip="音量ミキサー" onclick="openSettings()">›</button>
+    </div>
+    <div class="footer">
+        <span class="value" id="value">100%</span>
+        <button class="gear" data-tooltip="設定" onclick="openSettings()">⚙</button>
+    </div>
+</div>
+
+<script src="common/messaging.js"></script>
+<script src="common/ui-sound.js"></script>
+<script src="select/quick/quick-view.js"></script>
+</body>
+</html>

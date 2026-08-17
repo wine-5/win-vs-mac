@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "core/constant/BgmType.h"
 #include "core/constant/SeType.h"
+#include "core/data/GameSettings.h"
 
 namespace core::iface
 {
@@ -37,5 +38,15 @@ namespace core::iface
 		 * @param deltaTime フレーム間の時間差（秒）
 		 */
 		virtual void update(float deltaTime) = 0;
+
+		/**
+		 * @brief プレイヤーが設定した音量を反映する
+		 *
+		 * 音源ごとの音量（resources.json）はそのままに、その上へ倍率として掛ける。
+		 * 置き換えにすると音源ごとに調整したバランスが失われるため。
+		 * 再生中の BGM へは即座に効き、SE は次に鳴る一発から効く
+		 * @param settings 反映する音量設定
+		 */
+		virtual void applyVolumeSettings(const core::data::AudioSettings& settings) = 0;
 	};
 } // namespace core::iface

@@ -205,6 +205,11 @@
     <ClCompile Include="src\game\system\visual\TelegraphVisualsSystem.cpp" />
     <ClCompile Include="src\game\ui\FadeTransition.cpp" />
     <ClCompile Include="src\infrastructure\AudioManager.cpp" />
+    <ClCompile Include="src\infrastructure\settings\SettingsRepository.cpp" />
+    <ClCompile Include="src\game\SettingsManager.cpp" />
+    <ClCompile Include="src\game\ui\settings\SettingsPanelView.cpp" />
+    <ClCompile Include="src\game\ui\UiInputMapper.cpp" />
+    <ClCompile Include="src\game\ui\settings\SettingsPanelController.cpp" />
     <ClCompile Include="src\infrastructure\effect\EffectFactory.cpp" />
     <ClCompile Include="src\infrastructure\effect\EffectPool.cpp" />
     <ClCompile Include="src\infrastructure\resource\repository\AudioRepository.cpp" />
@@ -273,6 +278,8 @@
     <ClCompile Include="src\platform\window\select\DesktopWindow.cpp" />
     <ClCompile Include="src\platform\window\select\DifficultyWindow.cpp" />
     <ClCompile Include="src\platform\window\select\RulesWindow.cpp" />
+    <ClCompile Include="src\platform\window\select\SettingsWindow.cpp" />
+    <ClCompile Include="src\platform\window\select\QuickSettingsWindow.cpp" />
     <ClCompile Include="src\platform\window\select\ParameterWindow.cpp" />
     <ClCompile Include="src\platform\window\UiSound.cpp" />
     <ClCompile Include="src\platform\window\WindowBase.cpp" />
@@ -375,6 +382,8 @@
     <ClInclude Include="src\core\interface\IRenderer.h" />
     <ClInclude Include="src\core\interface\IResourceManager.h" />
     <ClInclude Include="src\core\interface\IResourcePreloader.h" />
+    <ClInclude Include="src\core\interface\ISettingsRepository.h" />
+    <ClInclude Include="src\core\data\GameSettings.h" />
     <ClInclude Include="src\core\interface\IStringConverter.h" />
     <ClInclude Include="src\core\input\KeyCode.h" />
     <ClInclude Include="src\core\interface\IScreen.h" />
@@ -465,6 +474,11 @@
     <ClInclude Include="src\game\utility\GroundQuery.h" />
     <ClInclude Include="src\game\utility\MiniMapProjection.h" />
     <ClInclude Include="src\infrastructure\AudioManager.h" />
+    <ClInclude Include="src\infrastructure\settings\SettingsRepository.h" />
+    <ClInclude Include="src\game\SettingsManager.h" />
+    <ClInclude Include="src\game\ui\settings\SettingsPanelView.h" />
+    <ClInclude Include="src\game\ui\UiInputMapper.h" />
+    <ClInclude Include="src\game\ui\settings\SettingsPanelController.h" />
     <ClInclude Include="src\infrastructure\effect\EffectFactory.h" />
     <ClInclude Include="src\infrastructure\effect\EffectPool.h" />
     <ClInclude Include="src\infrastructure\resource\repository\AudioRepository.h" />
@@ -555,6 +569,8 @@
     <ClInclude Include="src\platform\utility\StringConverter.h" />
     <ClInclude Include="src\platform\window\select\FileSelectWindow.h" />
     <ClInclude Include="src\platform\window\select\RulesWindow.h" />
+    <ClInclude Include="src\platform\window\select\SettingsWindow.h" />
+    <ClInclude Include="src\platform\window\select\QuickSettingsWindow.h" />
     <ClInclude Include="src\platform\window\select\Win32SelectWindowManager.h" />
     <ClInclude Include="src\platform\window\WindowBase.h" />
     <ClInclude Include="src\platform\window\WebViewWindowBase.h" />
@@ -592,4 +608,29 @@
     </PropertyGroup>
     <Error Condition="!Exists('packages\Microsoft.Web.WebView2.1.0.3967.48\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Web.WebView2.1.0.3967.48\build\native\Microsoft.Web.WebView2.targets'))" />
   </Target>
+  <!-- 実行に必要なデータを出力先へ同期する。
+       assets と web はカレントディレクトリからの相対パスで開いているため
+       （ResourceManager.cpp / WebView2Host.cpp）、実行ファイルと同じ階層に
+       無いと起動できない。配布のたびに手でコピーすると入れ忘れるのでビルドに含める。
+
+       Release だけを対象にする。Debug は Visual Studio から
+       プロジェクトフォルダをカレントディレクトリにして起動するので複製がいらない。
+
+       PostBuildEvent ではなく AfterTargets="Build" にしているのは、
+       ソースが変わらずアセットだけ差し替えたビルドでも確実に走らせるため。 -->
+  <ItemGroup>
+    <RuntimeContentDir Include="assets" />
+    <RuntimeContentDir Include="web" />
+    <RuntimeContentDir Include="ファイルはこちらからでも選べます" />
+  </ItemGroup>
+  <Target Name="SyncRuntimeContent" AfterTargets="Build" Condition="'$(Configuration)'=='Release'">
+    <!-- robocopy /MIR は差分だけを写し、消えたファイルは出力先からも消す。
+         中身が同じなら何もしないので、2回目以降はほぼ時間がかからない。
+         /XF は Explorer が勝手に置いていくファイルで、配布物に入れる意味がない。
+         robocopy はコピーが発生しただけで 1 を返すため、8 以上だけを失敗として扱う -->
+    <Exec Condition="Exists('$(SolutionDir)%(RuntimeContentDir.Identity)')"
+          Command="robocopy &quot;$(SolutionDir)%(RuntimeContentDir.Identity)&quot; &quot;$(TargetDir)%(RuntimeContentDir.Identity)&quot; /MIR /XF desktop.ini Thumbs.db /NFL /NDL /NJH /NJS /NP&#xD;&#xA;if errorlevel 8 exit /b 1&#xD;&#xA;exit /b 0" />
+  </Target>
 </Project>
+
+

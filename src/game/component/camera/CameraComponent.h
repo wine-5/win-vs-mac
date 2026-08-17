@@ -17,7 +17,6 @@ namespace game::component::camera
 		float m_distance{ 600.0f };     // 注視点からカメラまでの距離
 		float m_targetHeight{ 150.0f }; // 注視点の高さ（プレイヤー足元からの頭あたり）
 		float m_fov{ 1.047f };          // 視野角（ラジアン、約60度）
-		float m_sensitivity{ 0.003f };  // マウス感度（ラジアン/ピクセル）
 
 		// ピッチの可動範囲（見上げすぎ・見下ろしすぎを防ぐ）。
 		// 下限（見上げ側）は浮遊敵（Safari等：高度300を保ちつつ水平400〜600）へ

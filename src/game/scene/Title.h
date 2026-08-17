@@ -4,6 +4,7 @@
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
+#include <functional>
 #include <memory>
 
 namespace core::iface
@@ -32,11 +33,13 @@ namespace game::scene
 	   * @param uiRenderer UI描画インターフェース
 	   * @param screen 画面情報インターフェース
 	   * @param gameManager ゲーム全体の状態（終了要求の伝達に使用）
+	   * @param onOpenSettings 「設定」ボタンで設定画面を開くためのコールバック
 	   */
 	  Title(core::iface::IInputProvider& inputProvider,
 		  core::iface::IUIRenderer& uiRenderer,
 		  core::iface::IScreen& screen,
-		  GameManager& gameManager);
+		  GameManager& gameManager,
+		  std::function<void()> onOpenSettings);
 
 	  /**
 	   * @brief Titleのデストラクタ
@@ -63,6 +66,7 @@ namespace game::scene
 		};
 
 		void goToSelect();
+		void openSettings();
 		void exitApp();
 
 		core::iface::IInputProvider&           m_inputProvider;
@@ -70,6 +74,10 @@ namespace game::scene
 		core::iface::IScreen&                  m_screen;
 		GameManager& m_gameManager;
 		core::iface::IPerformanceDataProvider* m_perfProvider{};
+
+		// 設定画面は Application が所有してシーンをまたいで使い回すため、
+		// 開く操作だけを受け取る
+		std::function<void()> m_onOpenSettings;
 
 		std::unique_ptr<TitleView>          m_view{};
 		std::unique_ptr<ui::FadeTransition> m_fade{};

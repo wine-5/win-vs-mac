@@ -14,25 +14,28 @@ namespace game::scene
 	Title::Title(core::iface::IInputProvider& inputProvider,
 	    core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
-	    GameManager& gameManager)
+	    GameManager& gameManager,
+	    std::function<void()> onOpenSettings)
 	    : m_inputProvider{ inputProvider }
 	    , m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_gameManager{ gameManager }
+	    , m_onOpenSettings{ std::move(onOpenSettings) }
 	{
 		auto* res{ core::base::ServiceLocator::get<core::iface::IResourceManager>() };
-		std::string mainFontName{ res->getFontName("main").value_or("") };
 
 		m_view = std::make_unique<TitleView>(
-			inputProvider, uiRenderer, screen,
-			std::move(mainFontName),
-			[this]() { goToSelect(); },
-			[this]() { exitApp(); });
+		    inputProvider, uiRenderer, screen, *res,
+		    [this]()
+		    { goToSelect(); },
+		    [this]()
+		    { openSettings(); },
+		    [this]()
+		    { exitApp(); });
 
-		// Loading 画面で起動演出済みのため、タイトルはフェードインから開始する
+		// 入りは TitleView 自身の起動演出（覆いが引いて中身が順に入る）に任せる。
+		// 黒のフェードを重ねると、白い画面がいったん暗くなって見え方が濁る
 		m_view->setButtonsVisible(true);
-		m_fade = std::make_unique<ui::FadeTransition>(
-			m_uiRenderer, m_screen, FADE_DURATION, true);
 
 		m_perfProvider = core::base::ServiceLocator::get<core::iface::IPerformanceDataProvider>();
 
@@ -56,20 +59,16 @@ namespace game::scene
 		case State::TitleFadeIn:
 		{
 			const auto snap{ m_perfProvider->getSnapshot() };
-			m_fade->update(deltaTime);
-			m_view->update(snap);
-			if (m_fade->isFinished())
-			{
-				m_fade = nullptr;
+			m_view->update(snap, deltaTime);
+			if (m_view->isIntroFinished())
 				m_state = State::Idle;
-			}
 			break;
 		}
 
 		case State::Idle:
 		{
 			const auto snap{ m_perfProvider->getSnapshot() };
-			m_view->update(snap);
+			m_view->update(snap, deltaTime);
 			break;
 		}
 
@@ -102,6 +101,15 @@ namespace game::scene
 		m_fade = std::make_unique<ui::FadeTransition>(
 			m_uiRenderer, m_screen, FADE_DURATION, false);
 		m_state = State::FadingOut;
+	}
+
+	void Title::openSettings()
+	{
+		if (m_state != State::Idle)
+			return;
+
+		if (m_onOpenSettings)
+			m_onOpenSettings();
 	}
 
 	void Title::exitApp()

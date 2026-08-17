@@ -16,12 +16,14 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IWindowFactory.h"
+#include <functional>
 #include <memory>
 
 namespace game
 {
-	class GameManager;  // 前方宣言
-	class PauseManager; // 前方宣言
+	class GameManager;     // 前方宣言
+	class PauseManager;    // 前方宣言
+	class SettingsManager; // 前方宣言
 } // namespace game
 
 namespace game::scene
@@ -37,8 +39,11 @@ namespace game::scene
 	   * @brief SceneFactoryのコンストラクタ
 	   * @param gameManager シーン間共有データ（各シーンへ注入する）
 	   * @param pauseManager ポーズ状態（各シーンへ注入する）
+	   * @param settingsManager プレイヤーの設定（各シーンへ注入する）
+	   * @param onOpenSettings 設定画面を開く操作（Applicationが所有する画面を開くために渡す）
 	   */
-	  SceneFactory(GameManager& gameManager, PauseManager& pauseManager);
+	  SceneFactory(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager,
+		  std::function<void()> onOpenSettings);
 
 	  /**
 	   * @brief デストラクタ
@@ -62,6 +67,8 @@ namespace game::scene
     private:
 	  GameManager& m_gameManager;
 	  PauseManager& m_pauseManager;
+	  SettingsManager& m_settingsManager;
+	  std::function<void()> m_onOpenSettings;
 
 	  // シーンインスタンスの管理
 	  std::unique_ptr<InGame> m_inGameScene{};
