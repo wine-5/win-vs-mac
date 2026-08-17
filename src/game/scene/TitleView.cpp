@@ -15,10 +15,8 @@ namespace
 	/** @brief アプリアイコンのリソースID */
 	constexpr const char* APP_ICON_IMAGE_ID{ "game-icon" };
 
-	// ウィンドウの大きさ（画面に対する比率）。
-	// 中の寸法はすべて高さから換算するので、ここを変えれば文字も一緒に拡大する
-	constexpr float WINDOW_WIDTH_RATIO{ 0.86f };
-	constexpr float WINDOW_HEIGHT_RATIO{ 0.88f };
+	// ウィンドウは画面いっぱいに広げる（最大化したタスクマネージャーと同じ状態）。
+	// 中の寸法はすべてウィンドウ高さから換算するので、画面が大きいほど文字も一緒に拡大する。
 
 	// 以下は基準サイズ（ウィンドウ高さ740px）でのピクセル数
 	constexpr float BASE_WINDOW_HEIGHT{ 740.0f };
@@ -65,7 +63,8 @@ namespace
 	constexpr float START_BUTTON_TOP_GAP{ 14.0f };
 	constexpr float BUTTON_RADIUS{ 4.0f };
 
-	constexpr float WINDOW_RADIUS{ 8.0f };
+	/** @brief コンテンツ面の角丸。最大化したウィンドウで丸くなるのは左上だけ */
+	constexpr float CONTENT_RADIUS{ 8.0f };
 	constexpr float GRID_LINE_COUNT{ 10.0f };
 
 	/** @brief グラフの塗りの濃さ。白地なので、線が読める程度まで薄くする */
@@ -211,10 +210,11 @@ namespace game::scene
 		const int screenWidth{ m_screen.getWidth() };
 		const int screenHeight{ m_screen.getHeight() };
 
-		m_windowWidth = static_cast<int>(screenWidth * WINDOW_WIDTH_RATIO);
-		m_windowHeight = static_cast<int>(screenHeight * WINDOW_HEIGHT_RATIO);
-		m_windowX = (screenWidth - m_windowWidth) / 2;
-		m_windowY = (screenHeight - m_windowHeight) / 2;
+		// 画面いっぱいに広げる。実物を最大化したときと同じ収まりにする
+		m_windowWidth = screenWidth;
+		m_windowHeight = screenHeight;
+		m_windowX = 0;
+		m_windowY = 0;
 
 		m_scale = m_windowHeight / BASE_WINDOW_HEIGHT;
 
@@ -299,10 +299,6 @@ namespace game::scene
 
 	void TitleView::drawTitle() const
 	{
-		// ウィンドウの外側。真っ黒だと影が出ず板が浮かないので、わずかに青を残す
-		m_uiRenderer.drawBox(0, 0, m_screen.getWidth(), m_screen.getHeight(),
-		    Color::TITLE_BACKDROP, true);
-
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 
 		drawWindow();
@@ -318,18 +314,15 @@ namespace game::scene
 
 	void TitleView::drawWindow() const
 	{
-		const int radius{ scaled(WINDOW_RADIUS) };
+		m_uiRenderer.drawBox(m_windowX, m_windowY, m_windowWidth, m_windowHeight,
+		    Color::TITLE_WINDOW_BG, true);
 
-		m_uiRenderer.drawRoundedBox(m_windowX, m_windowY, m_windowWidth, m_windowHeight,
-		    radius, Color::TITLE_WINDOW_BG, true, 1);
-
-		// 右のコンテンツ面。ウィンドウの右下までを覆い、角丸をウィンドウと共有する
+		// 右のコンテンツ面。最大化したウィンドウで丸いのは左上だけなので、
+		// 右端と下端を画面の外へはみ出させ、そちら側の角丸を切り落とす
+		const int radius{ scaled(CONTENT_RADIUS) };
 		m_uiRenderer.drawRoundedBox(m_windowX + m_navWidth, m_windowY + m_titleBarHeight,
-		    m_windowWidth - m_navWidth, m_windowHeight - m_titleBarHeight,
+		    m_windowWidth - m_navWidth + radius, m_windowHeight - m_titleBarHeight + radius,
 		    radius, Color::TITLE_CONTENT_BG, true, 1);
-
-		m_uiRenderer.drawRoundedBox(m_windowX, m_windowY, m_windowWidth, m_windowHeight,
-		    radius, Color::TITLE_STROKE, false, 1);
 	}
 
 	void TitleView::drawTitleBar() const
