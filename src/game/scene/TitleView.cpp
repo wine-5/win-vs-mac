@@ -82,6 +82,20 @@ namespace
 	constexpr float PULSE_THICKNESS{ 2.0f };   // 輪の太さ
 	constexpr float PULSE_MAX_ALPHA{ 170.0f }; // 出はじめの濃さ
 
+	// 起動演出。完成形がいきなり出ると静止画に見えるので、実物のウィンドウが開くときと同じ
+	// 「枠が出る → 中身が下から入る」順で組み立てる。数字はすべて秒
+	constexpr float INTRO_VEIL_DURATION{ 0.30f }; // 地の色の覆いが引くまで
+	constexpr float INTRO_HEADER_START{ 0.22f };  // ゲーム名
+	constexpr float INTRO_HEADER_DURATION{ 0.50f };
+	constexpr float INTRO_PANEL_START{ 0.46f }; // サムネイルとグラフ
+	constexpr float INTRO_PANEL_DURATION{ 0.52f };
+	constexpr float INTRO_BUTTON_START{ 0.90f }; // 2つのボタン
+	constexpr float INTRO_BUTTON_DURATION{ 0.34f };
+	constexpr float INTRO_TOTAL{ INTRO_BUTTON_START + INTRO_BUTTON_DURATION };
+
+	/** @brief 起動演出でせり上がる距離（基準サイズでのピクセル数） */
+	constexpr float INTRO_SLIDE{ 16.0f };
+
 	/** @brief コンテンツ面の角丸。最大化したウィンドウで丸くなるのは左上だけ */
 	constexpr float CONTENT_RADIUS{ 8.0f };
 	constexpr float GRID_LINE_COUNT{ 10.0f };
@@ -159,6 +173,9 @@ namespace game::scene
 
 	void TitleView::update(const core::iface::PerformanceSnapshot& snap, float deltaTime)
 	{
+		if (!isIntroFinished())
+			m_introTimer += deltaTime;
+
 		m_pulseTimer += deltaTime;
 		if (m_pulseTimer >= PULSE_INTERVAL)
 			m_pulseTimer -= PULSE_INTERVAL;
@@ -177,7 +194,8 @@ namespace game::scene
 
 		int mouseX{}, mouseY{};
 		m_inputProvider.getMousePosition(mouseX, mouseY);
-		m_hovered = m_isInteractive ? getHitAt(mouseX, mouseY) : Hit::None;
+		// まだ出ていないものは押せない。起動演出が終わってから受け付ける
+		m_hovered = (m_isInteractive && isIntroFinished()) ? getHitAt(mouseX, mouseY) : Hit::None;
 
 		const bool mouseLeft{ m_inputProvider.isMouseLeftPressed() };
 		const bool mouseClicked{ mouseLeft && !m_prevMouseLeft };
@@ -227,6 +245,29 @@ namespace game::scene
 	int TitleView::scaled(float basePixels) const noexcept
 	{
 		return std::max(1, static_cast<int>(basePixels * m_scale));
+	}
+
+	bool TitleView::isIntroFinished() const noexcept
+	{
+		return m_introTimer >= INTRO_TOTAL;
+	}
+
+	float TitleView::introProgress(float start, float duration) const noexcept
+	{
+		return std::clamp((m_introTimer - start) / duration, 0.0f, 1.0f);
+	}
+
+	int TitleView::introAlpha(float start, float duration) const noexcept
+	{
+		// 両端を緩めると、点いたり消えたりではなく「浮かび上がる」ように見える
+		return static_cast<int>(255.0f * core::utility::smoothstep(introProgress(start, duration)));
+	}
+
+	int TitleView::introSlide(float start, float duration) const noexcept
+	{
+		// scaled() は最低1を返すので、演出後に1pxずれ続けないようここで直に換算する
+		const float remaining{ 1.0f - core::utility::easeOut(introProgress(start, duration)) };
+		return static_cast<int>(INTRO_SLIDE * m_scale * remaining);
 	}
 
 	void TitleView::updateLayout()
@@ -333,8 +374,22 @@ namespace game::scene
 		drawThumbnails();
 		drawDetail();
 		drawStartButton();
+		drawIntroVeil();
 
 		m_uiRenderer.resetFont();
+	}
+
+	void TitleView::drawIntroVeil() const
+	{
+		const float progress{ introProgress(0.0f, INTRO_VEIL_DURATION) };
+		if (progress >= 1.0f)
+			return;
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+		    static_cast<int>(255.0f * (1.0f - progress)));
+		m_uiRenderer.drawBox(0, 0, m_screen.getWidth(), m_screen.getHeight(),
+		    Color::TITLE_WINDOW_BG, true);
+		m_uiRenderer.resetBlendMode();
 	}
 
 	void TitleView::drawWindow() const
@@ -404,6 +459,13 @@ namespace game::scene
 
 	void TitleView::drawAppHeader() const
 	{
+		const int alpha{ introAlpha(INTRO_HEADER_START, INTRO_HEADER_DURATION) };
+		if (alpha <= 0)
+			return;
+
+		m_uiRenderer.setDrawOffset(0, introSlide(INTRO_HEADER_START, INTRO_HEADER_DURATION));
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+
 		const int iconSize{ scaled(APP_ICON_SIZE) };
 
 		if (m_iconHandle != -1)
@@ -419,20 +481,38 @@ namespace game::scene
 		const std::string sub{ toDrawable("WinVsMac.exe ・ 実行中") };
 		m_uiRenderer.drawText(textX, m_contentY + titleFontSize + scaled(4.0f),
 		    sub.c_str(), Color::TITLE_TEXT_TERTIARY, subFontSize);
+
+		m_uiRenderer.resetBlendMode();
+		m_uiRenderer.resetDrawOffset();
 	}
 
 	void TitleView::drawExitButton() const
 	{
+		const int alpha{ introAlpha(INTRO_BUTTON_START, INTRO_BUTTON_DURATION) };
+		if (alpha <= 0)
+			return;
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+
 		int rectX{}, rectY{}, rectWidth{}, rectHeight{};
 		getExitButtonRect(rectX, rectY, rectWidth, rectHeight);
 
 		// 実物は「タスクを終了する」だが、それだと何が終わるのか伝わらない。
 		// ここは世界観より、押した先が分かることを優先する
 		drawButton(rectX, rectY, rectWidth, rectHeight, "ゲームを終了する", false, m_hovered == Hit::Exit);
+
+		m_uiRenderer.resetBlendMode();
 	}
 
 	void TitleView::drawThumbnails() const
 	{
+		const int alpha{ introAlpha(INTRO_PANEL_START, INTRO_PANEL_DURATION) };
+		if (alpha <= 0)
+			return;
+
+		m_uiRenderer.setDrawOffset(0, introSlide(INTRO_PANEL_START, INTRO_PANEL_DURATION));
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+
 		const int nameFontSize{ scaled(FONT_THUMB_NAME) };
 		const int valueFontSize{ scaled(FONT_THUMB_VALUE) };
 		const int graphWidth{ scaled(THUMB_GRAPH_WIDTH) };
@@ -456,7 +536,7 @@ namespace game::scene
 			const int graphX{ rectX + padding };
 			const int graphY{ rectY + (rectHeight - graphHeight) / 2 };
 			m_uiRenderer.drawBox(graphX, graphY, graphWidth, graphHeight, Color::TITLE_CARD, true);
-			drawGraph(graphX, graphY, graphWidth, graphHeight, i, false);
+			drawGraph(graphX, graphY, graphWidth, graphHeight, i, false, alpha);
 			m_uiRenderer.drawBox(graphX, graphY, graphWidth, graphHeight, Color::TITLE_STROKE, false);
 
 			const int textX{ graphX + graphWidth + scaled(THUMB_TEXT_GAP) };
@@ -469,10 +549,20 @@ namespace game::scene
 			m_uiRenderer.drawText(textX, graphY + scaled(8.0f) + nameFontSize + scaled(4.0f),
 			    value.c_str(), Color::TITLE_TEXT_TERTIARY, valueFontSize);
 		}
+
+		m_uiRenderer.resetBlendMode();
+		m_uiRenderer.resetDrawOffset();
 	}
 
 	void TitleView::drawDetail() const
 	{
+		const int alpha{ introAlpha(INTRO_PANEL_START, INTRO_PANEL_DURATION) };
+		if (alpha <= 0)
+			return;
+
+		m_uiRenderer.setDrawOffset(0, introSlide(INTRO_PANEL_START, INTRO_PANEL_DURATION));
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+
 		const ChannelSpec& spec{ CHANNEL_SPECS[m_selectedChannel] };
 
 		// 実物が「ディスク 0 (C:) ／ 型番」を出す位置。こちらはチャンネル名と取得元を出す
@@ -502,7 +592,7 @@ namespace game::scene
 		const int graphHeight{ statsY - scaled(STATS_TOP_GAP) - scaled(GRAPH_AXIS_HEIGHT) - graphY };
 
 		m_uiRenderer.drawBox(m_detailX, graphY, m_detailWidth, graphHeight, Color::TITLE_CARD, true);
-		drawGraph(m_detailX, graphY, m_detailWidth, graphHeight, m_selectedChannel, true);
+		drawGraph(m_detailX, graphY, m_detailWidth, graphHeight, m_selectedChannel, true, alpha);
 		m_uiRenderer.drawBox(m_detailX, graphY, m_detailWidth, graphHeight, Color::TITLE_STROKE, false);
 
 		const int axisY{ graphY + graphHeight + scaled(4.0f) };
@@ -513,9 +603,13 @@ namespace game::scene
 		    "0", Color::TITLE_TEXT_TERTIARY, smallFontSize);
 
 		drawStats(statsY);
+
+		m_uiRenderer.resetBlendMode();
+		m_uiRenderer.resetDrawOffset();
 	}
 
-	void TitleView::drawGraph(int x, int y, int width, int height, int channelIndex, bool withGrid) const
+	void TitleView::drawGraph(int x, int y, int width, int height, int channelIndex,
+	    bool withGrid, int groupAlpha) const
 	{
 		const unsigned int color{ CHANNEL_SPECS[channelIndex].m_color };
 		const std::array<float, HISTORY_SIZE>& history{ m_channels[channelIndex].m_history };
@@ -545,11 +639,13 @@ namespace game::scene
 			const int barY{ y + height - barHeight };
 
 			// 塗り（薄く）と上端の線。実物の面グラフに近い見え方になる
-			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, GRAPH_FILL_ALPHA);
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+			    GRAPH_FILL_ALPHA * groupAlpha / 255);
 			m_uiRenderer.drawBox(barX, barY, barWidth, barHeight, color, true);
-			m_uiRenderer.resetBlendMode();
 
-			// 上端は白地に対してそのまま置く。薄めると塗りとの差が出ず輪郭が消える
+			// 上端は白地に対してそのまま置く。薄めると塗りとの差が出ず輪郭が消える。
+			// 呼び出し側の濃さへ戻すので、ここを抜けたあとも同じ濃さで描き続けられる
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, groupAlpha);
 			m_uiRenderer.drawBox(barX, barY, barWidth, std::max(1, scaled(1.6f)), color, true);
 		}
 	}
@@ -591,6 +687,10 @@ namespace game::scene
 
 	void TitleView::drawStartButton() const
 	{
+		const int alpha{ introAlpha(INTRO_BUTTON_START, INTRO_BUTTON_DURATION) };
+		if (alpha <= 0)
+			return;
+
 		int rectX{}, rectY{}, rectWidth{}, rectHeight{};
 		getStartButtonRect(rectX, rectY, rectWidth, rectHeight);
 
@@ -598,12 +698,15 @@ namespace game::scene
 		if (m_hovered != Hit::Start)
 			drawStartPulse(rectX, rectY, rectWidth, rectHeight);
 
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
 		drawButton(rectX, rectY, rectWidth, rectHeight, "選択画面へ", true, m_hovered == Hit::Start);
+		m_uiRenderer.resetBlendMode();
 	}
 
 	void TitleView::drawStartPulse(int x, int y, int width, int height) const
 	{
-		if (m_pulseTimer >= PULSE_DURATION)
+		// 起動演出の途中はまだボタンが出そろっていないので、呼び込みは始めない
+		if (!isIntroFinished() || m_pulseTimer >= PULSE_DURATION)
 			return;
 
 		const float progress{ m_pulseTimer / PULSE_DURATION };

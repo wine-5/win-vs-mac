@@ -64,6 +64,12 @@ namespace game::scene
 		void drawTitle() const;
 
 		/**
+		 * @brief 起動演出が終わったかを返す
+		 * @return 終わっていれば true
+		 */
+		[[nodiscard]] bool isIntroFinished() const noexcept;
+
+		/**
 		 * @brief 操作を受け付けるかを設定する
 		 *
 		 * フェード中は押せないようにする。描画自体は常に行う
@@ -106,7 +112,19 @@ namespace game::scene
 		void drawExitButton() const;
 		void drawThumbnails() const;
 		void drawDetail() const;
-		void drawGraph(int x, int y, int width, int height, int channelIndex, bool withGrid) const;
+		/**
+		 * @brief 折れ線グラフを描く
+		 * @param x 左上X座標
+		 * @param y 左上Y座標
+		 * @param width 幅
+		 * @param height 高さ
+		 * @param channelIndex 描くチャンネル
+		 * @param withGrid 方眼を敷くか
+		 * @param groupAlpha 呼び出し側が掛けている不透明度（0〜255）。
+		 *        グラフの中で濃さを変えるため、戻すときはこの値に戻す
+		 */
+		void drawGraph(int x, int y, int width, int height, int channelIndex,
+		    bool withGrid, int groupAlpha) const;
 		void drawStats(int y) const;
 		void drawStartButton() const;
 
@@ -121,6 +139,37 @@ namespace game::scene
 		 * @param height ボタンの高さ
 		 */
 		void drawStartPulse(int x, int y, int width, int height) const;
+
+		/**
+		 * @brief 起動演出の覆いを描く
+		 *
+		 * ウィンドウの地の色で画面を覆い、それが引くことで「窓が開いた」ように見せる
+		 */
+		void drawIntroVeil() const;
+
+		/**
+		 * @brief 起動演出の進み具合を返す
+		 * @param start 始まる時刻（秒）
+		 * @param duration かける時間（秒）
+		 * @return 進行度（0〜1）
+		 */
+		[[nodiscard]] float introProgress(float start, float duration) const noexcept;
+
+		/**
+		 * @brief 起動演出での不透明度を返す
+		 * @param start 始まる時刻（秒）
+		 * @param duration かける時間（秒）
+		 * @return 不透明度（0〜255）
+		 */
+		[[nodiscard]] int introAlpha(float start, float duration) const noexcept;
+
+		/**
+		 * @brief 起動演出でのせり上がり量を返す
+		 * @param start 始まる時刻（秒）
+		 * @param duration かける時間（秒）
+		 * @return 下へずらすピクセル数（演出が終われば0）
+		 */
+		[[nodiscard]] int introSlide(float start, float duration) const noexcept;
 
 		/**
 		 * @brief 歯車（設定）のアイコンを描く
@@ -209,6 +258,9 @@ namespace game::scene
 
 		/** @brief 「選択画面へ」の呼び込みの経過時間（秒）。一定の周期で0へ戻す */
 		float m_pulseTimer{};
+
+		/** @brief 起動演出の経過時間（秒）。演出が終わったあとも増え続ける */
+		float m_introTimer{};
 
 		Hit m_hovered{ Hit::None };
 		bool m_isInteractive{ false };

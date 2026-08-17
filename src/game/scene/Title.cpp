@@ -33,10 +33,9 @@ namespace game::scene
 		    [this]()
 		    { exitApp(); });
 
-		// Loading 画面で起動演出済みのため、タイトルはフェードインから開始する
+		// 入りは TitleView 自身の起動演出（覆いが引いて中身が順に入る）に任せる。
+		// 黒のフェードを重ねると、白い画面がいったん暗くなって見え方が濁る
 		m_view->setButtonsVisible(true);
-		m_fade = std::make_unique<ui::FadeTransition>(
-			m_uiRenderer, m_screen, FADE_DURATION, true);
 
 		m_perfProvider = core::base::ServiceLocator::get<core::iface::IPerformanceDataProvider>();
 
@@ -60,13 +59,9 @@ namespace game::scene
 		case State::TitleFadeIn:
 		{
 			const auto snap{ m_perfProvider->getSnapshot() };
-			m_fade->update(deltaTime);
 			m_view->update(snap, deltaTime);
-			if (m_fade->isFinished())
-			{
-				m_fade = nullptr;
+			if (m_view->isIntroFinished())
 				m_state = State::Idle;
-			}
 			break;
 		}
 
