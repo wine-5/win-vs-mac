@@ -70,7 +70,12 @@ namespace game::system::combat
 			box.m_yaw = collider.m_rotationY;
 
 			if (isRider)
+			{
+				// 天面に乗っているかはこのフレームの解決で取り直す。前フレームの結果を
+				// 残すと、ブロックが壊れて足場が消えた後も空中で跳べてしまう
+				m_componentManager.get<component::movement::VelocityComponent>(id).m_isOnBoxTop = false;
 				m_riders.push_back(box);
+			}
 			else
 				m_grounds.push_back(box);
 		}
@@ -158,6 +163,11 @@ namespace game::system::combat
 		{
 			// riderが上＝地面に乗る。上端を相手の上端へ合わせる
 			riderTransform.m_position.y += overlapY;
+
+			// ここで乗ったことを残さないと、GroundSurfaceComponentしか見ないGroundingSystemが
+			// ブロックの上を「空中」と判定し、乗っている間ジャンプできなくなる。
+			if (riderVelocity.m_velocity.y <= 0.0f)
+				riderVelocity.m_isOnBoxTop = true;
 
 			// 死亡中の敵は地面で反発してバウンドする（Safariの落下演出）。
 			// 落下速度が閾値を下回ったら跳ねるのをやめて静止させ、着地済みとして記録する。

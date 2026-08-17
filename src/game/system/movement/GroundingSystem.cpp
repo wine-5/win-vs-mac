@@ -167,7 +167,10 @@ namespace game::system::movement
 
 			// 接地している面に応じて外力を更新する（空中では減衰させる）
 			const bool isStanding{ found && foot <= bestHeight + STEP_TOLERANCE };
-			velocity.m_isGrounded = isStanding; // ジャンプの可否判定用にPhysicsSystemへ伝える
+
+			// 障害物（ブロック等）の天面はGroundSurfaceComponentを持たずここでは見つからないため、
+			// CollisionSystemが立てたフラグと合流させる。滑り・動く歩道は床の性質なので isStanding のまま使う
+			velocity.m_isGrounded = isStanding || velocity.m_isOnBoxTop; // ジャンプの可否判定用にPhysicsSystemへ伝える
 
 			// 動く歩道は運ぶ速度そのものが外力になるため、滑りとは併用せず排他にする。
 			// 両方効かせると坂の下り勾配ぶんだけ速度が上乗せされ、データの値と挙動が合わなくなる
