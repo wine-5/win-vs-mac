@@ -608,6 +608,29 @@
     </PropertyGroup>
     <Error Condition="!Exists('packages\Microsoft.Web.WebView2.1.0.3967.48\build\native\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Web.WebView2.1.0.3967.48\build\native\Microsoft.Web.WebView2.targets'))" />
   </Target>
+  <!-- 実行に必要なデータを出力先へ同期する。
+       assets と web はカレントディレクトリからの相対パスで開いているため
+       （ResourceManager.cpp / WebView2Host.cpp）、実行ファイルと同じ階層に
+       無いと起動できない。配布のたびに手でコピーすると入れ忘れるのでビルドに含める。
+
+       Release だけを対象にする。Debug は Visual Studio から
+       プロジェクトフォルダをカレントディレクトリにして起動するので複製がいらない。
+
+       PostBuildEvent ではなく AfterTargets="Build" にしているのは、
+       ソースが変わらずアセットだけ差し替えたビルドでも確実に走らせるため。 -->
+  <ItemGroup>
+    <RuntimeContentDir Include="assets" />
+    <RuntimeContentDir Include="web" />
+    <RuntimeContentDir Include="ファイルはこちらからでも選べます" />
+  </ItemGroup>
+  <Target Name="SyncRuntimeContent" AfterTargets="Build" Condition="'$(Configuration)'=='Release'">
+    <!-- robocopy /MIR は差分だけを写し、消えたファイルは出力先からも消す。
+         中身が同じなら何もしないので、2回目以降はほぼ時間がかからない。
+         /XF は Explorer が勝手に置いていくファイルで、配布物に入れる意味がない。
+         robocopy はコピーが発生しただけで 1 を返すため、8 以上だけを失敗として扱う -->
+    <Exec Condition="Exists('$(SolutionDir)%(RuntimeContentDir.Identity)')"
+          Command="robocopy &quot;$(SolutionDir)%(RuntimeContentDir.Identity)&quot; &quot;$(TargetDir)%(RuntimeContentDir.Identity)&quot; /MIR /XF desktop.ini Thumbs.db /NFL /NDL /NJH /NJS /NP&#xD;&#xA;if errorlevel 8 exit /b 1&#xD;&#xA;exit /b 0" />
+  </Target>
 </Project>
 
 
