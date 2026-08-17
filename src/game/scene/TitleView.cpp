@@ -24,11 +24,11 @@ namespace
 	constexpr float BASE_WINDOW_HEIGHT{ 740.0f };
 
 	constexpr float TITLE_BAR_HEIGHT{ 48.0f };
-	constexpr float NAV_WIDTH{ 210.0f };
+	constexpr float NAV_WIDTH{ 226.0f };
 	constexpr float NAV_LEFT_MARGIN{ 12.0f };
 	constexpr float NAV_RIGHT_MARGIN{ 16.0f };
-	constexpr float NAV_ITEM_HEIGHT{ 36.0f };
-	constexpr float NAV_TEXT_INDENT{ 40.0f };
+	constexpr float NAV_ITEM_HEIGHT{ 42.0f };
+	constexpr float NAV_TEXT_INDENT{ 44.0f };
 	constexpr float NAV_PILL_WIDTH{ 3.0f };
 	constexpr float NAV_PILL_HEIGHT{ 16.0f };
 	constexpr float NAV_TOP_GAP{ 48.0f };    // ハンバーガーの下から最初の項目まで
@@ -48,28 +48,28 @@ namespace
 
 	constexpr float APP_ICON_SIZE{ 56.0f };
 	constexpr float APP_ICON_GAP{ 16.0f };
-	constexpr float APP_HEADER_HEIGHT{ 72.0f }; // アイコンの高さ＋下の余白
+	constexpr float APP_HEADER_HEIGHT{ 78.0f }; // アイコンの高さ＋下の余白
 
-	constexpr float THUMB_COLUMN_WIDTH{ 214.0f };
-	constexpr float THUMB_HEIGHT{ 70.0f };
+	constexpr float THUMB_COLUMN_WIDTH{ 234.0f };
+	constexpr float THUMB_HEIGHT{ 78.0f };
 	constexpr float THUMB_GAP{ 10.0f };
-	constexpr float THUMB_GRAPH_WIDTH{ 92.0f };
-	constexpr float THUMB_GRAPH_HEIGHT{ 54.0f };
+	constexpr float THUMB_GRAPH_WIDTH{ 98.0f };
+	constexpr float THUMB_GRAPH_HEIGHT{ 60.0f };
 	constexpr float THUMB_PADDING{ 8.0f };
 	constexpr float THUMB_TEXT_GAP{ 12.0f };
 	constexpr float PANES_GAP{ 22.0f };
 
-	constexpr float DETAIL_HEAD_HEIGHT{ 40.0f };
-	constexpr float GRAPH_CAPTION_HEIGHT{ 18.0f };
-	constexpr float GRAPH_AXIS_HEIGHT{ 18.0f };
-	constexpr float STATS_HEIGHT{ 52.0f };
+	constexpr float DETAIL_HEAD_HEIGHT{ 46.0f };
+	constexpr float GRAPH_CAPTION_HEIGHT{ 22.0f };
+	constexpr float GRAPH_AXIS_HEIGHT{ 22.0f };
+	constexpr float STATS_HEIGHT{ 60.0f };
 	constexpr float STATS_TOP_GAP{ 16.0f };
-	constexpr float STATS_COLUMN_WIDTH{ 130.0f };
+	constexpr float STATS_COLUMN_WIDTH{ 152.0f };
 
-	constexpr float BUTTON_HEIGHT{ 34.0f };
-	constexpr float EXIT_BUTTON_WIDTH{ 158.0f };
-	constexpr float START_BUTTON_WIDTH{ 176.0f };
-	constexpr float START_BUTTON_HEIGHT{ 42.0f };
+	constexpr float BUTTON_HEIGHT{ 38.0f };
+	constexpr float EXIT_BUTTON_WIDTH{ 180.0f };
+	constexpr float START_BUTTON_WIDTH{ 200.0f };
+	constexpr float START_BUTTON_HEIGHT{ 48.0f };
 	constexpr float START_BUTTON_TOP_GAP{ 14.0f };
 	constexpr float BUTTON_RADIUS{ 4.0f };
 
@@ -80,19 +80,20 @@ namespace
 	/** @brief グラフの塗りの濃さ。白地なので、線が読める程度まで薄くする */
 	constexpr int GRAPH_FILL_ALPHA{ 64 };
 
-	// フォントサイズ（基準サイズでのピクセル数）
-	constexpr float FONT_TITLE_BAR{ 13.0f };
-	constexpr float FONT_GAME_TITLE{ 42.0f };
-	constexpr float FONT_APP_SUB{ 13.0f };
-	constexpr float FONT_NAV{ 13.0f };
-	constexpr float FONT_THUMB_NAME{ 14.0f };
-	constexpr float FONT_THUMB_VALUE{ 12.0f };
-	constexpr float FONT_CHANNEL_NAME{ 26.0f };
-	constexpr float FONT_SMALL{ 12.0f };
-	constexpr float FONT_STAT_LABEL{ 12.0f };
-	constexpr float FONT_STAT_VALUE{ 26.0f };
-	constexpr float FONT_BUTTON{ 13.0f };
-	constexpr float FONT_START_BUTTON{ 15.0f };
+	// フォントサイズ（基準サイズでのピクセル数）。
+	// 実物は手元で読む前提の細かい字だが、こちらは離れて見るゲーム画面なので一回り大きくする
+	constexpr float FONT_TITLE_BAR{ 15.0f };
+	constexpr float FONT_GAME_TITLE{ 44.0f };
+	constexpr float FONT_APP_SUB{ 15.0f };
+	constexpr float FONT_NAV{ 16.0f };
+	constexpr float FONT_THUMB_NAME{ 17.0f };
+	constexpr float FONT_THUMB_VALUE{ 14.0f };
+	constexpr float FONT_CHANNEL_NAME{ 30.0f };
+	constexpr float FONT_SMALL{ 14.0f };
+	constexpr float FONT_STAT_LABEL{ 14.0f };
+	constexpr float FONT_STAT_VALUE{ 30.0f };
+	constexpr float FONT_BUTTON{ 15.0f };
+	constexpr float FONT_START_BUTTON{ 17.0f };
 
 	/** @brief チャンネルごとの見せ方。値そのものは TitleView が持つ */
 	struct ChannelSpec
