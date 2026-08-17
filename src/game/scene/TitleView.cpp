@@ -329,6 +329,7 @@ namespace game::scene
 		drawTitleBar();
 		drawNav();
 		drawAppHeader();
+		drawExitButton();
 		drawThumbnails();
 		drawDetail();
 		drawStartButton();
@@ -418,12 +419,16 @@ namespace game::scene
 		const std::string sub{ toDrawable("WinVsMac.exe ・ 実行中") };
 		m_uiRenderer.drawText(textX, m_contentY + titleFontSize + scaled(4.0f),
 		    sub.c_str(), Color::TITLE_TEXT_TERTIARY, subFontSize);
+	}
 
-		int exitX{}, exitY{}, exitWidth{}, exitHeight{};
-		getExitButtonRect(exitX, exitY, exitWidth, exitHeight);
+	void TitleView::drawExitButton() const
+	{
+		int rectX{}, rectY{}, rectWidth{}, rectHeight{};
+		getExitButtonRect(rectX, rectY, rectWidth, rectHeight);
+
 		// 実物は「タスクを終了する」だが、それだと何が終わるのか伝わらない。
 		// ここは世界観より、押した先が分かることを優先する
-		drawButton(exitX, exitY, exitWidth, exitHeight, "ゲームを終了する", false, m_hovered == Hit::Exit);
+		drawButton(rectX, rectY, rectWidth, rectHeight, "ゲームを終了する", false, m_hovered == Hit::Exit);
 	}
 
 	void TitleView::drawThumbnails() const

@@ -103,6 +103,7 @@ namespace game::scene
 		void drawTitleBar() const;
 		void drawNav() const;
 		void drawAppHeader() const;
+		void drawExitButton() const;
 		void drawThumbnails() const;
 		void drawDetail() const;
 		void drawGraph(int x, int y, int width, int height, int channelIndex, bool withGrid) const;
