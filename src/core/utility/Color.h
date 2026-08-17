@@ -143,6 +143,25 @@ namespace core::utility
 		// わずかに青を残した暗色にする
 		static constexpr unsigned int TITLE_BACKDROP = 0xFF080C14;
 
+		// 実物のタスクマネージャーはライトテーマが既定で、白い面に濃い文字が載る。
+		// 「自分のPCのタスクマネージャーがそのまま立ち上がった」ように見せたい画面なので、
+		// ダークで組んだ設定画面（SETTINGS_*）とは別に、白基調の一式をここに持つ
+		static constexpr unsigned int TITLE_WINDOW_BG = 0xFFF3F3F3;     // タイトルバー・左ナビの地
+		static constexpr unsigned int TITLE_CONTENT_BG = 0xFFFFFFFF;    // 右のコンテンツ領域
+		static constexpr unsigned int TITLE_CARD = 0xFFFFFFFF;          // グラフの面
+		static constexpr unsigned int TITLE_CARD_HOVER = 0xFFEAEAEA;    // カーソルを乗せた項目の面
+		static constexpr unsigned int TITLE_NAV_SELECTED = 0xFFE4E4E4;  // 左ナビ・サムネイルの選択中の背景
+		static constexpr unsigned int TITLE_STROKE = 0xFFDCDCDC;        // カード・ボタンの枠
+		static constexpr unsigned int TITLE_ACCENT = 0xFF0067C0;        // ライトテーマのアクセント（青）
+		static constexpr unsigned int TITLE_TEXT = 0xFF1B1B1B;          // 本文・数値
+		static constexpr unsigned int TITLE_TEXT_TERTIARY = 0xFF5D5D5D; // 説明文・軸ラベル
+		static constexpr unsigned int TITLE_GRID = 0xFFEAEAEA;          // グラフの方眼
+
+		// グラフの色。白地に載せるので、暗い画面用より明度を落として輪郭が出るようにする
+		static constexpr unsigned int TITLE_GRAPH_CPU = 0xFF0F6CBD;    // 青：CPU使用率
+		static constexpr unsigned int TITLE_GRAPH_MEMORY = 0xFF1A8F4C; // 緑：メモリ使用率
+		static constexpr unsigned int TITLE_GRAPH_DISK = 0xFF0E8A9B;   // 青緑：ディスク活動率
+
 		// ========== ポーズ画面（Ctrl+Alt+Del のセキュリティオプション画面）用の色 ==========
 
 		// 画面全体を沈める濃紺。真っ黒で覆うと単なる暗転に見えるが、青をわずかに残すと
