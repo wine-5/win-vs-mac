@@ -3,6 +3,7 @@
 #include "core/constant/UI.h"
 #include "core/interface/IStringConverter.h"
 #include "core/utility/Color.h"
+#include "core/utility/MathConstants.h"
 #include <algorithm>
 #include <cmath>
 #include <string>
@@ -582,13 +583,12 @@ namespace game::ui::settings
 	{
 		// 半径が小さいうちは分割を増やしても見えないので、円周の長さに合わせて刻む
 		const int segments{ std::clamp(radius, 6, 24) };
-		constexpr float DEG_TO_RAD{ 3.14159265f / 180.0f };
 
 		int previousX{}, previousY{};
 		for (int i{ 0 }; i <= segments; ++i)
 		{
 			const float t{ static_cast<float>(i) / segments };
-			const float angle{ (startDegrees + (endDegrees - startDegrees) * t) * DEG_TO_RAD };
+			const float angle{ (startDegrees + (endDegrees - startDegrees) * t) * core::utility::DEG_TO_RAD };
 			const int x{ centerX + static_cast<int>(std::cos(angle) * radius) };
 			const int y{ centerY + static_cast<int>(std::sin(angle) * radius) };
 
