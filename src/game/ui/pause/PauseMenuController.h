@@ -59,6 +59,19 @@ namespace game::ui::pause
 		void draw();
 
 	  private:
+		/**
+		 * @brief その操作に確認が要るかを返す
+		 * @param action 判定する操作
+		 * @return 確認が要るなら true（進行が失われる操作だけ）
+		 */
+		[[nodiscard]] static bool needsConfirm(PauseMenuAction action) noexcept;
+
+		/**
+		 * @brief 確認ダイアログの入力を処理する
+		 * @return 「はい」で確定した操作（未確定なら PauseMenuAction::None）
+		 */
+		[[nodiscard]] PauseMenuAction updateConfirm();
+
 		core::iface::IInputProvider& m_inputProvider;
 		core::iface::IScreen& m_screen;
 
@@ -72,5 +85,15 @@ namespace game::ui::pause
 		int m_selectedIndex{ 0 };
 		bool m_prevMouseLeft{ false };  // マウス左クリックのエッジ検出用
 		bool m_isPowerHovered{ false }; // 右下の電源ボタンにカーソルが乗っているか
+
+		/**
+		 * @brief 確認待ちの操作（None なら確認中ではない）
+		 *
+		 * サインアウトとシャットダウンは進行が失われるので、一度受け止めてから確認する
+		 */
+		PauseMenuAction m_pendingAction{ PauseMenuAction::None };
+
+		/** @brief 確認ダイアログで「はい」を選んでいるか（既定は「いいえ」） */
+		bool m_isConfirmYes{ false };
 	};
 } // namespace game::ui::pause

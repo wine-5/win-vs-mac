@@ -35,6 +35,24 @@ namespace
 
 	// 文字サイズ（画面高さ比）
 	constexpr float FONT_ITEM_RATIO{ 0.028f };
+
+	// ── 取り消せない操作の確認ダイアログ ──
+	// メニューの上へさらに重ねるので、下のメニューをもう一段沈めてから出す
+	constexpr int CONFIRM_DIM_ALPHA{ 140 };
+
+	constexpr float CONFIRM_PANEL_WIDTH_RATIO{ 0.34f };  // 画面幅比
+	constexpr float CONFIRM_PANEL_HEIGHT_RATIO{ 0.21f }; // 画面高さ比
+	constexpr float CONFIRM_PADDING_RATIO{ 0.018f };     // パネル内側の余白（画面幅比）
+	constexpr float CONFIRM_BUTTON_WIDTH_RATIO{ 0.085f };
+	constexpr float CONFIRM_BUTTON_HEIGHT_RATIO{ 0.052f };
+	constexpr float CONFIRM_BUTTON_GAP_RATIO{ 0.010f };
+	constexpr float CONFIRM_PANEL_RADIUS_RATIO{ 0.007f };
+
+	constexpr float FONT_CONFIRM_TITLE_RATIO{ 0.030f };
+	constexpr float FONT_CONFIRM_MESSAGE_RATIO{ 0.024f };
+
+	/** @brief 確認ボタンの数（はい・いいえ） */
+	constexpr int CONFIRM_BUTTON_COUNT{ 2 };
 } // namespace
 
 namespace game::ui::pause
@@ -150,6 +168,131 @@ namespace game::ui::pause
 		    thickness * 2, thickness * 2, Color::PAUSE_BACKGROUND_NAVY, true);
 		m_uiRenderer.drawBox(centerX - thickness / 2, centerY - radius - thickness / 2,
 		    std::max(1, thickness), radius, color, true);
+	}
+
+	void PauseMenuView::getConfirmPanelRect(int& outX, int& outY, int& outWidth, int& outHeight) const
+	{
+		outWidth = static_cast<int>(m_screen.getWidth() * CONFIRM_PANEL_WIDTH_RATIO);
+		outHeight = static_cast<int>(m_screen.getHeight() * CONFIRM_PANEL_HEIGHT_RATIO);
+		outX = (m_screen.getWidth() - outWidth) / 2;
+		outY = (m_screen.getHeight() - outHeight) / 2;
+	}
+
+	void PauseMenuView::getConfirmButtonRect(int index, int& outX, int& outY, int& outWidth, int& outHeight) const
+	{
+		int panelX{}, panelY{}, panelWidth{}, panelHeight{};
+		getConfirmPanelRect(panelX, panelY, panelWidth, panelHeight);
+
+		const int padding{ static_cast<int>(m_screen.getWidth() * CONFIRM_PADDING_RATIO) };
+		const int gap{ static_cast<int>(m_screen.getWidth() * CONFIRM_BUTTON_GAP_RATIO) };
+
+		outWidth = static_cast<int>(m_screen.getWidth() * CONFIRM_BUTTON_WIDTH_RATIO);
+		outHeight = static_cast<int>(m_screen.getHeight() * CONFIRM_BUTTON_HEIGHT_RATIO);
+
+		// 右下から詰めて並べる（右端が「いいえ」）。Windows のダイアログと同じ並び
+		const int right{ panelX + panelWidth - padding };
+		const int fromRight{ CONFIRM_BUTTON_COUNT - 1 - index };
+		outX = right - outWidth - fromRight * (outWidth + gap);
+		outY = panelY + panelHeight - padding - outHeight;
+	}
+
+	int PauseMenuView::getConfirmButtonAt(int x, int y) const
+	{
+		for (int i{ 0 }; i < CONFIRM_BUTTON_COUNT; ++i)
+		{
+			int rectX{}, rectY{}, rectWidth{}, rectHeight{};
+			getConfirmButtonRect(i, rectX, rectY, rectWidth, rectHeight);
+
+			if (x >= rectX && x < rectX + rectWidth &&
+			    y >= rectY && y < rectY + rectHeight)
+				return i;
+		}
+		return -1;
+	}
+
+	void PauseMenuView::drawConfirm(PauseMenuAction action, bool isYesSelected)
+	{
+		// 下のメニューをもう一段沈める。２枚重なったままだと、
+		// どちらを操作している状態なのか分からなくなる
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, CONFIRM_DIM_ALPHA);
+		m_uiRenderer.drawBox(0, 0, m_screen.getWidth(), m_screen.getHeight(),
+		    Color::PAUSE_BACKGROUND_NAVY, true);
+		m_uiRenderer.resetBlendMode();
+
+		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
+
+		int panelX{}, panelY{}, panelWidth{}, panelHeight{};
+		getConfirmPanelRect(panelX, panelY, panelWidth, panelHeight);
+
+		const int radius{ static_cast<int>(m_screen.getHeight() * CONFIRM_PANEL_RADIUS_RATIO) };
+		m_uiRenderer.drawRoundedBox(panelX, panelY, panelWidth, panelHeight, radius,
+		    Color::SETTINGS_WINDOW_BG, true, 1);
+		m_uiRenderer.drawRoundedBox(panelX, panelY, panelWidth, panelHeight, radius,
+		    Color::SETTINGS_STROKE, false, 1);
+
+		const int padding{ static_cast<int>(m_screen.getWidth() * CONFIRM_PADDING_RATIO) };
+		const int titleFontSize{ static_cast<int>(m_screen.getHeight() * FONT_CONFIRM_TITLE_RATIO) };
+		const int messageFontSize{ static_cast<int>(m_screen.getHeight() * FONT_CONFIRM_MESSAGE_RATIO) };
+
+		const std::string title{ getLabel(action) };
+		m_uiRenderer.drawText(panelX + padding, panelY + padding,
+		    title.c_str(), Color::WHITE, titleFontSize);
+
+		const std::string message{ getConfirmMessage(action) };
+		m_uiRenderer.drawText(panelX + padding, panelY + padding + titleFontSize + messageFontSize,
+		    message.c_str(), Color::SETTINGS_TEXT_SECONDARY, messageFontSize);
+
+		drawConfirmButtons(isYesSelected);
+
+		m_uiRenderer.resetFont();
+	}
+
+	void PauseMenuView::drawConfirmButtons(bool isYesSelected) const
+	{
+		const int fontSize{ static_cast<int>(m_screen.getHeight() * FONT_CONFIRM_MESSAGE_RATIO) };
+		const int ringThickness{ std::max(1, static_cast<int>(m_screen.getHeight() * FOCUS_RING_RATIO)) };
+		const char* labels[CONFIRM_BUTTON_COUNT]{ "はい", "いいえ" };
+
+		for (int i{ 0 }; i < CONFIRM_BUTTON_COUNT; ++i)
+		{
+			int rectX{}, rectY{}, rectWidth{}, rectHeight{};
+			getConfirmButtonRect(i, rectX, rectY, rectWidth, rectHeight);
+
+			const bool isSelected{ (i == 0) == isYesSelected };
+
+			m_uiRenderer.drawRoundedBox(rectX, rectY, rectWidth, rectHeight,
+			    std::max(2, ringThickness * 2), Color::PAUSE_CANCEL_BUTTON, true, 1);
+
+			// 選択中は項目リストと同じく白い枠で囲む
+			if (isSelected)
+			{
+				m_uiRenderer.drawBox(rectX, rectY, rectWidth, ringThickness, Color::WHITE, true);
+				m_uiRenderer.drawBox(rectX, rectY + rectHeight - ringThickness, rectWidth, ringThickness, Color::WHITE, true);
+				m_uiRenderer.drawBox(rectX, rectY, ringThickness, rectHeight, Color::WHITE, true);
+				m_uiRenderer.drawBox(rectX + rectWidth - ringThickness, rectY, ringThickness, rectHeight, Color::WHITE, true);
+			}
+
+			const std::string label{ getDrawableText(labels[i]) };
+			const int labelWidth{ m_uiRenderer.getTextWidth(label.c_str(), fontSize) };
+			m_uiRenderer.drawText(rectX + (rectWidth - labelWidth) / 2,
+			    rectY + (rectHeight - fontSize) / 2,
+			    label.c_str(), Color::WHITE, fontSize);
+		}
+	}
+
+	std::string PauseMenuView::getConfirmMessage(PauseMenuAction action) const
+	{
+		// 何が失われるのかを書く。「よろしいですか？」だけだと、
+		// 押した先で何が起きるのか分からないまま決めさせることになる
+		switch (action)
+		{
+		case PauseMenuAction::BackToTitle:
+			return getDrawableText("タイトルへ戻ります。ここまでの進行は失われます。");
+		case PauseMenuAction::Quit:
+			return getDrawableText("ゲームを終了します。ここまでの進行は失われます。");
+		default:
+			return std::string{};
+		}
 	}
 
 	int PauseMenuView::getItemIndexAt(int x, int y, int itemCount) const

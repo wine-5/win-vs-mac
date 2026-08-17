@@ -44,6 +44,21 @@ namespace game::ui::pause
 		[[nodiscard]] bool isOnPowerButton(int x, int y) const;
 
 		/**
+		 * @brief 取り消せない操作の確認を描画する（メニューの上に重ねる）
+		 * @param action 確認する操作
+		 * @param isYesSelected 「はい」を選んでいるか
+		 */
+		void drawConfirm(PauseMenuAction action, bool isYesSelected);
+
+		/**
+		 * @brief 指定座標にある確認ボタンの番号を返す
+		 * @param x 判定するX座標
+		 * @param y 判定するY座標
+		 * @return 0＝はい、1＝いいえ、どちらでもなければ -1
+		 */
+		[[nodiscard]] int getConfirmButtonAt(int x, int y) const;
+
+		/**
 		 * @brief 指定座標の上にある項目のインデックスを返す（マウスホバー用）
 		 * @param x 判定するX座標
 		 * @param y 判定するY座標
@@ -102,6 +117,38 @@ namespace game::ui::pause
 		 */
 		void getItemRect(int index, int itemCount,
 		    int& outX, int& outY, int& outWidth, int& outHeight) const;
+
+		/**
+		 * @brief 確認ダイアログの「はい」「いいえ」を描く
+		 * @param isYesSelected 「はい」を選んでいるか
+		 */
+		void drawConfirmButtons(bool isYesSelected) const;
+
+		/**
+		 * @brief 確認ダイアログに出す説明文を返す（Shift-JIS変換済み）
+		 * @param action 確認する操作
+		 * @return 説明文
+		 */
+		[[nodiscard]] std::string getConfirmMessage(PauseMenuAction action) const;
+
+		/**
+		 * @brief 確認ダイアログの外枠の矩形を返す
+		 * @param outX 左上X座標の出力先
+		 * @param outY 左上Y座標の出力先
+		 * @param outWidth 幅の出力先
+		 * @param outHeight 高さの出力先
+		 */
+		void getConfirmPanelRect(int& outX, int& outY, int& outWidth, int& outHeight) const;
+
+		/**
+		 * @brief 確認ダイアログのボタンの矩形を返す
+		 * @param index 0＝はい、1＝いいえ
+		 * @param outX 左上X座標の出力先
+		 * @param outY 左上Y座標の出力先
+		 * @param outWidth 幅の出力先
+		 * @param outHeight 高さの出力先
+		 */
+		void getConfirmButtonRect(int index, int& outX, int& outY, int& outWidth, int& outHeight) const;
 
 		/**
 		 * @brief 項目の表示ラベルを返す（Shift-JIS変換済み）
