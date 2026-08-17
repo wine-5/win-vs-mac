@@ -528,15 +528,15 @@ namespace game::scene
 			}
 		}
 
-		const int barWidth{ std::max(1, width / HISTORY_SIZE) };
-
 		for (int i{ 0 }; i < HISTORY_SIZE; ++i)
 		{
 			const int barHeight{ static_cast<int>(history[i] * height) };
 			if (barHeight <= 0)
 				continue;
 
+			// 幅は次の棒の位置から決める。固定幅だと割り切れないぶんの隙間が縞になって出る
 			const int barX{ x + i * width / HISTORY_SIZE };
+			const int barWidth{ std::max(1, x + (i + 1) * width / HISTORY_SIZE - barX) };
 			const int barY{ y + height - barHeight };
 
 			// 塗り（薄く）と上端の線。実物の面グラフに近い見え方になる
