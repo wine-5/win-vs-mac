@@ -61,15 +61,32 @@ namespace core::iface
 
 		/**
 		 * @brief 指定したゲームパッドボタンが押されているか判定する
+		 * @details キーボードと同じく、直近の captureFrameInput() 時点のスナップショットを参照する
 		 * @param code ゲームパッドコード
 		 * @return 押されている場合true
 		 */
 		virtual bool isPadButtonDown(core::input::GamePadCode code) const = 0;
 
 		/**
+		 * @brief 指定したゲームパッドボタンが押された瞬間か判定する（押しっぱなしは無視）
+		 * @param code ゲームパッドコード
+		 * @return 押された瞬間の場合true
+		 */
+		virtual bool isPadButtonPressed(core::input::GamePadCode code) const = 0;
+
+		/**
+		 * @brief 押された瞬間かを判定し、そのフレームぶんを消費する（1フレームに1回だけ成立）
+		 *
+		 * 理由は consumeKeyPress と同じ。開閉のように「押すたびに1回だけ起こしたい」操作に使う
+		 * @param code ゲームパッドコード
+		 * @return このフレームでまだ消費されていない「押された瞬間」ならtrue
+		 */
+		virtual bool consumePadPress(core::input::GamePadCode code) = 0;
+
+		/**
 		 * @brief ゲームパッドのアナログ値を取得する
 		 * @param code ゲームパッドコード
-		 * @return アナログ値（-1.0f〜1.0f）
+		 * @return アナログ値（スティックは-1.0f〜1.0f、トリガーは0.0f〜1.0f）
 		 */
 		virtual float getPadAxis(core::input::GamePadCode code) const = 0;
 

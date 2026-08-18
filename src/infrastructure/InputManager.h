@@ -55,14 +55,28 @@ namespace infrastructure
 		 * @return 押されている場合true
 		 */
 		[[nodiscard]] bool isPadButtonDown(core::input::GamePadCode code) const override;
-		
+
+		/**
+		 * @brief 指定したゲームパッドボタンが押された瞬間か判定する
+		 * @param code ゲームパッドコード
+		 * @return 押された瞬間の場合true
+		 */
+		[[nodiscard]] bool isPadButtonPressed(core::input::GamePadCode code) const override;
+
+		/**
+		 * @brief 押された瞬間かを判定し、そのフレームぶんを消費する
+		 * @param code ゲームパッドコード
+		 * @return このフレームでまだ消費されていない「押された瞬間」ならtrue
+		 */
+		[[nodiscard]] bool consumePadPress(core::input::GamePadCode code) override;
+
 		/**
 		 * @brief ゲームパッドのアナログ値を取得する
 		 * @param code ゲームパッドコード
-		 * @return アナログ値（-1.0f〜1.0f）
+		 * @return アナログ値（スティックは-1.0f〜1.0f、トリガーは0.0f〜1.0f）
 		 */
 		[[nodiscard]] float getPadAxis(core::input::GamePadCode code) const override;
-		
+
 		/**
 		 * @brief ゲームパッドが接続されているか判定する
 		 * @return 接続されている場合true
@@ -105,6 +119,59 @@ namespace infrastructure
 		void setMouseCursorVisible(bool visible) override;
 
 	  private:
+		/**
+		 * @brief パッドをどの経路から読んでいるか
+		 *
+		 * 素のDualShock 4／DualSenseはWindowsではXInputのデバイスとして見えず、
+		 * GetJoypadXInputStateが-1を返す。その場合はDirectInputから読む
+		 */
+		enum class PadKind
+		{
+			None,
+			XInput,
+			DirectInput,
+		};
+
+		static constexpr int PAD_CODE_COUNT{ static_cast<int>(core::input::GamePadCode::Count) };
+
+		/** @brief スティックの遊び。これ以下の倒し量は0として捨てる（据え置きのドリフト対策） */
+		static constexpr float STICK_DEADZONE{ 0.24f };
+		/** @brief トリガーを「押した」とみなす踏み込み量 */
+		static constexpr float TRIGGER_THRESHOLD{ 0.5f };
+
+		/**
+		 * @brief このフレームで使うパッドの状態を確定させる
+		 * @param isFocused 自分のアプリが前面か（前面でなければ全て未入力にする）
+		 */
+		void capturePadInput(bool isFocused);
+
+		/**
+		 * @brief XInputから状態を読む
+		 * @return 読めたらtrue
+		 */
+		bool capturePadFromXInput();
+
+		/**
+		 * @brief DirectInputから状態を読む（DualShock 4／DualSenseの並びを前提にする）
+		 * @return 読めたらtrue
+		 */
+		bool capturePadFromDirectInput();
+
+		/**
+		 * @brief スティックの倒し量へ円形の遊びを入れて格納する
+		 *
+		 * 軸ごとに切ると斜めの遊びが四角くなり、真横・真上へ寄りやすくなるため、
+		 * 大きさで判定してから向きを保ったまま0〜1へ引き伸ばす
+		 * @param xCode 横方向の格納先
+		 * @param yCode 縦方向の格納先
+		 * @param rawX 横方向の生の倒し量（-1.0f〜1.0f）
+		 * @param rawY 縦方向の生の倒し量（-1.0f〜1.0f・上が正）
+		 */
+		void storeStick(core::input::GamePadCode xCode, core::input::GamePadCode yCode, float rawX, float rawY);
+
+		/** @brief パッドの状態を全て未入力へ戻す */
+		void clearPadState() noexcept;
+
 		std::unordered_map<core::input::KeyCode, bool> m_currentKeyState;          // captureFrameInput()でキャプチャした今フレームの状態
 		mutable std::unordered_map<core::input::KeyCode, bool> m_previousKeyState; // isKeyPressed(const)内でoperator[]により新規挿入されうる
 
@@ -122,5 +189,13 @@ namespace infrastructure
 		// 前面へ戻った直後にカーソルを中央へ置き直すか。離れた位置のカーソルを
 		// そのまま差分にすると視点が飛ぶため、1フレームぶん捨てるのに使う
 		bool m_needsMouseRecenter{ false };
+
+		// パッドもキーボードと同じくフレーム頭で確定させる。フレーム内の複数箇所で
+		// 読んでもエッジ検出がずれないようにするため
+		PadKind m_padKind{ PadKind::None };
+		bool m_currentPadButtons[PAD_CODE_COUNT]{};
+		bool m_previousPadButtons[PAD_CODE_COUNT]{};
+		bool m_consumedPadButtons[PAD_CODE_COUNT]{}; // updatePreviousStateで空にする
+		float m_padAxes[PAD_CODE_COUNT]{};
 	};
 } // namespace infrastructure

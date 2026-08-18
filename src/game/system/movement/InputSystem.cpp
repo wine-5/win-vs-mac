@@ -55,34 +55,48 @@ namespace game::system::movement
 		if (m_inputProvider.isMouseRightPressed())
 			input.m_rangedAttackPressed = true;
 
-		if (!m_inputProvider.isPadConnected()) return;
+		if (!m_inputProvider.isPadConnected())
+			return;
 
 		// -------------------------------------------------------
 		// コントローラーの入力
 		// -------------------------------------------------------
-		
-		// スティック入力
-		float axisX{m_inputProvider.getPadAxis(core::input::GamePadCode::LeftStickX)};
-		float axisY{m_inputProvider.getPadAxis(core::input::GamePadCode::LeftStickY)};
-		if (axisX != 0.0f)
-			input.m_moveX = axisX;
-		if (axisY != 0.0f)
-			input.m_moveZ = axisY;
+		using core::input::GamePadCode;
 
-		// 十字
-		if(m_inputProvider.isPadButtonDown(core::input::GamePadCode::DPadRight))
+		// 左スティック。遊びと正規化はInputManagerで済んでいるので、0でなければ倒している
+		const float stickX{ m_inputProvider.getPadAxis(GamePadCode::LeftStickX) };
+		const float stickY{ m_inputProvider.getPadAxis(GamePadCode::LeftStickY) };
+		if (stickX != 0.0f)
+			input.m_moveX = stickX;
+		if (stickY != 0.0f)
+			input.m_moveZ = stickY;
+
+		// 十字キー。スティックと違い倒し量が無いので、キーボードと同じ扱いにする
+		if (m_inputProvider.isPadButtonDown(GamePadCode::DPadRight))
 			input.m_moveX = INPUT_POSITIVE;
-		if (m_inputProvider.isPadButtonDown(core::input::GamePadCode::DPadLeft))
+		if (m_inputProvider.isPadButtonDown(GamePadCode::DPadLeft))
 			input.m_moveX = INPUT_NEGATIVE;
-		if (m_inputProvider.isPadButtonDown(core::input::GamePadCode::DPadUp))
+		if (m_inputProvider.isPadButtonDown(GamePadCode::DPadUp))
 			input.m_moveZ = INPUT_POSITIVE;
-		if (m_inputProvider.isPadButtonDown(core::input::GamePadCode::DPadDown))
+		if (m_inputProvider.isPadButtonDown(GamePadCode::DPadDown))
 			input.m_moveZ = INPUT_NEGATIVE;
 
-		// ボタン
-		if (m_inputProvider.isPadButtonDown(core::input::GamePadCode::ButtonA))
-			input.m_attackPressed = true;
-		if (m_inputProvider.isPadButtonDown(core::input::GamePadCode::ButtonB))
+		// ×でジャンプ、〇で近接攻撃。近接はコンボの連打なので面ボタンへ置く
+		if (m_inputProvider.isPadButtonDown(GamePadCode::ButtonCross))
 			input.m_jumpPressed = true;
+		if (m_inputProvider.isPadButtonDown(GamePadCode::ButtonCircle))
+			input.m_attackPressed = true;
+
+		// R1は押している間ためる遠距離攻撃。L1と左スティック押し込みはダッシュで、
+		// どちらでも受けるのは持ち方によって押しやすい方が違うため
+		if (m_inputProvider.isPadButtonDown(GamePadCode::ButtonR1))
+			input.m_rangedAttackPressed = true;
+		if (m_inputProvider.isPadButtonDown(GamePadCode::ButtonL1) ||
+		    m_inputProvider.isPadButtonDown(GamePadCode::ButtonL3))
+			input.m_dashPressed = true;
+
+		// SHAREは押している間だけステータス一覧（Tabと同じ）
+		if (m_inputProvider.isPadButtonDown(GamePadCode::ButtonShare))
+			input.m_statusViewPressed = true;
 	}
 } // namespace game::system::movement
