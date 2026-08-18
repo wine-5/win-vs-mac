@@ -19,6 +19,11 @@ namespace game::component::movement
 		// PhysicsSystemがジャンプの可否判定に使う（GroundingSystemはPhysicsSystemの後に走るため1フレーム遅れだが、接地判定には十分）
 		bool m_isGrounded{ false };
 
+		// 障害物（AABBを持つ配置物・ブロック）の天面に乗っているか。CollisionSystemが毎フレーム更新する。
+		// 床・坂はGroundSurfaceComponentを見るGroundingSystemが拾うが、AABB側はそこに現れないため
+		// ここで伝え、GroundingSystemが m_isGrounded に合流させる
+		bool m_isOnBoxTop{ false };
+
 		// 足元にある床の高さ（ワールドY）。GroundingSystemが毎フレーム更新する。
 		// 浮遊敵が「地面から一定の高さ」を保つために使う（絶対高度だと階層ごとに浮き方が変わるため）
 		float m_groundHeight{ 0.0f };
