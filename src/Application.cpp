@@ -207,22 +207,30 @@ void Application::updatePauseMenu(float deltaTime)
 
 	const auto sceneType{ m_sceneManager->getCurrentSceneType() };
 
-	// Escで開閉する（別の理由でポーズ中は何もしない）
-	if (m_inputProvider->isKeyPressed(core::input::KeyCode::Escape))
+	// Esc／OPTIONSで開閉する（別の理由でポーズ中は何もしない）
+	const bool isTogglePressed{ m_inputProvider->isKeyPressed(core::input::KeyCode::Escape) ||
+		                        m_inputProvider->isPadButtonPressed(core::input::GamePadCode::ButtonOptions) };
+
+	// 開いている間は〇でも閉じられる。パッドの取り消しは〇に統一しているので、
+	// 開けたボタンを覚えていなくても戻れるようにする
+	const bool isClosePressed{ isTogglePressed ||
+		                       m_inputProvider->isPadButtonPressed(core::input::GamePadCode::ButtonCircle) };
+
+	if (m_pauseManager.isPausedBy(game::PauseReason::Menu))
 	{
-		if (m_pauseManager.isPausedBy(game::PauseReason::Menu))
+		if (isClosePressed)
 		{
 			m_pauseManager.resume();
 			m_sceneManager->notifyPauseChanged(false);
 			playUiSe(core::constant::SeType::UiClose);
 		}
-		else if (!m_pauseManager.isPaused() && canOpenPauseMenu(sceneType))
-		{
-			m_pauseManager.pause(game::PauseReason::Menu);
-			m_sceneManager->notifyPauseChanged(true);
-			m_pauseMenuController->open(allowBackToTitle(sceneType));
-			playUiSe(core::constant::SeType::PauseOpen);
-		}
+	}
+	else if (isTogglePressed && !m_pauseManager.isPaused() && canOpenPauseMenu(sceneType))
+	{
+		m_pauseManager.pause(game::PauseReason::Menu);
+		m_sceneManager->notifyPauseChanged(true);
+		m_pauseMenuController->open(allowBackToTitle(sceneType));
+		playUiSe(core::constant::SeType::PauseOpen);
 	}
 
 	if (!m_pauseManager.isPausedBy(game::PauseReason::Menu))

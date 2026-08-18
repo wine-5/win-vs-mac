@@ -152,6 +152,7 @@ namespace game::system::visual
 
 		return m_inputProvider.isKeyPressed(core::input::KeyCode::Enter) ||
 		       m_inputProvider.isKeyPressed(core::input::KeyCode::Space) ||
+		       m_inputProvider.isPadButtonPressed(core::input::GamePadCode::ButtonCross) ||
 		       isMouseLeftClicked;
 	}
 
