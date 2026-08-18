@@ -45,6 +45,10 @@ namespace infrastructure
 		GetWindowThreadProcessId(GetForegroundWindow(), &foregroundProcessId);
 		const bool focused{ foregroundProcessId == GetCurrentProcessId() };
 
+		// マウス視点操作（getMouseDelta）も同じ判定を使う。フレーム中に前面が
+		// 入れ替わってもキーとマウスで食い違わないよう、ここで確定させて共有する
+		m_isWindowFocused = focused;
+
 		// KEY_MAP内の全キーについて、このフレームで使う状態を一括でスナップショットする。
 		// isKeyDownは以後この値を返すだけになるため、フレーム内のどこで何度チェックしても
 		// 一貫した値になる（Application/各Scene/各Systemでチェックタイミングがバラバラでも、
@@ -142,6 +146,20 @@ namespace infrastructure
 
 	void InputManager::getMouseDelta(int& outDx, int& outDy)
 	{
+		outDx = 0;
+		outDy = 0;
+
+		// 他アプリが前面の間は視点を動かさず、カーソルにも触れない。
+		// ここで抜けないと、中央へ戻す SetMousePoint が他アプリを操作中の
+		// カーソルを毎フレーム引き戻して中央に貼り付いたように見え、さらに
+		// ゲーム画面の外にあるカーソル座標がそのまま移動量になってカメラが回り続ける
+		if (!m_isWindowFocused)
+		{
+			m_hasPreviousMousePosition = false; // 戻ってきたら現在位置を基準に取り直す
+			m_needsMouseRecenter = true;
+			return;
+		}
+
 		int mouseX{}, mouseY{};
 		GetMousePoint(&mouseX, &mouseY);
 
@@ -169,6 +187,15 @@ namespace infrastructure
 		GetDrawScreenSize(&screenWidth, &screenHeight);
 		const int centerX{ screenWidth / 2 };
 		const int centerY{ screenHeight / 2 };
+
+		// 前面へ戻った直後は中央へ置き直すだけにする。他アプリを操作していた間に
+		// カーソルは中央から離れているので、そのぶんを差分にすると視点が飛ぶ
+		if (m_needsMouseRecenter)
+		{
+			m_needsMouseRecenter = false;
+			SetMousePoint(centerX, centerY);
+			return;
+		}
 
 		outDx = mouseX - centerX;
 		outDy = mouseY - centerY;
