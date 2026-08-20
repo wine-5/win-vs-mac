@@ -1,7 +1,4 @@
 #include "InventoryView.h"
-#include <iterator>
-#include <algorithm>
-#include <cmath>
 #include "OrbitGlow.h"
 #include "core/base/ServiceLocator.h"
 #include "core/constant/UI.h"
@@ -22,6 +19,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <iterator>
 
 namespace
 {
@@ -99,6 +97,10 @@ namespace
 	constexpr float SWAP_PULSE_CYCLES{ 0.45f };
 	constexpr float SWAP_PULSE_MIN{ 0.55f };
 	constexpr int SWAP_BORDER_ALPHA{ 255 };
+
+	// 方向で移動先を探すときに、横へのずれをどれだけ嫌うか。
+	// 1だと斜めのマスへも同じ重みで飛ぶので、真っすぐ近いものを優先させる
+	constexpr int SLOT_NAV_CROSS_PENALTY{ 3 };
 
 	// パッドの案内の間隔（1080p基準）
 	constexpr int PAD_HINT_ICON_GAP{ 6 };  // 記号と説明の間
@@ -407,6 +409,73 @@ namespace game::ui::ingame
 				return bounds.m_acquiredIndex;
 		}
 		return -1;
+	}
+
+	int InventoryView::firstSelectableSlotIndex() const noexcept
+	{
+		int found{ -1 };
+		for (const SlotBounds& bounds : m_slotBounds)
+		{
+			if (bounds.m_isLocked || bounds.m_acquiredIndex < 0)
+				continue;
+
+			if (found < 0 || bounds.m_acquiredIndex < found)
+				found = bounds.m_acquiredIndex;
+		}
+
+		return found;
+	}
+
+	int InventoryView::findSlotIndexToward(int fromIndex, int directionX, int directionY) const noexcept
+	{
+		if (fromIndex < 0)
+			return firstSelectableSlotIndex();
+
+		// いまいるマスの中心を出す。見つからなければ先頭へ戻す
+		// （前のフレームで消えたマスを指していることがある）
+		const SlotBounds* from{ nullptr };
+		for (const SlotBounds& bounds : m_slotBounds)
+		{
+			if (bounds.m_isLocked || bounds.m_acquiredIndex != fromIndex)
+				continue;
+
+			from = &bounds;
+			break;
+		}
+
+		if (from == nullptr)
+			return firstSelectableSlotIndex();
+
+		const int fromX{ from->m_x + from->m_width / 2 };
+		const int fromY{ from->m_y + from->m_height / 2 };
+
+		int bestIndex{ fromIndex };
+		int bestScore{ 0 };
+		for (const SlotBounds& bounds : m_slotBounds)
+		{
+			if (bounds.m_isLocked || bounds.m_acquiredIndex < 0 ||
+			    bounds.m_acquiredIndex == fromIndex)
+				continue;
+
+			const int deltaX{ bounds.m_x + bounds.m_width / 2 - fromX };
+			const int deltaY{ bounds.m_y + bounds.m_height / 2 - fromY };
+
+			// 押した方向にあるものだけを候補にする
+			const int along{ directionX != 0 ? deltaX * directionX : deltaY * directionY };
+			if (along <= 0)
+				continue;
+
+			const int cross{ directionX != 0 ? std::abs(deltaY) : std::abs(deltaX) };
+			const int score{ along + cross * SLOT_NAV_CROSS_PENALTY };
+
+			if (bestIndex != fromIndex && score >= bestScore)
+				continue;
+
+			bestIndex = bounds.m_acquiredIndex;
+			bestScore = score;
+		}
+
+		return bestIndex;
 	}
 
 	bool InventoryView::isLockedSlotAt(int screenX, int screenY) const noexcept

@@ -136,6 +136,25 @@ namespace game::ui::ingame
 		[[nodiscard]] int findSlotIndexAt(int screenX, int screenY) const noexcept;
 
 		/**
+		 * @brief 指定したマスから見て、ある方向にある一番近いマスを返す
+		 *
+		 * マスの位置はレイアウトを組む描画側しか知らないため、移動先の判定もここが持つ。
+		 * 行と列で数えずに座標で探すのは、区分ごとに折り返し方も段数も違うため。
+		 * 座標で探せば、並びを変えても移動の規則を書き直さずに済む
+		 * @param fromIndex いまいるマス（m_acquired 上の添字）。-1 なら先頭のマスを返す
+		 * @param directionX 横方向（-1で左、+1で右、0なら横に動かない）
+		 * @param directionY 縦方向（-1で上、+1で下、0なら縦に動かない）
+		 * @return 移動先のマス。その方向にマスが無ければ fromIndex のまま
+		 */
+		[[nodiscard]] int findSlotIndexToward(int fromIndex, int directionX, int directionY) const noexcept;
+
+		/**
+		 * @brief 動かせるマスのうち、先頭のものを返す
+		 * @return 先頭のマス（m_acquired 上の添字）。動かせるマスが無ければ -1
+		 */
+		[[nodiscard]] int firstSelectableSlotIndex() const noexcept;
+
+		/**
 		 * @brief 画面座標が動かせない枠（持ち込み）の上にあるかを返す
 		 *
 		 * 何も無い場所へ落としたのか、固定された枠へ落とそうとしたのかを分けるために使う。
