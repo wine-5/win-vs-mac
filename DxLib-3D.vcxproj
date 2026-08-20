@@ -209,6 +209,7 @@
     <ClCompile Include="src\game\SettingsManager.cpp" />
     <ClCompile Include="src\game\ui\settings\SettingsPanelView.cpp" />
     <ClCompile Include="src\game\ui\PadButtonIcon.cpp" />
+    <ClCompile Include="src\game\ui\PadConnectedToast.cpp" />
     <ClCompile Include="src\game\ui\UiInputMapper.cpp" />
     <ClCompile Include="src\game\ui\settings\SettingsPanelController.cpp" />
     <ClCompile Include="src\infrastructure\effect\EffectFactory.cpp" />
@@ -480,6 +481,7 @@
     <ClInclude Include="src\game\SettingsManager.h" />
     <ClInclude Include="src\game\ui\settings\SettingsPanelView.h" />
     <ClInclude Include="src\game\ui\PadButtonIcon.h" />
+    <ClInclude Include="src\game\ui\PadConnectedToast.h" />
     <ClInclude Include="src\game\ui\UiInputMapper.h" />
     <ClInclude Include="src\game\ui\settings\SettingsPanelController.h" />
     <ClInclude Include="src\infrastructure\effect\EffectFactory.h" />
