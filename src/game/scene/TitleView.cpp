@@ -134,10 +134,20 @@ namespace
 		{ "メモリ", "メモリ使用率", "使用率", Color::TITLE_GRAPH_MEMORY, 0.40f },
 		{ "ディスク", "ディスクのアクティブな時間", "アクティブな時間", Color::TITLE_GRAPH_DISK, 0.15f },
 	};
-	// キー・パッドで操作しているときに出す選択枠（基準サイズでのピクセル数）
-	constexpr float FOCUS_RING_MARGIN{ 3.0f };
-	constexpr float FOCUS_RING_RADIUS{ 6.0f };
-	constexpr float FOCUS_RING_THICKNESS{ 2.0f };
+	// キー・パッドで操作しているときに出す選択枠（基準サイズでのピクセル数）。
+	//
+	// Windows 11 と同じく二重の枠にする。1本だけだと、白いカードの上では
+	// 薄い青の線が地に沈み、濃い面の上では逆に見えなくなる。
+	// 外を暗く・内を明るくしておけば、どちらの地の上でも片方が必ず立つ
+	constexpr float FOCUS_RING_MARGIN{ 4.0f };
+	constexpr float FOCUS_RING_RADIUS{ 7.0f };
+	constexpr float FOCUS_RING_OUTER_THICKNESS{ 4.0f };
+	constexpr float FOCUS_RING_INNER_THICKNESS{ 2.0f };
+
+	// 枠の明滅。止まった枠は背景の模様に紛れるが、動いていれば必ず目に入る
+	constexpr float FOCUS_RING_PULSE_CYCLES{ 0.7f };
+	constexpr int FOCUS_RING_ALPHA_MIN{ 150 };
+	constexpr int FOCUS_RING_ALPHA_MAX{ 255 };
 
 } // namespace
 
@@ -206,7 +216,13 @@ namespace game::scene
 		int mouseX{}, mouseY{};
 		m_inputProvider.getMousePosition(mouseX, mouseY);
 		// まだ出ていないものは押せない。起動演出が終わってから受け付ける
-		m_hovered = (m_isInteractive && isIntroFinished()) ? getHitAt(mouseX, mouseY) : Hit::None;
+		// パッドを触っている間はホバーを見ない。カーソルがたまたまボタンの上に
+		// 乗っているだけで、枠とホバーの2か所が同時に光って選択位置が読めなくなる
+		const bool isUsingMouse{ m_inputProvider.getLastInputDevice() ==
+			                     core::input::InputDevice::KeyboardMouse };
+		m_hovered = (m_isInteractive && isIntroFinished() && isUsingMouse)
+		                ? getHitAt(mouseX, mouseY)
+		                : Hit::None;
 
 		const bool mouseLeft{ m_inputProvider.isMouseLeftPressed() };
 		const bool mouseClicked{ mouseLeft && !m_prevMouseLeft };
@@ -340,9 +356,29 @@ namespace game::scene
 		// 対象より一回り外へ描く。枠の内側に重ねると、ボタン自身の縁と混ざって
 		// どちらが選択の印なのか分からなくなる
 		const int margin{ scaled(FOCUS_RING_MARGIN) };
-		m_uiRenderer.drawRoundedBox(x - margin, y - margin, width + margin * 2,
-		    height + margin * 2, scaled(FOCUS_RING_RADIUS),
-		    core::utility::Color::TITLE_ACCENT, false, scaled(FOCUS_RING_THICKNESS));
+		const int ringX{ x - margin };
+		const int ringY{ y - margin };
+		const int ringWidth{ width + margin * 2 };
+		const int ringHeight{ height + margin * 2 };
+		const int radius{ scaled(FOCUS_RING_RADIUS) };
+
+		// ゆっくり明滅させる。止まった枠は背景の折れ線や方眼に紛れる
+		const float wave{ std::sin(m_pulseTimer * FOCUS_RING_PULSE_CYCLES * core::utility::TWO_PI) };
+		const float rate{ wave * 0.5f + 0.5f };
+		const int alpha{ FOCUS_RING_ALPHA_MIN +
+			             static_cast<int>((FOCUS_RING_ALPHA_MAX - FOCUS_RING_ALPHA_MIN) * rate) };
+
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+
+		// 外側の濃い枠。明るい面の上でも輪郭が立つ
+		m_uiRenderer.drawRoundedBox(ringX, ringY, ringWidth, ringHeight, radius,
+		    Color::TITLE_TEXT, false, scaled(FOCUS_RING_OUTER_THICKNESS));
+
+		// 内側のアクセント。濃い面の上ではこちらが立つ
+		m_uiRenderer.drawRoundedBox(ringX, ringY, ringWidth, ringHeight, radius,
+		    Color::TITLE_ACCENT, false, scaled(FOCUS_RING_INNER_THICKNESS));
+
+		m_uiRenderer.resetBlendMode();
 	}
 
 	void TitleView::playUiClick() const
