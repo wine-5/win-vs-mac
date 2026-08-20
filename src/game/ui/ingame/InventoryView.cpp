@@ -313,7 +313,9 @@ namespace game::ui::ingame
 
 		// パッド用の案内。ボタンの記号は図形で描くので、ここには説明だけを持つ
 		m_padLabelClose = toDrawable("閉じる");
-		m_padLabelGrab = toDrawable("つかむ / 置く");
+		m_padLabelGrab = toDrawable("つかむ");
+		m_padLabelPlace = toDrawable("ここへ置く");
+		m_padLabelCancel = toDrawable("やめる");
 		m_padLabelSwapHere = toDrawable("の端末で付け替えできる");
 		m_captionOverflow = toDrawable(" 件は表示しきれません");
 	}
@@ -812,16 +814,27 @@ namespace game::ui::ingame
 
 		if (isUsingPad())
 		{
-			// 付け替え中は「つかむ／置く」が増える。掴んだあとで進み方が分からなくなるため
+			// 掴んでいるかどうかでボタンの意味が変わる。掴んだまま「閉じる」と出ていると、
+			// 〇を押したら窓が消えると思って、離すのをためらうことになる
+			const bool isHolding{ m_heldIndex >= 0 };
+			const PadHint holdHints[]{
+				{ PadButton::Cross, &m_padLabelPlace },
+				{ PadButton::Circle, &m_padLabelCancel },
+			};
 			const PadHint swapHints[]{
 				{ PadButton::Cross, &m_padLabelGrab },
 				{ PadButton::Circle, &m_padLabelClose },
 			};
 			const PadHint viewHints[]{ { PadButton::Circle, &m_padLabelClose } };
 
-			const PadHint* hints{ m_isSwapMode ? swapHints : viewHints };
-			const int count{ m_isSwapMode ? static_cast<int>(std::size(swapHints))
-				                          : static_cast<int>(std::size(viewHints)) };
+			const PadHint* hints{ viewHints };
+			int count{ static_cast<int>(std::size(viewHints)) };
+			if (m_isSwapMode)
+			{
+				hints = isHolding ? holdHints : swapHints;
+				count = isHolding ? static_cast<int>(std::size(holdHints))
+				                  : static_cast<int>(std::size(swapHints));
+			}
 
 			constexpr unsigned int HINT_COLOR{ core::utility::Color::HUD_INK_FAINT };
 			const int padHintWidth{ layoutPadHints(0, 0, hints, count, fontSize, true, HINT_COLOR) };

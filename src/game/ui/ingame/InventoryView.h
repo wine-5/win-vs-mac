@@ -490,6 +490,8 @@ namespace game::ui::ingame
 		PadButtonIcon m_padButtonIcon;
 		std::string m_padLabelClose{};
 		std::string m_padLabelGrab{};
+		std::string m_padLabelPlace{};  // 掴んでいるときの×
+		std::string m_padLabelCancel{}; // 掴んでいるときの〇
 		std::string m_padLabelSwapHere{};
 
 		// 開閉の動き。閉じる動きの最中も描き続けるため、開閉のフラグと進み具合を分けて持つ
