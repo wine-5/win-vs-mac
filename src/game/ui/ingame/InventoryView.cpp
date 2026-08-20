@@ -87,6 +87,11 @@ namespace
 	// 出し切ったあとにもう一段大きくなったように見えて落ち着かない
 	constexpr float OPEN_DURATION{ 0.14f }; // 開き切る／閉じ切るまでの時間（秒）
 
+	// 付け替えできるときの枠の脈動
+	constexpr float SWAP_PULSE_CYCLES{ 0.45f };
+	constexpr float SWAP_PULSE_MIN{ 0.55f };
+	constexpr int SWAP_BORDER_ALPHA{ 255 };
+
 	// パッドの案内の間隔（1080p基準）
 	constexpr int PAD_HINT_ICON_GAP{ 6 };  // 記号と説明の間
 	constexpr int PAD_HINT_ITEM_GAP{ 22 }; // 案内どうしの間
@@ -317,6 +322,13 @@ namespace game::ui::ingame
 		return m_isOpen ? progress : 1.0f - progress;
 	}
 
+	float InventoryView::breathRate(float cyclesPerSecond, float phase, float minRate) const
+	{
+		const float wave{ std::sin(
+			(elapsedSeconds() * cyclesPerSecond + phase) * core::utility::TWO_PI) };
+		return minRate + (1.0f - minRate) * (wave * 0.5f + 0.5f);
+	}
+
 	void InventoryView::setOpen(bool isOpen) noexcept
 	{
 		if (m_isOpen == isOpen)
@@ -456,9 +468,16 @@ namespace game::ui::ingame
 		// 目に入るのは中身より先に窓の輪郭なので、状態の違いはここへ出す
 		if (m_isSwapMode)
 		{
+			// ゆっくり脈動させる。色だけだと「そういう配色の窓」に見えるが、
+			// 動いていると「いま触れる状態だ」という主張になる
 			const int radius{ scaled(HudPanel::PANEL_RADIUS) };
+			const float rate{ breathRate(SWAP_PULSE_CYCLES, 0.0f, SWAP_PULSE_MIN) };
+
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+			    static_cast<int>(SWAP_BORDER_ALPHA * rate * eased));
 			m_uiRenderer.drawRoundedBox(left, top, width, height, radius,
 			    core::utility::Color::HUD_ACCENT, false, scaled(SWAP_BORDER_THICKNESS));
+			m_uiRenderer.resetBlendMode();
 		}
 
 		drawTitleBar(left, top, width);

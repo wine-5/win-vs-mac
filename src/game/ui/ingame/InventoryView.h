@@ -437,6 +437,15 @@ namespace game::ui::ingame
 		    int fontSize, bool measureOnly, unsigned int labelColor);
 
 		/**
+		 * @brief ゆっくりした明滅の強さを返す
+		 * @param cyclesPerSecond 1秒あたりの周期数
+		 * @param phase 位相のずらし量（0.0〜1.0）
+		 * @param minRate 一番暗いときの割合（0.0〜1.0）
+		 * @return minRate〜1.0 の値
+		 */
+		[[nodiscard]] float breathRate(float cyclesPerSecond, float phase, float minRate) const;
+
+		/**
 		 * @brief 開閉の進み具合を返す
 		 * @return 0.0（閉じ切っている）〜1.0（開き切っている）
 		 */
