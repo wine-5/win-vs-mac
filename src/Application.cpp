@@ -108,6 +108,12 @@ void Application::run()
 		}
 		else
 		{
+			// 押した瞬間に反応させたい操作はここで処理する。下の update は
+			// 溜まった時間が1/60秒に届かないフレームでは1回も回らないため、
+			// その中で「押した瞬間」を見ていると入力を取りこぼす
+			// （画面の更新が60Hzより速い環境ほど頻繁に起きる）
+			m_sceneManager->updateInput();
+
 			accumulator += elapsedTime;
 
 			int updateCount{ 0 };

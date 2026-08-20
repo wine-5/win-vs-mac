@@ -979,6 +979,24 @@ namespace game::scene
 		m_eventBus.publish(event::BossAppearedEvent{ m_macId });
 	}
 
+	void InGame::updateInput()
+	{
+		// 開始演出を送る入力もここで拾う。System の update は固定ステップで
+		// 1フレームに0回のこともあり、その中で見ていると押しても進まないことがある
+		if (m_battleStartSystem)
+			m_battleStartSystem->pollAdvanceInput();
+
+		updateInventory();
+		updateRenameTerminal();
+
+		// インベントリを開いている間も世界と時間は動かす。付け替えている間に敵が寄ってくる
+		// ことまで込みで「倒してから整えるか、そのまま整えるか」を選ばせたい。
+		// クリアタイムも止まらないので、付け替えそのものが時間というコストを持つ。
+		// プレイヤー自身は動けない（setInventoryOpen が InputComponent::m_uiLocked を立てる）
+		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
+			updateSwapSelection();
+	}
+
 	void InGame::update(float deltaTime)
 	{
 		// DEBUG: 更新レート（UPS）を数える。FPS計測は描画回数を数える必要があるためdraw側で行う
@@ -989,16 +1007,6 @@ namespace game::scene
 		// ヒットストップ中はSystemへ渡す時間に倍率を掛ける（0なら何も進まない）。
 		// 経過時間の計測もここへ揃える。止まっている間もタイマーだけ進むと、
 		// 画面が止まっているのに右上の秒数だけ動いて不自然になる
-		updateInventory();
-		updateRenameTerminal();
-
-		// インベントリを開いている間も世界と時間は動かす。付け替えている間に敵が寄ってくる
-		// ことまで込みで「倒してから整えるか、そのまま整えるか」を選ばせたい。
-		// クリアタイムも止まらないので、付け替えそのものが時間というコストを持つ。
-		// プレイヤー自身は動けない（setInventoryOpen が InputComponent::m_uiLocked を立てる）
-		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
-			updateSwapSelection();
-
 		const float scaledDeltaTime{ m_hitStop.apply(deltaTime) };
 
 		// 開始演出（READY）の間はまだ動けないので、クリアタイムの計測も始めない。

@@ -33,6 +33,12 @@ namespace game::scene
 			m_currentScene->draw();
 	}
 
+	void SceneManager::updateInput()
+	{
+		if (m_currentScene)
+			m_currentScene->updateInput();
+	}
+
 	void SceneManager::notifyPauseChanged(bool isPaused)
 	{
 		if (m_currentScene)

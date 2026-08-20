@@ -50,6 +50,14 @@ namespace game::scene
 	  void draw();
 
 	  /**
+	   * @brief 現在シーンのフレーム単位の入力処理を呼ぶ
+	   *
+	   * update と違い、フレームに必ず1回だけ呼ばれる。
+	   * 「押した瞬間」の取りこぼしを避けたい処理はこちらへ置く
+	   */
+	  void updateInput();
+
+	  /**
 	   * @brief シーンを変更する
 	   * @param sceneType 変更先のシーンの種類
 	   */

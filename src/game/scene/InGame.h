@@ -117,6 +117,15 @@ namespace game::scene
 	  void update(float deltaTime) override;
 
 	  /**
+	   * @brief フレームに1回だけ呼ばれる入力処理
+	   *
+	   * インベントリ・端末の開閉と、付け替えのマス選択をここで処理する。
+	   * update は固定ステップで1フレームに0回のこともあり、その中で
+	   * 「押した瞬間」を見ていると押しても開かないことがある
+	   */
+	  void updateInput() override;
+
+	  /**
 	   * @brief シーンの描画処理
 	   */
 	  void draw() override;
