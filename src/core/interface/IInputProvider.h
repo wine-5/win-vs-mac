@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "core/input/KeyCode.h"
 #include "core/input/GamePadCode.h"
+#include "core/input/InputDevice.h"
 
 namespace core::iface
 {
@@ -95,6 +96,15 @@ namespace core::iface
 		 * @return 接続されている場合true
 		 */
 		virtual bool isPadConnected() const = 0;
+
+		/**
+		 * @brief 最後に操作へ使われた入力機器を返す
+		 *
+		 * 操作の案内をどちらの表記で出すかに使う。何も触られていない間は
+		 * 直前の値を保つので、手を止めても表記が勝手に戻らない
+		 * @return 最後に触られた入力機器
+		 */
+		virtual core::input::InputDevice getLastInputDevice() const = 0;
 
 		// ========== マウス入力 ==========
 		/**

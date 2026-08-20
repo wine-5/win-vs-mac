@@ -2,6 +2,7 @@
 #include <DxLib.h>
 #include <unordered_map>
 #include <cmath>
+#include <cstdlib>
 
 namespace infrastructure
 {
@@ -59,6 +60,52 @@ namespace infrastructure
 
 		// パッドもここで確定させる。キーボードと同じ理由（フレーム内のどこで読んでも同じ値）
 		capturePadInput(focused);
+
+		// どちらの機器で操作しているかも、確定した状態から毎フレーム見る
+		if (focused)
+			updateLastInputDevice();
+	}
+
+	void InputManager::updateLastInputDevice()
+	{
+		// パッドは、ボタンが押されているかスティックが遊びを抜けていれば触られている。
+		// 遊びの処理は storeStick で済んでいるので、0 でなければ倒していると見てよい
+		bool isPadActive{ false };
+		for (int i{ 0 }; i < PAD_CODE_COUNT && !isPadActive; ++i)
+			isPadActive = m_currentPadButtons[i] || m_padAxes[i] != 0.0f;
+
+		if (isPadActive)
+		{
+			m_lastInputDevice = core::input::InputDevice::GamePad;
+			return;
+		}
+
+		bool isKeyboardActive{ false };
+		for (const auto& [keyCode, isDown] : m_currentKeyState)
+		{
+			if (!isDown)
+				continue;
+
+			isKeyboardActive = true;
+			break;
+		}
+
+		int mouseX{}, mouseY{};
+		GetMousePoint(&mouseX, &mouseY);
+
+		// 初回は基準を取るだけ。前回座標が無いまま差分を取ると必ず動いた扱いになる
+		bool isMouseMoved{ false };
+		if (m_hasDeviceMousePosition)
+		{
+			isMouseMoved = std::abs(mouseX - m_deviceMouseX) >= MOUSE_MOVE_THRESHOLD ||
+			               std::abs(mouseY - m_deviceMouseY) >= MOUSE_MOVE_THRESHOLD;
+		}
+		m_deviceMouseX = mouseX;
+		m_deviceMouseY = mouseY;
+		m_hasDeviceMousePosition = true;
+
+		if (isKeyboardActive || isMouseMoved || isMouseLeftPressed() || isMouseRightPressed())
+			m_lastInputDevice = core::input::InputDevice::KeyboardMouse;
 	}
 
 	bool InputManager::isKeyDown(core::input::KeyCode keyCode) const
@@ -317,6 +364,11 @@ namespace infrastructure
 	bool InputManager::isPadConnected() const
 	{
 		return m_padKind != PadKind::None;
+	}
+
+	core::input::InputDevice InputManager::getLastInputDevice() const
+	{
+		return m_lastInputDevice;
 	}
 
 	// ========== マウス入力 ==========

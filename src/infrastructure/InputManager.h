@@ -83,6 +83,12 @@ namespace infrastructure
 		 */
 		[[nodiscard]] bool isPadConnected() const override;
 
+		/**
+		 * @brief 最後に操作へ使われた入力機器を返す
+		 * @return 最後に触られた入力機器
+		 */
+		[[nodiscard]] core::input::InputDevice getLastInputDevice() const override;
+
 		// ========== マウス入力 ==========
 
 		/**
@@ -172,6 +178,18 @@ namespace infrastructure
 		/** @brief パッドの状態を全て未入力へ戻す */
 		void clearPadState() noexcept;
 
+		/**
+		 * @brief このフレームの入力から「最後に触った機器」を更新する
+		 *
+		 * パッドを優先して見るのは、パッドで遊んでいる最中に机の上のマウスが
+		 * わずかに動いただけで表記が戻ってしまうのを避けるため。
+		 * マウスの微動は下の MOUSE_MOVE_THRESHOLD で捨てる
+		 */
+		void updateLastInputDevice();
+
+		/** @brief マウスが「動いた」とみなす移動量（ピクセル） */
+		static constexpr int MOUSE_MOVE_THRESHOLD{ 3 };
+
 		std::unordered_map<core::input::KeyCode, bool> m_currentKeyState;          // captureFrameInput()でキャプチャした今フレームの状態
 		mutable std::unordered_map<core::input::KeyCode, bool> m_previousKeyState; // isKeyPressed(const)内でoperator[]により新規挿入されうる
 
@@ -197,5 +215,12 @@ namespace infrastructure
 		bool m_previousPadButtons[PAD_CODE_COUNT]{};
 		bool m_consumedPadButtons[PAD_CODE_COUNT]{}; // updatePreviousStateで空にする
 		float m_padAxes[PAD_CODE_COUNT]{};
+
+		// 最後に触られた入力機器。案内の表記を切り替えるのに使う。
+		// マウスの微動を捨てるため、判定用に前フレームの座標を別に持つ
+		core::input::InputDevice m_lastInputDevice{ core::input::InputDevice::KeyboardMouse };
+		int m_deviceMouseX{ 0 };
+		int m_deviceMouseY{ 0 };
+		bool m_hasDeviceMousePosition{ false };
 	};
 } // namespace infrastructure
