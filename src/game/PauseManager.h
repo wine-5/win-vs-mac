@@ -10,7 +10,7 @@ namespace game
 	{
 		None,      // ポーズしていない
 		Menu,      // ポーズメニュー（Esc）を開いている
-		Inventory, // インベントリ（E）を開いている
+		Inventory, // インベントリ（E／△）を開いている（時間は止めない）
 	};
 
 	/**
@@ -50,6 +50,22 @@ namespace game
 		[[nodiscard]] bool isPaused() const noexcept
 		{
 			return m_reason != PauseReason::None;
+		}
+
+		/**
+		 * @brief いまの理由でゲームの時間まで止めるかを返す
+		 *
+		 * インベントリは開いている間も世界を動かす。付け替えている間に敵が寄ってくることまで
+		 * 込みで「倒してから整えるか、そのまま整えるか」を選ばせたいため。
+		 * クリアタイムも止めないので、付け替えそのものが時間というコストを持つ。
+		 *
+		 * ポーズメニューはゲームの一部ではなくシステムの窓（設定・タイトルへ戻る）なので、
+		 * こちらは完全に止める
+		 * @return 時間を止めるならtrue
+		 */
+		[[nodiscard]] bool stopsTime() const noexcept
+		{
+			return m_reason == PauseReason::Menu;
 		}
 
 		/**

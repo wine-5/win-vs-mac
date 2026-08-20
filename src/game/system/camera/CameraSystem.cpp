@@ -141,7 +141,7 @@ namespace game::system::camera
 		m_inputProvider.getMouseDelta(deltaX, deltaY);
 
 		const bool isInputLocked{ m_componentManager.has<component::movement::InputComponent>(m_targetEntityId) &&
-			                      m_componentManager.get<component::movement::InputComponent>(m_targetEntityId).m_locked };
+			                      m_componentManager.get<component::movement::InputComponent>(m_targetEntityId).isInputBlocked() };
 		if (!isInputLocked)
 		{
 			// マウス移動量で yaw/pitch を更新する。感度と縦の向きは設定から毎フレーム引くので、

@@ -25,8 +25,9 @@ namespace game::system::movement
 		input.m_rangedAttackPressed = false;
 		input.m_statusViewPressed = false;
 
-		// シネマ演出中（ボス覚醒など）は全入力を受け付けない（上の初期化でニュートラルを維持）
-		if (input.m_locked)
+		// シネマ演出中（ボス覚醒など）と、インベントリを開いている間は
+		// 全入力を受け付けない（上の初期化でニュートラルを維持）
+		if (input.isInputBlocked())
 			return;
 
 		// -------------------------------------------------------

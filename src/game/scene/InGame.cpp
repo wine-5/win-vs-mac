@@ -29,6 +29,7 @@
 #include "game/system/stage/BossGateSystem.h"
 #include "game/system/movement/FootstepSystem.h"
 #include "game/component/movement/TransformComponent.h"
+#include "game/component/movement/InputComponent.h"
 #include "game/actor/Player.h"
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
@@ -826,6 +827,16 @@ namespace game::scene
 			    // 与えたときだけで、被弾側では止めない（操作不能時間は理不尽に感じるため）
 			    if (e.m_isCritical && e.m_targetId != m_playerId)
 					m_hitStop.requestOnCritical(); }));
+		// 死んだ瞬間にインベントリを閉じる。開いている間も世界は動くので、
+		// 付け替えている最中に殴られて死ぬことがある。窓が出たままだと
+		// 死亡アニメも暗転も窓の裏で進んでしまう
+		m_subscriptions.push_back(m_eventBus.subscribe<event::PlayerDeadEvent>(
+		    [this](const event::PlayerDeadEvent&)
+		    {
+			    if (m_pauseManager.isPausedBy(PauseReason::Inventory))
+				    setInventoryOpen(false, false);
+		    }));
+
 		// プレイヤー死亡演出の完了イベントの購読。
 		// HPが尽きた瞬間（PlayerDeadEvent）ではなく、死亡アニメと暗転を見せ終えてから遷移する。
 		// 演出中もモデルは表示し続ける（非表示にすると死亡アニメが見えなくなる）
@@ -981,14 +992,12 @@ namespace game::scene
 		updateInventory();
 		updateRenameTerminal();
 
-		// インベントリを開いている間は時間を止める。読む画面なので、
-		// 読んでいる最中に殴られるのはプレイヤーの落ち度ではなく設計の落ち度になる。
-		// ただし付け替えの操作だけは止まっている間に受け付ける
+		// インベントリを開いている間も世界と時間は動かす。付け替えている間に敵が寄ってくる
+		// ことまで込みで「倒してから整えるか、そのまま整えるか」を選ばせたい。
+		// クリアタイムも止まらないので、付け替えそのものが時間というコストを持つ。
+		// プレイヤー自身は動けない（setInventoryOpen が InputComponent::m_uiLocked を立てる）
 		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
-		{
 			updateSwapSelection();
-			return;
-		}
 
 		const float scaledDeltaTime{ m_hitStop.apply(deltaTime) };
 
@@ -1077,6 +1086,11 @@ namespace game::scene
 			m_pauseManager.pause(PauseReason::Inventory);
 		else
 			m_pauseManager.resume();
+
+		// 開いている間は動けない。世界のほうは止めないので、立ち止まっている間に
+		// 殴られる。どこで付け替えるかがそのまま判断になる
+		if (auto* input{ m_componentManager.tryGet<component::movement::InputComponent>(m_playerId) })
+			input->m_uiLocked = isOpen;
 
 		m_isSwapMode = isOpen && isSwapMode;
 		m_swapHeldIndex = -1;
