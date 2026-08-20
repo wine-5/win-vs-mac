@@ -54,8 +54,9 @@ namespace game::scene
 	   *
 	   * update と違い、フレームに必ず1回だけ呼ばれる。
 	   * 「押した瞬間」の取りこぼしを避けたい処理はこちらへ置く
+	   * @param deltaTime フレーム間の時間差（秒）
 	   */
-	  void updateInput();
+	  void updateInput(float deltaTime);
 
 	  /**
 	   * @brief シーンを変更する

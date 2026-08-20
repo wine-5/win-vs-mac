@@ -223,6 +223,7 @@ namespace game::scene
 	    , m_animator{ animator }
 	    , m_resourceManager{ resourceManager }
 	    , m_inputProvider{ inputProvider }
+	    , m_inventoryInputMapper{ inputProvider }
 	    , m_gameManager{ gameManager }
 	    , m_pauseManager{ pauseManager }
 	    , m_settingsManager{ settingsManager }
@@ -979,7 +980,7 @@ namespace game::scene
 		m_eventBus.publish(event::BossAppearedEvent{ m_macId });
 	}
 
-	void InGame::updateInput()
+	void InGame::updateInput(float deltaTime)
 	{
 		// 開始演出を送る入力もここで拾う。System の update は固定ステップで
 		// 1フレームに0回のこともあり、その中で見ていると押しても進まないことがある
@@ -994,7 +995,7 @@ namespace game::scene
 		// クリアタイムも止まらないので、付け替えそのものが時間というコストを持つ。
 		// プレイヤー自身は動けない（setInventoryOpen が InputComponent::m_uiLocked を立てる）
 		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
-			updateSwapSelection();
+			updateSwapSelection(deltaTime);
 	}
 
 	void InGame::update(float deltaTime)
@@ -1028,12 +1029,18 @@ namespace game::scene
 		// どの画面でも共通の期待なので、ここだけ効かないと閉じ方を探すことになる。
 		// ポーズメニュー側（Application）はインベントリで止まっている間はEscを見ないので、
 		// ここで閉じてもメニューが続けて開くことはない
-		if (m_pauseManager.isPausedBy(PauseReason::Inventory) &&
-		    (m_inputProvider.consumeKeyPress(core::input::KeyCode::Escape) ||
-		        m_inputProvider.consumePadPress(core::input::GamePadCode::ButtonCircle)))
+		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
 		{
-			setInventoryOpen(false, false);
-			return;
+			// 何か掴んでいる間の〇は「掴んだものを離す」に使う（updateSwapSelectionが拾う）。
+			// ここで閉じてしまうと、離すつもりで押したのに窓ごと消える
+			const bool canCloseByPad{ m_swapHeldIndex < 0 };
+			if (m_inputProvider.consumeKeyPress(core::input::KeyCode::Escape) ||
+			    (canCloseByPad &&
+			        m_inputProvider.consumePadPress(core::input::GamePadCode::ButtonCircle)))
+			{
+				setInventoryOpen(false, false);
+				return;
+			}
 		}
 
 		// パッドは△。キーと同じく、開けたボタンでそのまま閉じられる
@@ -1103,6 +1110,13 @@ namespace game::scene
 		m_isSwapMode = isOpen && isSwapMode;
 		m_swapHeldIndex = -1;
 
+		// 開くたびに枠の位置を取り直す。前に開いたときの位置が残っていると、
+		// 中身が変わっているのに関係ないマスを指したまま始まる
+		m_padCursorIndex = -1;
+
+		// 開くのに使ったボタンの押しっぱなしを、そのまま枠の操作として拾わせない
+		m_inventoryInputMapper.reset();
+
 		// 開閉は場面が切り替わる合図。時間が止まる／動き出すことを音でも示す
 		playUiSe(isOpen ? core::constant::SeType::InventoryOpen : core::constant::SeType::UiClose);
 
@@ -1138,7 +1152,7 @@ namespace game::scene
 		m_swapHeldIndex = -1;
 	}
 
-	void InGame::updateSwapSelection()
+	void InGame::updateSwapSelection(float deltaTime)
 	{
 		if (!m_isSwapMode)
 			return;
@@ -1152,17 +1166,88 @@ namespace game::scene
 		if (m_inventoryView == nullptr)
 			return;
 
-		int mouseX{ 0 };
-		int mouseY{ 0 };
-		m_inputProvider.getMousePosition(mouseX, mouseY);
-		const int hoveredIndex{ m_inventoryView->findSlotIndexAt(mouseX, mouseY) };
-
-		// 押した瞬間と離した瞬間を取り出す。押しっぱなしを毎フレーム見ると、
-		// 1回のクリックの間に掴むと離すを何度も繰り返してしまう
+		// マウスの押下エッジは、パッドで操作している間も更新し続ける。
+		// 止めると、マウスへ戻った瞬間に押しっぱなしが「押した瞬間」として拾われる
 		const bool isDown{ m_inputProvider.isMouseLeftPressed() };
 		const bool isPressed{ isDown && !m_wasMouseLeftDown };
 		const bool isReleased{ !isDown && m_wasMouseLeftDown };
 		m_wasMouseLeftDown = isDown;
+
+		m_inventoryInputMapper.update(deltaTime);
+
+		// 最後に触った機器のほうだけを動かす。両方を毎フレーム反映すると、
+		// パッドで合わせた枠がマウスの位置（マスの外なら-1）で上書きされて消える
+		if (m_inputProvider.getLastInputDevice() == core::input::InputDevice::GamePad)
+		{
+			updateSwapSelectionByPad(*inventory);
+			return;
+		}
+
+		updateSwapSelectionByMouse(*inventory, isDown, isPressed, isReleased);
+	}
+
+	void InGame::updateSwapSelectionByPad(
+	    const component::combat::ExtensionInventoryComponent& inventory)
+	{
+		using core::input::GamePadCode;
+
+		// 初めてパッドで触ったときは動かせるマスの先頭へ置く
+		if (m_padCursorIndex < 0)
+			m_padCursorIndex = m_inventoryView->firstSelectableSlotIndex();
+
+		const int previousIndex{ m_padCursorIndex };
+		if (m_inventoryInputMapper.isTriggered(ui::UiAction::NavigateUp))
+			m_padCursorIndex = m_inventoryView->findSlotIndexToward(m_padCursorIndex, 0, -1);
+		if (m_inventoryInputMapper.isTriggered(ui::UiAction::NavigateDown))
+			m_padCursorIndex = m_inventoryView->findSlotIndexToward(m_padCursorIndex, 0, 1);
+		if (m_inventoryInputMapper.isTriggered(ui::UiAction::NavigateLeft))
+			m_padCursorIndex = m_inventoryView->findSlotIndexToward(m_padCursorIndex, -1, 0);
+		if (m_inventoryInputMapper.isTriggered(ui::UiAction::NavigateRight))
+			m_padCursorIndex = m_inventoryView->findSlotIndexToward(m_padCursorIndex, 1, 0);
+
+		// 実際に動いたときだけ鳴らす。端で止まっているのに鳴り続けると、
+		// 動いていないのか音だけ鳴っているのか分からなくなる
+		if (m_padCursorIndex != previousIndex)
+			playUiSe(core::constant::SeType::UiKeyPress);
+
+		// 〇で掴んだものを離す。閉じる側（updateInventory）は掴んでいる間の〇を見ない
+		if (m_swapHeldIndex >= 0 && m_inputProvider.consumePadPress(GamePadCode::ButtonCircle))
+		{
+			playUiSe(core::constant::SeType::ExtensionDrop);
+			m_swapHeldIndex = -1;
+		}
+		else if (m_inputProvider.consumePadPress(GamePadCode::ButtonCross) && m_padCursorIndex >= 0)
+		{
+			if (m_swapHeldIndex < 0)
+			{
+				// 何も掴んでいなければ掴む
+				playUiSe(core::constant::SeType::ExtensionGrab);
+				m_swapHeldIndex = m_padCursorIndex;
+			}
+			else if (m_swapHeldIndex == m_padCursorIndex)
+			{
+				// 同じマスでもう一度押したら離す
+				playUiSe(core::constant::SeType::ExtensionDrop);
+				m_swapHeldIndex = -1;
+			}
+			else
+				requestSwap(inventory, m_padCursorIndex);
+		}
+
+		// 運んでいる見た目はマウス専用（アイコンがカーソルに付いて回る）。
+		// パッドは掴んでいるマスの色で示すので、運びの表示は出さない
+		m_inventoryView->setDragging(false, 0, 0);
+		m_inventoryView->setSelection(m_padCursorIndex, m_swapHeldIndex);
+	}
+
+	void InGame::updateSwapSelectionByMouse(
+	    const component::combat::ExtensionInventoryComponent& inventory,
+	    bool isDown, bool isPressed, bool isReleased)
+	{
+		int mouseX{ 0 };
+		int mouseY{ 0 };
+		m_inputProvider.getMousePosition(mouseX, mouseY);
+		const int hoveredIndex{ m_inventoryView->findSlotIndexAt(mouseX, mouseY) };
 
 		// 動かせない枠へ落とそうとしたら弾く。掴んだままにしておくのは、
 		// 拒否された操作で持ち物の状態まで変わるとやり直しが面倒になるため
@@ -1198,7 +1283,7 @@ namespace game::scene
 			else
 			{
 				// 掴んだまま別のマスを押した場合はその場で入れ替える
-				requestSwap(*inventory, hoveredIndex);
+				requestSwap(inventory, hoveredIndex);
 			}
 		}
 		else if (isReleased && m_swapHeldIndex >= 0 && hoveredIndex >= 0 &&
@@ -1207,7 +1292,7 @@ namespace game::scene
 			// 掴んだまま別のマスへ運んで離した（ドラッグ＆ドロップ）。
 			// 掴む・置くの2クリックと、運んで離すの1動作の両方を受けることで、
 			// どちらのつもりで触っても同じ結果になる
-			requestSwap(*inventory, hoveredIndex);
+			requestSwap(inventory, hoveredIndex);
 		}
 
 		// ボタンを押している間だけ運んでいる扱いにする。離したあとも掴んだままなら、

@@ -33,10 +33,10 @@ namespace game::scene
 			m_currentScene->draw();
 	}
 
-	void SceneManager::updateInput()
+	void SceneManager::updateInput(float deltaTime)
 	{
 		if (m_currentScene)
-			m_currentScene->updateInput();
+			m_currentScene->updateInput(deltaTime);
 	}
 
 	void SceneManager::notifyPauseChanged(bool isPaused)

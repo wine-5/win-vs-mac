@@ -15,6 +15,7 @@
 #include "core/interface/IEffectFactory.h"
 #include "core/base/EventBus.h"
 #include "core/constant/SeType.h"
+#include "game/ui/UiInputMapper.h"
 
 /* game層のインクルード */
 #include "game/factory/FactoryManager.h"
@@ -123,7 +124,7 @@ namespace game::scene
 	   * update は固定ステップで1フレームに0回のこともあり、その中で
 	   * 「押した瞬間」を見ていると押しても開かないことがある
 	   */
-	  void updateInput() override;
+	  void updateInput(float deltaTime) override;
 
 	  /**
 	   * @brief シーンの描画処理
@@ -175,7 +176,27 @@ namespace game::scene
 		 * どれと交換されたのかが分からないまま能力だけが変わる。
 		 * マスの位置はViewしか知らないため、指しているマスはViewへ問い合わせる
 		 */
-		void updateSwapSelection();
+		void updateSwapSelection(float deltaTime);
+
+		/**
+		 * @brief マウスでのマス選択を処理する（掴んで運ぶ・押して置く）
+		 * @param inventory プレイヤーの拡張子インベントリ
+		 * @param isDown いま左ボタンを押しているか
+		 * @param isPressed 押した瞬間か
+		 * @param isReleased 離した瞬間か
+		 */
+		void updateSwapSelectionByMouse(
+		    const component::combat::ExtensionInventoryComponent& inventory,
+		    bool isDown, bool isPressed, bool isReleased);
+
+		/**
+		 * @brief パッドでのマス選択を処理する（枠を動かして×で掴む・置く）
+		 *
+		 * マウスのように「掴んだまま運んで離す」ができないので、掴む・置くの2段階にする
+		 * @param inventory プレイヤーの拡張子インベントリ
+		 */
+		void updateSwapSelectionByPad(
+		    const component::combat::ExtensionInventoryComponent& inventory);
 
 		/**
 		 * @brief 掴んでいるものと指定のマスの入れ替えを要求する
@@ -308,6 +329,13 @@ namespace game::scene
 
 		// マウス左ボタンの前フレームの状態。押した瞬間だけを取り出すために持つ
 		bool m_wasMouseLeftDown{ false };
+
+		// パッドで動かしている枠の位置。マウスの指している位置とは別に持つ。
+		// 同じ変数にすると、マウスがマスの外にあるだけで枠が消えてしまう
+		int m_padCursorIndex{ -1 };
+
+		// 付け替え中の枠移動をUI共通の意図へ翻訳する（長押しの繰り返しもここが持つ）
+		ui::UiInputMapper m_inventoryInputMapper;
 
 		// 低HP警告のビネットのView
 		std::unique_ptr<ui::ingame::LowHealthVignetteView> m_lowHealthVignetteView;

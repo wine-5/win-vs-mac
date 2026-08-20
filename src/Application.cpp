@@ -112,7 +112,7 @@ void Application::run()
 			// 溜まった時間が1/60秒に届かないフレームでは1回も回らないため、
 			// その中で「押した瞬間」を見ていると入力を取りこぼす
 			// （画面の更新が60Hzより速い環境ほど頻繁に起きる）
-			m_sceneManager->updateInput();
+			m_sceneManager->updateInput(elapsedTime);
 
 			accumulator += elapsedTime;
 
