@@ -4,6 +4,8 @@
 #include "core/interface/IScreen.h"
 #include "core/interface/IWindow.h"
 #include "core/interface/IResultWindowManager.h"
+#include "core/interface/IInputProvider.h"
+#include "game/ui/UiInputMapper.h"
 #include <memory>
 
 namespace game
@@ -29,7 +31,8 @@ namespace game::scene
 	  Result(core::iface::IUIRenderer& uiRenderer,
 		  core::iface::IScreen& screen,
 		  std::unique_ptr<core::iface::IWindow> resultWindow,
-		  GameManager& gameManager);
+		  GameManager& gameManager,
+		  core::iface::IInputProvider& inputProvider);
 
 	  /**
 	   * @brief Resultのデストラクタ
@@ -43,6 +46,15 @@ namespace game::scene
 	  void update(float deltaTime) override;
 
 	  /**
+	   * @brief パッドの操作を読み取り、Windowへ渡す
+	   *
+	   * updateではなくフレーム単位で呼ぶのは、updateが固定ステップで
+	   * 1フレームに0回のこともあり、押した瞬間を取りこぼすため
+	   * @param deltaTime フレーム間の時間差（秒）
+	   */
+	  void updateInput(float deltaTime) override;
+
+	  /**
 	   * @brief シーンの描画処理
 	   */
 	  void draw() override;
@@ -51,5 +63,13 @@ namespace game::scene
         core::iface::IUIRenderer&              m_uiRenderer;
         core::iface::IScreen&                  m_screen;
         std::unique_ptr<core::iface::IWindow> m_resultWindow{};
-    };
+
+		core::iface::IInputProvider& m_inputProvider;
+
+		// パッドの操作をUI共通の意図へ翻訳する（長押しの繰り返しもここが持つ）
+		ui::UiInputMapper m_inputMapper;
+
+		// 1度でもパッドを触ったか。触るまでは枠を出さない
+		bool m_hasPadFocus{ false };
+	};
 } // namespace game::scene

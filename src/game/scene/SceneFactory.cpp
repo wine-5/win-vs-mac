@@ -203,7 +203,8 @@ namespace game::scene
 			    *uiRenderer,
 			    *screen,
 			    std::move(resultWindow),
-			    m_gameManager);
+			    m_gameManager,
+			    *core::base::ServiceLocator::get<core::iface::IInputProvider>());
 
 			return m_resultScene.get();
 		}

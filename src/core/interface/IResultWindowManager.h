@@ -21,5 +21,15 @@ namespace core::iface
          * @brief メッセージポンプ（毎フレーム呼び出し）
          */
         virtual void pumpMessages() noexcept = 0;
-    };
+
+		/**
+		 * @brief パッドの操作をWindowのJSへ送る
+		 *
+		 * リザルト画面は WebView2 のHTMLで、DxLibの入力ループの外にある。
+		 * OSのカーソルを合成で動かすと他のアプリへ入力が漏れるため、
+		 * 代わりに「何をしたいか」をJSへ渡してフォーカスを動かす
+		 * @param action 操作名（"up" / "down" / "left" / "right" / "confirm" / "focus"）
+		 */
+		virtual void sendPadAction(const char* action) noexcept = 0;
+	};
 } // namespace core::iface
