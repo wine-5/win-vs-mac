@@ -94,7 +94,8 @@ namespace game::scene
 			    *uiRenderer,
 			    *screen,
 			    *resourceManager,
-			    nullptr);
+			    nullptr,
+			    *core::base::ServiceLocator::get<core::iface::IInputProvider>());
 
 			auto* windowFactory = core::base::ServiceLocator::get<core::iface::IWindowFactory>();
 			auto windowManager = windowFactory->createSelectWindowManager(

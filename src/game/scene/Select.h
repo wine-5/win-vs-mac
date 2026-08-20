@@ -6,6 +6,8 @@
 #include "core/interface/IScreen.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/ISelectWindowManager.h"
+#include "core/interface/IInputProvider.h"
+#include "game/ui/UiInputMapper.h"
 #include <memory>
 
 namespace game::scene
@@ -22,11 +24,13 @@ namespace game::scene
 		 * @param screen 画面情報インターフェース
 		 * @param resourceManager リソース管理インターフェース
 		 * @param windowManager セレクトウィンドウ管理インターフェース
+		 * @param inputProvider 入力インターフェース（パッドの操作をWindowへ渡すのに使う）
 		 */
 		Select(core::iface::IUIRenderer& uiRenderer,
 		    core::iface::IScreen& screen,
 		    core::iface::IResourceManager& resourceManager,
-		    std::unique_ptr<core::iface::ISelectWindowManager> windowManager);
+		    std::unique_ptr<core::iface::ISelectWindowManager> windowManager,
+		    core::iface::IInputProvider& inputProvider);
 
 		/**
 		 * @brief Selectのデストラクタ
@@ -38,6 +42,16 @@ namespace game::scene
 		 * @param deltaTime フレーム間の時間差
 		 */
 		void update(float deltaTime) override;
+
+		/**
+		 * @brief パッドの操作を読み取り、Windowへ渡す
+		 *
+		 * WebViewのHTMLはDxLibの入力ループの外にあるため、こちらでパッドを読んで
+		 * 「何をしたいか」をJSへ送る。updateではなくフレーム単位で呼ぶのは、
+		 * updateが固定ステップで1フレームに0回のこともあり、押した瞬間を取りこぼすため
+		 * @param deltaTime フレーム間の時間差（秒）
+		 */
+		void updateInput(float deltaTime) override;
 
 		/**
 		 * @brief シーンの描画処理
@@ -88,6 +102,13 @@ namespace game::scene
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
 		core::iface::IResourceManager& m_resourceManager;
+		core::iface::IInputProvider& m_inputProvider;
+
+		// パッドの操作をUI共通の意図へ翻訳する（長押しの繰り返しもここが持つ）
+		ui::UiInputMapper m_inputMapper;
+
+		// 1度でもパッドを触ったか。触るまでは枠を出さない
+		bool m_hasPadFocus{ false };
 
 		std::unique_ptr<core::iface::ISelectWindowManager> m_windowManager;
 		std::unique_ptr<ui::FadeTransition> m_fade;

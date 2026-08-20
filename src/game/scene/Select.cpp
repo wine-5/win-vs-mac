@@ -1,4 +1,5 @@
 ﻿#include "Select.h"
+#include "core/input/GamePadCode.h"
 #include "SceneManager.h"
 #include "SceneType.h"
 #include "core/base/ServiceLocator.h"
@@ -11,10 +12,13 @@ namespace game::scene
 	Select::Select(core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IScreen& screen,
 	    core::iface::IResourceManager& resourceManager,
-	    std::unique_ptr<core::iface::ISelectWindowManager> windowManager)
+	    std::unique_ptr<core::iface::ISelectWindowManager> windowManager,
+	    core::iface::IInputProvider& inputProvider)
 	    : m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_resourceManager{ resourceManager }
+	    , m_inputProvider{ inputProvider }
+	    , m_inputMapper{ inputProvider }
 	    , m_windowManager{ std::move(windowManager) }
 	    , m_fade{ std::make_unique<ui::FadeTransition>(uiRenderer, screen, FADE_DURATION, true) }
 	{
@@ -30,6 +34,43 @@ namespace game::scene
 		m_fade.reset();
 		if (m_windowManager)
 			m_windowManager->destroyAllWindows();
+	}
+
+	void Select::updateInput(float deltaTime)
+	{
+		if (m_windowManager == nullptr || m_state != State::Idle)
+			return;
+
+		m_inputMapper.update(deltaTime);
+
+		using core::input::GamePadCode;
+
+		// L1/R1 でWindowを渡り歩く。ページ内の移動だけでは隣のWindowへ行けない
+		if (m_inputProvider.consumePadPress(GamePadCode::ButtonL1))
+			m_windowManager->movePadWindowFocus(-1);
+		if (m_inputProvider.consumePadPress(GamePadCode::ButtonR1))
+			m_windowManager->movePadWindowFocus(1);
+
+		// 最初にパッドを触った時点で枠を出す。触るまで枠が出ていると、
+		// マウスで遊ぶ人の画面に意味のない枠が残り続ける
+		if (!m_hasPadFocus &&
+		    m_inputProvider.getLastInputDevice() == core::input::InputDevice::GamePad)
+		{
+			m_hasPadFocus = true;
+			m_windowManager->sendPadAction("focus");
+		}
+
+		if (m_inputMapper.isTriggered(ui::UiAction::NavigateUp))
+			m_windowManager->sendPadAction("up");
+		if (m_inputMapper.isTriggered(ui::UiAction::NavigateDown))
+			m_windowManager->sendPadAction("down");
+		if (m_inputMapper.isTriggered(ui::UiAction::NavigateLeft))
+			m_windowManager->sendPadAction("left");
+		if (m_inputMapper.isTriggered(ui::UiAction::NavigateRight))
+			m_windowManager->sendPadAction("right");
+
+		if (m_inputProvider.consumePadPress(GamePadCode::ButtonCross))
+			m_windowManager->sendPadAction("confirm");
 	}
 
 	void Select::update(float deltaTime)
