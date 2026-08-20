@@ -38,8 +38,9 @@ namespace game::ui::ingame
 	 *   未装備     … 拾ったが枠が埋まっていて効果が乗っていないもの
 	 * 「未装備」があることが、リネームブロックを探す動機になる。
 	 *
-	 * 開いている間は時間が止まる（PauseReason::Inventory）。読む画面なので、
-	 * 読んでいる最中に殴られるのはプレイヤーの落ち度ではなく設計の落ち度になる。
+	 * 開いている間も世界と時間は動く（PauseReason::Inventory は時間を止めない）。
+	 * 付け替えている間に敵が寄ってくることまで込みで「倒してから整えるか、
+	 * そのまま整えるか」を選ばせるため。プレイヤー自身は動けず、普通に殴られる。
 	 */
 	class InventoryView
 	{
@@ -84,6 +85,25 @@ namespace game::ui::ingame
 		 * @param isSwapMode 付け替え中ならtrue
 		 */
 		void setSwapMode(bool isSwapMode) noexcept;
+
+		/**
+		 * @brief 開く／閉じる動きを始める
+		 *
+		 * 開くときは、奥を落とす暗幕を短い時間で濃くしながら出す。
+		 * 瞬間に出すと窓が「切り替わった」だけに見えて目が追えないため。
+		 * 閉じるときは動かさずその場で消す。同じ動きを逆再生すると、
+		 * 閉じたいのに一拍待たされる感じになる
+		 * @param isOpen 開くならtrue
+		 */
+		void setOpen(bool isOpen) noexcept;
+
+		/**
+		 * @brief まだ描く必要があるかを返す
+		 *
+		 * 閉じる動きの最中も描き続ける必要があるため、開閉のフラグとは別に持つ
+		 * @return 描く必要があるならtrue
+		 */
+		[[nodiscard]] bool isVisible() const;
 
 		/**
 		 * @brief 能力値の増減表示を消して比較の基準を取り直す
@@ -416,6 +436,12 @@ namespace game::ui::ingame
 		int layoutPadHints(int x, int y, const PadHint* hints, int count,
 		    int fontSize, bool measureOnly, unsigned int labelColor);
 
+		/**
+		 * @brief 開閉の進み具合を返す
+		 * @return 0.0（閉じ切っている）〜1.0（開き切っている）
+		 */
+		[[nodiscard]] float openProgress() const;
+
 		/** @brief パッドを触っている最中かを返す */
 		[[nodiscard]] bool isUsingPad() const;
 
@@ -424,6 +450,10 @@ namespace game::ui::ingame
 		std::string m_padLabelClose{};
 		std::string m_padLabelGrab{};
 		std::string m_padLabelSwapHere{};
+
+		// 開閉の動き。閉じる動きの最中も描き続けるため、開閉のフラグと進み具合を分けて持つ
+		bool m_isOpen{ false };
+		std::chrono::steady_clock::time_point m_transitionStart{};
 
 		std::string m_titleSwap{}; // 付け替えできるときの見出し
 		std::string m_captionSwapGuide{};

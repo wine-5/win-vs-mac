@@ -1,10 +1,13 @@
 #include "InventoryView.h"
 #include <iterator>
+#include <algorithm>
+#include <cmath>
 #include "OrbitGlow.h"
 #include "core/base/ServiceLocator.h"
 #include "core/constant/UI.h"
 #include "core/interface/IStringConverter.h"
 #include "core/utility/Color.h"
+#include "core/utility/Easing.h"
 #include "core/utility/MathConstants.h"
 #include "core/utility/Log.h"
 #include "game/component/combat/AttackComponent.h"
@@ -79,6 +82,10 @@ namespace
 
 	// 付け替えできるときだけ出す枠と帯の太さ（1080p基準）
 	constexpr int SWAP_BORDER_THICKNESS{ 3 };
+
+	// 開閉の動き。窓そのものは拡縮させない。少し小さいところから膨らませると、
+	// 出し切ったあとにもう一段大きくなったように見えて落ち着かない
+	constexpr float OPEN_DURATION{ 0.14f }; // 開き切る／閉じ切るまでの時間（秒）
 
 	// パッドの案内の間隔（1080p基準）
 	constexpr int PAD_HINT_ICON_GAP{ 6 };  // 記号と説明の間
@@ -301,6 +308,39 @@ namespace game::ui::ingame
 		return value * m_screen.getHeight() / BASE_SCREEN_HEIGHT;
 	}
 
+	float InventoryView::openProgress() const
+	{
+		const float elapsed{ std::chrono::duration<float>(
+			std::chrono::steady_clock::now() - m_transitionStart)
+			    .count() };
+		const float progress{ std::clamp(elapsed / OPEN_DURATION, 0.0f, 1.0f) };
+		return m_isOpen ? progress : 1.0f - progress;
+	}
+
+	void InventoryView::setOpen(bool isOpen) noexcept
+	{
+		if (m_isOpen == isOpen)
+			return;
+
+		m_isOpen = isOpen;
+
+		// 閉じるときは動かさずその場で消す。開くときと同じ動きを逆再生すると、
+		// 閉じたいのに一拍待たされる感じになって邪魔になる。
+		// 基準時刻を初期値へ戻すと経過が十分大きくなり、進み具合が 0 になる
+		if (!isOpen)
+		{
+			m_transitionStart = {};
+			return;
+		}
+
+		m_transitionStart = std::chrono::steady_clock::now();
+	}
+
+	bool InventoryView::isVisible() const
+	{
+		return m_isOpen || openProgress() > 0.0f;
+	}
+
 	float InventoryView::elapsedSeconds() const
 	{
 		return std::chrono::duration<float>(std::chrono::steady_clock::now() - m_startTime).count();
@@ -314,6 +354,10 @@ namespace game::ui::ingame
 
 	void InventoryView::setSwapMode(bool isSwapMode) noexcept
 	{
+		// 閉じる動きの最中は変えない。閉じながら別の窓へ化けたように見えるため
+		if (!m_isOpen)
+			return;
+
 		m_isSwapMode = isSwapMode;
 	}
 
@@ -384,9 +428,17 @@ namespace game::ui::ingame
 		// マスの位置はこのフレームのレイアウトから組み直す
 		m_slotBounds.clear();
 
+		const float progress{ openProgress() };
+		if (progress <= 0.0f)
+			return;
+
+		// 終わり際をゆっくり止める。等速だと機械が動いたようにしか見えない
+		const float eased{ core::utility::easeOut(progress) };
+
 		// 奥のゲーム画面を暗く落として、手前の文字を読めるようにする。
 		// 真っ黒で覆わないのは「今どこに立っているか」を見失わせないため
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, BACKDROP_ALPHA);
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+		    static_cast<int>(BACKDROP_ALPHA * eased));
 		m_uiRenderer.drawBox(0, 0, m_screen.getWidth(), m_screen.getHeight(),
 		    core::utility::Color::BLACK, true);
 		m_uiRenderer.resetBlendMode();

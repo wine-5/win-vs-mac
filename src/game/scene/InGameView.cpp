@@ -201,7 +201,9 @@ namespace game::scene
 
 		// インベントリ。画面を覆うので他のHUDより手前に描く。
 		// ただし死亡の暗転よりは奥（死んだ瞬間に持ち物が前面に残ると締まらない）
-		if (m_isInventoryOpen && m_inventoryView)
+		// 閉じたあとも動きが終わるまで描く。途中で描くのをやめると、
+		// 縮みかけたところで消えて瞬間に消したのと変わらなくなる
+		if (m_inventoryView && (m_isInventoryOpen || m_inventoryView->isVisible()))
 			m_inventoryView->draw(playerId);
 
 		// 低HPのフチは窓より後に描く。インベントリを開いている間も世界は動いていて
@@ -342,6 +344,9 @@ namespace game::scene
 	void InGameView::setInventoryOpen(bool isOpen)
 	{
 		m_isInventoryOpen = isOpen;
+
+		if (m_inventoryView)
+			m_inventoryView->setOpen(isOpen);
 	}
 
 	void InGameView::setInteractPromptView(ui::ingame::InteractPromptView* view)
