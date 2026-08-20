@@ -43,7 +43,96 @@ namespace platform::window::select
 	{
     }
 
-    void Win32SelectWindowManager::createAllWindows()
+	void Win32SelectWindowManager::PadTarget::postMessage(const std::string& json) const noexcept
+	{
+		if (m_webViewWindow != nullptr)
+			m_webViewWindow->postMessage(json);
+		else if (m_desktopWindow != nullptr)
+			m_desktopWindow->postMessage(json);
+	}
+
+	HWND Win32SelectWindowManager::PadTarget::getHwnd() const noexcept
+	{
+		if (m_webViewWindow != nullptr)
+			return m_webViewWindow->getHwnd();
+		if (m_desktopWindow != nullptr)
+			return m_desktopWindow->getHwnd();
+
+		return nullptr;
+	}
+
+	std::vector<Win32SelectWindowManager::PadTarget>
+	Win32SelectWindowManager::collectPadTargets() const noexcept
+	{
+		// 画面の並びに合わせて左から右、最後にデスクトップ（壁紙のアイコンとタスクバー）。
+		// 出ていないWindowは飛ばす
+		std::vector<PadTarget> targets{};
+
+		const auto add{ [&targets](platform::window::WebViewWindowBase* window, bool isVisible)
+			{
+			    if (window != nullptr && isVisible)
+				    targets.push_back(PadTarget{ window, nullptr });
+			} };
+
+		add(m_difficultyWindow.get(), m_diffVisible);
+		add(m_fileSelectWindow.get(), m_fileVisible);
+		add(m_parameterWindow.get(), m_paramVisible);
+		add(m_rulesWindow.get(), m_rulesVisible);
+		add(m_settingsWindow.get(), m_settingsVisible);
+		add(m_quickSettingsWindow.get(), m_quickSettingsVisible);
+
+		if (m_desktopWindow != nullptr)
+			targets.push_back(PadTarget{ nullptr, m_desktopWindow.get() });
+
+		return targets;
+	}
+
+	Win32SelectWindowManager::PadTarget Win32SelectWindowManager::currentPadTarget() const noexcept
+	{
+		const auto targets{ collectPadTargets() };
+		if (targets.empty())
+			return PadTarget{};
+
+		// 開閉で枚数が変わるため、番号はその時の一覧に対して丸める
+		const int index{ m_padWindowIndex % static_cast<int>(targets.size()) };
+		return targets[static_cast<std::size_t>(index)];
+	}
+
+	void Win32SelectWindowManager::sendPadAction(const char* action) noexcept
+	{
+		const PadTarget target{ currentPadTarget() };
+		if (!target.isValid() || action == nullptr)
+			return;
+
+		// JSONはUTF-8でなければWebView2側で例外になる。ここは英字だけなのでそのまま組む
+		target.postMessage(std::string{ R"({"type":"pad","action":")" } + action + R"("})");
+	}
+
+	void Win32SelectWindowManager::movePadWindowFocus(int delta) noexcept
+	{
+		const auto targets{ collectPadTargets() };
+		if (targets.empty())
+			return;
+
+		const int count{ static_cast<int>(targets.size()) };
+
+		// 移る前のWindowの枠を消す。消さないと、どちらを操作しているのか分からなくなる
+		sendPadAction("blur");
+
+		m_padWindowIndex = ((m_padWindowIndex + delta) % count + count) % count;
+
+		// 移った先で枠を出す。前面も取り直して、隠れているWindowへ渡ったときに見えるようにする
+		const PadTarget target{ currentPadTarget() };
+		if (!target.isValid())
+			return;
+
+		if (HWND hwnd{ target.getHwnd() })
+			BringWindowToTop(hwnd);
+
+		sendPadAction("focus");
+	}
+
+	void Win32SelectWindowManager::createAllWindows()
     {
         HWND dxlibHwnd = static_cast<HWND>(m_screen.getNativeWindowHandle());
 
