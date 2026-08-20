@@ -60,11 +60,16 @@ namespace game::ui::pause
 		if (m_inputMapper.isTriggered(UiAction::NavigateDown) && m_selectedIndex < itemCount - 1)
 			m_selectedIndex++;
 
-		// マウス：ホバーで選択を移動する
+		// マウス：ホバーで選択を移動する。
+		// マウスを触っているときだけにするのは、毎フレーム上書きすると
+		// カーソルがたまたま項目の上に乗っているだけで、パッドで動かした選択位置が
+		// 次のフレームに引き戻されて動かせなくなるため
 		int mouseX{}, mouseY{};
 		m_inputProvider.getMousePosition(mouseX, mouseY);
 		const int hoveredIndex{ m_view.getItemIndexAt(mouseX, mouseY, itemCount) };
-		if (hoveredIndex >= 0)
+		const bool isUsingMouse{ m_inputProvider.getLastInputDevice() ==
+			                     core::input::InputDevice::KeyboardMouse };
+		if (isUsingMouse && hoveredIndex >= 0)
 			m_selectedIndex = hoveredIndex;
 
 		// 右下の電源ボタン。実物と同じく、ここからも電源を切れる
