@@ -87,6 +87,14 @@ namespace
 	// 出し切ったあとにもう一段大きくなったように見えて落ち着かない
 	constexpr float OPEN_DURATION{ 0.14f }; // 開き切る／閉じ切るまでの時間（秒）
 
+	// 窓の地を上から下へ抜ける光の帯（1080p基準）
+	constexpr float FLOW_BAND_PERIOD{ 4.5f }; // 上端から下端まで抜けるのにかかる時間（秒）
+	constexpr int FLOW_BAND_THICKNESS{ 3 };   // 先頭の線の太さ
+	constexpr int FLOW_BAND_HEAD_ALPHA{ 46 }; // 先頭の濃さ
+	constexpr int FLOW_BAND_TAIL_COUNT{ 7 };  // 後ろへ引く尾の枚数
+	constexpr int FLOW_BAND_TAIL_STEP{ 5 };   // 尾を1枚ずらす間隔
+	constexpr unsigned int FLOW_BAND_COLOR{ core::utility::Color::HUD_CHARGE_CYAN };
+
 	// 付け替えできるときの枠の脈動
 	constexpr float SWAP_PULSE_CYCLES{ 0.45f };
 	constexpr float SWAP_PULSE_MIN{ 0.55f };
@@ -464,6 +472,10 @@ namespace game::ui::ingame
 		// この大きさだと白い帯が視界を横切って読む邪魔になる
 		m_panel.draw(left, top, width, height, false);
 
+		// 地を流し続ける。中身が空でも窓が止まって見えないようにするため、
+		// マスやアイコンより先（後ろ）に描く
+		drawFlowBand(left, top, width, height);
+
 		// 付け替えできるときだけ窓の枠をアクセント色にする。開いた瞬間に
 		// 目に入るのは中身より先に窓の輪郭なので、状態の違いはここへ出す
 		if (m_isSwapMode)
@@ -567,6 +579,33 @@ namespace game::ui::ingame
 		// 運んでいるアイコンは最後に描く。マス目や枠の下に潜ると、
 		// どこまで運んできたのかが見えなくなる
 		drawDraggedIcon(draggedType);
+	}
+
+	void InventoryView::drawFlowBand(int x, int y, int width, int height)
+	{
+		const int thickness{ std::max(1, scaled(FLOW_BAND_THICKNESS)) };
+		const int tailStep{ std::max(1, scaled(FLOW_BAND_TAIL_STEP)) };
+
+		// 1周期で上端から下端まで進む。端まで行ったら上へ戻る
+		const float phase{ elapsedSeconds() / FLOW_BAND_PERIOD };
+		const int headY{ y + static_cast<int>((phase - std::floor(phase)) * height) };
+
+		// 後ろへ薄い尾を引く。1本の線だけだと横切っただけに見えて、
+		// どちらへ流れているのかが読み取れない
+		for (int i{ FLOW_BAND_TAIL_COUNT }; i >= 0; --i)
+		{
+			const int lineY{ headY - i * tailStep };
+			if (lineY < y)
+				continue;
+
+			// 先頭が一番濃く、離れるほど薄くする
+			const int alpha{ FLOW_BAND_HEAD_ALPHA * (FLOW_BAND_TAIL_COUNT + 1 - i) /
+				             (FLOW_BAND_TAIL_COUNT + 1) };
+
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+			m_uiRenderer.drawBox(x, lineY, width, thickness, FLOW_BAND_COLOR, true);
+			m_uiRenderer.resetBlendMode();
+		}
 	}
 
 	void InventoryView::drawTitleBar(int x, int y, int width)

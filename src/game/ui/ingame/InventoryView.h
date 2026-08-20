@@ -180,6 +180,19 @@ namespace game::ui::ingame
 		[[nodiscard]] float elapsedSeconds() const;
 
 		/**
+		 * @brief 窓の地を上から下へ抜ける光の帯を描く
+		 *
+		 * 拡張子を1つも持っていないと、窓の中で動くものが何も無くなる。
+		 * 止まった窓は表示が壊れているようにも見えるので、地そのものを流し続ける。
+		 * Windowsの内部が舞台なので、データが流れている見え方にしてある
+		 * @param x 窓左上のX座標
+		 * @param y 窓左上のY座標
+		 * @param width 窓の幅
+		 * @param height 窓の高さ
+		 */
+		void drawFlowBand(int x, int y, int width, int height);
+
+		/**
 		 * @brief 窓のタイトルバーを描く
 		 *
 		 * この画面が何なのかを最初に伝える。開いた瞬間に目に入る位置へ置く
@@ -437,6 +450,12 @@ namespace game::ui::ingame
 		    int fontSize, bool measureOnly, unsigned int labelColor);
 
 		/**
+		 * @brief 開閉の進み具合を返す
+		 * @return 0.0（閉じ切っている）〜1.0（開き切っている）
+		 */
+		[[nodiscard]] float openProgress() const;
+
+		/**
 		 * @brief ゆっくりした明滅の強さを返す
 		 * @param cyclesPerSecond 1秒あたりの周期数
 		 * @param phase 位相のずらし量（0.0〜1.0）
@@ -444,12 +463,6 @@ namespace game::ui::ingame
 		 * @return minRate〜1.0 の値
 		 */
 		[[nodiscard]] float breathRate(float cyclesPerSecond, float phase, float minRate) const;
-
-		/**
-		 * @brief 開閉の進み具合を返す
-		 * @return 0.0（閉じ切っている）〜1.0（開き切っている）
-		 */
-		[[nodiscard]] float openProgress() const;
 
 		/** @brief パッドを触っている最中かを返す */
 		[[nodiscard]] bool isUsingPad() const;
