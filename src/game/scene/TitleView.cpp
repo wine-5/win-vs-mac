@@ -134,6 +134,11 @@ namespace
 		{ "メモリ", "メモリ使用率", "使用率", Color::TITLE_GRAPH_MEMORY, 0.40f },
 		{ "ディスク", "ディスクのアクティブな時間", "アクティブな時間", Color::TITLE_GRAPH_DISK, 0.15f },
 	};
+	// キー・パッドで操作しているときに出す選択枠（基準サイズでのピクセル数）
+	constexpr float FOCUS_RING_MARGIN{ 3.0f };
+	constexpr float FOCUS_RING_RADIUS{ 6.0f };
+	constexpr float FOCUS_RING_THICKNESS{ 2.0f };
+
 } // namespace
 
 namespace game::scene
@@ -148,6 +153,7 @@ namespace game::scene
 	    : m_inputProvider{ inputProvider }
 	    , m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
+	    , m_inputMapper{ inputProvider }
 	    , m_onGoToSelect{ std::move(onGoToSelect) }
 	    , m_onOpenSettings{ std::move(onOpenSettings) }
 	    , m_onExit{ std::move(onExit) }
@@ -161,8 +167,13 @@ namespace game::scene
 		m_isInteractive = visible;
 
 		// 受け付け始めた瞬間のクリックで誤爆しないよう、現在の押下状態を引き継ぐ
-		if (visible)
-			m_prevMouseLeft = m_inputProvider.isMouseLeftPressed();
+		if (!visible)
+			return;
+
+		m_prevMouseLeft = m_inputProvider.isMouseLeftPressed();
+
+		// 前の画面から押しっぱなしのキーをそのまま拾わないよう、枠の状態も作り直す
+		m_inputMapper.reset();
 	}
 
 	void TitleView::pushHistory(std::array<float, HISTORY_SIZE>& buffer, float value)
@@ -201,10 +212,77 @@ namespace game::scene
 		const bool mouseClicked{ mouseLeft && !m_prevMouseLeft };
 		m_prevMouseLeft = mouseLeft;
 
-		if (!mouseClicked)
+		// キー・パッドの操作を読む。演出中は受け付けないが、読むこと自体は毎フレーム行う
+		// （読み飛ばすと、受け付け始めた瞬間に溜まっていた入力が一度に効く）
+		m_inputMapper.update(deltaTime);
+
+		if (!m_isInteractive || !isIntroFinished())
 			return;
 
-		switch (m_hovered)
+		if (m_inputMapper.isTriggered(ui::UiAction::NavigateUp))
+			moveFocus(0, -1);
+		if (m_inputMapper.isTriggered(ui::UiAction::NavigateDown))
+			moveFocus(0, 1);
+		if (m_inputMapper.isTriggered(ui::UiAction::NavigateLeft))
+			moveFocus(-1, 0);
+		if (m_inputMapper.isTriggered(ui::UiAction::NavigateRight))
+			moveFocus(1, 0);
+
+		if (m_inputMapper.isTriggered(ui::UiAction::Confirm))
+			activate(focusedHit());
+
+		if (mouseClicked)
+			activate(m_hovered);
+	}
+
+	TitleView::Hit TitleView::focusedHit() const noexcept
+	{
+		return FOCUS_ORDER[m_focusColumn][m_focusRow];
+	}
+
+	void TitleView::moveFocus(int columnDelta, int rowDelta) noexcept
+	{
+		const int previousColumn{ m_focusColumn };
+		const int previousRow{ m_focusRow };
+
+		if (rowDelta != 0)
+		{
+			// 端で止める。回り込ませると、下端から一気に上端へ飛んで位置を見失う
+			m_focusRow = std::clamp(m_focusRow + rowDelta, 0, FOCUS_ROW_COUNT[m_focusColumn] - 1);
+		}
+		else if (columnDelta != 0)
+		{
+			const int nextColumn{ std::clamp(m_focusColumn + columnDelta, 0, FOCUS_COLUMN_COUNT - 1) };
+
+			// 列を移るときは画面上で近いほうへ着地させる。行番号をそのまま持ち越すと、
+			// 右下のボタンから左へ移ったのに真ん中のサムネイルへ飛ぶ、といったことが起きる
+			const bool isUpperHalf{ m_focusRow * 2 < FOCUS_ROW_COUNT[m_focusColumn] };
+			m_focusColumn = nextColumn;
+			m_focusRow = isUpperHalf ? 0 : FOCUS_ROW_COUNT[nextColumn] - 1;
+		}
+
+		// 実際に動いたときだけ鳴らす。端で止まっているのに鳴り続けると、
+		// 動いていないのか音だけ鳴っているのか分からなくなる
+		if (m_focusColumn == previousColumn && m_focusRow == previousRow)
+			return;
+
+		if (auto* audio{ core::base::ServiceLocator::get<core::iface::IAudioManager>() })
+			audio->playSe(core::constant::SeType::UiKeyPress);
+	}
+
+	bool TitleView::isHighlighted(Hit hit) const noexcept
+	{
+		if (hit == Hit::None)
+			return false;
+		if (m_hovered == hit)
+			return true;
+
+		return m_inputMapper.isFocusVisible() && focusedHit() == hit;
+	}
+
+	void TitleView::activate(Hit hit)
+	{
+		switch (hit)
 		{
 		case Hit::ThumbCpu:
 			m_selectedChannel = static_cast<int>(TitleChannel::Cpu);
@@ -234,6 +312,37 @@ namespace game::scene
 			break;
 		default: break;
 		}
+	}
+
+	bool TitleView::getHitRect(Hit hit, int& outX, int& outY, int& outWidth, int& outHeight) const
+	{
+		switch (hit)
+		{
+		case Hit::ThumbCpu: getThumbRect(0, outX, outY, outWidth, outHeight); return true;
+		case Hit::ThumbMemory: getThumbRect(1, outX, outY, outWidth, outHeight); return true;
+		case Hit::ThumbDisk: getThumbRect(2, outX, outY, outWidth, outHeight); return true;
+		case Hit::Settings: getNavSettingsRect(outX, outY, outWidth, outHeight); return true;
+		case Hit::Exit: getExitButtonRect(outX, outY, outWidth, outHeight); return true;
+		case Hit::Start: getStartButtonRect(outX, outY, outWidth, outHeight); return true;
+		default: return false;
+		}
+	}
+
+	void TitleView::drawFocusRing() const
+	{
+		if (!m_isInteractive || !isIntroFinished() || !m_inputMapper.isFocusVisible())
+			return;
+
+		int x{}, y{}, width{}, height{};
+		if (!getHitRect(focusedHit(), x, y, width, height))
+			return;
+
+		// 対象より一回り外へ描く。枠の内側に重ねると、ボタン自身の縁と混ざって
+		// どちらが選択の印なのか分からなくなる
+		const int margin{ scaled(FOCUS_RING_MARGIN) };
+		m_uiRenderer.drawRoundedBox(x - margin, y - margin, width + margin * 2,
+		    height + margin * 2, scaled(FOCUS_RING_RADIUS),
+		    core::utility::Color::TITLE_ACCENT, false, scaled(FOCUS_RING_THICKNESS));
 	}
 
 	void TitleView::playUiClick() const
@@ -374,6 +483,7 @@ namespace game::scene
 		drawThumbnails();
 		drawDetail();
 		drawStartButton();
+		drawFocusRing();
 		drawIntroVeil();
 
 		m_uiRenderer.resetFont();
@@ -441,7 +551,7 @@ namespace game::scene
 		int settingsX{}, settingsY{}, settingsWidth{}, settingsHeight{};
 		getNavSettingsRect(settingsX, settingsY, settingsWidth, settingsHeight);
 
-		if (m_hovered == Hit::Settings)
+		if (isHighlighted(Hit::Settings))
 		{
 			m_uiRenderer.drawRoundedBox(settingsX, settingsY, settingsWidth, settingsHeight,
 			    scaled(5.0f), Color::TITLE_CARD_HOVER, true, 1);
@@ -499,7 +609,7 @@ namespace game::scene
 
 		// 実物は「タスクを終了する」だが、それだと何が終わるのか伝わらない。
 		// ここは世界観より、押した先が分かることを優先する
-		drawButton(rectX, rectY, rectWidth, rectHeight, "ゲームを終了する", false, m_hovered == Hit::Exit);
+		drawButton(rectX, rectY, rectWidth, rectHeight, "ゲームを終了する", false, isHighlighted(Hit::Exit));
 
 		m_uiRenderer.resetBlendMode();
 	}
@@ -527,7 +637,7 @@ namespace game::scene
 			getThumbRect(i, rectX, rectY, rectWidth, rectHeight);
 
 			const bool isSelected{ i == m_selectedChannel };
-			if (isSelected || m_hovered == THUMB_HITS[i])
+			if (isSelected || isHighlighted(THUMB_HITS[i]))
 			{
 				m_uiRenderer.drawRoundedBox(rectX, rectY, rectWidth, rectHeight, scaled(4.0f),
 				    isSelected ? Color::TITLE_NAV_SELECTED : Color::TITLE_CARD_HOVER, true, 1);
@@ -695,11 +805,11 @@ namespace game::scene
 		getStartButtonRect(rectX, rectY, rectWidth, rectHeight);
 
 		// カーソルが乗っているなら気づけているので、呼び込みは出さない
-		if (m_hovered != Hit::Start)
+		if (!isHighlighted(Hit::Start))
 			drawStartPulse(rectX, rectY, rectWidth, rectHeight);
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
-		drawButton(rectX, rectY, rectWidth, rectHeight, "選択画面へ", true, m_hovered == Hit::Start);
+		drawButton(rectX, rectY, rectWidth, rectHeight, "選択画面へ", true, isHighlighted(Hit::Start));
 		m_uiRenderer.resetBlendMode();
 	}
 

@@ -4,6 +4,7 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IUIRenderer.h"
+#include "game/ui/UiInputMapper.h"
 #include <array>
 #include <functional>
 #include <string>
@@ -95,6 +96,23 @@ namespace game::scene
 			Exit,
 			Start,
 		};
+
+		/** @brief 枠を移動できる場所を、画面の並びどおりに並べたもの */
+		static constexpr int FOCUS_COLUMN_COUNT{ 2 };
+		static constexpr int FOCUS_MAX_ROW{ 4 };
+
+		/**
+		 * @brief 枠の移動先。左の列は上から、右の列は上から並べる
+		 *
+		 * 画面の並びと同じ順にしておくと、押した方向と枠の動きが食い違わない
+		 */
+		static constexpr Hit FOCUS_ORDER[FOCUS_COLUMN_COUNT][FOCUS_MAX_ROW]{
+			{ Hit::ThumbCpu, Hit::ThumbMemory, Hit::ThumbDisk, Hit::Settings },
+			{ Hit::Exit, Hit::Start, Hit::None, Hit::None },
+		};
+
+		/** @brief 列ごとの行数 */
+		static constexpr int FOCUS_ROW_COUNT[FOCUS_COLUMN_COUNT]{ 4, 2 };
 
 		/** @brief 1チャンネルぶんの計測状態 */
 		struct ChannelState
@@ -204,12 +222,70 @@ namespace game::scene
 		void getStartButtonRect(int& outX, int& outY, int& outWidth, int& outHeight) const;
 
 		/**
+		 * @brief いま枠が当たっている場所を返す
+		 * @return 枠が当たっている場所
+		 */
+		[[nodiscard]] Hit focusedHit() const noexcept;
+
+		/**
+		 * @brief 枠を動かす
+		 * @param columnDelta 横方向の移動（-1で左、+1で右）
+		 * @param rowDelta 縦方向の移動（-1で上、+1で下）
+		 */
+		void moveFocus(int columnDelta, int rowDelta) noexcept;
+
+		/**
+		 * @brief その場所を強調して描くかを返す
+		 *
+		 * マウスを乗せているときと、枠が当たっているときの両方で強調する。
+		 * どちらで操作していても同じ見え方になるようにする
+		 * @param hit 判定する場所
+		 * @return 強調するならtrue
+		 */
+		[[nodiscard]] bool isHighlighted(Hit hit) const noexcept;
+
+		/**
+		 * @brief その場所を押したときの処理を行う
+		 *
+		 * マウスのクリックからもパッドの決定からも同じ所へ入るようにして、
+		 * 入力の種類で挙動がずれないようにする
+		 * @param hit 押した場所
+		 */
+		void activate(Hit hit);
+
+		/**
+		 * @brief 指定した場所の矩形を返す
+		 * @param hit 対象の場所
+		 * @param outX 左上X座標の出力先
+		 * @param outY 左上Y座標の出力先
+		 * @param outWidth 幅の出力先
+		 * @param outHeight 高さの出力先
+		 * @return 矩形を持つ場所ならtrue
+		 */
+		[[nodiscard]] bool getHitRect(Hit hit, int& outX, int& outY, int& outWidth, int& outHeight) const;
+
+		/**
+		 * @brief 枠が当たっている場所に選択枠を描く
+		 *
+		 * マウスを動かしている間は出さない。Windowsと同じく、
+		 * キーやパッドを触ったときだけ枠を出す
+		 */
+		void drawFocusRing() const;
+
+		/**
 		 * @brief 指定座標にある押せる場所を返す
 		 * @param x 判定するX座標
 		 * @param y 判定するY座標
 		 * @return 押せる場所（どこでもなければ Hit::None）
 		 */
 		[[nodiscard]] Hit getHitAt(int x, int y) const;
+
+		// 枠の位置。マウスを使っている間も持ち続け、パッドを触った瞬間から続きを動かせるようにする
+		int m_focusColumn{ 1 };
+		int m_focusRow{ 1 };
+
+		// キー・パッドの操作をUI共通の意図へ翻訳する。リピートや枠の出し入れもここが持つ
+		game::ui::UiInputMapper m_inputMapper;
 
 		/**
 		 * @brief 基準サイズ（ウィンドウ高さ740px）での値を、いまの画面サイズへ換算する
