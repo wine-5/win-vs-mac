@@ -21,6 +21,7 @@ namespace game::scene
 	    , m_screen{ screen }
 	    , m_gameManager{ gameManager }
 	    , m_onOpenSettings{ std::move(onOpenSettings) }
+	    , m_padConnectedToast{ inputProvider, uiRenderer, screen }
 	{
 		auto* res{ core::base::ServiceLocator::get<core::iface::IResourceManager>() };
 
@@ -54,6 +55,9 @@ namespace game::scene
 			m_perfProvider->update();
 		}
 
+		// 出し入れは状態に関わらず進める。フェード中に繋いだぶんも取りこぼさない
+		m_padConnectedToast.update(deltaTime);
+
 		switch (m_state)
 		{
 		case State::TitleFadeIn:
@@ -86,6 +90,10 @@ namespace game::scene
 	void Title::draw()
 	{
 		m_view->drawTitle();
+
+		// 起動演出の覆いより後に描く。覆いの下だと、出ている間ずっと隠れてしまう
+		m_padConnectedToast.draw();
+
 		if (m_fade)
 			m_fade->draw();
 	}
