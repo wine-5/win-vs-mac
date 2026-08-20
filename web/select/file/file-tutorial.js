@@ -176,6 +176,8 @@ const FileTutorial = (function () {
 
         nextEl.onclick = function () { showStep(currentStep + 1); };
         skipEl.onclick = finish;
+        nextEl.dataset.padFocus = '';
+        skipEl.dataset.padFocus = '';
         window.addEventListener('resize', function () {
             if (isActive && STEPS[currentStep]) layoutTip(STEPS[currentStep]);
         });

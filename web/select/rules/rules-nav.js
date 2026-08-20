@@ -27,5 +27,6 @@
 
     menuItems.forEach(function (item) {
         item.onclick = function () { activate(item.dataset.page); };
+        item.dataset.padFocus = '';
     });
 }());
