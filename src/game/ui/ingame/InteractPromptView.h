@@ -4,6 +4,8 @@
 #include "core/interface/IRenderer.h"
 #include "core/interface/IScreen.h"
 #include "core/interface/IUIRenderer.h"
+#include "core/interface/IInputProvider.h"
+#include "game/ui/PadButtonIcon.h"
 #include <chrono>
 #include <string>
 
@@ -30,11 +32,13 @@ namespace game::ui::ingame
 		 * @param renderer ワールド座標からスクリーン座標への変換に使う
 		 * @param screen 画面サイズ取得のインターフェース
 		 * @param componentManager 対象の座標を読むComponentManagerの参照
+		 * @param inputProvider 案内の表記をキーとパッドで切り替えるために参照する
 		 */
 		InteractPromptView(core::iface::IUIRenderer& uiRenderer,
 		    core::iface::IRenderer& renderer,
 		    core::iface::IScreen& screen,
-		    core::ecs::ComponentManager& componentManager);
+		    core::ecs::ComponentManager& componentManager,
+		    core::iface::IInputProvider& inputProvider);
 
 		/**
 		 * @brief 吹き出しを描画する
@@ -54,6 +58,11 @@ namespace game::ui::ingame
 		core::iface::IRenderer& m_renderer;
 		core::iface::IScreen& m_screen;
 		core::ecs::ComponentManager& m_componentManager;
+		core::iface::IInputProvider& m_inputProvider;
+
+		// パッドで遊んでいる間は「F2」ではなく□を出す。キーの名前を出し続けると、
+		// 画面に書いてあるのに何を押せばいいのか分からない状態になる
+		game::ui::PadButtonIcon m_padButtonIcon;
 
 		// 出現の進行（0.0〜1.0）。ぱっと出ると視界の端で見落とすため、
 		// 短い時間で浮かび上がらせて動きで気付かせる

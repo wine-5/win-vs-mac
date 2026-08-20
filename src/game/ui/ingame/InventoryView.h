@@ -7,6 +7,8 @@
 #include "core/data/FileExtensionType.h"
 #include "game/utility/PlayerStats.h"
 #include "HudPanel.h"
+#include "core/interface/IInputProvider.h"
+#include "game/ui/PadButtonIcon.h"
 #include <array>
 #include <chrono>
 #include <string>
@@ -54,7 +56,8 @@ namespace game::ui::ingame
 		    core::iface::IScreen& screen,
 		    core::ecs::ComponentManager& componentManager,
 		    core::iface::IResourceManager& resourceManager,
-		    const data::FileEquipmentData& equipmentData);
+		    const data::FileEquipmentData& equipmentData,
+		    core::iface::IInputProvider& inputProvider);
 
 		/**
 		 * @brief インベントリを描画する
@@ -327,6 +330,7 @@ namespace game::ui::ingame
 		core::iface::IScreen& m_screen;
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IResourceManager& m_resourceManager;
+		core::iface::IInputProvider& m_inputProvider;
 		const data::FileEquipmentData& m_equipmentData;
 		HudPanel m_panel;
 
@@ -386,6 +390,41 @@ namespace game::ui::ingame
 		std::string m_captionAcquired{};
 		std::string m_captionUnequipped{};
 		std::string m_captionNoUnequipped{};
+		/**
+		 * @brief 案内1件分（押すボタンと、それで何が起きるか）
+		 */
+		struct PadHint
+		{
+			PadButton m_button{};
+			const std::string* m_label{ nullptr };
+		};
+
+		/**
+		 * @brief パッドの案内を1行に並べて描く
+		 *
+		 * 記号を混ぜると getTextWidth だけでは幅が測れないため、
+		 * 描画と幅の計算を同じ並べ方で行えるようにまとめてある
+		 * @param x 左端のX座標（measureOnly のときは使われない）
+		 * @param y 上端のY座標（同上）
+		 * @param hints 並べる案内
+		 * @param count 案内の数
+		 * @param fontSize 文字の大きさ（記号の大きさもこれに合わせる）
+		 * @param measureOnly 幅を測るだけで描かないならtrue
+		 * @param labelColor 説明文の色
+		 * @return 1行の幅（ピクセル）
+		 */
+		int layoutPadHints(int x, int y, const PadHint* hints, int count,
+		    int fontSize, bool measureOnly, unsigned int labelColor);
+
+		/** @brief パッドを触っている最中かを返す */
+		[[nodiscard]] bool isUsingPad() const;
+
+		// パッドで遊んでいる間の案内。キーの名前ではなく記号で出す
+		PadButtonIcon m_padButtonIcon;
+		std::string m_padLabelClose{};
+		std::string m_padLabelGrab{};
+		std::string m_padLabelSwapHere{};
+
 		std::string m_titleSwap{}; // 付け替えできるときの見出し
 		std::string m_captionSwapGuide{};
 		std::string m_modeSwapLabel{};

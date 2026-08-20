@@ -1,4 +1,5 @@
 #include "InventoryView.h"
+#include <iterator>
 #include "OrbitGlow.h"
 #include "core/base/ServiceLocator.h"
 #include "core/constant/UI.h"
@@ -76,6 +77,10 @@ namespace
 
 	// 付け替えできるときだけ出す枠と帯の太さ（1080p基準）
 	constexpr int SWAP_BORDER_THICKNESS{ 3 };
+
+	// パッドの案内の間隔（1080p基準）
+	constexpr int PAD_HINT_ICON_GAP{ 6 };  // 記号と説明の間
+	constexpr int PAD_HINT_ITEM_GAP{ 22 }; // 案内どうしの間
 
 	// アドレスバー右端のモードバッジの余白（1080p基準）
 	constexpr int MODE_BADGE_PADDING_X{ 10 };
@@ -221,11 +226,14 @@ namespace game::ui::ingame
 	    core::iface::IScreen& screen,
 	    core::ecs::ComponentManager& componentManager,
 	    core::iface::IResourceManager& resourceManager,
-	    const data::FileEquipmentData& equipmentData)
+	    const data::FileEquipmentData& equipmentData,
+	    core::iface::IInputProvider& inputProvider)
 	    : m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_componentManager{ componentManager }
 	    , m_resourceManager{ resourceManager }
+	    , m_inputProvider{ inputProvider }
+	    , m_padButtonIcon{ uiRenderer }
 	    , m_equipmentData{ equipmentData }
 	    , m_panel{ uiRenderer, screen }
 	{
@@ -278,6 +286,11 @@ namespace game::ui::ingame
 		// 掴んだあとで進み方が分からなくなる
 		m_captionSwapHint = toDrawable("ドラッグして入れ替え    F2 / Esc : 閉じる");
 		m_captionEmptySlot = toDrawable("空き");
+
+		// パッド用の案内。ボタンの記号は図形で描くので、ここには説明だけを持つ
+		m_padLabelClose = toDrawable("閉じる");
+		m_padLabelGrab = toDrawable("つかむ / 置く");
+		m_padLabelSwapHere = toDrawable("の端末で付け替えできる");
 		m_captionOverflow = toDrawable(" 件は表示しきれません");
 	}
 
@@ -563,6 +576,38 @@ namespace game::ui::ingame
 		m_uiRenderer.resetBlendMode();
 	}
 
+	bool InventoryView::isUsingPad() const
+	{
+		return m_inputProvider.getLastInputDevice() == core::input::InputDevice::GamePad;
+	}
+
+	int InventoryView::layoutPadHints(int x, int y, const PadHint* hints, int count,
+	    int fontSize, bool measureOnly, unsigned int labelColor)
+	{
+		const int iconGap{ scaled(PAD_HINT_ICON_GAP) };
+		const int itemGap{ scaled(PAD_HINT_ITEM_GAP) };
+
+		int cursorX{ x };
+		for (int i{ 0 }; i < count; ++i)
+		{
+			if (i > 0)
+				cursorX += itemGap;
+
+			const int iconWidth{ m_padButtonIcon.measure(hints[i].m_button, fontSize) };
+			if (!measureOnly)
+				m_padButtonIcon.draw(hints[i].m_button, cursorX, y, fontSize);
+			cursorX += iconWidth + iconGap;
+
+			const std::string& label{ *hints[i].m_label };
+			if (!measureOnly)
+				m_uiRenderer.drawText(cursorX, y, label.c_str(), labelColor, fontSize);
+
+			cursorX += m_uiRenderer.getTextWidth(label.c_str(), fontSize);
+		}
+
+		return cursorX - x;
+	}
+
 	void InventoryView::drawStatusBar(int x, int y, int width, int itemCount)
 	{
 		const int barHeight{ scaled(STATUS_BAR_HEIGHT) };
@@ -582,9 +627,32 @@ namespace game::ui::ingame
 		    countLabel.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
 
 		// 操作の案内。開いたはいいが閉じ方が分からない、を起こさない
+		const int hintY{ y + (barHeight - fontSize) / 2 };
+
+		if (isUsingPad())
+		{
+			// 付け替え中は「つかむ／置く」が増える。掴んだあとで進み方が分からなくなるため
+			const PadHint swapHints[]{
+				{ PadButton::Cross, &m_padLabelGrab },
+				{ PadButton::Circle, &m_padLabelClose },
+			};
+			const PadHint viewHints[]{ { PadButton::Circle, &m_padLabelClose } };
+
+			const PadHint* hints{ m_isSwapMode ? swapHints : viewHints };
+			const int count{ m_isSwapMode ? static_cast<int>(std::size(swapHints))
+				                          : static_cast<int>(std::size(viewHints)) };
+
+			constexpr unsigned int HINT_COLOR{ core::utility::Color::HUD_INK_FAINT };
+			const int padHintWidth{ layoutPadHints(0, 0, hints, count, fontSize, true, HINT_COLOR) };
+			layoutPadHints(x + width - padding - padHintWidth, hintY, hints, count,
+			    fontSize, false, HINT_COLOR);
+			m_uiRenderer.resetFont();
+			return;
+		}
+
 		const std::string& hint{ m_isSwapMode ? m_captionSwapHint : m_captionHint };
 		const int hintWidth{ m_uiRenderer.getTextWidth(hint.c_str(), fontSize) };
-		m_uiRenderer.drawText(x + width - padding - hintWidth, y + (barHeight - fontSize) / 2,
+		m_uiRenderer.drawText(x + width - padding - hintWidth, hintY,
 		    hint.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
 		m_uiRenderer.resetFont();
 	}
@@ -622,9 +690,24 @@ namespace game::ui::ingame
 		{
 			const int captionFontSize{ scaled(SECTION_FONT_SIZE) };
 			m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
-			const int guideWidth{ m_uiRenderer.getTextWidth(m_captionSwapGuide.c_str(), captionFontSize) };
-			m_uiRenderer.drawText(x + width - guideWidth, y, m_captionSwapGuide.c_str(),
-			    core::utility::Color::HUD_ACCENT, captionFontSize);
+			if (isUsingPad())
+			{
+				// ここは「拾ったのに効いていないもの」の隣で一番読まれる導線なので、
+				// キーボードのときと同じくアクセント色で目立たせる
+				constexpr unsigned int GUIDE_COLOR{ core::utility::Color::HUD_ACCENT };
+				const PadHint guideHints[]{ { PadButton::Square, &m_padLabelSwapHere } };
+				const int padGuideWidth{
+					layoutPadHints(0, 0, guideHints, 1, captionFontSize, true, GUIDE_COLOR)
+				};
+				layoutPadHints(x + width - padGuideWidth, y, guideHints, 1,
+				    captionFontSize, false, GUIDE_COLOR);
+			}
+			else
+			{
+				const int guideWidth{ m_uiRenderer.getTextWidth(m_captionSwapGuide.c_str(), captionFontSize) };
+				m_uiRenderer.drawText(x + width - guideWidth, y, m_captionSwapGuide.c_str(),
+				    core::utility::Color::HUD_ACCENT, captionFontSize);
+			}
 			m_uiRenderer.resetFont();
 		}
 

@@ -364,14 +364,16 @@ namespace game::scene
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
 		    m_componentManager,
 		    m_resourceManager,
-		    m_fileEquipmentData);
+		    m_fileEquipmentData,
+		    m_inputProvider);
 		m_view.setInventoryView(m_inventoryView.get());
 
 		m_interactPromptView = std::make_unique<ui::ingame::InteractPromptView>(
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    m_renderer,
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
-		    m_componentManager);
+		    m_componentManager,
+		    m_inputProvider);
 		m_view.setInteractPromptView(m_interactPromptView.get());
 
 		m_lowHealthVignetteView = std::make_unique<ui::ingame::LowHealthVignetteView>(
