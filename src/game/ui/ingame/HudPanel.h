@@ -17,6 +17,14 @@ namespace game::ui::ingame
 	{
 	  public:
 		/**
+		 * @brief 面の角丸（1080p基準・Windows 11のウィンドウと同じ大きさ）
+		 *
+		 * 面の上へ別の枠を重ねるViewが角丸を合わせられるように公開している。
+		 * 値が食い違うと、角だけ二重に見えてしまう
+		 */
+		static constexpr int PANEL_RADIUS{ 8 };
+
+		/**
 		 * @brief HudPanelのコンストラクタ
 		 * @param uiRenderer UI描画のインターフェース
 		 * @param screen 画面サイズ取得のインターフェース

@@ -9,8 +9,6 @@ namespace
 	// 基準解像度。レイアウトの数値はすべてこの高さのときのピクセル数として書く
 	constexpr int BASE_SCREEN_HEIGHT{ 1080 };
 
-	constexpr int PANEL_RADIUS{ 8 }; // Windows 11のウィンドウ・パネルの角丸
-
 	// 塗りと枠。DxLibのブレンドはアルファ値を別途指定するため、色と不透明度を分けて持つ
 	constexpr unsigned int PANEL_FILL_COLOR{ core::utility::Color::HUD_PANEL_FILL };
 	constexpr int PANEL_FILL_ALPHA{ 184 }; // 約72%
@@ -35,7 +33,7 @@ namespace game::ui::ingame
 
 	void HudPanel::draw(int x, int y, int width, int height, bool withSweep)
 	{
-		const int radius{ PANEL_RADIUS * m_screen.getHeight() / BASE_SCREEN_HEIGHT };
+		const int radius{ HudPanel::PANEL_RADIUS * m_screen.getHeight() / BASE_SCREEN_HEIGHT };
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, PANEL_FILL_ALPHA);
 		m_uiRenderer.drawRoundedBox(x, y, width, height, radius, PANEL_FILL_COLOR, true, 1);

@@ -73,6 +73,13 @@ namespace
 	constexpr int SLOT_HEIGHT{ 158 }; // アイコン＋ファイル名＋ボーナス表記の3段ぶん
 	constexpr int SLOT_GAP{ 10 };
 	constexpr int SLOT_RADIUS{ 4 }; // Windows 11のコントロールの角丸
+
+	// 付け替えできるときだけ出す枠と帯の太さ（1080p基準）
+	constexpr int SWAP_BORDER_THICKNESS{ 3 };
+
+	// アドレスバー右端のモードバッジの余白（1080p基準）
+	constexpr int MODE_BADGE_PADDING_X{ 10 };
+	constexpr int MODE_BADGE_PADDING_Y{ 4 };
 	constexpr int SLOT_ICON_SIZE{ 66 };
 	constexpr int SLOT_ICON_TOP{ 10 };
 	constexpr int SLOT_NAME_FONT_SIZE{ 16 };
@@ -248,6 +255,7 @@ namespace game::ui::ingame
 
 		// 日本語は変換結果が毎フレーム同じなので、生成時に一度だけ変換して保持する
 		m_title = toDrawable("インベントリ");
+		m_titleSwap = toDrawable("拡張子の付け替え");
 		m_addressText = toDrawable("PC  >  拡張子  >  所持しているもの");
 		// 見出しは区分の幅に収まる長さにする。はみ出すと隣の区分の見出しへ重なり、
 		// どちらも読めなくなる（説明はアドレスバーとステータスバーが担う）
@@ -262,8 +270,8 @@ namespace game::ui::ingame
 
 		// EとF2で窓の見た目がほとんど同じなため、どちらでも入れ替えられると誤解される。
 		// パンくずの行き先だけでは弱いので、いま何ができるのかを上部で言い切る
-		m_modeSwapLabel = toDrawable("拡張子を入れ替えられます");
-		m_modeViewLabel = toDrawable("見るだけ（入れ替えは F2 の端末で）");
+		m_modeSwapLabel = toDrawable("入れ替えできます");
+		m_modeViewLabel = toDrawable("見るだけ");
 		m_captionHint = toDrawable("E / Esc : 閉じる");
 
 		// 付け替え中は操作が増える。どのキーで何ができるかを出しておかないと、
@@ -377,6 +385,15 @@ namespace game::ui::ingame
 		// この大きさだと白い帯が視界を横切って読む邪魔になる
 		m_panel.draw(left, top, width, height, false);
 
+		// 付け替えできるときだけ窓の枠をアクセント色にする。開いた瞬間に
+		// 目に入るのは中身より先に窓の輪郭なので、状態の違いはここへ出す
+		if (m_isSwapMode)
+		{
+			const int radius{ scaled(HudPanel::PANEL_RADIUS) };
+			m_uiRenderer.drawRoundedBox(left, top, width, height, radius,
+			    core::utility::Color::HUD_ACCENT, false, scaled(SWAP_BORDER_THICKNESS));
+		}
+
 		drawTitleBar(left, top, width);
 		drawAddressBar(left, top + scaled(TITLE_BAR_HEIGHT), width);
 
@@ -474,16 +491,31 @@ namespace game::ui::ingame
 		const int padding{ scaled(WINDOW_PADDING) };
 		const int iconSize{ scaled(TITLE_ICON_SIZE) };
 
-		// フォルダを表す四角。専用の画像を持たずに済ませ、色だけで「フォルダ」を示す
+		// フォルダを表す四角。専用の画像を持たずに済ませ、色だけで「フォルダ」を示す。
+		// 付け替え中はアクセント色にして、見出しと合わせて別の窓だと分かるようにする
+		const unsigned int iconColor{ m_isSwapMode ? core::utility::Color::HUD_ACCENT
+			                                       : core::utility::Color::HUD_CHARGE_MAX };
 		m_uiRenderer.drawRoundedBox(x + padding, y + (barHeight - iconSize) / 2,
-		    iconSize, iconSize, scaled(SLOT_RADIUS), core::utility::Color::HUD_CHARGE_MAX, true, 1);
+		    iconSize, iconSize, scaled(SLOT_RADIUS), iconColor, true, 1);
+
+		// 見出しそのものを変える。「インベントリ」のままだと、色が変わっただけの
+		// 同じ窓に見えて、何が違うのかを読み取らせる手間が残る
+		const std::string& title{ m_isSwapMode ? m_titleSwap : m_title };
 
 		const int fontSize{ scaled(TITLE_FONT_SIZE) };
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(x + padding + iconSize + scaled(TITLE_ICON_GAP),
-		    y + (barHeight - fontSize) / 2, m_title.c_str(),
+		    y + (barHeight - fontSize) / 2, title.c_str(),
 		    core::utility::Color::HUD_INK, fontSize);
 		m_uiRenderer.resetFont();
+
+		// 区切り線。付け替え中は太いアクセントの帯にして、見出しの帯ごと目立たせる
+		if (m_isSwapMode)
+		{
+			m_uiRenderer.drawBox(x, y + barHeight, width, scaled(SWAP_BORDER_THICKNESS),
+			    core::utility::Color::HUD_ACCENT, true);
+			return;
+		}
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SEPARATOR_ALPHA);
 		m_uiRenderer.drawLine(x, y + barHeight, x + width, y + barHeight, SEPARATOR_COLOR, 1);
@@ -502,14 +534,28 @@ namespace game::ui::ingame
 		m_uiRenderer.drawText(x + scaled(WINDOW_PADDING), y + (barHeight - fontSize) / 2,
 		    address.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
 
-		// できること／できないことを右端で言い切る。入れ替えられるときだけ
-		// アクセント色にして、開いた瞬間にどちらの窓かが色で分かるようにする
+		// できること／できないことを右端で言い切る。入れ替えられるときは塗りの
+		// バッジにして、薄い文字の中で1つだけ浮かせる
 		const std::string& mode{ m_isSwapMode ? m_modeSwapLabel : m_modeViewLabel };
-		const unsigned int modeColor{ m_isSwapMode ? core::utility::Color::HUD_ACCENT
-			                                       : core::utility::Color::HUD_INK_FAINT };
 		const int modeWidth{ m_uiRenderer.getTextWidth(mode.c_str(), fontSize) };
-		m_uiRenderer.drawText(x + width - scaled(WINDOW_PADDING) - modeWidth,
-		    y + (barHeight - fontSize) / 2, mode.c_str(), modeColor, fontSize);
+		const int modeX{ x + width - scaled(WINDOW_PADDING) - modeWidth };
+		const int modeY{ y + (barHeight - fontSize) / 2 };
+
+		if (m_isSwapMode)
+		{
+			const int padX{ scaled(MODE_BADGE_PADDING_X) };
+			const int padY{ scaled(MODE_BADGE_PADDING_Y) };
+			m_uiRenderer.drawRoundedBox(modeX - padX, modeY - padY,
+			    modeWidth + padX * 2, fontSize + padY * 2, scaled(SLOT_RADIUS),
+			    core::utility::Color::HUD_ACCENT, true, 1);
+			m_uiRenderer.drawText(modeX, modeY, mode.c_str(),
+			    core::utility::Color::HUD_INK, fontSize);
+			m_uiRenderer.resetFont();
+			return;
+		}
+
+		m_uiRenderer.drawText(modeX, modeY, mode.c_str(),
+		    core::utility::Color::HUD_INK_FAINT, fontSize);
 		m_uiRenderer.resetFont();
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SEPARATOR_ALPHA);

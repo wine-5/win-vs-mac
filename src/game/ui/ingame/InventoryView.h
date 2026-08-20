@@ -386,6 +386,7 @@ namespace game::ui::ingame
 		std::string m_captionAcquired{};
 		std::string m_captionUnequipped{};
 		std::string m_captionNoUnequipped{};
+		std::string m_titleSwap{}; // 付け替えできるときの見出し
 		std::string m_captionSwapGuide{};
 		std::string m_modeSwapLabel{};
 		std::string m_modeViewLabel{};
