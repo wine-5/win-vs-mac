@@ -137,13 +137,19 @@ namespace game::scene
 		void setupEvents();
 
 		/**
-		 * @brief Eキーによるインベントリの開閉を処理する
+		 * @brief E／△によるインベントリの開閉を処理する
 		 *
 		 * 開いている間は時間を止める（PauseReason::Inventory）。
 		 * ポーズメニューと同時に開くと、どちらのキーが効いているのか
 		 * 分からなくなるため、他の理由で止まっている間は開かない
 		 */
 		void updateInventory();
+
+		/**
+		 * @brief いま付け替えできる端末の前に立っているかを返す
+		 * @return 端末の前ならtrue
+		 */
+		[[nodiscard]] bool isNearRenameTerminal() const;
 
 		/**
 		 * @brief リネーム端末の前でのF2による付け替え画面の開閉を処理する

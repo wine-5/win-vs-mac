@@ -1025,9 +1025,24 @@ namespace game::scene
 		// 別の理由（ポーズメニュー）で止まっている間は開かない。
 		// 2つの画面が重なると、どちらのキーが効いているのか分からなくなる
 		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
+		{
 			setInventoryOpen(false, false);
-		else if (!m_pauseManager.isPaused())
-			setInventoryOpen(true, false);
+			return;
+		}
+
+		if (m_pauseManager.isPaused())
+			return;
+
+		// 端末の前で開いたときは、そのまま付け替えられる状態にする。
+		// ここで「見るだけ」を開いてしまうと、目の前に端末があるのに
+		// 一度閉じて□を押し直すことになり、付け替えられること自体に気付けない
+		setInventoryOpen(true, isNearRenameTerminal());
+	}
+
+	bool InGame::isNearRenameTerminal() const
+	{
+		return m_renameTerminalSystem != nullptr &&
+		       m_renameTerminalSystem->getNearTerminalId() != core::ecs::INVALID_ENTITY_ID;
 	}
 
 	void InGame::updateRenameTerminal()
@@ -1048,8 +1063,7 @@ namespace game::scene
 			return;
 
 		// 端末の前でのみ開く。どこでも付け替えられるなら、端末を探す理由が無くなる
-		if (m_renameTerminalSystem == nullptr ||
-		    m_renameTerminalSystem->getNearTerminalId() == core::ecs::INVALID_ENTITY_ID)
+		if (!isNearRenameTerminal())
 			return;
 
 		setInventoryOpen(true, true);
