@@ -25,8 +25,10 @@ namespace
 	// 基準解像度。レイアウトの数値はすべてこの高さのときのピクセル数として書く
 	constexpr int BASE_SCREEN_HEIGHT{ 1080 };
 
-	// 画面全体を覆う暗幕。奥のゲーム画面を残したまま、手前の文字を読めるようにする
-	constexpr int BACKDROP_ALPHA{ 176 };
+	// 画面全体を覆う暗幕。開いている間も世界は動いているので、
+	// 覆い隠しすぎると殴られていることに気付けない。窓の中は窓自身が地を持つため、
+	// ここを薄くしても文字の読みやすさは変わらない
+	constexpr int BACKDROP_ALPHA{ 118 };
 
 	// 窓の大きさ（1080p基準）
 	constexpr int WINDOW_WIDTH{ 1280 };
