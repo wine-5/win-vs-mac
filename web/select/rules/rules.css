@@ -98,81 +98,72 @@ code {
 .steps li { margin-bottom: clamp(4px, 0.6vw, 12px); }
 
 /* ── 操作ページ ──
-   一目で分かることを優先し、左に図、右に名前を置く。
-   図はすべてCSSとSVGで描く。画像を用意しないので、拡大しても輪郭が崩れない */
-.ctrl-grid {
-    display: grid;
-    grid-template-columns: max-content 1fr;
-    align-items: center;
-    gap: clamp(8px, 1.1vw, 22px) clamp(14px, 1.8vw, 36px);
-}
+   操作の中身は1枚の図（画像）に描き込んである。ここで持つのは
+   「どちらの機器の図を出すか」の切り替えと、図を窓に収める大きさだけ */
 
-.ctrl-visual {
+/* 機器の切り替え。上のメニューバーと役割が違う（ページではなく図の出し分け）ので、
+   同じ見た目にはせず、2つで1組と分かる連結したボタンにする */
+.device-switch {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: clamp(80px, 8vw, 170px);
-}
-
-.ctrl-label { color: #e8e8e8; }
-
-/* 補足（矢印キーでも動く、など）は主たる名前より小さく落とす */
-.ctrl-sub {
-    display: block;
-    color: #9a9a9a;
-    font-size: clamp(17px, 1.7vw, 37px);
-}
-
-/* キーキャップ。実物のキーの形に寄せると、文字を読む前に何を押すか伝わる */
-.key {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: clamp(30px, 2.9vw, 62px);
-    padding: clamp(5px, 0.6vw, 12px) clamp(6px, 0.7vw, 14px);
-    background: #333333;
-    border: 1px solid #565656;
-    border-bottom-width: clamp(3px, 0.3vw, 6px);
+    margin: 0 0 clamp(10px, 1.4vw, 28px);
+    border: 1px solid #3c3c3c;
     border-radius: clamp(4px, 0.5vw, 9px);
+    overflow: hidden;
+    width: max-content;
+}
+
+.device-switch-item {
+    padding: clamp(5px, 0.7vw, 13px) clamp(12px, 1.6vw, 32px);
+    background: #2d2d2d;
+    border: none;
+    color: #cccccc;
+    font-family: inherit;
+    font-size: clamp(18px, 1.85vw, 40px);
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.device-switch-item + .device-switch-item { border-left: 1px solid #3c3c3c; }
+
+.device-switch-item:hover:not(.is-active) {
+    background: #383838;
     color: #ffffff;
-    font-size: clamp(18px, 1.8vw, 39px);
-    line-height: 1;
 }
 
-.key.is-wide { min-width: clamp(64px, 6.4vw, 136px); }
-.key.is-space { min-width: clamp(96px, 9.6vw, 200px); }
-
-/* WASDのキー配置。上段中央にW、下段にA・S・Dを置いた実際の並びを再現する。
-   自動配置に任せるとWの右にAが並んでしまうので、4つとも位置を明示する */
-.keypad {
-    display: grid;
-    grid-template-columns: repeat(3, max-content);
-    gap: clamp(3px, 0.35vw, 7px);
+/* いま出ている図の側。押せる側と押されている側の区別が付かないと、
+   切り替わったのかどうかが図を見比べないと分からなくなる */
+.device-switch-item.is-active {
+    background: #4cc2ff;
+    color: #1e1e1e;
 }
 
-.keypad .key:nth-child(1) { grid-area: 1 / 2; }
-.keypad .key:nth-child(2) { grid-area: 2 / 1; }
-.keypad .key:nth-child(3) { grid-area: 2 / 2; }
-.keypad .key:nth-child(4) { grid-area: 2 / 3; }
+/* 図は1枚で完結しているので、スクロールさせずに一目で見せたい。
+   ページを縦のフレックスにして、余った高さをそのまま図の枠にする */
+#page-controls.is-active {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
 
-/* マウス図。押すボタン側だけを塗ることで、左右どちらかを言葉にせず示す */
-.mouse {
-    width: clamp(38px, 3.6vw, 78px);
+.device-figure {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: flex-start;
+    /* これが無いと中身の高さが下限になり、枠が縮まずにはみ出す */
+    min-height: 0;
+}
+
+.device-image {
+    display: none;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
     height: auto;
+    object-fit: contain;
 }
 
-.mouse-body {
-    fill: #333333;
-    stroke: #565656;
-    stroke-width: 3;
-}
-
-.mouse-btn.is-on { fill: #4cc2ff; }
-
-.mouse-line {
-    stroke: #565656;
-    stroke-width: 3;
-}
+.device-image.is-active { display: block; }
 
 /* ── 装備ページ ──
    ファイル選択ウィンドウと同じアイコンを使い、「拡張子 → 伸びる能力」を1行で見せる */

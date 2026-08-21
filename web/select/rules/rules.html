@@ -16,65 +16,29 @@
         <span class="menu-item" data-page="flow" data-se="UiKeyPress">進行(P)</span>
     </div>
     <div class="content" id="content">
-        <!-- 操作は「読む」より「見て分かる」が速い。キーは実物のキーの形、
-             マウスは押すボタンを塗った図にして、文字は補足に回す -->
+        <!-- 操作は「読む」より「見て分かる」が速い。キーの位置も押すボタンも
+             1枚の図に描き込み、文字での説明は図の中へ畳んである -->
         <section class="page is-active" id="page-controls">
             <p class="lead">PC内部のダンジョンを進み、最終ボス <code>mac_os.exe</code> を撃退する。</p>
 
-            <h2>キーボード＋マウス</h2>
-            <div class="ctrl-grid">
-                <div class="ctrl-visual">
-                    <div class="keypad">
-                        <span class="key">W</span>
-                        <span class="key">A</span>
-                        <span class="key">S</span>
-                        <span class="key">D</span>
-                    </div>
-                </div>
-                <div class="ctrl-label">移動<span class="ctrl-sub">矢印キーでも動かせます</span></div>
+            <!-- 使う機器は人によってどちらか一方に決まっている。両方を縦に並べると
+                 自分の側を探して読み飛ばす手間が要るので、切り替えて1枚だけを見せる -->
+            <div class="device-switch">
+                <button type="button" class="device-switch-item is-active"
+                        data-device="keyboard" data-se="UiKeyPress">キーボード＆マウス</button>
+                <button type="button" class="device-switch-item"
+                        data-device="gamepad" data-se="UiKeyPress">コントローラー</button>
+            </div>
 
-                <div class="ctrl-visual">
-                    <svg class="mouse" viewBox="0 0 60 92" aria-hidden="true">
-                        <rect class="mouse-body" x="2" y="2" width="56" height="88" rx="26"/>
-                        <path class="mouse-btn is-on" d="M2 28V28C2 13.6 13.6 2 28 2h2v26z"/>
-                        <line class="mouse-line" x1="30" y1="2" x2="30" y2="28"/>
-                        <line class="mouse-line" x1="2" y1="28" x2="58" y2="28"/>
-                    </svg>
-                </div>
-                <div class="ctrl-label">攻撃（斬撃）
-                    <span class="ctrl-sub">押すと斬る。続けてもう一度押すと2段目の回転斬り（威力が上がる）</span></div>
-
-                <div class="ctrl-visual">
-                    <svg class="mouse" viewBox="0 0 60 92" aria-hidden="true">
-                        <rect class="mouse-body" x="2" y="2" width="56" height="88" rx="26"/>
-                        <path class="mouse-btn is-on" d="M58 28V28C58 13.6 46.4 2 32 2h-2v26z"/>
-                        <line class="mouse-line" x1="30" y1="2" x2="30" y2="28"/>
-                        <line class="mouse-line" x1="2" y1="28" x2="58" y2="28"/>
-                    </svg>
-                </div>
-                <div class="ctrl-label">遠距離攻撃（Window弾）
-                    <span class="ctrl-sub">押している間ためて、離すと撃つ。ためきると特大の一発（音で合図）</span></div>
-
-                <div class="ctrl-visual"><span class="key is-wide">Shift</span></div>
-                <div class="ctrl-label">ダッシュ</div>
-
-                <div class="ctrl-visual"><span class="key is-space">Space</span></div>
-                <div class="ctrl-label">ジャンプ</div>
-
-                <div class="ctrl-visual"><span class="key is-wide">Tab</span></div>
-                <div class="ctrl-label">ステータスを開く
-                    <span class="ctrl-sub">押している間だけ、画面左下の能力値が全項目ぶん開きます</span></div>
-
-                <div class="ctrl-visual"><span class="key">E</span></div>
-                <div class="ctrl-label">持ち物を開く
-                    <span class="ctrl-sub">道中で拾った拡張子と、いまの能力を確認できます。開いている間は時間が止まります</span></div>
-
-                <div class="ctrl-visual"><span class="key is-wide">F2</span></div>
-                <div class="ctrl-label">拡張子を付け替える
-                    <span class="ctrl-sub">白いリネーム端末の前でだけ使えます。持ち物が開き、拡張子をドラッグして入れ替えられます</span></div>
-
-                <div class="ctrl-visual"><span class="key is-wide">Esc</span></div>
-                <div class="ctrl-label">メニュー</div>
+            <!-- 2枚とも最初から置いておく。切り替えのたびに読み込むと、
+                 一瞬何も無い枠が出て「壊れた」ように見える -->
+            <div class="device-figure">
+                <img class="device-image is-active" data-device="keyboard"
+                     src="https://assets.game.web/images/ui/rules/keyboard.png"
+                     alt="キーボードとマウスの操作一覧">
+                <img class="device-image" data-device="gamepad"
+                     src="https://assets.game.web/images/ui/rules/gamepad.png"
+                     alt="コントローラーの操作一覧">
             </div>
 
         </section>
@@ -199,6 +163,7 @@
     <script src="common/ui-sound.js"></script>
     <script src="common/stat-meta.js"></script>
     <script src="select/rules/rules-nav.js"></script>
+    <script src="select/rules/rules-controls.js"></script>
     <script src="select/rules/rules-bonus.js"></script>
 </body>
 </html>
