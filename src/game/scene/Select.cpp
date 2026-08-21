@@ -57,6 +57,19 @@ namespace game::scene
 		if (m_state != State::Idle)
 			return;
 
+		updatePointer(deltaTime);
+	}
+
+	void Select::pumpPointerWhileModal(float deltaTime)
+	{
+		// ダイアログがゲームのループを止めているので、入力の確定もここで行う
+		m_inputProvider.captureFrameInput();
+		updatePointer(deltaTime);
+		m_inputProvider.updatePreviousState();
+	}
+
+	void Select::updatePointer(float deltaTime)
+	{
 		using core::input::GamePadCode;
 
 		// 左スティックでカーソルを動かす。倒し量をそのまま速さにすると細かく
@@ -149,8 +162,15 @@ namespace game::scene
 	void Select::setWindowManager(std::unique_ptr<core::iface::ISelectWindowManager> windowManager) noexcept
 	{
 		m_windowManager = std::move(windowManager);
-		if (m_windowManager)
-			m_windowManager->createAllWindows();
+		if (!m_windowManager)
+			return;
+
+		// 確認ダイアログの間はゲームのループが止まる。止まっている間もカーソルを
+		// 動かせるよう、入力を1回ぶん回す処理を渡しておく
+		m_windowManager->setModalInputPump([this](float deltaTime)
+		    { pumpPointerWhileModal(deltaTime); });
+
+		m_windowManager->createAllWindows();
 	}
 
 	void Select::notifyGameStart() noexcept

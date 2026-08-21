@@ -55,6 +55,24 @@ namespace game::scene
 		 */
 		void updateInput(float deltaTime) override;
 
+	  private:
+		/**
+		 * @brief パッドの入力からカーソルを動かし、×でクリックする
+		 * @param deltaTime フレーム間の時間差（秒）
+		 */
+		void updatePointer(float deltaTime);
+
+		/**
+		 * @brief 確認ダイアログを出している間に、入力を1回ぶん回す
+		 *
+		 * ダイアログのモーダルループがゲームのループを止めるため、入力の確定と
+		 * 前回状態の更新もここで行う。止まっている間は他に誰も入力を読まないので、
+		 * ここでスナップショットを取り直しても取り合いにはならない
+		 * @param deltaTime 前回からの経過秒数
+		 */
+		void pumpPointerWhileModal(float deltaTime);
+
+	  public:
 		/**
 		 * @brief シーンの描画処理
 		 */
