@@ -105,7 +105,9 @@ code {
    同じ見た目にはせず、2つで1組と分かる連結したボタンにする */
 .device-switch {
     display: flex;
-    margin: 0 0 clamp(10px, 1.4vw, 28px);
+    /* 主役は図。切り替えは図を出し分ける小さな取っ手に留め、
+       ここで高さを使うほど図が縮んで図中の文字が読めなくなる */
+    margin: 0 0 clamp(6px, 0.9vw, 18px);
     border: 1px solid #3c3c3c;
     border-radius: clamp(4px, 0.5vw, 9px);
     overflow: hidden;
@@ -113,12 +115,12 @@ code {
 }
 
 .device-switch-item {
-    padding: clamp(5px, 0.7vw, 13px) clamp(12px, 1.6vw, 32px);
+    padding: clamp(4px, 0.5vw, 10px) clamp(10px, 1.3vw, 26px);
     background: #2d2d2d;
     border: none;
     color: #cccccc;
     font-family: inherit;
-    font-size: clamp(18px, 1.85vw, 40px);
+    font-size: clamp(15px, 1.5vw, 32px);
     line-height: 1.4;
     cursor: pointer;
 }
