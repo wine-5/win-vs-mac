@@ -124,6 +124,18 @@ namespace infrastructure
 		 */
 		void setMouseCursorVisible(bool visible) override;
 
+		/**
+		 * @brief OSのマウスカーソルを動かす（パッドで画面を指すのに使う）
+		 * @param deltaX 横方向の移動量（ピクセル）
+		 * @param deltaY 縦方向の移動量（ピクセル）
+		 */
+		void movePointer(int deltaX, int deltaY) override;
+
+		/**
+		 * @brief いまカーソルがある位置へ左クリックを送る
+		 */
+		void clickPointer() override;
+
 	  private:
 		/**
 		 * @brief パッドをどの経路から読んでいるか

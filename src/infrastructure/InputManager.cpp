@@ -2,6 +2,8 @@
 #include <DxLib.h>
 #include <unordered_map>
 #include <cmath>
+#include <iterator>
+#include <algorithm>
 #include <cstdlib>
 
 namespace infrastructure
@@ -446,6 +448,54 @@ namespace infrastructure
 
 		// 次フレームのため中央に戻す（画面端で止まらず無限にマウスを動かせるようにする)
 		SetMousePoint(centerX, centerY);
+	}
+
+	void InputManager::movePointer(int deltaX, int deltaY)
+	{
+		// 前面でないときは触らない。他のアプリを操作している最中にカーソルが
+		// 動くと、ゲームの外へ操作が漏れる
+		if (!m_isWindowFocused)
+			return;
+
+		if (deltaX == 0 && deltaY == 0)
+			return;
+
+		POINT cursor{};
+		if (GetCursorPos(&cursor) == 0)
+			return;
+
+		int x{ cursor.x + deltaX };
+		int y{ cursor.y + deltaY };
+
+		// ゲームのウィンドウの中へ丸める。別のモニタや他のアプリの上へは出さない
+		RECT windowRect{};
+		if (auto* hwnd{ static_cast<HWND>(GetMainWindowHandle()) };
+		    hwnd != nullptr && GetWindowRect(hwnd, &windowRect) != 0)
+		{
+			x = std::clamp(x, static_cast<int>(windowRect.left),
+			    static_cast<int>(windowRect.right) - 1);
+			y = std::clamp(y, static_cast<int>(windowRect.top),
+			    static_cast<int>(windowRect.bottom) - 1);
+		}
+
+		SetCursorPos(x, y);
+	}
+
+	void InputManager::clickPointer()
+	{
+		// 前面でないときは送らない。他のアプリを勝手に操作してしまう
+		if (!m_isWindowFocused)
+			return;
+
+		// 押して離すまでを1回で送る。素早く2回呼ばれれば、OSが時間差を見て
+		// ダブルクリックとして扱う（デスクトップのアイコンはこれで開ける）
+		INPUT inputs[2]{};
+		inputs[0].type = INPUT_MOUSE;
+		inputs[0].mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+		inputs[1].type = INPUT_MOUSE;
+		inputs[1].mi.dwFlags = MOUSEEVENTF_LEFTUP;
+
+		SendInput(static_cast<UINT>(std::size(inputs)), inputs, sizeof(INPUT));
 	}
 
 	void InputManager::setMouseCursorVisible(bool visible)

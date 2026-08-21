@@ -138,5 +138,26 @@ namespace core::iface
 		 * @param visible trueで表示、falseで非表示
 		 */
 		virtual void setMouseCursorVisible(bool visible) = 0;
+
+		/**
+		 * @brief OSのマウスカーソルを動かす（パッドで画面を指すのに使う）
+		 *
+		 * セレクト画面は押せる場所が多く、独立したWindowも並ぶため、
+		 * 枠を送るより「カーソルを動かして押す」ほうが素直に届く。
+		 *
+		 * 自分のアプリが前面のときだけ動かし、ゲームのウィンドウの中へ丸める。
+		 * これが無いと、前面を失った瞬間に他のアプリの上でカーソルが動いてしまう
+		 * @param deltaX 横方向の移動量（ピクセル）
+		 * @param deltaY 縦方向の移動量（ピクセル）
+		 */
+		virtual void movePointer(int deltaX, int deltaY) = 0;
+
+		/**
+		 * @brief いまカーソルがある位置へ左クリックを送る
+		 *
+		 * 素早く2回呼べば、OSがそのままダブルクリックとして扱う。
+		 * movePointer と同じく、自分のアプリが前面のときだけ送る
+		 */
+		virtual void clickPointer() = 0;
 	};
 } // namespace core::iface
