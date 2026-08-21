@@ -1,11 +1,28 @@
 ﻿#include "Select.h"
 #include "core/input/GamePadCode.h"
+#include <cmath>
 #include "SceneManager.h"
 #include "SceneType.h"
 #include "core/base/ServiceLocator.h"
 #include "core/interface/ILogger.h"
 #include "core/interface/IAudioManager.h"
 #include "core/constant/BgmType.h"
+
+namespace
+{
+	// パッドでカーソルを動かす速さ（倒し切ったときのピクセル/秒）
+	constexpr float POINTER_SPEED{ 1100.0f };
+
+	/**
+	 * @brief スティックの倒し量へ手前を緩やかにするカーブを掛ける
+	 * @param value 倒し量（-1.0f〜1.0f）
+	 * @return カーブを掛けた倒し量（-1.0f〜1.0f）
+	 */
+	float shapeStick(float value) noexcept
+	{
+		return value * std::abs(value);
+	}
+} // namespace
 
 namespace game::scene
 {
@@ -18,7 +35,6 @@ namespace game::scene
 	    , m_screen{ screen }
 	    , m_resourceManager{ resourceManager }
 	    , m_inputProvider{ inputProvider }
-	    , m_inputMapper{ inputProvider }
 	    , m_windowManager{ std::move(windowManager) }
 	    , m_fade{ std::make_unique<ui::FadeTransition>(uiRenderer, screen, FADE_DURATION, true) }
 	{
@@ -38,39 +54,41 @@ namespace game::scene
 
 	void Select::updateInput(float deltaTime)
 	{
-		if (m_windowManager == nullptr || m_state != State::Idle)
+		if (m_state != State::Idle)
 			return;
-
-		m_inputMapper.update(deltaTime);
 
 		using core::input::GamePadCode;
 
-		// L1/R1 でWindowを渡り歩く。ページ内の移動だけでは隣のWindowへ行けない
-		if (m_inputProvider.consumePadPress(GamePadCode::ButtonL1))
-			m_windowManager->movePadWindowFocus(-1);
-		if (m_inputProvider.consumePadPress(GamePadCode::ButtonR1))
-			m_windowManager->movePadWindowFocus(1);
+		// 左スティックでカーソルを動かす。倒し量をそのまま速さにすると細かく
+		// 合わせられないので、2乗にして手前を緩やかにする
+		const float stickX{ m_inputProvider.getPadAxis(GamePadCode::LeftStickX) };
+		const float stickY{ m_inputProvider.getPadAxis(GamePadCode::LeftStickY) };
 
-		// 最初にパッドを触った時点で枠を出す。触るまで枠が出ていると、
-		// マウスで遊ぶ人の画面に意味のない枠が残り続ける
-		if (!m_hasPadFocus &&
-		    m_inputProvider.getLastInputDevice() == core::input::InputDevice::GamePad)
+		if (stickX != 0.0f || stickY != 0.0f)
 		{
-			m_hasPadFocus = true;
-			m_windowManager->sendPadAction("focus");
+			const float distance{ POINTER_SPEED * deltaTime };
+
+			// 画面の縦は下が正。スティックは上が正なので符号を反転させる
+			m_pointerRemainderX += shapeStick(stickX) * distance;
+			m_pointerRemainderY += -shapeStick(stickY) * distance;
+
+			// 整数ぶんだけ動かし、端数は次のフレームへ持ち越す
+			const int moveX{ static_cast<int>(m_pointerRemainderX) };
+			const int moveY{ static_cast<int>(m_pointerRemainderY) };
+			m_pointerRemainderX -= static_cast<float>(moveX);
+			m_pointerRemainderY -= static_cast<float>(moveY);
+
+			m_inputProvider.movePointer(moveX, moveY);
+		}
+		else
+		{
+			// 倒していない間に端数を残すと、次に倒した瞬間に1ピクセル飛ぶ
+			m_pointerRemainderX = 0.0f;
+			m_pointerRemainderY = 0.0f;
 		}
 
-		if (m_inputMapper.isTriggered(ui::UiAction::NavigateUp))
-			m_windowManager->sendPadAction("up");
-		if (m_inputMapper.isTriggered(ui::UiAction::NavigateDown))
-			m_windowManager->sendPadAction("down");
-		if (m_inputMapper.isTriggered(ui::UiAction::NavigateLeft))
-			m_windowManager->sendPadAction("left");
-		if (m_inputMapper.isTriggered(ui::UiAction::NavigateRight))
-			m_windowManager->sendPadAction("right");
-
 		if (m_inputProvider.consumePadPress(GamePadCode::ButtonCross))
-			m_windowManager->sendPadAction("confirm");
+			m_inputProvider.clickPointer();
 	}
 
 	void Select::update(float deltaTime)

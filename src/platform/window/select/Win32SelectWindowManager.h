@@ -48,10 +48,6 @@ namespace platform::window::select
 	  void destroyAllWindows() override;
 	  void pumpMessages() override;
 
-	  void sendPadAction(const char* action) noexcept override;
-
-	  void movePadWindowFocus(int delta) noexcept override;
-
 	  void showWarningMessage(const std::string& message) noexcept override;
 
 	  void setWindowsVisible(bool visible) noexcept override;
@@ -209,52 +205,6 @@ namespace platform::window::select
 		 */
 		void broadcastSettings() noexcept;
 
-		/**
-		 * @brief パッドの操作を送る先
-		 *
-		 * DesktopWindow だけ WebViewWindowBase を継承しておらず、同じ基底の
-		 * ポインタでは持てない。送るのに要る2つの口（postMessage と HWND）だけを
-		 * 揃えて持ち、どちらの型でも同じように扱えるようにする
-		 */
-		struct PadTarget
-		{
-			platform::window::WebViewWindowBase* m_webViewWindow{ nullptr };
-			DesktopWindow* m_desktopWindow{ nullptr };
-
-			/** @brief 送り先が居るか */
-			[[nodiscard]] bool isValid() const noexcept
-			{
-				return m_webViewWindow != nullptr || m_desktopWindow != nullptr;
-			}
-
-			/**
-			 * @brief JS へメッセージを送る
-			 * @param json 送信するJSON（UTF-8）
-			 */
-			void postMessage(const std::string& json) const noexcept;
-
-			/**
-			 * @brief ウィンドウハンドルを返す
-			 * @return HWND（送り先が居なければ nullptr）
-			 */
-			[[nodiscard]] HWND getHwnd() const noexcept;
-		};
-
-		/**
-		 * @brief パッドで操作できるWindowを、並べたい順に集める
-		 *
-		 * 出ていないWindowは飛ばす。並びは画面の配置に合わせ、
-		 * L1/R1で送っていったときに画面上を素直に渡っていくようにする
-		 * @return 操作対象になりうるWindowの一覧
-		 */
-		[[nodiscard]] std::vector<PadTarget> collectPadTargets() const noexcept;
-
-		/**
-		 * @brief いまパッドの操作対象になっているWindowを返す
-		 * @return 対象のWindow。1枚も出ていなければ空のPadTarget
-		 */
-		[[nodiscard]] PadTarget currentPadTarget() const noexcept;
-
 		void handleDesktopMessage(const std::string& json) noexcept;
         void notifyWindowState(const std::string& name, bool visible) noexcept;
 
@@ -272,10 +222,6 @@ namespace platform::window::select
         bool m_rulesVisible{false};
 		bool m_settingsVisible{ false };
 		bool m_quickSettingsVisible{ false };
-
-		// パッドの操作対象になっているWindowの番号（collectPadTargets の並びでの位置）。
-		// 出ているWindowは開閉で増減するため、番号は都度その時の一覧に対して丸める
-		int m_padWindowIndex{ 0 };
 
 		// DEBUG: F4での一時退避の状態（リリース時に削除）
 		bool m_debugOverlayHidden{ false };

@@ -162,9 +162,6 @@ const FileView = (function () {
                 row.style.animationDelay = appearDelayMs + 'ms';
             row.dataset.slot = i;
             row.onclick = function () { FileLogic.selectSlot(i); };
-            // パッドの枠移動で拾えるようにする（属性ではなくJSで代入した onclick は
-            // セレクタで拾えないため、目印を付ける）
-            row.dataset.padFocus = '';
 
             // 下の一覧と同じアイコン表記にする。装備中のスロットこそ一番見る場所なので、
             // 一覧より読み取りにくい略称テキストのままにしない。

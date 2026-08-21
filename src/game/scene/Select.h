@@ -7,7 +7,6 @@
 #include "core/interface/IResourceManager.h"
 #include "core/interface/ISelectWindowManager.h"
 #include "core/interface/IInputProvider.h"
-#include "game/ui/UiInputMapper.h"
 #include <memory>
 
 namespace game::scene
@@ -44,11 +43,14 @@ namespace game::scene
 		void update(float deltaTime) override;
 
 		/**
-		 * @brief パッドの操作を読み取り、Windowへ渡す
+		 * @brief パッドでマウスカーソルを動かし、×で押す
 		 *
-		 * WebViewのHTMLはDxLibの入力ループの外にあるため、こちらでパッドを読んで
-		 * 「何をしたいか」をJSへ送る。updateではなくフレーム単位で呼ぶのは、
-		 * updateが固定ステップで1フレームに0回のこともあり、押した瞬間を取りこぼすため
+		 * セレクト画面は押せる場所が多く、独立したWindowも並ぶ。枠を送る形だと
+		 * Windowをまたぐ移動が煩雑になるため、カーソルそのものを動かす。
+		 * 実際のクリックを送るので、×を素早く2回押せばデスクトップのアイコンも開ける。
+		 *
+		 * updateではなくフレーム単位で呼ぶのは、updateが固定ステップで
+		 * 1フレームに0回のこともあり、押した瞬間を取りこぼすため
 		 * @param deltaTime フレーム間の時間差（秒）
 		 */
 		void updateInput(float deltaTime) override;
@@ -104,11 +106,10 @@ namespace game::scene
 		core::iface::IResourceManager& m_resourceManager;
 		core::iface::IInputProvider& m_inputProvider;
 
-		// パッドの操作をUI共通の意図へ翻訳する（長押しの繰り返しもここが持つ）
-		ui::UiInputMapper m_inputMapper;
-
-		// 1度でもパッドを触ったか。触るまでは枠を出さない
-		bool m_hasPadFocus{ false };
+		// カーソルの移動量の端数。1フレームぶんの移動は1ピクセルに満たないことが多く、
+		// 切り捨てるとゆっくり倒したときに1ミリも動かなくなる
+		float m_pointerRemainderX{ 0.0f };
+		float m_pointerRemainderY{ 0.0f };
 
 		std::unique_ptr<core::iface::ISelectWindowManager> m_windowManager;
 		std::unique_ptr<ui::FadeTransition> m_fade;
