@@ -48,6 +48,8 @@ namespace platform::window::select
 	  void destroyAllWindows() override;
 	  void pumpMessages() override;
 
+	  void setModalInputPump(std::function<void(float)> pump) noexcept override;
+
 	  void showWarningMessage(const std::string& message) noexcept override;
 
 	  void setWindowsVisible(bool visible) noexcept override;
@@ -114,6 +116,44 @@ namespace platform::window::select
 
 		/** @brief 装備済みスロット数を数える */
 		[[nodiscard]] int countEquippedSlots() const noexcept;
+
+		/** @brief 確認ダイアログ中にカーソルを動かす間隔（ミリ秒） */
+		static constexpr UINT MODAL_PUMP_INTERVAL_MS{ 16 };
+
+		/** @brief 上の間隔を秒で表したもの。止まっている間は実時間を測れないので固定値を渡す */
+		static constexpr float MODAL_PUMP_DELTA{ 0.016f };
+
+		/**
+		 * @brief はい／いいえの確認ダイアログを出す
+		 *
+		 * 出している間もパッドでカーソルを動かせるよう、タイマーを仕掛けてから出す
+		 * @param text 本文
+		 * @param caption 見出し
+		 * @return OKを選んだならtrue
+		 */
+		[[nodiscard]] bool showConfirmDialog(const wchar_t* text, const wchar_t* caption) noexcept;
+
+		/**
+		 * @brief 確認ダイアログを出している間だけ、入力を回すタイマーを仕掛ける
+		 *
+		 * ウィンドウを指定せずにタイマーを張ると、WM_TIMER は DispatchMessage から
+		 * 直接この手続きへ渡される。ダイアログのモーダルループも DispatchMessage を
+		 * 呼ぶので、ゲームのループが止まっている間も動く
+		 */
+		void beginModalInputPump() noexcept;
+
+		/** @brief 確認ダイアログを閉じたあとにタイマーを止める */
+		void endModalInputPump() noexcept;
+
+		/**
+		 * @brief タイマーから呼ばれ、入力を1回ぶん回す
+		 * @param hwnd 使わない（ウィンドウ無しのタイマーのため）
+		 * @param msg 使わない
+		 * @param timerId 使わない
+		 * @param elapsed 使わない
+		 */
+		static void CALLBACK modalInputPumpProc(
+		    HWND hwnd, UINT msg, UINT_PTR timerId, DWORD elapsed) noexcept;
 
 		/**
 		 * @brief 出撃前の確認ダイアログを出す
@@ -222,6 +262,14 @@ namespace platform::window::select
         bool m_rulesVisible{false};
 		bool m_settingsVisible{ false };
 		bool m_quickSettingsVisible{ false };
+
+		// 確認ダイアログを出している間だけ回す入力処理と、そのタイマー
+		std::function<void(float)> m_modalInputPump{};
+		UINT_PTR m_modalPumpTimerId{ 0 };
+
+		// ウィンドウ無しのタイマーは手続きが静的になるため、いま仕掛けている側を控える。
+		// セレクト画面は同時に1つしか存在しないので、1つで足りる
+		static Win32SelectWindowManager* s_modalPumpOwner;
 
 		// DEBUG: F4での一時退避の状態（リリース時に削除）
 		bool m_debugOverlayHidden{ false };

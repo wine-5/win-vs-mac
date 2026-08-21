@@ -43,6 +43,61 @@ namespace platform::window::select
 	{
     }
 
+	Win32SelectWindowManager* Win32SelectWindowManager::s_modalPumpOwner{ nullptr };
+
+	void Win32SelectWindowManager::setModalInputPump(std::function<void(float)> pump) noexcept
+	{
+		m_modalInputPump = std::move(pump);
+	}
+
+	void CALLBACK Win32SelectWindowManager::modalInputPumpProc(
+	    HWND /*hwnd*/, UINT /*msg*/, UINT_PTR /*timerId*/, DWORD /*elapsed*/) noexcept
+	{
+		if (s_modalPumpOwner == nullptr || !s_modalPumpOwner->m_modalInputPump)
+			return;
+
+		s_modalPumpOwner->m_modalInputPump(MODAL_PUMP_DELTA);
+	}
+
+	void Win32SelectWindowManager::beginModalInputPump() noexcept
+	{
+		if (!m_modalInputPump || m_modalPumpTimerId != 0)
+			return;
+
+		s_modalPumpOwner = this;
+		m_modalPumpTimerId = SetTimer(nullptr, 0, MODAL_PUMP_INTERVAL_MS, modalInputPumpProc);
+	}
+
+	void Win32SelectWindowManager::endModalInputPump() noexcept
+	{
+		if (m_modalPumpTimerId == 0)
+			return;
+
+		KillTimer(nullptr, m_modalPumpTimerId);
+		m_modalPumpTimerId = 0;
+		s_modalPumpOwner = nullptr;
+	}
+
+	bool Win32SelectWindowManager::showConfirmDialog(
+	    const wchar_t* text, const wchar_t* caption) noexcept
+	{
+		HWND parentHwnd{ (m_desktopWindow && m_desktopWindow->getHwnd())
+			                 ? m_desktopWindow->getHwnd()
+			                 : nullptr };
+
+		// ダイアログは自前のモーダルループを回し、ゲームのループを止める。
+		// 止まっている間もパッドでカーソルを動かせるようタイマーを仕掛けておく
+		beginModalInputPump();
+
+		// 既定はキャンセル側。誤ってダブルクリックしても進んでしまわないようにする
+		const int result{ MessageBoxW(parentHwnd, text, caption,
+			MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) };
+
+		endModalInputPump();
+
+		return result == IDOK;
+	}
+
 	void Win32SelectWindowManager::createAllWindows()
     {
         HWND dxlibHwnd = static_cast<HWND>(m_screen.getNativeWindowHandle());
@@ -776,8 +831,6 @@ namespace platform::window::select
 
 	bool Win32SelectWindowManager::confirmStart() noexcept
 	{
-		HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
-
 		const int equipped{ countEquippedSlots() };
 
 		// 出撃後は装備も難易度も変えられないので、今の内容をそのまま読み上げて確認する。
@@ -791,26 +844,18 @@ namespace platform::window::select
 		platform::utility::StringConverter converter;
 		const std::wstring message{ converter.utf8ToWide(text) };
 
-		return MessageBoxW(parentHwnd, message.c_str(), L"出撃の確認",
-		           MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
+		return showConfirmDialog(message.c_str(), L"出撃の確認");
 	}
 
 	bool Win32SelectWindowManager::confirmBackToTitle() noexcept
 	{
-		HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
-
-		// 既定はキャンセル側。誤ってダブルクリックしても選び直しにならないようにする
-		return MessageBoxW(parentHwnd,
-		           L"選んだ装備ファイルと難易度は破棄されます。\n\nタイトル画面へ戻りますか？",
-		           L"タイトルへ戻る", MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
+		return showConfirmDialog(
+		    L"選んだ装備ファイルと難易度は破棄されます。\n\nタイトル画面へ戻りますか？",
+		    L"タイトルへ戻る");
 	}
 
 	bool Win32SelectWindowManager::confirmQuitGame() noexcept
 	{
-		HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
-
-		return MessageBoxW(parentHwnd,
-		           L"ゲームを終了します。\n\nよろしいですか？",
-		           L"シャットダウン", MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
+		return showConfirmDialog(L"ゲームを終了します。\n\nよろしいですか？", L"シャットダウン");
 	}
 } // namespace platform::window::select
