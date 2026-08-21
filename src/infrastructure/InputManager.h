@@ -191,6 +191,14 @@ namespace infrastructure
 		void clearPadState() noexcept;
 
 		/**
+		 * @brief パッドが1つも見つからないときに、次の探索まで空ける回数
+		 *
+		 * XInput は繋がっていないスロットへの問い合わせが重い。見つからないのに
+		 * 毎回2つとも問い合わせると、その空振りだけで時間を取られる
+		 */
+		static constexpr int PAD_PROBE_INTERVAL{ 60 };
+
+		/**
 		 * @brief このフレームの入力から「最後に触った機器」を更新する
 		 *
 		 * パッドを優先して見るのは、パッドで遊んでいる最中に机の上のマウスが
@@ -230,6 +238,9 @@ namespace infrastructure
 
 		// 最後に触られた入力機器。案内の表記を切り替えるのに使う。
 		// マウスの微動を捨てるため、判定用に前フレームの座標を別に持つ
+		// 次にパッドを探し直すまでの残り回数。見つからない間の空振りを減らすために使う
+		int m_padProbeCountdown{ 0 };
+
 		core::input::InputDevice m_lastInputDevice{ core::input::InputDevice::KeyboardMouse };
 		int m_deviceMouseX{ 0 };
 		int m_deviceMouseY{ 0 };

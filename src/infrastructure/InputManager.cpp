@@ -163,8 +163,26 @@ namespace infrastructure
 			return;
 		}
 
-		// XInputで見えるパッド（Xbox系）を先に試し、駄目ならDirectInputへ落とす。
-		// 素のDualShock 4／DualSenseはXInputでは見えないため、この順で両方を拾う
+		// 前回うまくいった経路を先に試す。XInputは繋がっていないスロットへの
+		// 問い合わせが重く、素のDualShock 4のようにXInputで見えないパッドでは、
+		// 毎回そこで空振りしてからDirectInputへ落ちることになる
+		if (m_padKind == PadKind::DirectInput && capturePadFromDirectInput())
+			return;
+
+		if (m_padKind == PadKind::XInput && capturePadFromXInput())
+			return;
+
+		// 1つも見つかっていない間は、探し直す間隔を空ける。
+		// 毎回2つとも問い合わせると、その空振りだけで時間を取られる
+		if (m_padKind == PadKind::None && m_padProbeCountdown > 0)
+		{
+			--m_padProbeCountdown;
+			clearPadState();
+			return;
+		}
+		m_padProbeCountdown = PAD_PROBE_INTERVAL;
+
+		// ここへ来るのは、初回か、挿し替えて経路が変わったとき
 		if (capturePadFromXInput())
 		{
 			m_padKind = PadKind::XInput;
