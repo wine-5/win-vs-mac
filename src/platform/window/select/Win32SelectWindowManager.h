@@ -117,11 +117,24 @@ namespace platform::window::select
 		/** @brief 装備済みスロット数を数える */
 		[[nodiscard]] int countEquippedSlots() const noexcept;
 
-		/** @brief 確認ダイアログ中にカーソルを動かす間隔（ミリ秒） */
-		static constexpr UINT MODAL_PUMP_INTERVAL_MS{ 16 };
+		/**
+		 * @brief 確認ダイアログ中にカーソルを動かす間隔（ミリ秒）
+		 *
+		 * Windowsのタイマーはこれ以下を指定しても10msへ丸められる。
+		 * WM_TIMER は他に処理するものが無いときにだけ配送されるため、
+		 * 実際の間隔はここで指定した値どおりにはならない
+		 */
+		static constexpr UINT MODAL_PUMP_INTERVAL_MS{ 10 };
 
-		/** @brief 上の間隔を秒で表したもの。止まっている間は実時間を測れないので固定値を渡す */
-		static constexpr float MODAL_PUMP_DELTA{ 0.016f };
+		/** @brief ダイアログを出している間だけ上げるタイマーの分解能（ミリ秒） */
+		static constexpr UINT TIMER_RESOLUTION_MS{ 1 };
+
+		/**
+		 * @brief 1回ぶんで進める時間の上限（秒）
+		 *
+		 * 間隔が空いたぶんをそのまま渡すと、詰まったあとにカーソルが大きく飛ぶ
+		 */
+		static constexpr float MODAL_PUMP_MAX_DELTA{ 0.05f };
 
 		/**
 		 * @brief はい／いいえの確認ダイアログを出す
@@ -266,6 +279,14 @@ namespace platform::window::select
 		// 確認ダイアログを出している間だけ回す入力処理と、そのタイマー
 		std::function<void(float)> m_modalInputPump{};
 		UINT_PTR m_modalPumpTimerId{ 0 };
+
+		// 前回タイマーが動いた時刻（高分解能カウンタ）。WM_TIMER は等間隔では来ないので、
+		// 実際に空いた時間を渡さないとカーソルの速さがばらつく。
+		//
+		// GetTickCount64 では測れない。あちらの分解能はタイマーの間隔とほぼ同じ約16msで、
+		// 「0ms進んだ」「31ms進んだ」が交互に並ぶ形に量子化されてしまい、
+		// 実時間で測っているつもりのまま同じかくつきが残る
+		LONGLONG m_modalPumpLastCount{ 0 };
 
 		// ウィンドウ無しのタイマーは手続きが静的になるため、いま仕掛けている側を控える。
 		// セレクト画面は同時に1つしか存在しないので、1つで足りる

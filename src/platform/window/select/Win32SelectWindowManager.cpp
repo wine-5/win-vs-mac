@@ -1,4 +1,9 @@
 ﻿#include "Win32SelectWindowManager.h"
+
+// timeBeginPeriod / timeEndPeriod を使うため。プロジェクト側の設定に足さなくて済むよう、
+// 使うこのファイルでリンクを指定する
+#include <timeapi.h>
+#pragma comment(lib, "winmm.lib")
 #include "core/data/ModelMetadata.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/MetadataKeys.h"
@@ -56,7 +61,24 @@ namespace platform::window::select
 		if (s_modalPumpOwner == nullptr || !s_modalPumpOwner->m_modalInputPump)
 			return;
 
-		s_modalPumpOwner->m_modalInputPump(MODAL_PUMP_DELTA);
+		// 実際に空いた時間を高分解能カウンタで測って渡す。固定値やGetTickCount64では
+		// 分解能がタイマーの間隔と変わらず、進んだ時間が0と2回ぶんに割れてかくつく
+		LARGE_INTEGER frequency{};
+		LARGE_INTEGER counter{};
+		if (QueryPerformanceFrequency(&frequency) == 0 || QueryPerformanceCounter(&counter) == 0)
+			return;
+
+		const LONGLONG previous{ s_modalPumpOwner->m_modalPumpLastCount };
+		s_modalPumpOwner->m_modalPumpLastCount = counter.QuadPart;
+
+		const float deltaTime{ previous == 0
+			                       ? 0.0f
+			                       : static_cast<float>(counter.QuadPart - previous) /
+			                             static_cast<float>(frequency.QuadPart) };
+
+		// windows.h が min/max をマクロで定義しているため std::min は使わない
+		const float clamped{ deltaTime > MODAL_PUMP_MAX_DELTA ? MODAL_PUMP_MAX_DELTA : deltaTime };
+		s_modalPumpOwner->m_modalInputPump(clamped);
 	}
 
 	void Win32SelectWindowManager::beginModalInputPump() noexcept
@@ -65,6 +87,12 @@ namespace platform::window::select
 			return;
 
 		s_modalPumpOwner = this;
+		m_modalPumpLastCount = 0; // 開いた瞬間に前回からの時間が飛ばないよう測り直す
+
+		// タイマーの分解能を上げる。既定では約16ms刻みでしか起きず、10msを頼んでも
+		// そこまで細かくは来ない。ダイアログを閉じるまでの間だけ上げて必ず戻す
+		timeBeginPeriod(TIMER_RESOLUTION_MS);
+
 		m_modalPumpTimerId = SetTimer(nullptr, 0, MODAL_PUMP_INTERVAL_MS, modalInputPumpProc);
 	}
 
@@ -76,6 +104,9 @@ namespace platform::window::select
 		KillTimer(nullptr, m_modalPumpTimerId);
 		m_modalPumpTimerId = 0;
 		s_modalPumpOwner = nullptr;
+
+		// 上げた分解能は必ず戻す。上げたままにすると、システム全体の消費電力が増える
+		timeEndPeriod(TIMER_RESOLUTION_MS);
 	}
 
 	bool Win32SelectWindowManager::showConfirmDialog(
