@@ -208,6 +208,9 @@
     <ClCompile Include="src\infrastructure\settings\SettingsRepository.cpp" />
     <ClCompile Include="src\game\SettingsManager.cpp" />
     <ClCompile Include="src\game\ui\settings\SettingsPanelView.cpp" />
+    <ClCompile Include="src\game\CursorVisibility.cpp" />
+    <ClCompile Include="src\game\ui\PadButtonIcon.cpp" />
+    <ClCompile Include="src\game\ui\PadConnectedToast.cpp" />
     <ClCompile Include="src\game\ui\UiInputMapper.cpp" />
     <ClCompile Include="src\game\ui\settings\SettingsPanelController.cpp" />
     <ClCompile Include="src\infrastructure\effect\EffectFactory.cpp" />
@@ -374,6 +377,7 @@
     <ClInclude Include="src\core\base\EventBus.h" />
     <ClInclude Include="src\core\base\ObjectPool.h" />
     <ClInclude Include="src\core\input\GamePadCode.h" />
+    <ClInclude Include="src\core\input\InputDevice.h" />
     <ClInclude Include="src\core\interface\IAnimator.h" />
     <ClInclude Include="src\core\interface\IAudioManager.h" />
     <ClInclude Include="src\core\interface\IEffectFactory.h" />
@@ -477,6 +481,9 @@
     <ClInclude Include="src\infrastructure\settings\SettingsRepository.h" />
     <ClInclude Include="src\game\SettingsManager.h" />
     <ClInclude Include="src\game\ui\settings\SettingsPanelView.h" />
+    <ClInclude Include="src\game\CursorVisibility.h" />
+    <ClInclude Include="src\game\ui\PadButtonIcon.h" />
+    <ClInclude Include="src\game\ui\PadConnectedToast.h" />
     <ClInclude Include="src\game\ui\UiInputMapper.h" />
     <ClInclude Include="src\game\ui\settings\SettingsPanelController.h" />
     <ClInclude Include="src\infrastructure\effect\EffectFactory.h" />

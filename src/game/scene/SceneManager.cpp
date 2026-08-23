@@ -3,10 +3,11 @@
 
 namespace game::scene
 {
-	SceneManager::SceneManager(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager,
+	SceneManager::SceneManager(GameManager& gameManager, PauseManager& pauseManager,
+	    CursorVisibility& cursorVisibility, SettingsManager& settingsManager,
 	    std::function<void()> onOpenSettings)
-	    : m_sceneFactory(std::make_unique<SceneFactory>(gameManager, pauseManager, settingsManager,
-	          std::move(onOpenSettings)))
+	    : m_sceneFactory(std::make_unique<SceneFactory>(gameManager, pauseManager, cursorVisibility,
+	          settingsManager, std::move(onOpenSettings)))
 	    , m_currentScene{}
 	{
 	}
@@ -31,6 +32,12 @@ namespace game::scene
 	{
 		if (m_currentScene)
 			m_currentScene->draw();
+	}
+
+	void SceneManager::updateInput(float deltaTime)
+	{
+		if (m_currentScene)
+			m_currentScene->updateInput(deltaTime);
 	}
 
 	void SceneManager::notifyPauseChanged(bool isPaused)

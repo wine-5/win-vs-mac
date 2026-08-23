@@ -8,7 +8,8 @@
 namespace game
 {
 	class GameManager;     // 前方宣言
-	class PauseManager;    // 前方宣言
+	class PauseManager;
+	class CursorVisibility; // 前方宣言
 	class SettingsManager; // 前方宣言
 } // namespace game
 
@@ -30,7 +31,8 @@ namespace game::scene
 	   * @param settingsManager プレイヤーの設定（各シーンへ注入する）
 	   * @param onOpenSettings 設定画面を開く操作（Applicationが所有する画面を開くために渡す）
 	   */
-	  SceneManager(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager,
+	  SceneManager(GameManager& gameManager, PauseManager& pauseManager,
+		  CursorVisibility& cursorVisibility, SettingsManager& settingsManager,
 		  std::function<void()> onOpenSettings);
 
 	  /**
@@ -48,6 +50,15 @@ namespace game::scene
 	   * @brief 現在のシーンを描画する
 	   */
 	  void draw();
+
+	  /**
+	   * @brief 現在シーンのフレーム単位の入力処理を呼ぶ
+	   *
+	   * update と違い、フレームに必ず1回だけ呼ばれる。
+	   * 「押した瞬間」の取りこぼしを避けたい処理はこちらへ置く
+	   * @param deltaTime フレーム間の時間差（秒）
+	   */
+	  void updateInput(float deltaTime);
 
 	  /**
 	   * @brief シーンを変更する

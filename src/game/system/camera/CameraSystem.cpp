@@ -7,6 +7,7 @@
 #include "game/component/TagComponent.h"
 #include "game/constant/Tag.h"
 #include "core/utility/Rotation.h"
+#include "core/input/GamePadCode.h"
 #include <cmath>
 #include <algorithm>
 
@@ -100,6 +101,31 @@ namespace game::system::camera
 		return std::max(nearest, MIN_WALL_DISTANCE);
 	}
 
+	float CameraSystem::shapeStickInput(float value) noexcept
+	{
+		// 倒し量をそのまま速さにすると、少しだけ倒して細かく狙う範囲が無くなる。
+		// 2乗にして手前を緩やかにし、倒し切ったときの速さは変えない
+		return value * std::abs(value);
+	}
+
+	void CameraSystem::applyPadLook(component::camera::CameraComponent& camera, float deltaTime)
+	{
+		using core::input::GamePadCode;
+
+		const float stickX{ m_inputProvider.getPadAxis(GamePadCode::RightStickX) };
+		const float stickY{ m_inputProvider.getPadAxis(GamePadCode::RightStickY) };
+		if (stickX == 0.0f && stickY == 0.0f)
+			return;
+
+		const float speed{ m_controlSettings.sensitivityPerSecond() * deltaTime };
+
+		camera.m_yaw += shapeStickInput(stickX) * speed;
+
+		// pitch が増えるとカメラが上へ回り込んで見下ろす向きになる。
+		// スティックは上に倒したら見上げてほしいので符号を反転させる
+		camera.m_pitch -= shapeStickInput(stickY) * speed * m_controlSettings.pitchDirection();
+	}
+
 	void CameraSystem::update(float deltaTime)
 	{
 		if (!m_componentManager.has<component::camera::CameraComponent>(m_targetEntityId))
@@ -115,7 +141,7 @@ namespace game::system::camera
 		m_inputProvider.getMouseDelta(deltaX, deltaY);
 
 		const bool isInputLocked{ m_componentManager.has<component::movement::InputComponent>(m_targetEntityId) &&
-			                      m_componentManager.get<component::movement::InputComponent>(m_targetEntityId).m_locked };
+			                      m_componentManager.get<component::movement::InputComponent>(m_targetEntityId).isInputBlocked() };
 		if (!isInputLocked)
 		{
 			// マウス移動量で yaw/pitch を更新する。感度と縦の向きは設定から毎フレーム引くので、
@@ -123,6 +149,9 @@ namespace game::system::camera
 			const float sensitivity{ m_controlSettings.sensitivityPerPixel() };
 			camera.m_yaw += deltaX * sensitivity;
 			camera.m_pitch += deltaY * sensitivity * m_controlSettings.pitchDirection();
+
+			// 右スティックぶんを足す。マウスと違い「倒している速さ」なので deltaTime を掛ける
+			applyPadLook(camera, deltaTime);
 		}
 
 		// ピッチを可動範囲に制限する

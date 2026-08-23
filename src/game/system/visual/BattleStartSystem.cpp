@@ -144,15 +144,21 @@ namespace game::system::visual
 		return m_phase == Phase::Battle;
 	}
 
-	bool BattleStartSystem::isAdvanceRequested()
+	void BattleStartSystem::pollAdvanceInput()
 	{
 		const bool isMouseLeftDown{ m_inputProvider.isMouseLeftPressed() };
 		const bool isMouseLeftClicked{ isMouseLeftDown && !m_wasMouseLeftDown };
 		m_wasMouseLeftDown = isMouseLeftDown;
 
-		return m_inputProvider.isKeyPressed(core::input::KeyCode::Enter) ||
-		       m_inputProvider.isKeyPressed(core::input::KeyCode::Space) ||
-		       isMouseLeftClicked;
+		// 押されたことだけ覚えておき、消すのは update 側。押した瞬間はそのフレームにしか
+		// 現れないので、ここで拾い損ねると押しても進まない
+		if (m_inputProvider.isKeyPressed(core::input::KeyCode::Enter) ||
+		    m_inputProvider.isKeyPressed(core::input::KeyCode::Space) ||
+		    m_inputProvider.isPadButtonPressed(core::input::GamePadCode::ButtonCross) ||
+		    isMouseLeftClicked)
+		{
+			m_isAdvanceRequested = true;
+		}
 	}
 
 	int BattleStartSystem::scaled(int value) const
@@ -198,12 +204,18 @@ namespace game::system::visual
 
 		m_phaseTime += deltaTime;
 
+		// 読み終える前に押されたぶんは捨てる。出し切ってから受け付ける仕様なので、
+		// 溜めておくと出し切った瞬間に勝手に飛んでしまう
+		if (m_phase == Phase::Mission && m_phaseTime < MISSION_FADE_IN)
+			m_isAdvanceRequested = false;
+
 		// ミッションを読み終えるまでREADYへ進まない。フェードインの途中で飛ばすと
 		// 何が出たのか分からないまま消えるため、出し切ってから入力を受け付ける
 		if (m_phase == Phase::Mission)
 		{
-			if (m_phaseTime >= MISSION_FADE_IN && isAdvanceRequested())
+			if (m_phaseTime >= MISSION_FADE_IN && m_isAdvanceRequested)
 			{
+				m_isAdvanceRequested = false;
 				m_phase = Phase::Fly;
 				m_phaseTime = 0.0f;
 			}

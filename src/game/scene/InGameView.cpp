@@ -170,11 +170,6 @@ namespace game::scene
 				    [&]
 				    { m_miniMapView->draw(playerId); });
 
-			// 低HP警告のビネット。四隅を赤く染めるが、下の隅はHUDのパネルが占めているため、
-			// パネルより手前に描かないと下2つの隅が隠れてしまう。
-			// 画面全体が危険な状態なので、HUDごと赤く染まるほうが表現としても正しい
-			if (m_lowHealthVignetteView)
-				m_lowHealthVignetteView->draw(playerId);
 
 			// 当たりの閃光は他のHUDより手前。画面全体を一度だけ光らせるものなので、
 			// 下に置くとスロットや数値の裏へ回って気付けない
@@ -206,8 +201,15 @@ namespace game::scene
 
 		// インベントリ。画面を覆うので他のHUDより手前に描く。
 		// ただし死亡の暗転よりは奥（死んだ瞬間に持ち物が前面に残ると締まらない）
-		if (m_isInventoryOpen && m_inventoryView)
+		// 閉じたあとも動きが終わるまで描く。途中で描くのをやめると、
+		// 縮みかけたところで消えて瞬間に消したのと変わらなくなる
+		if (m_inventoryView && (m_isInventoryOpen || m_inventoryView->isVisible()))
 			m_inventoryView->draw(playerId);
+
+		// 低HPのフチは窓より後に描く。インベントリを開いている間も世界は動いていて
+		// 殴られるので、窓の裏に隠れると危ないことに気付けないまま死ぬ
+		if (m_lowHealthVignetteView)
+			m_lowHealthVignetteView->draw(playerId);
 
 		// プレイヤー死亡時の暗転。画面の全てを覆って暗くするため最後に描く
 		if (m_playerDeathSystem)
@@ -342,6 +344,9 @@ namespace game::scene
 	void InGameView::setInventoryOpen(bool isOpen)
 	{
 		m_isInventoryOpen = isOpen;
+
+		if (m_inventoryView)
+			m_inventoryView->setOpen(isOpen);
 	}
 
 	void InGameView::setInteractPromptView(ui::ingame::InteractPromptView* view)

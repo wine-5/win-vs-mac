@@ -6,16 +6,17 @@
 #include "core/interface/IInputProvider.h"
 #include "core/data/GameSettings.h"
 
-namespace game
+namespace game::component::camera
 {
-} // namespace game
+	struct CameraComponent;
+} // namespace game::component::camera
 
 namespace game::system::camera
 {
 	/**
-	 * @brief マウス入力から3人称カメラを制御するSystem
+	 * @brief マウス・パッド入力から3人称カメラを制御するSystem
 	 *
-	 * 対象EntityのCameraComponentをマウス移動量で更新し、
+	 * 対象EntityのCameraComponentをマウス移動量と右スティックで更新し、
 	 * yaw/pitch/距離からカメラのワールド座標を計算してICameraへ渡す。
 	 */
 	class CameraSystem : public core::ecs::ISystem
@@ -42,6 +43,20 @@ namespace game::system::camera
 		void update(float deltaTime) override;
 
 	  private:
+		/**
+		 * @brief スティックの倒し量へ手前を緩やかにするカーブを掛ける
+		 * @param value 倒し量（-1.0f〜1.0f）
+		 * @return カーブを掛けた倒し量（-1.0f〜1.0f）
+		 */
+		[[nodiscard]] static float shapeStickInput(float value) noexcept;
+
+		/**
+		 * @brief 右スティックのぶんだけ視点を回す
+		 * @param camera 更新するカメラのComponent
+		 * @param deltaTime フレーム間の時間差（秒）
+		 */
+		void applyPadLook(component::camera::CameraComponent& camera, float deltaTime);
+
 		/**
 		 * @brief 壁に遮られない位置までカメラを手前へ寄せる
 		 *

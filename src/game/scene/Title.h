@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "IScene.h"
 #include "game/ui/FadeTransition.h"
+#include "game/ui/PadConnectedToast.h"
 #include "core/interface/IInputProvider.h"
 #include "core/interface/IUIRenderer.h"
 #include "core/interface/IScreen.h"
@@ -81,6 +82,10 @@ namespace game::scene
 
 		std::unique_ptr<TitleView>          m_view{};
 		std::unique_ptr<ui::FadeTransition> m_fade{};
+
+		// 起動時に既にパッドが挿さっていても、画面はマウス前提の見た目のままで
+		// パッドで操作してよいのかが分からない。右下で一度だけ知らせる
+		ui::PadConnectedToast m_padConnectedToast;
 
 		State m_state{ State::TitleFadeIn };
 

@@ -6,6 +6,7 @@
 #include "core/interface/IScreen.h"
 #include "core/interface/IResourceManager.h"
 #include "core/interface/ISelectWindowManager.h"
+#include "core/interface/IInputProvider.h"
 #include <memory>
 
 namespace game::scene
@@ -22,11 +23,13 @@ namespace game::scene
 		 * @param screen 画面情報インターフェース
 		 * @param resourceManager リソース管理インターフェース
 		 * @param windowManager セレクトウィンドウ管理インターフェース
+		 * @param inputProvider 入力インターフェース（パッドの操作をWindowへ渡すのに使う）
 		 */
 		Select(core::iface::IUIRenderer& uiRenderer,
 		    core::iface::IScreen& screen,
 		    core::iface::IResourceManager& resourceManager,
-		    std::unique_ptr<core::iface::ISelectWindowManager> windowManager);
+		    std::unique_ptr<core::iface::ISelectWindowManager> windowManager,
+		    core::iface::IInputProvider& inputProvider);
 
 		/**
 		 * @brief Selectのデストラクタ
@@ -39,6 +42,37 @@ namespace game::scene
 		 */
 		void update(float deltaTime) override;
 
+		/**
+		 * @brief パッドでマウスカーソルを動かし、×で押す
+		 *
+		 * セレクト画面は押せる場所が多く、独立したWindowも並ぶ。枠を送る形だと
+		 * Windowをまたぐ移動が煩雑になるため、カーソルそのものを動かす。
+		 * 実際のクリックを送るので、×を素早く2回押せばデスクトップのアイコンも開ける。
+		 *
+		 * updateではなくフレーム単位で呼ぶのは、updateが固定ステップで
+		 * 1フレームに0回のこともあり、押した瞬間を取りこぼすため
+		 * @param deltaTime フレーム間の時間差（秒）
+		 */
+		void updateInput(float deltaTime) override;
+
+	  private:
+		/**
+		 * @brief パッドの入力からカーソルを動かし、×でクリックする
+		 * @param deltaTime フレーム間の時間差（秒）
+		 */
+		void updatePointer(float deltaTime);
+
+		/**
+		 * @brief 確認ダイアログを出している間に、入力を1回ぶん回す
+		 *
+		 * ダイアログのモーダルループがゲームのループを止めるため、入力の確定と
+		 * 前回状態の更新もここで行う。止まっている間は他に誰も入力を読まないので、
+		 * ここでスナップショットを取り直しても取り合いにはならない
+		 * @param deltaTime 前回からの経過秒数
+		 */
+		void pumpPointerWhileModal(float deltaTime);
+
+	  public:
 		/**
 		 * @brief シーンの描画処理
 		 */
@@ -88,6 +122,12 @@ namespace game::scene
 		core::iface::IUIRenderer& m_uiRenderer;
 		core::iface::IScreen& m_screen;
 		core::iface::IResourceManager& m_resourceManager;
+		core::iface::IInputProvider& m_inputProvider;
+
+		// カーソルの移動量の端数。1フレームぶんの移動は1ピクセルに満たないことが多く、
+		// 切り捨てるとゆっくり倒したときに1ミリも動かなくなる
+		float m_pointerRemainderX{ 0.0f };
+		float m_pointerRemainderY{ 0.0f };
 
 		std::unique_ptr<core::iface::ISelectWindowManager> m_windowManager;
 		std::unique_ptr<ui::FadeTransition> m_fade;

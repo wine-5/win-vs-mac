@@ -39,9 +39,7 @@ namespace game::scene
 
 		case State::Idle:
 			m_lockscreenView->update(deltaTime);
-			if (m_inputProvider.isKeyPressed(core::input::KeyCode::Space)
-				|| m_inputProvider.isMouseLeftPressed()
-				|| m_inputProvider.isMouseRightPressed())
+			if (m_inputProvider.isKeyPressed(core::input::KeyCode::Space) || m_inputProvider.isPadButtonPressed(core::input::GamePadCode::ButtonCross) || m_inputProvider.isMouseLeftPressed() || m_inputProvider.isMouseRightPressed())
 			{
 				m_state = State::Sliding;
 			}

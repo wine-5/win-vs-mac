@@ -100,8 +100,11 @@ namespace game::ui::settings
 		const int hovered{ m_view.getFocusIndexAt(m_page, mouseX, mouseY) };
 
 		// 行の上に乗せたら選択位置を移す。左ナビは押して初めて切り替える
-		// （乗せただけでページが変わると、通り道の項目に反応して内容が飛ぶ）
-		if (hovered >= PAGE_COUNT)
+		// カーソルがたまたま行の上に乗っているだけで、パッドで動かした選択位置が
+		// 次のフレームに引き戻されて動かせなくなる
+		const bool isUsingMouse{ m_inputProvider.getLastInputDevice() ==
+			                     core::input::InputDevice::KeyboardMouse };
+		if (isUsingMouse && hovered >= PAGE_COUNT)
 			m_focusIndex = hovered;
 
 		if (!isPressed)

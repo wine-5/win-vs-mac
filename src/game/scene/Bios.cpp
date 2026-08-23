@@ -93,9 +93,10 @@ namespace game::scene
     {
         if (m_transitioning) return;
 
-        // ESC で即時スキップ
-        if (m_inputProvider.isKeyPressed(core::input::KeyCode::Escape))
-        {
+		// ESC・〇 で即時スキップ
+		if (m_inputProvider.isKeyPressed(core::input::KeyCode::Escape) ||
+		    m_inputProvider.isPadButtonPressed(core::input::GamePadCode::ButtonCircle))
+		{
             transitionToLockscreen();
             return;
         }

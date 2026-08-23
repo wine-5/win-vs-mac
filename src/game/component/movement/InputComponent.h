@@ -20,5 +20,20 @@ namespace game::component::movement
 
 		// trueの間は全入力を無効化する（ボス覚醒などのシネマ演出中）。演出Systemが書く
 		bool m_locked{ false };
+
+		// trueの間は全入力を無効化する（インベントリなどの画面を開いている間）。Sceneが書く。
+		// m_lockedと分けているのは持ち主が違うため。同じ変数を2箇所から書くと、
+		// 演出中に窓を閉じたときに演出側のロックまで解けてしまう。
+		// また敵のAIはm_lockedだけを見る（演出中は狙わないが、窓を開けている間は狙う）
+		bool m_uiLocked{ false };
+
+		/**
+		 * @brief いま入力を受け付けない状態かを返す
+		 * @return 受け付けないならtrue
+		 */
+		[[nodiscard]] bool isInputBlocked() const noexcept
+		{
+			return m_locked || m_uiLocked;
+		}
 	};
 } // namespace game::component::movement

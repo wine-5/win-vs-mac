@@ -4,7 +4,8 @@
 namespace game
 {
 	class GameManager;     // 前方宣言
-	class PauseManager;    // 前方宣言
+	class PauseManager;
+	class CursorVisibility; // 前方宣言
 	class SettingsManager; // 前方宣言
 } // namespace game
 
@@ -21,10 +22,12 @@ public:
    * @param screenHeight 画面高さ
    * @param gameManager シーン間共有データ（SceneManager経由で各シーンへ注入する）
    * @param pauseManager ポーズ状態（SceneManager経由で各シーンへ注入する）
+   * @param cursorVisibility マウスカーソルの出し入れ（同上）
    * @param settingsManager プレイヤーの設定（SceneManager経由で各シーンへ注入する）
    * @param onOpenSettings 設定画面を開く操作（Applicationが所有する画面をシーンから開くために渡す）
    */
   static void init(int screenWidth, int screenHeight,
 	  game::GameManager& gameManager, game::PauseManager& pauseManager,
+	  game::CursorVisibility& cursorVisibility,
 	  game::SettingsManager& settingsManager, std::function<void()> onOpenSettings);
 };

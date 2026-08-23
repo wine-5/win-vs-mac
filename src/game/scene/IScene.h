@@ -17,6 +17,20 @@ namespace game::scene
 		virtual void update(float deltaTime) = 0;
 
 		/**
+		 * @brief フレームに1回だけ呼ばれる入力処理
+		 *
+		 * update は固定ステップ（1/60秒）で回るため、1フレームに0回のこともある。
+		 * 画面の更新が60Hzより速い環境ではそちらのほうが多く、
+		 * update の中で「押した瞬間」を見ていると取りこぼす。
+		 * 押した瞬間に反応させたい開閉（インベントリ・端末）はここで処理する。
+		 * 何もしなくてよいシーンのために既定実装を置く
+		 * @param deltaTime フレーム間の時間差（秒）。長押しの繰り返しなどに使う
+		 */
+		virtual void updateInput([[maybe_unused]] float deltaTime)
+		{
+		}
+
+		/**
 		 * @brief シーンの描画処理
 		 */
 		virtual void draw() = 0;

@@ -29,6 +29,7 @@
 #include "game/system/stage/BossGateSystem.h"
 #include "game/system/movement/FootstepSystem.h"
 #include "game/component/movement/TransformComponent.h"
+#include "game/component/movement/InputComponent.h"
 #include "game/actor/Player.h"
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
@@ -216,14 +217,17 @@ namespace game::scene
 	    core::iface::IInputProvider& inputProvider,
 	    GameManager& gameManager,
 	    PauseManager& pauseManager,
+	    CursorVisibility& cursorVisibility,
 	    SettingsManager& settingsManager)
 	    : m_camera{ camera }
 	    , m_renderer{ renderer }
 	    , m_animator{ animator }
 	    , m_resourceManager{ resourceManager }
 	    , m_inputProvider{ inputProvider }
+	    , m_inventoryInputMapper{ inputProvider }
 	    , m_gameManager{ gameManager }
 	    , m_pauseManager{ pauseManager }
+	    , m_cursorVisibility{ cursorVisibility }
 	    , m_settingsManager{ settingsManager }
 	    , m_fileEquipmentData{ gameManager.getFileEquipmentData() }
 	    , m_effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() }
@@ -311,9 +315,6 @@ namespace game::scene
 			}
 		}
 
-		// 3人称マウス視点のためカーソルを非表示にする（表示の切り替えは DebugFlags.h で行う）
-		m_inputProvider.setMouseCursorVisible(core::constant::SHOW_MOUSE_CURSOR_IN_GAME);
-
 		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（生成するかは DebugFlags.h で切り替える）。
 		// 生成しない場合は両方nullptrのままで、更新も描画も呼び出し側のnull判定で飛ばされる
 		if (core::constant::ENABLE_DEBUG_VIEWS)
@@ -364,14 +365,16 @@ namespace game::scene
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
 		    m_componentManager,
 		    m_resourceManager,
-		    m_fileEquipmentData);
+		    m_fileEquipmentData,
+		    m_inputProvider);
 		m_view.setInventoryView(m_inventoryView.get());
 
 		m_interactPromptView = std::make_unique<ui::ingame::InteractPromptView>(
 		    *core::base::ServiceLocator::get<core::iface::IUIRenderer>(),
 		    m_renderer,
 		    *core::base::ServiceLocator::get<core::iface::IScreen>(),
-		    m_componentManager);
+		    m_componentManager,
+		    m_inputProvider);
 		m_view.setInteractPromptView(m_interactPromptView.get());
 
 		m_lowHealthVignetteView = std::make_unique<ui::ingame::LowHealthVignetteView>(
@@ -409,21 +412,16 @@ namespace game::scene
 
 	InGame::~InGame()
 	{
-		// カーソルを戻す最後の砦。onPauseChanged は「ポーズ中だけ出す」可逆な切り替えなので、
-		// ポーズからタイトルへ戻る経路では resume() が先に走って再び隠れてしまう。
-		// 抜け方（死亡・勝利・タイトルへ）ごとに書くと漏れるため、終了地点に一本化する
-		m_inputProvider.setMouseCursorVisible(true);
-
 		// シャドウマップはServiceLocator側がインゲームより長生きするため、
 		// シーンを抜けるときにこちらで確保を解く
 		if (auto* shadowMap{ core::base::ServiceLocator::get<core::iface::IShadowMap>() })
 			shadowMap->destroy();
 	}
 
-	void InGame::onPauseChanged(bool isPaused)
+	void InGame::onPauseChanged(bool /*isPaused*/)
 	{
-		// ポーズ中はメニューをマウスで操作できるように出し、再開したら戦闘用に隠す
-		m_inputProvider.setMouseCursorVisible(isPaused);
+		// カーソルの出し入れは CursorVisibility が一手に引き受ける（Application が毎フレーム決める）。
+		// このシーンで面倒を見るものは今のところ無い
 	}
 
 	void InGame::loadResources()
@@ -824,6 +822,16 @@ namespace game::scene
 			    // 与えたときだけで、被弾側では止めない（操作不能時間は理不尽に感じるため）
 			    if (e.m_isCritical && e.m_targetId != m_playerId)
 					m_hitStop.requestOnCritical(); }));
+		// 死んだ瞬間にインベントリを閉じる。開いている間も世界は動くので、
+		// 付け替えている最中に殴られて死ぬことがある。窓が出たままだと
+		// 死亡アニメも暗転も窓の裏で進んでしまう
+		m_subscriptions.push_back(m_eventBus.subscribe<event::PlayerDeadEvent>(
+		    [this](const event::PlayerDeadEvent&)
+		    {
+			    if (m_pauseManager.isPausedBy(PauseReason::Inventory))
+				    setInventoryOpen(false, false);
+		    }));
+
 		// プレイヤー死亡演出の完了イベントの購読。
 		// HPが尽きた瞬間（PlayerDeadEvent）ではなく、死亡アニメと暗転を見せ終えてから遷移する。
 		// 演出中もモデルは表示し続ける（非表示にすると死亡アニメが見えなくなる）
@@ -966,6 +974,24 @@ namespace game::scene
 		m_eventBus.publish(event::BossAppearedEvent{ m_macId });
 	}
 
+	void InGame::updateInput(float deltaTime)
+	{
+		// 開始演出を送る入力もここで拾う。System の update は固定ステップで
+		// 1フレームに0回のこともあり、その中で見ていると押しても進まないことがある
+		if (m_battleStartSystem)
+			m_battleStartSystem->pollAdvanceInput();
+
+		updateInventory();
+		updateRenameTerminal();
+
+		// インベントリを開いている間も世界と時間は動かす。付け替えている間に敵が寄ってくる
+		// ことまで込みで「倒してから整えるか、そのまま整えるか」を選ばせたい。
+		// クリアタイムも止まらないので、付け替えそのものが時間というコストを持つ。
+		// プレイヤー自身は動けない（setInventoryOpen が InputComponent::m_uiLocked を立てる）
+		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
+			updateSwapSelection(deltaTime);
+	}
+
 	void InGame::update(float deltaTime)
 	{
 		// DEBUG: 更新レート（UPS）を数える。FPS計測は描画回数を数える必要があるためdraw側で行う
@@ -976,18 +1002,6 @@ namespace game::scene
 		// ヒットストップ中はSystemへ渡す時間に倍率を掛ける（0なら何も進まない）。
 		// 経過時間の計測もここへ揃える。止まっている間もタイマーだけ進むと、
 		// 画面が止まっているのに右上の秒数だけ動いて不自然になる
-		updateInventory();
-		updateRenameTerminal();
-
-		// インベントリを開いている間は時間を止める。読む画面なので、
-		// 読んでいる最中に殴られるのはプレイヤーの落ち度ではなく設計の落ち度になる。
-		// ただし付け替えの操作だけは止まっている間に受け付ける
-		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
-		{
-			updateSwapSelection();
-			return;
-		}
-
 		const float scaledDeltaTime{ m_hitStop.apply(deltaTime) };
 
 		// 開始演出（READY）の間はまだ動けないので、クリアタイムの計測も始めない。
@@ -1009,27 +1023,53 @@ namespace game::scene
 		// どの画面でも共通の期待なので、ここだけ効かないと閉じ方を探すことになる。
 		// ポーズメニュー側（Application）はインベントリで止まっている間はEscを見ないので、
 		// ここで閉じてもメニューが続けて開くことはない
-		if (m_pauseManager.isPausedBy(PauseReason::Inventory) &&
-		    m_inputProvider.consumeKeyPress(core::input::KeyCode::Escape))
+		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
 		{
-			setInventoryOpen(false, false);
-			return;
+			// 何か掴んでいる間の〇は「掴んだものを離す」に使う（updateSwapSelectionが拾う）。
+			// ここで閉じてしまうと、離すつもりで押したのに窓ごと消える
+			const bool canCloseByPad{ m_swapHeldIndex < 0 };
+			if (m_inputProvider.consumeKeyPress(core::input::KeyCode::Escape) ||
+			    (canCloseByPad &&
+			        m_inputProvider.consumePadPress(core::input::GamePadCode::ButtonCircle)))
+			{
+				setInventoryOpen(false, false);
+				return;
+			}
 		}
 
-		if (!m_inputProvider.consumeKeyPress(core::input::KeyCode::E))
+		// パッドは△。キーと同じく、開けたボタンでそのまま閉じられる
+		if (!m_inputProvider.consumeKeyPress(core::input::KeyCode::E) &&
+		    !m_inputProvider.consumePadPress(core::input::GamePadCode::ButtonTriangle))
 			return;
 
 		// 別の理由（ポーズメニュー）で止まっている間は開かない。
 		// 2つの画面が重なると、どちらのキーが効いているのか分からなくなる
 		if (m_pauseManager.isPausedBy(PauseReason::Inventory))
+		{
 			setInventoryOpen(false, false);
-		else if (!m_pauseManager.isPaused())
-			setInventoryOpen(true, false);
+			return;
+		}
+
+		if (m_pauseManager.isPaused())
+			return;
+
+		// 端末の前で開いたときは、そのまま付け替えられる状態にする。
+		// ここで「見るだけ」を開いてしまうと、目の前に端末があるのに
+		// 一度閉じて□を押し直すことになり、付け替えられること自体に気付けない
+		setInventoryOpen(true, isNearRenameTerminal());
+	}
+
+	bool InGame::isNearRenameTerminal() const
+	{
+		return m_renameTerminalSystem != nullptr &&
+		       m_renameTerminalSystem->getNearTerminalId() != core::ecs::INVALID_ENTITY_ID;
 	}
 
 	void InGame::updateRenameTerminal()
 	{
-		if (!m_inputProvider.consumeKeyPress(core::input::KeyCode::F2))
+		// パッドは□
+		if (!m_inputProvider.consumeKeyPress(core::input::KeyCode::F2) &&
+		    !m_inputProvider.consumePadPress(core::input::GamePadCode::ButtonSquare))
 			return;
 
 		// 開いている間はF2でも閉じられる。開いたキーで閉じられないと、
@@ -1043,8 +1083,7 @@ namespace game::scene
 			return;
 
 		// 端末の前でのみ開く。どこでも付け替えられるなら、端末を探す理由が無くなる
-		if (m_renameTerminalSystem == nullptr ||
-		    m_renameTerminalSystem->getNearTerminalId() == core::ecs::INVALID_ENTITY_ID)
+		if (!isNearRenameTerminal())
 			return;
 
 		setInventoryOpen(true, true);
@@ -1057,8 +1096,20 @@ namespace game::scene
 		else
 			m_pauseManager.resume();
 
+		// 開いている間は動けない。世界のほうは止めないので、立ち止まっている間に
+		// 殴られる。どこで付け替えるかがそのまま判断になる
+		if (auto* input{ m_componentManager.tryGet<component::movement::InputComponent>(m_playerId) })
+			input->m_uiLocked = isOpen;
+
 		m_isSwapMode = isOpen && isSwapMode;
 		m_swapHeldIndex = -1;
+
+		// 開くたびに枠の位置を取り直す。前に開いたときの位置が残っていると、
+		// 中身が変わっているのに関係ないマスを指したまま始まる
+		m_padCursorIndex = -1;
+
+		// 開くのに使ったボタンの押しっぱなしを、そのまま枠の操作として拾わせない
+		m_inventoryInputMapper.reset();
 
 		// 開閉は場面が切り替わる合図。時間が止まる／動き出すことを音でも示す
 		playUiSe(isOpen ? core::constant::SeType::InventoryOpen : core::constant::SeType::UiClose);
@@ -1071,10 +1122,13 @@ namespace game::scene
 			m_inventoryView->resetStatChanges();
 		}
 
-		// 開いている間はカーソルを出す。隠したままだとマウスを中央へ戻す処理
-		// （getMouseDelta）が止まり、カーソルが端まで流れていく。
-		// その状態で閉じると溜まったぶんが一度に効いてカメラが飛ぶ
-		m_inputProvider.setMouseCursorVisible(isOpen);
+		// 開いている間はカーソルを出したい、と伝えるだけにする。実際に出すかは
+		// CursorVisibility が決める（パッドで遊んでいる間は出さない）。
+		//
+		// 隠したままだとマウスを中央へ戻す処理（getMouseDelta）が止まり、
+		// カーソルが端まで流れていく。その状態で閉じると溜まったぶんが
+		// 一度に効いてカメラが飛ぶ
+		m_cursorVisibility.setNeeded(CursorVisibility::Reason::Inventory, isOpen);
 	}
 
 	void InGame::playUiSe(core::constant::SeType seType) const
@@ -1095,7 +1149,7 @@ namespace game::scene
 		m_swapHeldIndex = -1;
 	}
 
-	void InGame::updateSwapSelection()
+	void InGame::updateSwapSelection(float deltaTime)
 	{
 		if (!m_isSwapMode)
 			return;
@@ -1109,17 +1163,88 @@ namespace game::scene
 		if (m_inventoryView == nullptr)
 			return;
 
-		int mouseX{ 0 };
-		int mouseY{ 0 };
-		m_inputProvider.getMousePosition(mouseX, mouseY);
-		const int hoveredIndex{ m_inventoryView->findSlotIndexAt(mouseX, mouseY) };
-
-		// 押した瞬間と離した瞬間を取り出す。押しっぱなしを毎フレーム見ると、
-		// 1回のクリックの間に掴むと離すを何度も繰り返してしまう
+		// マウスの押下エッジは、パッドで操作している間も更新し続ける。
+		// 止めると、マウスへ戻った瞬間に押しっぱなしが「押した瞬間」として拾われる
 		const bool isDown{ m_inputProvider.isMouseLeftPressed() };
 		const bool isPressed{ isDown && !m_wasMouseLeftDown };
 		const bool isReleased{ !isDown && m_wasMouseLeftDown };
 		m_wasMouseLeftDown = isDown;
+
+		m_inventoryInputMapper.update(deltaTime);
+
+		// 最後に触った機器のほうだけを動かす。両方を毎フレーム反映すると、
+		// パッドで合わせた枠がマウスの位置（マスの外なら-1）で上書きされて消える
+		if (m_inputProvider.getLastInputDevice() == core::input::InputDevice::GamePad)
+		{
+			updateSwapSelectionByPad(*inventory);
+			return;
+		}
+
+		updateSwapSelectionByMouse(*inventory, isDown, isPressed, isReleased);
+	}
+
+	void InGame::updateSwapSelectionByPad(
+	    const component::combat::ExtensionInventoryComponent& inventory)
+	{
+		using core::input::GamePadCode;
+
+		// 初めてパッドで触ったときは動かせるマスの先頭へ置く
+		if (m_padCursorIndex < 0)
+			m_padCursorIndex = m_inventoryView->firstSelectableSlotIndex();
+
+		const int previousIndex{ m_padCursorIndex };
+		if (m_inventoryInputMapper.isTriggered(ui::UiAction::NavigateUp))
+			m_padCursorIndex = m_inventoryView->findSlotIndexToward(m_padCursorIndex, 0, -1);
+		if (m_inventoryInputMapper.isTriggered(ui::UiAction::NavigateDown))
+			m_padCursorIndex = m_inventoryView->findSlotIndexToward(m_padCursorIndex, 0, 1);
+		if (m_inventoryInputMapper.isTriggered(ui::UiAction::NavigateLeft))
+			m_padCursorIndex = m_inventoryView->findSlotIndexToward(m_padCursorIndex, -1, 0);
+		if (m_inventoryInputMapper.isTriggered(ui::UiAction::NavigateRight))
+			m_padCursorIndex = m_inventoryView->findSlotIndexToward(m_padCursorIndex, 1, 0);
+
+		// 実際に動いたときだけ鳴らす。端で止まっているのに鳴り続けると、
+		// 動いていないのか音だけ鳴っているのか分からなくなる
+		if (m_padCursorIndex != previousIndex)
+			playUiSe(core::constant::SeType::UiKeyPress);
+
+		// 〇で掴んだものを離す。閉じる側（updateInventory）は掴んでいる間の〇を見ない
+		if (m_swapHeldIndex >= 0 && m_inputProvider.consumePadPress(GamePadCode::ButtonCircle))
+		{
+			playUiSe(core::constant::SeType::ExtensionDrop);
+			m_swapHeldIndex = -1;
+		}
+		else if (m_inputProvider.consumePadPress(GamePadCode::ButtonCross) && m_padCursorIndex >= 0)
+		{
+			if (m_swapHeldIndex < 0)
+			{
+				// 何も掴んでいなければ掴む
+				playUiSe(core::constant::SeType::ExtensionGrab);
+				m_swapHeldIndex = m_padCursorIndex;
+			}
+			else if (m_swapHeldIndex == m_padCursorIndex)
+			{
+				// 同じマスでもう一度押したら離す
+				playUiSe(core::constant::SeType::ExtensionDrop);
+				m_swapHeldIndex = -1;
+			}
+			else
+				requestSwap(inventory, m_padCursorIndex);
+		}
+
+		// 運んでいる見た目はマウス専用（アイコンがカーソルに付いて回る）。
+		// パッドは掴んでいるマスの色で示すので、運びの表示は出さない
+		m_inventoryView->setDragging(false, 0, 0);
+		m_inventoryView->setSelection(m_padCursorIndex, m_swapHeldIndex);
+	}
+
+	void InGame::updateSwapSelectionByMouse(
+	    const component::combat::ExtensionInventoryComponent& inventory,
+	    bool isDown, bool isPressed, bool isReleased)
+	{
+		int mouseX{ 0 };
+		int mouseY{ 0 };
+		m_inputProvider.getMousePosition(mouseX, mouseY);
+		const int hoveredIndex{ m_inventoryView->findSlotIndexAt(mouseX, mouseY) };
 
 		// 動かせない枠へ落とそうとしたら弾く。掴んだままにしておくのは、
 		// 拒否された操作で持ち物の状態まで変わるとやり直しが面倒になるため
@@ -1155,7 +1280,7 @@ namespace game::scene
 			else
 			{
 				// 掴んだまま別のマスを押した場合はその場で入れ替える
-				requestSwap(*inventory, hoveredIndex);
+				requestSwap(inventory, hoveredIndex);
 			}
 		}
 		else if (isReleased && m_swapHeldIndex >= 0 && hoveredIndex >= 0 &&
@@ -1164,7 +1289,7 @@ namespace game::scene
 			// 掴んだまま別のマスへ運んで離した（ドラッグ＆ドロップ）。
 			// 掴む・置くの2クリックと、運んで離すの1動作の両方を受けることで、
 			// どちらのつもりで触っても同じ結果になる
-			requestSwap(*inventory, hoveredIndex);
+			requestSwap(inventory, hoveredIndex);
 		}
 
 		// ボタンを押している間だけ運んでいる扱いにする。離したあとも掴んだままなら、

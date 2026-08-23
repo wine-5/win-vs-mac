@@ -47,6 +47,15 @@ namespace game::system::visual
 		void update(float deltaTime) override;
 
 		/**
+		 * @brief 送る操作が押されたかを読み取り、updateが拾うまで覚えておく
+		 *
+		 * マウスの押下エッジを内部で更新するため、1フレームに1回だけ呼ぶこと。
+		 * updateの中で見ないのは、updateが固定ステップで1フレームに0回のこともあり、
+		 * 「押した瞬間」がそのフレームにしか現れないため取りこぼすから
+		 */
+		void pollAdvanceInput();
+
+		/**
 		 * @brief READY / FIGHT! の文字を描画する（InGameViewの描画フェーズから呼ぶ）
 		 */
 		void draw();
@@ -109,14 +118,6 @@ namespace game::system::visual
 		void drawMissionCard(int centerX, int centerY, float scale, float alphaRate);
 
 		/**
-		 * @brief ミッション提示を先へ進める操作が行われたかを返す
-		 *
-		 * マウスの押下エッジを内部で更新するため、1フレームに1回だけ呼ぶこと
-		 * @return Enter / Space / マウス左クリックのいずれかが押された瞬間ならtrue
-		 */
-		[[nodiscard]] bool isAdvanceRequested();
-
-		/**
 		 * @brief READYの文字（フェードイン→ホールド→フェードアウト）を描画する
 		 */
 		void drawReady();
@@ -141,6 +142,9 @@ namespace game::system::visual
 		// マウス左ボタンは押下エッジを自前で取る（IInputProviderは押下状態しか返さない）。
 		// シーンへ入る前のクリックを押しっぱなしと見なして即スキップしないよう、押下状態から始める
 		bool m_wasMouseLeftDown{ true };
+
+		// 送る操作が押されたか。フレーム単位で読み取り、updateが拾うまで覚えておく
+		bool m_isAdvanceRequested{ false };
 
 		// DxLibの描画はShift_JISを期待するため、ソース上のUTF-8日本語をそのまま渡すと文字化けする。
 		// 変換結果は毎フレーム同じなので生成時に一度だけ変換して保持する

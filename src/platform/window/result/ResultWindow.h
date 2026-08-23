@@ -45,7 +45,13 @@ namespace platform::window::result
          */
         void pumpMessages() noexcept override;
 
-        /**
+		/**
+		 * @brief パッドの操作をWebViewのJSへ送る
+		 * @param action 操作名
+		 */
+		void sendPadAction(const char* action) noexcept override;
+
+		/**
          * @brief ウィンドウを破棄する
          */
         void destroy() noexcept override;

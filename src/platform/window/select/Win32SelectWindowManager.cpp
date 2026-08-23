@@ -1,4 +1,9 @@
 ﻿#include "Win32SelectWindowManager.h"
+
+// timeBeginPeriod / timeEndPeriod を使うため。プロジェクト側の設定に足さなくて済むよう、
+// 使うこのファイルでリンクを指定する
+#include <timeapi.h>
+#pragma comment(lib, "winmm.lib")
 #include "core/data/ModelMetadata.h"
 #include "game/constant/ModelId.h"
 #include "game/constant/MetadataKeys.h"
@@ -43,7 +48,88 @@ namespace platform::window::select
 	{
     }
 
-    void Win32SelectWindowManager::createAllWindows()
+	Win32SelectWindowManager* Win32SelectWindowManager::s_modalPumpOwner{ nullptr };
+
+	void Win32SelectWindowManager::setModalInputPump(std::function<void(float)> pump) noexcept
+	{
+		m_modalInputPump = std::move(pump);
+	}
+
+	void CALLBACK Win32SelectWindowManager::modalInputPumpProc(
+	    HWND /*hwnd*/, UINT /*msg*/, UINT_PTR /*timerId*/, DWORD /*elapsed*/) noexcept
+	{
+		if (s_modalPumpOwner == nullptr || !s_modalPumpOwner->m_modalInputPump)
+			return;
+
+		// 実際に空いた時間を高分解能カウンタで測って渡す。固定値やGetTickCount64では
+		// 分解能がタイマーの間隔と変わらず、進んだ時間が0と2回ぶんに割れてかくつく
+		LARGE_INTEGER frequency{};
+		LARGE_INTEGER counter{};
+		if (QueryPerformanceFrequency(&frequency) == 0 || QueryPerformanceCounter(&counter) == 0)
+			return;
+
+		const LONGLONG previous{ s_modalPumpOwner->m_modalPumpLastCount };
+		s_modalPumpOwner->m_modalPumpLastCount = counter.QuadPart;
+
+		const float deltaTime{ previous == 0
+			                       ? 0.0f
+			                       : static_cast<float>(counter.QuadPart - previous) /
+			                             static_cast<float>(frequency.QuadPart) };
+
+		// windows.h が min/max をマクロで定義しているため std::min は使わない
+		const float clamped{ deltaTime > MODAL_PUMP_MAX_DELTA ? MODAL_PUMP_MAX_DELTA : deltaTime };
+		s_modalPumpOwner->m_modalInputPump(clamped);
+	}
+
+	void Win32SelectWindowManager::beginModalInputPump() noexcept
+	{
+		if (!m_modalInputPump || m_modalPumpTimerId != 0)
+			return;
+
+		s_modalPumpOwner = this;
+		m_modalPumpLastCount = 0; // 開いた瞬間に前回からの時間が飛ばないよう測り直す
+
+		// タイマーの分解能を上げる。既定では約16ms刻みでしか起きず、10msを頼んでも
+		// そこまで細かくは来ない。ダイアログを閉じるまでの間だけ上げて必ず戻す
+		timeBeginPeriod(TIMER_RESOLUTION_MS);
+
+		m_modalPumpTimerId = SetTimer(nullptr, 0, MODAL_PUMP_INTERVAL_MS, modalInputPumpProc);
+	}
+
+	void Win32SelectWindowManager::endModalInputPump() noexcept
+	{
+		if (m_modalPumpTimerId == 0)
+			return;
+
+		KillTimer(nullptr, m_modalPumpTimerId);
+		m_modalPumpTimerId = 0;
+		s_modalPumpOwner = nullptr;
+
+		// 上げた分解能は必ず戻す。上げたままにすると、システム全体の消費電力が増える
+		timeEndPeriod(TIMER_RESOLUTION_MS);
+	}
+
+	bool Win32SelectWindowManager::showConfirmDialog(
+	    const wchar_t* text, const wchar_t* caption) noexcept
+	{
+		HWND parentHwnd{ (m_desktopWindow && m_desktopWindow->getHwnd())
+			                 ? m_desktopWindow->getHwnd()
+			                 : nullptr };
+
+		// ダイアログは自前のモーダルループを回し、ゲームのループを止める。
+		// 止まっている間もパッドでカーソルを動かせるようタイマーを仕掛けておく
+		beginModalInputPump();
+
+		// 既定はキャンセル側。誤ってダブルクリックしても進んでしまわないようにする
+		const int result{ MessageBoxW(parentHwnd, text, caption,
+			MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) };
+
+		endModalInputPump();
+
+		return result == IDOK;
+	}
+
+	void Win32SelectWindowManager::createAllWindows()
     {
         HWND dxlibHwnd = static_cast<HWND>(m_screen.getNativeWindowHandle());
 
@@ -776,8 +862,6 @@ namespace platform::window::select
 
 	bool Win32SelectWindowManager::confirmStart() noexcept
 	{
-		HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
-
 		const int equipped{ countEquippedSlots() };
 
 		// 出撃後は装備も難易度も変えられないので、今の内容をそのまま読み上げて確認する。
@@ -791,26 +875,18 @@ namespace platform::window::select
 		platform::utility::StringConverter converter;
 		const std::wstring message{ converter.utf8ToWide(text) };
 
-		return MessageBoxW(parentHwnd, message.c_str(), L"出撃の確認",
-		           MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
+		return showConfirmDialog(message.c_str(), L"出撃の確認");
 	}
 
 	bool Win32SelectWindowManager::confirmBackToTitle() noexcept
 	{
-		HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
-
-		// 既定はキャンセル側。誤ってダブルクリックしても選び直しにならないようにする
-		return MessageBoxW(parentHwnd,
-		           L"選んだ装備ファイルと難易度は破棄されます。\n\nタイトル画面へ戻りますか？",
-		           L"タイトルへ戻る", MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
+		return showConfirmDialog(
+		    L"選んだ装備ファイルと難易度は破棄されます。\n\nタイトル画面へ戻りますか？",
+		    L"タイトルへ戻る");
 	}
 
 	bool Win32SelectWindowManager::confirmQuitGame() noexcept
 	{
-		HWND parentHwnd = (m_desktopWindow && m_desktopWindow->getHwnd()) ? m_desktopWindow->getHwnd() : nullptr;
-
-		return MessageBoxW(parentHwnd,
-		           L"ゲームを終了します。\n\nよろしいですか？",
-		           L"シャットダウン", MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON2) == IDOK;
+		return showConfirmDialog(L"ゲームを終了します。\n\nよろしいですか？", L"シャットダウン");
 	}
 } // namespace platform::window::select

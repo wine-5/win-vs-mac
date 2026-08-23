@@ -65,8 +65,10 @@ namespace core::data
 		static constexpr int MAX_SENSITIVITY{ 10 };
 		/** @brief カメラ感度の既定値（この段階のとき従来と同じ速さになる） */
 		static constexpr int DEFAULT_SENSITIVITY{ 5 };
-		/** @brief 感度が既定値のときのラジアン/ピクセル */
+		/** @brief 感度が既定値のときのラジアン/ピクセル（マウス用） */
 		static constexpr float BASE_SENSITIVITY{ 0.003f };
+		/** @brief 感度が既定値のときのラジアン/秒（パッドのスティック用） */
+		static constexpr float BASE_PAD_SENSITIVITY{ 2.5f };
 
 		/** @brief 画面の揺れの最大値（100 で従来どおりの揺れ） */
 		static constexpr int MAX_SHAKE{ 100 };
@@ -84,6 +86,19 @@ namespace core::data
 		[[nodiscard]] constexpr float sensitivityPerPixel() const noexcept
 		{
 			return BASE_SENSITIVITY * static_cast<float>(m_sensitivity) / DEFAULT_SENSITIVITY;
+		}
+
+		/**
+		 * @brief 段階値をスティックのカメラ感度（ラジアン/秒）へ変換する
+		 *
+		 * マウスは「動かした量」、スティックは「倒している速さ」で性質が違うため、
+		 * 同じ段階値から別の係数を作る。ラジアン/ピクセルのまま掛けると
+		 * フレームレートで振り向きの速さが変わってしまう
+		 * @return スティックの倒し量へ掛ける係数（ラジアン/秒）
+		 */
+		[[nodiscard]] constexpr float sensitivityPerSecond() const noexcept
+		{
+			return BASE_PAD_SENSITIVITY * static_cast<float>(m_sensitivity) / DEFAULT_SENSITIVITY;
 		}
 
 		/**

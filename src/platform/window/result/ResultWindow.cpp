@@ -1,5 +1,6 @@
 ﻿#include <windows.h>
 #include "ResultWindow.h"
+#include <string>
 #include "core/base/ServiceLocator.h"
 #include "core/interface/IAudioManager.h"
 #include "core/constant/SeType.h"
@@ -63,7 +64,16 @@ namespace platform::window::result
         WindowBase::show();
     }
 
-    void ResultWindow::pumpMessages() noexcept
+	void ResultWindow::sendPadAction(const char* action) noexcept
+	{
+		if (action == nullptr)
+			return;
+
+		// JSONはUTF-8でなければWebView2側で例外になる。ここは英字だけなのでそのまま組む
+		postMessage(std::string{ R"({"type":"pad","action":")" } + action + R"("})");
+	}
+
+	void ResultWindow::pumpMessages() noexcept
     {
         MSG msg{};
         while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))

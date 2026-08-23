@@ -83,6 +83,14 @@ namespace core::utility
 		static constexpr unsigned int HUD_CRIT_RED = 0xFFE81123;    // 敵を捕捉中・危険
 		static constexpr unsigned int HUD_ACCENT = 0xFF0078D4;      // Windows 11のアクセント色
 		static constexpr unsigned int HUD_INK_FAINT = 0xFF5E708A;   // 補足情報・未装備などの控えめな文字
+
+		// パッドのボタン記号。PlayStationの色をそのまま出すと画面から浮くので、
+		// HUDの暗い地に合わせて彩度を落としてある
+		static constexpr unsigned int PAD_CROSS_BLUE = 0xFF7B9CE8;
+		static constexpr unsigned int PAD_CIRCLE_RED = 0xFFE8736B;
+		static constexpr unsigned int PAD_SQUARE_PINK = 0xFFE58BC8;
+		static constexpr unsigned int PAD_TRIANGLE_GREEN = 0xFF6BD6A8;
+		static constexpr unsigned int PAD_BADGE_BORDER = 0xFF8CAAD2; // L1・OPTIONSなど文字バッジの枠
 		// 能力が上がったことを示す緑。強化中の黄色（HUD_CHARGE_MAX）と役割が違う。
 		// 黄色は「今この能力は強化された状態」という継続した状態、
 		// こちらは「たった今上がった」という瞬間を表す

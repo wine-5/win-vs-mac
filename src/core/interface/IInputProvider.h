@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "core/input/KeyCode.h"
 #include "core/input/GamePadCode.h"
+#include "core/input/InputDevice.h"
 
 namespace core::iface
 {
@@ -61,15 +62,32 @@ namespace core::iface
 
 		/**
 		 * @brief 指定したゲームパッドボタンが押されているか判定する
+		 * @details キーボードと同じく、直近の captureFrameInput() 時点のスナップショットを参照する
 		 * @param code ゲームパッドコード
 		 * @return 押されている場合true
 		 */
 		virtual bool isPadButtonDown(core::input::GamePadCode code) const = 0;
 
 		/**
+		 * @brief 指定したゲームパッドボタンが押された瞬間か判定する（押しっぱなしは無視）
+		 * @param code ゲームパッドコード
+		 * @return 押された瞬間の場合true
+		 */
+		virtual bool isPadButtonPressed(core::input::GamePadCode code) const = 0;
+
+		/**
+		 * @brief 押された瞬間かを判定し、そのフレームぶんを消費する（1フレームに1回だけ成立）
+		 *
+		 * 理由は consumeKeyPress と同じ。開閉のように「押すたびに1回だけ起こしたい」操作に使う
+		 * @param code ゲームパッドコード
+		 * @return このフレームでまだ消費されていない「押された瞬間」ならtrue
+		 */
+		virtual bool consumePadPress(core::input::GamePadCode code) = 0;
+
+		/**
 		 * @brief ゲームパッドのアナログ値を取得する
 		 * @param code ゲームパッドコード
-		 * @return アナログ値（-1.0f〜1.0f）
+		 * @return アナログ値（スティックは-1.0f〜1.0f、トリガーは0.0f〜1.0f）
 		 */
 		virtual float getPadAxis(core::input::GamePadCode code) const = 0;
 
@@ -78,6 +96,15 @@ namespace core::iface
 		 * @return 接続されている場合true
 		 */
 		virtual bool isPadConnected() const = 0;
+
+		/**
+		 * @brief 最後に操作へ使われた入力機器を返す
+		 *
+		 * 操作の案内をどちらの表記で出すかに使う。何も触られていない間は
+		 * 直前の値を保つので、手を止めても表記が勝手に戻らない
+		 * @return 最後に触られた入力機器
+		 */
+		virtual core::input::InputDevice getLastInputDevice() const = 0;
 
 		// ========== マウス入力 ==========
 		/**
@@ -111,5 +138,26 @@ namespace core::iface
 		 * @param visible trueで表示、falseで非表示
 		 */
 		virtual void setMouseCursorVisible(bool visible) = 0;
+
+		/**
+		 * @brief OSのマウスカーソルを動かす（パッドで画面を指すのに使う）
+		 *
+		 * セレクト画面は押せる場所が多く、独立したWindowも並ぶため、
+		 * 枠を送るより「カーソルを動かして押す」ほうが素直に届く。
+		 *
+		 * 自分のアプリが前面のときだけ動かし、ゲームのウィンドウの中へ丸める。
+		 * これが無いと、前面を失った瞬間に他のアプリの上でカーソルが動いてしまう
+		 * @param deltaX 横方向の移動量（ピクセル）
+		 * @param deltaY 縦方向の移動量（ピクセル）
+		 */
+		virtual void movePointer(int deltaX, int deltaY) = 0;
+
+		/**
+		 * @brief いまカーソルがある位置へ左クリックを送る
+		 *
+		 * 素早く2回呼べば、OSがそのままダブルクリックとして扱う。
+		 * movePointer と同じく、自分のアプリが前面のときだけ送る
+		 */
+		virtual void clickPointer() = 0;
 	};
 } // namespace core::iface

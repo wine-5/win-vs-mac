@@ -46,11 +46,14 @@ namespace game::ui::ingame
 	InteractPromptView::InteractPromptView(core::iface::IUIRenderer& uiRenderer,
 	    core::iface::IRenderer& renderer,
 	    core::iface::IScreen& screen,
-	    core::ecs::ComponentManager& componentManager)
+	    core::ecs::ComponentManager& componentManager,
+	    core::iface::IInputProvider& inputProvider)
 	    : m_uiRenderer{ uiRenderer }
 	    , m_renderer{ renderer }
 	    , m_screen{ screen }
 	    , m_componentManager{ componentManager }
+	    , m_inputProvider{ inputProvider }
+	    , m_padButtonIcon{ uiRenderer }
 	{
 		auto* converter{ core::base::ServiceLocator::get<core::iface::IStringConverter>() };
 		m_keyText = "F2";
@@ -100,8 +103,12 @@ namespace game::ui::ingame
 
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		const int fontSize{ scaled(FONT_SIZE) };
-		const int keyWidth{ m_uiRenderer.getTextWidth(m_keyText.c_str(), fontSize) };
 		const int actionWidth{ m_uiRenderer.getTextWidth(m_actionText.c_str(), fontSize) };
+
+		// パッドを触っているなら□の記号、そうでなければキーの名前を出す
+		const bool isPad{ m_inputProvider.getLastInputDevice() == core::input::InputDevice::GamePad };
+		const int keyWidth{ isPad ? m_padButtonIcon.measure(ui::PadButton::Square, fontSize)
+			                      : m_uiRenderer.getTextWidth(m_keyText.c_str(), fontSize) };
 
 		const int keyBadgeWidth{ keyWidth + scaled(KEY_PADDING_X) * 2 };
 		const int contentWidth{ keyBadgeWidth + scaled(KEY_GAP) + actionWidth };
@@ -132,8 +139,16 @@ namespace game::ui::ingame
 		m_uiRenderer.drawRoundedBox(keyLeft, top + scaled(PADDING_Y) / 2, keyBadgeWidth,
 		    boxHeight - scaled(PADDING_Y), scaled(RADIUS), KEY_FILL_COLOR, true, 1);
 
-		m_uiRenderer.drawText(keyLeft + scaled(KEY_PADDING_X), top + scaled(PADDING_Y),
-		    m_keyText.c_str(), core::utility::Color::HUD_INK, fontSize);
+		if (isPad)
+		{
+			m_padButtonIcon.draw(ui::PadButton::Square,
+			    keyLeft + scaled(KEY_PADDING_X), top + scaled(PADDING_Y), fontSize);
+		}
+		else
+		{
+			m_uiRenderer.drawText(keyLeft + scaled(KEY_PADDING_X), top + scaled(PADDING_Y),
+			    m_keyText.c_str(), core::utility::Color::HUD_INK, fontSize);
+		}
 		m_uiRenderer.drawText(keyLeft + keyBadgeWidth + scaled(KEY_GAP), top + scaled(PADDING_Y),
 		    m_actionText.c_str(), core::utility::Color::HUD_INK, fontSize);
 

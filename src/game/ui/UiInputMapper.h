@@ -76,7 +76,24 @@ namespace game::ui
 		/** @brief 繰り返しの間隔（秒） */
 		static constexpr float REPEAT_INTERVAL{ 0.08f };
 
+		/** @brief スティックを「倒した」とみなす倒し量 */
+		static constexpr float STICK_TRIGGER{ 0.5f };
+		/** @brief スティックを「戻した」とみなす倒し量（成立より低くして往復を防ぐ） */
+		static constexpr float STICK_RELEASE{ 0.35f };
+
 		static constexpr int ACTION_COUNT{ static_cast<int>(UiAction::Count) };
+
+		/** @brief スティックをデジタルの方向として覚えておく順番 */
+		enum class StickDirection
+		{
+			Up,
+			Down,
+			Left,
+			Right,
+			Count,
+		};
+
+		static constexpr int STICK_DIRECTION_COUNT{ static_cast<int>(StickDirection::Count) };
 
 		/**
 		 * @brief 押されている状態から成立判定を作る
@@ -87,6 +104,17 @@ namespace game::ui
 		 */
 		void updateAction(UiAction action, bool isDown, float deltaTime, bool allowRepeat);
 
+		/**
+		 * @brief スティックの倒し量をデジタルの方向として読む
+		 *
+		 * 1つのしきい値で切ると、境目で倒しているときに成立と解除を細かく繰り返して
+		 * カーソルが暴れる。成立と解除で別のしきい値を使って落ち着かせる
+		 * @param direction 判定する方向
+		 * @param amount その方向への倒し量（0.0f〜1.0f）
+		 * @return 倒していると見なすなら true
+		 */
+		[[nodiscard]] bool readStick(StickDirection direction, float amount) noexcept;
+
 		core::iface::IInputProvider& m_inputProvider;
 
 		bool m_isTriggered[ACTION_COUNT]{};
@@ -94,6 +122,9 @@ namespace game::ui
 		float m_repeatTimer[ACTION_COUNT]{};
 
 		bool m_isFocusVisible{ false };
+
+		// スティックを倒しているか（方向ごと）。しきい値の往復を抑えるために持つ
+		bool m_stickDirections[STICK_DIRECTION_COUNT]{};
 
 		// マウスが動いたかを見るために前フレームの座標を持つ
 		int m_previousMouseX{ -1 };

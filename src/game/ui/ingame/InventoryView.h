@@ -7,6 +7,8 @@
 #include "core/data/FileExtensionType.h"
 #include "game/utility/PlayerStats.h"
 #include "HudPanel.h"
+#include "core/interface/IInputProvider.h"
+#include "game/ui/PadButtonIcon.h"
 #include <array>
 #include <chrono>
 #include <string>
@@ -36,8 +38,9 @@ namespace game::ui::ingame
 	 *   未装備     … 拾ったが枠が埋まっていて効果が乗っていないもの
 	 * 「未装備」があることが、リネームブロックを探す動機になる。
 	 *
-	 * 開いている間は時間が止まる（PauseReason::Inventory）。読む画面なので、
-	 * 読んでいる最中に殴られるのはプレイヤーの落ち度ではなく設計の落ち度になる。
+	 * 開いている間も世界と時間は動く（PauseReason::Inventory は時間を止めない）。
+	 * 付け替えている間に敵が寄ってくることまで込みで「倒してから整えるか、
+	 * そのまま整えるか」を選ばせるため。プレイヤー自身は動けず、普通に殴られる。
 	 */
 	class InventoryView
 	{
@@ -54,7 +57,8 @@ namespace game::ui::ingame
 		    core::iface::IScreen& screen,
 		    core::ecs::ComponentManager& componentManager,
 		    core::iface::IResourceManager& resourceManager,
-		    const data::FileEquipmentData& equipmentData);
+		    const data::FileEquipmentData& equipmentData,
+		    core::iface::IInputProvider& inputProvider);
 
 		/**
 		 * @brief インベントリを描画する
@@ -81,6 +85,25 @@ namespace game::ui::ingame
 		 * @param isSwapMode 付け替え中ならtrue
 		 */
 		void setSwapMode(bool isSwapMode) noexcept;
+
+		/**
+		 * @brief 開く／閉じる動きを始める
+		 *
+		 * 開くときは、奥を落とす暗幕を短い時間で濃くしながら出す。
+		 * 瞬間に出すと窓が「切り替わった」だけに見えて目が追えないため。
+		 * 閉じるときは動かさずその場で消す。同じ動きを逆再生すると、
+		 * 閉じたいのに一拍待たされる感じになる
+		 * @param isOpen 開くならtrue
+		 */
+		void setOpen(bool isOpen) noexcept;
+
+		/**
+		 * @brief まだ描く必要があるかを返す
+		 *
+		 * 閉じる動きの最中も描き続ける必要があるため、開閉のフラグとは別に持つ
+		 * @return 描く必要があるならtrue
+		 */
+		[[nodiscard]] bool isVisible() const;
 
 		/**
 		 * @brief 能力値の増減表示を消して比較の基準を取り直す
@@ -111,6 +134,25 @@ namespace game::ui::ingame
 		 * @return 指しているマスの m_acquired 上の位置。どのマスでもなければ -1
 		 */
 		[[nodiscard]] int findSlotIndexAt(int screenX, int screenY) const noexcept;
+
+		/**
+		 * @brief 指定したマスから見て、ある方向にある一番近いマスを返す
+		 *
+		 * マスの位置はレイアウトを組む描画側しか知らないため、移動先の判定もここが持つ。
+		 * 行と列で数えずに座標で探すのは、区分ごとに折り返し方も段数も違うため。
+		 * 座標で探せば、並びを変えても移動の規則を書き直さずに済む
+		 * @param fromIndex いまいるマス（m_acquired 上の添字）。-1 なら先頭のマスを返す
+		 * @param directionX 横方向（-1で左、+1で右、0なら横に動かない）
+		 * @param directionY 縦方向（-1で上、+1で下、0なら縦に動かない）
+		 * @return 移動先のマス。その方向にマスが無ければ fromIndex のまま
+		 */
+		[[nodiscard]] int findSlotIndexToward(int fromIndex, int directionX, int directionY) const noexcept;
+
+		/**
+		 * @brief 動かせるマスのうち、先頭のものを返す
+		 * @return 先頭のマス（m_acquired 上の添字）。動かせるマスが無ければ -1
+		 */
+		[[nodiscard]] int firstSelectableSlotIndex() const noexcept;
 
 		/**
 		 * @brief 画面座標が動かせない枠（持ち込み）の上にあるかを返す
@@ -155,6 +197,19 @@ namespace game::ui::ingame
 		 * @return 経過秒数
 		 */
 		[[nodiscard]] float elapsedSeconds() const;
+
+		/**
+		 * @brief 窓の地を上から下へ抜ける光の帯を描く
+		 *
+		 * 拡張子を1つも持っていないと、窓の中で動くものが何も無くなる。
+		 * 止まった窓は表示が壊れているようにも見えるので、地そのものを流し続ける。
+		 * Windowsの内部が舞台なので、データが流れている見え方にしてある
+		 * @param x 窓左上のX座標
+		 * @param y 窓左上のY座標
+		 * @param width 窓の幅
+		 * @param height 窓の高さ
+		 */
+		void drawFlowBand(int x, int y, int width, int height);
 
 		/**
 		 * @brief 窓のタイトルバーを描く
@@ -327,6 +382,7 @@ namespace game::ui::ingame
 		core::iface::IScreen& m_screen;
 		core::ecs::ComponentManager& m_componentManager;
 		core::iface::IResourceManager& m_resourceManager;
+		core::iface::IInputProvider& m_inputProvider;
 		const data::FileEquipmentData& m_equipmentData;
 		HudPanel m_panel;
 
@@ -386,6 +442,63 @@ namespace game::ui::ingame
 		std::string m_captionAcquired{};
 		std::string m_captionUnequipped{};
 		std::string m_captionNoUnequipped{};
+		/**
+		 * @brief 案内1件分（押すボタンと、それで何が起きるか）
+		 */
+		struct PadHint
+		{
+			PadButton m_button{};
+			const std::string* m_label{ nullptr };
+		};
+
+		/**
+		 * @brief パッドの案内を1行に並べて描く
+		 *
+		 * 記号を混ぜると getTextWidth だけでは幅が測れないため、
+		 * 描画と幅の計算を同じ並べ方で行えるようにまとめてある
+		 * @param x 左端のX座標（measureOnly のときは使われない）
+		 * @param y 上端のY座標（同上）
+		 * @param hints 並べる案内
+		 * @param count 案内の数
+		 * @param fontSize 文字の大きさ（記号の大きさもこれに合わせる）
+		 * @param measureOnly 幅を測るだけで描かないならtrue
+		 * @param labelColor 説明文の色
+		 * @return 1行の幅（ピクセル）
+		 */
+		int layoutPadHints(int x, int y, const PadHint* hints, int count,
+		    int fontSize, bool measureOnly, unsigned int labelColor);
+
+		/**
+		 * @brief 開閉の進み具合を返す
+		 * @return 0.0（閉じ切っている）〜1.0（開き切っている）
+		 */
+		[[nodiscard]] float openProgress() const;
+
+		/**
+		 * @brief ゆっくりした明滅の強さを返す
+		 * @param cyclesPerSecond 1秒あたりの周期数
+		 * @param phase 位相のずらし量（0.0〜1.0）
+		 * @param minRate 一番暗いときの割合（0.0〜1.0）
+		 * @return minRate〜1.0 の値
+		 */
+		[[nodiscard]] float breathRate(float cyclesPerSecond, float phase, float minRate) const;
+
+		/** @brief パッドを触っている最中かを返す */
+		[[nodiscard]] bool isUsingPad() const;
+
+		// パッドで遊んでいる間の案内。キーの名前ではなく記号で出す
+		PadButtonIcon m_padButtonIcon;
+		std::string m_padLabelClose{};
+		std::string m_padLabelGrab{};
+		std::string m_padLabelPlace{};  // 掴んでいるときの×
+		std::string m_padLabelCancel{}; // 掴んでいるときの〇
+		std::string m_padLabelSwapHere{};
+
+		// 開閉の動き。閉じる動きの最中も描き続けるため、開閉のフラグと進み具合を分けて持つ
+		bool m_isOpen{ false };
+		std::chrono::steady_clock::time_point m_transitionStart{};
+
+		std::string m_titleSwap{}; // 付け替えできるときの見出し
 		std::string m_captionSwapGuide{};
 		std::string m_modeSwapLabel{};
 		std::string m_modeViewLabel{};

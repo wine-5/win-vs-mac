@@ -4,6 +4,7 @@
 #include "core/constant/UI.h"
 #include "core/interface/IStringConverter.h"
 #include "core/utility/Color.h"
+#include "core/utility/Easing.h"
 #include "core/utility/MathConstants.h"
 #include "core/utility/Log.h"
 #include "game/component/combat/AttackComponent.h"
@@ -18,14 +19,17 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <iterator>
 
 namespace
 {
 	// 基準解像度。レイアウトの数値はすべてこの高さのときのピクセル数として書く
 	constexpr int BASE_SCREEN_HEIGHT{ 1080 };
 
-	// 画面全体を覆う暗幕。奥のゲーム画面を残したまま、手前の文字を読めるようにする
-	constexpr int BACKDROP_ALPHA{ 176 };
+	// 画面全体を覆う暗幕。開いている間も世界は動いているので、
+	// 覆い隠しすぎると殴られていることに気付けない。窓の中は窓自身が地を持つため、
+	// ここを薄くしても文字の読みやすさは変わらない
+	constexpr int BACKDROP_ALPHA{ 118 };
 
 	// 窓の大きさ（1080p基準）
 	constexpr int WINDOW_WIDTH{ 1280 };
@@ -73,6 +77,38 @@ namespace
 	constexpr int SLOT_HEIGHT{ 158 }; // アイコン＋ファイル名＋ボーナス表記の3段ぶん
 	constexpr int SLOT_GAP{ 10 };
 	constexpr int SLOT_RADIUS{ 4 }; // Windows 11のコントロールの角丸
+
+	// 付け替えできるときだけ出す枠と帯の太さ（1080p基準）
+	constexpr int SWAP_BORDER_THICKNESS{ 3 };
+
+	// 開閉の動き。窓そのものは拡縮させない。少し小さいところから膨らませると、
+	// 出し切ったあとにもう一段大きくなったように見えて落ち着かない
+	constexpr float OPEN_DURATION{ 0.14f }; // 開き切る／閉じ切るまでの時間（秒）
+
+	// 窓の地を上から下へ抜ける光の帯（1080p基準）
+	constexpr float FLOW_BAND_PERIOD{ 4.5f }; // 上端から下端まで抜けるのにかかる時間（秒）
+	constexpr int FLOW_BAND_THICKNESS{ 3 };   // 先頭の線の太さ
+	constexpr int FLOW_BAND_HEAD_ALPHA{ 46 }; // 先頭の濃さ
+	constexpr int FLOW_BAND_TAIL_COUNT{ 7 };  // 後ろへ引く尾の枚数
+	constexpr int FLOW_BAND_TAIL_STEP{ 5 };   // 尾を1枚ずらす間隔
+	constexpr unsigned int FLOW_BAND_COLOR{ core::utility::Color::HUD_CHARGE_CYAN };
+
+	// 付け替えできるときの枠の脈動
+	constexpr float SWAP_PULSE_CYCLES{ 0.45f };
+	constexpr float SWAP_PULSE_MIN{ 0.55f };
+	constexpr int SWAP_BORDER_ALPHA{ 255 };
+
+	// 方向で移動先を探すときに、横へのずれをどれだけ嫌うか。
+	// 1だと斜めのマスへも同じ重みで飛ぶので、真っすぐ近いものを優先させる
+	constexpr int SLOT_NAV_CROSS_PENALTY{ 3 };
+
+	// パッドの案内の間隔（1080p基準）
+	constexpr int PAD_HINT_ICON_GAP{ 6 };  // 記号と説明の間
+	constexpr int PAD_HINT_ITEM_GAP{ 22 }; // 案内どうしの間
+
+	// アドレスバー右端のモードバッジの余白（1080p基準）
+	constexpr int MODE_BADGE_PADDING_X{ 10 };
+	constexpr int MODE_BADGE_PADDING_Y{ 4 };
 	constexpr int SLOT_ICON_SIZE{ 66 };
 	constexpr int SLOT_ICON_TOP{ 10 };
 	constexpr int SLOT_NAME_FONT_SIZE{ 16 };
@@ -214,11 +250,14 @@ namespace game::ui::ingame
 	    core::iface::IScreen& screen,
 	    core::ecs::ComponentManager& componentManager,
 	    core::iface::IResourceManager& resourceManager,
-	    const data::FileEquipmentData& equipmentData)
+	    const data::FileEquipmentData& equipmentData,
+	    core::iface::IInputProvider& inputProvider)
 	    : m_uiRenderer{ uiRenderer }
 	    , m_screen{ screen }
 	    , m_componentManager{ componentManager }
 	    , m_resourceManager{ resourceManager }
+	    , m_inputProvider{ inputProvider }
+	    , m_padButtonIcon{ uiRenderer }
 	    , m_equipmentData{ equipmentData }
 	    , m_panel{ uiRenderer, screen }
 	{
@@ -248,6 +287,7 @@ namespace game::ui::ingame
 
 		// 日本語は変換結果が毎フレーム同じなので、生成時に一度だけ変換して保持する
 		m_title = toDrawable("インベントリ");
+		m_titleSwap = toDrawable("拡張子の付け替え");
 		m_addressText = toDrawable("PC  >  拡張子  >  所持しているもの");
 		// 見出しは区分の幅に収まる長さにする。はみ出すと隣の区分の見出しへ重なり、
 		// どちらも読めなくなる（説明はアドレスバーとステータスバーが担う）
@@ -262,20 +302,67 @@ namespace game::ui::ingame
 
 		// EとF2で窓の見た目がほとんど同じなため、どちらでも入れ替えられると誤解される。
 		// パンくずの行き先だけでは弱いので、いま何ができるのかを上部で言い切る
-		m_modeSwapLabel = toDrawable("拡張子を入れ替えられます");
-		m_modeViewLabel = toDrawable("見るだけ（入れ替えは F2 の端末で）");
+		m_modeSwapLabel = toDrawable("入れ替えできます");
+		m_modeViewLabel = toDrawable("見るだけ");
 		m_captionHint = toDrawable("E / Esc : 閉じる");
 
 		// 付け替え中は操作が増える。どのキーで何ができるかを出しておかないと、
 		// 掴んだあとで進み方が分からなくなる
 		m_captionSwapHint = toDrawable("ドラッグして入れ替え    F2 / Esc : 閉じる");
 		m_captionEmptySlot = toDrawable("空き");
+
+		// パッド用の案内。ボタンの記号は図形で描くので、ここには説明だけを持つ
+		m_padLabelClose = toDrawable("閉じる");
+		m_padLabelGrab = toDrawable("つかむ");
+		m_padLabelPlace = toDrawable("ここへ置く");
+		m_padLabelCancel = toDrawable("やめる");
+		m_padLabelSwapHere = toDrawable("の端末で付け替えできる");
 		m_captionOverflow = toDrawable(" 件は表示しきれません");
 	}
 
 	int InventoryView::scaled(int value) const
 	{
 		return value * m_screen.getHeight() / BASE_SCREEN_HEIGHT;
+	}
+
+	float InventoryView::openProgress() const
+	{
+		const float elapsed{ std::chrono::duration<float>(
+			std::chrono::steady_clock::now() - m_transitionStart)
+			    .count() };
+		const float progress{ std::clamp(elapsed / OPEN_DURATION, 0.0f, 1.0f) };
+		return m_isOpen ? progress : 1.0f - progress;
+	}
+
+	float InventoryView::breathRate(float cyclesPerSecond, float phase, float minRate) const
+	{
+		const float wave{ std::sin(
+			(elapsedSeconds() * cyclesPerSecond + phase) * core::utility::TWO_PI) };
+		return minRate + (1.0f - minRate) * (wave * 0.5f + 0.5f);
+	}
+
+	void InventoryView::setOpen(bool isOpen) noexcept
+	{
+		if (m_isOpen == isOpen)
+			return;
+
+		m_isOpen = isOpen;
+
+		// 閉じるときは動かさずその場で消す。開くときと同じ動きを逆再生すると、
+		// 閉じたいのに一拍待たされる感じになって邪魔になる。
+		// 基準時刻を初期値へ戻すと経過が十分大きくなり、進み具合が 0 になる
+		if (!isOpen)
+		{
+			m_transitionStart = {};
+			return;
+		}
+
+		m_transitionStart = std::chrono::steady_clock::now();
+	}
+
+	bool InventoryView::isVisible() const
+	{
+		return m_isOpen || openProgress() > 0.0f;
 	}
 
 	float InventoryView::elapsedSeconds() const
@@ -291,6 +378,10 @@ namespace game::ui::ingame
 
 	void InventoryView::setSwapMode(bool isSwapMode) noexcept
 	{
+		// 閉じる動きの最中は変えない。閉じながら別の窓へ化けたように見えるため
+		if (!m_isOpen)
+			return;
+
 		m_isSwapMode = isSwapMode;
 	}
 
@@ -320,6 +411,73 @@ namespace game::ui::ingame
 				return bounds.m_acquiredIndex;
 		}
 		return -1;
+	}
+
+	int InventoryView::firstSelectableSlotIndex() const noexcept
+	{
+		int found{ -1 };
+		for (const SlotBounds& bounds : m_slotBounds)
+		{
+			if (bounds.m_isLocked || bounds.m_acquiredIndex < 0)
+				continue;
+
+			if (found < 0 || bounds.m_acquiredIndex < found)
+				found = bounds.m_acquiredIndex;
+		}
+
+		return found;
+	}
+
+	int InventoryView::findSlotIndexToward(int fromIndex, int directionX, int directionY) const noexcept
+	{
+		if (fromIndex < 0)
+			return firstSelectableSlotIndex();
+
+		// いまいるマスの中心を出す。見つからなければ先頭へ戻す
+		// （前のフレームで消えたマスを指していることがある）
+		const SlotBounds* from{ nullptr };
+		for (const SlotBounds& bounds : m_slotBounds)
+		{
+			if (bounds.m_isLocked || bounds.m_acquiredIndex != fromIndex)
+				continue;
+
+			from = &bounds;
+			break;
+		}
+
+		if (from == nullptr)
+			return firstSelectableSlotIndex();
+
+		const int fromX{ from->m_x + from->m_width / 2 };
+		const int fromY{ from->m_y + from->m_height / 2 };
+
+		int bestIndex{ fromIndex };
+		int bestScore{ 0 };
+		for (const SlotBounds& bounds : m_slotBounds)
+		{
+			if (bounds.m_isLocked || bounds.m_acquiredIndex < 0 ||
+			    bounds.m_acquiredIndex == fromIndex)
+				continue;
+
+			const int deltaX{ bounds.m_x + bounds.m_width / 2 - fromX };
+			const int deltaY{ bounds.m_y + bounds.m_height / 2 - fromY };
+
+			// 押した方向にあるものだけを候補にする
+			const int along{ directionX != 0 ? deltaX * directionX : deltaY * directionY };
+			if (along <= 0)
+				continue;
+
+			const int cross{ directionX != 0 ? std::abs(deltaY) : std::abs(deltaX) };
+			const int score{ along + cross * SLOT_NAV_CROSS_PENALTY };
+
+			if (bestIndex != fromIndex && score >= bestScore)
+				continue;
+
+			bestIndex = bounds.m_acquiredIndex;
+			bestScore = score;
+		}
+
+		return bestIndex;
 	}
 
 	bool InventoryView::isLockedSlotAt(int screenX, int screenY) const noexcept
@@ -361,9 +519,17 @@ namespace game::ui::ingame
 		// マスの位置はこのフレームのレイアウトから組み直す
 		m_slotBounds.clear();
 
+		const float progress{ openProgress() };
+		if (progress <= 0.0f)
+			return;
+
+		// 終わり際をゆっくり止める。等速だと機械が動いたようにしか見えない
+		const float eased{ core::utility::easeOut(progress) };
+
 		// 奥のゲーム画面を暗く落として、手前の文字を読めるようにする。
 		// 真っ黒で覆わないのは「今どこに立っているか」を見失わせないため
-		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, BACKDROP_ALPHA);
+		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+		    static_cast<int>(BACKDROP_ALPHA * eased));
 		m_uiRenderer.drawBox(0, 0, m_screen.getWidth(), m_screen.getHeight(),
 		    core::utility::Color::BLACK, true);
 		m_uiRenderer.resetBlendMode();
@@ -376,6 +542,26 @@ namespace game::ui::ingame
 		// 光の帯は走らせない。小さなHUDでは生存確認として効くが、
 		// この大きさだと白い帯が視界を横切って読む邪魔になる
 		m_panel.draw(left, top, width, height, false);
+
+		// 地を流し続ける。中身が空でも窓が止まって見えないようにするため、
+		// マスやアイコンより先（後ろ）に描く
+		drawFlowBand(left, top, width, height);
+
+		// 付け替えできるときだけ窓の枠をアクセント色にする。開いた瞬間に
+		// 目に入るのは中身より先に窓の輪郭なので、状態の違いはここへ出す
+		if (m_isSwapMode)
+		{
+			// ゆっくり脈動させる。色だけだと「そういう配色の窓」に見えるが、
+			// 動いていると「いま触れる状態だ」という主張になる
+			const int radius{ scaled(HudPanel::PANEL_RADIUS) };
+			const float rate{ breathRate(SWAP_PULSE_CYCLES, 0.0f, SWAP_PULSE_MIN) };
+
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA,
+			    static_cast<int>(SWAP_BORDER_ALPHA * rate * eased));
+			m_uiRenderer.drawRoundedBox(left, top, width, height, radius,
+			    core::utility::Color::HUD_ACCENT, false, scaled(SWAP_BORDER_THICKNESS));
+			m_uiRenderer.resetBlendMode();
+		}
 
 		drawTitleBar(left, top, width);
 		drawAddressBar(left, top + scaled(TITLE_BAR_HEIGHT), width);
@@ -466,6 +652,33 @@ namespace game::ui::ingame
 		drawDraggedIcon(draggedType);
 	}
 
+	void InventoryView::drawFlowBand(int x, int y, int width, int height)
+	{
+		const int thickness{ std::max(1, scaled(FLOW_BAND_THICKNESS)) };
+		const int tailStep{ std::max(1, scaled(FLOW_BAND_TAIL_STEP)) };
+
+		// 1周期で上端から下端まで進む。端まで行ったら上へ戻る
+		const float phase{ elapsedSeconds() / FLOW_BAND_PERIOD };
+		const int headY{ y + static_cast<int>((phase - std::floor(phase)) * height) };
+
+		// 後ろへ薄い尾を引く。1本の線だけだと横切っただけに見えて、
+		// どちらへ流れているのかが読み取れない
+		for (int i{ FLOW_BAND_TAIL_COUNT }; i >= 0; --i)
+		{
+			const int lineY{ headY - i * tailStep };
+			if (lineY < y)
+				continue;
+
+			// 先頭が一番濃く、離れるほど薄くする
+			const int alpha{ FLOW_BAND_HEAD_ALPHA * (FLOW_BAND_TAIL_COUNT + 1 - i) /
+				             (FLOW_BAND_TAIL_COUNT + 1) };
+
+			m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, alpha);
+			m_uiRenderer.drawBox(x, lineY, width, thickness, FLOW_BAND_COLOR, true);
+			m_uiRenderer.resetBlendMode();
+		}
+	}
+
 	void InventoryView::drawTitleBar(int x, int y, int width)
 	{
 		// 面の色は変えない。上下で濃さが違うと、窓が2枚重なっているように見える。
@@ -474,16 +687,31 @@ namespace game::ui::ingame
 		const int padding{ scaled(WINDOW_PADDING) };
 		const int iconSize{ scaled(TITLE_ICON_SIZE) };
 
-		// フォルダを表す四角。専用の画像を持たずに済ませ、色だけで「フォルダ」を示す
+		// フォルダを表す四角。専用の画像を持たずに済ませ、色だけで「フォルダ」を示す。
+		// 付け替え中はアクセント色にして、見出しと合わせて別の窓だと分かるようにする
+		const unsigned int iconColor{ m_isSwapMode ? core::utility::Color::HUD_ACCENT
+			                                       : core::utility::Color::HUD_CHARGE_MAX };
 		m_uiRenderer.drawRoundedBox(x + padding, y + (barHeight - iconSize) / 2,
-		    iconSize, iconSize, scaled(SLOT_RADIUS), core::utility::Color::HUD_CHARGE_MAX, true, 1);
+		    iconSize, iconSize, scaled(SLOT_RADIUS), iconColor, true, 1);
+
+		// 見出しそのものを変える。「インベントリ」のままだと、色が変わっただけの
+		// 同じ窓に見えて、何が違うのかを読み取らせる手間が残る
+		const std::string& title{ m_isSwapMode ? m_titleSwap : m_title };
 
 		const int fontSize{ scaled(TITLE_FONT_SIZE) };
 		m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
 		m_uiRenderer.drawText(x + padding + iconSize + scaled(TITLE_ICON_GAP),
-		    y + (barHeight - fontSize) / 2, m_title.c_str(),
+		    y + (barHeight - fontSize) / 2, title.c_str(),
 		    core::utility::Color::HUD_INK, fontSize);
 		m_uiRenderer.resetFont();
+
+		// 区切り線。付け替え中は太いアクセントの帯にして、見出しの帯ごと目立たせる
+		if (m_isSwapMode)
+		{
+			m_uiRenderer.drawBox(x, y + barHeight, width, scaled(SWAP_BORDER_THICKNESS),
+			    core::utility::Color::HUD_ACCENT, true);
+			return;
+		}
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SEPARATOR_ALPHA);
 		m_uiRenderer.drawLine(x, y + barHeight, x + width, y + barHeight, SEPARATOR_COLOR, 1);
@@ -502,19 +730,65 @@ namespace game::ui::ingame
 		m_uiRenderer.drawText(x + scaled(WINDOW_PADDING), y + (barHeight - fontSize) / 2,
 		    address.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
 
-		// できること／できないことを右端で言い切る。入れ替えられるときだけ
-		// アクセント色にして、開いた瞬間にどちらの窓かが色で分かるようにする
+		// できること／できないことを右端で言い切る。入れ替えられるときは塗りの
+		// バッジにして、薄い文字の中で1つだけ浮かせる
 		const std::string& mode{ m_isSwapMode ? m_modeSwapLabel : m_modeViewLabel };
-		const unsigned int modeColor{ m_isSwapMode ? core::utility::Color::HUD_ACCENT
-			                                       : core::utility::Color::HUD_INK_FAINT };
 		const int modeWidth{ m_uiRenderer.getTextWidth(mode.c_str(), fontSize) };
-		m_uiRenderer.drawText(x + width - scaled(WINDOW_PADDING) - modeWidth,
-		    y + (barHeight - fontSize) / 2, mode.c_str(), modeColor, fontSize);
+		const int modeX{ x + width - scaled(WINDOW_PADDING) - modeWidth };
+		const int modeY{ y + (barHeight - fontSize) / 2 };
+
+		if (m_isSwapMode)
+		{
+			const int padX{ scaled(MODE_BADGE_PADDING_X) };
+			const int padY{ scaled(MODE_BADGE_PADDING_Y) };
+			m_uiRenderer.drawRoundedBox(modeX - padX, modeY - padY,
+			    modeWidth + padX * 2, fontSize + padY * 2, scaled(SLOT_RADIUS),
+			    core::utility::Color::HUD_ACCENT, true, 1);
+			m_uiRenderer.drawText(modeX, modeY, mode.c_str(),
+			    core::utility::Color::HUD_INK, fontSize);
+			m_uiRenderer.resetFont();
+			return;
+		}
+
+		m_uiRenderer.drawText(modeX, modeY, mode.c_str(),
+		    core::utility::Color::HUD_INK_FAINT, fontSize);
 		m_uiRenderer.resetFont();
 
 		m_uiRenderer.setBlendMode(core::constant::ui::BLEND_MODE_ALPHA, SEPARATOR_ALPHA);
 		m_uiRenderer.drawLine(x, y + barHeight, x + width, y + barHeight, SEPARATOR_COLOR, 1);
 		m_uiRenderer.resetBlendMode();
+	}
+
+	bool InventoryView::isUsingPad() const
+	{
+		return m_inputProvider.getLastInputDevice() == core::input::InputDevice::GamePad;
+	}
+
+	int InventoryView::layoutPadHints(int x, int y, const PadHint* hints, int count,
+	    int fontSize, bool measureOnly, unsigned int labelColor)
+	{
+		const int iconGap{ scaled(PAD_HINT_ICON_GAP) };
+		const int itemGap{ scaled(PAD_HINT_ITEM_GAP) };
+
+		int cursorX{ x };
+		for (int i{ 0 }; i < count; ++i)
+		{
+			if (i > 0)
+				cursorX += itemGap;
+
+			const int iconWidth{ m_padButtonIcon.measure(hints[i].m_button, fontSize) };
+			if (!measureOnly)
+				m_padButtonIcon.draw(hints[i].m_button, cursorX, y, fontSize);
+			cursorX += iconWidth + iconGap;
+
+			const std::string& label{ *hints[i].m_label };
+			if (!measureOnly)
+				m_uiRenderer.drawText(cursorX, y, label.c_str(), labelColor, fontSize);
+
+			cursorX += m_uiRenderer.getTextWidth(label.c_str(), fontSize);
+		}
+
+		return cursorX - x;
 	}
 
 	void InventoryView::drawStatusBar(int x, int y, int width, int itemCount)
@@ -536,9 +810,43 @@ namespace game::ui::ingame
 		    countLabel.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
 
 		// 操作の案内。開いたはいいが閉じ方が分からない、を起こさない
+		const int hintY{ y + (barHeight - fontSize) / 2 };
+
+		if (isUsingPad())
+		{
+			// 掴んでいるかどうかでボタンの意味が変わる。掴んだまま「閉じる」と出ていると、
+			// 〇を押したら窓が消えると思って、離すのをためらうことになる
+			const bool isHolding{ m_heldIndex >= 0 };
+			const PadHint holdHints[]{
+				{ PadButton::Cross, &m_padLabelPlace },
+				{ PadButton::Circle, &m_padLabelCancel },
+			};
+			const PadHint swapHints[]{
+				{ PadButton::Cross, &m_padLabelGrab },
+				{ PadButton::Circle, &m_padLabelClose },
+			};
+			const PadHint viewHints[]{ { PadButton::Circle, &m_padLabelClose } };
+
+			const PadHint* hints{ viewHints };
+			int count{ static_cast<int>(std::size(viewHints)) };
+			if (m_isSwapMode)
+			{
+				hints = isHolding ? holdHints : swapHints;
+				count = isHolding ? static_cast<int>(std::size(holdHints))
+				                  : static_cast<int>(std::size(swapHints));
+			}
+
+			constexpr unsigned int HINT_COLOR{ core::utility::Color::HUD_INK_FAINT };
+			const int padHintWidth{ layoutPadHints(0, 0, hints, count, fontSize, true, HINT_COLOR) };
+			layoutPadHints(x + width - padding - padHintWidth, hintY, hints, count,
+			    fontSize, false, HINT_COLOR);
+			m_uiRenderer.resetFont();
+			return;
+		}
+
 		const std::string& hint{ m_isSwapMode ? m_captionSwapHint : m_captionHint };
 		const int hintWidth{ m_uiRenderer.getTextWidth(hint.c_str(), fontSize) };
-		m_uiRenderer.drawText(x + width - padding - hintWidth, y + (barHeight - fontSize) / 2,
+		m_uiRenderer.drawText(x + width - padding - hintWidth, hintY,
 		    hint.c_str(), core::utility::Color::HUD_INK_FAINT, fontSize);
 		m_uiRenderer.resetFont();
 	}
@@ -576,9 +884,24 @@ namespace game::ui::ingame
 		{
 			const int captionFontSize{ scaled(SECTION_FONT_SIZE) };
 			m_uiRenderer.setFont(core::constant::ui::UI_FONT_NAME);
-			const int guideWidth{ m_uiRenderer.getTextWidth(m_captionSwapGuide.c_str(), captionFontSize) };
-			m_uiRenderer.drawText(x + width - guideWidth, y, m_captionSwapGuide.c_str(),
-			    core::utility::Color::HUD_ACCENT, captionFontSize);
+			if (isUsingPad())
+			{
+				// ここは「拾ったのに効いていないもの」の隣で一番読まれる導線なので、
+				// キーボードのときと同じくアクセント色で目立たせる
+				constexpr unsigned int GUIDE_COLOR{ core::utility::Color::HUD_ACCENT };
+				const PadHint guideHints[]{ { PadButton::Square, &m_padLabelSwapHere } };
+				const int padGuideWidth{
+					layoutPadHints(0, 0, guideHints, 1, captionFontSize, true, GUIDE_COLOR)
+				};
+				layoutPadHints(x + width - padGuideWidth, y, guideHints, 1,
+				    captionFontSize, false, GUIDE_COLOR);
+			}
+			else
+			{
+				const int guideWidth{ m_uiRenderer.getTextWidth(m_captionSwapGuide.c_str(), captionFontSize) };
+				m_uiRenderer.drawText(x + width - guideWidth, y, m_captionSwapGuide.c_str(),
+				    core::utility::Color::HUD_ACCENT, captionFontSize);
+			}
 			m_uiRenderer.resetFont();
 		}
 
