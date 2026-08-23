@@ -141,6 +141,19 @@ namespace game::ui::pause
 		void getConfirmPanelRect(int& outX, int& outY, int& outWidth, int& outHeight) const;
 
 		/**
+		 * @brief Shift_JISの文字列を、指定した幅に収まる行へ折り返す
+		 *
+		 * 日本語は語の間に空白が無いので、文字単位で見て入るところまで詰める。
+		 * 行頭に句読点や閉じ括弧が来ると読みにくいので、それらは前の行へ残す
+		 * @param text 折り返す文字列（Shift_JIS）
+		 * @param maxWidth 1行に許す幅（ピクセル）
+		 * @param fontSize 文字の大きさ
+		 * @return 折り返した各行
+		 */
+		[[nodiscard]] std::vector<std::string> wrapText(
+		    const std::string& text, int maxWidth, int fontSize) const;
+
+		/**
 		 * @brief 確認ダイアログのボタンの矩形を返す
 		 * @param index 0＝はい、1＝いいえ
 		 * @param outX 左上X座標の出力先

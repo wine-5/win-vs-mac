@@ -41,7 +41,7 @@ namespace
 	constexpr int CONFIRM_DIM_ALPHA{ 140 };
 
 	constexpr float CONFIRM_PANEL_WIDTH_RATIO{ 0.34f };  // 画面幅比
-	constexpr float CONFIRM_PANEL_HEIGHT_RATIO{ 0.21f }; // 画面高さ比
+	constexpr float CONFIRM_PANEL_HEIGHT_RATIO{ 0.27f }; // 画面高さ比（本文2行ぶんを見込む）
 	constexpr float CONFIRM_PADDING_RATIO{ 0.018f };     // パネル内側の余白（画面幅比）
 	constexpr float CONFIRM_BUTTON_WIDTH_RATIO{ 0.085f };
 	constexpr float CONFIRM_BUTTON_HEIGHT_RATIO{ 0.052f };
@@ -53,6 +53,12 @@ namespace
 
 	/** @brief 確認ボタンの数（はい・いいえ） */
 	constexpr int CONFIRM_BUTTON_COUNT{ 2 };
+
+	// 本文の行送り（文字の大きさに対する倍率）
+	constexpr float CONFIRM_MESSAGE_LINE_HEIGHT{ 1.45f };
+
+	// 行頭に置きたくない文字（Shift_JIS）。これらは前の行へ残して読みやすさを保つ
+	constexpr const char* CONFIRM_NO_LINE_START[]{ "。", "、", "）", "」", "！", "？", "・" };
 } // namespace
 
 namespace game::ui::pause
@@ -238,9 +244,22 @@ namespace game::ui::pause
 		m_uiRenderer.drawText(panelX + padding, panelY + padding,
 		    title.c_str(), Color::WHITE, titleFontSize);
 
+		// 本文はパネルの内側に収まるよう折り返す。1行で描くと、文が長いだけで
+		// パネルの外へはみ出して読めなくなる
 		const std::string message{ getConfirmMessage(action) };
-		m_uiRenderer.drawText(panelX + padding, panelY + padding + titleFontSize + messageFontSize,
-		    message.c_str(), Color::SETTINGS_TEXT_SECONDARY, messageFontSize);
+		const int messageTop{ panelY + padding + titleFontSize + messageFontSize };
+		const int lineHeight{ static_cast<int>(messageFontSize * CONFIRM_MESSAGE_LINE_HEIGHT) };
+
+		const std::vector<std::string> lines{
+			wrapText(message, panelWidth - padding * 2, messageFontSize)
+		};
+
+		for (std::size_t i{ 0 }; i < lines.size(); ++i)
+		{
+			m_uiRenderer.drawText(panelX + padding,
+			    messageTop + static_cast<int>(i) * lineHeight,
+			    lines[i].c_str(), Color::SETTINGS_TEXT_SECONDARY, messageFontSize);
+		}
 
 		drawConfirmButtons(isYesSelected);
 
@@ -278,6 +297,56 @@ namespace game::ui::pause
 			    rectY + (rectHeight - fontSize) / 2,
 			    label.c_str(), Color::WHITE, fontSize);
 		}
+	}
+
+	std::vector<std::string> PauseMenuView::wrapText(
+	    const std::string& text, int maxWidth, int fontSize) const
+	{
+		std::vector<std::string> lines{};
+		if (text.empty() || maxWidth <= 0)
+			return lines;
+
+		const auto isNoLineStart{ [](const std::string& character)
+			{
+			    for (const char* forbidden : CONFIRM_NO_LINE_START)
+			    {
+				    if (character == forbidden)
+					    return true;
+			    }
+			    return false;
+			} };
+
+		std::string line{};
+		for (std::size_t i{ 0 }; i < text.size();)
+		{
+			// Shift_JISの2バイト文字は先頭バイトがこの範囲に入る。
+			// 1バイトずつ切ると文字が割れて化ける
+			const auto lead{ static_cast<unsigned char>(text[i]) };
+			const bool isDoubleByte{ (lead >= 0x81 && lead <= 0x9F) || (lead >= 0xE0 && lead <= 0xFC) };
+			const std::size_t length{ isDoubleByte && i + 1 < text.size() ? 2u : 1u };
+
+			const std::string character{ text.substr(i, length) };
+			const std::string candidate{ line + character };
+
+			// 行頭に置きたくない文字は、はみ出しても前の行へ残す
+			const bool isTooWide{ m_uiRenderer.getTextWidth(candidate.c_str(), fontSize) > maxWidth };
+			if (isTooWide && !line.empty() && !isNoLineStart(character))
+			{
+				lines.push_back(line);
+				line = character;
+			}
+			else
+			{
+				line = candidate;
+			}
+
+			i += length;
+		}
+
+		if (!line.empty())
+			lines.push_back(line);
+
+		return lines;
 	}
 
 	std::string PauseMenuView::getConfirmMessage(PauseMenuAction action) const
