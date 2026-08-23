@@ -217,6 +217,7 @@ namespace game::scene
 	    core::iface::IInputProvider& inputProvider,
 	    GameManager& gameManager,
 	    PauseManager& pauseManager,
+	    CursorVisibility& cursorVisibility,
 	    SettingsManager& settingsManager)
 	    : m_camera{ camera }
 	    , m_renderer{ renderer }
@@ -226,6 +227,7 @@ namespace game::scene
 	    , m_inventoryInputMapper{ inputProvider }
 	    , m_gameManager{ gameManager }
 	    , m_pauseManager{ pauseManager }
+	    , m_cursorVisibility{ cursorVisibility }
 	    , m_settingsManager{ settingsManager }
 	    , m_fileEquipmentData{ gameManager.getFileEquipmentData() }
 	    , m_effectFactory{ *core::base::ServiceLocator::get<core::iface::IEffectFactory>() }
@@ -312,9 +314,6 @@ namespace game::scene
 				shadowMap->setAdjustDepth(SHADOW_ADJUST_DEPTH);
 			}
 		}
-
-		// 3人称マウス視点のためカーソルを非表示にする（表示の切り替えは DebugFlags.h で行う）
-		m_inputProvider.setMouseCursorVisible(core::constant::SHOW_MOUSE_CURSOR_IN_GAME);
 
 		// DEBUG: ワールド空間デバッグ可視化・常時デバッグHUD（生成するかは DebugFlags.h で切り替える）。
 		// 生成しない場合は両方nullptrのままで、更新も描画も呼び出し側のnull判定で飛ばされる
@@ -413,21 +412,16 @@ namespace game::scene
 
 	InGame::~InGame()
 	{
-		// カーソルを戻す最後の砦。onPauseChanged は「ポーズ中だけ出す」可逆な切り替えなので、
-		// ポーズからタイトルへ戻る経路では resume() が先に走って再び隠れてしまう。
-		// 抜け方（死亡・勝利・タイトルへ）ごとに書くと漏れるため、終了地点に一本化する
-		m_inputProvider.setMouseCursorVisible(true);
-
 		// シャドウマップはServiceLocator側がインゲームより長生きするため、
 		// シーンを抜けるときにこちらで確保を解く
 		if (auto* shadowMap{ core::base::ServiceLocator::get<core::iface::IShadowMap>() })
 			shadowMap->destroy();
 	}
 
-	void InGame::onPauseChanged(bool isPaused)
+	void InGame::onPauseChanged(bool /*isPaused*/)
 	{
-		// ポーズ中はメニューをマウスで操作できるように出し、再開したら戦闘用に隠す
-		m_inputProvider.setMouseCursorVisible(isPaused);
+		// カーソルの出し入れは CursorVisibility が一手に引き受ける（Application が毎フレーム決める）。
+		// このシーンで面倒を見るものは今のところ無い
 	}
 
 	void InGame::loadResources()
@@ -1128,10 +1122,13 @@ namespace game::scene
 			m_inventoryView->resetStatChanges();
 		}
 
-		// 開いている間はカーソルを出す。隠したままだとマウスを中央へ戻す処理
-		// （getMouseDelta）が止まり、カーソルが端まで流れていく。
-		// その状態で閉じると溜まったぶんが一度に効いてカメラが飛ぶ
-		m_inputProvider.setMouseCursorVisible(isOpen);
+		// 開いている間はカーソルを出したい、と伝えるだけにする。実際に出すかは
+		// CursorVisibility が決める（パッドで遊んでいる間は出さない）。
+		//
+		// 隠したままだとマウスを中央へ戻す処理（getMouseDelta）が止まり、
+		// カーソルが端まで流れていく。その状態で閉じると溜まったぶんが
+		// 一度に効いてカメラが飛ぶ
+		m_cursorVisibility.setNeeded(CursorVisibility::Reason::Inventory, isOpen);
 	}
 
 	void InGame::playUiSe(core::constant::SeType seType) const

@@ -23,6 +23,7 @@ namespace game
 {
 	class GameManager;     // 前方宣言
 	class PauseManager;    // 前方宣言
+	class CursorVisibility; // 前方宣言
 	class SettingsManager; // 前方宣言
 } // namespace game
 
@@ -42,7 +43,8 @@ namespace game::scene
 	   * @param settingsManager プレイヤーの設定（各シーンへ注入する）
 	   * @param onOpenSettings 設定画面を開く操作（Applicationが所有する画面を開くために渡す）
 	   */
-	  SceneFactory(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager,
+	  SceneFactory(GameManager& gameManager, PauseManager& pauseManager,
+		  CursorVisibility& cursorVisibility, SettingsManager& settingsManager,
 		  std::function<void()> onOpenSettings);
 
 	  /**
@@ -67,6 +69,7 @@ namespace game::scene
     private:
 	  GameManager& m_gameManager;
 	  PauseManager& m_pauseManager;
+	  CursorVisibility& m_cursorVisibility;
 	  SettingsManager& m_settingsManager;
 	  std::function<void()> m_onOpenSettings;
 

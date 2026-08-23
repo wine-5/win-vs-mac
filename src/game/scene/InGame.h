@@ -16,6 +16,7 @@
 #include "core/base/EventBus.h"
 #include "core/constant/SeType.h"
 #include "game/ui/UiInputMapper.h"
+#include "game/CursorVisibility.h"
 
 /* game層のインクルード */
 #include "game/factory/FactoryManager.h"
@@ -103,6 +104,7 @@ namespace game::scene
 		  core::iface::IInputProvider& inputProvider,
 		  GameManager& gameManager,
 		  PauseManager& pauseManager,
+		  CursorVisibility& cursorVisibility,
 		  SettingsManager& settingsManager);
 
 	  /**
@@ -274,6 +276,7 @@ namespace game::scene
 		core::iface::IInputProvider   &m_inputProvider;
 		GameManager& m_gameManager;
 		PauseManager& m_pauseManager;
+		CursorVisibility& m_cursorVisibility;
 		SettingsManager& m_settingsManager;
 		data::FileEquipmentData       &m_fileEquipmentData;
 		core::iface::IEffectFactory& m_effectFactory;

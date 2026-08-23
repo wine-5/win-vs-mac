@@ -38,7 +38,8 @@ Application::Application(int screenWidth, int screenHeight)
 	// サービスを登録する（GameManager/PauseManagerはApplicationが所有し、参照を注入する）
 	// タイトルの「設定」ボタンからも、Applicationが持つ同じ設定画面を開く。
 	// 閉じたあとはポーズメニューを出さずゲームへ戻す（そもそも開いていないため）
-	ServiceLocatorInitializer::init(screenWidth, screenHeight, m_gameManager, m_pauseManager, m_settingsManager,
+	ServiceLocatorInitializer::init(screenWidth, screenHeight, m_gameManager, m_pauseManager,
+	    m_cursorVisibility, m_settingsManager,
 	    [this]()
 	    { openSettings(false); });
 
@@ -91,6 +92,10 @@ void Application::run()
 
 		// シーンをまたぐポーズメニュー（Esc）の開閉・操作を処理する
 		updatePauseMenu(elapsedTime);
+
+		// カーソルの出し入れは1か所で決める。各所が直接切り替えると、
+		// 後から呼んだ方が勝って順番に依存した不具合になる
+		updateCursorVisibility();
 
 		if (m_pauseManager.isPausedBy(game::PauseReason::Menu))
 		{
@@ -291,6 +296,43 @@ bool Application::allowBackToTitle(game::scene::SceneType sceneType) const noexc
 {
 	// タイトルより後のシーンでのみ「タイトルへ戻る」を表示する
 	return sceneType == game::scene::SceneType::InGame;
+}
+
+bool Application::needsCursor(game::scene::SceneType sceneType) const noexcept
+{
+	switch (sceneType)
+	{
+	// マウスで押す画面。パッドで遊んでいる間は隠れる
+	case game::scene::SceneType::Title:
+	case game::scene::SceneType::Select:
+	case game::scene::SceneType::Result:
+	case game::scene::SceneType::Lockscreen:
+		return true;
+
+	// 3人称のマウス視点なので、本来は隠す（DebugFlags.h で出せる）
+	case game::scene::SceneType::InGame:
+		return core::constant::SHOW_MOUSE_CURSOR_IN_GAME;
+
+	// BIOS・ローディングは見るだけの画面
+	default:
+		return false;
+	}
+}
+
+void Application::updateCursorVisibility()
+{
+	const auto sceneType{ m_sceneManager->getCurrentSceneType() };
+
+	using Reason = game::CursorVisibility::Reason;
+	m_cursorVisibility.setNeeded(Reason::Scene, needsCursor(sceneType));
+	m_cursorVisibility.setNeeded(Reason::PauseMenu,
+	    m_pauseManager.isPausedBy(game::PauseReason::Menu) && !m_isSettingsOpen);
+	m_cursorVisibility.setNeeded(Reason::Settings, m_isSettingsOpen);
+
+	// セレクト画面だけはパッドでカーソルそのものを動かすので、隠してはいけない
+	m_cursorVisibility.setPointerDrivenByPad(sceneType == game::scene::SceneType::Select);
+
+	m_cursorVisibility.update(*m_inputProvider);
 }
 
 int Application::preloadBudgetMs(game::scene::SceneType sceneType) const noexcept

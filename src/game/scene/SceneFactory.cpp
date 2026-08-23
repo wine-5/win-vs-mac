@@ -29,10 +29,12 @@ namespace
 
 namespace game::scene
 {
-	SceneFactory::SceneFactory(GameManager& gameManager, PauseManager& pauseManager, SettingsManager& settingsManager,
+	SceneFactory::SceneFactory(GameManager& gameManager, PauseManager& pauseManager,
+	    CursorVisibility& cursorVisibility, SettingsManager& settingsManager,
 	    std::function<void()> onOpenSettings)
 	    : m_gameManager{ gameManager }
 	    , m_pauseManager{ pauseManager }
+	    , m_cursorVisibility{ cursorVisibility }
 	    , m_settingsManager{ settingsManager }
 	    , m_onOpenSettings{ std::move(onOpenSettings) }
 	{
@@ -178,6 +180,7 @@ namespace game::scene
 			    *inputProvider,
 			    m_gameManager,
 			    m_pauseManager,
+			    m_cursorVisibility,
 			    m_settingsManager);
 			return m_inGameScene.get();
 		}

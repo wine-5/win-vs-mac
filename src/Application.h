@@ -1,6 +1,7 @@
 #pragma once
 #include "game/GameManager.h"
 #include "game/PauseManager.h"
+#include "game/CursorVisibility.h"
 #include "game/SettingsManager.h"
 #include "game/ui/pause/PauseMenuController.h"
 #include "game/ui/settings/SettingsPanelController.h"
@@ -97,8 +98,25 @@ class Application
 	 */
 	[[nodiscard]] int preloadBudgetMs(game::scene::SceneType sceneType) const noexcept;
 
+	/**
+	 * @brief そのシーンがマウスカーソルを必要とするかを返す
+	 * @param sceneType 判定するシーンの種類
+	 * @return 必要とするならtrue
+	 */
+	[[nodiscard]] bool needsCursor(game::scene::SceneType sceneType) const noexcept;
+
+	/** @brief シーンとメニューの状態からカーソルの出し入れを更新する */
+	void updateCursorVisibility();
+
 	game::GameManager m_gameManager{};
 	game::PauseManager m_pauseManager{};
+
+	/**
+	 * @brief カーソルを出すかどうかの唯一の持ち主
+	 *
+	 * PauseManager と同じく、利用側へは参照で注入する
+	 */
+	game::CursorVisibility m_cursorVisibility{};
 
 	// 設定は保存先（リポジトリ）より後に生まれる必要があるため、この順で宣言する
 	infrastructure::settings::SettingsRepository m_settingsRepository{};
