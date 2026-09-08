@@ -1,588 +1,167 @@
-﻿# リファクタリング診断・分離計画
+﻿# 総合レビュー: リファクタリング & パフォーマンス
 
-対象: src 全体（403ファイル / 約47,000行）
-最終更新: 2026-08-20（ゲームパッド対応が一段落した時点で全面的に再診断）
-目的: 責務違反の検出と、肥大化クラスの分離方針の決定
-
----
-
-## 全体所見
-
-レイヤー依存（core → game → infrastructure → platform）は一方向に保たれており、System・Factory・View の分割粒度も概ね適切。`new` / `delete` の直接使用はゼロで、所有権表現も一貫している。
-
-前回診断からの変化は以下の2点。
-
-- **InventoryView が 1065 → 1263行に増え、リポジトリ最大のファイルになった**。前回「分割不要」と判断したが、その判断はもう成立しない（後述）
-- **InGame は分離が未着手のまま 1163 → 1259行**。ゲームパッド対応で `updateInput()` が増えた
-- InGameView の setter は 26 → 30個。配線コストの問題は放置すると増え続けることが実証された
-
-分離すべきクラスは **InGame・InventoryView・InGameView・InputManager の4件**。Win32SelectWindowManager は責務が2つあるが、優先度の判断として今は触らない。
+対象: src 最新版（約48,000行 / 前回版との差分: CursorVisibility新設・パッド対応拡充・シーン管理変更・InputManager更新）
+観点: ①責務分離（前回レビューの更新） ②パフォーマンス（新規・重点）
 
 ---
 
-## 分離対象のまとめ（優先度順）
+# 第1部 リファクタリング（前回からの更新）
 
-| # | クラス | 現在 | 分離するもの | 削減見込み | 難度 |
-|---|---|---|---|---|---|
-| 1 | InGame | 1259行 | InGameSetup / MissionProgress / InventoryController | -947行 | 低（移動のみ） |
-| 2 | InventoryView | 1263行 | InventoryStatsPane | -200行 | 低 |
-| 3 | InGameView | 744行 | setter群（#1の副産物）／ ReticleView | -291行 | 低〜中 |
-| 4 | InputManager | 477行 | PadInputReader | -220行 | 中 |
-| － | Win32SelectWindowManager | 816行 | （保留） | － | － |
+## 解消済み
 
----
+- **カーソル表示管理の散在（前回B-4）**: `CursorVisibility` として実装済み。「理由の立て下ろし＋毎フレーム合成」方式で、前回指摘した設計そのもの。ヘッダの「書き手はそれぞれ1か所に限る」というコメントも良い。**この項目はクローズ**。
 
-# 1. InGame（.cpp 1259行 + .h 339行）— 4つの責務が混在
+## 継続（数値を最新版で更新）
 
-## 責務の分解（実測）
-
-| 行範囲 | 中身 | 行数 | 分離先 |
+| 項目 | 前回 | 今回 | 状態 |
 |---|---|---|---|
-| 126-209 | 無名名前空間（`buildTabProjectileSetup` / `buildRainbowSetup`） | 84 | ① Setup |
-| 213-412 | コンストラクタ（環境設定・View11個の生成＋setter呼び出し） | 200 | ① Setup |
-| 540-816 | `setupSystems()` | **277** | ① Setup |
-| 817-916 | `setupEvents()` | 100 | ② MissionProgress |
-| 917-981 | `killRemainingEnemies()` / `spawnBoss()` | 65 | ② MissionProgress |
-| 1233-1259 | `saveResultData()` | 27 | ② MissionProgress |
-| 1025-1218 | `updateInventory()` 〜 `updateSwapSelection()` | 194 | ③ InventoryController |
-| 413-464, 465-539, 982-1024, 1219-1232 | dtor・`loadResources()`・`spawnEntities()`・`updateInput()`・`update()`・`draw()` | 184 | InGame に残す |
+| A-1. InGame の4責務混在 | 1259行 | **1341行** | 悪化。パッド対応で `updateSwapSelectionByPad/ByMouse` が入力コントローラ責務にさらに積まれた |
+| A-2. TitleView の View+Controller 混在 | 795行 | **941行** | 悪化。パッド対応の入力分岐が View 内にさらに増加 |
+| A-3. InGameView の setter 30個 | 30個 | 30個 | 変化なし |
+| A-4. Win32SelectWindowManager の設定同期混在 | 816行 | 892行 | 微増 |
+| B-1. 設定⇄JSON変換の platform 散在 | - | - | 変化なし |
+| B-2. UI SE再生ヘルパの重複 | 4箇所 | 4箇所 | 変化なし |
+| B-3. クリックのエッジ検出の自前実装 | 5箇所 | 5箇所 | 変化なし |
 
-① 561行 ／ ② 192行 ／ ③ 194行。合計 947行が移動対象で、残る本体は約190行（＋インクルード125行）。
+分離の設計案（InGameSetup / MissionProgress / InventoryController、InGameContext の一括渡し）は前回mdの内容がそのまま有効なので再掲しない。1点だけ追記:
 
-シーンクラス本来の仕事は「ライフサイクルの委譲」だけなので、①②③を切り出す。
+- **InventoryController 切り出しの価値が上がった。** パッド対応で入力コントローラ責務が「マウス用」「パッド用」の2系統に分かれ（`updateSwapSelectionByPad` / `ByMouse`）、InGame 内の入力コードは前回比+80行。この2関数はまさにコントローラの中身なので、切り出せばそのまま持っていける。
 
-## 分離① InGameSetup — 最優先・効果最大
+---
 
-`setupSystems()` の277行（System登録の羅列＋順序コメント）、コンストラクタ内のView生成、ライティング／フォグ／シャドウマップ設定、無名名前空間の2関数は、すべて**構築時のみの処理でシーンの実行時状態と無関係**。
+# 第2部 パフォーマンス
 
-```
-game/scene/ingame/
-  InGameSetup.h / .cpp     ← System登録・View生成・環境設定を担う
-```
+先に総評: **メインループ・固定タイムステップ・先読みの設計は非常に良い**。accumulator方式＋処理落ち時の切り捨て（スパイラル防止）、先読み時間をフレーム計測から除外する処理、入力を1フレーム1回確定させる設計は、いずれも正しく実装されている。ここは触る必要がない。
 
-Setupの生成物は構造体で返す。
+問題は以下の順で影響が大きい。
 
-```cpp
-// InGameSetup が構築して返すもの
-struct InGameContext
-{
-    // Viewが描画フェーズで参照するSystemポインタ群
-    system::visual::BattleStartSystem* m_battleStartSystem{};
-    system::stage::RenameTerminalSystem* m_renameTerminalSystem{};
-    // View群のunique_ptr
-    std::unique_ptr<ui::ingame::PlayerHUDView> m_playerHUDView;
-    // ...
-};
-```
+## P-1.【最重要・リーク調査に直結】モデルハンドルが一度も解放されていない
 
-**注意**: System登録の順序コメント（「押し返しの前に」「AttackSystemの後に」等）は貴重な仕様ドキュメントなので、そのまま Setup 側へ移すこと。
+Application.cpp に「1秒ごとに使用量を記録する（リーク調査用）」の一時コードがあるので、現在メモリ増加を調査中と推測する。その有力な原因候補を特定した:
 
-## 分離② MissionProgress — ゲーム進行ルール
+**コードベース全体に `MV1DeleteModel` の呼び出しが1箇所も存在しない**（AnimationRepository のコメント「ここで MV1DeleteModel を呼んではいけない」を除き、grep でゼロ件）。`IResourceManager` にも unload / release 系の API がない。つまり:
 
-「雑魚IDを追跡 → 全滅でボス出現 → ボス撃破で残敵一掃 → リザルト保存」は勝敗仕様そのもの。EventBus 購読で完結しているため綺麗に切れる。
+1. **破壊可能ブロックの複製モデル**: `FactoryInitializer` がブロック1個につき `duplicateModel()` を呼ぶ（破壊状態を個体別に持つため）。InGame に入るたびに複製され、解放されない。**リトライ／周回のたびに段差状に増える**
+2. **破砕モデル（m_fracturedHandle）**: 同上。ブロック数ぶん毎回複製
+3. **敵モデルのプール（EnemySpawner::m_modelHandlePool）**: プール自体は良い設計（使い回しで生成コストを抑えている）が、EnemySpawner がシーンと共に破棄されるとき、プール内のハンドルを誰も削除しない
+
+計測コードのコメントにある「カウントダウン明けに段差状に増えるのか」という仮説と、1（シーン入場時の一括複製）は整合する。
+
+### 対処案
+
+ModelRepository に複製ハンドルの台帳を持たせ、シーン単位で解放する:
 
 ```cpp
-// game/scene/ingame/MissionProgress.h
-class MissionProgress
+// ModelRepository
+int duplicateModel(int modelHandle)
 {
-public:
-    MissionProgress(core::base::EventBus& eventBus,
-        core::ecs::ComponentManager& componentManager,
-        factory::EnemySpawner& enemySpawner,
-        core::iface::IResourceManager& resourceManager,
-        GameManager& gameManager);
-
-    void registerInitialEnemies();          // spawnEntities末尾の処理
-    void update(float scaledDeltaTime);     // 経過時間・計測制御
-    [[nodiscard]] int remainingEnemyCount() const noexcept;
-    [[nodiscard]] core::ecs::EntityId bossId() const noexcept;
-    [[nodiscard]] float elapsedTime() const noexcept;
-private:
-    void spawnBoss();
-    void killRemainingEnemies(core::ecs::EntityId excludedId) noexcept;
-    void saveResultData(bool isVictory) noexcept;
-    // m_stageEnemyIds, m_macId, m_killCount, m_totalDamageTaken,
-    // m_elapsedTime, m_isTimeMeasuring, m_subscriptions をここへ移動
-};
-```
-
-- `draw()` で渡している `m_stageEnemyIds.size()` / `m_macId` / `m_elapsedTime` はすべてゲッターに置き換わる
-- ヒットストップ（`m_hitStop`）はクリティカルイベント購読とセットなので同居させてよい
-
-## 分離③ InventoryController
-
-`updateInventory()` / `updateRenameTerminal()` / `updateSwapSelection()` 一帯は「入力を解釈して View に問い合わせ、イベントを発行する」典型的なコントローラ。InGame 本体とは PauseManager の共有以外に接点がない。
-
-ゲームパッド対応で `updateInput()` という専用フックができたため、**移設先の呼び出し点は既に用意されている**。
-
-```cpp
-// game/ui/ingame/InventoryController.h
-class InventoryController
-{
-public:
-    void update();  // E/□/Esc/マウス/パッドの全処理
-    [[nodiscard]] bool isOpen() const noexcept;
-private:
-    // m_isSwapMode, m_swapHeldIndex, m_wasMouseLeftDown をここへ
-};
-```
-
-置き場所は `ui/ingame/`（InventoryView の隣）。View（描画）と Controller（入力解釈）が対になり追いやすくなる。
-
-## 分離後の InGame（想定190行）
-
-```cpp
-InGame::InGame(...) : ...
-{
-    loadResources();
-    spawnEntities();
-    InGameSetup setup{ ... };
-    m_context = setup.build(m_view);        // ← System登録・View生成・環境設定
-    m_missionProgress.registerInitialEnemies();
+    const int duplicated{ MV1DuplicateModel(modelHandle) };
+    if (duplicated != -1)
+        m_duplicatedHandles.push_back(duplicated);  // 台帳に記録
+    return duplicated;
 }
 
-void InGame::updateInput()
+void releaseDuplicates()  // InGame退出時（シーン遷移時）に呼ぶ
 {
-    m_context.m_battleStartSystem->pollAdvanceInput();
-    m_inventoryController.update();
-}
-
-void InGame::update(float deltaTime)
-{
-    const float scaled{ m_hitStop.apply(deltaTime) };
-    m_missionProgress.update(scaled);
-    m_systemManager.update(scaled);
-    m_view.setInteractTarget(...);
-}
-
-void InGame::draw()
-{
-    m_view.draw(m_playerId, m_missionProgress.remainingEnemyCount(),
-        m_missionProgress.bossId(), m_missionProgress.elapsedTime());
+    for (const int handle : m_duplicatedHandles)
+        MV1DeleteModel(handle);
+    m_duplicatedHandles.clear();
 }
 ```
 
-## 実施時の注意
+- EnemySpawner のプールは、返却先が結局 duplicateModel 由来なので、台帳方式ならプール側の変更は不要（デストラクタでプールを空にするだけ。実体の削除は台帳が行う）
+- ベースモデル（MV1LoadModel したもの）はキャッシュとして生かし続けて良い。増え続けるのは複製の方
+- 対処後、既存の計測コード（core::probe）でリトライを数回繰り返し、水平になることを確認してから計測コードを削除する流れが安全
 
-- **EventBus の破棄順**: InGame.h 先頭のコメント（購読者より前に EventBus を宣言）の制約は、MissionProgress 切り出し後も同じく残る。MissionProgress のメンバ宣言は EventBus より**後**（＝破棄が先）に置くこと
-- System 登録の順序コメントは仕様ドキュメントとして Setup 側へ必ず引き継ぐこと
+## P-2. ECSのコンポーネントアクセスコスト（毎フレームの基礎代謝）
 
----
+ComponentArray は unordered_map 実装で、これはヘッダのコメントに設計判断として明記されている（数百体規模ではキャッシュ効率より単純さを優先、外部IFは差し替え可能）。**この判断自体は正しく、packed array への差し替えは不要**。ただし現行実装のまま安くできる箇所が3つある。
 
-# 2. InventoryView（.cpp 1263行 + .h 483行）— 前回判定を撤回
+### P-2a. `getAllEntities()` が呼び出しごとに vector を新規確保
 
-前回は「責務は描画一本、座標計算の共有が逆に面倒になる」として分割不要と判断した。**その理由は右カラムの能力値ペインには当てはまらない**ことが分かったため、判定を撤回する。
-
-## 根拠
-
-`draw()` からの呼び出しは1行だけで、マス目の当たり判定（`m_slotBounds`）にも折り返し計算にも一切触れていない。
+全60箇所（うちSystem内34箇所）が毎フレーム呼んでおり、**毎フレーム約40〜60回のヒープ確保**が発生している。ComponentManager に走査visitorを足せば確保ゼロにできる:
 
 ```cpp
-drawStats(dividerX + padding, contentTop, rightWidth, playerId);
-```
-
-x / y / width / playerId を渡して終わる、独立した矩形領域である。
-
-## 切り出す範囲
-
-| 関数 | 行数 |
-|---|---|
-| `drawStats` | 101 |
-| `drawMultiplierBadge` | 29 |
-| `trackStatChanges` | 30 |
-| `changeFlashAlpha` | 18 |
-| `refreshBonusLabels` | 14 |
-| 計 | **192** |
-
-さらにこのペイン専用の状態が8つある。
-
-```
-m_previousStats / m_changeAmounts / m_hasPreviousStats / m_changeTime
-m_labelMultiplier / m_bonusLabels / m_statLabels / m_statIconHandles
-```
-
-「前フレームの値と突き合わせて増減を拾い、拾った時刻から一定時間だけ光らせる」という**マス目の描画とは別のライフサイクル**を持っている。これが1クラスに同居していることが行数以上に読みにくさの原因になっている。
-
-## 分離案
-
-```
-game/ui/ingame/
-  InventoryStatsPane.h / .cpp   ← 右カラムの能力値表示と増減演出
-```
-
-```cpp
-class InventoryStatsPane
+// ComponentArray に追加
+template <typename F>
+void forEach(F&& func)
 {
-public:
-    InventoryStatsPane(core::iface::IUIRenderer& uiRenderer,
-        core::iface::IScreen& screen,
-        core::ecs::ComponentManager& componentManager,
-        core::iface::IResourceManager& resourceManager);
-
-    /// @brief 能力値の一覧を描く
-    void draw(int x, int y, int width, core::ecs::EntityId playerId);
-
-    /// @brief 増減表示を消して比較の基準を取り直す（開くたびに呼ぶ）
-    void resetChanges() noexcept;
-};
-```
-
-InventoryView 側は `m_statsPane.draw(dividerX + padding, contentTop, rightWidth, playerId)` の1行になり、`resetStatChanges()` はそのまま委譲になる。**-200行超、ヘッダからもメンバ8個と Doxygen が消える。**
-
-## 分割しないもの
-
-`drawSection` / `drawSlot` / `drawHoldingPane` / `findSlotIndexAt` / `isLockedSlotAt` は `m_slotBounds` とレイアウト計算を共有しているため、**前回の判断どおり切らない**。切ると座標の受け渡しが増えて逆に読みにくくなる。
-
----
-
-# 3. InGameView（.cpp 744行 + .h 456行）— 2種類の分離余地
-
-| 行範囲 | 中身 | 行数 |
-|---|---|---|
-| 64-218 | `draw()` ＝ 描画順の決定 | 155 |
-| 219-391 | **setter 28個の羅列** | 173 |
-| 392-524 | モデル・影・装備武器の3D描画 | 133 |
-| 525-642 | レティクル・チャージゲージ | 118 |
-| 643-744 | 取得物・弾の3D描画 | 102 |
-
-## (a) setter群 — InGameSetup の副産物として消える
-
-InGameView の setter は 26 → **30個**に増えた。`registerSystem` → `setXxxSystem` のペア増殖が実際に進行している。
-
-```cpp
-auto* xxx = m_systemManager.registerSystem<XxxSystem>(...);
-m_view.setXxxSystem(xxx);
-```
-
-「描画順は View が決め、描画内容は System が持つ」という設計判断自体は正しい。問題は配線コストだけなので、**分離①の `InGameContext` を丸ごと View へ渡す**ことで解決する。
-
-```cpp
-m_view.attach(context);  // setterの30呼び出しが1回に
-```
-
-.cpp から173行、.h から Doxygen 込みで約180行が消える。**独立作業にする必要はなく、分離①とセットで片付ける。**
-
-## (b) 自前で描いている350行 — 方針の不揃い
-
-PlayerHUD・EquipmentSlot・MiniMap・BossHUD・InteractPrompt などHUD要素は全て専用Viewクラスに切り出されているのに、**レティクルとチャージゲージだけ InGameView に直書きされたまま**になっている。
-
-```
-drawReticle / getAttackCooldownRatio / drawChargeGauge   ← 118行
-```
-
-`ui/ingame/ReticleView` として切り出せば他のHUD要素と方針が揃う。3Dモデル描画（`drawModels` / `drawShadowCasters` / `drawAttachedWeapon` / `drawExtensionPickups` / `drawProjectileModels` の235行）も同様に切れるが、こちらは「Viewがワールドを描く」という括りで一貫しているため急がない。
-
-(a)(b) の両方を行うと InGameView は「描画順を決めるだけ」の約200行になり、クラス名と実体が一致する。
-
----
-
-# 4. InputManager（.cpp 477行 + .h 226行）— パッド対応で倍増した
-
-| 行範囲 | 中身 | 行数 |
-|---|---|---|
-| 35-152 | キーボード（キャプチャ・エッジ検出・consume） | 118 |
-| 153-374 | **ゲームパッド** | 222 |
-| 376-477 | マウス（座標・差分・カーソル表示） | 102 |
-
-パッド部分は `capturePadFromXInput()` と `capturePadFromDirectInput()` の**2バックエンドを内包**しており、専用の状態も5つ持つ。
-
-```
-m_padKind / m_currentPadButtons / m_previousPadButtons
-m_consumedPadButtons / m_padAxes
-```
-
-キーボード・マウス側とは `updateLastInputDevice()` 以外で状態を共有していない。
-
-## 分離案
-
-```
-infrastructure/input/
-  PadInputReader.h / .cpp   ← XInput / DirectInput の2系統とパッド状態
-```
-
-`IInputProvider` の実装面（`isPadButtonDown` / `consumePadPress` / `getPadAxis` / `isPadConnected`）は InputManager に残したまま委譲するだけなので、**呼び出し側は一切変わらない**。infrastructure 層で完結する。
-
-優先度は中。今すぐ困ってはいないが、パッド周りを今後も触るなら先に切っておく価値がある。
-
----
-
-# 5. Win32SelectWindowManager（816行）— 責務は2つだが今は触らない
-
-| 中身 | 行数 |
-|---|---|
-| `createAllWindows()` ＝ 7つの窓のレイアウト＋生成 | 194 |
-| WebView との JSONメッセージ ルーティング／ブロードキャスト | 約300 |
-
-`handleDesktopMessage()`（140行）を中心としたメッセージ処理は、窓の生成・配置とは別の責務であり `SelectWindowMessageRouter` として切り出せる。
-
-ただし **platform層でセレクト画面は既に完成しており、変更頻度が低い**。終盤の今、リスクを取って触る価値は薄いと判断する。
-
----
-
-# 分割不要と判断したもの
-
-| クラス | 行数 | 判断理由 |
-|---|---|---|
-| SettingsPanelView | 831 | `SettingsPanelController` が既に別クラスとして存在し、View/Controller 分離は完了済み。残りは `drawSpeakerIcon` 等の描画ヘルパーの羅列 |
-| TitleView | 795 | `Title.cpp` が126行に収まっておりシーン側は薄い。パフォーマンスグラフの状態を持つ点だけ純粋なViewではないが、単一画面で変更頻度も低い |
-| ModelRepository | 627 | 半分近くが json パース。気になるなら `ModelMetadataParser` として切れるが、Repository＝「読み込みと保持」の責務内。終盤の今は触らない |
-| PlayerHUDView | 543 | HUDパネル1枚の描画。privateヘルパーに分割済み |
-| BattleStartSystem | 496 | 演出の仕様が大きいだけで責務は単一 |
-| MacAISystem | 488 | ボスFSMの仕様が大きいだけで責務は単一 |
-| EquipmentSlotView | 453 | 装備スロット1つの描画。同上 |
-| EnemyData / PlayerData | 339 / 289 | ゲッターの羅列で行数が出ているだけ。健全 |
-| GameManager | - | 「シーン間で持ち回る共有データ」に収まっており問題なし |
-| ServiceLocator | - | 多数箇所から使われるもの（IAudioManager 33箇所、IUIRenderer 27箇所）が中心で方針どおり。ICamera/IRenderer/IAnimator がロケータ登録なのに InGame へはコンストラクタ注入という二重経路だけ若干不揃いだが実害なし |
-
----
-
-# 推奨作業順
-
-| 順 | 作業 | 効果 | 備考 |
-|---|---|---|---|
-| 1 | **InGameSetup 切り出し** | InGame -561行／InGameView -173行 | setter は Context 一括渡しに置換。純粋な移動でリスク最小・効果最大 |
-| 2 | **InventoryStatsPane 切り出し** | InventoryView -200行 | 1と依存関係なし。どちらから始めてもよい |
-| 3 | **MissionProgress 切り出し** | InGame -192行 | イベント購読の移動。破棄順に注意 |
-| 4 | **InventoryController 切り出し** | InGame -194行 | 呼び出し点は `updateInput()` が既にある |
-| 5 | **ReticleView 切り出し** | InGameView -118行 | 方針を揃える作業なので後回し可 |
-| 6 | **PadInputReader 切り出し** | InputManager -220行 | パッド周りを今後も触るなら |
-
-1〜4はいずれも「コードの移動」であって書き換えではないため、終盤でも安全に実施できる。
-
-**着手前の注意**: InventoryView.cpp / InventoryView.h に未コミットの変更が残っている場合は、先にコミットしてから移動を始めること。
-
----
----
-
-# 付録: コードレビュー（ポインタ・所有権・パフォーマンス）
-
-**状態: 4件とも未着手**（2026-08-20 時点で再確認）
-
-対象：`src/`（約 47,000 行 / 403 ファイル）
-
-## 総評
-
-`new` / `delete` の直接使用はゼロ。所有権は `unique_ptr`、非所有は生ポインタ・参照で一貫して表現されており、設計は良好。以下は「さらに良くする」ための指摘。
-
-| # | 問題 | 深刻度 | 修正コスト | 状態 |
-|---|---|---|---|---|
-| 1 | `ServiceLocator::provide` のポインタ調整漏れ | **高**（潜在） | 1 行 | 未着手 |
-| 2 | `getAllEntities()` の毎フレームアロケーション | 中 | 中 | 未着手（呼び出し 56 → **64箇所**） |
-| 3 | `has()` → `get()` の二重ハッシュ検索 | 低〜中 | 小（機械的） | 未着手（`has<` **134箇所**） |
-| 4 | `ComponentArray::add()` の余分なコピー | 低 | 小 | 未着手 |
-
----
-
-## 1. `ServiceLocator::provide` のポインタ調整漏れ
-
-**場所**：`core/base/ServiceLocator.h`
-**深刻度**：高（現状は未発症。多重継承を導入した瞬間に未定義動作）
-
-### 現状
-
-```cpp
-template<typename TInterface, typename TImpl>
-static void provide(std::unique_ptr<TImpl> service)
-{
-    registerService(std::type_index(typeid(TInterface)),
-                    std::shared_ptr<void>(std::move(service)));  // TImpl* のまま消える
+    for (auto& [id, component] : m_component)
+        func(id, component);
 }
 ```
 
-呼び出し側は `provide<IStringConverter>(std::make_unique<StringConverter>())` の形。
-オーバーロード解決の結果、**全 17 箇所がこの 2 引数版を通る**（`TImpl` 側が完全一致で勝つ）。
+利用側は `getAllEntities` のループを `forEach` に置き換えるだけで、ID列挙の確保と get() の再検索が両方消える（コンポーネント参照が直接渡るため）。60箇所を一括で変える必要はなく、毎フレーム呼ばれるSystemから順に置き換えれば良い。
 
-このため `shared_ptr<void>` に入るのは `TImpl*`。一方 `get<T>()` は：
+注意: ループ内で `removeAll` / `destroy` する System（ProjectileSystem・EnemyDeathSystem 等）は走査中削除になるため、従来どおり ID列挙（getAllEntities）を使い続けるか、削除予約リストに積んでループ後に消す方式にする。
 
-```cpp
-return static_cast<T*>(it->second.get());   // void* を TInterface* とみなす
-```
+### P-2b. has() → get() の二重ハッシュ検索が残っている
 
-`TImpl*` → `TInterface*` の変換に必要な**ポインタ調整が行われない**。
-
-### 実測（多重継承の場合）
-
-```
-AudioManager* のアドレス   : 0x558bdbda62b0
-IAudioManager* へ正しく変換: 0x558bdbda62b8  <- 8 バイトずれる
-void* 経由で復元           : 0x558bdbda62b0  <- ずれない = 誤り
-一致するか: いいえ（未定義動作）
-```
-
-ずれたアドレスで仮想関数を呼ぶと、別インターフェースの vtable を引く。
-単一継承では基底がオフセット 0 に来るため、**現状は偶然動いている**。
-
-### 修正
+`tryGet` が導入済みで、ComponentManager のコメントにも「2回ハッシュ検索する代わりに1回で済ませたい場面で使う」とあるが、System 側に古いパターンが残っている。例: MeleeChaseAISystem::update の
 
 ```cpp
-template<typename TInterface, typename TImpl>
-static void provide(std::unique_ptr<TImpl> service)
-{
-    // TInterface へ変換してから型を消す（ここで調整が入る）
-    std::unique_ptr<TInterface> asInterface{ std::move(service) };
-    registerService(std::type_index(typeid(TInterface)),
-                    std::shared_ptr<void>(std::move(asInterface)));
-}
-```
-
----
-
-## 2. `getAllEntities()` の毎フレームアロケーション
-
-**場所**：`core/ecs/ComponentArray.h` / `ComponentManager.h`、呼び出し **64 箇所**
-**深刻度**：中
-
-### 現状
-
-```cpp
-std::vector<EntityId> getAllEntities() const   // 値返し = 毎回ヒープ確保
-{
-    std::vector<EntityId> entities;
-    entities.reserve(m_component.size());
-    for (const auto& [id, _] : m_component) entities.push_back(id);
-    return entities;
-}
-```
-
-呼び出し側の典型：
-
-```cpp
-const auto entities{ m_componentManager.getAllEntities<ColliderComponent>() };
-for (const auto id : entities)
-{
-    const auto& collider{ m_componentManager.get<ColliderComponent>(id) };  // 再検索
-}
-```
-
-**確保 → 詰める → ID で引き直す**の 3 段階。ID からの再検索はハッシュ検索。
-
-### 修正案：`forEach` を追加する
-
-```cpp
-// ComponentArray
-template <typename Fn>
-void forEach(Fn&& fn)
-{
-    for (auto& [id, comp] : m_component) fn(id, comp);
-}
-
-// ComponentManager
-template <typename T, typename Fn>
-void forEach(Fn&& fn) { getComponentArray<T>()->forEach(std::forward<Fn>(fn)); }
-```
-
-```cpp
-m_componentManager.forEach<ColliderComponent>(
-    [&](EntityId id, ColliderComponent& collider) { ... });
-```
-
-**アロケーションとハッシュ再検索の両方が消える。**
-
-### 補足
-
-`ComponentArray` のコメントに「利用側を変えずに packed array へ差し替えられる」とあるが、
-`getAllEntities` が残っていると「ID を受け取って引き直す」形が固定されてしまう。
-`forEach` を経由させておくと、その差し替えが本当に無痛になる。
-
----
-
-## 3. `has()` → `get()` の二重ハッシュ検索
-
-**場所**：`has<` の呼び出しが **134 箇所**。うち直後に `get<` が続くものが対象
-**深刻度**：低〜中（AI 系は毎フレーム全敵を走査するため効く）
-
-### 現状
-
-```cpp
-if (!m_componentManager.has<AIComponent>(entityId))    // find #1
+if (!m_componentManager.has<component::ai::AIComponent>(entityId))
     continue;
-auto& ai{ m_componentManager.get<AIComponent>(entityId) };  // find #2
+auto& ai{ m_componentManager.get<component::ai::AIComponent>(entityId) };
 ```
 
-`has()` も `get()` も内部は `m_component.find(id)`。**同じキーを 2 回引いている。**
+は毎敵・毎フレームで2回検索している。`tryGet` への置き換えで半減する。同型のコードが AI 系・combat 系に十数箇所ある。
 
-### 修正
+### P-2c. 型→ComponentArray の解決も毎回ハッシュ検索
 
-```cpp
-auto* ai{ m_componentManager.tryGet<AIComponent>(entityId) };
-if (!ai) continue;
-```
+`get<T>` のたびに typeid → type_index → unordered_map::find が走る。System は扱う型が固定なので、コンストラクタで `ComponentArray<T>*` を取得して持てば消せる（getComponentArray を public にするか、forEach 導入でまとめて解決するなら不要）。**優先度は a > b > c**。a と b だけで実測差が出るはずで、c は a を入れれば大半が不要になる。
 
-または C++17 の初期化付き `if`：
+## P-3. 毎フレームの ServiceLocator::get（23箇所）
 
-```cpp
-if (auto* ai{ m_componentManager.tryGet<AIComponent>(entityId) })
-{
-    // このブロック内で ai は非 nullptr が保証される
-}
-```
+PhysicsSystem・FootstepSystem・BattleStartSystem 等の update/draw 内で `ServiceLocator::get<IAudioManager>()` 等を毎フレーム呼んでいる。中身は type_index のハッシュ検索＋assert で、1回は安いが23箇所×毎フレームで積もる。
 
-### 優先して直す箇所
+ServiceLocator 登録サービスはシーンより長生きすることが保証されている（シャドウマップの寿命コメントに明記あり）ので、**各Systemのコンストラクタで1回取得してメンバに保持**すれば安全に消せる。
 
-| ファイル | 備考 |
+## P-4. MiniMapView が毎フレーム全Entityを走査
+
+draw() のたびに `getAllEntities<GroundSurfaceComponent>`（地形）と `getAllEntities<TagComponent>`（全Entity）を列挙し、座標変換して描いている。地形は動かないので:
+
+- 地形のミニマップ座標は初回に計算してキャッシュし、ブロック破壊イベント（既存の BlockBreak イベント購読で可能）で該当分だけ無効化する
+- 動くもの（プレイヤー・敵）だけ毎フレーム変換する
+
+TagComponent の全列挙は「全Entityの中から敵とプレイヤーを探す」使い方なので、P-2a の forEach 化とあわせて EnemyTagComponent 等の絞り込み済みコンポーネントで回す方が筋が良い。
+
+## P-5. drawModels の2パス走査
+
+死亡ディゾルブの半透明を後回しにするため全Entityを2周し、各周で `has<ProjectileComponent>` と `has<DeathComponent>` を毎回検索している（Entity数×2周×2検索）。1周目で「不透明を描きつつ、ディゾルブ中のIDだけ小さな vector に積み、2周目はその vector だけ回す」形にすれば、2周目がディゾルブ中の数体だけになる。ディゾルブ対象は同時に数体なので効果は中程度だが、変更も小さい。
+
+## P-6. 微小（気になったら程度）
+
+- DamagePopupSystem::draw が表示中ポップアップ1件ごとに毎フレーム `std::to_string` している。char配列＋snprintf（PlayerHUDView と同じ方式）に揃えれば確保が消える。HUD側は既に snprintf で統一されており正しい
+- ホットループ内の `core::log::info` はほぼコメントアウト済みで問題なし。ExtensionEquipSystem 等に残っているものはイベント時のみの発火なので放置で良い
+- リーク計測の probe コード（std::format を60フレームに1回）は計測中は妥当。P-1解消の確認後に削除を忘れずに
+
+## 問題なし（確認済み・変更不要）
+
+| 箇所 | 確認内容 |
 |---|---|
-| `system/ai/MeleeChaseAISystem.cpp` | 毎フレーム全敵 |
-| `system/ai/EnemyRangedAttackSystem.cpp` | 同上 |
-| `system/ai/DetectionSystem.cpp` | **2 組あり 4 回 → 2 回** |
-
-`tryGet` は既に多数箇所で使われているため、方針は統一済み。取りこぼしの回収にあたる。
-
----
-
-## 4. `ComponentArray::add()` の余分なコピー
-
-**場所**：`core/ecs/ComponentArray.h` / `ComponentManager.h`
-**深刻度**：低
-
-### 現状
-
-```cpp
-void add(EntityId id, T component)   // コピー #1（値渡し）
-{
-    m_component[id] = component;     // コピー #2（代入）
-}
-```
-
-`ComponentManager::add()` も同様に値で受けて値で渡している。
-Component が小さいうちは誤差だが、`std::string` や `std::vector` を含む型では効く。
-
-### 修正
-
-```cpp
-// ComponentArray
-template <typename U = T>
-void add(EntityId id, U&& component)
-{
-    m_component.insert_or_assign(id, std::forward<U>(component));
-}
-
-// ComponentManager
-template <typename T, typename U = T>
-void add(EntityId id, U&& component)
-{
-    getComponentArray<T>()->add(id, std::forward<U>(component));
-}
-```
+| メインループ | 固定タイムステップ＋accumulator、処理落ち時の切り捨て、先読み時間のフレーム計測除外、入力の1フレーム1回確定。すべて正しい |
+| CollisionSystem | 乗る側×地面側に絞った上での総当たり。コメントどおり無駄な組み合わせを省いており、この規模で空間分割は不要 |
+| 敵モデルのプール（EnemySpawner） | 使い回し設計は正しい（解放だけがP-1の問題） |
+| シャドウマップ | プレイヤー周辺だけを写す範囲限定＋範囲外キャスターの事前除外。設計・実装ともに良い |
+| AI系 | ターゲットを AIComponent に保持しており、毎フレームのプレイヤー探索はしていない |
+| EventBus | 購読ID方式＋RAIIハンドル。dispatch は unordered_map 1回で、イベント発生はゲームイベント粒度なのでコスト問題なし |
+| HUD文字列 | snprintf＋固定バッファで統一されており確保なし |
 
 ---
 
-## 良い点（維持すべき設計）
+# 優先順位まとめ
 
-- `new` / `delete` の直接使用なし
-- 所有＝`unique_ptr`・値、非所有＝`T*`・`T&` の使い分けが全体で一貫
-- `ObjectPool` の `m_all`（`unique_ptr`）と `m_available`（`T*`）の分離
-- `vector<unique_ptr<T>>` によるポインタ安定性の確保（`expand()` で借用ポインタが無効化しない）
-- `EventBus::Subscription` による RAII での購読解除
-- `InGame` のメンバ宣言順コメント（破棄順の明示）
-- `ServiceLocator::clear()` の `m_order` による逆順破棄
-- `get()` は assert、`tryGet()` は `nullptr` という意図の撃ち分け
-- `[[nodiscard]]` の付与
+| 順 | 作業 | 種別 | 効果 | 工数 |
+|---|---|---|---|---|
+| 1 | **P-1: 複製モデルの台帳＋シーン退出時解放** | 性能 | リーク解消（調査中の問題に直結） | 小 |
+| 2 | A-1: InGameSetup / MissionProgress / InventoryController 分離 | 責務 | InGame 1341→約200行 | 中 |
+| 3 | P-2a: forEach 導入（毎フレームSystemから順次） | 性能 | 毎フレームのヒープ確保 40〜60回→ほぼ0 | 小〜中 |
+| 4 | P-2b: has→get を tryGet へ | 性能 | コンポーネント検索の半減（十数箇所） | 小 |
+| 5 | P-3: ServiceLocator::get のコンストラクタ取得化 | 性能 | 毎フレーム検索23箇所の除去 | 小 |
+| 6 | P-4: ミニマップの地形キャッシュ | 性能 | draw毎の全Entity走査の除去 | 小 |
+| 7 | B-1〜B-3: SE集約・クリック消費API・SettingsJsonTranslator | 責務 | 重複の解消 | 小 |
+| 8 | A-2: TitleView の分離 or リネーム | 責務 | 画面間の構造統一 | 小〜中 |
+| 9 | P-5 / P-6: 2パス走査・to_string | 性能 | 微改善 | 小 |
 
----
-
-## 付録の推奨着手順
-
-1. **問題 1**（1 行。将来の地雷除去）
-2. **問題 3**（機械的。AI 系のみ先行でも可）
-3. **問題 4**（`add` 周りのみ）
-4. **問題 2**（`forEach` 追加 → 呼び出し 64 箇所を段階的に移行）
+P-1 だけは調査中の問題に直結するため最初に。責務系（2）と性能系（3〜6）は独立しているので並行して進められる。P-2〜P-4 はいずれも「実測で困ってから」でも遅くない類だが、変更が局所的でリスクが低いため、リファクタのついでに拾う価値がある。
